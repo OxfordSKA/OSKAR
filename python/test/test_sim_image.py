@@ -2,6 +2,7 @@
 from __future__ import print_function
 from oskar import (Sky, Telescope, Simulator, Imager)
 import numpy
+import os
 import time
 
 if __name__ == '__main__':
@@ -24,7 +25,7 @@ if __name__ == '__main__':
 
     # Set up the sky model.
     sky = Sky(precision)
-    sky.append_data(phase_centre_ra_deg, phase_centre_dec_deg, 2.0)
+    sky.append_sources(phase_centre_ra_deg, phase_centre_dec_deg, 2.0)
 
     # Set up the telescope model.
     tel = Telescope(precision)
@@ -38,6 +39,7 @@ if __name__ == '__main__':
 
     # Set up the simulator.
     simulator = Simulator(precision)
+    simulator.set_settings_path(os.path.abspath(__file__))
     simulator.set_sky_model(sky)
     simulator.set_telescope_model(tel)
     simulator.set_observation_frequency(start_freq_hz)

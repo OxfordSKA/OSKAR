@@ -165,8 +165,15 @@ void oskar_simulator_check_init(oskar_Simulator* h, int* status)
         return;
     }
 
-    /* Create the visibility header. */
+    /* Create the visibility header and set up the output files if required. */
     set_up_vis_header(h, status);
+    if (h->vis_name && !h->vis)
+        h->vis = oskar_vis_header_write(h->header, h->vis_name, status);
+#ifndef OSKAR_NO_MS
+    if (h->ms_name && !h->ms)
+        h->ms = oskar_vis_header_write_ms(h->header, h->ms_name, OSKAR_TRUE,
+                h->force_polarised_ms, status);
+#endif
 
     /* Compute source direction cosines relative to phase centre. */
     ra0 = oskar_telescope_phase_centre_ra_rad(h->tel);
@@ -463,8 +470,16 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
     int i, num_threads = 1, num_vis_blocks;
     if (*status) return;
 
-    /* Write file headers. */
-    oskar_simulator_write_headers(h, status);
+    /* Check the visibilities are going somewhere. */
+    if (!(h->vis_name || h->ms_name))
+    {
+        oskar_log_error(h->log, "No output file specified.");
+        *status = OSKAR_ERR_SETTINGS_INTERFEROMETER;
+        return;
+    }
+
+    /* Initialise if required. */
+    oskar_simulator_check_init(h, status);
 
     /* Get the number of visibility blocks to be processed. */
     num_vis_blocks = oskar_simulator_num_vis_blocks(h);
@@ -828,27 +843,6 @@ void oskar_simulator_write_block(oskar_Simulator* h,
 #endif
     if (h->vis) oskar_vis_block_write(block, h->vis, block_index, status);
     oskar_timer_pause(h->tmr_write);
-}
-
-
-void oskar_simulator_write_headers(oskar_Simulator* h, int* status)
-{
-    /* Set up output file handles. */
-    oskar_simulator_check_init(h, status);
-    if (*status) return;
-    if (!(h->vis_name || h->ms_name))
-    {
-        oskar_log_error(h->log, "No output file specified.");
-        *status = OSKAR_ERR_SETTINGS_INTERFEROMETER;
-        return;
-    }
-    if (h->vis_name)
-        h->vis = oskar_vis_header_write(h->header, h->vis_name, status);
-#ifndef OSKAR_NO_MS
-    if (h->ms_name)
-        h->ms = oskar_vis_header_write_ms(h->header, h->ms_name, OSKAR_TRUE,
-                h->force_polarised_ms, status);
-#endif
 }
 
 

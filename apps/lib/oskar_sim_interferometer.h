@@ -147,9 +147,6 @@ OSKAR_APPS_EXPORT
 void oskar_simulator_write_block(oskar_Simulator* h,
         const oskar_VisBlock* block, int block_index, int* status);
 
-OSKAR_APPS_EXPORT
-void oskar_simulator_write_headers(oskar_Simulator* h, int* status);
-
 #ifdef __cplusplus
 }
 #endif

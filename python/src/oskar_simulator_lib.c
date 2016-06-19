@@ -452,6 +452,18 @@ static PyObject* set_output_vis_file(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* set_settings_path(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    const char* filename;
+    if (!PyArg_ParseTuple(args, "Os", &capsule, &filename)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_set_settings_path(h, filename);
+    return Py_BuildValue("");
+}
+
+
 static PyObject* set_sky_model(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
@@ -538,27 +550,6 @@ static PyObject* write_block(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* write_headers(PyObject* self, PyObject* args)
-{
-    oskar_Simulator* h = 0;
-    PyObject* capsule = 0;
-    int status = 0;
-    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_simulator(capsule))) return 0;
-    oskar_simulator_write_headers(h, &status);
-
-    /* Check for errors. */
-    if (status)
-    {
-        PyErr_Format(PyExc_RuntimeError,
-                "oskar_simulator_write_headers() failed with code %d (%s).",
-                status, oskar_get_error_string(status));
-        return 0;
-    }
-    return Py_BuildValue("");
-}
-
-
 /* Method table. */
 static PyMethodDef methods[] =
 {
@@ -599,6 +590,8 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "set_output_measurement_set(filename)"},
         {"set_output_vis_file", (PyCFunction)set_output_vis_file,
                 METH_VARARGS, "set_output_vis_file(filename)"},
+        {"set_settings_path", (PyCFunction)set_settings_path,
+                METH_VARARGS, "set_settings_path(filename)"},
         {"set_sky_model", (PyCFunction)set_sky_model,
                 METH_VARARGS, "set_sky_model(sky, max_sources_per_chunk)"},
         {"set_telescope_model", (PyCFunction)set_telescope_model,
@@ -607,8 +600,6 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "set_zero_failed_gaussians(value)"},
         {"write_block", (PyCFunction)write_block,
                 METH_VARARGS, "write_block(block_index)"},
-        {"write_headers", (PyCFunction)write_headers,
-                METH_VARARGS, "write_headers()"},
         {NULL, NULL, 0, NULL}
 };
 

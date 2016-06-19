@@ -212,6 +212,17 @@ class Simulator(object):
         _simulator_lib.set_output_vis_file(self._capsule, filename)
 
 
+    def set_settings_path(self, filename):
+        """Sets the path to the input settings file or script.
+
+        This is used only to store the file in the output visibility data.
+
+        Args:
+            filename (str): Filename.
+        """
+        _simulator_lib.set_settings_path(self._capsule, filename)
+
+
     def set_sky_model(self, sky_model, max_sources_per_chunk=16384):
         """Sets the sky model used for the simulation.
 
@@ -244,12 +255,4 @@ class Simulator(object):
             block_index (int): The simulation block index to write.
         """
         _simulator_lib.write_block(self._capsule, block._capsule, block_index)
-
-
-    def write_headers(self):
-        """Writes visibility headers.
-
-        This method should be called before the first call to write_block().
-        """
-        _simulator_lib.write_headers(self._capsule)
 

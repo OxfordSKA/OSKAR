@@ -4,6 +4,7 @@ from threading import Thread
 from oskar import (Sky, Telescope, Simulator, Imager, VisBlock, Barrier)
 import logging
 import numpy
+import os
 import time
 
 
@@ -37,6 +38,7 @@ def run_blocks(simulator, imager, barrier, thread_id):
         if thread_id == 0 and block_id > 0:
             logging.debug('Imaging block %d/%d', block_id, num_blocks)
             block_handle = simulator.finalise_block(block_index=block_id - 1)
+            #simulator.write_block(block_handle, block_index=block_id - 1)
             imager.update_block(block_handle)
 
         # Barrier 1: Reset work unit index.
@@ -60,6 +62,7 @@ if __name__ == '__main__':
     length_sec = 43200.0
     num_time_steps = 48
     inc_sec = length_sec / num_time_steps
+    vis_file = 'sim_test.vis'
 
     # Define a telescope layout.
     num_stations = 512
@@ -69,7 +72,7 @@ if __name__ == '__main__':
 
     # Set up the sky model.
     sky = Sky(precision)
-    sky.append_data(phase_centre_ra_deg, phase_centre_dec_deg, 2.0)
+    sky.append_sources(phase_centre_ra_deg, phase_centre_dec_deg, 2.0)
 
     # Set up the telescope model.
     tel = Telescope(precision)
@@ -83,6 +86,7 @@ if __name__ == '__main__':
 
     # Set up the simulator.
     simulator = Simulator(precision)
+    simulator.set_settings_path(os.path.abspath(__file__))
     simulator.set_sky_model(sky)
     simulator.set_telescope_model(tel)
     simulator.set_observation_frequency(start_freq_hz)
@@ -90,6 +94,8 @@ if __name__ == '__main__':
         length_sec, num_time_steps)
     simulator.set_max_times_per_block(5)
     simulator.set_gpus(-1)
+    #simulator.set_output_measurement_set(vis_file+'.ms')
+    #simulator.set_output_vis_file(vis_file)
     simulator.check_init()
 
     # Set up the imager.

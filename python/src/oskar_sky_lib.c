@@ -148,7 +148,7 @@ static PyObject* set_up(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* append_data(PyObject* self, PyObject* args)
+static PyObject* append_sources(PyObject* self, PyObject* args)
 {
     oskar_Sky *h = 0;
     PyObject *obj[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -275,7 +275,7 @@ static PyObject* append_data(PyObject* self, PyObject* args)
     if (status)
     {
         PyErr_Format(PyExc_RuntimeError,
-                "Sky model append failed with code %d (%s).",
+                "Sky model append_sources() failed with code %d (%s).",
                 status, oskar_get_error_string(status));
         goto fail;
     }
@@ -341,8 +341,8 @@ static PyObject* append_file(PyObject* self, PyObject* args)
 static PyMethodDef methods[] =
 {
         {"create", (PyCFunction)create, METH_VARARGS, "create(type)"},
-        {"append_data", (PyCFunction)append_data, METH_VARARGS,
-                "append_data(ra, dec, I, Q, U, V, ref_freq, spectral_index, "
+        {"append_sources", (PyCFunction)append_sources, METH_VARARGS,
+                "append_sources(ra, dec, I, Q, U, V, ref_freq, spectral_index, "
                 "rotation_measure, major, minor, position_angle)"},
         {"append_file", (PyCFunction)append_file, METH_VARARGS,
                 "append_file(filename)"},

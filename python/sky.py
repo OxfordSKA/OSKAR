@@ -51,11 +51,11 @@ class Sky(object):
             self._capsule = _sky_lib.create(precision)
 
 
-    def append_data(self, ra_deg, dec_deg, I, Q=None, U=None, V=None, 
+    def append_sources(self, ra_deg, dec_deg, I, Q=None, U=None, V=None, 
             ref_freq_hz=None, spectral_index=None, rotation_measure=None,
             major_axis_arcsec=None, minor_axis_arcsec=None, 
             position_angle_deg=None):
-        """Appends data to an OSKAR sky model from arrays in memory.
+        """Appends source data to an OSKAR sky model from arrays in memory.
 
         Args:
             ra_deg (float, array-like):
@@ -97,7 +97,7 @@ class Sky(object):
             minor_axis_arcsec = numpy.zeros_like(I)
         if position_angle_deg is None:
             position_angle_deg = numpy.zeros_like(I)
-        _sky_lib.append_data(self._capsule, 
+        _sky_lib.append_sources(self._capsule, 
             numpy.radians(ra_deg), numpy.radians(dec_deg), I, Q, U, V, 
             ref_freq_hz, spectral_index, rotation_measure, 
             numpy.radians(major_axis_arcsec / 3600.0), 
