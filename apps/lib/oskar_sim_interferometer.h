@@ -130,11 +130,7 @@ void oskar_simulator_set_sky_model(oskar_Simulator* h, const oskar_Sky* sky,
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_telescope_model(oskar_Simulator* h,
-        oskar_Telescope* model, int* status);
-
-OSKAR_APPS_EXPORT
-void oskar_simulator_set_thermal_noise(oskar_Simulator* h,
-        int enabled, int seed);
+        const oskar_Telescope* model, int* status);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_source_flux_range(oskar_Simulator* h,

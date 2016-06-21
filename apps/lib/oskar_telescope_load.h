@@ -35,7 +35,6 @@
 
 #include <oskar_global.h>
 #include <oskar_telescope.h>
-#include <oskar_Settings_old.h>
 #include <oskar_log.h>
 
 #ifdef __cplusplus
@@ -53,12 +52,11 @@ extern "C" {
  * @param[in,out] telescope  Pointer to telescope model to fill.
  * @param[in]     path       Pathname of telescope model directory to load.
  * @param[in,out] log        Pointer to log.
- * @param[in]     settings   FIXME Shouldn't be here, grrr...!
  * @param[in,out] status     Status return code.
  */
 OSKAR_APPS_EXPORT
 void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
-        oskar_Log* log, const oskar_Settings_old* settings, int* status);
+        oskar_Log* log, int* status);
 
 #ifdef __cplusplus
 }

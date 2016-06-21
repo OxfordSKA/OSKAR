@@ -50,6 +50,7 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     telescope->mem_location = location;
 
     /* Copy the meta-data. */
+    telescope->pol_mode = src->pol_mode;
     telescope->num_stations = src->num_stations;
     telescope->max_station_size = src->max_station_size;
     telescope->max_station_depth = src->max_station_depth;
@@ -69,6 +70,8 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     telescope->uv_filter_min = src->uv_filter_min;
     telescope->uv_filter_max = src->uv_filter_max;
     telescope->uv_filter_units = src->uv_filter_units;
+    telescope->noise_enabled = src->noise_enabled;
+    telescope->noise_seed = src->noise_seed;
 
     /* Copy the coordinates. */
     oskar_mem_copy(telescope->station_true_x_offset_ecef_metres,

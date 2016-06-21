@@ -763,8 +763,161 @@ OSKAR_EXPORT
 const oskar_Mem* oskar_telescope_station_true_z_enu_metres_const(
         const oskar_Telescope* model);
 
+/**
+ * @brief
+ * Returns the flag specifying whether thermal noise is enabled.
+ *
+ * @details
+ * Returns the flag specifying whether thermal noise is enabled.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return Flag specifying whether thermal noise is enabled.
+ */
+OSKAR_EXPORT
+int oskar_telescope_noise_enabled(const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns the random generator seed.
+ *
+ * @details
+ * Returns the random generator seed.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return The random generator seed.
+ */
+OSKAR_EXPORT
+unsigned int oskar_telescope_noise_seed(const oskar_Telescope* model);
+
 
 /* Setters. */
+
+/**
+ * @brief
+ * Sets the flag to specify whether station beam duplication is enabled.
+ *
+ * @details
+ * Sets the flag to specify whether station beam duplication is enabled.
+ *
+ * @param[in] model    Pointer to telescope model.
+ * @param[in] value    If true, stations will share common source positions.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model,
+        int value);
+
+/**
+ * @brief
+ * Sets whether thermal noise is enabled.
+ *
+ * @details
+ * Sets whether thermal noise is enabled.
+ *
+ * @param[in] model            Pointer to telescope model.
+ * @param[in] value            If true, enable thermal noise.
+ * @param[in] seed             Random generator seed.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_enable_noise(oskar_Telescope* model,
+        int value, unsigned int seed);
+
+/**
+ * @brief
+ * Sets the flag to specify whether numerical element patterns are enabled.
+ *
+ * @details
+ * Sets the flag to specify whether numerical element patterns are enabled.
+ *
+ * @param[in] model    Pointer to telescope model.
+ * @param[in] value    If true, numerical element patterns will be enabled.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_enable_numerical_patterns(oskar_Telescope* model,
+        int value);
+
+/**
+ * @brief
+ * Sets the Gaussian station beam parameters.
+ *
+ * @details
+ * Sets the Gaussian station beam parameters.
+ * These are only used if the station type is "Gaussian beam"
+ *
+ * @param[in] model       Pointer to telescope model.
+ * @param[in] fwhm_deg    The Gaussian FWHM value of the beam, in degrees.
+ * @param[in] ref_freq_hz Reference frequency at which the FWHM applies, in Hz.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_gaussian_station_beam_values(oskar_Telescope* model,
+        double fwhm_deg, double ref_freq_hz);
+
+/**
+ * @brief
+ * Sets the frequencies for which thermal noise is defined.
+ *
+ * @details
+ * Sets the frequencies for which thermal noise is defined.
+ *
+ * @param[in] model            Pointer to telescope model.
+ * @param[in] filename         Text file to load.
+ * @param[in,out] status       Status return code.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_noise_freq_file(oskar_Telescope* model,
+        const char* filename, int* status);
+
+/**
+ * @brief
+ * Sets the frequencies for which thermal noise is defined.
+ *
+ * @details
+ * Sets the frequencies for which thermal noise is defined.
+ *
+ * @param[in] model            Pointer to telescope model.
+ * @param[in] num_channels     Number of frequency channels.
+ * @param[in] start_hz         Frequency of the first channel, in Hz.
+ * @param[in] inc_hz           Frequency increment, in Hz.
+ * @param[in,out] status       Status return code.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_noise_freq_range(oskar_Telescope* model,
+        int num_channels, double start_hz, double inc_hz, int* status);
+
+/**
+ * @brief
+ * Sets the thermal noise RMS values from a file.
+ *
+ * @details
+ * Sets the thermal noise RMS values from a file.
+ *
+ * @param[in] model            Pointer to telescope model.
+ * @param[in] filename         Text file to load.
+ * @param[in,out] status       Status return code.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_noise_rms_file(oskar_Telescope* model,
+        const char* filename, int* status);
+
+/**
+ * @brief
+ * Sets the thermal noise RMS values from a range.
+ *
+ * @details
+ * Sets the thermal noise RMS values from a range.
+ *
+ * Note that this can only be called after the noise frequencies have been
+ * defined.
+ *
+ * @param[in] model            Pointer to telescope model.
+ * @param[in] start            RMS value in the first channel.
+ * @param[in] end              RMS value in the last channel.
+ * @param[in,out] status       Status return code.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_noise_rms_range(oskar_Telescope* model,
+        double start, double end, int* status);
 
 /**
  * @brief
@@ -817,21 +970,6 @@ void oskar_telescope_set_phase_centre(oskar_Telescope* model,
 
 /**
  * @brief
- * Sets the values of the smearing parameters.
- *
- * @details
- * Sets the values of the smearing parameters.
- *
- * @param[in] model            Pointer to telescope model.
- * @param[in] bandwidth_hz     Channel bandwidth, in Hz.
- * @param[in] time_average_sec Time averaging interval, in seconds.
- */
-OSKAR_EXPORT
-void oskar_telescope_set_smearing_values(oskar_Telescope* model,
-        double bandwidth_hz, double time_average_sec);
-
-/**
- * @brief
  * Sets the channel bandwidth, used for bandwidth smearing.
  *
  * @details
@@ -873,6 +1011,23 @@ void oskar_telescope_set_station_ids(oskar_Telescope* model);
 
 /**
  * @brief
+ * Sets the type of stations within the telescope model.
+ *
+ * @details
+ * Sets the type of stations within the telescope model,
+ * recursively if necessary.
+ *
+ * Only the first letter of the type string is checked.
+ *
+ * @param[in] model            Pointer to telescope model.
+ * @param[in] type             Station type, either "Array", "Gaussian"
+ *                             or "Isotropic".
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type);
+
+/**
+ * @brief
  * Sets the values of the smearing parameters.
  *
  * @details
@@ -886,34 +1041,6 @@ void oskar_telescope_set_station_ids(oskar_Telescope* model);
 OSKAR_EXPORT
 void oskar_telescope_set_uv_filter(oskar_Telescope* model,
         double uv_filter_min, double uv_filter_max, int uv_filter_units);
-
-/**
- * @brief
- * Sets the flag to specify whether station beam duplication is enabled.
- *
- * @details
- * Sets the flag to specify whether station beam duplication is enabled.
- *
- * @param[in] model    Pointer to telescope model.
- * @param[in] value    If true, stations will share common source positions.
- */
-OSKAR_EXPORT
-void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model,
-        int value);
-
-/**
- * @brief
- * Sets the flag to specify whether numerical element patterns are enabled.
- *
- * @details
- * Sets the flag to specify whether numerical element patterns are enabled.
- *
- * @param[in] model    Pointer to telescope model.
- * @param[in] value    If true, numerical element patterns will be enabled.
- */
-OSKAR_EXPORT
-void oskar_telescope_set_enable_numerical_patterns(oskar_Telescope* model,
-        int value);
 
 /**
  * @brief

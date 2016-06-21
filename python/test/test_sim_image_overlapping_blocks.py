@@ -81,8 +81,10 @@ if __name__ == '__main__':
     tel.set_pol_mode('Scalar')
     tel.set_station_coords_enu(longitude_deg=0, latitude_deg=60, altitude_m=0, 
         x=x, y=y)
-    # Set phase centre after stations have been defined.
+    # Set station properties after stations have been defined.
     tel.set_phase_centre(phase_centre_ra_deg, phase_centre_dec_deg)
+    tel.set_station_type('Gaussian')
+    tel.set_gaussian_station_beam_values(5.0, 100e6)
 
     # Set up the simulator.
     simulator = Simulator(precision)
@@ -93,7 +95,6 @@ if __name__ == '__main__':
     simulator.set_observation_time(start_time_mjd_utc,
         length_sec, num_time_steps)
     simulator.set_max_times_per_block(5)
-    simulator.set_gpus(-1)
     #simulator.set_output_measurement_set(vis_file+'.ms')
     #simulator.set_output_vis_file(vis_file)
     simulator.check_init()

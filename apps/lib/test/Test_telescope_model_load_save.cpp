@@ -32,11 +32,8 @@
 #include "apps/lib/oskar_telescope_save.h"
 #include "apps/lib/oskar_telescope_load.h"
 
-#include <oskar_SettingsTelescope.h>
 #include <oskar_telescope.h>
 #include <oskar_get_error_string.h>
-#include <oskar_settings_old_init.h>
-#include <oskar_settings_old_free.h>
 #include <oskar_mem.h>
 
 #include <QtCore/QtCore>
@@ -76,17 +73,14 @@ TEST(telescope_model_load_save, test_0_level)
 
     // Load it back again.
     {
-        oskar_Settings_old settings;
-        oskar_settings_old_init(&settings);
         oskar_Telescope* telescope = oskar_telescope_create(OSKAR_DOUBLE,
                         OSKAR_CPU, 0, &err);
         oskar_telescope_set_position(telescope,
                 longitude_rad, latitude_rad, altitude_m);
         oskar_telescope_set_enable_numerical_patterns(telescope, 0);
-        oskar_telescope_load(telescope, path, NULL, &settings, &err);
+        oskar_telescope_load(telescope, path, NULL, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
         oskar_telescope_free(telescope, &err);
-        oskar_settings_old_free(&settings);
     }
 
     // Remove test directory.
@@ -139,16 +133,13 @@ TEST(telescope_model_load_save, test_1_level)
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
     // Load it back again.
-    oskar_Settings_old settings;
-    oskar_settings_old_init(&settings);
     oskar_Telescope* telescope2 = oskar_telescope_create(OSKAR_SINGLE,
                     OSKAR_CPU, 0, &err);
     oskar_telescope_set_position(telescope2,
             longitude_rad, latitude_rad, altitude_m);
     oskar_telescope_set_enable_numerical_patterns(telescope, 0);
-    oskar_telescope_load(telescope2, path, NULL, &settings, &err);
+    oskar_telescope_load(telescope2, path, NULL, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    oskar_settings_old_free(&settings);
 
     // Check the contents.
     ASSERT_EQ(oskar_telescope_num_stations(telescope),
@@ -284,17 +275,14 @@ TEST(telescope_model_load_save, test_2_level)
     file.close();
 
     // Load it back again.
-    oskar_Settings_old settings;
-    oskar_settings_old_init(&settings);
     oskar_Telescope* telescope2 = oskar_telescope_create(OSKAR_SINGLE,
                     OSKAR_CPU, 0, &err);
     oskar_telescope_set_position(telescope2,
             longitude_rad, latitude_rad, altitude_m);
     oskar_telescope_set_enable_numerical_patterns(telescope, 0);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    oskar_telescope_load(telescope2, path, NULL, &settings, &err);
+    oskar_telescope_load(telescope2, path, NULL, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    oskar_settings_old_free(&settings);
 
     // Check the contents.
     ASSERT_EQ(oskar_telescope_num_stations(telescope),
@@ -521,21 +509,10 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
             location, 0, &err);
     oskar_telescope_set_position(telescope, 0.1, 0.5, 0.0);
     oskar_telescope_set_enable_numerical_patterns(telescope, 0);
-    oskar_Settings_old settings;
-    oskar_settings_old_init(&settings);
-    settings.sim.double_precision = (type == OSKAR_DOUBLE) ? OSKAR_TRUE : OSKAR_FALSE;
+    oskar_telescope_set_enable_noise(telescope, 1, 1);
     QByteArray path = root.toLatin1();
-    oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
-    noise->enable = OSKAR_TRUE;
-    noise->seed = 0;
-    noise->rms.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
-    noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
-    settings.obs.length_sec = 1;
-    settings.obs.num_time_steps = 1;
-    settings.interferometer.channel_bandwidth_hz = 1;
-    settings.interferometer.time_average_sec = 1;
 
-    oskar_telescope_load(telescope, path.constData(), NULL, &settings, &err);
+    oskar_telescope_load(telescope, path.constData(), NULL, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
     ASSERT_EQ(oskar_telescope_num_stations(telescope), num_stations);

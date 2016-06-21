@@ -77,14 +77,15 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
 
     // Station type.
     temp = s.value("station_type", "Aperture array").toString();
+    tel->station_type = (char*) calloc(2, sizeof(char));
     if (temp.startsWith("A", Qt::CaseInsensitive))
-        tel->station_type = OSKAR_STATION_TYPE_AA;
+        tel->station_type[0] = 'A';
     else if (temp.startsWith("I", Qt::CaseInsensitive))
-        tel->station_type = OSKAR_STATION_TYPE_ISOTROPIC;
+        tel->station_type[0] = 'I';
     else if (temp.startsWith("G", Qt::CaseInsensitive))
-        tel->station_type = OSKAR_STATION_TYPE_GAUSSIAN_BEAM;
+        tel->station_type[0] = 'G';
     else if (temp.startsWith("VLA (PBCOR)", Qt::CaseInsensitive))
-        tel->station_type = OSKAR_STATION_TYPE_VLA_PBCOR;
+        tel->station_type[0] = 'V';
     else
     {
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
@@ -227,7 +228,7 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         // **DONT FIX** until some design thought has been made to how to
         // deal with settings functions and stdout messages / error codes.
         QStringList keys = s.allKeys();
-        if (tel->station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM &&
+        if (tel->station_type[0] == 'G' &&
             (!keys.contains("fwhm_deg") || !keys.contains("ref_freq_hz")))
         {
             printf("E|\n");

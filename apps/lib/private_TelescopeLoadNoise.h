@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,11 @@
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-struct oskar_Settings_old;
 
 class TelescopeLoadNoise : public oskar_TelescopeLoadAbstract
 {
 public:
-    TelescopeLoadNoise(const oskar_Settings_old* settings);
+    TelescopeLoadNoise();
     ~TelescopeLoadNoise();
 
     void load(oskar_Telescope* telescope, const oskar_Dir& cwd, int num_subdirs,
@@ -50,26 +49,18 @@ public:
 
 private:
     // Updates set of files to load.
-    void updateFileMap_(std::map<std::string, std::string>& filemap,
+    void update_map(std::map<std::string, std::string>& filemap,
             const oskar_Dir& cwd);
 
-    // Obtains the array of noise frequencies.
-    void getNoiseFreqs_(oskar_Mem* freqs, const std::string& filepath,
-            int* status);
-
     // Obtains the noise RMS values and sets then into the telescope model.
-    void setNoiseRMS_(oskar_Station* model,
+    void set_noise_rms(oskar_Station* model,
             const std::map<std::string, std::string>& filemap, int* status);
 
-    void evaluate_range_(oskar_Mem* values, int num_values, double start,
-            double end, int* status);
-
 private:
-    enum FileIds_ { FREQ, RMS, SENSITIVITY, TSYS, AREA, EFFICIENCY };
-    int dataType_;  // OSKAR data type of the telescope model being loaded.
-    std::map<FileIds_, std::string> files_;
+    enum FileIds_ { FREQ, RMS };
     oskar_Mem* freqs_;
-    const oskar_Settings_old* settings_;
+    oskar_Telescope* telescope_;
+    std::map<FileIds_, std::string> files_;
 };
 
 #endif /* OSKAR_TELESCOPE_LOAD_NOISE_H_ */

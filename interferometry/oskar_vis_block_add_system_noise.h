@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@ extern "C" {
  *
  * @param[in,out] vis             Visibility structure to which to add noise.
  * @param[in]     telescope       Telescope model in use.
- * @param[in]     seed            Seed for the random number generator.
  * @param[in]     block_index     Simulation time index for the block.
  * @param[in,out] station_work    Work buffer of length num_stations.
  * @param[in,out] status          Status return code.
@@ -54,8 +53,7 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
         const oskar_VisHeader* header, const oskar_Telescope* telescope,
-        unsigned int seed, unsigned int block_index, oskar_Mem* station_work,
-        int* status);
+        unsigned int block_index, oskar_Mem* station_work, int* status);
 
 #ifdef __cplusplus
 }

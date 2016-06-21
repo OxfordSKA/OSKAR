@@ -98,7 +98,7 @@ struct oskar_Simulator
 {
     /* Settings. */
     int prec, *cuda_device_ids, num_gpus, num_channels, num_time_steps;
-    int max_sources_per_chunk, max_times_per_block, noise_enabled, noise_seed;
+    int max_sources_per_chunk, max_times_per_block;
     int apply_horizon_clip, force_polarised_ms, zero_failed_gaussians;
     double freq_start_hz, freq_inc_hz, time_start_mjd_utc, time_inc_sec;
     double source_min_jy, source_max_jy;
@@ -279,9 +279,8 @@ oskar_VisBlock* oskar_simulator_finalise_block(oskar_Simulator* h,
     }
 
     /* Add uncorrelated system noise to the combined visibilities. */
-    if (h->noise_enabled)
-        oskar_vis_block_add_system_noise(b0, h->header, h->tel,
-                h->noise_seed, block_index, h->temp, status);
+    oskar_vis_block_add_system_noise(b0, h->header, h->tel,
+            block_index, h->temp, status);
 
     /* Return a pointer to the block. */
     return b0;
@@ -300,6 +299,7 @@ void oskar_simulator_free(oskar_Simulator* h, int* status)
     oskar_simulator_reset_cache(h, status);
     for (i = 0; i < h->num_chunks; ++i)
         oskar_sky_free(h->sky_chunks[i], status);
+    oskar_telescope_free(h->tel, status);
     oskar_mem_free(h->temp, status);
     oskar_timer_free(h->tmr_sim);
     oskar_timer_free(h->tmr_write);
@@ -359,7 +359,7 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
     if (*status) return;
 
     /* Check that initialisation has happened. We can't initialise here,
-     * as we're already multi-threaded at this point. */
+     * as we may be already multi-threaded at this point. */
     if (!h->header)
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
@@ -577,7 +577,7 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
      * The alternative would be to scale the noise to match the station
      * beam gain but that would require knowledge of the station beam
      * amplitude at the phase centre for each time and channel. */
-    if (h->log && h->noise_enabled && !*status)
+    if (h->log && oskar_telescope_noise_enabled(h->tel) && !*status)
     {
         int have_sources, amp_calibrated;
         have_sources = (h->num_chunks > 0 &&
@@ -743,6 +743,7 @@ void oskar_simulator_set_sky_model(oskar_Simulator* h, const oskar_Sky* sky,
         int max_sources_per_chunk, int* status)
 {
     int i;
+    if (*status) return;
 
     /* Clear the old chunk set. */
     for (i = 0; i < h->num_chunks; ++i)
@@ -760,29 +761,26 @@ void oskar_simulator_set_sky_model(oskar_Simulator* h, const oskar_Sky* sky,
 
 
 void oskar_simulator_set_telescope_model(oskar_Simulator* h,
-        oskar_Telescope* model, int* status)
+        const oskar_Telescope* model, int* status)
 {
     if (*status) return;
-    h->tel = model;
 
-    /* Analyse the telescope model. */
-    if (oskar_telescope_num_stations(h->tel) == 0)
+    /* Check the model is not empty. */
+    if (oskar_telescope_num_stations(model) == 0)
     {
         oskar_log_error(h->log, "Telescope model is empty.");
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
     }
+
+    /* Remove any existing telescope model, and copy the new one. */
+    oskar_telescope_free(h->tel, status);
+    h->tel = oskar_telescope_create_copy(model, OSKAR_CPU, status);
+
+    /* Analyse the telescope model. */
     oskar_telescope_analyse(h->tel, status);
     if (h->log)
         oskar_telescope_log_summary(h->tel, h->log, status);
-}
-
-
-void oskar_simulator_set_thermal_noise(oskar_Simulator* h,
-        int enabled, int seed)
-{
-    h->noise_enabled = enabled;
-    h->noise_seed = seed;
 }
 
 

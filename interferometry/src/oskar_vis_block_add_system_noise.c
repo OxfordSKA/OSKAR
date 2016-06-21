@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -288,15 +288,18 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
 
 void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
         const oskar_VisHeader* header, const oskar_Telescope* telescope,
-        unsigned int seed, unsigned int block_index, oskar_Mem* station_work,
-        int* status)
+        unsigned int block_index, oskar_Mem* station_work, int* status)
 {
     int c, num_channels;
+    unsigned int seed;
     double freq_hz, freq_start_hz, freq_inc_hz;
     double channel_bandwidth_hz, time_int_sec;
 
     /* Check if safe to proceed. */
     if (*status) return;
+
+    /* Return if noise is not enabled. */
+    if (!oskar_telescope_noise_enabled(telescope)) return;
 
     /* Check baseline dimensions match. */
     if (oskar_telescope_num_baselines(telescope) !=
@@ -307,6 +310,7 @@ void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
     }
 
     /* Get frequency start and increment. */
+    seed                 = oskar_telescope_noise_seed(telescope);
     num_channels         = oskar_vis_block_num_channels(vis);
     channel_bandwidth_hz = oskar_vis_header_channel_bandwidth_hz(header);
     time_int_sec         = oskar_vis_header_time_average_sec(header);

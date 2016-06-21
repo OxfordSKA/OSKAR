@@ -38,6 +38,7 @@ struct oskar_Telescope
     int mem_location;
 
     /* Fundamental properties that don't depend on stations. */
+    int pol_mode;                /* Polarisation mode (full or scalar). */
     double lon_rad;              /* Geodetic longitude of telescope, in radians. */
     double lat_rad;              /* Geodetic latitude of telescope, in radians. */
     double alt_metres;           /* Altitude of telescope above ellipsoid, in metres. */
@@ -51,7 +52,8 @@ struct oskar_Telescope
     double uv_filter_min;        /* Minimum allowed UV distance. */
     double uv_filter_max;        /* Maximum allowed UV distance. */
     int uv_filter_units;         /* Unit of allowed UV distance (OSKAR_METRES or OSKAR_WAVELENGTHS). */
-    int pol_mode;                /* Polarisation mode (full or scalar). */
+    int noise_enabled;           /* Flag set if thermal noise is enabled. */
+    unsigned int noise_seed;     /* Random generator seed. */
 
     /* Station data. */
     int supplied_coord_type;                          /* Type of coordinates specified in telescope model. */

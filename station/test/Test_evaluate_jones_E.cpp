@@ -82,8 +82,8 @@ TEST(evaluate_jones_E, evaluate_e)
     oskar_telescope_set_station_ids(tel_cpu);
     oskar_telescope_set_phase_centre(tel_cpu,
             OSKAR_SPHERICAL_TYPE_EQUATORIAL, 0.0, M_PI/2.0);
-    oskar_telescope_analyse(tel_cpu, &error);
     oskar_telescope_set_allow_station_beam_duplication(tel_cpu, OSKAR_TRUE);
+    oskar_telescope_analyse(tel_cpu, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Copy telescope structure to the GPU, and free the CPU version.
@@ -94,7 +94,7 @@ TEST(evaluate_jones_E, evaluate_e)
 
     // Create pixel positions.
     int num_l = 128, num_m = 128;
-    int num_pts = num_l * num_m;
+    int num_pts = 1 + num_l * num_m;
     oskar_Mem* l = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pts, &error);
     oskar_Mem* m = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pts, &error);
     oskar_Mem* n = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pts, &error);
@@ -112,7 +112,7 @@ TEST(evaluate_jones_E, evaluate_e)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Evaluate Jones E.
-    oskar_evaluate_jones_E(E, num_pts, OSKAR_RELATIVE_DIRECTIONS,
+    oskar_evaluate_jones_E(E, num_pts - 1, OSKAR_RELATIVE_DIRECTIONS,
             l_gpu, m_gpu, n_gpu, tel_gpu, gast, frequency, work, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
@@ -124,7 +124,7 @@ TEST(evaluate_jones_E, evaluate_e)
     {
         oskar_jones_get_station_pointer(E_station, E, j, &error);
         ASSERT_EQ(0, error) << oskar_get_error_string(error);
-        oskar_mem_save_ascii(file, 4, num_pts, &error,
+        oskar_mem_save_ascii(file, 4, num_pts - 1, &error,
                 oskar_station_work_enu_direction_x(work),
                 oskar_station_work_enu_direction_y(work),
                 oskar_station_work_enu_direction_z(work),

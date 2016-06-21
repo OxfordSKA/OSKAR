@@ -45,7 +45,6 @@ if __name__ == '__main__':
     simulator.set_observation_frequency(start_freq_hz)
     simulator.set_observation_time(start_time_mjd_utc,
         length_sec, num_time_steps)
-    simulator.set_gpus(-1)
     simulator.set_output_measurement_set(vis_file+'.ms')
 
     # Set up the imager.

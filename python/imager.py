@@ -243,6 +243,9 @@ class Imager(object):
         Args:
             size (int): Image side length in pixels.
         """
+        if size % 2 != 0:
+            raise RuntimeError("Image size must be even.")
+            return
         _imager_lib.set_size(self._capsule, size)
 
 
@@ -414,6 +417,9 @@ class Imager(object):
         Returns:
             array: Image as a 2D numpy array. Data are ordered as in FITS image.
         """
+        if size % 2 != 0:
+            raise RuntimeError("Image size must be even.")
+            return
         return _imager_lib.make_image(uu, vv, ww, amps, weight, fov_deg, size)
 
 

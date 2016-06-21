@@ -41,26 +41,27 @@ class VisBlock(object):
         """
         self._capsule = 0
 
+
     def baseline_uu_metres(self):
-        """Returns a new array containing the block baseline uu coordinates.
+        """Returns an array reference to the block baseline uu coordinates.
         """
         return _vis_block_lib.baseline_uu_metres(self._capsule)
 
 
     def baseline_vv_metres(self):
-        """Returns a new array containing the block baseline vv coordinates.
+        """Returns an array reference to the block baseline vv coordinates.
         """
         return _vis_block_lib.baseline_vv_metres(self._capsule)
 
 
     def baseline_ww_metres(self):
-        """Returns a new array containing the block baseline ww coordinates.
+        """Returns an array reference to the block baseline ww coordinates.
         """
         return _vis_block_lib.baseline_ww_metres(self._capsule)
 
 
     def cross_correlations(self):
-        """Returns a new array containing the cross correlations in the block.
+        """Returns an array reference to the cross correlations in the block.
         """
         return _vis_block_lib.cross_correlations(self._capsule)
 

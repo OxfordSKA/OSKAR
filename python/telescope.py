@@ -53,14 +53,73 @@ class Telescope(object):
             self._capsule = _telescope_lib.create(precision)
 
 
+    def load(self, dir_name):
+        """Loads an OSKAR telescope model directory.
+
+        Note that some telescope model meta-data must have been set
+        prior to calling this method, as it affects how data are loaded.
+
+        Specifically, the following methods must be called BEFORE this one:
+            set_position()
+            set_pol_mode()
+            set_enable_numerical_patterns()
+
+        Args:
+            dir_name (str): Path to telescope model directory to load.
+        """
+        _telescope_lib.load(self._capsule, dir_name)
+
+
+    def set_allow_station_beam_duplication(self, value):
+        """Sets whether station beams will be copied if stations are identical.
+
+        Args:
+            value (int):
+                If true, station beams will be copied if stations are identical.
+        """
+        _telescope_lib.set_allow_station_beam_duplication(self._capsule, value)
+
+
     def set_channel_bandwidth(self, channel_bandwidth_hz):
-        """Sets the values used to simulate bandwidth smearing.
+        """Sets the value used to simulate bandwidth smearing.
 
         Args:
             channel_bandwidth_hz (float): The channel bandwidth, in Hz.
         """
         _telescope_lib.set_channel_bandwidth(self._capsule, 
             channel_bandwidth_hz)
+
+
+    def set_enable_noise(self, value, seed=1):
+        """Sets whether thermal noise is enabled.
+
+        Args:
+            value (int): If true, thermal noise will be added to visibilities.
+            seed (int): Random number generator seed.
+        """
+        _telescope_lib.set_enable_noise(self._capsule, value, seed)
+
+
+    def set_enable_numerical_patterns(self, value):
+        """Sets whether numerical element patterns are enabled.
+
+        Args:
+            value (int): If true, numerical element patterns will be loaded.
+        """
+        _telescope_lib.set_enable_numerical_patterns(self._capsule, value)
+
+
+    def set_gaussian_station_beam_values(self, fwhm_deg, ref_freq_hz):
+        """Sets the parameters used for stations with Gaussian beams.
+
+        Args:
+            fwhm_deg (float):
+                The Gaussian FWHM value, in degrees.
+            ref_freq_hz (float):
+                The reference frequency at which the FWHM applies, in Hz.
+        """
+        _telescope_lib.set_gaussian_station_beam_values(self._capsule, 
+            fwhm_deg, ref_freq_hz)
 
 
     def set_phase_centre(self, ra_deg, dec_deg):
@@ -185,6 +244,17 @@ class Telescope(object):
             math.radians(longitude_deg), math.radians(latitude_deg),
             altitude_m, station_longitudes_deg, station_latitudes_deg,
             station_altitudes_m)
+
+
+    def set_station_type(self, type_string):
+        """Sets the type of stations within the telescope model.
+
+        Args:
+            type_string (str):
+                Station type, either "Array", "Gaussian" or "Isotropic".
+                Only the first letter is checked.
+        """
+        _telescope_lib.set_station_type(self._capsule, type_string)
 
 
     def set_time_average(self, time_average_sec):

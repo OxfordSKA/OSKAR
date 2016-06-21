@@ -122,14 +122,13 @@ static PyObject* baseline_uu_metres(PyObject* self, PyObject* args)
         return 0;
     }
 
-    /* Return a copy of the array to Python. */
+    /* Return an array reference to Python. */
     m = oskar_vis_block_baseline_uu_metres(h);
     dims[0] = oskar_vis_block_num_times(h);
     dims[1] = oskar_vis_block_num_baselines(h);
-    array = (PyArrayObject*)PyArray_SimpleNew(2, dims,
-            oskar_mem_is_double(m) ? NPY_DOUBLE : NPY_FLOAT);
-    memcpy(PyArray_DATA(array), oskar_mem_void_const(m),
-            dims[0] * dims[1] * oskar_mem_element_size(oskar_mem_type(m)));
+    array = (PyArrayObject*)PyArray_SimpleNewFromData(2, dims,
+            (oskar_mem_is_double(m) ? NPY_DOUBLE : NPY_FLOAT),
+            oskar_mem_void(m));
     return Py_BuildValue("N", array); /* Don't increment refcount. */
 }
 
@@ -151,14 +150,13 @@ static PyObject* baseline_vv_metres(PyObject* self, PyObject* args)
         return 0;
     }
 
-    /* Return a copy of the array to Python. */
+    /* Return an array reference to Python. */
     m = oskar_vis_block_baseline_vv_metres(h);
     dims[0] = oskar_vis_block_num_times(h);
     dims[1] = oskar_vis_block_num_baselines(h);
-    array = (PyArrayObject*)PyArray_SimpleNew(2, dims,
-            oskar_mem_is_double(m) ? NPY_DOUBLE : NPY_FLOAT);
-    memcpy(PyArray_DATA(array), oskar_mem_void_const(m),
-            dims[0] * dims[1] * oskar_mem_element_size(oskar_mem_type(m)));
+    array = (PyArrayObject*)PyArray_SimpleNewFromData(2, dims,
+            (oskar_mem_is_double(m) ? NPY_DOUBLE : NPY_FLOAT),
+            oskar_mem_void(m));
     return Py_BuildValue("N", array); /* Don't increment refcount. */
 }
 
@@ -180,14 +178,13 @@ static PyObject* baseline_ww_metres(PyObject* self, PyObject* args)
         return 0;
     }
 
-    /* Return a copy of the array to Python. */
+    /* Return an array reference to Python. */
     m = oskar_vis_block_baseline_ww_metres(h);
     dims[0] = oskar_vis_block_num_times(h);
     dims[1] = oskar_vis_block_num_baselines(h);
-    array = (PyArrayObject*)PyArray_SimpleNew(2, dims,
-            oskar_mem_is_double(m) ? NPY_DOUBLE : NPY_FLOAT);
-    memcpy(PyArray_DATA(array), oskar_mem_void_const(m),
-            dims[0] * dims[1] * oskar_mem_element_size(oskar_mem_type(m)));
+    array = (PyArrayObject*)PyArray_SimpleNewFromData(2, dims,
+            (oskar_mem_is_double(m) ? NPY_DOUBLE : NPY_FLOAT),
+            oskar_mem_void(m));
     return Py_BuildValue("N", array); /* Don't increment refcount. */
 }
 
@@ -209,17 +206,15 @@ static PyObject* cross_correlations(PyObject* self, PyObject* args)
         return 0;
     }
 
-    /* Return a copy of the array to Python. */
+    /* Return an array reference to Python. */
     m = oskar_vis_block_cross_correlations(h);
     dims[0] = oskar_vis_block_num_times(h);
     dims[1] = oskar_vis_block_num_channels(h);
     dims[2] = oskar_vis_block_num_baselines(h);
     dims[3] = oskar_vis_block_num_pols(h);
-    array = (PyArrayObject*)PyArray_SimpleNew(4, dims,
-            oskar_mem_is_double(m) ? NPY_CDOUBLE : NPY_CFLOAT);
-    memcpy(PyArray_DATA(array), oskar_mem_void_const(m),
-            dims[0] * dims[1] * dims[2] * dims[3] *
-            oskar_mem_element_size(oskar_mem_type(m)));
+    array = (PyArrayObject*)PyArray_SimpleNewFromData(4, dims,
+            (oskar_mem_is_double(m) ? NPY_CDOUBLE : NPY_CFLOAT),
+            oskar_mem_void(m));
     return Py_BuildValue("N", array); /* Don't increment refcount. */
 }
 

@@ -138,8 +138,6 @@ int main(int argc, char** argv)
             s.to_string("correlation_type", &e).c_str(), &e);
     oskar_simulator_set_max_times_per_block(h,
             s.to_int("max_time_samples_per_block", &e));
-    oskar_simulator_set_thermal_noise(h, s.to_int("noise/enable", &e),
-            s.to_int("noise/seed", &e));
     oskar_simulator_set_output_vis_file(h,
             s.to_string("oskar_vis_filename", &e).c_str());
 #ifndef OSKAR_NO_MS
@@ -150,14 +148,15 @@ int main(int argc, char** argv)
 #endif
     s.end_group();
 
-    // Set up sky model. A copy is made, so the original can be freed.
+    // Set the sky model. A copy is made, so the original can be freed.
     oskar_Sky* sky = oskar_set_up_sky(&s_old, log, &e);
     oskar_simulator_set_sky_model(h, sky, max_sources_per_chunk, &e);
     oskar_sky_free(sky, &e);
 
-    // Set up telescope model.
+    // Set the telescope model. A copy is made, so the original can be freed.
     oskar_Telescope* tel = oskar_set_up_telescope(&s_old, log, &e);
     oskar_simulator_set_telescope_model(h, tel, &e);
+    oskar_telescope_free(tel, &e);
 
     // Run simulation.
     oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
@@ -175,7 +174,6 @@ int main(int argc, char** argv)
     // Free memory.
     oskar_timer_free(tmr);
     oskar_simulator_free(h, &e);
-    oskar_telescope_free(tel, &e);
     oskar_log_free(log);
 
     return e;

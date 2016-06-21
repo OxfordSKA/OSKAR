@@ -90,6 +90,41 @@ static PyObject* create(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* load(PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    const char* dir_name;
+    if (!PyArg_ParseTuple(args, "Os", &dir_name)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    oskar_telescope_load(h, dir_name, 0, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_telescope_load() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_allow_station_beam_duplication(PyObject* self,
+        PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    int value = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    oskar_telescope_set_allow_station_beam_duplication(h, value);
+    return Py_BuildValue("");
+}
+
+
 static PyObject* set_channel_bandwidth(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
@@ -103,6 +138,51 @@ static PyObject* set_channel_bandwidth(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* set_enable_noise(PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    int value = 0, seed = 0;
+    if (!PyArg_ParseTuple(args, "Oii", &capsule, &value, &seed)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    oskar_telescope_set_enable_noise(h, value, (unsigned int) seed);
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_enable_numerical_patterns(PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    int value = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    oskar_telescope_set_enable_numerical_patterns(h, value);
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_gaussian_station_beam_values(PyObject* self,
+        PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    double fwhm_deg = 0.0, ref_freq_hz = 0.0;
+    if (!PyArg_ParseTuple(args, "Odd", &capsule, &fwhm_deg, &ref_freq_hz))
+        return 0;
+    if (!(h = get_handle(capsule))) return 0;
+
+    /* Check stations exist. */
+    if (oskar_telescope_num_stations(h) == 0)
+    {
+        PyErr_Format(PyExc_RuntimeError, "No stations in telescope model!");
+        return 0;
+    }
+    oskar_telescope_set_gaussian_station_beam_values(h, fwhm_deg, ref_freq_hz);
+    return Py_BuildValue("");
+}
+
+
 static PyObject* set_phase_centre(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
@@ -110,6 +190,13 @@ static PyObject* set_phase_centre(PyObject* self, PyObject* args)
     double ra_rad = 0.0, dec_rad = 0.0;
     if (!PyArg_ParseTuple(args, "Odd", &capsule, &ra_rad, &dec_rad)) return 0;
     if (!(h = get_handle(capsule))) return 0;
+
+    /* Check stations exist. */
+    if (oskar_telescope_num_stations(h) == 0)
+    {
+        PyErr_Format(PyExc_RuntimeError, "No stations in telescope model!");
+        return 0;
+    }
     oskar_telescope_set_phase_centre(h, OSKAR_SPHERICAL_TYPE_EQUATORIAL,
             ra_rad, dec_rad);
     return Py_BuildValue("");
@@ -396,6 +483,25 @@ fail:
 }
 
 
+static PyObject* set_station_type(PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    const char* type_string = 0;
+    if (!PyArg_ParseTuple(args, "Os", &capsule, &type_string)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+
+    /* Check stations exist. */
+    if (oskar_telescope_num_stations(h) == 0)
+    {
+        PyErr_Format(PyExc_RuntimeError, "No stations in telescope model!");
+        return 0;
+    }
+    oskar_telescope_set_station_type(h, type_string);
+    return Py_BuildValue("");
+}
+
+
 static PyObject* set_time_average(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
@@ -483,32 +589,43 @@ static PyObject* set_uv_filter(PyObject* self, PyObject* args)
 static PyMethodDef methods[] =
 {
         {"create", (PyCFunction)create, METH_VARARGS, "create(type)"},
+        {"load", (PyCFunction)load, METH_VARARGS, "load(input_dir)"},
+        {"set_allow_station_beam_duplication",
+                (PyCFunction)set_allow_station_beam_duplication, METH_VARARGS,
+                "set_allow_station_beam_duplication(value)"},
         {"set_channel_bandwidth", (PyCFunction)set_channel_bandwidth,
                 METH_VARARGS, "set_channel_bandwidth(channel_bandwidth_hz)"},
+        {"set_enable_noise", (PyCFunction)set_enable_noise, METH_VARARGS,
+                "set_enable_noise(value, seed)"},
+        {"set_enable_numerical_patterns",
+                (PyCFunction)set_enable_numerical_patterns, METH_VARARGS,
+                "set_enable_numerical_patterns(value)"},
+        {"set_gaussian_station_beam_values",
+                (PyCFunction)set_gaussian_station_beam_values, METH_VARARGS,
+                "set_gaussian_station_beam_values(fwhm_deg, ref_freq_hz)"},
         {"set_phase_centre", (PyCFunction)set_phase_centre, METH_VARARGS,
                 "set_phase_centre(ra_rad, dec_rad)"},
         {"set_pol_mode", (PyCFunction)set_pol_mode, METH_VARARGS,
                 "set_pol_mode(type)"},
         {"set_position", (PyCFunction)set_position, METH_VARARGS,
                 "set_position(longitude, latitude, altitude)"},
-        {"set_station_coords_enu", (PyCFunction)set_station_coords_enu,
-                METH_VARARGS, "set_station_coords_enu(longitude, latitude, "
-                        "altitude, x, y, z, x_err, y_err, z_err)"},
         {"set_station_coords_ecef", (PyCFunction)set_station_coords_ecef,
                 METH_VARARGS, "set_station_coords_ecef(longitude, latitude, "
+                        "altitude, x, y, z, x_err, y_err, z_err)"},
+        {"set_station_coords_enu", (PyCFunction)set_station_coords_enu,
+                METH_VARARGS, "set_station_coords_enu(longitude, latitude, "
                         "altitude, x, y, z, x_err, y_err, z_err)"},
         {"set_station_coords_wgs84", (PyCFunction)set_station_coords_wgs84,
                 METH_VARARGS, "set_station_coords_wgs84(longitude, latitude, "
                         "altitude, station_longitudes, station_latitudes, "
                         "station_altitudes)"},
+        {"set_station_type", (PyCFunction)set_station_type,
+                METH_VARARGS, "set_station_type(type_string)"},
         {"set_time_average", (PyCFunction)set_time_average,
                 METH_VARARGS, "set_time_average(time_average_sec)"},
         {"set_up", (PyCFunction)set_up, METH_VARARGS, "set_up(settings_path)"},
         {"set_uv_filter", (PyCFunction)set_uv_filter, METH_VARARGS,
                 "set_uv_filter(uv_filter_min, uv_filter_max, units)"},
-        /*{"set_enable_numerical_patterns",
-                (PyCFunction)set_enable_numerical_patterns, METH_VARARGS,
-                "set_enable_numerical_patterns(value)"},*/
         {NULL, NULL, 0, NULL}
 };
 

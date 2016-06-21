@@ -1107,6 +1107,7 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
 
     /* Set up telescope model. */
     h->tel = oskar_set_up_telescope(&h->s, log, status);
+    oskar_telescope_analyse(h->tel, status);
     if (*status) return;
 
     /* Get values from settings. */

@@ -219,7 +219,8 @@ int benchmark(int num_stations, int num_sources, int type,
     oskar_Jones* J = oskar_jones_create(jones_type, loc, num_stations,
             num_sources, &status);
 
-    oskar_telescope_set_smearing_values(tel, 1e6, (double) use_time_ave);
+    oskar_telescope_set_channel_bandwidth(tel, 1e6);
+    oskar_telescope_set_time_average(tel, (double) use_time_ave);
     oskar_sky_set_use_extended(sky, use_extended);
 
     // Memory for visibility coordinates and output visibility slice.

@@ -29,6 +29,9 @@
 #include <private_telescope.h>
 
 #include <oskar_telescope_accessors.h>
+#include <oskar_cmath.h>
+
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -307,8 +310,150 @@ const oskar_Mem* oskar_telescope_station_true_z_enu_metres_const(
     return model->station_true_z_enu_metres;
 }
 
+int oskar_telescope_noise_enabled(const oskar_Telescope* model)
+{
+    return model->noise_enabled;
+}
+
+unsigned int oskar_telescope_noise_seed(const oskar_Telescope* model)
+{
+    return model->noise_seed;
+}
+
 
 /* Setters. */
+
+void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model,
+        int value)
+{
+    model->allow_station_beam_duplication = value;
+}
+
+void oskar_telescope_set_enable_noise(oskar_Telescope* model,
+        int value, unsigned int seed)
+{
+    model->noise_enabled = value;
+    model->noise_seed = seed;
+}
+
+void oskar_telescope_set_enable_numerical_patterns(oskar_Telescope* model,
+        int value)
+{
+    model->enable_numerical_patterns = value;
+}
+
+static void oskar_telescope_set_gaussian_station_beam_p(oskar_Station* station,
+        double fwhm_rad, double ref_freq_hz)
+{
+    oskar_station_set_gaussian_beam_values(station, fwhm_rad, ref_freq_hz);
+    if (oskar_station_has_child(station))
+    {
+        int i, num_elements;
+        num_elements = oskar_station_num_elements(station);
+        for (i = 0; i < num_elements; ++i)
+        {
+            oskar_telescope_set_gaussian_station_beam_p(
+                    oskar_station_child(station, i), fwhm_rad, ref_freq_hz);
+        }
+    }
+}
+
+void oskar_telescope_set_gaussian_station_beam_values(oskar_Telescope* model,
+        double fwhm_deg, double ref_freq_hz)
+{
+    int i;
+    for (i = 0; i < model->num_stations; ++i)
+    {
+        oskar_telescope_set_gaussian_station_beam_p(model->station[i],
+                fwhm_deg * M_PI / 180.0, ref_freq_hz);
+    }
+}
+
+void oskar_telescope_set_noise_freq_file(oskar_Telescope* model,
+        const char* filename, int* status)
+{
+    int i;
+    for (i = 0; i < model->num_stations; ++i)
+    {
+        oskar_mem_load_ascii(filename, 1, status,
+                oskar_station_noise_freq_hz(model->station[i]), "");
+    }
+}
+
+void oskar_telescope_set_noise_freq_range(oskar_Telescope* model,
+        int num_channels, double start_hz, double inc_hz, int* status)
+{
+    int i;
+    oskar_Mem* noise_freq_hz;
+    noise_freq_hz = oskar_mem_create(model->precision, OSKAR_CPU,
+            num_channels, status);
+    if (*status) return;
+    if (model->precision == OSKAR_DOUBLE)
+    {
+        double* f = oskar_mem_double(noise_freq_hz, status);
+        for (i = 0; i < num_channels; ++i) f[i] = start_hz + i * inc_hz;
+    }
+    else
+    {
+        float* f = oskar_mem_float(noise_freq_hz, status);
+        for (i = 0; i < num_channels; ++i) f[i] = start_hz + i * inc_hz;
+    }
+
+    /* Set noise frequency for all top-level stations. */
+    for (i = 0; i < model->num_stations; ++i)
+    {
+        oskar_Mem* t;
+        t = oskar_station_noise_freq_hz(model->station[i]);
+        oskar_mem_realloc(t, num_channels, status);
+        oskar_mem_copy(t, noise_freq_hz, status);
+    }
+    oskar_mem_free(noise_freq_hz, status);
+}
+
+void oskar_telescope_set_noise_rms_file(oskar_Telescope* model,
+        const char* filename, int* status)
+{
+    int i;
+    for (i = 0; i < model->num_stations; ++i)
+    {
+        oskar_mem_load_ascii(filename, 1, status,
+                oskar_station_noise_rms_jy(model->station[i]), "");
+    }
+}
+
+void oskar_telescope_set_noise_rms_range(oskar_Telescope* model,
+        double start, double end, int* status)
+{
+    int i, num_channels;
+    double inc;
+    oskar_Station* s;
+    oskar_Mem *noise_rms_jy, *h;
+
+    /* Set noise RMS for all top-level stations. */
+    for (i = 0; i < model->num_stations; ++i)
+    {
+        s = model->station[i];
+        h = oskar_station_noise_rms_jy(s);
+        num_channels = (int)oskar_mem_length(oskar_station_noise_freq_hz(s));
+        if (num_channels == 0) continue;
+        oskar_mem_realloc(h, num_channels, status);
+        noise_rms_jy = oskar_mem_create(model->precision, OSKAR_CPU,
+                num_channels, status);
+        inc = (end - start) / (double)num_channels;
+        if (model->precision == OSKAR_DOUBLE)
+        {
+            double* r = oskar_mem_double(noise_rms_jy, status);
+            for (i = 0; i < num_channels; ++i) r[i] = start + i * inc;
+        }
+        else
+        {
+            float* r = oskar_mem_float(noise_rms_jy, status);
+            for (i = 0; i < num_channels; ++i) r[i] = start + i * inc;
+        }
+        oskar_mem_copy(h, noise_rms_jy, status);
+        oskar_mem_free(noise_rms_jy, status);
+    }
+}
 
 void oskar_telescope_set_position(oskar_Telescope* model,
         double longitude_rad, double latitude_rad, double altitude_metres)
@@ -363,13 +508,6 @@ void oskar_telescope_set_phase_centre(oskar_Telescope* model,
     }
 }
 
-void oskar_telescope_set_smearing_values(oskar_Telescope* model,
-        double bandwidth_hz, double time_average_sec)
-{
-    model->channel_bandwidth_hz = bandwidth_hz;
-    model->time_average_sec = time_average_sec;
-}
-
 void oskar_telescope_set_channel_bandwidth(oskar_Telescope* model,
         double bandwidth_hz)
 {
@@ -389,24 +527,42 @@ void oskar_telescope_set_station_ids(oskar_Telescope* model)
         oskar_station_set_unique_ids(model->station[i], &counter);
 }
 
+static void oskar_telescope_set_station_type_p(oskar_Station* station, int type)
+{
+    oskar_station_set_station_type(station, type);
+    if (oskar_station_has_child(station))
+    {
+        int i, num_elements;
+        num_elements = oskar_station_num_elements(station);
+        for (i = 0; i < num_elements; ++i)
+        {
+            oskar_telescope_set_station_type_p(
+                    oskar_station_child(station, i), type);
+        }
+    }
+}
+
+void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type)
+{
+    int i, t;
+    if (!strncmp(type, "A", 1) || !strncmp(type, "a", 1))
+        t = OSKAR_STATION_TYPE_AA;
+    else if (!strncmp(type, "G", 1) || !strncmp(type, "g", 1))
+        t = OSKAR_STATION_TYPE_GAUSSIAN_BEAM;
+    else if (!strncmp(type, "I", 1) || !strncmp(type, "i", 1))
+        t = OSKAR_STATION_TYPE_ISOTROPIC;
+    else if (!strncmp(type, "V", 1) || !strncmp(type, "v", 1))
+        t = OSKAR_STATION_TYPE_VLA_PBCOR;
+    for (i = 0; i < model->num_stations; ++i)
+        oskar_telescope_set_station_type_p(model->station[i], t);
+}
+
 void oskar_telescope_set_uv_filter(oskar_Telescope* model,
         double uv_filter_min, double uv_filter_max, int uv_filter_units)
 {
     model->uv_filter_min = uv_filter_min;
     model->uv_filter_max = uv_filter_max;
     model->uv_filter_units = uv_filter_units;
-}
-
-void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model,
-        int value)
-{
-    model->allow_station_beam_duplication = value;
-}
-
-void oskar_telescope_set_enable_numerical_patterns(oskar_Telescope* model,
-        int value)
-{
-    model->enable_numerical_patterns = value;
 }
 
 void oskar_telescope_set_pol_mode(oskar_Telescope* model, int value)

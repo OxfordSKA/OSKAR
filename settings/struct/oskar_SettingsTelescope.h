@@ -159,7 +159,7 @@ struct oskar_SettingsTelescope
     double longitude_rad;
     double latitude_rad;
     double altitude_m;
-    int station_type;
+    char* station_type;
     int normalise_beams_at_phase_centre;
     int pol_mode;
     int allow_station_beam_duplication;

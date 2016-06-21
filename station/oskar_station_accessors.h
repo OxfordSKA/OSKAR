@@ -419,7 +419,7 @@ void oskar_station_set_phase_centre(oskar_Station* model,
  * @param[in] ref_freq_hz Reference frequency at which FWHM applies, in Hz.
  */
 OSKAR_EXPORT
-void oskar_station_set_gaussian_beam(oskar_Station* model,
+void oskar_station_set_gaussian_beam_values(oskar_Station* model,
         double fwhm_rad, double ref_freq_hz);
 
 /**

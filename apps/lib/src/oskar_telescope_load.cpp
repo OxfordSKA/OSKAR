@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_dir.h"
 #include "apps/lib/oskar_telescope_load.h"
 #include "apps/lib/private_TelescopeLoadApodisation.h"
 #include "apps/lib/private_TelescopeLoadElementTypes.h"
@@ -37,7 +36,7 @@
 #include "apps/lib/private_TelescopeLoadMountTypes.h"
 #include "apps/lib/private_TelescopeLoadNoise.h"
 #include "apps/lib/private_TelescopeLoadPermittedBeams.h"
-#include <oskar_log.h>
+#include <oskar_dir.h>
 #include <oskar_get_error_string.h>
 
 #include <cstdlib>
@@ -58,7 +57,7 @@ static void load_directories(oskar_Telescope* telescope,
 
 extern "C"
 void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
-        oskar_Log* log, const oskar_Settings_old* settings, int* status)
+        oskar_Log* log, int* status)
 {
     // Check if safe to proceed.
     if (*status) return;
@@ -79,7 +78,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
 
     // Create the loaders.
     vector<oskar_TelescopeLoadAbstract*> loaders;
-    // The layout loader must be first.
+    // The layout loader must be first, because it defines the stations.
     loaders.push_back(new TelescopeLoadLayout);
     loaders.push_back(new TelescopeLoadGainPhase);
     loaders.push_back(new TelescopeLoadApodisation);
@@ -88,7 +87,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
     loaders.push_back(new TelescopeLoadMountTypes);
     loaders.push_back(new TelescopeLoadPermittedBeams);
     loaders.push_back(new TelescopeLoadElementPattern);
-    loaders.push_back(new TelescopeLoadNoise(settings));
+    loaders.push_back(new TelescopeLoadNoise);
 
     // Load everything recursively from the telescope directory tree.
     map<string, string> filemap;

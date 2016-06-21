@@ -474,7 +474,7 @@ void oskar_station_set_phase_centre(oskar_Station* model,
     model->beam_lat_rad = beam_latitude_rad;
 }
 
-void oskar_station_set_gaussian_beam(oskar_Station* model,
+void oskar_station_set_gaussian_beam_values(oskar_Station* model,
         double fwhm_rad, double ref_freq_hz)
 {
     model->gaussian_beam_fwhm_rad = fwhm_rad;

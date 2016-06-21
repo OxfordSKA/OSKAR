@@ -57,7 +57,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
     int* id = 0;
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status || !filename) return;
 
     /* Check type. */
     type = oskar_telescope_precision(telescope);

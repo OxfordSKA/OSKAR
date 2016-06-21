@@ -69,6 +69,7 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->mem_location = location;
 
     /* Initialise the meta-data. */
+    telescope->pol_mode = OSKAR_POL_MODE_FULL;
     telescope->num_stations = num_stations;
     telescope->max_station_size = 0;
     telescope->max_station_depth = 1;
@@ -88,8 +89,10 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->uv_filter_min = 0.0;
     telescope->uv_filter_max = FLT_MAX;
     telescope->uv_filter_units = OSKAR_METRES;
+    telescope->noise_enabled = 0;
+    telescope->noise_seed = 1;
 
-    /* Initialise the arrays. */
+    /* Initialise the coordinate arrays. */
     telescope->station_true_x_offset_ecef_metres =
             oskar_mem_create(type, location, num_stations, status);
     telescope->station_true_y_offset_ecef_metres =

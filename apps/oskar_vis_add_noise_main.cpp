@@ -102,8 +102,9 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    // FIXME oskar_set_up_telescope should not be printing log messages!
+    // Set up the telescope model.
     oskar_Telescope* tel = oskar_set_up_telescope(&settings, log, &status);
+    oskar_telescope_analyse(tel, &status);
     if (status)
     {
         oskar_log_error(log, "Error: %s", oskar_get_error_string(status));
@@ -176,8 +177,7 @@ int main(int argc, char** argv)
             oskar_vis_block_read(blk, hdr, h_in, b, &status);
 
             // Add noise to the block.
-            oskar_vis_block_add_system_noise(blk, hdr, tel,
-                    settings.interferometer.noise.seed, b, station_work,
+            oskar_vis_block_add_system_noise(blk, hdr, tel, b, station_work,
                     &status);
 
             // Write the block.

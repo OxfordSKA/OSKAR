@@ -363,7 +363,7 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings_old* s)
             s->telescope.allow_station_beam_duplication);
 
     /* Aperture array settings. */
-    if (s->telescope.station_type == OSKAR_STATION_TYPE_AA)
+    if (s->telescope.station_type[0] == 'A')
     {
         const oskar_SettingsApertureArray* aa = &s->telescope.aperture_array;
 
@@ -523,7 +523,7 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings_old* s)
     } /* [Aperture array settings] */
 
     /* Gaussian beam settings. */
-    else if (s->telescope.station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
+    else if (s->telescope.station_type[0] == 'G')
     {
         LVS("Station type", "Gaussian beam");
         oskar_log_message(log, 'M', depth, "Gaussian beam settings");
@@ -534,7 +534,7 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings_old* s)
                 s->telescope.gaussian_beam.ref_freq_hz);
         --depth;
     }
-    else if (s->telescope.station_type == OSKAR_STATION_TYPE_ISOTROPIC)
+    else if (s->telescope.station_type[0] == 'I')
     {
         LVS("Station type", "Isotropic (STATION BEAM DISABLED!)");
     }
