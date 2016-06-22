@@ -311,6 +311,15 @@ class Imager(object):
         _imager_lib.set_w_range(self._capsule, w_min, w_max, w_rms)
 
 
+    def set_weighting_type(self, weighting_type):
+        """Sets the type of visibility weighting to use.
+
+        Args:
+            weighting_type (str): Either 'Natural', 'Radial' or 'Gridless'.
+        """
+        _imager_lib.set_weighting_type(self._capsule, weighting_type)
+
+
     def update(self, num_baselines, uu, vv, ww, amps, weight, 
         num_pols = 1, start_time = 0, end_time = 0, 
         start_channel = 0, end_channel = 0):

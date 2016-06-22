@@ -53,6 +53,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     h->vis_im      = oskar_mem_create(imager_precision | OSKAR_COMPLEX,
             OSKAR_CPU, 0, status);
     h->weight_im   = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
+    h->weight_tmp  = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
 
     /* Check data type. */
     if (imager_precision != OSKAR_SINGLE && imager_precision != OSKAR_DOUBLE)
@@ -70,6 +71,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     oskar_imager_set_channel_range(h, 0, -1, 1); /* Channel snapshots. */
     oskar_imager_set_image_type(h, "I", status);
     oskar_imager_set_algorithm(h, "FFT", status);
+    oskar_imager_set_weighting_type(h, "Natural", status);
     oskar_imager_set_ms_column(h, "DATA", status);
     oskar_imager_set_default_direction(h);
     return h;

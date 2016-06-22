@@ -35,6 +35,8 @@
 #include <private_imager_update_plane_dft.h>
 #include <private_imager_update_plane_fft.h>
 #include <private_imager_update_plane_wproj.h>
+#include <private_imager_weight_gridless.h>
+#include <private_imager_weight_radial.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -289,6 +291,25 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
     {
         th = oskar_mem_convert_precision(weight, h->imager_prec, status);
         ph = th;
+    }
+
+    /* Re-weight visibilities if required. */
+    switch (h->weighting)
+    {
+    case OSKAR_WEIGHTING_NATURAL:
+        /* Nothing to do. */
+        break;
+    case OSKAR_WEIGHTING_RADIAL:
+        oskar_imager_weight_radial(num_vis, pu, pv, ph, h->weight_tmp, status);
+        ph = h->weight_tmp;
+        break;
+    case OSKAR_WEIGHTING_GRIDLESS_UNIFORM:
+        oskar_imager_weight_gridless(num_vis, pu, pv, ph, h->weight_tmp, status);
+        ph = h->weight_tmp;
+        break;
+    default:
+        *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+        break;
     }
 
     /* Update the supplied plane with the supplied visibilities. */

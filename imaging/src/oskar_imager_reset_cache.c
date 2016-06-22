@@ -56,6 +56,8 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     oskar_mem_realloc(h->vv_tmp, 0, status);
     oskar_mem_realloc(h->ww_tmp, 0, status);
     oskar_mem_realloc(h->vis_im, 0, status);
+    oskar_mem_realloc(h->weight_im, 0, status);
+    oskar_mem_realloc(h->weight_tmp, 0, status);
     oskar_mem_free(h->stokes, status);
     for (i = 0; i < h->im_num_pols; ++i)
     {

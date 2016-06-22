@@ -48,6 +48,8 @@ if (CUDA_FOUND)
         src/private_imager_update_plane_dft.c
         src/private_imager_update_plane_fft.c
         src/private_imager_update_plane_wproj.c
+        src/private_imager_weight_radial.c
+        src/private_imager_weight_gridless.c
     )
 
     add_library(${libname} ${${libname}_SRC})

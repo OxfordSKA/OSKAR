@@ -411,6 +411,21 @@ OSKAR_EXPORT
 void oskar_imager_set_w_range(oskar_Imager* h,
         double w_min, double w_max, double w_rms);
 
+/**
+ * @brief
+ * Sets the visibility weighting scheme to use.
+ *
+ * @details
+ * Sets the visibility weighting scheme to use,
+ * either "Natural", "Radial" or "Gridless".
+ *
+ * @param[in,out] h            Handle to imager.
+ * @param[in] type             Visibility weighting type string, as above.
+ * @param[in,out] status       Status return code.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_weighting_type(oskar_Imager* h, const char* type, int* status);
+
 #ifdef __cplusplus
 }
 #endif

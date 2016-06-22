@@ -26,72 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_H_
-#define OSKAR_IMAGER_H_
-
-/**
- * @file oskar_imager.h
- */
-
-/* Public interface. */
+#include <private_imager_weight_radial.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_Imager;
-#ifndef OSKAR_IMAGER_TYPEDEF_
-#define OSKAR_IMAGER_TYPEDEF_
-typedef struct oskar_Imager oskar_Imager;
-#endif /* OSKAR_IMAGER_TYPEDEF_ */
-
-enum OSKAR_IMAGE_TYPE
+void oskar_imager_weight_radial(int num_points, const oskar_Mem* uu,
+        const oskar_Mem* vv, const oskar_Mem* weight_in, oskar_Mem* weight_out,
+        int* status)
 {
-    OSKAR_IMAGE_TYPE_STOKES, /* IQUV */
-    OSKAR_IMAGE_TYPE_I,
-    OSKAR_IMAGE_TYPE_Q,
-    OSKAR_IMAGE_TYPE_U,
-    OSKAR_IMAGE_TYPE_V,
-    OSKAR_IMAGE_TYPE_LINEAR, /* all linear polarisations XX,XY,YX,YY */
-    OSKAR_IMAGE_TYPE_XX,
-    OSKAR_IMAGE_TYPE_YY,
-    OSKAR_IMAGE_TYPE_XY,
-    OSKAR_IMAGE_TYPE_YX,
-    OSKAR_IMAGE_TYPE_PSF
-};
-
-enum OSKAR_IMAGE_ALGORITHM
-{
-    OSKAR_ALGORITHM_FFT,
-    OSKAR_ALGORITHM_DFT_2D,
-    OSKAR_ALGORITHM_DFT_3D,
-    OSKAR_ALGORITHM_WPROJ,
-    OSKAR_ALGORITHM_AWPROJ
-};
-
-enum OSKAR_IMAGE_WEIGHTING
-{
-    OSKAR_WEIGHTING_NATURAL,
-    OSKAR_WEIGHTING_RADIAL,
-    OSKAR_WEIGHTING_GRIDLESS_UNIFORM
-};
+    int i;
+    if (*status) return;
+    oskar_mem_realloc(weight_out, num_points, status);
+    if (oskar_mem_precision(weight_out) == OSKAR_DOUBLE)
+    {
+        double *wt_out;
+        const double *u, *v, *wt_in;
+        u      = oskar_mem_double_const(uu, status);
+        v      = oskar_mem_double_const(vv, status);
+        wt_in  = oskar_mem_double_const(weight_in, status);
+        wt_out = oskar_mem_double(weight_out, status);
+        for (i = 0; i < num_points; ++i)
+            wt_out[i] = wt_in[i] * sqrt(u[i]*u[i] + v[i]*v[i]);
+    }
+    else
+    {
+        float *wt_out;
+        const float *u, *v, *wt_in;
+        u      = oskar_mem_float_const(uu, status);
+        v      = oskar_mem_float_const(vv, status);
+        wt_in  = oskar_mem_float_const(weight_in, status);
+        wt_out = oskar_mem_float(weight_out, status);
+        for (i = 0; i < num_points; ++i)
+            wt_out[i] = wt_in[i] * sqrt(u[i]*u[i] + v[i]*v[i]);
+    }
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#include <oskar_imager_accessors.h>
-#include <oskar_imager_check_init.h>
-#include <oskar_imager_create.h>
-#include <oskar_imager_finalise.h>
-#include <oskar_imager_free.h>
-#include <oskar_imager_linear_to_stokes.h>
-#include <oskar_imager_reset_cache.h>
-#include <oskar_imager_rotate_coords.h>
-#include <oskar_imager_rotate_vis.h>
-#include <oskar_imager_run.h>
-#include <oskar_imager_select_coords.h>
-#include <oskar_imager_select_vis.h>
-#include <oskar_imager_update.h>
-
-#endif /* OSKAR_IMAGER_H_ */

@@ -343,6 +343,18 @@ void oskar_imager_set_w_range(oskar_Imager* h,
 }
 
 
+void oskar_imager_set_weighting_type(oskar_Imager* h, const char* type, int* status)
+{
+    if (!strncmp(type, "N", 1) || !strncmp(type, "n", 1))
+        h->weighting = OSKAR_WEIGHTING_NATURAL;
+    else if (!strncmp(type, "R", 1) || !strncmp(type, "r", 1))
+        h->weighting = OSKAR_WEIGHTING_RADIAL;
+    else if (!strncmp(type, "G", 1) || !strncmp(type, "g", 1))
+        h->weighting = OSKAR_WEIGHTING_GRIDLESS_UNIFORM;
+    else *status = OSKAR_ERR_SETTINGS_IMAGE;
+}
+
+
 void oskar_imager_data_range(const int settings_range[2],
         int num_data_values, int range[2], int* status)
 {

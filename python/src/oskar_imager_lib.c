@@ -520,6 +520,28 @@ static PyObject* set_w_range(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* set_weighting_type(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    const char* type = 0;
+    if (!PyArg_ParseTuple(args, "Os", &capsule, &type)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_weighting_type(h, type, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_imager_set_weighting() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
 static PyObject* update(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -932,6 +954,8 @@ static PyMethodDef methods[] =
                 "set_vis_time(ref_mjd_utc, inc_sec, num_times)"},
         {"set_w_range", (PyCFunction)set_w_range, METH_VARARGS,
                 "set_w_range(w_min, w_max, w_rms)"},
+        {"set_weighting_type", (PyCFunction)set_weighting_type, METH_VARARGS,
+                "set_weighting_type(type)"},
         {"update", (PyCFunction)update, METH_VARARGS,
                 "update(num_baselines, uu, vv, ww, amps, weight, "
                 "num_pols, start_time, end_time, start_chan, end_chan)"},

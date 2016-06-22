@@ -54,6 +54,7 @@ struct oskar_Imager
     int chan_snaps, time_snaps, chan_range[2], time_range[2];
     int im_type, im_num_times, im_num_channels, im_num_pols, pol_offset;
     int algorithm, image_size, use_ms, use_stokes, support, oversample;
+    int weighting;
     char direction_type, kernel_type, *input_file, *image_root, *ms_column;
     double fov_deg, im_centre_deg[2];
 
@@ -66,7 +67,7 @@ struct oskar_Imager
 
     /* Scratch data. */
     oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im, *weight_im;
-    oskar_Mem *uu_tmp, *vv_tmp, *ww_tmp, *stokes;
+    oskar_Mem *uu_tmp, *vv_tmp, *ww_tmp, *stokes, *weight_tmp;
     int num_planes; /* for each output time, channel and polarisation. */
     double *plane_norm, delta_l, delta_m, delta_n, M[9];
     oskar_Mem **planes;
