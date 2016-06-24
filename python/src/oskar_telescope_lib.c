@@ -220,7 +220,7 @@ static PyObject* set_noise_rms_range(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     int status = 0;
     double start = 0.0, end = 0.0;
-    if (!PyArg_ParseTuple(args, "Oidd", &capsule, &start, &end)) return 0;
+    if (!PyArg_ParseTuple(args, "Odd", &capsule, &start, &end)) return 0;
     if (!(h = get_handle(capsule))) return 0;
 
     /* Check stations exist. */

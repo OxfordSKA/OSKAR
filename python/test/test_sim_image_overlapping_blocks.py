@@ -72,7 +72,10 @@ if __name__ == '__main__':
 
     # Set up the sky model.
     sky = Sky(precision)
-    sky.append_sources(phase_centre_ra_deg, phase_centre_dec_deg, 2.0)
+    sky.append_sources(phase_centre_ra_deg, phase_centre_dec_deg, 1.0)
+    grid = Sky.generate_grid(precision, 
+        phase_centre_ra_deg, phase_centre_dec_deg, 4, 1.5)
+    sky.append(grid)
 
     # Set up the telescope model.
     tel = Telescope(precision)
@@ -81,8 +84,11 @@ if __name__ == '__main__':
     tel.set_pol_mode('Scalar')
     tel.set_station_coords_enu(longitude_deg=0, latitude_deg=60, altitude_m=0, 
         x=x, y=y)
-    # Set station properties after stations have been defined.
+    # Set station properties after stations have been defined.    
     tel.set_phase_centre(phase_centre_ra_deg, phase_centre_dec_deg)
+    tel.set_enable_noise(True)
+    tel.set_noise_freq_range(1, 100e6, 0.0)
+    tel.set_noise_rms_range(10, 10)
     tel.set_station_type('Gaussian')
     tel.set_gaussian_station_beam_values(5.0, 100e6)
 
@@ -106,7 +112,7 @@ if __name__ == '__main__':
     imager.set_vis_phase_centre(phase_centre_ra_deg, phase_centre_dec_deg)
     imager.set_vis_frequency(start_freq_hz)
     imager.set_vis_time(start_time_mjd_utc, inc_sec, num_time_steps)
-    imager.set_output_root('sim_test_overlapping_blocks')
+    imager.set_output_root('sim_test_overlapping_blocks_noise')
     imager.set_algorithm('W-projection')
     imager.set_num_w_planes(256)
     print('Initialising imager...')

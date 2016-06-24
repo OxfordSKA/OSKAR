@@ -424,7 +424,7 @@ void oskar_telescope_set_noise_rms_file(oskar_Telescope* model,
 void oskar_telescope_set_noise_rms_range(oskar_Telescope* model,
         double start, double end, int* status)
 {
-    int i, num_channels;
+    int i, j, num_channels;
     double inc;
     oskar_Station* s;
     oskar_Mem *noise_rms_jy, *h;
@@ -447,12 +447,12 @@ void oskar_telescope_set_noise_rms_range(oskar_Telescope* model,
         if (model->precision == OSKAR_DOUBLE)
         {
             double* r = oskar_mem_double(noise_rms_jy, status);
-            for (i = 0; i < num_channels; ++i) r[i] = start + i * inc;
+            for (j = 0; j < num_channels; ++j) r[j] = start + j * inc;
         }
         else
         {
             float* r = oskar_mem_float(noise_rms_jy, status);
-            for (i = 0; i < num_channels; ++i) r[i] = start + i * inc;
+            for (j = 0; j < num_channels; ++j) r[j] = start + j * inc;
         }
         oskar_mem_copy(h, noise_rms_jy, status);
         oskar_mem_free(noise_rms_jy, status);
