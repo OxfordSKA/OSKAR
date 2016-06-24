@@ -51,6 +51,15 @@ class Sky(object):
             self._capsule = _sky_lib.create(precision)
 
 
+    def append(self, other):
+        """Appends data from another sky model.
+
+        Args:
+            other (oskar.Sky): Another sky model.
+        """
+        _sky_lib.append(self._capsule, other._capsule)
+
+
     def append_sources(self, ra_deg, dec_deg, I, Q=None, U=None, V=None, 
             ref_freq_hz=None, spectral_index=None, rotation_measure=None,
             major_axis_arcsec=None, minor_axis_arcsec=None, 
@@ -106,10 +115,38 @@ class Sky(object):
 
 
     def append_file(self, filename):
-        """Appends data to an OSKAR sky model from a file.
+        """Appends data to the sky model from a file.
 
         Args:
             filename (str): Name of file to open.
         """
         _sky_lib.append_file(self._capsule, filename)
+
+
+    def generate_grid(self, precision, ra0_deg, dec0_deg, side_length, 
+        fov_deg, mean_flux_jy, std_flux_jy, seed=1):
+        """Generates a grid of sources and returns it as a new sky model.
+
+        Args:
+            precision (str):      Either 'double' or 'single' to specify
+                the numerical precision of the data.
+            ra0_deg (float):      Right Ascension of grid centre, in degrees.
+            dec0_deg (float):     Declination of grid centre, in degrees.
+            side_length (int):    Side length of generated grid.
+            fov_deg (float):      Grid field-of-view, in degrees.
+            mean_flux_jy (float): Mean Stokes-I source flux, in Jy.
+            std_flux_jy (float):  Standard deviation Stokes-I source flux, in Jy.
+            seed (int):           Random generator seed.
+        """
+        return _sky_lib.generate_grid(self._capsule, precision, ra0_deg, 
+            dec0_deg, side_length, fov_deg, mean_flux_jy, std_flux_jy, seed)
+
+
+    def save(self, filename):
+        """Saves data to a sky model text file.
+
+        Args:
+            filename (str): Name of file to write.
+        """
+        _sky_lib.save(self._capsule, filename)
 

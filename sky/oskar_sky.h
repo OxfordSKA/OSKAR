@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,6 +83,7 @@ enum OSKAR_SKY_TAGS
 #include <oskar_sky_filter_by_flux.h>
 #include <oskar_sky_filter_by_radius.h>
 #include <oskar_sky_free.h>
+#include <oskar_sky_generate_grid.h>
 #include <oskar_sky_horizon_clip.h>
 #include <oskar_sky_load.h>
 #include <oskar_sky_load_gsm.h>

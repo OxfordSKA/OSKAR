@@ -88,63 +88,27 @@ static int numpy_type_from_oskar(int type)
 }
 
 
-static PyObject* create(PyObject* self, PyObject* args)
+static PyObject* append(PyObject* self, PyObject* args)
 {
-    oskar_Sky* h = 0;
-    PyObject* capsule = 0;
-    int status = 0, prec = 0;
-    const char* type;
-    if (!PyArg_ParseTuple(args, "s", &type)) return 0;
-    prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
-    h = oskar_sky_create(prec, OSKAR_CPU, 0, &status);
-    capsule = PyCapsule_New((void*)h, name,
-            (PyCapsule_Destructor)sky_free);
-    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
-}
-
-
-static PyObject* set_up(PyObject* self, PyObject* args)
-{
-    oskar_Sky* h = 0;
-    PyObject* capsule = 0;
-    oskar_Settings_old s_old;
-    const char* filename = 0;
+    oskar_Sky *h1 = 0, *h2 = 0;
+    PyObject *capsule1 = 0, *capsule2 = 0;
     int status = 0;
+    if (!PyArg_ParseTuple(args, "OO", &capsule1, &capsule2)) return 0;
+    if (!(h1 = get_handle(capsule1))) return 0;
+    if (!(h2 = get_handle(capsule2))) return 0;
 
-    /* Load the settings file. */
-    /* FIXME Stop using the old settings structures. */
-    if (!PyArg_ParseTuple(args, "s", &filename)) return 0;
-    oskar_settings_old_load(&s_old, 0, filename, &status);
+    /* Append the sky model. */
+    oskar_sky_append(h1, h2, &status);
 
     /* Check for errors. */
     if (status)
     {
-        oskar_settings_old_free(&s_old);
         PyErr_Format(PyExc_RuntimeError,
-                "Unable to load settings file (%s).",
-                oskar_get_error_string(status));
-        return 0;
-    }
-
-    /* Set up the sky model. */
-    h = oskar_set_up_sky(&s_old, 0, &status);
-
-    /* Check for errors. */
-    if (status || !h)
-    {
-        oskar_settings_old_free(&s_old);
-        oskar_sky_free(h, &status);
-        PyErr_Format(PyExc_RuntimeError,
-                "Sky model set up failed with code %d (%s).",
+                "oskar_sky_append() failed with code %d (%s).",
                 status, oskar_get_error_string(status));
         return 0;
     }
-
-    /* Create the PyCapsule and return it. */
-    oskar_settings_old_free(&s_old);
-    capsule = PyCapsule_New((void*)h, name,
-            (PyCapsule_Destructor)sky_free);
-    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+    return Py_BuildValue("");
 }
 
 
@@ -337,15 +301,136 @@ static PyObject* append_file(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* create(PyObject* self, PyObject* args)
+{
+    oskar_Sky* h = 0;
+    PyObject* capsule = 0;
+    int status = 0, prec = 0;
+    const char* type;
+    if (!PyArg_ParseTuple(args, "s", &type)) return 0;
+    prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
+    h = oskar_sky_create(prec, OSKAR_CPU, 0, &status);
+    capsule = PyCapsule_New((void*)h, name,
+            (PyCapsule_Destructor)sky_free);
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+}
+
+
+static PyObject* generate_grid(PyObject* self, PyObject* args)
+{
+    oskar_Sky *h = 0;
+    PyObject* capsule = 0;
+    int prec, side_length = 0, seed = 1, status = 0;
+    const char* type = 0;
+    double ra0, dec0, fov, mean_flux_jy, std_flux_jy;
+    if (!PyArg_ParseTuple(args, "sddidddi", &type, &ra0, &dec0,
+            &side_length, &fov, &mean_flux_jy, &std_flux_jy, &seed)) return 0;
+
+    /* Generate the grid. */
+    prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
+    ra0 *= M_PI / 180.0;
+    dec0 *= M_PI / 180.0;
+    fov *= M_PI / 180.0;
+    h = oskar_sky_generate_grid(prec, ra0, dec0, side_length, fov,
+            mean_flux_jy, std_flux_jy, seed, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_generate_grid() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        oskar_sky_free(h, &status);
+        return 0;
+    }
+    capsule = PyCapsule_New((void*)h, name,
+            (PyCapsule_Destructor)sky_free);
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+}
+
+
+static PyObject* save(PyObject* self, PyObject* args)
+{
+    oskar_Sky *h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    const char* filename = 0;
+    if (!PyArg_ParseTuple(args, "Os", &capsule, &filename)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+
+    /* Save the sky model. */
+    oskar_sky_save(filename, h, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_save() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_up(PyObject* self, PyObject* args)
+{
+    oskar_Sky* h = 0;
+    PyObject* capsule = 0;
+    oskar_Settings_old s_old;
+    const char* filename = 0;
+    int status = 0;
+
+    /* Load the settings file. */
+    /* FIXME Stop using the old settings structures. */
+    if (!PyArg_ParseTuple(args, "s", &filename)) return 0;
+    oskar_settings_old_load(&s_old, 0, filename, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        oskar_settings_old_free(&s_old);
+        PyErr_Format(PyExc_RuntimeError,
+                "Unable to load settings file (%s).",
+                oskar_get_error_string(status));
+        return 0;
+    }
+
+    /* Set up the sky model. */
+    h = oskar_set_up_sky(&s_old, 0, &status);
+
+    /* Check for errors. */
+    if (status || !h)
+    {
+        oskar_settings_old_free(&s_old);
+        oskar_sky_free(h, &status);
+        PyErr_Format(PyExc_RuntimeError,
+                "Sky model set up failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+
+    /* Create the PyCapsule and return it. */
+    oskar_settings_old_free(&s_old);
+    capsule = PyCapsule_New((void*)h, name,
+            (PyCapsule_Destructor)sky_free);
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+}
+
+
 /* Method table. */
 static PyMethodDef methods[] =
 {
         {"create", (PyCFunction)create, METH_VARARGS, "create(type)"},
+        {"append", (PyCFunction)append, METH_VARARGS, "append(sky)"},
         {"append_sources", (PyCFunction)append_sources, METH_VARARGS,
                 "append_sources(ra, dec, I, Q, U, V, ref_freq, spectral_index, "
                 "rotation_measure, major, minor, position_angle)"},
         {"append_file", (PyCFunction)append_file, METH_VARARGS,
                 "append_file(filename)"},
+        {"save", (PyCFunction)save, METH_VARARGS, "save(filename)"},
+        {"generate_grid", (PyCFunction)generate_grid, METH_VARARGS,
+                "generate_grid()"},
         {"set_up", (PyCFunction)set_up, METH_VARARGS, "set_up(settings_path)"},
         {NULL, NULL, 0, NULL}
 };

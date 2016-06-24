@@ -313,59 +313,17 @@ static void set_up_gen_grid(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGeneratorGrid* s, double ra0, double dec0,
         int* status)
 {
-    int i, j, k, num_points, side_length, type;
-    double fov_rad, mean_flux, std_flux, r[2];
     oskar_Sky* t;
 
-    /* Get the grid generator parameters. */
-    side_length = s->side_length;
-    fov_rad = s->fov_rad;
-    mean_flux = s->mean_flux_jy;
-    std_flux = s->std_flux_jy;
-    if (*status || side_length <= 0)
+    /* Check if generator is enabled. */
+    if (*status || s->side_length <= 0)
         return;
 
-    /* Create a temporary sky model. */
-    num_points = side_length * side_length;
-    type = oskar_sky_precision(sky);
-    t = oskar_sky_create(type, OSKAR_CPU, num_points, status);
+    /* Generate a sky model containing the grid. */
     oskar_log_message(log, 'M', 0, "Generating source grid positions...");
-
-    /* Side length of 1 is a special case. */
-    if (side_length == 1)
-    {
-        /* Generate the Stokes I flux and store the value. */
-        oskar_random_gaussian2(s->seed, 0, 0, r);
-        r[0] = mean_flux + std_flux * r[0];
-        oskar_sky_set_source(t, 0, ra0, dec0, r[0], 0.0, 0.0,
-                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
-    }
-    else
-    {
-        double l_max, l, m, n, sin_dec0, cos_dec0, ra, dec;
-        l_max = sin(0.5 * fov_rad);
-        sin_dec0 = sin(dec0);
-        cos_dec0 = cos(dec0);
-        for (j = 0, k = 0; j < side_length; ++j)
-        {
-            m = 2.0 * l_max * j / (side_length - 1) - l_max;
-            for (i = 0; i < side_length; ++i, ++k)
-            {
-                l = -2.0 * l_max * i / (side_length - 1) + l_max;
-
-                /* Get longitude and latitude from tangent plane coords. */
-                n = sqrt(1.0 - l*l - m*m);
-                dec = asin(n * sin_dec0 + m * cos_dec0);
-                ra = ra0 + atan2(l, cos_dec0 * n - m * sin_dec0);
-
-                /* Generate the Stokes I flux and store the value. */
-                oskar_random_gaussian2(s->seed, i, j, r);
-                r[0] = mean_flux + std_flux * r[0];
-                oskar_sky_set_source(t, k, ra, dec, r[0], 0.0, 0.0,
-                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
-            }
-        }
-    }
+    t = oskar_sky_generate_grid(oskar_sky_precision(sky), ra0, dec0,
+            s->side_length, s->fov_rad, s->mean_flux_jy, s->std_flux_jy,
+            s->seed, status);
 
     /* Apply polarisation and extended source over-ride. */
     set_up_pol(t, &s->pol, status);
