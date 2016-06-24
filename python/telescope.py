@@ -122,12 +122,36 @@ class Telescope(object):
             fwhm_deg, ref_freq_hz)
 
 
+    def set_noise_freq_range(self, num_channels, start_hz, inc_hz):
+        """Sets the noise frequency range.
+
+        Args:
+            num_channels (int): Number of channels.
+            start_hz (float): Start frequency, in Hz.
+            inc_hz (float): Frequency increment, in Hz.
+        """
+        _telescope_lib.set_noise_freq_range(self._capsule, 
+            num_channels, start_hz, inc_hz)
+
+
+    def set_noise_rms_range(self, start, end):
+        """Sets the noise RMS range.
+
+        Call this only after set_noise_freq_range().
+
+        Args:
+            start (float): Value at first frequency, in Jy.
+            end (float): Value at last frequency, in Jy.
+        """
+        _telescope_lib.set_noise_rms_range(self._capsule, start, end)
+
+
     def set_phase_centre(self, ra_deg, dec_deg):
         """Sets the telescope phase centre coordinates.
 
         Args:
-            ra_deg (str): Right Ascension, in degrees.
-            dec_deg (str): Declination, in degrees.
+            ra_deg (float): Right Ascension, in degrees.
+            dec_deg (float): Declination, in degrees.
         """
         _telescope_lib.set_phase_centre(self._capsule, 
             math.radians(ra_deg), math.radians(dec_deg))

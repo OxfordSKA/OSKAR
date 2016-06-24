@@ -435,7 +435,11 @@ void oskar_telescope_set_noise_rms_range(oskar_Telescope* model,
         s = model->station[i];
         h = oskar_station_noise_rms_jy(s);
         num_channels = (int)oskar_mem_length(oskar_station_noise_freq_hz(s));
-        if (num_channels == 0) continue;
+        if (num_channels == 0)
+        {
+            *status = OSKAR_ERR_OUT_OF_RANGE;
+            return;
+        }
         oskar_mem_realloc(h, num_channels, status);
         noise_rms_jy = oskar_mem_create(model->precision, OSKAR_CPU,
                 num_channels, status);

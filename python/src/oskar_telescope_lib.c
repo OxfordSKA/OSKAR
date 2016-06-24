@@ -183,6 +183,68 @@ static PyObject* set_gaussian_station_beam_values(PyObject* self,
 }
 
 
+static PyObject* set_noise_freq_range(PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    int num_channels = 0, status = 0;
+    double start_hz = 0.0, inc_hz = 0.0;
+    if (!PyArg_ParseTuple(args, "Oidd", &capsule, &num_channels, &start_hz,
+            &inc_hz)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+
+    /* Check stations exist. */
+    if (oskar_telescope_num_stations(h) == 0)
+    {
+        PyErr_Format(PyExc_RuntimeError, "No stations in telescope model!");
+        return 0;
+    }
+    oskar_telescope_set_noise_freq_range(h, num_channels, start_hz, inc_hz,
+            &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_telescope_set_noise_freq_range() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_noise_rms_range(PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    double start = 0.0, end = 0.0;
+    if (!PyArg_ParseTuple(args, "Oidd", &capsule, &start, &end)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+
+    /* Check stations exist. */
+    if (oskar_telescope_num_stations(h) == 0)
+    {
+        PyErr_Format(PyExc_RuntimeError, "No stations in telescope model!");
+        return 0;
+    }
+    oskar_telescope_set_noise_rms_range(h, start, end, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_telescope_set_noise_rms_range() failed "
+                "with code %d (%s).\n\n"
+                "Remember to set noise frequencies first!",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
 static PyObject* set_phase_centre(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
@@ -603,6 +665,12 @@ static PyMethodDef methods[] =
         {"set_gaussian_station_beam_values",
                 (PyCFunction)set_gaussian_station_beam_values, METH_VARARGS,
                 "set_gaussian_station_beam_values(fwhm_deg, ref_freq_hz)"},
+        {"set_noise_freq_range",
+                (PyCFunction)set_noise_freq_range, METH_VARARGS,
+                "set_noise_freq_range(num_channels, start_freq_hz, inc_hz)"},
+        {"set_noise_rms_range",
+                (PyCFunction)set_noise_rms_range, METH_VARARGS,
+                "set_noise_rms_range(start, end)"},
         {"set_phase_centre", (PyCFunction)set_phase_centre, METH_VARARGS,
                 "set_phase_centre(ra_rad, dec_rad)"},
         {"set_pol_mode", (PyCFunction)set_pol_mode, METH_VARARGS,
