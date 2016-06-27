@@ -123,8 +123,8 @@ class Sky(object):
         _sky_lib.append_file(self._capsule, filename)
 
 
-    @staticmethod
-    def generate_grid(precision, ra0_deg, dec0_deg, side_length, fov_deg,
+    @classmethod
+    def generate_grid(cls, precision, ra0_deg, dec0_deg, side_length, fov_deg,
             mean_flux_jy=1.0, std_flux_jy=0.0, seed=1):
         """Generates a grid of sources and returns it as a new sky model.
 
@@ -139,7 +139,7 @@ class Sky(object):
             std_flux_jy (float):  Standard deviation Stokes-I source flux, in Jy.
             seed (int):           Random generator seed.
         """
-        temp = Sky
+        temp = Sky()
         temp._capsule = _sky_lib.generate_grid(precision, ra0_deg, 
             dec0_deg, side_length, fov_deg, mean_flux_jy, std_flux_jy, seed)
         return temp
