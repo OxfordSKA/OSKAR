@@ -31,7 +31,6 @@
 #include <fits/oskar_fits_image_to_sky_model.h>
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
 #include <oskar_random_gaussian.h>
-#include <oskar_random_power_law.h>
 #include <oskar_random_broken_power_law.h>
 #include <oskar_generate_random_coordinate.h>
 #include <oskar_sky.h>
@@ -378,29 +377,18 @@ static void set_up_gen_rpl(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGeneratorRandomPowerLaw* s, double ra0,
         double dec0, int* status)
 {
-    int i, num_sources, type;
     oskar_Sky* t;
 
     /* Random power-law generator. */
-    num_sources = s->num_sources;
-    if (*status || num_sources <= 0)
+    if (*status || s->num_sources <= 0)
         return;
 
-    /* Generate the new positions into a temporary sky model. */
-    type = oskar_sky_precision(sky);
-    t = oskar_sky_create(type, OSKAR_CPU, num_sources, status);
-    oskar_log_message(log, 'M', 0, "Generating random power law source distribution...");
-
-    /* Cannot parallelise here, since rand() is not thread safe. */
-    srand(s->seed);
-    for (i = 0; i < num_sources; ++i)
-    {
-        double ra, dec, b;
-        oskar_generate_random_coordinate(&ra, &dec);
-        b = oskar_random_power_law(s->flux_min, s->flux_max, s->power);
-        oskar_sky_set_source(t, i, ra, dec, b, 0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
-    }
+    /* Generate the sources into a temporary sky model. */
+    oskar_log_message(log, 'M', 0,
+            "Generating random power law source distribution...");
+    t = oskar_sky_generate_random_power_law(oskar_sky_precision(sky),
+            s->num_sources, s->flux_min, s->flux_max, s->power,
+            s->seed, status);
 
     /* Apply filters and extended source over-ride. */
     set_up_filter(t, &s->filter, ra0, dec0, status);
@@ -428,7 +416,8 @@ static void set_up_gen_rbpl(oskar_Sky* sky, oskar_Log* log,
     /* Generate the new positions into a temporary sky model. */
     type = oskar_sky_precision(sky);
     t = oskar_sky_create(type, OSKAR_CPU, num_sources, status);
-    oskar_log_message(log, 'M', 0, "Generating random broken power law source distribution...");
+    oskar_log_message(log, 'M', 0,
+            "Generating random broken power law source distribution...");
 
     /* Cannot parallelise here, since rand() is not thread safe. */
     srand(s->seed);

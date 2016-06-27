@@ -139,10 +139,30 @@ class Sky(object):
             std_flux_jy (float):  Standard deviation Stokes-I source flux, in Jy.
             seed (int):           Random generator seed.
         """
-        temp = Sky()
-        temp._capsule = _sky_lib.generate_grid(precision, ra0_deg, 
+        t = Sky()
+        t._capsule = _sky_lib.generate_grid(precision, ra0_deg, 
             dec0_deg, side_length, fov_deg, mean_flux_jy, std_flux_jy, seed)
-        return temp
+        return t
+
+
+    @classmethod
+    def generate_random_power_law(cls, precision, num_sources,
+            min_flux_jy, max_flux_jy, power_law_index, seed=1):
+        """Generates sources scattered randomly over the sphere.
+
+        Args:
+            precision (str):         Either 'double' or 'single' to specify
+                the numerical precision of the data.
+            num_sources (int):       The number of sources to generate.
+            min_flux_jy (float):     Minimum Stokes-I source flux, in Jy.
+            max_flux_jy (float):     Maximum Stokes-I source flux, in Jy.
+            power_law_index (float): Power law index/exponent.
+            seed (int):              Random generator seed.
+        """
+        t = Sky()
+        t._capsule = _sky_lib.generate_random_power_law(precision, 
+            num_sources, min_flux_jy, max_flux_jy, power_law_index, seed)
+        return t
 
 
     def save(self, filename):
