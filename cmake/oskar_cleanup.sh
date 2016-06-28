@@ -28,6 +28,7 @@ rm -rf _CPack_Packages
 
 # Remove OSKAR source module folders
 rm -rf apps
+rm -rf beam_pattern
 rm -rf convert
 rm -rf correlate
 rm -rf doc
@@ -62,13 +63,13 @@ rm -f  .DS_Store
 # Remove any stray log files
 rm -f  *.log
 
-# Remove install folders (WARNING: Use this option with CARE!!)
+# Remove install folders (WARNING: Use this option with EXTREME CARE!!)
 # Note can only remove the contents of the directories not the directories
 # themselves as they may contain non-OSKAR files.
 if [ "$1" == "-uninstall" ]; then
     rm -f  @CMAKE_INSTALL_PREFIX@/@OSKAR_BIN_INSTALL_DIR@/oskar*
     rm -f  @CMAKE_INSTALL_PREFIX@/@OSKAR_LIB_INSTALL_DIR@/liboskar*
     rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_INCLUDE_INSTALL_DIR@
-    rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_MATLAB_INSTALL_DIR@
-    rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_PYTHON_INSTALL_DIR@
+    # rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_MATLAB_INSTALL_DIR@
+    # rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_PYTHON_INSTALL_DIR@
 fi
