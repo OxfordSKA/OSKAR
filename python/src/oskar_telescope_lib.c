@@ -96,7 +96,7 @@ static PyObject* load(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     int status = 0;
     const char* dir_name;
-    if (!PyArg_ParseTuple(args, "Os", &dir_name)) return 0;
+    if (!PyArg_ParseTuple(args, "Os", &capsule, &dir_name)) return 0;
     if (!(h = get_handle(capsule))) return 0;
     oskar_telescope_load(h, dir_name, 0, &status);
 

@@ -84,6 +84,7 @@ enum OSKAR_SKY_TAGS
 #include <oskar_sky_filter_by_radius.h>
 #include <oskar_sky_free.h>
 #include <oskar_sky_generate_grid.h>
+#include <oskar_sky_generate_random_power_law.h>
 #include <oskar_sky_horizon_clip.h>
 #include <oskar_sky_load.h>
 #include <oskar_sky_load_gsm.h>
