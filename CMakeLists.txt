@@ -3,7 +3,7 @@
 #
 
 # === Set the project name and specify the required CMAKE version.
-cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 # Set various policies to get old behviour with cmake 3.x
 if (POLICY CMP0042)
     cmake_policy(SET CMP0042 OLD)
@@ -43,6 +43,8 @@ endif()
 
 # === Set dependencies and compiler options.
 include(oskar_dependencies)
+include(oskar_includes)
+include(oskar_set_version)
 include(oskar_compiler_options)
 
 enable_testing()
