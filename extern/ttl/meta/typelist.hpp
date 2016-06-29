@@ -129,7 +129,9 @@ namespace impl
 		{
 			if( i == N ) 
 			{
-				f.operator()<typename impl::get<L,N>::type>();
+			    // Edited(BM) 07/05/16 added the 'template'
+			    // f.operator()<typename impl::get<L,N>::type>();
+				f.template operator()<typename impl::get<L,N>::type>();
 			}
 			else
 			{
