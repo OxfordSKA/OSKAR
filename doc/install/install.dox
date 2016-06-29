@@ -109,6 +109,21 @@ These are as listed below.
   - Specifies a custom path in which to look for the CasaCore library headers. This is the path to the top level casacore include folder.
   - Note: This should only be used in special cases, where the version of CasaCore headers installed in the system include path can't be used to build OSKAR.
 
+- <tt><b>-DNVCC_COMPILER_BINDIR=\<path\></b></tt> (default: None)
+  - Specifies a nvcc compiler binary directory over-ride. see nvcc help.
+  - Note: This is likely only to be needed on os x when the version of the
+    compiler picked up by nvcc which is related to the version of xcode being
+    used is incompatible with the current version of cuda.
+
+- <tt><b>-DFORCE_LIBSTDC++=\<ON, or OFF\></b></tt> (default: OFF)
+  - If ON forces the use of libstdc++ with the clang compiler
+  - Note: Used for controlling linking behaviour when using clang or clang-omp 
+    compilers with dependencies which may have been compiled against libstdc++
+
+- <tt><b>-DBUILD_INFO=\<ON, or OFF\></b></tt> (default: OFF)
+  - If ON enables the display of diagnostic build information when running
+    cmake.
+
 <!--
 - <tt><b>-DMATLAB_ROOT=\<path\></b></tt> (default: searches common system install locations)
   - Specifies a custom path in which to search for MATLAB libraries and library headers.
