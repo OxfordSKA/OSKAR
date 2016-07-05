@@ -43,7 +43,7 @@
 #include <oskar_cross_correlate_point_scalar_omp.h>
 #include <oskar_cross_correlate_point_time_smearing_scalar_cuda.h>
 #include <oskar_cross_correlate_point_time_smearing_scalar_omp.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #include <float.h>
 #include <math.h>
@@ -218,7 +218,7 @@ void oskar_cross_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
                                 inv_wavelength, frac_bandwidth, vis_);
                     }
                 }
-                oskar_cuda_check_error(status);
+                oskar_device_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -311,7 +311,7 @@ void oskar_cross_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
                                 inv_wavelength, frac_bandwidth, vis_);
                     }
                 }
-                oskar_cuda_check_error(status);
+                oskar_device_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -429,7 +429,7 @@ void oskar_cross_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
                                 inv_wavelength, frac_bandwidth, vis_);
                     }
                 }
-                oskar_cuda_check_error(status);
+                oskar_device_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -522,7 +522,7 @@ void oskar_cross_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
                                 inv_wavelength, frac_bandwidth, vis_);
                     }
                 }
-                oskar_cuda_check_error(status);
+                oskar_device_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

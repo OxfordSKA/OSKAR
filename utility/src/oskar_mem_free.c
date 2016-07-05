@@ -32,7 +32,7 @@
 
 #include <private_mem.h>
 #include <oskar_mem.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #include <stdlib.h>
 
@@ -62,7 +62,7 @@ void oskar_mem_free(oskar_Mem* mem, int* status)
 #ifdef OSKAR_HAVE_CUDA
             /* Free GPU memory. */
             cudaFree(mem->data);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             if (status) *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

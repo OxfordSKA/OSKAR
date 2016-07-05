@@ -106,6 +106,38 @@ void oskar_imager_set_channel_range(oskar_Imager* h, int start, int end,
 
 /**
  * @brief
+ * Sets the imager to ignore visibility data and only update weights grids.
+ *
+ * @details
+ * Use this method with uniform weighting or W-projection.
+ * The grids of weights can only be used once they are fully populated,
+ * so this method puts the imager into a mode where it only updates its
+ * internal weights grids when calling oskar_imager_update().
+ *
+ * This should only be called after setting all imager options.
+ *
+ * Turn this mode off when processing visibilities.
+ *
+ * The calling sequence should be:
+ *
+ *     // Update weights grid with all coordinates.
+ *     oskar_imager_set_coords_only(true)
+ *     (repeat) oskar_imager_update()
+ *
+ *     // Process actual visibility data.
+ *     oskar_imager_set_coords_only(false)
+ *     (repeat) oskar_imager_update()
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     flag       If set, ignore visibilities and only update
+ *                           weights grids.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_coords_only(oskar_Imager* h, int flag, int* status);
+
+/**
+ * @brief
  * Clears any direction override.
  *
  * @details
@@ -396,23 +428,6 @@ void oskar_imager_set_num_w_planes(oskar_Imager* h, int value);
 
 /**
  * @brief
- * Sets the visibility W-coordinate range.
- *
- * @details
- * Sets the visibility W-coordinate range, used only for W-projection.
- * Note that the values must be in wavelengths.
- *
- * @param[in,out] h            Handle to imager.
- * @param[in] w_min            Minimum value of W, in wavelengths.
- * @param[in] w_max            Maximum value of W, in wavelengths.
- * @param[in] w_rms            RMS value of W, in wavelengths.
- */
-OSKAR_EXPORT
-void oskar_imager_set_w_range(oskar_Imager* h,
-        double w_min, double w_max, double w_rms);
-
-/**
- * @brief
  * Sets the visibility weighting scheme to use.
  *
  * @details
@@ -424,7 +439,8 @@ void oskar_imager_set_w_range(oskar_Imager* h,
  * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_set_weighting_type(oskar_Imager* h, const char* type, int* status);
+void oskar_imager_set_weighting_type(oskar_Imager* h, const char* type,
+        int* status);
 
 #ifdef __cplusplus
 }

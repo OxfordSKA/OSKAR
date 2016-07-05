@@ -26,14 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-
 #include <oskar_sim_beam_pattern.h>
 
 #include <oskar_beam_pattern_generate_coordinates.h>
 #include <oskar_cmath.h>
 #include <oskar_convert_mjd_to_gast_fast.h>
 #include <oskar_cuda_mem_log.h>
+#include <oskar_device_utils.h>
 #include <oskar_evaluate_auto_power.h>
 #include <oskar_evaluate_cross_power.h>
 #include <oskar_evaluate_station_beam.h>
@@ -311,7 +310,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
 #endif
 
     /* Find out how many GPUs are in the system. */
-    *status = (int) cudaGetDeviceCount(&num_gpus_avail);
+    num_gpus_avail = oskar_device_count(status);
     if (*status) { free_host_data(h, status); return; }
     if (num_gpus_avail < h->num_gpus)
     {
@@ -329,7 +328,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
     d = (DeviceData*) calloc(h->num_gpus, sizeof(DeviceData));
     for (i = 0; i < h->num_gpus; ++i)
     {
-        *status = (int) cudaSetDevice(s->sim.cuda_device_ids[i]);
+        oskar_device_set(s->sim.cuda_device_ids[i], status);
         if (*status)
         {
             free_device_data(h->num_gpus, s->sim.cuda_device_ids, d, status);
@@ -337,7 +336,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
             return;
         }
         set_up_device_data(&d[i], h, status);
-        cudaDeviceSynchronize();
+        oskar_device_synchronize();
     }
 
     /* Record memory usage. */
@@ -371,7 +370,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
         gpu_id = thread_id - 1;
 #endif
         if (gpu_id >= 0)
-            cudaSetDevice(s->sim.cuda_device_ids[gpu_id]);
+            oskar_device_set(s->sim.cuda_device_ids[gpu_id], status);
 
         /* Set ranges of inner and outer loops based on averaging mode. */
         if (h->average_single_axis != 'T')
@@ -1934,7 +1933,7 @@ static void free_device_data(int num_gpus, int* cuda_device_ids,
     {
         DeviceData* dd = &d[i];
         if (!dd) continue;
-        cudaSetDevice(cuda_device_ids[i]);
+        oskar_device_set(cuda_device_ids[i], status);
         oskar_mem_free(dd->jones_data_cpu[0], status);
         oskar_mem_free(dd->jones_data_cpu[1], status);
         oskar_mem_free(dd->jones_data, status);
@@ -1959,7 +1958,7 @@ static void free_device_data(int num_gpus, int* cuda_device_ids,
         oskar_telescope_free(dd->tel, status);
         oskar_station_work_free(dd->work, status);
         oskar_timer_free(dd->tmr_compute);
-        cudaDeviceReset();
+        oskar_device_reset();
     }
     free(d);
 }
@@ -1998,7 +1997,7 @@ static void free_host_data(HostData* h, int* status)
 static void record_timing(int num_gpus, int* cuda_device_ids,
         DeviceData* d, HostData* h, oskar_Log* log)
 {
-    int i;
+    int i, status = 0;
     oskar_log_section(log, 'M', "Simulation timing");
     oskar_log_value(log, 'M', 0, "Total wall time", "%.3f s",
             oskar_timer_elapsed(h->tmr_sim) + oskar_timer_elapsed(h->tmr_load));
@@ -2006,7 +2005,7 @@ static void record_timing(int num_gpus, int* cuda_device_ids,
             oskar_timer_elapsed(h->tmr_load));
     for (i = 0; i < num_gpus; ++i)
     {
-        cudaSetDevice(cuda_device_ids[i]);
+        oskar_device_set(cuda_device_ids[i], &status);
         oskar_log_value(log, 'M', 0, "Compute", "%.3f s [GPU %i]",
                 oskar_timer_elapsed(d[i].tmr_compute), i);
     }

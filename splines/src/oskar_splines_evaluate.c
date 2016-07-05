@@ -29,7 +29,7 @@
 #include <oskar_dierckx_bispev.h>
 #include <oskar_dierckx_bispev_bicubic_cuda.h>
 #include <oskar_splines.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -119,7 +119,7 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
 #ifdef OSKAR_HAVE_CUDA
             oskar_dierckx_bispev_bicubic_cuda_f(tx, nx, ty, ny, coeff,
                     num_points, x_, y_, stride, out);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -179,7 +179,7 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
 #ifdef OSKAR_HAVE_CUDA
             oskar_dierckx_bispev_bicubic_cuda_d(tx, nx, ty, ny, coeff,
                     num_points, x_, y_, stride, out);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

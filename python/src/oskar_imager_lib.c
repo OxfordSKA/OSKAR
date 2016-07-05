@@ -301,6 +301,28 @@ static PyObject* set_channel_range(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* set_coords_only(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    int flag = 0, status = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &flag))
+        return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_coords_only(h, flag, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_imager_set_coords_only() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
 static PyObject* set_default_direction(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -507,19 +529,6 @@ static PyObject* set_vis_time(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* set_w_range(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    double w_min = 0.0, w_max = 0.0, w_rms = 0.0;
-    if (!PyArg_ParseTuple(args, "Oddd", &capsule, &w_min, &w_max, &w_rms))
-        return 0;
-    if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_w_range(h, w_min, w_max, w_rms);
-    return Py_BuildValue("");
-}
-
-
 static PyObject* set_weighting_type(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -667,15 +676,19 @@ static PyObject* update_block(PyObject* self, PyObject* args)
 static PyObject* update_plane(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
-    PyObject *obj[] = {0, 0, 0, 0, 0, 0, 0};
-    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *weight_c, *plane_c;
-    PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0, *plane = 0;
+    PyObject *obj[] = {0, 0, 0, 0, 0, 0, 0, 0};
+    oskar_Mem *uu_c = 0, *vv_c = 0, *ww_c = 0, *amp_c = 0, *weight_c = 0;
+    oskar_Mem *plane_c = 0, *weights_grid_c = 0;
+    PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0;
+    PyArrayObject *plane = 0, *weights_grid = 0;
     double plane_norm = 0.0;
     int num_vis, status = 0;
 
-    /* Parse inputs: capsule, uu, vv, ww, amps, weight, plane, plane_norm. */
-    if (!PyArg_ParseTuple(args, "OOOOOOOd", &obj[0],
-            &obj[1], &obj[2], &obj[3], &obj[4], &obj[5], &obj[6], &plane_norm))
+    /* Parse inputs:
+     * capsule, uu, vv, ww, amps, weight, plane, plane_norm, weights_grid. */
+    if (!PyArg_ParseTuple(args, "OOOOOOOdO", &obj[0],
+            &obj[1], &obj[2], &obj[3], &obj[4], &obj[5], &obj[6], &plane_norm,
+            &obj[7]))
         return 0;
     if (!(h = get_handle_imager(obj[0]))) return 0;
 
@@ -688,6 +701,14 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
     plane  = (PyArrayObject*) PyArray_FROM_OF(obj[6], NPY_ARRAY_OUT_ARRAY);
     if (!uu || !vv || !ww || !amps || !weight || !plane)
         goto fail;
+
+    /* Check if weights grid is present. */
+    if (obj[7] != Py_None)
+    {
+        weights_grid = (PyArrayObject*) PyArray_FROM_OF(obj[7],
+                NPY_ARRAY_IN_ARRAY);
+        if (!weights_grid) goto fail;
+    }
 
     /* Check dimensions. */
     if (PyArray_NDIM(uu) != 1 || PyArray_NDIM(vv) != 1 ||
@@ -734,10 +755,17 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
     plane_c = oskar_mem_create_alias_from_raw(PyArray_DATA(plane),
             oskar_type_from_numpy(plane), OSKAR_CPU,
             (size_t) PyArray_SIZE(plane), &status);
+    if (weights_grid)
+    {
+        weights_grid_c = oskar_mem_create_alias_from_raw(
+                PyArray_DATA(weights_grid),
+                oskar_type_from_numpy(weights_grid), OSKAR_CPU,
+                (size_t) PyArray_SIZE(weights_grid), &status);
+    }
 
     /* Update the plane. */
     oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c,
-            weight_c, plane_c, &plane_norm, &status);
+            weight_c, plane_c, &plane_norm, weights_grid_c, &status);
 
     /* Clean up. */
     oskar_mem_free(uu_c, &status);
@@ -746,6 +774,7 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
     oskar_mem_free(amp_c, &status);
     oskar_mem_free(weight_c, &status);
     oskar_mem_free(plane_c, &status);
+    oskar_mem_free(weights_grid_c, &status);
 
     /* Check for errors. */
     if (status)
@@ -761,6 +790,7 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
     Py_XDECREF(amps);
     Py_XDECREF(weight);
     Py_XDECREF(plane);
+    Py_XDECREF(weights_grid);
     return Py_BuildValue("d", plane_norm);
 
 fail:
@@ -770,6 +800,7 @@ fail:
     Py_XDECREF(amps);
     Py_XDECREF(weight);
     Py_XDECREF(plane);
+    Py_XDECREF(weights_grid);
     return 0;
 }
 
@@ -851,7 +882,7 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     plane = oskar_mem_create(oskar_type_from_numpy(amps), OSKAR_CPU,
             num_pixels, &status);
     oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c,
-            weight_c, plane, &norm, &status);
+            weight_c, plane, &norm, 0, &status);
     oskar_imager_finalise_plane(h, plane, norm, &status);
 
     /* Get the real part only. */
@@ -924,6 +955,8 @@ static PyMethodDef methods[] =
                 "set_algorithm(type)"},
         {"set_channel_range", (PyCFunction)set_channel_range, METH_VARARGS,
                 "set_channel_range(start, end, snapshots)"},
+        {"set_coords_only", (PyCFunction)set_coords_only, METH_VARARGS,
+                "set_coords_only(flag)"},
         {"set_default_direction", (PyCFunction)set_default_direction, METH_VARARGS,
                 "set_default_direction()"},
         {"set_direction", (PyCFunction)set_direction, METH_VARARGS,
@@ -952,8 +985,6 @@ static PyMethodDef methods[] =
                 "set_vis_phase_centre(ra_deg, dec_deg)"},
         {"set_vis_time", (PyCFunction)set_vis_time, METH_VARARGS,
                 "set_vis_time(ref_mjd_utc, inc_sec, num_times)"},
-        {"set_w_range", (PyCFunction)set_w_range, METH_VARARGS,
-                "set_w_range(w_min, w_max, w_rms)"},
         {"set_weighting_type", (PyCFunction)set_weighting_type, METH_VARARGS,
                 "set_weighting_type(type)"},
         {"update", (PyCFunction)update, METH_VARARGS,

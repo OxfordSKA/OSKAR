@@ -35,7 +35,7 @@
 #include <oskar_convert_relative_directions_to_enu_directions_cuda.h>
 #include <oskar_update_horizon_mask.h>
 #include <oskar_update_horizon_mask_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #define CF(m) oskar_mem_float(m, status)
 #define CFC(m) oskar_mem_float_const(m, status)
@@ -235,7 +235,7 @@ static void horizon_clip_single(oskar_Sky* out, const oskar_Sky* in,
                 ra, o_ra, dec, o_dec, I, o_I, Q, o_Q, U, o_U, V, o_V,
                 ref, o_ref, sp, o_sp, rm, o_rm, l, o_l, m, o_m, n, o_n,
                 a, o_a, b, o_b, c, o_c, maj, o_maj, min, o_min, pa, o_pa);
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -355,7 +355,7 @@ static void horizon_clip_double(oskar_Sky* out, const oskar_Sky* in,
                 ra, o_ra, dec, o_dec, I, o_I, Q, o_Q, U, o_U, V, o_V,
                 ref, o_ref, sp, o_sp, rm, o_rm, l, o_l, m, o_m, n, o_n,
                 a, o_a, b, o_b, c, o_c, maj, o_maj, min, o_min, pa, o_pa);
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

@@ -29,7 +29,7 @@
 #include <oskar_evaluate_geometric_dipole_pattern.h>
 #include <oskar_evaluate_geometric_dipole_pattern_cuda.h>
 #include <oskar_evaluate_geometric_dipole_pattern_inline.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <oskar_cmath.h>
 
 #ifdef __cplusplus
@@ -204,7 +204,7 @@ void oskar_evaluate_geometric_dipole_pattern(oskar_Mem* pattern, int num_points,
                     oskar_mem_double_const(phi, status), stride,
                     oskar_mem_double2(pattern, status) + offset);
         }
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OSKAR_HAVE_CUDA
-/* Must include this first to avoid type conflict.*/
-#include <cuda_runtime_api.h>
-#define H2D cudaMemcpyHostToDevice
-#endif
-
 #include <stdlib.h>
 #include <math.h>
 
@@ -45,9 +39,6 @@ extern "C" {
 void oskar_station_set_element_type(oskar_Station* dst,
         int index, int element_type, int* status)
 {
-    int location, *t_;
-    size_t offset_bytes;
-
     /* Check if safe to proceed. */
     if (*status) return;
 
@@ -58,25 +49,16 @@ void oskar_station_set_element_type(oskar_Station* dst,
         return;
     }
 
-    /* Get the data type. */
-    location = oskar_mem_location(dst->element_types);
-    offset_bytes = index * sizeof(int);
+    /* Check location. */
+    if (oskar_mem_location(dst->element_types) != OSKAR_CPU)
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
 
     /* Set the data. */
     oskar_mem_int(dst->element_types_cpu, status)[index] = element_type;
-    t_ = oskar_mem_int(dst->element_types, status);
-    if (location == OSKAR_CPU)
-        t_[index] = element_type;
-    else if (location == OSKAR_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        cudaMemcpy((char*)t_ + offset_bytes, &element_type, sizeof(int), H2D);
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-    }
-    else
-        *status = OSKAR_ERR_BAD_LOCATION;
+    oskar_mem_int(dst->element_types, status)[index] = element_type;
 }
 
 #ifdef __cplusplus

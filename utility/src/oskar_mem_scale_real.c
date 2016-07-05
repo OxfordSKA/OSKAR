@@ -28,7 +28,7 @@
 
 #include <private_mem.h>
 #include <oskar_mem.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <oskar_mem_scale_real_cuda.h>
 
 #ifdef __cplusplus
@@ -64,7 +64,7 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
 #ifdef OSKAR_HAVE_CUDA
             oskar_mem_scale_real_cuda_f(num_elements, (float)value,
                     (float*)(mem->data));
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -87,7 +87,7 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
 #ifdef OSKAR_HAVE_CUDA
             oskar_mem_scale_real_cuda_d(num_elements, value,
                     (double*)(mem->data));
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

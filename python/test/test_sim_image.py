@@ -45,15 +45,17 @@ if __name__ == '__main__':
     simulator.set_observation_frequency(start_freq_hz)
     simulator.set_observation_time(start_time_mjd_utc,
         length_sec, num_time_steps)
-    simulator.set_output_measurement_set(vis_file+'.ms')
+    simulator.set_output_vis_file(vis_file)
+    #simulator.set_output_measurement_set(vis_file+'.ms')
 
     # Set up the imager.
     imager = Imager(precision)
     imager.set_size(1024)
     imager.set_fov(2.0)
-    imager.set_input_file(vis_file+'.ms')
-    imager.set_output_root('sim_test')
+    imager.set_input_file(vis_file)
+    imager.set_output_root('oskar_uniform')
     imager.set_algorithm('W-projection')
+    imager.set_weighting_type('Uniform')
     imager.set_num_w_planes(256)
 
     # Run the simulator and imager in sequence.

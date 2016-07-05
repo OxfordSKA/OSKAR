@@ -37,29 +37,29 @@ void oskar_telescope_set_station_coords(oskar_Telescope* dst, int index,
         const double measured_offset_ecef[3], const double true_offset_ecef[3],
         const double measured_enu[3], const double true_enu[3], int* status)
 {
-    oskar_mem_set_element_scalar_real(dst->station_measured_x_offset_ecef_metres,
+    oskar_mem_set_element_real(dst->station_measured_x_offset_ecef_metres,
             index, measured_offset_ecef[0], status);
-    oskar_mem_set_element_scalar_real(dst->station_measured_y_offset_ecef_metres,
+    oskar_mem_set_element_real(dst->station_measured_y_offset_ecef_metres,
             index, measured_offset_ecef[1], status);
-    oskar_mem_set_element_scalar_real(dst->station_measured_z_offset_ecef_metres,
+    oskar_mem_set_element_real(dst->station_measured_z_offset_ecef_metres,
             index, measured_offset_ecef[2], status);
-    oskar_mem_set_element_scalar_real(dst->station_true_x_offset_ecef_metres,
+    oskar_mem_set_element_real(dst->station_true_x_offset_ecef_metres,
             index, true_offset_ecef[0], status);
-    oskar_mem_set_element_scalar_real(dst->station_true_y_offset_ecef_metres,
+    oskar_mem_set_element_real(dst->station_true_y_offset_ecef_metres,
             index, true_offset_ecef[1], status);
-    oskar_mem_set_element_scalar_real(dst->station_true_z_offset_ecef_metres,
+    oskar_mem_set_element_real(dst->station_true_z_offset_ecef_metres,
             index, true_offset_ecef[2], status);
-    oskar_mem_set_element_scalar_real(dst->station_measured_x_enu_metres,
+    oskar_mem_set_element_real(dst->station_measured_x_enu_metres,
             index, measured_enu[0], status);
-    oskar_mem_set_element_scalar_real(dst->station_measured_y_enu_metres,
+    oskar_mem_set_element_real(dst->station_measured_y_enu_metres,
             index, measured_enu[1], status);
-    oskar_mem_set_element_scalar_real(dst->station_measured_z_enu_metres,
+    oskar_mem_set_element_real(dst->station_measured_z_enu_metres,
             index, measured_enu[2], status);
-    oskar_mem_set_element_scalar_real(dst->station_true_x_enu_metres,
+    oskar_mem_set_element_real(dst->station_true_x_enu_metres,
             index, true_enu[0], status);
-    oskar_mem_set_element_scalar_real(dst->station_true_y_enu_metres,
+    oskar_mem_set_element_real(dst->station_true_y_enu_metres,
             index, true_enu[1], status);
-    oskar_mem_set_element_scalar_real(dst->station_true_z_enu_metres,
+    oskar_mem_set_element_real(dst->station_true_z_enu_metres,
             index, true_enu[2], status);
 }
 

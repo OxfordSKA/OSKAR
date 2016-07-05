@@ -29,7 +29,7 @@
 #include <oskar_evaluate_cross_power.h>
 #include <oskar_evaluate_cross_power_cuda.h>
 #include <oskar_evaluate_cross_power_omp.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,7 +68,7 @@ void oskar_evaluate_cross_power(int num_sources,
             oskar_evaluate_cross_power_cuda_f(num_sources,
                     num_stations, oskar_mem_float4c_const(jones, status),
                     oskar_mem_float4c(out, status));
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -88,7 +88,7 @@ void oskar_evaluate_cross_power(int num_sources,
             oskar_evaluate_cross_power_cuda_d(num_sources,
                     num_stations, oskar_mem_double4c_const(jones, status),
                     oskar_mem_double4c(out, status));
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -110,7 +110,7 @@ void oskar_evaluate_cross_power(int num_sources,
             oskar_evaluate_cross_power_scalar_cuda_f(num_sources,
                     num_stations, oskar_mem_float2_const(jones, status),
                     oskar_mem_float2(out, status));
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -130,7 +130,7 @@ void oskar_evaluate_cross_power(int num_sources,
             oskar_evaluate_cross_power_scalar_cuda_d(num_sources,
                     num_stations, oskar_mem_double2_const(jones, status),
                     oskar_mem_double2(out, status));
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

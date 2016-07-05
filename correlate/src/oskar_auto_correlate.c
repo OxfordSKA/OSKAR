@@ -31,7 +31,7 @@
 #include <oskar_auto_correlate_omp.h>
 #include <oskar_auto_correlate_scalar_cuda.h>
 #include <oskar_auto_correlate_scalar_omp.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #include <float.h>
 #include <math.h>
@@ -112,7 +112,7 @@ void oskar_auto_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
 #ifdef OSKAR_HAVE_CUDA
                 oskar_auto_correlate_cuda_d(n_sources, n_stations,
                         J_, I_, Q_, U_, V_, vis_);
-                oskar_cuda_check_error(status);
+                oskar_device_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -135,7 +135,7 @@ void oskar_auto_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
 #ifdef OSKAR_HAVE_CUDA
                 oskar_auto_correlate_scalar_cuda_d(n_sources, n_stations,
                         J_, I_, vis_);
-                oskar_cuda_check_error(status);
+                oskar_device_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -167,7 +167,7 @@ void oskar_auto_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
 #ifdef OSKAR_HAVE_CUDA
                 oskar_auto_correlate_cuda_f(n_sources, n_stations,
                         J_, I_, Q_, U_, V_, vis_);
-                oskar_cuda_check_error(status);
+                oskar_device_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -190,7 +190,7 @@ void oskar_auto_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
 #ifdef OSKAR_HAVE_CUDA
                 oskar_auto_correlate_scalar_cuda_f(n_sources, n_stations,
                         J_, I_, vis_);
-                oskar_cuda_check_error(status);
+                oskar_device_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

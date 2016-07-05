@@ -28,7 +28,7 @@
 
 #include <oskar_rebin_sky_cuda.h>
 #include <oskar_sky.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
 
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
             oskar_mem_float_const(oskar_sky_ra_rad_const(output_gpu), &error),
             oskar_mem_float_const(oskar_sky_dec_rad_const(output_gpu), &error),
             oskar_mem_float(oskar_sky_I(output_gpu), &error));
-    oskar_cuda_check_error(&error);
+    oskar_device_check_error(&error);
     if (error)
         fprintf(stderr, "CUDA error (%s).\n", oskar_get_error_string(error));
 

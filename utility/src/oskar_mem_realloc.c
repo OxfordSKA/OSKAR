@@ -30,7 +30,7 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <oskar_mem.h>
 #include <private_mem.h>
 
@@ -127,7 +127,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
 
         /* Free the old block. */
         cudaFree(mem->data);
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 
         /* Set the new meta-data. */
         mem->data = mem_new;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,8 @@ extern "C" {
  * This function sets the value of one element in a scalar array at the
  * specified index. The array may be either in CPU or GPU memory.
  *
+ * Note that the index is relative to the base precision type of the array.
+ *
  * Integer types will cause an error code to be returned.
  *
  * @param[in] mem           Pointer to the block of memory to update.
@@ -55,7 +57,7 @@ extern "C" {
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_set_element_scalar_real(oskar_Mem* mem, size_t index,
+void oskar_mem_set_element_real(oskar_Mem* mem, size_t index,
         double val, int* status);
 
 #ifdef __cplusplus

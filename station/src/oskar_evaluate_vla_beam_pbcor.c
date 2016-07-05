@@ -30,7 +30,7 @@
 
 #include <oskar_evaluate_vla_beam_pbcor.h>
 #include <oskar_evaluate_vla_beam_pbcor_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <oskar_find_closest_match.h>
 #include <oskar_vla_pbcor_inline.h>
 
@@ -204,7 +204,7 @@ void oskar_evaluate_vla_beam_pbcor(oskar_Mem* beam, int num_sources,
                         oskar_mem_float4c(beam, status),
                         num_sources, l_, m_, f, p1, p2, p3);
             }
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -258,7 +258,7 @@ void oskar_evaluate_vla_beam_pbcor(oskar_Mem* beam, int num_sources,
                         oskar_mem_double4c(beam, status),
                         num_sources, l_, m_, f, p1, p2, p3);
             }
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

@@ -26,13 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-
 #include <private_imager.h>
 
 #include <oskar_dft_c2r_2d_cuda.h>
 #include <oskar_dft_c2r_3d_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <oskar_imager.h>
 #include <private_imager_update_plane_dft.h>
 
@@ -68,7 +66,7 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
     t = (oskar_Mem**) calloc(h->num_gpus, sizeof(oskar_Mem*));
     for (i = 0; i < h->num_gpus; ++i)
     {
-        cudaSetDevice(h->cuda_device_ids[i]);
+        oskar_device_set(h->cuda_device_ids[i], status);
         oskar_mem_copy(h->d[i].uu, uu, status);
         oskar_mem_copy(h->d[i].vv, vv, status);
         oskar_mem_copy(h->d[i].amp, amps, status);
@@ -94,7 +92,7 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
         thread_id = omp_get_thread_num();
 #endif
         d = &h->d[thread_id];
-        cudaSetDevice(h->cuda_device_ids[thread_id]);
+        oskar_device_set(h->cuda_device_ids[thread_id], status);
 
         /* Calculate the block size. */
         block_start = i * max_block_size;
@@ -163,7 +161,7 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
                         oskar_mem_float_const(d->n, status),
                         oskar_mem_float(d->block_gpu, status));
         }
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 
         /* Copy the data back and add to existing data. */
         oskar_mem_copy(d->block_cpu, d->block_gpu, status);

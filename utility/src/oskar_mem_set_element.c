@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,34 +37,38 @@
 extern "C" {
 #endif
 
-void oskar_mem_set_element_scalar_real(oskar_Mem* mem, size_t index,
+void oskar_mem_set_element_real(oskar_Mem* mem, size_t index,
         double val, int* status)
 {
-    int type, location;
+    int precision, location;
+    size_t bound = 0;
 
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check index is within range. */
-    if (index >= mem->num_elements)
+    /* Get the data type and location */
+    precision = oskar_type_precision(mem->type);
+    location = mem->location;
+    bound = mem->num_elements;
+    if (oskar_mem_is_complex(mem))
+        bound *= 2;
+    if (oskar_mem_is_matrix(mem))
+        bound *= 4;
+    if (index >= bound)
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
 
-    /* Get the data type and location */
-    type = mem->type;
-    location = mem->location;
-
-    /* Set the data into the array element. */
+    /* Set the data into the array. */
     if (location == OSKAR_CPU)
     {
-        if (type == OSKAR_DOUBLE)
+        if (precision == OSKAR_DOUBLE)
         {
             ((double*)(mem->data))[index] = val;
             return;
         }
-        else if (type == OSKAR_SINGLE)
+        else if (precision == OSKAR_SINGLE)
         {
             ((float*)(mem->data))[index] = (float) val;
             return;
@@ -75,13 +79,13 @@ void oskar_mem_set_element_scalar_real(oskar_Mem* mem, size_t index,
     else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_DOUBLE)
+        if (precision == OSKAR_DOUBLE)
         {
             cudaMemcpy((double*)(mem->data) + index, &val, sizeof(double),
                     cudaMemcpyHostToDevice);
             return;
         }
-        else if (type == OSKAR_SINGLE)
+        else if (precision == OSKAR_SINGLE)
         {
             float temp;
             temp = (float) val;

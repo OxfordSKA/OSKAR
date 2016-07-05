@@ -26,11 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef OSKAR_HAVE_CUDA
 #include <cufft.h>
-#include <cuda_runtime_api.h>
+#endif
 
 #include <private_imager.h>
 
+#include <oskar_device_utils.h>
 #include <oskar_fftpack_cfft.h>
 #include <oskar_fftpack_cfft_f.h>
 #include <oskar_fftphase.h>
@@ -147,11 +149,15 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
             oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
             if (h->fft_on_gpu)
             {
-                cudaSetDevice(h->cuda_device_ids[0]);
+#ifdef OSKAR_HAVE_CUDA
+                oskar_device_set(h->cuda_device_ids[0], status);
                 oskar_mem_copy(d->plane_gpu, plane, status);
                 cufftExecZ2Z(h->cufft_plan, oskar_mem_void(d->plane_gpu),
                         oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
                 oskar_mem_copy(plane, d->plane_gpu, status);
+#else
+                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
             }
             else
             {
@@ -171,11 +177,15 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
             oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
             if (h->fft_on_gpu)
             {
-                cudaSetDevice(h->cuda_device_ids[0]);
+#ifdef OSKAR_HAVE_CUDA
+                oskar_device_set(h->cuda_device_ids[0], status);
                 oskar_mem_copy(d->plane_gpu, plane, status);
                 cufftExecC2C(h->cufft_plan, oskar_mem_void(d->plane_gpu),
                         oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
                 oskar_mem_copy(plane, d->plane_gpu, status);
+#else
+                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
             }
             else
             {

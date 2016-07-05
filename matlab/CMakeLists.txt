@@ -8,7 +8,6 @@ if (MATLAB_FOUND AND CUDA_FOUND)
 
     add_subdirectory(binary_file)
     add_subdirectory(convert)
-    add_subdirectory(cuda)
     add_subdirectory(image)
     #add_subdirectory(math)
     add_subdirectory(settings)

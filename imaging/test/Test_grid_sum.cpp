@@ -64,7 +64,7 @@ TEST(imager, grid_sum)
     // Grid visibility data.
     double plane_norm = 0.0;
     oskar_imager_update_plane(im, num_vis, uu, vv, ww, vis, weight, grid,
-            &plane_norm, &status);
+            &plane_norm, 0, &status);
     ASSERT_DOUBLE_EQ((double)num_vis, plane_norm);
 
     // Sum the grid.

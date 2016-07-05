@@ -28,7 +28,7 @@
 
 #include <oskar_evaluate_element_weights_dft.h>
 #include <oskar_evaluate_element_weights_dft_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <math.h>
 
 #ifdef __cplusplus
@@ -157,7 +157,7 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
 #ifdef OSKAR_HAVE_CUDA
             oskar_evaluate_element_weights_dft_cuda_d(weights_, num_elements,
                     wavenumber, x_, y_, z_, x_beam, y_beam, z_beam);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -183,7 +183,7 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
             oskar_evaluate_element_weights_dft_cuda_f(weights_, num_elements,
                     (float)wavenumber, x_, y_, z_, (float)x_beam,
                     (float)y_beam, (float)z_beam);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

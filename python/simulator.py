@@ -153,10 +153,19 @@ class Simulator(object):
         """Sets the GPU device IDs to use.
 
         Args:
-            device_ids (int, array-like): 
+            device_ids (int, array-like):
                 A list of the GPU IDs to use, or -1 to use all.
         """
         _simulator_lib.set_gpus(self._capsule, device_ids)
+
+
+    def set_horizon_clip(self, value):
+        """Sets whether horizon clipping is performed.
+
+        Args:
+            value (bool): If set, apply horizon clipping.
+        """
+        _simulator_lib.set_horizon_clip(self._capsule, value)
 
 
     def set_max_times_per_block(self, value):

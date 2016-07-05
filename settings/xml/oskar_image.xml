@@ -71,7 +71,7 @@
         <desc>The type of transform used to generate the image.</desc>
     </s>
     <s k="weighting_type"><label>Weighting type</label>
-        <type name="OptionList" default="Natural">Natural,Radial</type>
+        <type name="OptionList" default="Natural">Natural,Radial,Uniform</type>
         <desc>The type of visibility weighting scheme to use.</desc>
     </s>
     <s k="fft"><label>FFT options</label>

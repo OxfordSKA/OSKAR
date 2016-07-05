@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 #include <oskar_convert_station_uvw_to_baseline_uvw.h>
 #include <oskar_convert_station_uvw_to_baseline_uvw_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,15 +84,6 @@ void oskar_convert_station_uvw_to_baseline_uvw(const oskar_Mem* u,
     num_stations = (int)oskar_mem_length(u);
     num_baselines = num_stations * (num_stations - 1) / 2;
 
-    /* Check that the data types match. */
-    if (oskar_mem_type(v) != type || oskar_mem_type(w) != type ||
-            oskar_mem_type(uu) != type || oskar_mem_type(vv) != type ||
-            oskar_mem_type(ww) != type)
-    {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
-    }
-
     /* Check that the data locations match. */
     if (oskar_mem_location(v) != location ||
             oskar_mem_location(w) != location ||
@@ -101,15 +92,6 @@ void oskar_convert_station_uvw_to_baseline_uvw(const oskar_Mem* u,
             oskar_mem_location(ww) != location)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
-        return;
-    }
-
-    /* Check that the memory is allocated. */
-    if (!oskar_mem_allocated(uu) || !oskar_mem_allocated(vv) ||
-            !oskar_mem_allocated(ww) || !oskar_mem_allocated(u) ||
-            !oskar_mem_allocated(v) || !oskar_mem_allocated(w))
-    {
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;
     }
 
@@ -178,7 +160,7 @@ void oskar_convert_station_uvw_to_baseline_uvw(const oskar_Mem* u,
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

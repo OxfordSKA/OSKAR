@@ -28,7 +28,7 @@
 
 #include <oskar_apply_element_taper_cosine.h>
 #include <oskar_apply_element_taper_cosine_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <math.h>
 
 #ifdef __cplusplus
@@ -160,7 +160,7 @@ void oskar_apply_element_taper_cosine(oskar_Mem* jones, int num_sources,
             }
             else
                 *status = OSKAR_ERR_BAD_DATA_TYPE;
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -207,7 +207,7 @@ void oskar_apply_element_taper_cosine(oskar_Mem* jones, int num_sources,
             }
             else
                 *status = OSKAR_ERR_BAD_DATA_TYPE;
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

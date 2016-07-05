@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OSKAR_HAVE_CUDA
-/* Must include this first to avoid type conflict.*/
-#include <cuda_runtime_api.h>
-#define H2D cudaMemcpyHostToDevice
-#endif
-
 #include <stdlib.h>
 
 #include <private_station.h>
@@ -45,9 +39,6 @@ void oskar_station_set_element_coords(oskar_Station* dst,
         int index, const double measured_enu[3], const double true_enu[3],
         int* status)
 {
-    int type, location;
-    void *xw, *yw, *zw, *xs, *ys, *zs;
-
     /* Check if safe to proceed. */
     if (*status) return;
 
@@ -58,24 +49,24 @@ void oskar_station_set_element_coords(oskar_Station* dst,
         return;
     }
 
-    /* Get the data type and location. */
-    type = oskar_station_precision(dst);
-    location = oskar_station_mem_location(dst);
-
     /* Check if any z component is nonzero, and set 3D flag if so. */
     if (measured_enu[2] != 0.0 || true_enu[2] != 0.0)
         dst->array_is_3d = OSKAR_TRUE;
 
-    /* Get raw pointers. */
-    xw = oskar_mem_void(dst->element_measured_x_enu_metres);
-    yw = oskar_mem_void(dst->element_measured_y_enu_metres);
-    zw = oskar_mem_void(dst->element_measured_z_enu_metres);
-    xs = oskar_mem_void(dst->element_true_x_enu_metres);
-    ys = oskar_mem_void(dst->element_true_y_enu_metres);
-    zs = oskar_mem_void(dst->element_true_z_enu_metres);
-
-    if (location == OSKAR_CPU)
+    if (oskar_station_mem_location(dst) == OSKAR_CPU)
     {
+        int type;
+        void *xw, *yw, *zw, *xs, *ys, *zs;
+
+        /* Get raw pointers. */
+        xw = oskar_mem_void(dst->element_measured_x_enu_metres);
+        yw = oskar_mem_void(dst->element_measured_y_enu_metres);
+        zw = oskar_mem_void(dst->element_measured_z_enu_metres);
+        xs = oskar_mem_void(dst->element_true_x_enu_metres);
+        ys = oskar_mem_void(dst->element_true_y_enu_metres);
+        zs = oskar_mem_void(dst->element_true_z_enu_metres);
+
+        type = oskar_station_precision(dst);
         if (type == OSKAR_DOUBLE)
         {
             ((double*)xw)[index] = measured_enu[0];
@@ -97,45 +88,21 @@ void oskar_station_set_element_coords(oskar_Station* dst,
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-    else if (location == OSKAR_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        size_t size, offset_bytes;
-        size = oskar_mem_element_size(type);
-        offset_bytes = index * size;
-        if (type == OSKAR_DOUBLE)
-        {
-            cudaMemcpy((char*)xw + offset_bytes, &measured_enu[0], size, H2D);
-            cudaMemcpy((char*)yw + offset_bytes, &measured_enu[1], size, H2D);
-            cudaMemcpy((char*)zw + offset_bytes, &measured_enu[2], size, H2D);
-            cudaMemcpy((char*)xs + offset_bytes, &true_enu[0], size, H2D);
-            cudaMemcpy((char*)ys + offset_bytes, &true_enu[1], size, H2D);
-            cudaMemcpy((char*)zs + offset_bytes, &true_enu[2], size, H2D);
-        }
-        else if (type == OSKAR_SINGLE)
-        {
-            float txw, tyw, tzw, txs, tys, tzs;
-            txw = (float) measured_enu[0];
-            tyw = (float) measured_enu[1];
-            tzw = (float) measured_enu[2];
-            txs = (float) true_enu[0];
-            tys = (float) true_enu[1];
-            tzs = (float) true_enu[2];
-            cudaMemcpy((char*)xw + offset_bytes, &txw, size, H2D);
-            cudaMemcpy((char*)yw + offset_bytes, &tyw, size, H2D);
-            cudaMemcpy((char*)zw + offset_bytes, &tzw, size, H2D);
-            cudaMemcpy((char*)xs + offset_bytes, &txs, size, H2D);
-            cudaMemcpy((char*)ys + offset_bytes, &tys, size, H2D);
-            cudaMemcpy((char*)zs + offset_bytes, &tzs, size, H2D);
-        }
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-    }
     else
-        *status = OSKAR_ERR_BAD_LOCATION;
+    {
+        oskar_mem_set_element_real(dst->element_measured_x_enu_metres,
+                index, measured_enu[0], status);
+        oskar_mem_set_element_real(dst->element_measured_y_enu_metres,
+                index, measured_enu[1], status);
+        oskar_mem_set_element_real(dst->element_measured_z_enu_metres,
+                index, measured_enu[2], status);
+        oskar_mem_set_element_real(dst->element_true_x_enu_metres,
+                index, true_enu[0], status);
+        oskar_mem_set_element_real(dst->element_true_y_enu_metres,
+                index, true_enu[1], status);
+        oskar_mem_set_element_real(dst->element_true_z_enu_metres,
+                index, true_enu[2], status);
+    }
 }
 
 #ifdef __cplusplus

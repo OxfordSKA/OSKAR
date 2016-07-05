@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ void oskar_convert_ecef_to_baseline_uvw(int num_stations, const oskar_Mem* x,
         oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* work, int* status)
 {
     oskar_Mem *u, *v, *w, *uu_dump, *vv_dump, *ww_dump; /* Aliases. */
-    int i, type, location, num_baselines;
+    int i, num_baselines;
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -62,28 +62,6 @@ void oskar_convert_ecef_to_baseline_uvw(int num_stations, const oskar_Mem* x,
     if ((int)oskar_mem_length(work) < 3 * num_stations)
         oskar_mem_realloc(work, 3 * num_stations, status);
     if (*status) return;
-
-    /* Check that the data are of the right type. */
-    type = oskar_mem_type(x);
-    if (oskar_mem_type(uu) != type || oskar_mem_type(vv) != type ||
-            oskar_mem_type(ww) != type || oskar_mem_type(y) != type ||
-            oskar_mem_type(z) != type || oskar_mem_type(work) != type)
-    {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
-    }
-
-    /* Check that the data are in the right location. */
-    location = oskar_mem_location(x);
-    if (oskar_mem_location(y) != location ||
-            oskar_mem_location(z) != location ||
-            oskar_mem_location(uu) != location ||
-            oskar_mem_location(vv) != location ||
-            oskar_mem_location(ww) != location)
-    {
-        *status = OSKAR_ERR_LOCATION_MISMATCH;
-        return;
-    }
 
     /* Create pointers from work buffer. */
     u = oskar_mem_create_alias(work, 0, num_stations, status);

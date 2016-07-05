@@ -32,7 +32,7 @@
 #include <oskar_evaluate_jones_R.h>
 #include <oskar_evaluate_jones_R_cuda.h>
 #include <oskar_parallactic_angle.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -195,7 +195,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
                         latitude, lst);
             }
         }
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,8 @@
 
 #include <oskar_settings_load_simulator.h>
 
-#include <cuda_runtime_api.h>
+#include <oskar_device_utils.h>
+#include <oskar_get_error_string.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -61,15 +62,12 @@ void oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
     QVariant devs = s.value("cuda_device_ids", "all");
     if (devs.toString() == "all")
     {
-        int num_devices = 0;
-
         // Query the number of devices in the system.
-        cudaError_t error = cudaGetDeviceCount(&num_devices);
-        if (error != cudaSuccess || num_devices == 0)
+        int num_devices = oskar_device_count(status);
+        if (*status || num_devices == 0)
         {
             fprintf(stderr, "Unable to determine number of CUDA devices: %s\n",
-                    cudaGetErrorString(error));
-            *status = (int) error;
+                    oskar_get_error_string(*status));
             return;
         }
 

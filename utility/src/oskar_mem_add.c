@@ -28,7 +28,7 @@
 
 #include <oskar_mem.h>
 #include <oskar_mem_add_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -97,7 +97,7 @@ void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_mem_add_cuda_d(num_elements, bb, cc, aa);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -122,7 +122,7 @@ void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_mem_add_cuda_f(num_elements, bb, cc, aa);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
