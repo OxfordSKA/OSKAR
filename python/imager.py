@@ -417,7 +417,8 @@ class Imager(object):
 
 
     @staticmethod
-    def make_image(uu, vv, ww, amps, weight, fov_deg, size):
+    def make_image(uu, vv, ww, amps, fov_deg, size,
+            weighting='Natural', algorithm='FFT', weight=None):
         """Makes an image from visibility data.
 
         Args:
@@ -429,10 +430,14 @@ class Imager(object):
                 Baseline ww coordinates, in wavelengths.
             amps (complex float, array-like, shape (n,)):
                 Baseline visibility amplitudes.
-            weight (float, array-like, shape (n,)):
-                Visibility weights.
             fov_deg (float): Image field of view, in degrees.
             size (int):      Image size along one dimension, in pixels.
+            weighting (Optional[str]):
+                Either 'Natural', 'Radial' or 'Uniform'.
+            algorithm (Optional[str]):
+                Algorithm type: 'FFT', 'DFT 2D', 'DFT 3D' or 'W-projection'.
+            weight (Optional[float, array-like, shape (n,)]):
+                Visibility weights.
 
         Returns:
             array: Image as a 2D numpy array. Data are ordered as in FITS image.
@@ -440,7 +445,8 @@ class Imager(object):
         if size % 2 != 0:
             raise RuntimeError("Image size must be even.")
             return
-        return _imager_lib.make_image(uu, vv, ww, amps, weight, fov_deg, size)
+        return _imager_lib.make_image(uu, vv, ww, amps, fov_deg, size,
+            weighting, algorithm, weight)
 
 
     @staticmethod

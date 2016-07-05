@@ -305,20 +305,10 @@ static PyObject* set_coords_only(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
-    int flag = 0, status = 0;
-    if (!PyArg_ParseTuple(args, "Oi", &capsule, &flag))
-        return 0;
+    int flag = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &flag)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_coords_only(h, flag, &status);
-
-    /* Check for errors. */
-    if (status)
-    {
-        PyErr_Format(PyExc_RuntimeError,
-                "oskar_imager_set_coords_only() failed with code %d (%s).",
-                status, oskar_get_error_string(status));
-        return 0;
-    }
+    oskar_imager_set_coords_only(h, flag);
     return Py_BuildValue("");
 }
 
@@ -810,13 +800,17 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     oskar_Imager* h;
     PyObject *obj[] = {0, 0, 0, 0, 0};
     PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0, *im = 0;
-    int i, status = 0, num_vis, num_pixels, size = 0, type;
+    int i, num_cells, num_pixels, num_vis, size = 0, status = 0, type = 0;
+    int dft = 0, wproj = 0, uniform = 0;
     double fov_deg = 0.0, norm = 0.0;
+    const char *weighting_type = 0, *algorithm_type = 0;
     oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *weight_c, *plane;
+    oskar_Mem *weights_grid = 0;
 
     /* Parse inputs. */
-    if (!PyArg_ParseTuple(args, "OOOOOdi",
-            &obj[0], &obj[1], &obj[2], &obj[3], &obj[4], &fov_deg, &size))
+    if (!PyArg_ParseTuple(args, "OOOOdissO",
+            &obj[0], &obj[1], &obj[2], &obj[3], &fov_deg, &size,
+            &weighting_type, &algorithm_type, &obj[4]))
         return 0;
 
     /* Make sure input objects are arrays. Convert if required. */
@@ -824,14 +818,19 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     vv     = (PyArrayObject*) PyArray_FROM_OF(obj[1], NPY_ARRAY_IN_ARRAY);
     ww     = (PyArrayObject*) PyArray_FROM_OF(obj[2], NPY_ARRAY_IN_ARRAY);
     amps   = (PyArrayObject*) PyArray_FROM_OF(obj[3], NPY_ARRAY_IN_ARRAY);
-    weight = (PyArrayObject*) PyArray_FROM_OF(obj[4], NPY_ARRAY_IN_ARRAY);
-    if (!uu || !vv || !ww || !amps || !weight)
+    if (!uu || !vv || !ww || !amps)
         goto fail;
+
+    /* Check if weights are present. */
+    if (obj[4] != Py_None)
+    {
+        weight = (PyArrayObject*) PyArray_FROM_OF(obj[4], NPY_ARRAY_IN_ARRAY);
+        if (!weight) goto fail;
+    }
 
     /* Check dimensions. */
     if (PyArray_NDIM(uu) != 1 || PyArray_NDIM(vv) != 1 ||
-            PyArray_NDIM(ww) != 1 || PyArray_NDIM(amps) != 1 ||
-            PyArray_NDIM(weight) != 1)
+            PyArray_NDIM(ww) != 1 || PyArray_NDIM(amps) != 1)
     {
         PyErr_SetString(PyExc_RuntimeError, "Input data arrays must be 1D.");
         goto fail;
@@ -839,8 +838,12 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     num_vis = (int) PyArray_SIZE(amps);
     if (num_vis != (int) PyArray_SIZE(uu) ||
             num_vis != (int) PyArray_SIZE(vv) ||
-            num_vis != (int) PyArray_SIZE(ww) ||
-            num_vis != (int) PyArray_SIZE(weight))
+            num_vis != (int) PyArray_SIZE(ww))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Input data dimension mismatch.");
+        goto fail;
+    }
+    if (weight && (num_vis != (int) PyArray_SIZE(weight)))
     {
         PyErr_SetString(PyExc_RuntimeError, "Input data dimension mismatch.");
         goto fail;
@@ -865,6 +868,19 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     h = oskar_imager_create(type, &status);
     oskar_imager_set_fov(h, fov_deg);
     oskar_imager_set_size(h, size);
+    oskar_imager_set_algorithm(h, algorithm_type, &status);
+    oskar_imager_set_weighting_type(h, weighting_type, &status);
+
+    /* Check for DFT, W-projection or uniform weighting. */
+    if (!strncmp(algorithm_type, "DFT", 3) ||
+            !strncmp(algorithm_type, "dft", 3))
+        dft = 1;
+    if (!strncmp(algorithm_type, "W", 1) ||
+            !strncmp(algorithm_type, "w", 1))
+        wproj = 1;
+    if (!strncmp(weighting_type, "U", 1) ||
+            !strncmp(weighting_type, "u", 1))
+        uniform = 1;
 
     /* Pointers to input/output arrays. */
     uu_c = oskar_mem_create_alias_from_raw(PyArray_DATA(uu),
@@ -875,36 +891,53 @@ static PyObject* make_image(PyObject* self, PyObject* args)
             oskar_type_from_numpy(ww), OSKAR_CPU, num_vis, &status);
     amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amps),
             oskar_type_from_numpy(amps), OSKAR_CPU, num_vis, &status);
-    weight_c = oskar_mem_create_alias_from_raw(PyArray_DATA(weight),
-            oskar_type_from_numpy(weight), OSKAR_CPU, num_vis, &status);
-
-    /* Make the image. */
-    plane = oskar_mem_create(oskar_type_from_numpy(amps), OSKAR_CPU,
-            num_pixels, &status);
-    oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c,
-            weight_c, plane, &norm, 0, &status);
-    oskar_imager_finalise_plane(h, plane, norm, &status);
-
-    /* Get the real part only. */
-    if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
+    if (weight)
     {
-        double *t = oskar_mem_double(plane, &status);
-        for (i = 0; i < num_pixels; ++i) t[i] = t[2 * i];
+        weight_c = oskar_mem_create_alias_from_raw(PyArray_DATA(weight),
+                oskar_type_from_numpy(weight), OSKAR_CPU, num_vis, &status);
     }
     else
     {
-        float *t = oskar_mem_float(plane, &status);
-        for (i = 0; i < num_pixels; ++i) t[i] = t[2 * i];
+        /* Set weights to 1 if not supplied. */
+        weight_c = oskar_mem_create(type, OSKAR_CPU, num_vis, &status);
+        oskar_mem_set_value_real(weight_c, 1.0, 0, num_vis, &status);
     }
+
+    /* Supply the coordinates first, if required. */
+    if (wproj || uniform)
+    {
+        weights_grid = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
+        oskar_imager_set_coords_only(h, 1);
+        oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, 0, weight_c,
+                0, 0, weights_grid, &status);
+        oskar_imager_set_coords_only(h, 0);
+    }
+
+    /* Initialise the algorithm to get the plane size. */
+    oskar_imager_check_init(h, &status);
+    num_cells = oskar_imager_plane_size(h);
+    num_cells *= num_cells;
+
+    /* Make the image. */
+    plane = oskar_mem_create((dft ? type : (type | OSKAR_COMPLEX)), OSKAR_CPU,
+            num_cells, &status);
+    oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c, weight_c,
+            plane, &norm, weights_grid, &status);
+    oskar_imager_finalise_plane(h, plane, norm, &status);
+    oskar_imager_trim_image(plane, oskar_imager_plane_size(h), size, &status);
+
+    /* Copy the data out. */
     memcpy(PyArray_DATA(im), oskar_mem_void_const(plane),
             num_pixels * oskar_mem_element_size(type));
 
     /* Free memory. */
+    oskar_mem_free(plane, &status);
     oskar_mem_free(uu_c, &status);
     oskar_mem_free(vv_c, &status);
     oskar_mem_free(ww_c, &status);
     oskar_mem_free(amp_c, &status);
     oskar_mem_free(weight_c, &status);
+    oskar_mem_free(weights_grid, &status);
     oskar_imager_free(h, &status);
 
     /* Check for errors. */

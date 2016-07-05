@@ -73,6 +73,22 @@ OSKAR_EXPORT
 void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
         double plane_norm, int* status);
 
+/**
+ * @brief
+ * Low-level utility function to compact a plane.
+ *
+ * @details
+ * Takes the real part and trims the image plane if required.
+ *
+ * @param[in,out] plane      Plane to finalise.
+ * @param[in]     plane_size Side length of input plane.
+ * @param[in]     image_size Side length of output plane.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_imager_trim_image(oskar_Mem* plane,
+        int plane_size, int image_size, int* status);
+
 #ifdef __cplusplus
 }
 #endif

@@ -148,7 +148,7 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
             h->algorithm == OSKAR_ALGORITHM_WPROJ)
     {
         oskar_Mem *uu, *vv, *ww;
-        oskar_imager_set_coords_only(h, 1, status);
+        oskar_imager_set_coords_only(h, 1);
         if (h->log)
         {
             oskar_log_message(h->log, 'M', 0, "Reading coordinates...");
@@ -206,7 +206,7 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
         oskar_mem_free(uu, status);
         oskar_mem_free(vv, status);
         oskar_mem_free(ww, status);
-        oskar_imager_set_coords_only(h, 0, status);
+        oskar_imager_set_coords_only(h, 0);
     }
 
     /* Initialise the algorithm. */
@@ -354,7 +354,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     if (h->weighting == OSKAR_WEIGHTING_UNIFORM ||
             h->algorithm == OSKAR_ALGORITHM_WPROJ)
     {
-        oskar_imager_set_coords_only(h, 1, status);
+        oskar_imager_set_coords_only(h, 1);
         if (h->log)
         {
             oskar_log_message(h->log, 'M', 0, "Reading coordinates...");
@@ -406,7 +406,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
             }
         }
         if (h->log) oskar_log_message(h->log, 'S', -2, "");
-        oskar_imager_set_coords_only(h, 0, status);
+        oskar_imager_set_coords_only(h, 0);
     }
 
     /* Initialise the algorithm. */

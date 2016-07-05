@@ -45,6 +45,8 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, int num_vis,
     int num_cells, num_skipped = 0;
     if (*status) return;
     num_cells = h->grid_size * h->grid_size;
+    if (oskar_mem_precision(plane) != h->imager_prec)
+        *status = OSKAR_ERR_TYPE_MISMATCH;
     if ((int)oskar_mem_length(plane) < num_cells)
         oskar_mem_realloc(plane, num_cells, status);
     if (*status) return;

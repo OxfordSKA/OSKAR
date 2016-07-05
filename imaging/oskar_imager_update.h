@@ -113,6 +113,9 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
  *
  * The supplied baseline coordinates must be in wavelengths.
  *
+ * If this is called in "coordinate only" mode, then the visibility amplitudes
+ * are ignored, the plane is untouched and the weights grid is updated instead.
+ *
  * @param[in,out] h             Handle to imager.
  * @param[in]     num_vis       Number of visibilities.
  * @param[in]     uu            Baseline uu coordinates, in wavelengths.
@@ -122,38 +125,14 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
  * @param[in]     weight        Visibility weights.
  * @param[in,out] plane         Updated image or visibility plane.
  * @param[in,out] plane_norm    Updated required normalisation of plane.
- * @param[in]     weights_grid  Updated grid of weights.
+ * @param[in,out] weights_grid  Grid of weights, updated if required.
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
 void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
         const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
-        double* plane_norm, const oskar_Mem* weights_grid, int* status);
-
-/**
- * @brief
- * Updates the grid of weights.
- *
- * @details
- * This low-level function updates the grid of weights,
- * which is used during uniform weighting.
- * It also updates the statistics on W-coordinates,
- * which are used for W-projection.
- *
- * @param[in,out] h             Handle to imager.
- * @param[in]     num_points    Number of points.
- * @param[in]     uu            Baseline uu coordinates, in wavelengths.
- * @param[in]     vv            Baseline vv coordinates, in wavelengths.
- * @param[in]     ww            Baseline ww coordinates, in wavelengths.
- * @param[in]     weight        Visibility weights.
- * @param[in,out] weights_grid  Updated grid of weights.
- * @param[in,out] status        Status return code.
- */
-OSKAR_EXPORT
-void oskar_imager_update_weights_grid(oskar_Imager* h, int num_points,
-        const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* weight, oskar_Mem* weights_grid, int* status);
+        double* plane_norm, oskar_Mem* weights_grid, int* status);
 
 #ifdef __cplusplus
 }

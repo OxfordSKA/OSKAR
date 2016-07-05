@@ -50,6 +50,9 @@ extern "C" {
 #endif
 
 static void oskar_imager_allocate_planes(oskar_Imager* h, int *status);
+static void oskar_imager_update_weights_grid(oskar_Imager* h, int num_points,
+        const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
+        const oskar_Mem* weight, oskar_Mem* weights_grid, int* status);
 
 void oskar_imager_update_block(oskar_Imager* h, const oskar_VisBlock* b,
         int* status)
@@ -238,14 +241,14 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
                 /* Update this image plane with the visibilities. */
                 plane = h->im_num_pols * (t * h->im_num_channels + c) + p;
                 if (h->coords_only)
-                    oskar_imager_update_weights_grid(h, num_vis, h->uu_im,
-                            h->vv_im, h->ww_im, h->weight_im,
+                    oskar_imager_update_plane(h, num_vis, h->uu_im, h->vv_im,
+                            h->ww_im, 0, h->weight_im, 0, 0,
                             h->weights_grids[plane], status);
                 else
                     oskar_imager_update_plane(h, num_vis, h->uu_im, h->vv_im,
-                            h->ww_im, h->vis_im, h->weight_im, h->planes[plane],
-                            &h->plane_norm[plane], h->weights_grids[plane],
-                            status);
+                            h->ww_im, h->vis_im, h->weight_im,
+                            h->planes[plane], &h->plane_norm[plane],
+                            h->weights_grids[plane], status);
             } /* End image pol */
         } /* End image channel */
     } /* End image time */
@@ -261,22 +264,14 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
 void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
         const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
-        double* plane_norm, const oskar_Mem* weights_grid, int* status)
+        double* plane_norm, oskar_Mem* weights_grid, int* status)
 {
     oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
     const oskar_Mem *pu, *pv, *pw, *pa, *ph;
     if (*status) return;
-    if (oskar_mem_precision(plane) != h->imager_prec)
-    {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
-    }
-
-    /* Do nothing if we're in "coords only" mode. */
-    if (h->coords_only) return;
 
     /* Convert precision of input data if required. */
-    pu = uu; pv = vv; pw = ww; pa = amps; ph = weight;
+    pu = uu; pv = vv; pw = ww; ph = weight;
     if (oskar_mem_precision(uu) != h->imager_prec)
     {
         tu = oskar_mem_convert_precision(uu, h->imager_prec, status);
@@ -292,60 +287,74 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
         tw = oskar_mem_convert_precision(ww, h->imager_prec, status);
         pw = tw;
     }
-    if (oskar_mem_precision(amps) != h->imager_prec)
-    {
-        ta = oskar_mem_convert_precision(amps, h->imager_prec, status);
-        pa = ta;
-    }
     if (oskar_mem_precision(weight) != h->imager_prec)
     {
         th = oskar_mem_convert_precision(weight, h->imager_prec, status);
         ph = th;
     }
 
-    /* Check imager is ready. */
-    oskar_imager_check_init(h, status);
-
-    /* Re-weight visibilities if required. */
-    switch (h->weighting)
+    /* Just update the grid of weights if we're in coordinate-only mode. */
+    if (h->coords_only)
     {
-    case OSKAR_WEIGHTING_NATURAL:
-        /* Nothing to do. */
-        break;
-    case OSKAR_WEIGHTING_RADIAL:
-        oskar_imager_weight_radial(num_vis, pu, pv, ph, h->weight_tmp, status);
-        ph = h->weight_tmp;
-        break;
-    case OSKAR_WEIGHTING_UNIFORM:
-        oskar_imager_weight_uniform(num_vis, pu, pv, ph, h->weight_tmp,
-                h->cellsize_rad, h->image_size, weights_grid, status);
-        ph = h->weight_tmp;
-        break;
-    default:
-        *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-        break;
+        oskar_imager_update_weights_grid(h, num_vis, uu, vv, ww, weight,
+                weights_grid, status);
+    }
+    else
+    {
+        /* Convert precision of visibility amplitudes if required. */
+        pa = amps;
+        if (oskar_mem_precision(amps) != h->imager_prec)
+        {
+            ta = oskar_mem_convert_precision(amps, h->imager_prec, status);
+            pa = ta;
+        }
+
+        /* Check imager is ready. */
+        oskar_imager_check_init(h, status);
+
+        /* Re-weight visibilities if required. */
+        switch (h->weighting)
+        {
+        case OSKAR_WEIGHTING_NATURAL:
+            /* Nothing to do. */
+            break;
+        case OSKAR_WEIGHTING_RADIAL:
+            oskar_imager_weight_radial(num_vis, pu, pv, ph, h->weight_tmp,
+                    status);
+            ph = h->weight_tmp;
+            break;
+        case OSKAR_WEIGHTING_UNIFORM:
+            oskar_imager_weight_uniform(num_vis, pu, pv, ph, h->weight_tmp,
+                    h->cellsize_rad, h->image_size, weights_grid, status);
+            ph = h->weight_tmp;
+            break;
+        default:
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            break;
+        }
+
+        /* Update the supplied plane with the supplied visibilities. */
+        switch (h->algorithm)
+        {
+        case OSKAR_ALGORITHM_DFT_2D:
+        case OSKAR_ALGORITHM_DFT_3D:
+            oskar_imager_update_plane_dft(h, num_vis, pu, pv, pw, pa, ph,
+                    plane, plane_norm, status);
+            break;
+        case OSKAR_ALGORITHM_FFT:
+            oskar_imager_update_plane_fft(h, num_vis, pu, pv, pa, ph,
+                    plane, plane_norm, status);
+            break;
+        case OSKAR_ALGORITHM_WPROJ:
+            oskar_imager_update_plane_wproj(h, num_vis, pu, pv, pw, pa, ph,
+                    plane, plane_norm, status);
+            break;
+        default:
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+        }
     }
 
-    /* Update the supplied plane with the supplied visibilities. */
-    switch (h->algorithm)
-    {
-    case OSKAR_ALGORITHM_DFT_2D:
-    case OSKAR_ALGORITHM_DFT_3D:
-        oskar_imager_update_plane_dft(h, num_vis, pu, pv, pw, pa, ph,
-                plane, plane_norm, status);
-        break;
-    case OSKAR_ALGORITHM_FFT:
-        oskar_imager_update_plane_fft(h, num_vis, pu, pv, pa, ph,
-                plane, plane_norm, status);
-        break;
-    case OSKAR_ALGORITHM_WPROJ:
-        oskar_imager_update_plane_wproj(h, num_vis, pu, pv, pw, pa, ph,
-                plane, plane_norm, status);
-        break;
-    default:
-        *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-    }
-
+    /* Clean up. */
     oskar_mem_free(tu, status);
     oskar_mem_free(tv, status);
     oskar_mem_free(tw, status);
@@ -423,7 +432,25 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, int num_points,
 void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
 {
     int i;
-    if (*status || h->planes || h->coords_only) return;
+    if (*status) return;
+
+    /* Allocate the weights grids if required. */
+    if (!h->weights_grids)
+    {
+        h->weights_grids = calloc(h->num_planes, sizeof(oskar_Mem*));
+        if (h->weighting == OSKAR_WEIGHTING_UNIFORM)
+        {
+            for (i = 0; i < h->num_planes; ++i)
+            {
+                h->weights_grids[i] = oskar_mem_create(h->imager_prec,
+                        OSKAR_CPU, h->image_size * h->image_size, status);
+            }
+        }
+    }
+
+    /* If we're in coordinate-only mode, or the planes already exist,
+     * there's nothing more to do here. */
+    if (h->coords_only || h->planes) return;
 
     /* Allocate the image or visibility planes. */
     h->planes = calloc(h->num_planes, sizeof(oskar_Mem*));

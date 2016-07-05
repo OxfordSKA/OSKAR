@@ -91,9 +91,8 @@ void oskar_imager_set_channel_range(oskar_Imager* h, int start, int end,
 }
 
 
-void oskar_imager_set_coords_only(oskar_Imager* h, int flag, int* status)
+void oskar_imager_set_coords_only(oskar_Imager* h, int flag)
 {
-    int i;
     h->coords_only = flag;
 
     /* Check if coordinate input is starting or finishing. */
@@ -110,19 +109,6 @@ void oskar_imager_set_coords_only(oskar_Imager* h, int flag, int* status)
         /* Finishing. */
         if (h->ww_points > 0)
             h->ww_rms = sqrt(h->ww_rms / h->ww_points);
-    }
-
-    /* Allocate the weights grids if required. */
-    if (h->weights_grids) return;
-    oskar_imager_set_num_planes(h);
-    h->weights_grids = calloc(h->num_planes, sizeof(oskar_Mem*));
-    if (h->weighting == OSKAR_WEIGHTING_UNIFORM)
-    {
-        for (i = 0; i < h->num_planes; ++i)
-        {
-            h->weights_grids[i] = oskar_mem_create(h->imager_prec,
-                    OSKAR_CPU, h->image_size * h->image_size, status);
-        }
     }
 }
 

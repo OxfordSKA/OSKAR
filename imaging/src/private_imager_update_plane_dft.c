@@ -56,6 +56,8 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
     /* Check the image plane. */
     num_pixels = h->image_size * h->image_size;
     prec = oskar_mem_precision(amps);
+    if (oskar_mem_precision(plane) != h->imager_prec)
+        *status = OSKAR_ERR_TYPE_MISMATCH;
     if (oskar_mem_is_complex(plane) || oskar_mem_is_matrix(plane))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
     if ((int)oskar_mem_length(plane) < num_pixels)

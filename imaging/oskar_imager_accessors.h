@@ -131,10 +131,9 @@ void oskar_imager_set_channel_range(oskar_Imager* h, int start, int end,
  * @param[in,out] h          Handle to imager.
  * @param[in]     flag       If set, ignore visibilities and only update
  *                           weights grids.
- * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_set_coords_only(oskar_Imager* h, int flag, int* status);
+void oskar_imager_set_coords_only(oskar_Imager* h, int flag);
 
 /**
  * @brief
