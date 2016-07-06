@@ -26,18 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef OSKAR_HAVE_CUDA
 #include <cufft.h>
-#include <cuda_runtime_api.h>
+#endif
 
 #include <private_imager.h>
+#include <oskar_imager.h>
 
+#include <oskar_device_utils.h>
 #include <oskar_fftpack_cfft.h>
 #include <oskar_fftpack_cfft_f.h>
 #include <oskar_fftphase.h>
 #include <oskar_grid_correction.h>
-#include <oskar_imager.h>
-#include <oskar_imager_finalise.h>
-#include <oskar_imager_reset_cache.h>
 #include <oskar_mem.h>
 #include <fitsio.h>
 #include <stdlib.h>
@@ -54,50 +54,15 @@ static void write_plane(oskar_Imager* h, oskar_Mem* plane,
 void oskar_imager_finalise(oskar_Imager* h, oskar_Mem* output_plane,
         int* status)
 {
-    int t, c, p, i, j, num_cells, size_diff;
+    int t, c, p, i;
     if (*status) return;
 
     /* Finalise all the planes. */
-    num_cells = h->grid_size * h->grid_size;
     for (i = 0; i < h->num_planes; ++i)
     {
         oskar_imager_finalise_plane(h, h->planes[i], h->plane_norm[i], status);
-
-        if (h->algorithm == OSKAR_ALGORITHM_FFT ||
-                h->algorithm == OSKAR_ALGORITHM_WPROJ)
-        {
-            /* Get the real part only. */
-            if (oskar_mem_precision(h->planes[i]) == OSKAR_DOUBLE)
-            {
-                double *t = oskar_mem_double(h->planes[i], status);
-                for (j = 0; j < num_cells; ++j) t[j] = t[2 * j];
-            }
-            else
-            {
-                float *t = oskar_mem_float(h->planes[i], status);
-                for (j = 0; j < num_cells; ++j) t[j] = t[2 * j];
-            }
-
-            /* Trim to required image size. */
-            size_diff = h->grid_size - h->image_size;
-            if (size_diff > 0)
-            {
-                char *ptr;
-                size_t in = 0, out = 0, copy_len = 0, element_size = 0;
-                ptr = oskar_mem_char(h->planes[i]);
-                element_size = oskar_mem_element_size(
-                        oskar_mem_precision(h->planes[i]));
-                copy_len = element_size * h->image_size;
-                in = element_size * (size_diff / 2) * (h->grid_size + 1);
-                for (j = 0; j < h->image_size; ++j)
-                {
-                    /* Use memmove() instead of memcpy() to allow for overlap. */
-                    memmove(ptr + out, ptr + in, copy_len);
-                    in += h->grid_size * element_size;
-                    out += copy_len;
-                }
-            }
-        }
+        oskar_imager_trim_image(h->planes[i],
+                h->grid_size, h->image_size, status);
     }
 
     /* Copy plane 0 to output image plane if given. */
@@ -147,11 +112,15 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
             oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
             if (h->fft_on_gpu)
             {
-                cudaSetDevice(h->cuda_device_ids[0]);
+#ifdef OSKAR_HAVE_CUDA
+                oskar_device_set(h->cuda_device_ids[0], status);
                 oskar_mem_copy(d->plane_gpu, plane, status);
                 cufftExecZ2Z(h->cufft_plan, oskar_mem_void(d->plane_gpu),
                         oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
                 oskar_mem_copy(plane, d->plane_gpu, status);
+#else
+                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
             }
             else
             {
@@ -171,11 +140,15 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
             oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
             if (h->fft_on_gpu)
             {
-                cudaSetDevice(h->cuda_device_ids[0]);
+#ifdef OSKAR_HAVE_CUDA
+                oskar_device_set(h->cuda_device_ids[0], status);
                 oskar_mem_copy(d->plane_gpu, plane, status);
                 cufftExecC2C(h->cufft_plan, oskar_mem_void(d->plane_gpu),
                         oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
                 oskar_mem_copy(plane, d->plane_gpu, status);
+#else
+                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
             }
             else
             {
@@ -189,6 +162,49 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
             oskar_grid_correction_f(size,
                     oskar_mem_double(h->corr_func, status),
                     oskar_mem_float(plane, status));
+        }
+    }
+}
+
+
+void oskar_imager_trim_image(oskar_Mem* plane,
+        int plane_size, int image_size, int* status)
+{
+    int i, num_cells, size_diff;
+    if (*status) return;
+
+    /* Get the real part only, if the plane is complex. */
+    if (oskar_mem_is_complex(plane))
+    {
+        num_cells = plane_size * plane_size;
+        if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
+        {
+            double *t = oskar_mem_double(plane, status);
+            for (i = 0; i < num_cells; ++i) t[i] = t[2 * i];
+        }
+        else
+        {
+            float *t = oskar_mem_float(plane, status);
+            for (i = 0; i < num_cells; ++i) t[i] = t[2 * i];
+        }
+    }
+
+    /* Trim to required image size. */
+    size_diff = plane_size - image_size;
+    if (size_diff > 0)
+    {
+        char *ptr;
+        size_t in = 0, out = 0, copy_len = 0, element_size = 0;
+        ptr = oskar_mem_char(plane);
+        element_size = oskar_mem_element_size(oskar_mem_precision(plane));
+        copy_len = element_size * image_size;
+        in = element_size * (size_diff / 2) * (plane_size + 1);
+        for (i = 0; i < image_size; ++i)
+        {
+            /* Use memmove() instead of memcpy() to allow for overlap. */
+            memmove(ptr + out, ptr + in, copy_len);
+            in += plane_size * element_size;
+            out += copy_len;
         }
     }
 }

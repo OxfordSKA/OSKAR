@@ -31,7 +31,7 @@
 #include <oskar_gaussian.h>
 #include <oskar_gaussian_cuda.h>
 #include <oskar_mem.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #include <oskar_cmath.h>
 #include <stdio.h>
@@ -133,7 +133,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
                 oskar_gaussian_cuda_md(oskar_mem_double4c(beam, status),
                         num_points, l_, m_, std);
             }
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
         }
     }
     else /* type == OSKAR_SINGLE */
@@ -167,7 +167,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
                 oskar_gaussian_cuda_mf(oskar_mem_float4c(beam, status),
                         num_points, l_, m_, (float)std);
             }
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
         }
     }
 

@@ -28,7 +28,7 @@
 
 #include <oskar_sky.h>
 #include <oskar_sky_filter_by_flux_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #include <float.h>
 
@@ -125,7 +125,7 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
             oskar_sky_filter_by_flux_cuda_f(num_sources, &out, min_I, max_I,
                     ra_, dec_, I_, Q_, U_, V_, ref_, spix_, rm_, l_, m_, n_,
                     a_, b_, c_, maj_, min_, pa_);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -188,7 +188,7 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
             oskar_sky_filter_by_flux_cuda_d(num_sources, &out, min_I, max_I,
                     ra_, dec_, I_, Q_, U_, V_, ref_, spix_, rm_, l_, m_, n_,
                     a_, b_, c_, maj_, min_, pa_);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

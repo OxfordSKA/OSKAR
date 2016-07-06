@@ -27,7 +27,7 @@
  */
 
 #include <mex.h>
-#include <cuda_runtime_api.h>
+#include <oskar_device_utils.h>
 #include <oskar_get_error_string.h>
 #include <oskar_dft_c2r_3d_cuda.h>
 #include <oskar_evaluate_image_lmn_grid.h>
@@ -39,7 +39,7 @@
 // Cleanup function called when the mex function is unloaded. (i.e. 'clear mex')
 void cleanup(void)
 {
-    cudaDeviceReset();
+    oskar_device_reset();
 }
 
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
@@ -190,7 +190,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                     oskar_mem_double_const(n_g, &err),
                     oskar_mem_double(im_g, &err));
     }
-    oskar_cuda_check_error(&err);
+    oskar_device_check_error(&err);
     oskar_mem_scale_real(im_g, 1.0 / num_vis, &err);
 
     /* Copy image data back from GPU. */

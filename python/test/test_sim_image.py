@@ -24,8 +24,9 @@ if __name__ == '__main__':
     y = 5000 * numpy.random.randn(num_stations)
 
     # Set up the sky model.
-    sky = Sky(precision)
-    sky.append_sources(phase_centre_ra_deg, phase_centre_dec_deg, 2.0)
+    sky = Sky.generate_grid(precision,
+        phase_centre_ra_deg, phase_centre_dec_deg, 4, 1.5)
+    sky.append_sources(phase_centre_ra_deg, phase_centre_dec_deg, 1.0)
 
     # Set up the telescope model.
     tel = Telescope(precision)
@@ -45,15 +46,17 @@ if __name__ == '__main__':
     simulator.set_observation_frequency(start_freq_hz)
     simulator.set_observation_time(start_time_mjd_utc,
         length_sec, num_time_steps)
+    simulator.set_output_vis_file(vis_file)
     simulator.set_output_measurement_set(vis_file+'.ms')
 
     # Set up the imager.
     imager = Imager(precision)
     imager.set_size(1024)
     imager.set_fov(2.0)
-    imager.set_input_file(vis_file+'.ms')
-    imager.set_output_root('sim_test')
+    imager.set_input_file(vis_file)
+    imager.set_output_root('oskar_uniform')
     imager.set_algorithm('W-projection')
+    imager.set_weighting_type('Uniform')
     imager.set_num_w_planes(256)
 
     # Run the simulator and imager in sequence.

@@ -28,7 +28,7 @@
 
 #include <oskar_convert_ecef_to_station_uvw.h>
 #include <oskar_convert_ecef_to_station_uvw_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <private_convert_ecef_to_station_uvw_inline.h>
 
 #include <math.h>
@@ -175,7 +175,7 @@ void oskar_convert_ecef_to_station_uvw(int num_stations, const oskar_Mem* x,
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

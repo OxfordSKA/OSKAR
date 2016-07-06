@@ -29,7 +29,7 @@
 #include <oskar_convert_lon_lat_to_relative_directions.h>
 #include <oskar_convert_lon_lat_to_relative_directions_cuda.h>
 #include <private_convert_lon_lat_to_relative_directions_inline.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #include <math.h>
 
@@ -211,7 +211,7 @@ void oskar_convert_lon_lat_to_relative_directions(int num_points,
             oskar_convert_lon_lat_to_relative_directions_cuda_f(
                     num_points, lon_, lat_, (float)lon0_rad, (float)lat0_rad,
                     l_, m_, n_);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -238,7 +238,7 @@ void oskar_convert_lon_lat_to_relative_directions(int num_points,
 #ifdef OSKAR_HAVE_CUDA
             oskar_convert_lon_lat_to_relative_directions_cuda_d(
                     num_points, lon_, lat_, lon0_rad, lat0_rad, l_, m_, n_);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

@@ -30,7 +30,7 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <oskar_mem.h>
 #include <private_mem.h>
 
@@ -91,7 +91,7 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
         cudaMalloc(&mem->data, bytes);
         if (mem->data == NULL)
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

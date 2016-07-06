@@ -28,7 +28,7 @@
 
 #include <oskar_convert_ludwig3_to_theta_phi_components.h>
 #include <oskar_convert_ludwig3_to_theta_phi_components_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <private_convert_ludwig3_to_theta_phi_components_inline.h>
 
 #ifdef __cplusplus
@@ -94,7 +94,7 @@ void oskar_convert_ludwig3_to_theta_phi_components(oskar_Mem* vec,
 #ifdef OSKAR_HAVE_CUDA
             oskar_convert_ludwig3_to_theta_phi_components_cuda_f(num_points,
                     h_theta, v_phi, phi_, stride);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -118,7 +118,7 @@ void oskar_convert_ludwig3_to_theta_phi_components(oskar_Mem* vec,
 #ifdef OSKAR_HAVE_CUDA
             oskar_convert_ludwig3_to_theta_phi_components_cuda_d(num_points,
                     h_theta, v_phi, phi_, stride);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

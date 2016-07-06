@@ -487,9 +487,9 @@ static PyObject* set_station_coords_wgs84(PyObject* self, PyObject* args)
     double longitude, latitude, altitude;
 
     /* Parse inputs. */
-    if (!PyArg_ParseTuple(args, "OdddOOOOOO", &obj[0],
+    if (!PyArg_ParseTuple(args, "OdddOOO", &obj[0],
             &longitude, &latitude, &altitude,
-            &obj[1], &obj[2], &obj[3], &obj[4], &obj[5], &obj[6])) return 0;
+            &obj[1], &obj[2], &obj[3])) return 0;
     if (!(h = get_handle(obj[0]))) return 0;
 
     /* Make sure input objects are arrays. Convert if required. */

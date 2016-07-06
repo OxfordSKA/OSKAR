@@ -113,22 +113,26 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
  *
  * The supplied baseline coordinates must be in wavelengths.
  *
- * @param[in,out] h          Handle to imager.
- * @param[in]     num_vis    Number of visibilities.
- * @param[in]     uu         Baseline uu coordinates, in wavelengths.
- * @param[in]     vv         Baseline vv coordinates, in wavelengths.
- * @param[in]     ww         Baseline ww coordinates, in wavelengths.
- * @param[in]     amps       Input complex visibilities.
- * @param[in]     weight     Visibility weights.
- * @param[in,out] plane      Updated image or visibility plane.
- * @param[in,out] plane_norm Updated required normalisation of plane.
- * @param[in,out] status     Status return code.
+ * If this is called in "coordinate only" mode, then the visibility amplitudes
+ * are ignored, the plane is untouched and the weights grid is updated instead.
+ *
+ * @param[in,out] h             Handle to imager.
+ * @param[in]     num_vis       Number of visibilities.
+ * @param[in]     uu            Baseline uu coordinates, in wavelengths.
+ * @param[in]     vv            Baseline vv coordinates, in wavelengths.
+ * @param[in]     ww            Baseline ww coordinates, in wavelengths.
+ * @param[in]     amps          Input complex visibilities.
+ * @param[in]     weight        Visibility weights.
+ * @param[in,out] plane         Updated image or visibility plane.
+ * @param[in,out] plane_norm    Updated required normalisation of plane.
+ * @param[in,out] weights_grid  Grid of weights, updated if required.
+ * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
 void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
         const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
-        double* plane_norm, int* status);
+        double* plane_norm, oskar_Mem* weights_grid, int* status);
 
 #ifdef __cplusplus
 }

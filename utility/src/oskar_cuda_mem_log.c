@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
+#include <oskar_device_utils.h>
 #include <oskar_cuda_mem_log.h>
 #include <oskar_log.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,18 +37,18 @@ extern "C" {
 
 void oskar_cuda_mem_log(oskar_Log* log, int depth, int device_id)
 {
-    struct cudaDeviceProp device_prop;
+    char* name = 0;
     size_t mem_free = 0, mem_total = 0;
 
     /* Record GPU memory usage. */
-    cudaMemGetInfo(&mem_free, &mem_total);
-    cudaGetDeviceProperties(&device_prop, device_id);
+    oskar_device_mem_info(&mem_free, &mem_total);
+    name = oskar_device_name(device_id);
     oskar_log_message(log, 'M', depth, "Memory on GPU %d [%s] is %.1f%% "
-            "(%.1f/%.1f GB) used.",
-            device_id, device_prop.name,
+            "(%.1f/%.1f GB) used.", device_id, name,
             100.0 * (1.0 - (mem_free / (double)mem_total)),
             (mem_total-mem_free)/(1024.*1024.*1024.),
             mem_total/(1024.*1024.*1024.));
+    free(name);
 }
 
 #ifdef __cplusplus

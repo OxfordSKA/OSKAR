@@ -141,6 +141,25 @@ class Imager(object):
         _imager_lib.set_channel_range(self._capsule, start, end, snapshots)
 
 
+    def set_coords_only(self, flag):
+        """Sets the imager to ignore visibility data and use coordinates only.
+
+        Use this method with uniform weighting or W-projection.
+        The grids of weights can only be used once they are fully populated,
+        so this method puts the imager into a mode where it only updates its
+        internal weights grids when calling update().
+
+        This should only be called after setting all imager options.
+
+        Turn this mode off when processing visibilities.
+
+        Args:
+            flag (boolean):
+                If true, ignore visibility data and use coordinates only.
+        """
+        _imager_lib.set_coords_only(self._capsule, flag)
+
+
     def set_default_direction(self):
         """Clears any direction override."""
         _imager_lib.set_default_direction(self._capsule)
@@ -300,29 +319,17 @@ class Imager(object):
         _imager_lib.set_vis_time(self._capsule, ref_mjd_utc, inc_sec, num_times)
 
 
-    def set_w_range(self, w_min, w_max, w_rms):
-        """Sets the range of W values, if using W-projection.
-
-        Args:
-            w_min (float): Minimum value of w, in wavelengths.
-            w_max (float): Maximum value of w, in wavelengths.
-            w_rms (float): RMS value of w, in wavelengths.
-        """
-        _imager_lib.set_w_range(self._capsule, w_min, w_max, w_rms)
-
-
     def set_weighting_type(self, weighting_type):
         """Sets the type of visibility weighting to use.
 
         Args:
-            weighting_type (str): Either 'Natural', 'Radial' or 'Gridless'.
+            weighting_type (str): Either 'Natural', 'Radial' or 'Uniform'.
         """
         _imager_lib.set_weighting_type(self._capsule, weighting_type)
 
 
-    def update(self, num_baselines, uu, vv, ww, amps, weight, 
-        num_pols = 1, start_time = 0, end_time = 0, 
-        start_channel = 0, end_channel = 0):
+    def update(self, num_baselines, uu, vv, ww, amps, weight, num_pols=1,
+            start_time=0, end_time=0, start_channel=0, end_channel=0):
         """Runs imager for supplied visibilities, applying optional selection.
 
         The visibility amplitude data dimension order must be:
@@ -374,7 +381,8 @@ class Imager(object):
         _imager_lib.update_block(self._capsule, block._capsule)
 
 
-    def update_plane(self, uu, vv, ww, amps, weight, plane, plane_norm):
+    def update_plane(self, uu, vv, ww, amps, weight, plane, plane_norm,
+            weights_grid=None):
         """Updates the supplied plane with the supplied visibilities.
 
         This is a low-level function that can be used to generate 
@@ -397,16 +405,20 @@ class Imager(object):
                 Plane to update.
             plane_norm (float):
                 Current plane normalisation.
+            weights_grid (Optional[float, array-like]):
+                Gridded weights, size and shape of the image plane.
+                Used for uniform weighting.
 
         Returns:
             float: Updated plane normalisation.
         """
         return _imager_lib.update_plane(self._capsule, uu, vv, ww, 
-            amps, weight, plane, plane_norm)
+            amps, weight, plane, plane_norm, weights_grid)
 
 
     @staticmethod
-    def make_image(uu, vv, ww, amps, weight, fov_deg, size):
+    def make_image(uu, vv, ww, amps, fov_deg, size,
+            weighting='Natural', algorithm='FFT', weight=None):
         """Makes an image from visibility data.
 
         Args:
@@ -418,10 +430,14 @@ class Imager(object):
                 Baseline ww coordinates, in wavelengths.
             amps (complex float, array-like, shape (n,)):
                 Baseline visibility amplitudes.
-            weight (float, array-like, shape (n,)):
-                Visibility weights.
             fov_deg (float): Image field of view, in degrees.
             size (int):      Image size along one dimension, in pixels.
+            weighting (Optional[str]):
+                Either 'Natural', 'Radial' or 'Uniform'.
+            algorithm (Optional[str]):
+                Algorithm type: 'FFT', 'DFT 2D', 'DFT 3D' or 'W-projection'.
+            weight (Optional[float, array-like, shape (n,)]):
+                Visibility weights.
 
         Returns:
             array: Image as a 2D numpy array. Data are ordered as in FITS image.
@@ -429,7 +445,8 @@ class Imager(object):
         if size % 2 != 0:
             raise RuntimeError("Image size must be even.")
             return
-        return _imager_lib.make_image(uu, vv, ww, amps, weight, fov_deg, size)
+        return _imager_lib.make_image(uu, vv, ww, amps, fov_deg, size,
+            weighting, algorithm, weight)
 
 
     @staticmethod

@@ -26,12 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
 #include <private_imager.h>
-
 #include <oskar_imager.h>
-#include <private_imager_free_gpu_data.h>
 
+#include <oskar_convert_fov_to_cellsize.h>
+#include <oskar_device_utils.h>
+#include <private_imager_free_gpu_data.h>
+#include <private_imager_set_num_planes.h>
+
+#include <float.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -88,6 +91,28 @@ void oskar_imager_set_channel_range(oskar_Imager* h, int start, int end,
 }
 
 
+void oskar_imager_set_coords_only(oskar_Imager* h, int flag)
+{
+    h->coords_only = flag;
+
+    /* Check if coordinate input is starting or finishing. */
+    if (flag)
+    {
+        /* Starting. */
+        h->ww_min = DBL_MAX;
+        h->ww_max = -DBL_MAX;
+        h->ww_points = 0;
+        h->ww_rms = 0.0;
+    }
+    else
+    {
+        /* Finishing. */
+        if (h->ww_points > 0)
+            h->ww_rms = sqrt(h->ww_rms / h->ww_points);
+    }
+}
+
+
 void oskar_imager_set_default_direction(oskar_Imager* h)
 {
     h->direction_type = 'O';
@@ -105,6 +130,8 @@ void oskar_imager_set_direction(oskar_Imager* h, double ra_deg, double dec_deg)
 void oskar_imager_set_fov(oskar_Imager* h, double fov_deg)
 {
     h->fov_deg = fov_deg;
+    h->cellsize_rad = oskar_convert_fov_to_cellsize(h->fov_deg * M_PI/180,
+            h->image_size);
 }
 
 
@@ -120,13 +147,8 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
     int i, num_gpus_avail;
     if (*status) return;
     oskar_imager_free_gpu_data(h, status);
-    *status = (int) cudaGetDeviceCount(&num_gpus_avail);
+    num_gpus_avail = oskar_device_count(status);
     if (*status) return;
-    if (num > num_gpus_avail)
-    {
-        *status = OSKAR_ERR_CUDA_DEVICES;
-        return;
-    }
     if (num < 0)
     {
         h->num_gpus = num_gpus_avail;
@@ -136,6 +158,11 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
     }
     else if (num > 0)
     {
+        if (num > num_gpus_avail)
+        {
+            *status = OSKAR_ERR_CUDA_DEVICES;
+            return;
+        }
         h->num_gpus = num;
         h->cuda_device_ids = (int*) calloc(h->num_gpus, sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
@@ -145,7 +172,7 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
     h->d = (DeviceData*) calloc(h->num_gpus, sizeof(DeviceData));
     for (i = 0; i < h->num_gpus; ++i)
     {
-        *status = (int) cudaSetDevice(h->cuda_device_ids[i]);
+        oskar_device_set(h->cuda_device_ids[i], status);
         if (*status) return;
         h->d[i].uu = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
         h->d[i].vv = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
@@ -162,7 +189,7 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
                 OSKAR_CPU, 0, status);
         h->d[i].plane_gpu = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
                 OSKAR_GPU, 0, status);
-        cudaDeviceSynchronize();
+        oskar_device_synchronize();
     }
 }
 
@@ -288,6 +315,8 @@ void oskar_imager_set_size(oskar_Imager* h, int size)
 {
     h->image_size = size;
     h->grid_size = size;
+    h->cellsize_rad = oskar_convert_fov_to_cellsize(h->fov_deg * M_PI/180,
+            h->image_size);
 }
 
 
@@ -334,21 +363,15 @@ void oskar_imager_set_num_w_planes(oskar_Imager* h, int value)
 }
 
 
-void oskar_imager_set_w_range(oskar_Imager* h,
-        double w_min, double w_max, double w_rms)
-{
-    h->ww_min = w_min;
-    h->ww_max = w_max;
-    h->ww_rms = w_rms;
-}
-
-
-void oskar_imager_set_weighting_type(oskar_Imager* h, const char* type, int* status)
+void oskar_imager_set_weighting_type(oskar_Imager* h, const char* type,
+        int* status)
 {
     if (!strncmp(type, "N", 1) || !strncmp(type, "n", 1))
         h->weighting = OSKAR_WEIGHTING_NATURAL;
     else if (!strncmp(type, "R", 1) || !strncmp(type, "r", 1))
         h->weighting = OSKAR_WEIGHTING_RADIAL;
+    else if (!strncmp(type, "U", 1) || !strncmp(type, "u", 1))
+        h->weighting = OSKAR_WEIGHTING_UNIFORM;
     else if (!strncmp(type, "G", 1) || !strncmp(type, "g", 1))
         h->weighting = OSKAR_WEIGHTING_GRIDLESS_UNIFORM;
     else *status = OSKAR_ERR_SETTINGS_IMAGE;

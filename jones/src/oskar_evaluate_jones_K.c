@@ -28,7 +28,7 @@
 
 #include <oskar_evaluate_jones_K.h>
 #include <oskar_evaluate_jones_K_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <oskar_cmath.h>
 
 #ifdef __cplusplus
@@ -213,7 +213,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
                     oskar_mem_double_const(source_filter, status),
                     source_filter_min, source_filter_max);
         }
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

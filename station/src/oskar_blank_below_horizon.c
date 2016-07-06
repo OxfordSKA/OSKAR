@@ -28,7 +28,7 @@
 
 #include <oskar_blank_below_horizon.h>
 #include <oskar_blank_below_horizon_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -163,7 +163,7 @@ void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
             }
             else
                 *status = OSKAR_ERR_BAD_DATA_TYPE;
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -204,7 +204,7 @@ void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
             }
             else
                 *status = OSKAR_ERR_BAD_DATA_TYPE;
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

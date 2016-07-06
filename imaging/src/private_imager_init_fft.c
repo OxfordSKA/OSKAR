@@ -26,13 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef OSKAR_HAVE_CUDA
 #include <cufft.h>
+#endif
+
 #include <private_imager.h>
 #include <private_imager_init_fft.h>
 #include <private_imager_free_fft.h>
 
 #include <oskar_cmath.h>
-#include <oskar_convert_fov_to_cellsize.h>
 #include <oskar_fftpack_cfft.h>
 #include <oskar_fftpack_cfft_f.h>
 #include <oskar_grid_functions_spheroidal.h>
@@ -46,10 +48,6 @@ void oskar_imager_init_fft(oskar_Imager* h, int* status)
 {
     oskar_imager_free_fft(h, status);
     if (*status) return;
-
-    /* Calculate cellsize. */
-    h->cellsize_rad = oskar_convert_fov_to_cellsize(h->fov_deg * M_PI/180,
-            h->image_size);
 
     /* Generate the convolution function. */
     h->conv_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
@@ -74,11 +72,15 @@ void oskar_imager_init_fft(oskar_Imager* h, int* status)
     /* Set up the FFT. */
     if (h->fft_on_gpu)
     {
+#ifdef OSKAR_HAVE_CUDA
         /* Generate FFT plan. */
         if (h->imager_prec == OSKAR_DOUBLE)
             cufftPlan2d(&h->cufft_plan, h->grid_size, h->grid_size, CUFFT_Z2Z);
         else
             cufftPlan2d(&h->cufft_plan, h->grid_size, h->grid_size, CUFFT_C2C);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
     else
     {

@@ -26,8 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-
 #include <oskar_sim_interferometer.h>
 
 #include <oskar_cmath.h>
@@ -37,6 +35,7 @@
 #include <oskar_auto_correlate.h>
 #include <oskar_cross_correlate.h>
 #include <oskar_cuda_mem_log.h>
+#include <oskar_device_utils.h>
 #include <oskar_evaluate_jones_R.h>
 #include <oskar_evaluate_jones_Z.h>
 #include <oskar_evaluate_jones_E.h>
@@ -97,7 +96,7 @@ typedef struct DeviceData DeviceData;
 struct oskar_Simulator
 {
     /* Settings. */
-    int prec, *cuda_device_ids, num_gpus, num_channels, num_time_steps;
+    int prec, *device_ids, num_gpus, num_channels, num_time_steps;
     int max_sources_per_chunk, max_times_per_block;
     int apply_horizon_clip, force_polarised_ms, zero_failed_gaussians;
     double freq_start_hz, freq_inc_hz, time_start_mjd_utc, time_inc_sec;
@@ -139,8 +138,8 @@ typedef struct oskar_Simulator oskar_Simulator;
 static void sim_baselines(oskar_Simulator* h, DeviceData* d, oskar_Sky* sky,
         int channel_index_block, int time_index_block,
         int time_index_simulation, int* status);
-static void free_gpu_data(oskar_Simulator* h, int* status);
-static void set_up_gpu_data(oskar_Simulator* h, int* status);
+static void free_device_data(oskar_Simulator* h, int* status);
+static void set_up_device_data(oskar_Simulator* h, int* status);
 static void set_up_vis_header(oskar_Simulator* h, int* status);
 static void record_timing(oskar_Simulator* h);
 static unsigned int disp_width(unsigned int value);
@@ -203,7 +202,7 @@ void oskar_simulator_check_init(oskar_Simulator* h, int* status)
     }
 
     /* Set up each of the GPUs. */
-    set_up_gpu_data(h, status);
+    set_up_device_data(h, status);
 }
 
 
@@ -238,9 +237,9 @@ oskar_VisBlock* oskar_simulator_finalise_block(oskar_Simulator* h,
     oskar_VisBlock *b0 = 0, *b = 0;
     if (*status) return 0;
 
-    /* Can't safely do GPU operations in here (even if cudaSetDevice()
-     * is called) because we don't want to block the default stream, so we
-     * copy the visibilities back at the end of the block simulation. */
+    /* Can't safely do GPU operations in here because we don't want to block
+     * the default stream, so we copy the visibilities back at the end of
+     * the block simulation. */
 
     /* Combine all vis blocks into the first one. */
     i_active = (block_index + 1) % 2;
@@ -304,7 +303,7 @@ void oskar_simulator_free(oskar_Simulator* h, int* status)
     oskar_timer_free(h->tmr_sim);
     oskar_timer_free(h->tmr_write);
     free(h->sky_chunks);
-    free(h->cuda_device_ids);
+    free(h->device_ids);
     free(h->vis_name);
     free(h->ms_name);
     free(h->settings_path);
@@ -331,7 +330,7 @@ int oskar_simulator_num_vis_blocks(const oskar_Simulator* h)
 
 void oskar_simulator_reset_cache(oskar_Simulator* h, int* status)
 {
-    free_gpu_data(h, status);
+    free_device_data(h, status);
     oskar_binary_free(h->vis);
     oskar_vis_header_free(h->header, status);
 #ifndef OSKAR_NO_MS
@@ -374,7 +373,7 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
         *status = OSKAR_ERR_CUDA_DEVICES;
         return;
     }
-    cudaSetDevice(h->cuda_device_ids[gpu_id]);
+    oskar_device_set(h->device_ids[gpu_id], status);
 
     /* Clear the visibility block. */
     i_active = block_index % 2; /* Index of the active buffer. */
@@ -489,7 +488,7 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
     {
         oskar_log_section(h->log, 'M', "Initial memory usage");
         for (i = 0; i < h->num_gpus; ++i)
-            oskar_cuda_mem_log(h->log, 0, h->cuda_device_ids[i]);
+            oskar_cuda_mem_log(h->log, 0, h->device_ids[i]);
         system_mem_log(h->log);
         oskar_log_section(h->log, 'M', "Starting simulation...");
     }
@@ -517,7 +516,7 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
     num_threads = h->num_gpus + 1;
     omp_set_num_threads(num_threads);
 #else
-    oskar_log_warning(h->log, "OpenMP not found: Using only the first GPU.");
+    oskar_log_warning(h->log, "OpenMP not found: Using one compute device.");
 #endif
 
     oskar_simulator_reset_work_unit_index(h);
@@ -567,7 +566,7 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
     {
         oskar_log_section(h->log, 'M', "Final memory usage");
         for (i = 0; i < h->num_gpus; ++i)
-            oskar_cuda_mem_log(h->log, 0, h->cuda_device_ids[i]);
+            oskar_cuda_mem_log(h->log, 0, h->device_ids[i]);
         system_mem_log(h->log);
     }
 
@@ -655,37 +654,37 @@ void oskar_simulator_set_gpus(oskar_Simulator* h, int num,
 {
     int i, num_gpus_avail;
     if (*status) return;
-    free_gpu_data(h, status);
-    *status = (int) cudaGetDeviceCount(&num_gpus_avail);
+    free_device_data(h, status);
+    num_gpus_avail = oskar_device_count(status);
     if (*status) return;
-    if (num > num_gpus_avail)
-    {
-        oskar_log_error(h->log, "More CUDA devices were requested than found.");
-        *status = OSKAR_ERR_CUDA_DEVICES;
-        return;
-    }
     if (num < 0)
     {
         h->num_gpus = num_gpus_avail;
-        h->cuda_device_ids = (int*) realloc(h->cuda_device_ids,
+        h->device_ids = (int*) realloc(h->device_ids,
                 h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
-            h->cuda_device_ids[i] = i;
+            h->device_ids[i] = i;
     }
     else if (num > 0)
     {
+        if (num > num_gpus_avail)
+        {
+            oskar_log_error(h->log, "More CUDA devices were requested than found.");
+            *status = OSKAR_ERR_CUDA_DEVICES;
+            return;
+        }
         h->num_gpus = num;
-        h->cuda_device_ids = (int*) realloc(h->cuda_device_ids,
+        h->device_ids = (int*) realloc(h->device_ids,
                 h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
-            h->cuda_device_ids[i] = ids[i];
+            h->device_ids[i] = ids[i];
     }
     else return;
     h->d = (DeviceData*) realloc(h->d, h->num_gpus * sizeof(DeviceData));
     memset(h->d, 0, h->num_gpus * sizeof(DeviceData));
     for (i = 0; i < h->num_gpus; ++i)
     {
-        *status = (int) cudaSetDevice(h->cuda_device_ids[i]);
+        oskar_device_set(h->device_ids[i], status);
         if (*status) return;
     }
 }
@@ -897,9 +896,8 @@ static void sim_baselines(oskar_Simulator* h, DeviceData* d, oskar_Sky* sky,
     /* Evaluate station beam (Jones E: may be matrix). */
     oskar_timer_resume(d->tmr_E);
     oskar_evaluate_jones_E(d->E, num_src, OSKAR_RELATIVE_DIRECTIONS,
-            oskar_sky_l(sky), oskar_sky_m(sky), oskar_sky_n(sky),
-            d->tel, gast, frequency, d->station_work, time_index_simulation,
-            status);
+            oskar_sky_l(sky), oskar_sky_m(sky), oskar_sky_n(sky), d->tel,
+            gast, frequency, d->station_work, time_index_simulation, status);
     oskar_timer_pause(d->tmr_E);
 
 #if 0
@@ -1043,14 +1041,15 @@ static void set_up_vis_header(oskar_Simulator* h, int* status)
 }
 
 
-static void set_up_gpu_data(oskar_Simulator* h, int* status)
+static void set_up_device_data(oskar_Simulator* h, int* status)
 {
-    int i, complx, vistype, num_stations, num_src;
+    int i, dev_loc, complx, vistype, num_stations, num_src;
     if (*status) return;
 
     /* Get local variables. */
     num_stations = oskar_telescope_num_stations(h->tel);
     num_src      = h->max_sources_per_chunk;
+    dev_loc      = OSKAR_GPU;
     complx       = (h->prec) | OSKAR_COMPLEX;
     vistype      = complx;
     if (oskar_telescope_pol_mode(h->tel) == OSKAR_POL_MODE_FULL)
@@ -1060,7 +1059,7 @@ static void set_up_gpu_data(oskar_Simulator* h, int* status)
     {
         /* Select the device. */
         DeviceData* d = &h->d[i];
-        cudaSetDevice(h->cuda_device_ids[i]);
+        oskar_device_set(h->device_ids[i], status);
 
         /* Host memory. */
         d->vis_block_cpu[0] = oskar_vis_block_create(OSKAR_CPU, h->header,
@@ -1070,24 +1069,23 @@ static void set_up_gpu_data(oskar_Simulator* h, int* status)
 
         /* Device memory. */
         d->previous_chunk_index = -1;
-        d->vis_block = oskar_vis_block_create(OSKAR_GPU, h->header, status);
-        d->u = oskar_mem_create(h->prec, OSKAR_GPU, num_stations, status);
-        d->v = oskar_mem_create(h->prec, OSKAR_GPU, num_stations, status);
-        d->w = oskar_mem_create(h->prec, OSKAR_GPU, num_stations, status);
-        d->sky_chunk = oskar_sky_create(h->prec, OSKAR_GPU, num_src, status);
-        d->local_sky = oskar_sky_create(h->prec, OSKAR_GPU, num_src, status);
-        d->tel = oskar_telescope_create_copy(h->tel, OSKAR_GPU, status);
-        d->J = oskar_jones_create(vistype, OSKAR_GPU, num_stations, num_src,
+        d->vis_block = oskar_vis_block_create(dev_loc, h->header, status);
+        d->u = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+        d->v = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+        d->w = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+        d->sky_chunk = oskar_sky_create(h->prec, dev_loc, num_src, status);
+        d->local_sky = oskar_sky_create(h->prec, dev_loc, num_src, status);
+        d->tel = oskar_telescope_create_copy(h->tel, dev_loc, status);
+        d->J = oskar_jones_create(vistype, dev_loc, num_stations, num_src,
                 status);
         d->R = oskar_type_is_matrix(vistype) ? oskar_jones_create(vistype,
-                OSKAR_GPU, num_stations, num_src, status) : 0;
-        d->E = oskar_jones_create(vistype, OSKAR_GPU, num_stations, num_src,
+                dev_loc, num_stations, num_src, status) : 0;
+        d->E = oskar_jones_create(vistype, dev_loc, num_stations, num_src,
                 status);
-        d->K = oskar_jones_create(complx, OSKAR_GPU, num_stations, num_src,
+        d->K = oskar_jones_create(complx, dev_loc, num_stations, num_src,
                 status);
         d->Z = 0;
-        d->station_work = oskar_station_work_create(h->prec, OSKAR_GPU,
-                status);
+        d->station_work = oskar_station_work_create(h->prec, dev_loc, status);
 
         /* Clear all visibility blocks. */
         oskar_vis_block_clear(d->vis_block, status);
@@ -1096,18 +1094,18 @@ static void set_up_gpu_data(oskar_Simulator* h, int* status)
 
         /* Timers. */
         d->tmr_compute   = oskar_timer_create(OSKAR_TIMER_NATIVE);
-        d->tmr_copy      = oskar_timer_create(OSKAR_TIMER_CUDA);
-        d->tmr_clip      = oskar_timer_create(OSKAR_TIMER_CUDA);
-        d->tmr_E         = oskar_timer_create(OSKAR_TIMER_CUDA);
-        d->tmr_K         = oskar_timer_create(OSKAR_TIMER_CUDA);
-        d->tmr_join      = oskar_timer_create(OSKAR_TIMER_CUDA);
-        d->tmr_correlate = oskar_timer_create(OSKAR_TIMER_CUDA);
-        cudaDeviceSynchronize();
+        d->tmr_copy      = oskar_timer_create(OSKAR_TIMER_NATIVE);
+        d->tmr_clip      = oskar_timer_create(OSKAR_TIMER_NATIVE);
+        d->tmr_E         = oskar_timer_create(OSKAR_TIMER_NATIVE);
+        d->tmr_K         = oskar_timer_create(OSKAR_TIMER_NATIVE);
+        d->tmr_join      = oskar_timer_create(OSKAR_TIMER_NATIVE);
+        d->tmr_correlate = oskar_timer_create(OSKAR_TIMER_NATIVE);
+        oskar_device_synchronize();
     }
 }
 
 
-static void free_gpu_data(oskar_Simulator* h, int* status)
+static void free_device_data(oskar_Simulator* h, int* status)
 {
     int i;
     if (!h->d) return;
@@ -1115,7 +1113,7 @@ static void free_gpu_data(oskar_Simulator* h, int* status)
     {
         DeviceData* d = &(h->d[i]);
         if (!d) continue;
-        cudaSetDevice(h->cuda_device_ids[i]);
+        oskar_device_set(h->device_ids[i], status);
         oskar_vis_block_free(d->vis_block_cpu[0], status);
         oskar_vis_block_free(d->vis_block_cpu[1], status);
         oskar_vis_block_free(d->vis_block, status);
@@ -1138,7 +1136,7 @@ static void free_gpu_data(oskar_Simulator* h, int* status)
         oskar_timer_free(d->tmr_join);
         oskar_timer_free(d->tmr_correlate);
         memset(d, 0, sizeof(DeviceData));
-        cudaDeviceReset();
+        oskar_device_reset();
     }
 }
 
@@ -1146,14 +1144,14 @@ static void free_gpu_data(oskar_Simulator* h, int* status)
 static void record_timing(oskar_Simulator* h)
 {
     /* Obtain component times. */
-    int i;
+    int i, status = 0;
     double t_copy = 0., t_clip = 0., t_E = 0., t_K = 0., t_join = 0.;
     double t_correlate = 0., t_compute = 0., t_components = 0.;
     double *compute_times;
     compute_times = (double*) calloc(h->num_gpus, sizeof(double));
     for (i = 0; i < h->num_gpus; ++i)
     {
-        cudaSetDevice(h->cuda_device_ids[i]);
+        oskar_device_set(h->device_ids[i], &status);
         compute_times[i] = oskar_timer_elapsed(h->d[i].tmr_compute);
         t_copy += oskar_timer_elapsed(h->d[i].tmr_copy);
         t_clip += oskar_timer_elapsed(h->d[i].tmr_clip);

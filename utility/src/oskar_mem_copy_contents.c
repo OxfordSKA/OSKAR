@@ -30,7 +30,7 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <oskar_mem.h>
 #include <private_mem.h>
 
@@ -92,7 +92,7 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, source, bytes, cudaMemcpyHostToDevice);
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -104,7 +104,7 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, source, bytes, cudaMemcpyDeviceToHost);
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -116,7 +116,7 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, source, bytes, cudaMemcpyDeviceToDevice);
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

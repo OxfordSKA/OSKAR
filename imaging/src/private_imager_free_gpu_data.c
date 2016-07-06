@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
+#include <oskar_device_utils.h>
 #include <private_imager.h>
 #include <private_imager_free_gpu_data.h>
 
@@ -43,7 +43,7 @@ void oskar_imager_free_gpu_data(oskar_Imager* h, int* status)
     {
         DeviceData* dd = &h->d[i];
         if (!dd) continue;
-        cudaSetDevice(h->cuda_device_ids[i]);
+        oskar_device_set(h->cuda_device_ids[i], status);
         oskar_mem_free(dd->uu, status);
         oskar_mem_free(dd->vv, status);
         oskar_mem_free(dd->ww, status);
@@ -54,7 +54,7 @@ void oskar_imager_free_gpu_data(oskar_Imager* h, int* status)
         oskar_mem_free(dd->n, status);
         oskar_mem_free(dd->block_gpu, status);
         oskar_mem_free(dd->block_cpu, status);
-        cudaDeviceReset();
+        oskar_device_reset();
     }
     free(h->d);
     free(h->cuda_device_ids);

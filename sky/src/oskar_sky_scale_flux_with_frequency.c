@@ -29,7 +29,7 @@
 #include <oskar_sky.h>
 #include <oskar_scale_flux_with_frequency_cuda.h>
 #include <oskar_scale_flux_with_frequency.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,7 +68,7 @@ void oskar_sky_scale_flux_with_frequency(oskar_Sky* model, double frequency,
 #ifdef OSKAR_HAVE_CUDA
             oskar_scale_flux_with_frequency_cuda_f(num_sources, frequency,
                     I, Q, U, V, ref, spix, rm);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -98,7 +98,7 @@ void oskar_sky_scale_flux_with_frequency(oskar_Sky* model, double frequency,
 #ifdef OSKAR_HAVE_CUDA
             oskar_scale_flux_with_frequency_cuda_d(num_sources, frequency,
                     I, Q, U, V, ref, spix, rm);
-            oskar_cuda_check_error(status);
+            oskar_device_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

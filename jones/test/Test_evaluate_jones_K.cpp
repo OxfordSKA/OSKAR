@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
+#include <oskar_device_utils.h>
 #include <gtest/gtest.h>
 
 #include <oskar_timer.h>
@@ -80,7 +80,7 @@ static void run_test(int type, double tol)
     printf("Jones K (CPU): %.3f sec\n", oskar_timer_elapsed(tmr));
 
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    cudaDeviceSynchronize();
+    oskar_device_synchronize();
     oskar_timer_start(tmr);
     for (int i = 0; i < n_tries; ++i)
         oskar_evaluate_jones_K(K_g, num_sources, l_g, m_g, n_g, u_g, v_g, w_g,

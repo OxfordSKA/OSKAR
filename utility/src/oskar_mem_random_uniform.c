@@ -28,7 +28,7 @@
 
 #include <oskar_mem_random_uniform.h>
 #include <oskar_mem_random_uniform_cuda.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <private_random_helpers.h>
 
 #ifdef __cplusplus
@@ -140,7 +140,7 @@ void oskar_mem_random_uniform(oskar_Mem* data, unsigned int seed,
                     oskar_mem_double(data, status), seed,
                     counter1, counter2, counter3);
         }
-        oskar_cuda_check_error(status);
+        oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

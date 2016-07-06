@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,16 +27,12 @@
  */
 
 #include <gtest/gtest.h>
-#ifdef OSKAR_HAVE_CUDA
-#include <cuda_runtime_api.h>
-#endif
+#include <oskar_device_utils.h>
 
 int main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
     int val = RUN_ALL_TESTS();
-#ifdef OSKAR_HAVE_CUDA
-    cudaDeviceReset();
-#endif
+    oskar_device_reset();
     return val;
 }

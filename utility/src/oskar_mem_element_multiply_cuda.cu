@@ -30,7 +30,7 @@
 #include <oskar_mem.h>
 
 #include <oskar_multiply_inline.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_device_utils.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -439,7 +439,7 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
 
     /* Check for type mismatch and CUDA error. */
     if (error) *status = error;
-    oskar_cuda_check_error(status);
+    oskar_device_check_error(status);
 }
 
 

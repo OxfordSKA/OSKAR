@@ -48,9 +48,9 @@ void oskar_sky_set_filter_bands(oskar_Sky* sky, int num_bands,
     oskar_mem_realloc(sky->filter_band_radius_rad, num_bands, status);
     for (i = 0; i < num_bands; ++i)
     {
-        oskar_mem_set_element_scalar_real(sky->filter_band_flux_jy, i,
+        oskar_mem_set_element_real(sky->filter_band_flux_jy, i,
                 band_fluxes_jy[i], status);
-        oskar_mem_set_element_scalar_real(sky->filter_band_radius_rad, i,
+        oskar_mem_set_element_real(sky->filter_band_radius_rad, i,
                 band_radii_deg[i] * M_PI/180.0, status);
     }
 }

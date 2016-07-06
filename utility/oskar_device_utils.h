@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,71 +26,99 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_FINALISE_H_
-#define OSKAR_IMAGER_FINALISE_H_
+#ifndef OSKAR_DEVICE_UTILS_H_
+#define OSKAR_DEVICE_UTILS_H_
 
 /**
- * @file oskar_imager_finalise.h
+ * @file oskar_device_utils.h
  */
 
 #include <oskar_global.h>
-#include <oskar_mem.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief
- * Low-level function that must be called to finalise and write images.
+ * @brief Checks if a device error occurred.
  *
  * @details
- * This low-level function must be called to finalise and write images,
- * after using oskar_imager_update().
+ * This function checks to see if a device error occurred.
+ * In debug builds, a call to cudaDeviceSynchronize() is made before the check.
  *
- * @param[in,out] h            Handle to imager.
- * @param[in,out] output_plane If not NULL, image plane 0 is returned here.
- * @param[in,out] status       Status return code.
+ * @param[out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_finalise(oskar_Imager* h, oskar_Mem* output_plane,
-        int* status);
+void oskar_device_check_error(int* status);
 
 /**
  * @brief
- * Low-level function that must be called to finalise a plane.
+ * Returns the number of devices on the system.
  *
  * @details
- * This low-level function must be called to finalise a plane, after using
- * oskar_imager_update_plane().
- *
- * @param[in,out] h          Handle to imager.
- * @param[in,out] plane      Plane to finalise.
- * @param[in,out] plane_norm Normalisation required for plane.
- * @param[in,out] status     Status return code.
+ * This simply calls cudaDeviceReset() if CUDA is available.
  */
 OSKAR_EXPORT
-void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
-        double plane_norm, int* status);
+int oskar_device_count(int* status);
 
 /**
  * @brief
- * Low-level utility function to compact a plane.
+ * Returns the amount of free memory on the device.
  *
  * @details
- * Takes the real part and trims the image plane if required.
- *
- * @param[in,out] plane      Plane to finalise.
- * @param[in]     plane_size Side length of input plane.
- * @param[in]     image_size Side length of output plane.
- * @param[in,out] status     Status return code.
+ * This simply calls cudaMemGetInfo() if CUDA is available.
  */
 OSKAR_EXPORT
-void oskar_imager_trim_image(oskar_Mem* plane,
-        int plane_size, int image_size, int* status);
+void oskar_device_mem_info(size_t* mem_free, size_t* mem_total);
+
+/**
+ * @brief
+ * Returns the name of the specified device.
+ *
+ * @details
+ * The name of the device specified by \p device_id is returned as a string.
+ * Use free() to deallocate the string.
+ */
+OSKAR_EXPORT
+char* oskar_device_name(int device_id);
+
+/**
+ * @brief
+ * Resets the current device.
+ *
+ * @details
+ * This simply calls cudaDeviceReset() if CUDA is available.
+ */
+OSKAR_EXPORT
+void oskar_device_reset(void);
+
+/**
+ * @brief
+ * Sets the device to use for subsequent device calls.
+ *
+ * @details
+ * Sets the device to use for subsequent device calls.
+ * This simply calls cudaSetDevice() if CUDA is available.
+ *
+ * @param[in] id          CUDA device ID.
+ * @param[in,out] status  Status return code.
+ */
+OSKAR_EXPORT
+void oskar_device_set(int id, int* status);
+
+/**
+ * @brief
+ * Synchronises the current device.
+ *
+ * @details
+ * This simply calls cudaDeviceSynchronize() if CUDA is available.
+ */
+OSKAR_EXPORT
+void oskar_device_synchronize(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_IMAGER_FINALISE_H_ */
+#endif /* OSKAR_DEVICE_UTILS_H_ */

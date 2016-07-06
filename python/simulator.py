@@ -189,6 +189,15 @@ class Simulator(object):
         _simulator_lib.set_gpus(self._capsule, device_ids)
 
 
+    def set_horizon_clip(self, value):
+        """Sets whether horizon clipping is performed.
+
+        Args:
+            value (bool): If set, apply horizon clipping.
+        """
+        _simulator_lib.set_horizon_clip(self._capsule, value)
+
+
     def set_max_times_per_block(self, value):
         """Sets the maximum number of times in a visibility block.
 

@@ -131,36 +131,42 @@ void copy_vis_pol(oskar_Mem* amps, oskar_Mem* wt, int amps_offset,
 {
     int i;
     if (*status) return;
-    if (oskar_mem_precision(vis) == OSKAR_SINGLE)
+    if (oskar_mem_precision(amps) == OSKAR_SINGLE)
     {
-        float2* a;
-        const float2* v;
         float* w_out;
         const float* w_in;
-        a = oskar_mem_float2(amps, status) + amps_offset;
-        v = oskar_mem_float2_const(vis, status);
         w_out = oskar_mem_float(wt, status) + amps_offset;
         w_in = oskar_mem_float_const(weight, status);
         for (i = 0; i < num_baselines; ++i)
-        {
-            a[i] = v[stride * (vis_offset + i) + pol_offset];
             w_out[i] = w_in[stride * (weight_offset + i) + pol_offset];
+
+        if (vis)
+        {
+            float2* a;
+            const float2* v;
+            a = oskar_mem_float2(amps, status) + amps_offset;
+            v = oskar_mem_float2_const(vis, status);
+            for (i = 0; i < num_baselines; ++i)
+                a[i] = v[stride * (vis_offset + i) + pol_offset];
         }
     }
     else
     {
-        double2* a;
-        const double2* v;
         double* w_out;
         const double* w_in;
-        a = oskar_mem_double2(amps, status) + amps_offset;
-        v = oskar_mem_double2_const(vis, status);
         w_out = oskar_mem_double(wt, status) + amps_offset;
         w_in = oskar_mem_double_const(weight, status);
         for (i = 0; i < num_baselines; ++i)
-        {
-            a[i] = v[stride * (vis_offset + i) + pol_offset];
             w_out[i] = w_in[stride * (weight_offset + i) + pol_offset];
+
+        if (vis)
+        {
+            double2* a;
+            const double2* v;
+            a = oskar_mem_double2(amps, status) + amps_offset;
+            v = oskar_mem_double2_const(vis, status);
+            for (i = 0; i < num_baselines; ++i)
+                a[i] = v[stride * (vis_offset + i) + pol_offset];
         }
     }
 }

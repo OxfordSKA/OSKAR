@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,33 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_CHECK_ERROR_H_
-#define OSKAR_CUDA_CHECK_ERROR_H_
-
-/**
- * @file oskar_cuda_check_error.h
- */
-
-#include "oskar_global.h"
+#include <private_imager.h>
+#include <private_imager_set_num_planes.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Checks if a CUDA error occurred.
- *
- * @details
- * This function checks to see if a CUDA error occurred.
- * In debug builds, a call to cudaDeviceSynchronize is made before the check.
- *
- * @param[out] status  Status return code.
- */
-OSKAR_EXPORT
-void oskar_cuda_check_error(int* status);
+#define SEC2DAYS 1.15740740740740740740741e-5
+
+void oskar_imager_set_num_planes(oskar_Imager* h)
+{
+    if (h->num_planes > 0) return;
+
+    /* Set image meta-data. */
+    h->im_num_channels = (h->chan_snaps ?
+            1 + h->vis_chan_range[1] - h->vis_chan_range[0] : 1);
+    h->im_num_times = (h->time_snaps ?
+            1 + h->vis_time_range[1] - h->vis_time_range[0] : 1);
+    h->im_time_start_mjd_utc = h->vis_time_start_mjd_utc +
+            (h->vis_time_range[0] * h->time_inc_sec * SEC2DAYS);
+    if (h->chan_snaps)
+    {
+        h->im_freq_start_hz = h->vis_freq_start_hz +
+                h->vis_chan_range[0] * h->freq_inc_hz;
+    }
+    else
+    {
+        double chan0 = 0.5 * (h->vis_chan_range[1] - h->vis_chan_range[0]);
+        h->im_freq_start_hz = h->vis_freq_start_hz + chan0 * h->freq_inc_hz;
+    }
+    h->num_planes = h->im_num_times * h->im_num_channels * h->im_num_pols;
+}
+
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_CUDA_CHECK_ERROR_H_ */

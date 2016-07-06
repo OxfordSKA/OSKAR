@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_cuda_check_error.h"
-#include <cuda_runtime_api.h>
+#include <oskar_grid_weights.h>
+#include <private_imager_weight_uniform.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_cuda_check_error(int* status)
+void oskar_imager_weight_uniform(int num_points, const oskar_Mem* uu,
+        const oskar_Mem* vv, const oskar_Mem* weight_in, oskar_Mem* weight_out,
+        double cell_size_rad, int grid_size, const oskar_Mem* weight_grid,
+        int* status)
 {
-    int code;
+    int num_skipped = 0;
 
-    /* Check inputs. */
-    if (!status) return;
+    /* Check the grid exists. */
+    if (!weight_grid || !oskar_mem_void_const(weight_grid))
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
+
+    /* Size the output array. */
+    oskar_mem_realloc(weight_out, num_points, status);
     if (*status) return;
 
-    /* Check for CUDA errors. */
-#ifndef NDEBUG
-    /* Call cudaDeviceSynchronize only in debug builds. */
-    cudaDeviceSynchronize();
-#endif
-    code = cudaPeekAtLastError();
-    if (code) *status = code;
+    /* Calculate new weights from the grid. */
+    if (oskar_mem_precision(weight_out) == OSKAR_DOUBLE)
+        oskar_grid_weights_read_d(num_points,
+                oskar_mem_double_const(uu, status),
+                oskar_mem_double_const(vv, status),
+                oskar_mem_double_const(weight_in, status),
+                oskar_mem_double(weight_out, status),
+                cell_size_rad, grid_size, &num_skipped,
+                oskar_mem_double_const(weight_grid, status));
+    else
+        oskar_grid_weights_read_f(num_points,
+                oskar_mem_float_const(uu, status),
+                oskar_mem_float_const(vv, status),
+                oskar_mem_float_const(weight_in, status),
+                oskar_mem_float(weight_out, status),
+                cell_size_rad, grid_size, &num_skipped,
+                oskar_mem_float_const(weight_grid, status));
+    if (num_skipped > 0)
+        printf("WARNING: Skipped %d visibility weights.\n", num_skipped);
 }
 
 #ifdef __cplusplus

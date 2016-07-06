@@ -26,8 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <fitsio.h>
+#ifdef OSKAR_HAVE_CUDA
 #include <cufft.h>
+#endif
+
+#include <fitsio.h>
 #include <oskar_mem.h>
 #include <oskar_log.h>
 
@@ -63,14 +66,14 @@ struct oskar_Imager
     double vis_centre_deg[2];
     double vis_freq_start_hz, im_freq_start_hz, freq_inc_hz;
     double vis_time_start_mjd_utc, im_time_start_mjd_utc, time_inc_sec;
-    double ww_min, ww_max, ww_rms; /* In wavelengths. */
 
     /* Scratch data. */
     oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im, *weight_im;
     oskar_Mem *uu_tmp, *vv_tmp, *ww_tmp, *stokes, *weight_tmp;
-    int num_planes; /* for each output time, channel and polarisation. */
+    int coords_only; /* Set if doing a first pass for uniform weighting. */
+    int num_planes; /* For each output time, channel and polarisation. */
     double *plane_norm, delta_l, delta_m, delta_n, M[9];
-    oskar_Mem **planes;
+    oskar_Mem **planes, **weights_grids;
 
     /* DFT imager data. */
     oskar_Mem *l, *m, *n;
@@ -79,11 +82,13 @@ struct oskar_Imager
     double cellsize_rad;
     int grid_size;
     oskar_Mem *conv_func, *corr_func, *fftpack_wsave, *fftpack_work;
+#ifdef OSKAR_HAVE_CUDA
     cufftHandle cufft_plan;
+#endif
 
     /* W-projection imager data. */
-    int num_w_planes, conv_size_half;
-    double w_scale;
+    int num_w_planes, conv_size_half, ww_points;
+    double w_scale, ww_min, ww_max, ww_rms;
     oskar_Mem *w_kernels, *w_support;
 
     /* Memory allocated per GPU (array of DeviceData structures). */
