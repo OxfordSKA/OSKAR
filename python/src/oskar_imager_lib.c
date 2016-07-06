@@ -111,7 +111,9 @@ static PyObject* check_init(PyObject* self, PyObject* args)
     int status = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
+    Py_BEGIN_ALLOW_THREADS
     oskar_imager_check_init(h, &status);
+    Py_END_ALLOW_THREADS
     return Py_BuildValue("i", status);
 }
 
@@ -153,7 +155,9 @@ static PyObject* finalise(PyObject* self, PyObject* args)
     }
 
     /* Finalise. */
+    Py_BEGIN_ALLOW_THREADS
     oskar_imager_finalise(h, plane_c, &status);
+    Py_END_ALLOW_THREADS
     oskar_mem_free(plane_c, &status);
 
     /* Check for errors. */
@@ -193,7 +197,9 @@ static PyObject* finalise_plane(PyObject* self, PyObject* args)
             PyArray_SIZE(plane), &status);
 
     /* Finalise the plane. */
+    Py_BEGIN_ALLOW_THREADS
     oskar_imager_finalise_plane(h, plane_c, plane_norm, &status);
+    Py_END_ALLOW_THREADS
     oskar_mem_free(plane_c, &status);
 
     /* Check for errors. */
@@ -252,7 +258,9 @@ static PyObject* run(PyObject* self, PyObject* args)
     int status = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
+    Py_BEGIN_ALLOW_THREADS
     oskar_imager_run(h, &status);
+    Py_END_ALLOW_THREADS
 
     /* Check for errors. */
     if (status)
@@ -754,8 +762,10 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
     }
 
     /* Update the plane. */
+    Py_BEGIN_ALLOW_THREADS
     oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c,
             weight_c, plane_c, &plane_norm, weights_grid_c, &status);
+    Py_END_ALLOW_THREADS
 
     /* Clean up. */
     oskar_mem_free(uu_c, &status);
@@ -806,6 +816,7 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     const char *weighting_type = 0, *algorithm_type = 0;
     oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *weight_c, *plane;
     oskar_Mem *weights_grid = 0;
+    npy_intp dims[2];
 
     /* Parse inputs. */
     if (!PyArg_ParseTuple(args, "OOOOdissO",
@@ -829,6 +840,7 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     }
 
     /* Check dimensions. */
+    num_pixels = size * size;
     if (PyArray_NDIM(uu) != 1 || PyArray_NDIM(vv) != 1 ||
             PyArray_NDIM(ww) != 1 || PyArray_NDIM(amps) != 1)
     {
@@ -858,30 +870,6 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     }
     type = oskar_type_precision(oskar_type_from_numpy(amps));
 
-    /* Create the output image array. */
-    num_pixels = size * size;
-    npy_intp dims[] = {size, size};
-    im = (PyArrayObject*)PyArray_SimpleNew(2, dims,
-            oskar_type_is_double(type) ? NPY_DOUBLE : NPY_FLOAT);
-
-    /* Create and set up the imager. */
-    h = oskar_imager_create(type, &status);
-    oskar_imager_set_fov(h, fov_deg);
-    oskar_imager_set_size(h, size);
-    oskar_imager_set_algorithm(h, algorithm_type, &status);
-    oskar_imager_set_weighting_type(h, weighting_type, &status);
-
-    /* Check for DFT, W-projection or uniform weighting. */
-    if (!strncmp(algorithm_type, "DFT", 3) ||
-            !strncmp(algorithm_type, "dft", 3))
-        dft = 1;
-    if (!strncmp(algorithm_type, "W", 1) ||
-            !strncmp(algorithm_type, "w", 1))
-        wproj = 1;
-    if (!strncmp(weighting_type, "U", 1) ||
-            !strncmp(weighting_type, "u", 1))
-        uniform = 1;
-
     /* Pointers to input/output arrays. */
     uu_c = oskar_mem_create_alias_from_raw(PyArray_DATA(uu),
             oskar_type_from_numpy(uu), OSKAR_CPU, num_vis, &status);
@@ -902,6 +890,27 @@ static PyObject* make_image(PyObject* self, PyObject* args)
         weight_c = oskar_mem_create(type, OSKAR_CPU, num_vis, &status);
         oskar_mem_set_value_real(weight_c, 1.0, 0, num_vis, &status);
     }
+
+    /* Create and set up the imager. */
+    h = oskar_imager_create(type, &status);
+    oskar_imager_set_fov(h, fov_deg);
+    oskar_imager_set_size(h, size);
+    oskar_imager_set_algorithm(h, algorithm_type, &status);
+    oskar_imager_set_weighting_type(h, weighting_type, &status);
+
+    /* Check for DFT, W-projection or uniform weighting. */
+    if (!strncmp(algorithm_type, "DFT", 3) ||
+            !strncmp(algorithm_type, "dft", 3))
+        dft = 1;
+    if (!strncmp(algorithm_type, "W", 1) ||
+            !strncmp(algorithm_type, "w", 1))
+        wproj = 1;
+    if (!strncmp(weighting_type, "U", 1) ||
+            !strncmp(weighting_type, "u", 1))
+        uniform = 1;
+
+    /* Allow threads. */
+    Py_BEGIN_ALLOW_THREADS
 
     /* Supply the coordinates first, if required. */
     if (wproj || uniform)
@@ -926,12 +935,10 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     oskar_imager_finalise_plane(h, plane, norm, &status);
     oskar_imager_trim_image(plane, oskar_imager_plane_size(h), size, &status);
 
-    /* Copy the data out. */
-    memcpy(PyArray_DATA(im), oskar_mem_void_const(plane),
-            num_pixels * oskar_mem_element_size(type));
+    /* Disallow threads. */
+    Py_END_ALLOW_THREADS
 
-    /* Free memory. */
-    oskar_mem_free(plane, &status);
+    /* Free temporaries. */
     oskar_mem_free(uu_c, &status);
     oskar_mem_free(vv_c, &status);
     oskar_mem_free(ww_c, &status);
@@ -939,6 +946,15 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     oskar_mem_free(weight_c, &status);
     oskar_mem_free(weights_grid, &status);
     oskar_imager_free(h, &status);
+
+    /* Copy the data out. */
+    dims[0] = size;
+    dims[1] = size;
+    im = (PyArrayObject*)PyArray_SimpleNew(2, dims,
+            oskar_type_is_double(type) ? NPY_DOUBLE : NPY_FLOAT);
+    memcpy(PyArray_DATA(im), oskar_mem_void_const(plane),
+            num_pixels * oskar_mem_element_size(type));
+    oskar_mem_free(plane, &status);
 
     /* Check for errors. */
     if (status)
