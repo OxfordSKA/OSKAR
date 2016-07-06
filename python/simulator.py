@@ -1,6 +1,10 @@
-# 
+"""Simulator module.
+
+TODO module doc
+"""
+#
 #  This file is part of OSKAR.
-# 
+#
 # Copyright (c) 2016, The University of Oxford
 # All rights reserved.
 #
@@ -17,7 +21,7 @@
 #  3. Neither the name of the University of Oxford nor the names of its
 #     contributors may be used to endorse or promote products derived from this
 #     software without specific prior written permission.
-# 
+#
 #  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,10 +33,11 @@
 #  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 
 import _simulator_lib
 from vis_block import VisBlock
+import numpy as np
 
 class Simulator(object):
     """This class provides a Python interface to the OSKAR simulator."""
@@ -41,7 +46,7 @@ class Simulator(object):
         """Creates a handle to an OSKAR simulator.
 
         Args:
-            type (str): Either 'double' or 'single' to specify 
+            type (str): Either 'double' or 'single' to specify
                 the numerical precision of the simulation.
         """
         self._capsule = _simulator_lib.create(precision)
@@ -50,7 +55,7 @@ class Simulator(object):
     def check_init(self):
         """Initialises the simulator if it has not already been done.
 
-        All simulator options and data must have been set appropriately 
+        All simulator options and data must have been set appropriately
         before calling this function.
         """
         _simulator_lib.check_init(self._capsule)
@@ -59,7 +64,7 @@ class Simulator(object):
     def finalise_block(self, block_index):
         """Finalises a visibility block.
 
-        This method should be called after all prior calls to run_block() 
+        This method should be called after all prior calls to run_block()
         have completed for a given simulation block.
 
         Args:
@@ -70,7 +75,7 @@ class Simulator(object):
                 This is only valid until the next block is simulated.
         """
         block = VisBlock()
-        block._capsule = _simulator_lib.finalise_block(self._capsule, 
+        block._capsule = _simulator_lib.finalise_block(self._capsule,
             block_index)
         return block
 
@@ -129,7 +134,7 @@ class Simulator(object):
 
         This method should be called only after setting all required options.
 
-        Call finalise_block() with the same block ID to finalise the block 
+        Call finalise_block() with the same block ID to finalise the block
         after calling this method.
 
         Args:
@@ -149,11 +154,36 @@ class Simulator(object):
         _simulator_lib.run(self._capsule)
 
 
+    def generate_visibilities(self, wavelength, flatten=False):
+        """
+        """
+        self.check_init()
+        for block_id in range(self.num_vis_blocks()):
+            self.reset_work_unit_index()
+            self.run_block(block_id)
+            block = self.finalise_block(block_id)
+            xcorr_ = block.cross_correlations()
+            uu_ = block.baseline_uu_metres() / wavelength
+            vv_ = block.baseline_vv_metres() / wavelength
+            ww_ = block.baseline_ww_metres() / wavelength
+            amp = xcorr_ if block_id == 0 else np.concatenate((amp, xcorr_))
+            uu = uu_ if block_id == 0 else np.concatenate((uu, uu_))
+            vv = vv_ if block_id == 0 else np.concatenate((vv, vv_))
+            ww = ww_ if block_id == 0 else np.concatenate((ww, ww_))
+        self.finalise()
+        uu, vv, ww = uu.squeeze(), vv.squeeze(), ww.squeeze()
+        amp = np.squeeze(amp)
+        if flatten:
+            uu, vv, ww = uu.flatten(), vv.flatten(), ww.flatten()
+            amp = amp.flatten()
+        return uu, vv, ww, amp
+
+
     def set_gpus(self, device_ids):
         """Sets the GPU device IDs to use.
 
         Args:
-            device_ids (int, array-like): 
+            device_ids (int, array-like):
                 A list of the GPU IDs to use, or -1 to use all.
         """
         _simulator_lib.set_gpus(self._capsule, device_ids)
@@ -168,7 +198,7 @@ class Simulator(object):
         _simulator_lib.set_max_times_per_block(self._capsule, value)
 
 
-    def set_observation_frequency(self, start_frequency_hz, 
+    def set_observation_frequency(self, start_frequency_hz,
                 inc_hz=0.0, num_channels=1):
         """Sets observation start frequency, increment, and number of channels.
 
@@ -177,11 +207,11 @@ class Simulator(object):
             inc_hz (Optional[float]): Frequency increment, in Hz.
             num_channels (Optional[int]): Number of frequency channels.
         """
-        _simulator_lib.set_observation_frequency(self._capsule, 
+        _simulator_lib.set_observation_frequency(self._capsule,
             start_frequency_hz, inc_hz, num_channels)
 
 
-    def set_observation_time(self, start_time_mjd_utc, length_sec, 
+    def set_observation_time(self, start_time_mjd_utc, length_sec,
                 num_time_steps):
         """Sets observation start time, length, and number of samples.
 
@@ -190,7 +220,7 @@ class Simulator(object):
             length_sec (float): Observation length in seconds.
             num_time_steps (int): Number of time steps to simulate.
         """
-        _simulator_lib.set_observation_time(self._capsule, 
+        _simulator_lib.set_observation_time(self._capsule,
             start_time_mjd_utc, length_sec, num_time_steps)
 
 
@@ -230,7 +260,7 @@ class Simulator(object):
             sky_model (Sky): Sky model object.
             max_sources_per_chunk (int): Maximum number of sources per chunk.
         """
-        _simulator_lib.set_sky_model(self._capsule, 
+        _simulator_lib.set_sky_model(self._capsule,
             sky_model._capsule, max_sources_per_chunk)
 
 
@@ -240,7 +270,7 @@ class Simulator(object):
         Args:
             telescope_model (Telescope): Telescope model object.
         """
-        _simulator_lib.set_telescope_model(self._capsule, 
+        _simulator_lib.set_telescope_model(self._capsule,
             telescope_model._capsule)
 
 
@@ -255,4 +285,3 @@ class Simulator(object):
             block_index (int): The simulation block index to write.
         """
         _simulator_lib.write_block(self._capsule, block._capsule, block_index)
-
