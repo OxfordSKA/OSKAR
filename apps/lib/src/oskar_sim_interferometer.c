@@ -42,6 +42,7 @@
 #include <oskar_evaluate_jones_K.h>
 #include <oskar_jones.h>
 #include <oskar_log.h>
+#include <oskar_mutex.h>
 #include <oskar_sky.h>
 #include <oskar_station_work.h>
 #include <oskar_telescope.h>
@@ -105,6 +106,7 @@ struct oskar_Simulator
 
     /* State. */
     int chunk_time_index;
+    oskar_Mutex* mutex;
 
     /* Sky model and telescope model. */
     int num_chunks;
@@ -122,10 +124,6 @@ struct oskar_Simulator
 
     /* Array of DeviceData structures, one per GPU. */
     DeviceData* d;
-
-#ifdef _OPENMP
-    omp_lock_t mutex;
-#endif
 };
 #ifndef OSKAR_SIMULATOR_TYPEDEF_
 #define OSKAR_SIMULATOR_TYPEDEF_
@@ -214,9 +212,7 @@ oskar_Simulator* oskar_simulator_create(int precision, int* status)
     h->tmr_sim   = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->temp      = oskar_mem_create(precision, OSKAR_CPU, 0, status);
-#ifdef _OPENMP
-    omp_init_lock(&h->mutex);
-#endif
+    h->mutex     = oskar_mutex_create();
 
     /* Set sensible defaults. */
     h->max_sources_per_chunk = 16384;
@@ -302,15 +298,13 @@ void oskar_simulator_free(oskar_Simulator* h, int* status)
     oskar_mem_free(h->temp, status);
     oskar_timer_free(h->tmr_sim);
     oskar_timer_free(h->tmr_write);
+    oskar_mutex_free(h->mutex);
     free(h->sky_chunks);
     free(h->device_ids);
     free(h->vis_name);
     free(h->ms_name);
     free(h->settings_path);
     free(h->d);
-#ifdef _OPENMP
-    omp_destroy_lock(&h->mutex);
-#endif
     free(h);
 }
 
@@ -405,13 +399,9 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
         oskar_Sky* sky;
         int i_chunk_time, i_chunk, i_time, i_channel, sim_time_idx;
 
-#ifdef _OPENMP
-        omp_set_lock(&h->mutex); /* Lock the mutex */
-#endif
+        oskar_mutex_lock(h->mutex);
         i_chunk_time = (h->chunk_time_index)++;
-#ifdef _OPENMP
-        omp_unset_lock(&h->mutex); /* Unlock the mutex. */
-#endif
+        oskar_mutex_unlock(h->mutex);
         if ((i_chunk_time >= num_times_block * total_chunks) || *status) break;
 
         /* Convert slice index to chunk/time index. */

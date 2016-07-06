@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,57 +26,74 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_log.h>
-#include <oskar_log.h>
+#ifndef OSKAR_MUTEX_H_
+#define OSKAR_MUTEX_H_
 
-#include <stdio.h>
-#include <stdlib.h>
+/**
+ * @file oskar_mutex.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-char* oskar_log_file_data(oskar_Log* log, size_t* size)
-{
-    char* data = 0;
-    if (!size || !log) return 0;
+struct oskar_Mutex;
+#ifndef OSKAR_MUTEX_TYPEDEF_
+#define OSKAR_MUTEX_TYPEDEF_
+typedef struct oskar_Mutex oskar_Mutex;
+#endif /* OSKAR_MUTEX_TYPEDEF_ */
 
-    /* If log exists, then read the whole file. */
-    if (log->file)
-    {
-        FILE* temp_handle = 0;
+/**
+ * @brief Creates a mutex.
+ *
+ * @details
+ * Creates a mutex.
+ * The mutex will use the OpenMP mutex if it is available.
+ *
+ * The mutex is created in an unlocked state.
+ *
+ * @param[in,out] timer Pointer to timer.
+ */
+OSKAR_EXPORT
+oskar_Mutex* oskar_mutex_create(void);
 
-        /* Determine the current size of the file. */
-        fflush(log->file);
-        temp_handle = fopen(log->name, "rb");
-        if (temp_handle)
-        {
-            fseek(temp_handle, 0, SEEK_END);
-            *size = ftell(temp_handle);
+/**
+ * @brief Destroys the mutex.
+ *
+ * @details
+ * Destroys the mutex.
+ *
+ * @param[in,out] mutex Pointer to mutex.
+ */
+OSKAR_EXPORT
+void oskar_mutex_free(oskar_Mutex* mutex);
 
-            /* Read the file into memory. */
-            if (*size != 0)
-            {
-                size_t bytes_read = 0;
-                data = (char*) malloc(*size * sizeof(char));
-                if (data != 0)
-                {
-                    rewind(temp_handle);
-                    bytes_read = fread(data, 1, *size, temp_handle);
-                    if (bytes_read != *size)
-                    {
-                        free(data);
-                        data = 0;
-                    }
-                }
-            }
-            fclose(temp_handle);
-        }
-    }
+/**
+ * @brief Locks the mutex.
+ *
+ * @details
+ * Locks the mutex.
+ *
+ * @param[in,out] mutex Pointer to mutex.
+ */
+OSKAR_EXPORT
+void oskar_mutex_lock(oskar_Mutex* mutex);
 
-    return data;
-}
+/**
+ * @brief Unlocks the mutex.
+ *
+ * @details
+ * Unlocks the mutex.
+ *
+ * @param[in,out] mutex Pointer to mutex.
+ */
+OSKAR_EXPORT
+void oskar_mutex_unlock(oskar_Mutex* mutex);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_MUTEX_H_ */

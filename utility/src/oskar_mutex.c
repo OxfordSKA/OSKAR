@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,52 +26,67 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PRIVATE_TIMER_H_
-#define OSKAR_PRIVATE_TIMER_H_
-
-/**
- * @file private_timer.h
- */
-
-#include <oskar_global.h>
-
-#ifdef OSKAR_HAVE_CUDA
-#include <cuda_runtime_api.h>
-#endif
+#include <oskar_mutex.h>
+#include <stdlib.h>
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
-/**
- * @struct oskar_Timer
- *
- * @brief Structure to hold data for a timer.
- *
- * @details
- * The structure holds data for a single timer.
- */
-struct oskar_Timer
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+struct oskar_Mutex
 {
-    int type;
-    int paused;
-    double elapsed;
-    double start;
-#ifdef OSKAR_HAVE_CUDA
-    cudaEvent_t start_cuda;
-    cudaEvent_t end_cuda;
-#endif
-#ifdef OSKAR_OS_WIN
-    double freq;
-#endif
 #ifdef _OPENMP
-    omp_lock_t mutex;
+    omp_lock_t lock;
 #endif
 };
 
-#ifndef OSKAR_TIMER_TYPEDEF_
-#define OSKAR_TIMER_TYPEDEF_
-typedef struct oskar_Timer oskar_Timer;
-#endif /* OSKAR_TIMER_TYPEDEF_ */
+oskar_Mutex* oskar_mutex_create(void)
+{
+    oskar_Mutex* mutex;
 
-#endif /* OSKAR_PRIVATE_TIMER_H_ */
+    /* Create the structure. */
+    mutex = (oskar_Mutex*) calloc(1, sizeof(oskar_Mutex));
+
+#ifdef _OPENMP
+    omp_init_lock(&mutex->lock);
+#endif
+    return mutex;
+}
+
+
+void oskar_mutex_free(oskar_Mutex* mutex)
+{
+    if (!mutex) return;
+#ifdef _OPENMP
+    omp_destroy_lock(&mutex->lock);
+#endif
+    free(mutex);
+}
+
+
+void oskar_mutex_lock(oskar_Mutex* mutex)
+{
+    if (!mutex) return;
+#ifdef _OPENMP
+    omp_set_lock(&mutex->lock);
+#endif
+}
+
+
+void oskar_mutex_unlock(oskar_Mutex* mutex)
+{
+    if (!mutex) return;
+#ifdef _OPENMP
+    omp_unset_lock(&mutex->lock);
+#endif
+}
+
+
+#ifdef __cplusplus
+}
+#endif

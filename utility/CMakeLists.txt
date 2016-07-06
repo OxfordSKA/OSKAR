@@ -45,6 +45,7 @@ set(utility_SRC
     src/oskar_mem_set_element.c
     src/oskar_mem_set_value_real.c
     src/oskar_mem_stats.c
+    src/oskar_mutex.c
     src/oskar_scan_binary_file.c
     src/oskar_string_to_array.c
     src/oskar_timer.c

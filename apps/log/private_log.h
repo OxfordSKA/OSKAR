@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,6 @@
 #include <oskar_global.h>
 #include <stdio.h>
 #include <time.h>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 
 struct oskar_Log
 {
@@ -61,10 +58,6 @@ struct oskar_Log
     int* offset;       /**< Array containing the memory offsets in bytes of each entry. */
     int* length;       /**< Array containing the length in bytes of each entry. */
     time_t* timestamp; /**< Array containing log time stamps. */
-
-#ifdef _OPENMP
-    omp_lock_t mutex;
-#endif
 };
 
 #ifndef OSKAR_LOG_TYPEDEF_
