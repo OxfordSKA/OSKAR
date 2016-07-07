@@ -319,13 +319,13 @@ class Imager(object):
         _imager_lib.set_vis_time(self._capsule, ref_mjd_utc, inc_sec, num_times)
 
 
-    def set_weighting_type(self, weighting_type):
+    def set_weighting(self, weighting):
         """Sets the type of visibility weighting to use.
 
         Args:
-            weighting_type (str): Either 'Natural', 'Radial' or 'Uniform'.
+            weighting (str): Either 'Natural', 'Radial' or 'Uniform'.
         """
-        _imager_lib.set_weighting_type(self._capsule, weighting_type)
+        _imager_lib.set_weighting(self._capsule, weighting)
 
 
     def update(self, num_baselines, uu, vv, ww, amps, weight, num_pols=1,

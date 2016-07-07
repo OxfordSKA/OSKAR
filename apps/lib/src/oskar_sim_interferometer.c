@@ -100,11 +100,13 @@ struct oskar_Simulator
     int prec, num_devices, num_gpus, *gpu_ids, num_channels, num_time_steps;
     int max_sources_per_chunk, max_times_per_block;
     int apply_horizon_clip, force_polarised_ms, zero_failed_gaussians;
+    int coords_only;
     double freq_start_hz, freq_inc_hz, time_start_mjd_utc, time_inc_sec;
     double source_min_jy, source_max_jy;
     char correlation_type, *vis_name, *ms_name, *settings_path;
 
     /* State. */
+    int init_sky;
     int chunk_time_index;
     oskar_Mutex* mutex;
 
@@ -148,11 +150,7 @@ static void system_mem_log(oskar_Log* log);
 
 void oskar_simulator_check_init(oskar_Simulator* h, int* status)
 {
-    int i, num_failed = 0;
-    double ra0, dec0;
-
-    /* Check if initialisation needs to happen. */
-    if (*status || h->header) return;
+    if (*status) return;
 
     /* Check that the telescope model has been set. */
     if (!h->tel)
@@ -163,7 +161,8 @@ void oskar_simulator_check_init(oskar_Simulator* h, int* status)
     }
 
     /* Create the visibility header and set up the output files if required. */
-    set_up_vis_header(h, status);
+    if (!h->header)
+        set_up_vis_header(h, status);
     if (h->vis_name && !h->vis)
         h->vis = oskar_vis_header_write(h->header, h->vis_name, status);
 #ifndef OSKAR_NO_MS
@@ -172,34 +171,41 @@ void oskar_simulator_check_init(oskar_Simulator* h, int* status)
                 h->force_polarised_ms, status);
 #endif
 
-    /* Compute source direction cosines relative to phase centre. */
-    ra0 = oskar_telescope_phase_centre_ra_rad(h->tel);
-    dec0 = oskar_telescope_phase_centre_dec_rad(h->tel);
-    for (i = 0; i < h->num_chunks; ++i)
+    /* Calculate source parameters if required. */
+    if (!h->init_sky)
     {
-        oskar_sky_evaluate_relative_directions(h->sky_chunks[i],
-                ra0, dec0, status);
+        int i, num_failed = 0;
+        double ra0, dec0;
+
+        /* Compute source direction cosines relative to phase centre. */
+        ra0 = oskar_telescope_phase_centre_ra_rad(h->tel);
+        dec0 = oskar_telescope_phase_centre_dec_rad(h->tel);
+        for (i = 0; i < h->num_chunks; ++i)
+        {
+            oskar_sky_evaluate_relative_directions(h->sky_chunks[i],
+                    ra0, dec0, status);
 
 #if !defined(OSKAR_NO_LAPACK)
-        /* Evaluate extended source parameters. */
-        oskar_sky_evaluate_gaussian_source_parameters(h->sky_chunks[i],
-                h->zero_failed_gaussians, ra0, dec0, &num_failed, status);
+            /* Evaluate extended source parameters. */
+            oskar_sky_evaluate_gaussian_source_parameters(h->sky_chunks[i],
+                    h->zero_failed_gaussians, ra0, dec0, &num_failed, status);
 #endif
+        }
+        if (num_failed > 0)
+        {
+            if (h->zero_failed_gaussians)
+                oskar_log_warning(h->log, "Gaussian ellipse solution failed "
+                        "for %i sources. These will have their fluxes "
+                        "set to zero.", num_failed);
+            else
+                oskar_log_warning(h->log, "Gaussian ellipse solution failed "
+                        "for %i sources. These will be simulated "
+                        "as point sources.", num_failed);
+        }
+        h->init_sky = 1;
     }
 
-    if (num_failed > 0)
-    {
-        if (h->zero_failed_gaussians)
-            oskar_log_warning(h->log, "Gaussian ellipse solution failed for %i "
-                    "sources. These will have their fluxes set to zero.",
-                    num_failed);
-        else
-            oskar_log_warning(h->log, "Gaussian ellipse solution failed for %i "
-                    "sources. These will be simulated as point sources.",
-                    num_failed);
-    }
-
-    /* Set up each of the compute devices. */
+    /* Check that each compute device has been set up. */
     set_up_device_data(h, status);
 }
 
@@ -230,7 +236,6 @@ oskar_VisBlock* oskar_simulator_finalise_block(oskar_Simulator* h,
         int block_index, int* status)
 {
     int i, i_active;
-    oskar_Mem *xc0 = 0, *ac0 = 0;
     oskar_VisBlock *b0 = 0, *b = 0;
     if (*status) return 0;
 
@@ -240,17 +245,21 @@ oskar_VisBlock* oskar_simulator_finalise_block(oskar_Simulator* h,
     /* Combine all vis blocks into the first one. */
     i_active = (block_index + 1) % 2;
     b0 = h->d[0].vis_block_cpu[!i_active];
-    xc0 = oskar_vis_block_cross_correlations(b0);
-    ac0 = oskar_vis_block_auto_correlations(b0);
-    for (i = 1; i < h->num_devices; ++i)
+    if (!h->coords_only)
     {
-        b = h->d[i].vis_block_cpu[!i_active];
-        if (oskar_vis_block_has_cross_correlations(b))
-            oskar_mem_add(xc0, xc0, oskar_vis_block_cross_correlations(b),
-                    oskar_mem_length(xc0), status);
-        if (oskar_vis_block_has_auto_correlations(b))
-            oskar_mem_add(ac0, ac0, oskar_vis_block_auto_correlations(b),
-                    oskar_mem_length(ac0), status);
+        oskar_Mem *xc0 = 0, *ac0 = 0;
+        xc0 = oskar_vis_block_cross_correlations(b0);
+        ac0 = oskar_vis_block_auto_correlations(b0);
+        for (i = 1; i < h->num_devices; ++i)
+        {
+            b = h->d[i].vis_block_cpu[!i_active];
+            if (oskar_vis_block_has_cross_correlations(b))
+                oskar_mem_add(xc0, xc0, oskar_vis_block_cross_correlations(b),
+                        oskar_mem_length(xc0), status);
+            if (oskar_vis_block_has_auto_correlations(b))
+                oskar_mem_add(ac0, ac0, oskar_vis_block_auto_correlations(b),
+                        oskar_mem_length(ac0), status);
+        }
     }
 
     /* Calculate baseline uvw coordinates for the block. */
@@ -274,8 +283,11 @@ oskar_VisBlock* oskar_simulator_finalise_block(oskar_Simulator* h,
     }
 
     /* Add uncorrelated system noise to the combined visibilities. */
-    oskar_vis_block_add_system_noise(b0, h->header, h->tel,
-            block_index, h->temp, status);
+    if (!h->coords_only)
+    {
+        oskar_vis_block_add_system_noise(b0, h->header, h->tel,
+                block_index, h->temp, status);
+    }
 
     /* Return a pointer to the block. */
     return b0;
@@ -367,15 +379,18 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
         return;
     }
 
-    /* Disable any nested parallelism. */
+    if (!h->coords_only)
+    {
 #ifdef _OPENMP
-    omp_set_num_threads(1);
-    omp_set_nested(0);
+        /* Disable any nested parallelism. */
+        omp_set_num_threads(1);
+        omp_set_nested(0);
 #endif
 
-    /* Set the GPU to use. This is supposed to be a very low-overhead call. */
-    if (device_id >= 0 && device_id < h->num_gpus)
-        oskar_device_set(h->gpu_ids[device_id], status);
+        /* Set the GPU to use. (Supposed to be a very low-overhead call.) */
+        if (device_id >= 0 && device_id < h->num_gpus)
+            oskar_device_set(h->gpu_ids[device_id], status);
+    }
 
     /* Clear the visibility block. */
     i_active = block_index % 2; /* Index of the active buffer. */
@@ -402,7 +417,7 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
 
     /* Go though all possible work units in the block. A work unit is defined
      * as the simulation for one time and one sky chunk. */
-    while (1)
+    while (!h->coords_only)
     {
         oskar_Sky* sky;
         int i_chunk_time, i_chunk, i_time, i_channel, sim_time_idx;
@@ -632,6 +647,14 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
 }
 
 
+void oskar_simulator_set_coords_only(oskar_Simulator* h, int value,
+        int* status)
+{
+    h->coords_only = value;
+    oskar_simulator_check_init(h, status);
+}
+
+
 void oskar_simulator_set_correlation_type(oskar_Simulator* h,
         const char* type, int* status)
 {
@@ -775,6 +798,7 @@ void oskar_simulator_set_sky_model(oskar_Simulator* h, const oskar_Sky* sky,
     if (oskar_sky_num_sources(sky) > 0)
         oskar_sky_append_to_set(&h->num_chunks, &h->sky_chunks,
                 max_sources_per_chunk, sky, status);
+    h->init_sky = 0;
 }
 
 
@@ -1080,8 +1104,12 @@ static void set_up_device_data(oskar_Simulator* h, int* status)
 
     for (i = 0; i < h->num_devices; ++i)
     {
-        /* Select the device. */
         DeviceData* d = &h->d[i];
+
+        /* Check if device memory has already been set up. */
+        if (d->vis_block) continue;
+
+        /* Select the device. */
         if (i < h->num_gpus)
         {
             oskar_device_set(h->gpu_ids[i], status);
@@ -1093,14 +1121,15 @@ static void set_up_device_data(oskar_Simulator* h, int* status)
         }
 
         /* Host memory. */
-        d->vis_block_cpu[0] = oskar_vis_block_create(OSKAR_CPU, h->header,
-                status);
-        d->vis_block_cpu[1] = oskar_vis_block_create(OSKAR_CPU, h->header,
-                status);
+        d->vis_block_cpu[0] = oskar_vis_block_create_from_header(OSKAR_CPU,
+                h->header, status);
+        d->vis_block_cpu[1] = oskar_vis_block_create_from_header(OSKAR_CPU,
+                h->header, status);
 
         /* Device memory. */
         d->previous_chunk_index = -1;
-        d->vis_block = oskar_vis_block_create(dev_loc, h->header, status);
+        d->vis_block = oskar_vis_block_create_from_header(dev_loc,
+                h->header, status);
         d->u = oskar_mem_create(h->prec, dev_loc, num_stations, status);
         d->v = oskar_mem_create(h->prec, dev_loc, num_stations, status);
         d->w = oskar_mem_create(h->prec, dev_loc, num_stations, status);

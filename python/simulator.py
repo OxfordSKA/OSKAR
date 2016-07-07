@@ -85,10 +85,10 @@ class Simulator(object):
 
 
     def num_devices(self):
-        """Returns the number of compute devices used.
+        """Returns the number of compute devices selected.
 
         Returns:
-            int: The number of compute devices used.
+            int: The number of compute devices selected.
         """
         return _simulator_lib.num_devices(self._capsule)
 
@@ -155,6 +155,15 @@ class Simulator(object):
         _simulator_lib.run(self._capsule)
 
 
+    def set_coords_only(self, value):
+        """Sets whether the simulator provides baseline coordinates only.
+
+        Args:
+            value (bool): If set, simulate coordinates only.
+        """
+        _simulator_lib.set_coords_only(self._capsule, value)
+
+
     def set_gpus(self, device_ids):
         """Sets the GPU device IDs to use.
 
@@ -190,8 +199,8 @@ class Simulator(object):
         A compute device may be either a local CPU core, or a GPU.
         To use only a single CPU core for simulation, and no GPUs, call:
 
-        set_num_devices(1)
         set_gpus(None)
+        set_num_devices(1)
 
         Args:
             value (int): Number of compute devices to use.
@@ -258,7 +267,7 @@ class Simulator(object):
         """Sets the sky model used for the simulation.
 
         Args:
-            sky_model (Sky): Sky model object.
+            sky_model (oskar.Sky): Sky model object.
             max_sources_per_chunk (int): Maximum number of sources per chunk.
         """
         _simulator_lib.set_sky_model(self._capsule, 
@@ -269,7 +278,7 @@ class Simulator(object):
         """Sets the telescope model used for the simulation.
 
         Args:
-            telescope_model (Telescope): Telescope model object.
+            telescope_model (oskar.Telescope): Telescope model object.
         """
         _simulator_lib.set_telescope_model(self._capsule, 
             telescope_model._capsule)

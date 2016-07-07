@@ -107,8 +107,7 @@ int main(int argc, char** argv)
     oskar_imager_set_time_range(h, s.to_int("time_start", &e), end,
             s.to_int("time_snapshots", &e));
     oskar_imager_set_algorithm(h, s.to_string("algorithm", &e).c_str(), &e);
-    oskar_imager_set_weighting_type(h,
-            s.to_string("weighting_type", &e).c_str(), &e);
+    oskar_imager_set_weighting(h, s.to_string("weighting", &e).c_str(), &e);
     if (s.starts_with("algorithm", "FFT", &e) ||
             s.starts_with("algorithm", "fft", &e))
     {

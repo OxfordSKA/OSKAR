@@ -115,7 +115,8 @@ int main(int argc, char** argv)
                 max_times_per_block;
 
         // Create a visibility block to read into.
-        oskar_VisBlock* blk = oskar_vis_block_create(OSKAR_CPU, hdr, &error);
+        oskar_VisBlock* blk = oskar_vis_block_create_from_header(OSKAR_CPU,
+                hdr, &error);
 
         // Loop over blocks and write them to the Measurement Set.
         for (int b = 0; b < num_blocks; ++b)

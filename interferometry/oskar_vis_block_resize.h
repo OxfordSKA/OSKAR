@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,50 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VIS_BLOCK_H_
-#define OSKAR_VIS_BLOCK_H_
+#ifndef OSKAR_VIS_BLOCK_RESIZE_H_
+#define OSKAR_VIS_BLOCK_RESIZE_H_
 
 /**
- * @file oskar_vis_block.h
+ * @file oskar_vis_block_resize.h
  */
 
-/* Public interface. */
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_VisBlock;
-#ifndef OSKAR_VIS_BLOCK_TYPEDEF_
-#define OSKAR_VIS_BLOCK_TYPEDEF_
-typedef struct oskar_VisBlock oskar_VisBlock;
-#endif /* OSKAR_VIS_BLOCK_TYPEDEF_ */
-
-/* To maintain binary compatibility, do not change the values
- * in the lists below. */
-enum OSKAR_VIS_BLOCK_TAGS
-{
-    OSKAR_VIS_BLOCK_TAG_DIM_START_AND_SIZE    = 1,
-    OSKAR_VIS_BLOCK_TAG_AUTO_CORRELATIONS     = 2,
-    OSKAR_VIS_BLOCK_TAG_CROSS_CORRELATIONS    = 3,
-    OSKAR_VIS_BLOCK_TAG_BASELINE_UU           = 4,
-    OSKAR_VIS_BLOCK_TAG_BASELINE_VV           = 5,
-    OSKAR_VIS_BLOCK_TAG_BASELINE_WW           = 6
-};
+/**
+ * @brief
+ * Resizes the specified visibility block.
+ *
+ * @details
+ * Resizes the specified visibility block.
+ *
+ * @param[in,out] vis          The visibility block to resize.
+ * @param[in]     num_times    The new number of times.
+ * @param[in]     num_channels The new number of channels.
+ * @param[in]     num_stations The new number of stations.
+ * @param[in,out] status       Status return code.
+ */
+OSKAR_EXPORT
+void oskar_vis_block_resize(oskar_VisBlock* vis, int num_times,
+        int num_channels, int num_stations, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#include <oskar_vis_block_accessors.h>
-#include <oskar_vis_block_add_system_noise.h>
-#include <oskar_vis_block_clear.h>
-#include <oskar_vis_block_copy.h>
-#include <oskar_vis_block_create.h>
-#include <oskar_vis_block_create_from_header.h>
-#include <oskar_vis_block_free.h>
-#include <oskar_vis_block_read.h>
-#include <oskar_vis_block_resize.h>
-#include <oskar_vis_block_write.h>
-
-#endif /* OSKAR_VIS_BLOCK_H_ */
+#endif /* OSKAR_VIS_BLOCK_RESIZE_H_ */

@@ -3,7 +3,7 @@
     * Added option to specify whether to use GPUs for simulations.
 
     * Added option to specify the number of compute devices for simulations
-      (CPU cores and/or or GPU cards).
+      (CPU cores and/or GPU cards).
 
     * Added Python interface.
 

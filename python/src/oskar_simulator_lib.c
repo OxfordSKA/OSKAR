@@ -312,6 +312,27 @@ static PyObject* run(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* set_coords_only(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int status = 0, value = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_set_coords_only(h, value, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_simulator_set_coords_only() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
 static PyObject* set_correlation_type(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
@@ -602,6 +623,8 @@ static PyMethodDef methods[] =
         {"run_block", (PyCFunction)run_block,
                 METH_VARARGS, "run_block(block_index, gpu_id)"},
         {"run", (PyCFunction)run, METH_VARARGS, "run()"},
+        {"set_coords_only", (PyCFunction)set_coords_only,
+                METH_VARARGS, "set_coords_only(value)"},
         {"set_correlation_type", (PyCFunction)set_correlation_type,
                 METH_VARARGS, "set_correlation_type(type)"},
         {"set_force_polarised_ms", (PyCFunction)set_force_polarised_ms,

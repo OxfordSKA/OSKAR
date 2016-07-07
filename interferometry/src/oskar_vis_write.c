@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,12 +45,6 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     int amp_type, coord_precision, i, num_baselines, num_blocks, num_channels;
     int num_stations, num_times;
     double freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_sec;
-#if 0
-    int coord_type, *dim;
-    unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
-    oskar_Mem *temp;
-    const char* settings;
-#endif
     oskar_Binary* h = 0;
     char* log_data = 0;
     size_t log_size = 0;
@@ -108,7 +102,7 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     h = oskar_vis_header_write(hdr, filename, status);
 
     /* Create a visibility block to copy into. */
-    blk = oskar_vis_block_create(OSKAR_CPU, hdr, status);
+    blk = oskar_vis_block_create_from_header(OSKAR_CPU, hdr, status);
     num_baselines = oskar_vis_block_num_baselines(blk);
     amp = oskar_vis_amplitude_const(vis);
     xcorr = oskar_vis_block_cross_correlations(blk);
@@ -158,124 +152,6 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
         /* Write the block. */
         oskar_vis_block_write(blk, h, i, status);
     }
-
-#if 0
-    /* Create the handle. */
-    h = oskar_binary_create(filename, 'w', status);
-    if (*status)
-    {
-        oskar_binary_free(h);
-        return;
-    }
-
-    /* Write the header and common metadata. */
-    oskar_binary_write_metadata(h, status);
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* If settings path is set, write out the data. */
-    settings = oskar_mem_char_const(oskar_vis_settings_path_const(vis));
-    if (settings && strlen(settings) > 0)
-    {
-        oskar_binary_write_mem(h, oskar_vis_settings_path_const(vis),
-                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH,
-                0, 0, status);
-    }
-
-    /* If settings exist, write out the data. */
-    settings = oskar_mem_char_const(oskar_vis_settings_const(vis));
-    if (settings && strlen(settings) > 0)
-    {
-        oskar_binary_write_mem(h, oskar_vis_settings_const(vis),
-                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0, status);
-    }
-
-    /* Write the telescope model path. */
-    oskar_binary_write_mem(h, vis->telescope_path, grp,
-            OSKAR_VIS_TAG_TELESCOPE_PATH, 0, 0, status);
-
-    /* Write dimensions. */
-    oskar_binary_write_int(h, grp,
-            OSKAR_VIS_TAG_NUM_CHANNELS, 0, vis->num_channels, status);
-    oskar_binary_write_int(h, grp,
-            OSKAR_VIS_TAG_NUM_TIMES, 0, vis->num_times, status);
-    oskar_binary_write_int(h, grp,
-            OSKAR_VIS_TAG_NUM_STATIONS, 0, vis->num_stations, status);
-    oskar_binary_write_int(h, grp,
-            OSKAR_VIS_TAG_NUM_BASELINES, 0, vis->num_baselines, status);
-
-    /* Write the dimension order. */
-    if (*status) return;
-    temp = oskar_mem_create(OSKAR_INT, OSKAR_CPU, 4, status);
-    dim = oskar_mem_int(temp, status);
-    dim[0] = OSKAR_VIS_DIM_CHANNEL;
-    dim[1] = OSKAR_VIS_DIM_TIME;
-    dim[2] = OSKAR_VIS_DIM_BASELINE;
-    dim[3] = OSKAR_VIS_DIM_POLARISATION;
-    oskar_binary_write_mem(h, temp, grp,
-            OSKAR_VIS_TAG_DIMENSION_ORDER, 0, 0, status);
-    oskar_mem_free(temp, status);
-
-    /* Write other visibility metadata. */
-    oskar_binary_write_int(h, grp,
-            OSKAR_VIS_TAG_COORD_TYPE, 0, coord_type, status);
-    oskar_binary_write_int(h, grp,
-            OSKAR_VIS_TAG_AMP_TYPE, 0, amp_type, status);
-    oskar_binary_write_double(h, grp,
-            OSKAR_VIS_TAG_FREQ_START_HZ, 0, vis->freq_start_hz, status);
-    oskar_binary_write_double(h, grp,
-            OSKAR_VIS_TAG_FREQ_INC_HZ, 0, vis->freq_inc_hz, status);
-    oskar_binary_write_double(h, grp,
-            OSKAR_VIS_TAG_TIME_START_MJD_UTC, 0, vis->time_start_mjd_utc,
-            status);
-    oskar_binary_write_double(h, grp,
-            OSKAR_VIS_TAG_TIME_INC_SEC, 0, vis->time_inc_sec, status);
-    oskar_binary_write_int(h, grp,
-            OSKAR_VIS_TAG_POL_TYPE, 0, OSKAR_VIS_POL_TYPE_LINEAR, status);
-    oskar_binary_write_int(h, grp,
-            OSKAR_VIS_TAG_BASELINE_COORD_UNIT, 0,
-            OSKAR_VIS_BASELINE_COORD_UNIT_METRES, status);
-    oskar_binary_write_int(h, grp,
-            OSKAR_VIS_TAG_STATION_COORD_UNIT, 0,
-            OSKAR_VIS_STATION_COORD_UNIT_METRES, status);
-    oskar_binary_write_double(h, grp,
-            OSKAR_VIS_TAG_PHASE_CENTRE_RA, 0, vis->phase_centre_ra_deg, status);
-    oskar_binary_write_double(h, grp,
-            OSKAR_VIS_TAG_PHASE_CENTRE_DEC, 0, vis->phase_centre_dec_deg,
-            status);
-    oskar_binary_write_double(h, grp,
-            OSKAR_VIS_TAG_CHANNEL_BANDWIDTH_HZ, 0, vis->channel_bandwidth_hz,
-            status);
-    oskar_binary_write_double(h, grp,
-            OSKAR_VIS_TAG_TIME_AVERAGE_SEC, 0, vis->time_average_sec, status);
-    oskar_binary_write_double(h, grp,
-            OSKAR_VIS_TAG_TELESCOPE_LON, 0, vis->telescope_lon_deg, status);
-    oskar_binary_write_double(h, grp,
-            OSKAR_VIS_TAG_TELESCOPE_LAT, 0, vis->telescope_lat_deg, status);
-    oskar_binary_write_double(h, grp,
-            OSKAR_VIS_TAG_TELESCOPE_ALT, 0, vis->telescope_alt_metres, status);
-
-    /* Write the baseline coordinate arrays. */
-    oskar_binary_write_mem(h, vis->baseline_uu_metres,
-            grp, OSKAR_VIS_TAG_BASELINE_UU, 0, 0, status);
-    oskar_binary_write_mem(h, vis->baseline_vv_metres,
-            grp, OSKAR_VIS_TAG_BASELINE_VV, 0, 0, status);
-    oskar_binary_write_mem(h, vis->baseline_ww_metres,
-            grp, OSKAR_VIS_TAG_BASELINE_WW, 0, 0, status);
-
-    /* Write the visibility data. */
-    oskar_binary_write_mem(h, vis->amplitude,
-            grp, OSKAR_VIS_TAG_AMPLITUDE, 0, 0, status);
-
-    /* Write the station coordinate arrays. */
-    oskar_binary_write_mem(h, vis->station_x_offset_ecef_metres,
-            grp, OSKAR_VIS_TAG_STATION_X_OFFSET_ECEF, 0, 0, status);
-    oskar_binary_write_mem(h, vis->station_y_offset_ecef_metres,
-            grp, OSKAR_VIS_TAG_STATION_Y_OFFSET_ECEF, 0, 0, status);
-    oskar_binary_write_mem(h, vis->station_z_offset_ecef_metres,
-            grp, OSKAR_VIS_TAG_STATION_Z_OFFSET_ECEF, 0, 0, status);
-#endif
 
     /* If log exists, then write it out. */
     log_data = oskar_log_file_data(log, &log_size);

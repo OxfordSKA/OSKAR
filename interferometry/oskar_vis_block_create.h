@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_vis_header.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,14 +76,20 @@ extern "C" {
  * no longer required.
  *
  * @param[in] location         Memory location (OSKAR_CPU or OSKAR_GPU).
- * @param[in] hdr              Pointer to populated visibility header data.
+ * @param[in] amp_type         Memory type of visibility amplitudes.
+ * @param[in] num_times        Number of times in the block.
+ * @param[in] num_channels     Number of channels in the block.
+ * @param[in] num_stations     Number of stations in the block.
+ * @param[in] create_crosscorr If set, create space for cross correlations.
+ * @param[in] create_autocorr  If set, create space for auto correlations.
  * @param[in,out]  status      Status return code.
  *
  * @return A handle to the new data structure.
  */
 OSKAR_EXPORT
-oskar_VisBlock* oskar_vis_block_create(int location,
-        const oskar_VisHeader* hdr, int* status);
+oskar_VisBlock* oskar_vis_block_create(int location, int amp_type,
+        int num_times, int num_channels, int num_stations,
+        int create_crosscorr, int create_autocorr, int* status);
 
 #ifdef __cplusplus
 }

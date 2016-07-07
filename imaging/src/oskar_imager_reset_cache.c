@@ -49,8 +49,9 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     oskar_imager_free_wproj(h, status);
 
     /* Free the image planes. */
-    for (i = 0; i < h->num_planes; ++i)
-        oskar_mem_free(h->planes[i], status);
+    if (h->planes)
+        for (i = 0; i < h->num_planes; ++i)
+            oskar_mem_free(h->planes[i], status);
     free(h->planes);
     h->planes = 0;
     free(h->plane_norm);

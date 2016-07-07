@@ -70,7 +70,7 @@
         <type name="OptionList" default="FFT">FFT, DFT 2D, DFT 3D, W-projection</type>
         <desc>The type of transform used to generate the image.</desc>
     </s>
-    <s k="weighting_type"><label>Weighting type</label>
+    <s k="weighting"><label>Weighting</label>
         <type name="OptionList" default="Natural">Natural,Radial,Uniform</type>
         <desc>The type of visibility weighting scheme to use.</desc>
     </s>

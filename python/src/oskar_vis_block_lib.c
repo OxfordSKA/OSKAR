@@ -90,7 +90,7 @@ static oskar_VisHeader* get_handle_header(PyObject* capsule)
 }
 
 
-static PyObject* create(PyObject* self, PyObject* args)
+static PyObject* create_from_header(PyObject* self, PyObject* args)
 {
     oskar_VisBlock* h = 0;
     oskar_VisHeader* hdr = 0;
@@ -98,7 +98,7 @@ static PyObject* create(PyObject* self, PyObject* args)
     int status = 0;
     if (!PyArg_ParseTuple(args, "O", &header)) return 0;
     if (!(hdr = get_handle_header(header))) return 0;
-    h = oskar_vis_block_create(OSKAR_CPU, hdr, &status);
+    h = oskar_vis_block_create_from_header(OSKAR_CPU, hdr, &status);
     capsule = PyCapsule_New((void*)h, name,
             (PyCapsule_Destructor)vis_block_free);
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
@@ -222,7 +222,8 @@ static PyObject* cross_correlations(PyObject* self, PyObject* args)
 /* Method table. */
 static PyMethodDef methods[] =
 {
-        {"create", (PyCFunction)create, METH_VARARGS, "create(header)"},
+        {"create_from_header", (PyCFunction)create_from_header,
+                METH_VARARGS, "create_from_header(header)"},
         {"baseline_uu_metres", (PyCFunction)baseline_uu_metres,
                 METH_VARARGS, "baseline_uu_metres()"},
         {"baseline_vv_metres", (PyCFunction)baseline_vv_metres,

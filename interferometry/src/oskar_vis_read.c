@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -230,7 +230,7 @@ oskar_Vis* oskar_vis_read_new(oskar_Binary* h, int* status)
     oskar_vis_set_time_start_mjd_utc(vis, time_ref_mjd_utc);
 
     /* Create a visibility block to read into. */
-    blk = oskar_vis_block_create(OSKAR_CPU, hdr, status);
+    blk = oskar_vis_block_create_from_header(OSKAR_CPU, hdr, status);
     amp = oskar_vis_amplitude(vis);
     xcorr = oskar_vis_block_cross_correlations_const(blk);
 

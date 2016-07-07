@@ -226,7 +226,7 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
     }
 
     /* Loop over visibility blocks. */
-    blk = oskar_vis_block_create(OSKAR_CPU, hdr, status);
+    blk = oskar_vis_block_create_from_header(OSKAR_CPU, hdr, status);
     percent_next = 10;
     for (i_block = 0; i_block < num_blocks; ++i_block)
     {

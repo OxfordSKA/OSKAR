@@ -88,6 +88,10 @@ OSKAR_APPS_EXPORT
 void oskar_simulator_run(oskar_Simulator* h, int* status);
 
 OSKAR_APPS_EXPORT
+void oskar_simulator_set_coords_only(oskar_Simulator* h, int value,
+        int* status);
+
+OSKAR_APPS_EXPORT
 void oskar_simulator_set_correlation_type(oskar_Simulator* h,
         const char* type, int* status);
 

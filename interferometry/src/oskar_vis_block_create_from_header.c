@@ -26,50 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VIS_BLOCK_H_
-#define OSKAR_VIS_BLOCK_H_
-
-/**
- * @file oskar_vis_block.h
- */
-
-/* Public interface. */
+#include <private_vis_block.h>
+#include <oskar_vis_block.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_VisBlock;
-#ifndef OSKAR_VIS_BLOCK_TYPEDEF_
-#define OSKAR_VIS_BLOCK_TYPEDEF_
-typedef struct oskar_VisBlock oskar_VisBlock;
-#endif /* OSKAR_VIS_BLOCK_TYPEDEF_ */
-
-/* To maintain binary compatibility, do not change the values
- * in the lists below. */
-enum OSKAR_VIS_BLOCK_TAGS
+oskar_VisBlock* oskar_vis_block_create_from_header(int location,
+        const oskar_VisHeader* hdr, int* status)
 {
-    OSKAR_VIS_BLOCK_TAG_DIM_START_AND_SIZE    = 1,
-    OSKAR_VIS_BLOCK_TAG_AUTO_CORRELATIONS     = 2,
-    OSKAR_VIS_BLOCK_TAG_CROSS_CORRELATIONS    = 3,
-    OSKAR_VIS_BLOCK_TAG_BASELINE_UU           = 4,
-    OSKAR_VIS_BLOCK_TAG_BASELINE_VV           = 5,
-    OSKAR_VIS_BLOCK_TAG_BASELINE_WW           = 6
-};
+    oskar_VisBlock* vis = 0;
+    int amp_type = 0, num_times = 0, num_channels = 0, num_stations = 0;
+    int create_crosscorr = 0, create_autocorr = 0;
+
+    /* Get values from header. */
+    amp_type         = oskar_vis_header_amp_type(hdr);
+    num_times        = oskar_vis_header_max_times_per_block(hdr);
+    num_channels     = oskar_vis_header_max_channels_per_block(hdr);
+    num_stations     = oskar_vis_header_num_stations(hdr);
+    create_autocorr  = oskar_vis_header_write_auto_correlations(hdr);
+    create_crosscorr = oskar_vis_header_write_cross_correlations(hdr);
+
+    vis = oskar_vis_block_create(location, amp_type, num_times, num_channels,
+            num_stations, create_crosscorr, create_autocorr, status);
+
+    /* Return handle to structure. */
+    return vis;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#include <oskar_vis_block_accessors.h>
-#include <oskar_vis_block_add_system_noise.h>
-#include <oskar_vis_block_clear.h>
-#include <oskar_vis_block_copy.h>
-#include <oskar_vis_block_create.h>
-#include <oskar_vis_block_create_from_header.h>
-#include <oskar_vis_block_free.h>
-#include <oskar_vis_block_read.h>
-#include <oskar_vis_block_resize.h>
-#include <oskar_vis_block_write.h>
-
-#endif /* OSKAR_VIS_BLOCK_H_ */

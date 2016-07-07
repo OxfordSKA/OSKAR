@@ -165,7 +165,8 @@ int main(int argc, char** argv)
         oskar_Mem* station_work = oskar_mem_create(type, OSKAR_CPU, 0, &status);
 
         // Create a visibility block to read into.
-        oskar_VisBlock* blk = oskar_vis_block_create(OSKAR_CPU, hdr, &status);
+        oskar_VisBlock* blk = oskar_vis_block_create_from_header(OSKAR_CPU,
+                hdr, &status);
 
         // Loop over blocks.
         for (int b = 0; b < num_blocks; ++b)
