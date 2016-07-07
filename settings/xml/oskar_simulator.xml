@@ -6,6 +6,29 @@
         <type name="bool" default="true"/>
         <desc>Determines whether double precision arithmetic is used.</desc>
     </s>
+    <s k="use_gpus"><label>Use GPUs</label>
+        <type name="bool" default="true"/>
+        <desc>Use GPU devices if available.</desc>
+    </s>
+    <s k="cuda_device_ids"><label>CUDA device IDs to use</label>
+        <type name="IntListExt" default="all">all</type>
+        <depends k="simulator/use_gpus" v="true"/>
+        <desc>A comma-separated string containing device (GPU) IDs to use on
+            a multi-GPU system, or 'all' to use all devices.</desc>
+    </s>
+    <s k="num_devices"><label>Number of compute devices</label>
+        <type name="IntRangeExt" default="auto">1,MAX,auto</type>
+        <desc>Number of compute devices to use for the simulation.
+        A compute device is either a local CPU core, or a GPU. Don't set
+        this to more than the number of CPU cores in your system.</desc>
+    </s>
+    <s k="max_sources_per_chunk">
+        <label>Max. number of sources per chunk</label>
+        <type name="IntPositive" default="16384"/>
+        <desc>Maximum number of sources or pixels processed concurrently on a
+            single compute device. Reduce if simulations run out of GPU
+            memory.</desc>
+    </s>
     <s k="keep_log_file"><label>Keep log file</label>
         <type name="bool" default="false"/>
         <desc>Determines whether a log file of the run will remain on disk.
@@ -16,16 +39,5 @@
         <label>Write status messages to log file</label>
         <type name="bool" default="false"/>
         <desc>If set, write status (progress) messages to the log file.</desc>
-    </s>
-    <s k="max_sources_per_chunk">
-        <label>Max. number of sources per chunk</label>
-        <type name="IntPositive" default="16384"/>
-        <desc>Maximum number of sources or pixels processed concurrently on a
-            single GPU. Reduce if simulations run out of GPU memory.</desc>
-    </s>
-    <s k="cuda_device_ids"><label>CUDA device IDs to use</label>
-        <type name="IntListExt" default="all">all</type>
-        <desc>A comma-separated string containing device (GPU) IDs to use on
-            a multi-GPU system, or 'all' to use all devices.</desc>
     </s>
 </s>

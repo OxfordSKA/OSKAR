@@ -210,6 +210,17 @@ static PyObject* finalise(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* num_devices(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    return Py_BuildValue("i", oskar_simulator_num_devices(h));
+}
+
+
 static PyObject* num_gpus(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
@@ -259,13 +270,13 @@ static PyObject* run_block(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
     PyObject* capsule = 0;
-    int block_index = 0, gpu_id = 0, status = 0;
-    if (!PyArg_ParseTuple(args, "Oii", &capsule, &block_index, &gpu_id))
+    int block_index = 0, device_id = 0, status = 0;
+    if (!PyArg_ParseTuple(args, "Oii", &capsule, &block_index, &device_id))
         return 0;
     if (!(h = get_handle_simulator(capsule))) return 0;
 
     Py_BEGIN_ALLOW_THREADS
-    oskar_simulator_run_block(h, block_index, gpu_id, &status);
+    oskar_simulator_run_block(h, block_index, device_id, &status);
     Py_END_ALLOW_THREADS
 
     /* Check for errors. */
@@ -344,16 +355,26 @@ static PyObject* set_gpus(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "OO", &capsule, &array)) return 0;
     if (!(h = get_handle_simulator(capsule))) return 0;
 
-    /* Get the list of GPUs. */
-    flags = NPY_ARRAY_FORCECAST | NPY_ARRAY_IN_ARRAY;
-    gpus = (PyArrayObject*) PyArray_FROM_OTF(array, NPY_INT, flags);
-    if (!gpus) goto fail;
+    /* Check if array is None. */
+    if (array == Py_None)
+    {
+        /* Don't use GPUs. */
+        oskar_simulator_set_gpus(h, 0, 0, &status);
+    }
+    else
+    {
+        /* Get the list of GPUs. */
+        flags = NPY_ARRAY_FORCECAST | NPY_ARRAY_IN_ARRAY;
+        gpus = (PyArrayObject*) PyArray_FROM_OTF(array, NPY_INT, flags);
+        if (!gpus) goto fail;
 
-    /* Set the GPUs to use. */
-    num_gpus = (int) PyArray_SIZE(gpus);
-    if (num_gpus > 0 && ((int*) PyArray_DATA(gpus))[0] < 0)
-        num_gpus = -1;
-    oskar_simulator_set_gpus(h, num_gpus, (int*) PyArray_DATA(gpus), &status);
+        /* Set the GPUs to use. */
+        num_gpus = (int) PyArray_SIZE(gpus);
+        if (num_gpus > 0 && ((int*) PyArray_DATA(gpus))[0] < 0)
+            num_gpus = -1;
+        oskar_simulator_set_gpus(h, num_gpus, (int*) PyArray_DATA(gpus),
+                &status);
+    }
 
     /* Check for errors. */
     if (status)
@@ -393,6 +414,18 @@ static PyObject* set_max_times_per_block(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
     if (!(h = get_handle_simulator(capsule))) return 0;
     oskar_simulator_set_max_times_per_block(h, value);
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_num_devices(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int value = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_set_num_devices(h, value);
     return Py_BuildValue("");
 }
 
@@ -558,6 +591,7 @@ static PyMethodDef methods[] =
         {"finalise_block", (PyCFunction)finalise_block,
                 METH_VARARGS, "finalise_block(block_index)"},
         {"finalise", (PyCFunction)finalise, METH_VARARGS, "finalise()"},
+        {"num_devices", (PyCFunction)num_devices, METH_VARARGS, "num_devices()"},
         {"num_gpus", (PyCFunction)num_gpus, METH_VARARGS, "num_gpus()"},
         {"num_vis_blocks", (PyCFunction)num_vis_blocks,
                 METH_VARARGS, "num_vis_blocks()"},
@@ -578,6 +612,8 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "set_horizon_clip(value)"},
         {"set_max_times_per_block", (PyCFunction)set_max_times_per_block,
                 METH_VARARGS, "set_max_times_per_block(value)"},
+        {"set_num_devices", (PyCFunction)set_num_devices,
+                METH_VARARGS, "set_num_devices(value)"},
         {"set_observation_frequency", (PyCFunction)set_observation_frequency,
                 METH_VARARGS,
                 "set_observation_frequency(start_freq_hz, inc_hz, "

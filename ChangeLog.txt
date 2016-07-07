@@ -1,5 +1,12 @@
 2016-XX-YY  OSKAR-2.7.0
 
+    * Added option to specify whether to use GPUs for simulations.
+
+    * Added option to specify the number of compute devices for simulations
+      (CPU cores and/or or GPU cards).
+
+    * Added Python interface.
+
     * Re-wrote oskar_imager application to allow use of multiple GPUs
       when using a DFT. Visibility data are now loaded in blocks to reduce
       memory usage.
@@ -11,6 +18,9 @@
 
     * Added option to use W-projection to make images that are
       consistent with those from CASA.
+
+    * Added option to use natural, radial or uniform visibility weighting
+      when making images.
 
     * Fix to ensure pixel coordinates are consistent between
       the DFT and FFT algorithms.

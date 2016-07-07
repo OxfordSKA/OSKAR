@@ -54,10 +54,11 @@ void oskar_device_check_error(int* status)
 
 int oskar_device_count(int *status)
 {
-    int num = 0;
+    int num = 0, err = 0;
     if (*status) return 0;
 #ifdef OSKAR_HAVE_CUDA
-    *status = (int) cudaGetDeviceCount(&num);
+    err = (int) cudaGetDeviceCount(&num);
+    if (err) num = 0;
 #endif
     return num;
 }

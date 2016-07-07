@@ -84,6 +84,15 @@ class Simulator(object):
         _simulator_lib.finalise(self._capsule)
 
 
+    def num_devices(self):
+        """Returns the number of compute devices used.
+
+        Returns:
+            int: The number of compute devices used.
+        """
+        return _simulator_lib.num_devices(self._capsule)
+
+
     def num_gpus(self):
         """Returns the number of GPUs selected.
 
@@ -116,16 +125,13 @@ class Simulator(object):
         _simulator_lib.reset_work_unit_index(self._capsule)
 
 
-    def run_block(self, block_index, gpu_id=0):
+    def run_block(self, block_index, device_id=0):
         """Runs the simulator for one visibility block.
 
-        Multiple GPUs can be used to simulate each block.
-        For multi-GPU simulations, the method should be called multiple times
-        using different GPU IDs from different threads, but with the same
-        block index.
-
-        GPU IDs are zero-based. They correspond to the indices of the array
-        used in the call to set_gpus(), NOT directly to CUDA device IDs.
+        Multiple compute devices can be used to simulate each block.
+        For multi-device simulations, the method should be called multiple
+        times using different device IDs from different threads, but with
+        the same block index. Device IDs are zero-based.
 
         This method should be called only after setting all required options.
 
@@ -134,9 +140,9 @@ class Simulator(object):
 
         Args:
             block_index (int): The simulation block index.
-            gpu_id (Optional[int]): The GPU ID to use for this call.
+            device_id (Optional[int]): The device ID to use for this call.
         """
-        _simulator_lib.run_block(self._capsule, block_index, gpu_id)
+        _simulator_lib.run_block(self._capsule, block_index, device_id)
 
 
     def run(self):
@@ -153,8 +159,9 @@ class Simulator(object):
         """Sets the GPU device IDs to use.
 
         Args:
-            device_ids (int, array-like):
+            device_ids (int, array-like or None):
                 A list of the GPU IDs to use, or -1 to use all.
+                If None, then no GPUs will be used.
         """
         _simulator_lib.set_gpus(self._capsule, device_ids)
 
@@ -175,6 +182,21 @@ class Simulator(object):
             value (int): Number of time samples per block.
         """
         _simulator_lib.set_max_times_per_block(self._capsule, value)
+
+
+    def set_num_devices(self, value):
+        """Sets the number of compute devices to use.
+
+        A compute device may be either a local CPU core, or a GPU.
+        To use only a single CPU core for simulation, and no GPUs, call:
+
+        set_num_devices(1)
+        set_gpus(None)
+
+        Args:
+            value (int): Number of compute devices to use.
+        """
+        _simulator_lib.set_num_devices(self._capsule, value)
 
 
     def set_observation_frequency(self, start_frequency_hz, 

@@ -31,23 +31,23 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # 
 
-from threading import (Lock, Event)
+from threading import Condition
 
 # Python 3.2 has a built-in Barrier class.
 # We use this one instead for compatibility with Python 2.x.
 class Barrier:
     def __init__(self, num_threads):
         self.num_threads = num_threads
-        self.count = 0
-        self.lock = Lock()
-        self.event = Event()
+        self.num_remaining = num_threads
+        self.cond = Condition()
 
     def wait(self):
-        with self.lock:
-            self.count += 1
-            if self.count == self.num_threads:
-                self.count = 0
-                self.event.set()
-                self.event.clear()
-                return
-        self.event.wait(None)
+        self.cond.acquire()
+        self.num_remaining -= 1
+        if self.num_remaining > 0:
+            # Release lock and block this thread until notified.
+            self.cond.wait(None)
+        else:
+            self.num_remaining = self.num_threads
+            self.cond.notify_all()
+        self.cond.release()

@@ -37,6 +37,8 @@ if __name__ == '__main__':
         x=x, y=y)
     # Set phase centre after stations have been defined.
     tel.set_phase_centre(phase_centre_ra_deg, phase_centre_dec_deg)
+    tel.set_station_type('Gaussian')
+    tel.set_gaussian_station_beam_values(5.0, 100e6)
 
     # Set up the simulator.
     simulator = Simulator(precision)
@@ -46,18 +48,20 @@ if __name__ == '__main__':
     simulator.set_observation_frequency(start_freq_hz)
     simulator.set_observation_time(start_time_mjd_utc,
         length_sec, num_time_steps)
+    simulator.set_gpus(None)
+    simulator.set_num_devices(4)
     simulator.set_output_vis_file(vis_file)
-    simulator.set_output_measurement_set(vis_file+'.ms')
+    #simulator.set_output_measurement_set(vis_file+'.ms')
 
     # Set up the imager.
     imager = Imager(precision)
     imager.set_size(1024)
     imager.set_fov(2.0)
     imager.set_input_file(vis_file)
-    imager.set_output_root('oskar_uniform')
-    imager.set_algorithm('W-projection')
-    imager.set_weighting_type('Uniform')
-    imager.set_num_w_planes(256)
+    imager.set_output_root('sim_test')
+    #imager.set_algorithm('W-projection')
+    #imager.set_num_w_planes(256)
+    #imager.set_weighting_type('Uniform')
 
     # Run the simulator and imager in sequence.
     print('Running simulator...')

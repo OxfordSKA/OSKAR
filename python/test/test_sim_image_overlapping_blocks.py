@@ -11,9 +11,10 @@ import time
 def run_blocks(simulator, imager, barrier, thread_id):
     """Simulates and images visibility blocks concurrently.
 
-    Each thread executes this function. For N GPUs, there must be N+1 threads.
+    Each thread executes this function.
+    For N devices, there must be N+1 threads.
     Thread 0 is used for imaging on the host.
-    Threads 1 to N (mapped to GPUs) do the simulation.
+    Threads 1 to N (mapped to compute devices) do the simulation.
 
     Note that the imager is not launched on the first loop counter (as no
     data are ready yet), and no simulation is performed for the last loop
@@ -29,10 +30,10 @@ def run_blocks(simulator, imager, barrier, thread_id):
     # Loop over visibility blocks.
     num_blocks = simulator.num_vis_blocks()
     for block_id in range(num_blocks + 1):
-        # Run simulation in threads 1 to N on GPUs.
+        # Run simulation in threads 1 to N.
         if thread_id > 0 and block_id < num_blocks:
             logging.debug('Simulating block %d/%d', block_id + 1, num_blocks)
-            simulator.run_block(block_index=block_id, gpu_id=thread_id - 1)
+            simulator.run_block(block_index=block_id, device_id=thread_id - 1)
 
         # Run imager in thread 0 for the previous block.
         if thread_id == 0 and block_id > 0:
@@ -45,6 +46,7 @@ def run_blocks(simulator, imager, barrier, thread_id):
         barrier.wait()
         if thread_id == 0:
             simulator.reset_work_unit_index()
+            logging.debug('')
 
         # Barrier 2: Synchronise before moving to the next block.
         barrier.wait()
@@ -96,6 +98,8 @@ if __name__ == '__main__':
     simulator.set_observation_time(start_time_mjd_utc,
         length_sec, num_time_steps)
     simulator.set_max_times_per_block(5)
+    simulator.set_gpus(None)
+    simulator.set_num_devices(4)
     #simulator.set_output_measurement_set(vis_file+'.ms')
     #simulator.set_output_vis_file(vis_file)
     simulator.check_init()
@@ -108,15 +112,15 @@ if __name__ == '__main__':
     imager.set_vis_frequency(start_freq_hz)
     imager.set_vis_time(start_time_mjd_utc, inc_sec, num_time_steps)
     imager.set_output_root('sim_test_overlapping_blocks')
-    imager.set_algorithm('W-projection')
-    imager.set_num_w_planes(256)
+    #imager.set_algorithm('W-projection')
+    #imager.set_num_w_planes(256)
     print('Initialising imager...')
     start = time.time()
     imager.check_init()
     print('    Completed after %.3f seconds.' % (time.time() - start))
 
     # Set up worker threads to simulate and image each block concurrently.
-    num_threads = simulator.num_gpus() + 1
+    num_threads = simulator.num_devices() + 1
     barrier = Barrier(num_threads)
     threads = []
     for i in range(num_threads):
@@ -124,7 +128,7 @@ if __name__ == '__main__':
         threads.append(t)
 
     # Start all threads and wait for them to finish.
-    print('Looping over blocks using multiple threads...')
+    print('Looping over visibility blocks using multiple threads...')
     start = time.time()
     for t in threads: t.start()
     for t in threads: t.join()

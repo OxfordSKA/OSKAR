@@ -26,8 +26,9 @@ if __name__ == '__main__':
     y = 5000 * numpy.random.randn(num_stations)
 
     # Set up the sky model.
-    sky = Sky(precision)
-    sky.append_sources(phase_centre_ra_deg, phase_centre_dec_deg, 2.0)
+    sky = Sky.generate_grid(precision, 
+        phase_centre_ra_deg, phase_centre_dec_deg, 4, 1.5)
+    sky.append_sources(phase_centre_ra_deg, phase_centre_dec_deg, 1.0)
 
     # Set up the telescope model.
     tel = Telescope(precision)
@@ -38,6 +39,8 @@ if __name__ == '__main__':
         x=x, y=y)
     # Set phase centre after stations have been defined.
     tel.set_phase_centre(phase_centre_ra_deg, phase_centre_dec_deg)
+    tel.set_station_type('Gaussian')
+    tel.set_gaussian_station_beam_values(5.0, 100e6)
 
     # Set up the simulator.
     simulator = Simulator(precision)
@@ -48,6 +51,10 @@ if __name__ == '__main__':
     simulator.set_observation_time(start_time_mjd_utc,
         length_sec, num_time_steps)
     simulator.set_max_times_per_block(5)
+    simulator.set_gpus(None)
+    simulator.set_num_devices(4)
+    #simulator.set_output_measurement_set(vis_file+'.ms')
+    #simulator.set_output_vis_file(vis_file)
     simulator.check_init()
 
     # Set up the imager.
@@ -58,15 +65,15 @@ if __name__ == '__main__':
     imager.set_vis_frequency(start_freq_hz)
     imager.set_vis_time(start_time_mjd_utc, inc_sec, num_time_steps)
     imager.set_output_root('sim_test_blocks')
-    imager.set_algorithm('W-projection')
-    imager.set_num_w_planes(256)
+    #imager.set_algorithm('W-projection')
+    #imager.set_num_w_planes(256)
     print('Initialising imager...')
     start = time.time()
     imager.check_init()
     print('    Completed after %.3f seconds.' % (time.time() - start))
 
-    # Loop over all blocks.
-    print('Looping over blocks in sequence...')
+    # Loop over all visibility blocks.
+    print('Looping over visibility blocks in sequence...')
     start = time.time()
     num_blocks = simulator.num_vis_blocks()
     for block_id in range(num_blocks):

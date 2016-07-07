@@ -66,7 +66,7 @@
 extern "C" {
 #endif
 
-/* Memory allocated per GPU. */
+/* Memory allocated per compute device (may be either CPU or GPU). */
 struct DeviceData
 {
     /* Host memory. */
@@ -97,7 +97,7 @@ typedef struct DeviceData DeviceData;
 struct oskar_Simulator
 {
     /* Settings. */
-    int prec, *device_ids, num_gpus, num_channels, num_time_steps;
+    int prec, num_devices, num_gpus, *gpu_ids, num_channels, num_time_steps;
     int max_sources_per_chunk, max_times_per_block;
     int apply_horizon_clip, force_polarised_ms, zero_failed_gaussians;
     double freq_start_hz, freq_inc_hz, time_start_mjd_utc, time_inc_sec;
@@ -122,7 +122,7 @@ struct oskar_Simulator
     oskar_Timer* tmr_sim;   /* The total time for the simulation. */
     oskar_Timer* tmr_write; /* The time spent writing vis blocks. */
 
-    /* Array of DeviceData structures, one per GPU. */
+    /* Array of DeviceData structures, one per compute device. */
     DeviceData* d;
 };
 #ifndef OSKAR_SIMULATOR_TYPEDEF_
@@ -199,7 +199,7 @@ void oskar_simulator_check_init(oskar_Simulator* h, int* status)
                     num_failed);
     }
 
-    /* Set up each of the GPUs. */
+    /* Set up each of the compute devices. */
     set_up_device_data(h, status);
 }
 
@@ -217,6 +217,7 @@ oskar_Simulator* oskar_simulator_create(int precision, int* status)
     /* Set sensible defaults. */
     h->max_sources_per_chunk = 16384;
     oskar_simulator_set_gpus(h, -1, 0, status);
+    oskar_simulator_set_num_devices(h, -1);
     oskar_simulator_set_correlation_type(h, "Cross-correlations", status);
     oskar_simulator_set_horizon_clip(h, 1);
     oskar_simulator_set_source_flux_range(h, 0.0, DBL_MAX);
@@ -233,16 +234,15 @@ oskar_VisBlock* oskar_simulator_finalise_block(oskar_Simulator* h,
     oskar_VisBlock *b0 = 0, *b = 0;
     if (*status) return 0;
 
-    /* Can't safely do GPU operations in here because we don't want to block
-     * the default stream, so we copy the visibilities back at the end of
-     * the block simulation. */
+    /* The visibilities must be copied back
+     * at the end of the block simulation. */
 
     /* Combine all vis blocks into the first one. */
     i_active = (block_index + 1) % 2;
     b0 = h->d[0].vis_block_cpu[!i_active];
     xc0 = oskar_vis_block_cross_correlations(b0);
     ac0 = oskar_vis_block_auto_correlations(b0);
-    for (i = 1; i < h->num_gpus; ++i)
+    for (i = 1; i < h->num_devices; ++i)
     {
         b = h->d[i].vis_block_cpu[!i_active];
         if (oskar_vis_block_has_cross_correlations(b))
@@ -300,12 +300,18 @@ void oskar_simulator_free(oskar_Simulator* h, int* status)
     oskar_timer_free(h->tmr_write);
     oskar_mutex_free(h->mutex);
     free(h->sky_chunks);
-    free(h->device_ids);
+    free(h->gpu_ids);
     free(h->vis_name);
     free(h->ms_name);
     free(h->settings_path);
     free(h->d);
     free(h);
+}
+
+
+int oskar_simulator_num_devices(const oskar_Simulator* h)
+{
+    return h->num_devices;
 }
 
 
@@ -343,7 +349,7 @@ void oskar_simulator_reset_work_unit_index(oskar_Simulator* h)
 
 
 void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
-        int gpu_id, int* status)
+        int device_id, int* status)
 {
     double obs_start_mjd, dt_dump_days, gast, mjd;
     int i_active, time_index_start, time_index_end;
@@ -361,17 +367,19 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
         return;
     }
 
+    /* Disable any nested parallelism. */
+#ifdef _OPENMP
+    omp_set_num_threads(1);
+    omp_set_nested(0);
+#endif
+
     /* Set the GPU to use. This is supposed to be a very low-overhead call. */
-    if (gpu_id < 0 || gpu_id >= h->num_gpus)
-    {
-        *status = OSKAR_ERR_CUDA_DEVICES;
-        return;
-    }
-    oskar_device_set(h->device_ids[gpu_id], status);
+    if (device_id >= 0 && device_id < h->num_gpus)
+        oskar_device_set(h->gpu_ids[device_id], status);
 
     /* Clear the visibility block. */
     i_active = block_index % 2; /* Index of the active buffer. */
-    d = &(h->d[gpu_id]);
+    d = &(h->d[device_id]);
     oskar_timer_resume(d->tmr_compute);
     oskar_vis_block_clear(d->vis_block, status);
 
@@ -408,7 +416,7 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
         i_chunk = i_chunk_time / num_times_block;
         i_time  = i_chunk_time - i_chunk * num_times_block;
 
-        /* Copy sky chunk to GPU only if different from the previous one. */
+        /* Copy sky chunk to device only if different from the previous one. */
         if (i_chunk != d->previous_chunk_index)
         {
             d->previous_chunk_index = i_chunk;
@@ -436,12 +444,16 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
         {
             if (*status) break;
             if (h->log)
+            {
+                oskar_mutex_lock(h->mutex);
                 oskar_log_message(h->log, 'S', 1, "Time %*i/%i, "
-                        "Chunk %*i/%i, Channel %*i/%i [GPU %i, %i sources]",
+                        "Chunk %*i/%i, Channel %*i/%i [Device %i, %i sources]",
                         disp_width(total_times), sim_time_idx + 1, total_times,
                         disp_width(total_chunks), i_chunk + 1, total_chunks,
                         disp_width(num_channels), i_channel + 1, num_channels,
-                        gpu_id, oskar_sky_num_sources(sky));
+                        device_id, oskar_sky_num_sources(sky));
+                oskar_mutex_unlock(h->mutex);
+            }
             sim_baselines(h, d, sky, i_channel, i_time, sim_time_idx, status);
         }
     }
@@ -478,7 +490,7 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
     {
         oskar_log_section(h->log, 'M', "Initial memory usage");
         for (i = 0; i < h->num_gpus; ++i)
-            oskar_cuda_mem_log(h->log, 0, h->device_ids[i]);
+            oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
         system_mem_log(h->log);
         oskar_log_section(h->log, 'M', "Starting simulation...");
     }
@@ -495,7 +507,7 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
      * output.
      *
      * Thread 0 is used for file writes.
-     * Threads 1 to n (mapped to GPUs) do the simulation.
+     * Threads 1 to n (mapped to compute devices) do the simulation.
      *
      * Note that no write is launched on the first loop counter (as no
      * data are ready yet) and no simulation is performed for the last loop
@@ -503,8 +515,9 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
      * simply writes the last block.
      */
 #ifdef _OPENMP
-    num_threads = h->num_gpus + 1;
+    num_threads = h->num_devices + 1;
     omp_set_num_threads(num_threads);
+    omp_set_nested(0);
 #else
     oskar_log_warning(h->log, "OpenMP not found: Using one compute device.");
 #endif
@@ -512,19 +525,19 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
     oskar_simulator_reset_work_unit_index(h);
 #pragma omp parallel
     {
-        int b, thread_id = 0, gpu_id = 0;
+        int b, thread_id = 0, device_id = 0;
 
-        /* Get host thread ID and GPU ID. */
+        /* Get host thread ID and device ID. */
 #ifdef _OPENMP
         thread_id = omp_get_thread_num();
-        gpu_id = thread_id - 1;
+        device_id = thread_id - 1;
 #endif
 
         /* Loop over simulation time blocks (+1, for the last write). */
         for (b = 0; b < num_vis_blocks + 1; ++b)
         {
             if ((thread_id > 0 || num_threads == 1) && b < num_vis_blocks)
-                oskar_simulator_run_block(h, b, gpu_id, status);
+                oskar_simulator_run_block(h, b, device_id, status);
             if (thread_id == 0 && b > 0)
             {
                 oskar_VisBlock* block;
@@ -556,7 +569,7 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
     {
         oskar_log_section(h->log, 'M', "Final memory usage");
         for (i = 0; i < h->num_gpus; ++i)
-            oskar_cuda_mem_log(h->log, 0, h->device_ids[i]);
+            oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
         system_mem_log(h->log);
     }
 
@@ -650,31 +663,32 @@ void oskar_simulator_set_gpus(oskar_Simulator* h, int num,
     if (num < 0)
     {
         h->num_gpus = num_gpus_avail;
-        h->device_ids = (int*) realloc(h->device_ids,
-                h->num_gpus * sizeof(int));
+        h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
-            h->device_ids[i] = i;
+            h->gpu_ids[i] = i;
     }
     else if (num > 0)
     {
         if (num > num_gpus_avail)
         {
-            oskar_log_error(h->log, "More CUDA devices were requested than found.");
+            oskar_log_error(h->log, "More GPUs were requested than found.");
             *status = OSKAR_ERR_CUDA_DEVICES;
             return;
         }
         h->num_gpus = num;
-        h->device_ids = (int*) realloc(h->device_ids,
-                h->num_gpus * sizeof(int));
+        h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
-            h->device_ids[i] = ids[i];
+            h->gpu_ids[i] = ids[i];
     }
-    else return;
-    h->d = (DeviceData*) realloc(h->d, h->num_gpus * sizeof(DeviceData));
-    memset(h->d, 0, h->num_gpus * sizeof(DeviceData));
+    else /* num == 0 */
+    {
+        free(h->gpu_ids);
+        h->gpu_ids = 0;
+        h->num_gpus = 0;
+    }
     for (i = 0; i < h->num_gpus; ++i)
     {
-        oskar_device_set(h->device_ids[i], status);
+        oskar_device_set(h->gpu_ids[i], status);
         if (*status) return;
     }
 }
@@ -695,6 +709,21 @@ void oskar_simulator_set_log(oskar_Simulator* h, oskar_Log* log)
 void oskar_simulator_set_max_times_per_block(oskar_Simulator* h, int value)
 {
     h->max_times_per_block = value;
+}
+
+
+void oskar_simulator_set_num_devices(oskar_Simulator* h, int value)
+{
+    int status = 0;
+    free_device_data(h, &status);
+#ifdef _OPENMP
+    if (value < 1)
+        value = (h->num_gpus == 0) ? (omp_get_num_procs() - 1) : h->num_gpus;
+#endif
+    if (value < 1) value = 1;
+    h->num_devices = value;
+    h->d = (DeviceData*) realloc(h->d, h->num_devices * sizeof(DeviceData));
+    memset(h->d, 0, h->num_devices * sizeof(DeviceData));
 }
 
 
@@ -1039,17 +1068,29 @@ static void set_up_device_data(oskar_Simulator* h, int* status)
     /* Get local variables. */
     num_stations = oskar_telescope_num_stations(h->tel);
     num_src      = h->max_sources_per_chunk;
-    dev_loc      = OSKAR_GPU;
     complx       = (h->prec) | OSKAR_COMPLEX;
     vistype      = complx;
     if (oskar_telescope_pol_mode(h->tel) == OSKAR_POL_MODE_FULL)
         vistype |= OSKAR_MATRIX;
 
-    for (i = 0; i < h->num_gpus; ++i)
+    /* Expand the number of devices to the number of selected GPUs,
+     * if required. */
+    if (h->num_devices < h->num_gpus)
+        oskar_simulator_set_num_devices(h, h->num_gpus);
+
+    for (i = 0; i < h->num_devices; ++i)
     {
         /* Select the device. */
         DeviceData* d = &h->d[i];
-        oskar_device_set(h->device_ids[i], status);
+        if (i < h->num_gpus)
+        {
+            oskar_device_set(h->gpu_ids[i], status);
+            dev_loc = OSKAR_GPU;
+        }
+        else
+        {
+            dev_loc = OSKAR_CPU;
+        }
 
         /* Host memory. */
         d->vis_block_cpu[0] = oskar_vis_block_create(OSKAR_CPU, h->header,
@@ -1090,7 +1131,8 @@ static void set_up_device_data(oskar_Simulator* h, int* status)
         d->tmr_K         = oskar_timer_create(OSKAR_TIMER_NATIVE);
         d->tmr_join      = oskar_timer_create(OSKAR_TIMER_NATIVE);
         d->tmr_correlate = oskar_timer_create(OSKAR_TIMER_NATIVE);
-        oskar_device_synchronize();
+        if (i < h->num_gpus)
+            oskar_device_synchronize();
     }
 }
 
@@ -1099,11 +1141,12 @@ static void free_device_data(oskar_Simulator* h, int* status)
 {
     int i;
     if (!h->d) return;
-    for (i = 0; i < h->num_gpus; ++i)
+    for (i = 0; i < h->num_devices; ++i)
     {
         DeviceData* d = &(h->d[i]);
         if (!d) continue;
-        oskar_device_set(h->device_ids[i], status);
+        if (i < h->num_gpus)
+            oskar_device_set(h->gpu_ids[i], status);
         oskar_vis_block_free(d->vis_block_cpu[0], status);
         oskar_vis_block_free(d->vis_block_cpu[1], status);
         oskar_vis_block_free(d->vis_block, status);
@@ -1126,7 +1169,8 @@ static void free_device_data(oskar_Simulator* h, int* status)
         oskar_timer_free(d->tmr_join);
         oskar_timer_free(d->tmr_correlate);
         memset(d, 0, sizeof(DeviceData));
-        oskar_device_reset();
+        if (i < h->num_gpus)
+            oskar_device_reset();
     }
 }
 
@@ -1134,14 +1178,13 @@ static void free_device_data(oskar_Simulator* h, int* status)
 static void record_timing(oskar_Simulator* h)
 {
     /* Obtain component times. */
-    int i, status = 0;
+    int i;
     double t_copy = 0., t_clip = 0., t_E = 0., t_K = 0., t_join = 0.;
     double t_correlate = 0., t_compute = 0., t_components = 0.;
     double *compute_times;
-    compute_times = (double*) calloc(h->num_gpus, sizeof(double));
-    for (i = 0; i < h->num_gpus; ++i)
+    compute_times = (double*) calloc(h->num_devices, sizeof(double));
+    for (i = 0; i < h->num_devices; ++i)
     {
-        oskar_device_set(h->device_ids[i], &status);
         compute_times[i] = oskar_timer_elapsed(h->d[i].tmr_compute);
         t_copy += oskar_timer_elapsed(h->d[i].tmr_copy);
         t_clip += oskar_timer_elapsed(h->d[i].tmr_clip);
@@ -1157,8 +1200,8 @@ static void record_timing(oskar_Simulator* h)
     oskar_log_section(h->log, 'M', "Simulation timing");
     oskar_log_value(h->log, 'M', 0, "Total wall time", "%.3f s",
             oskar_timer_elapsed(h->tmr_sim));
-    for (i = 0; i < h->num_gpus; ++i)
-        oskar_log_value(h->log, 'M', 0, "Compute", "%.3f s [GPU %i]",
+    for (i = 0; i < h->num_devices; ++i)
+        oskar_log_value(h->log, 'M', 0, "Compute", "%.3f s [Device %i]",
                 compute_times[i], i);
     oskar_log_value(h->log, 'M', 0, "Write", "%.3f s",
             oskar_timer_elapsed(h->tmr_write));
