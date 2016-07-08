@@ -37,7 +37,7 @@ if __name__ == '__main__':
     tel.set_pol_mode('Scalar')
     tel.set_station_coords_enu(longitude_deg=0, latitude_deg=60, altitude_m=0, 
         x=x, y=y)
-    # Set phase centre after stations have been defined.
+    # Set station properties after stations have been defined.
     tel.set_phase_centre(phase_centre_ra_deg, phase_centre_dec_deg)
     tel.set_station_type('Gaussian')
     tel.set_gaussian_station_beam_values(5.0, 100e6)
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     # Set up the imager.
     imager = Imager(precision)
-    imager.set_size(1024)
+    imager.set_size(2048)
     imager.set_fov(2.0)
     imager.set_input_file(output_root+'.vis')
     imager.set_output_root(output_root)

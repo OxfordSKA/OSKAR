@@ -418,7 +418,7 @@ class Imager(object):
 
     @staticmethod
     def make_image(uu, vv, ww, amps, fov_deg, size,
-            weighting='Natural', algorithm='FFT', weight=None):
+            weighting='Natural', algorithm='FFT', weight=None, wprojplanes=-1):
         """Makes an image from visibility data.
 
         Args:
@@ -438,6 +438,10 @@ class Imager(object):
                 Algorithm type: 'FFT', 'DFT 2D', 'DFT 3D' or 'W-projection'.
             weight (Optional[float, array-like, shape (n,)]):
                 Visibility weights.
+            wprojplanes (Optional[int]):
+                Number of W-projection planes to use, if using W-projection.
+                If < 0, this will be determined automatically.
+                It will not be less than 16.
 
         Returns:
             array: Image as a 2D numpy array. Data are ordered as in FITS image.
@@ -446,7 +450,7 @@ class Imager(object):
             raise RuntimeError("Image size must be even.")
             return
         return _imager_lib.make_image(uu, vv, ww, amps, fov_deg, size,
-            weighting, algorithm, weight)
+            weighting, algorithm, weight, wprojplanes)
 
 
     @staticmethod

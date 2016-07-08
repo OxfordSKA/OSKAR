@@ -96,8 +96,8 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         else
             max_uvw = 0.25 / fabs(h->cellsize_rad);
     }
-    if (h->num_w_planes < 2)
-        h->num_w_planes = 2;
+    if (h->num_w_planes < 16)
+        h->num_w_planes = 16;
 
     /* Calculate convolution kernel size. */
     h->w_scale = pow(h->num_w_planes - 1, 2.0) / max_uvw;
