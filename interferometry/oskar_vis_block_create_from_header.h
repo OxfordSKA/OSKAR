@@ -26,14 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PRIVATE_VIS_BLOCK_H_
-#define OSKAR_PRIVATE_VIS_BLOCK_H_
+#ifndef OSKAR_VIS_BLOCK_CREATE_FROM_HEADER_H_
+#define OSKAR_VIS_BLOCK_CREATE_FROM_HEADER_H_
 
-#include <oskar_mem.h>
+/**
+ * @file oskar_vis_block_create_from_header.h
+ */
 
-/*
- * This structure holds visibility data for all baselines, and a set of times
- * and channels.
+#include <oskar_global.h>
+#include <oskar_vis_header.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Creates a new visibility block data structure.
+ *
+ * @details
+ * This function creates a new visibility block data structure and returns a
+ * handle to it. The structure holds visibility data for all baselines, and
+ * a set of times and channels.
+ *
+ * Allowed values of the \p location parameter are
+ * - OSKAR_CPU
+ * - OSKAR_GPU
  *
  * The dimension order is fixed. The polarisation dimension is implicit in the
  * data type (matrix or scalar) and is therefore the fastest varying.
@@ -51,40 +69,25 @@
  *
  * The number of polarisations is determined by the choice of matrix or
  * scalar amplitude types. Matrix amplitude types represent 4 polarisation
- * dimensions, whereas scalar types represent Stokes-I only.
+ * dimensions, whereas scalar types represent one polarisation.
+ * The polarisation type (linear or Stokes) is enumerated in the visibility
+ * header.
+ *
+ * The structure must be deallocated using oskar_vis_block_free() when it is
+ * no longer required.
+ *
+ * @param[in] location         Memory location (OSKAR_CPU or OSKAR_GPU).
+ * @param[in] hdr              Pointer to populated visibility header data.
+ * @param[in,out]  status      Status return code.
+ *
+ * @return A handle to the new data structure.
  */
-struct oskar_VisBlock
-{
-    /* Global start time index, start channel index,
-     * and maximum dimension sizes: time, channel, baseline, station. */
-    int dim_start_size[6];
-    int has_cross_correlations;
-    int has_auto_correlations;
+OSKAR_EXPORT
+oskar_VisBlock* oskar_vis_block_create_from_header(int location,
+        const oskar_VisHeader* hdr, int* status);
 
-    /* Cross-correlation amplitude array has size:
-     *     num_baselines * num_times * num_channels.
-     * Autocorrelation amplitude array has size:
-     *     num_stations * num_times * num_channels.
-     * Polarisation dimension is implicit, and therefore fastest varying. */
-    /* [complex / complex matrix] */
-    oskar_Mem* cross_correlations; /* Cross-correlation visibility amplitudes. */
-    oskar_Mem* auto_correlations;  /* Autocorrelation visibility amplitudes. */
+#ifdef __cplusplus
+}
+#endif
 
-    /* Coordinate arrays have sizes num_baselines * num_times. */
-    /* [real] */
-    oskar_Mem* baseline_uu_metres; /* Baseline coordinates, in metres. */
-    oskar_Mem* baseline_vv_metres; /* Baseline coordinates, in metres. */
-    oskar_Mem* baseline_ww_metres; /* Baseline coordinates, in metres. */
-
-    /* These arrays hold antenna/station indices for each baseline, and are
-     * only used when writing data to a Measurement Set. They are
-     * initialised in host memory on creation, and are not saved otherwise. */
-    oskar_Mem *a1, *a2;
-};
-
-#ifndef OSKAR_VIS_BLOCK_TYPEDEF_
-#define OSKAR_VIS_BLOCK_TYPEDEF_
-typedef struct oskar_VisBlock oskar_VisBlock;
-#endif /* OSKAR_VIS_BLOCK_TYPEDEF_ */
-
-#endif /* OSKAR_PRIVATE_VIS_BLOCK_H_ */
+#endif /* OSKAR_VIS_BLOCK_CREATE_FROM_HEADER_H_ */

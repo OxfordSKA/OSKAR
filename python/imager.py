@@ -319,13 +319,13 @@ class Imager(object):
         _imager_lib.set_vis_time(self._capsule, ref_mjd_utc, inc_sec, num_times)
 
 
-    def set_weighting_type(self, weighting_type):
+    def set_weighting(self, weighting):
         """Sets the type of visibility weighting to use.
 
         Args:
-            weighting_type (str): Either 'Natural', 'Radial' or 'Uniform'.
+            weighting (str): Either 'Natural', 'Radial' or 'Uniform'.
         """
-        _imager_lib.set_weighting_type(self._capsule, weighting_type)
+        _imager_lib.set_weighting(self._capsule, weighting)
 
 
     def update(self, num_baselines, uu, vv, ww, amps, weight, num_pols=1,
@@ -418,7 +418,7 @@ class Imager(object):
 
     @staticmethod
     def make_image(uu, vv, ww, amps, fov_deg, size,
-            weighting='Natural', algorithm='FFT', weight=None):
+            weighting='Natural', algorithm='FFT', weight=None, wprojplanes=-1):
         """Makes an image from visibility data.
 
         Args:
@@ -438,6 +438,10 @@ class Imager(object):
                 Algorithm type: 'FFT', 'DFT 2D', 'DFT 3D' or 'W-projection'.
             weight (Optional[float, array-like, shape (n,)]):
                 Visibility weights.
+            wprojplanes (Optional[int]):
+                Number of W-projection planes to use, if using W-projection.
+                If < 0, this will be determined automatically.
+                It will not be less than 16.
 
         Returns:
             array: Image as a 2D numpy array. Data are ordered as in FITS image.
@@ -446,7 +450,7 @@ class Imager(object):
             raise RuntimeError("Image size must be even.")
             return
         return _imager_lib.make_image(uu, vv, ww, amps, fov_deg, size,
-            weighting, algorithm, weight)
+            weighting, algorithm, weight, wprojplanes)
 
 
     @staticmethod

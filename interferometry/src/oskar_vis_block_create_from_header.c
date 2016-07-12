@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,55 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_log.h>
-#include <oskar_log.h>
-
-#include <stdio.h>
-#include <stdlib.h>
+#include <private_vis_block.h>
+#include <oskar_vis_block.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-char* oskar_log_file_data(oskar_Log* log, size_t* size)
+oskar_VisBlock* oskar_vis_block_create_from_header(int location,
+        const oskar_VisHeader* hdr, int* status)
 {
-    char* data = 0;
-    if (!size || !log) return 0;
+    oskar_VisBlock* vis = 0;
+    int amp_type = 0, num_times = 0, num_channels = 0, num_stations = 0;
+    int create_crosscorr = 0, create_autocorr = 0;
 
-    /* If log exists, then read the whole file. */
-    if (log->file)
-    {
-        FILE* temp_handle = 0;
+    /* Get values from header. */
+    amp_type         = oskar_vis_header_amp_type(hdr);
+    num_times        = oskar_vis_header_max_times_per_block(hdr);
+    num_channels     = oskar_vis_header_max_channels_per_block(hdr);
+    num_stations     = oskar_vis_header_num_stations(hdr);
+    create_autocorr  = oskar_vis_header_write_auto_correlations(hdr);
+    create_crosscorr = oskar_vis_header_write_cross_correlations(hdr);
 
-        /* Determine the current size of the file. */
-        fflush(log->file);
-        temp_handle = fopen(log->name, "rb");
-        if (temp_handle)
-        {
-            fseek(temp_handle, 0, SEEK_END);
-            *size = ftell(temp_handle);
+    vis = oskar_vis_block_create(location, amp_type, num_times, num_channels,
+            num_stations, create_crosscorr, create_autocorr, status);
 
-            /* Read the file into memory. */
-            if (*size != 0)
-            {
-                size_t bytes_read = 0;
-                data = (char*) malloc(*size * sizeof(char));
-                if (data != 0)
-                {
-                    rewind(temp_handle);
-                    bytes_read = fread(data, 1, *size, temp_handle);
-                    if (bytes_read != *size)
-                    {
-                        free(data);
-                        data = 0;
-                    }
-                }
-            }
-            fclose(temp_handle);
-        }
-    }
-
-    return data;
+    /* Return handle to structure. */
+    return vis;
 }
 
 #ifdef __cplusplus

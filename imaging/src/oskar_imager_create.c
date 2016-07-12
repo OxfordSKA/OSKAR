@@ -71,7 +71,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     oskar_imager_set_channel_range(h, 0, -1, 1); /* Channel snapshots. */
     oskar_imager_set_image_type(h, "I", status);
     oskar_imager_set_algorithm(h, "FFT", status);
-    oskar_imager_set_weighting_type(h, "Natural", status);
+    oskar_imager_set_weighting(h, "Natural", status);
     oskar_imager_set_ms_column(h, "DATA", status);
     oskar_imager_set_default_direction(h);
     return h;

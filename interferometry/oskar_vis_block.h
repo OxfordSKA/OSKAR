@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,8 +66,10 @@ enum OSKAR_VIS_BLOCK_TAGS
 #include <oskar_vis_block_clear.h>
 #include <oskar_vis_block_copy.h>
 #include <oskar_vis_block_create.h>
+#include <oskar_vis_block_create_from_header.h>
 #include <oskar_vis_block_free.h>
 #include <oskar_vis_block_read.h>
+#include <oskar_vis_block_resize.h>
 #include <oskar_vis_block_write.h>
 
 #endif /* OSKAR_VIS_BLOCK_H_ */

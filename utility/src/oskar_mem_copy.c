@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ void oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src, int* status)
     }
 
     /* Check the data dimensions, and resize if required. */
-    if (oskar_mem_length(src) > oskar_mem_length(dst))
+    if (oskar_mem_length(src) != oskar_mem_length(dst))
         oskar_mem_realloc(dst, oskar_mem_length(src), status);
 
     /* Copy the memory. */

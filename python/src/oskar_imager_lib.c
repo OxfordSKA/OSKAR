@@ -527,7 +527,7 @@ static PyObject* set_vis_time(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* set_weighting_type(PyObject* self, PyObject* args)
+static PyObject* set_weighting(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
@@ -535,7 +535,7 @@ static PyObject* set_weighting_type(PyObject* self, PyObject* args)
     const char* type = 0;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &type)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_weighting_type(h, type, &status);
+    oskar_imager_set_weighting(h, type, &status);
 
     /* Check for errors. */
     if (status)
@@ -811,7 +811,7 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     PyObject *obj[] = {0, 0, 0, 0, 0};
     PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0, *im = 0;
     int i, num_cells, num_pixels, num_vis, size = 0, status = 0, type = 0;
-    int dft = 0, wproj = 0, uniform = 0;
+    int dft = 0, wproj = 0, uniform = 0, wprojplanes = -1;
     double fov_deg = 0.0, norm = 0.0;
     const char *weighting_type = 0, *algorithm_type = 0;
     oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *weight_c, *plane;
@@ -819,9 +819,9 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     npy_intp dims[2];
 
     /* Parse inputs. */
-    if (!PyArg_ParseTuple(args, "OOOOdissO",
+    if (!PyArg_ParseTuple(args, "OOOOdissOi",
             &obj[0], &obj[1], &obj[2], &obj[3], &fov_deg, &size,
-            &weighting_type, &algorithm_type, &obj[4]))
+            &weighting_type, &algorithm_type, &obj[4], &wprojplanes))
         return 0;
 
     /* Make sure input objects are arrays. Convert if required. */
@@ -896,7 +896,8 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     oskar_imager_set_fov(h, fov_deg);
     oskar_imager_set_size(h, size);
     oskar_imager_set_algorithm(h, algorithm_type, &status);
-    oskar_imager_set_weighting_type(h, weighting_type, &status);
+    oskar_imager_set_num_w_planes(h, wprojplanes);
+    oskar_imager_set_weighting(h, weighting_type, &status);
 
     /* Check for DFT, W-projection or uniform weighting. */
     if (!strncmp(algorithm_type, "DFT", 3) ||
@@ -1034,8 +1035,8 @@ static PyMethodDef methods[] =
                 "set_vis_phase_centre(ra_deg, dec_deg)"},
         {"set_vis_time", (PyCFunction)set_vis_time, METH_VARARGS,
                 "set_vis_time(ref_mjd_utc, inc_sec, num_times)"},
-        {"set_weighting_type", (PyCFunction)set_weighting_type, METH_VARARGS,
-                "set_weighting_type(type)"},
+        {"set_weighting", (PyCFunction)set_weighting, METH_VARARGS,
+                "set_weighting(type)"},
         {"update", (PyCFunction)update, METH_VARARGS,
                 "update(num_baselines, uu, vv, ww, amps, weight, "
                 "num_pols, start_time, end_time, start_chan, end_chan)"},

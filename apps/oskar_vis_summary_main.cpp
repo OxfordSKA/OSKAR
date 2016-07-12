@@ -152,7 +152,7 @@ int main(int argc, char **argv)
             xc_m2.y = 0.0;
 
             // Create a visibility block to read into.
-            oskar_VisBlock* blk = oskar_vis_block_create(OSKAR_CPU,
+            oskar_VisBlock* blk = oskar_vis_block_create_from_header(OSKAR_CPU,
                     hdr, &status);
 
             // Loop over blocks.

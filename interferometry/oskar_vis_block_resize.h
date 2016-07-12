@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,52 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PRIVATE_TIMER_H_
-#define OSKAR_PRIVATE_TIMER_H_
+#ifndef OSKAR_VIS_BLOCK_RESIZE_H_
+#define OSKAR_VIS_BLOCK_RESIZE_H_
 
 /**
- * @file private_timer.h
+ * @file oskar_vis_block_resize.h
  */
 
 #include <oskar_global.h>
 
-#ifdef OSKAR_HAVE_CUDA
-#include <cuda_runtime_api.h>
-#endif
-
-#ifdef _OPENMP
-#include <omp.h>
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /**
- * @struct oskar_Timer
- *
- * @brief Structure to hold data for a timer.
+ * @brief
+ * Resizes the specified visibility block.
  *
  * @details
- * The structure holds data for a single timer.
+ * Resizes the specified visibility block.
+ *
+ * @param[in,out] vis          The visibility block to resize.
+ * @param[in]     num_times    The new number of times.
+ * @param[in]     num_channels The new number of channels.
+ * @param[in]     num_stations The new number of stations.
+ * @param[in,out] status       Status return code.
  */
-struct oskar_Timer
-{
-    int type;
-    int paused;
-    double elapsed;
-    double start;
-#ifdef OSKAR_HAVE_CUDA
-    cudaEvent_t start_cuda;
-    cudaEvent_t end_cuda;
-#endif
-#ifdef OSKAR_OS_WIN
-    double freq;
-#endif
-#ifdef _OPENMP
-    omp_lock_t mutex;
-#endif
-};
+OSKAR_EXPORT
+void oskar_vis_block_resize(oskar_VisBlock* vis, int num_times,
+        int num_channels, int num_stations, int* status);
 
-#ifndef OSKAR_TIMER_TYPEDEF_
-#define OSKAR_TIMER_TYPEDEF_
-typedef struct oskar_Timer oskar_Timer;
-#endif /* OSKAR_TIMER_TYPEDEF_ */
+#ifdef __cplusplus
+}
+#endif
 
-#endif /* OSKAR_PRIVATE_TIMER_H_ */
+#endif /* OSKAR_VIS_BLOCK_RESIZE_H_ */

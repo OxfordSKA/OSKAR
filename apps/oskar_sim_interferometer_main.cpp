@@ -98,12 +98,23 @@ int main(int argc, char** argv)
     oskar_Simulator* h = oskar_simulator_create(prec, &e);
     oskar_simulator_set_log(h, log);
     oskar_simulator_set_settings_path(h, settings_file);
-    if (!s.starts_with("cuda_device_ids", "all", &e))
+    if (!s.to_int("use_gpus", &e))
+        oskar_simulator_set_gpus(h, 0, 0, &e);
+    else
     {
-        vector<int> ids = s.to_int_list("cuda_device_ids", &e);
-        if (ids.size() > 0)
-            oskar_simulator_set_gpus(h, ids.size(), &ids[0], &e);
+        if (s.starts_with("cuda_device_ids", "all", &e))
+            oskar_simulator_set_gpus(h, -1, 0, &e);
+        else
+        {
+            vector<int> ids = s.to_int_list("cuda_device_ids", &e);
+            if (ids.size() > 0)
+                oskar_simulator_set_gpus(h, ids.size(), &ids[0], &e);
+        }
     }
+    if (s.starts_with("num_devices", "auto", &e))
+        oskar_simulator_set_num_devices(h, -1);
+    else
+        oskar_simulator_set_num_devices(h, s.to_int("num_devices", &e));
     oskar_log_set_keep_file(log, s.to_int("keep_log_file", &e));
     oskar_log_set_file_priority(log, s.to_int("write_status_to_log_file", &e) ?
             OSKAR_LOG_STATUS : OSKAR_LOG_MESSAGE);

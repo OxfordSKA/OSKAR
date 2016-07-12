@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,11 +49,6 @@ oskar_Log* oskar_log_create(int file_priority, int term_priority)
     /* Allocate the structure. */
     log = (oskar_Log*) malloc(sizeof(oskar_Log));
     if (!log) return 0;
-
-    /* Initialise mutex lock. */
-#ifdef _OPENMP
-    omp_init_lock(&log->mutex);
-#endif
 
     /* Initialise memory for the log data. */
     log->keep_file = 1;

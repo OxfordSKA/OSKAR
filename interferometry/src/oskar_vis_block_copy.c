@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,15 +46,13 @@ void oskar_vis_block_copy(oskar_VisBlock* dst, const oskar_VisBlock* src,
     dst->dim_start_size[3] = src->dim_start_size[3];
     dst->dim_start_size[4] = src->dim_start_size[4];
     dst->dim_start_size[5] = src->dim_start_size[5];
+    dst->has_auto_correlations = src->has_auto_correlations;
+    dst->has_cross_correlations = src->has_cross_correlations;
 
     /* Copy the memory. */
     oskar_mem_copy(dst->baseline_uu_metres, src->baseline_uu_metres, status);
     oskar_mem_copy(dst->baseline_vv_metres, src->baseline_vv_metres, status);
     oskar_mem_copy(dst->baseline_ww_metres, src->baseline_ww_metres, status);
-    /*oskar_mem_copy(dst->baseline_num_channel_averages,
-            src->baseline_num_channel_averages, status);*/
-    /*oskar_mem_copy(dst->baseline_num_time_averages,
-            src->baseline_num_time_averages, status);*/
     oskar_mem_copy(dst->auto_correlations, src->auto_correlations, status);
     oskar_mem_copy(dst->cross_correlations, src->cross_correlations, status);
     oskar_mem_copy(dst->a1, src->a1, status);

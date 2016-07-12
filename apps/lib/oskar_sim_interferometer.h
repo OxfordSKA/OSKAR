@@ -66,6 +66,9 @@ OSKAR_APPS_EXPORT
 void oskar_simulator_free(oskar_Simulator* h, int* status);
 
 OSKAR_APPS_EXPORT
+int oskar_simulator_num_devices(const oskar_Simulator* h);
+
+OSKAR_APPS_EXPORT
 int oskar_simulator_num_gpus(const oskar_Simulator* h);
 
 OSKAR_APPS_EXPORT
@@ -83,6 +86,10 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_run(oskar_Simulator* h, int* status);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_set_coords_only(oskar_Simulator* h, int value,
+        int* status);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_correlation_type(oskar_Simulator* h,
@@ -103,6 +110,9 @@ void oskar_simulator_set_log(oskar_Simulator* h, oskar_Log* log);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_max_times_per_block(oskar_Simulator* h, int value);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_set_num_devices(oskar_Simulator* h, int value);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_observation_frequency(oskar_Simulator* h,

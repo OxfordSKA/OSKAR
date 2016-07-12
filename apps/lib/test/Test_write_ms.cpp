@@ -54,7 +54,8 @@ TEST(write_ms, test_write)
     oskar_VisHeader* hdr = oskar_vis_header_create(OSKAR_DOUBLE_COMPLEX_MATRIX,
             OSKAR_DOUBLE, max_times_per_block, num_times, num_channels,
             num_channels, num_antennas, 1, 1, &status);
-    oskar_VisBlock* blk = oskar_vis_block_create(OSKAR_CPU, hdr, &status);
+    oskar_VisBlock* blk = oskar_vis_block_create_from_header(OSKAR_CPU,
+            hdr, &status);
     oskar_vis_block_set_num_times(blk, num_times, &status);
     double4c* v_ = oskar_mem_double4c(
             oskar_vis_block_cross_correlations(blk), &status);

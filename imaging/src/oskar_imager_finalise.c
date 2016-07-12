@@ -55,7 +55,7 @@ void oskar_imager_finalise(oskar_Imager* h, oskar_Mem* output_plane,
         int* status)
 {
     int t, c, p, i;
-    if (*status) return;
+    if (*status || !h->planes) return;
 
     /* Finalise all the planes. */
     for (i = 0; i < h->num_planes; ++i)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,10 +64,6 @@ void oskar_log_free(oskar_Log* log)
     free(log->offset);
     free(log->length);
     free(log->timestamp);
-
-#ifdef _OPENMP
-    omp_destroy_lock(&log->mutex);
-#endif
 
     /* Free the structure itself. */
     free(log);

@@ -1,7 +1,3 @@
-"""Simulator module.
-
-TODO module doc
-"""
 #
 #  This file is part of OSKAR.
 #
@@ -37,7 +33,6 @@ TODO module doc
 
 import _simulator_lib
 from vis_block import VisBlock
-import numpy as np
 
 class Simulator(object):
     """This class provides a Python interface to the OSKAR simulator."""
@@ -89,6 +84,15 @@ class Simulator(object):
         _simulator_lib.finalise(self._capsule)
 
 
+    def num_devices(self):
+        """Returns the number of compute devices selected.
+
+        Returns:
+            int: The number of compute devices selected.
+        """
+        return _simulator_lib.num_devices(self._capsule)
+
+
     def num_gpus(self):
         """Returns the number of GPUs selected.
 
@@ -121,16 +125,13 @@ class Simulator(object):
         _simulator_lib.reset_work_unit_index(self._capsule)
 
 
-    def run_block(self, block_index, gpu_id=0):
+    def run_block(self, block_index, device_id=0):
         """Runs the simulator for one visibility block.
 
-        Multiple GPUs can be used to simulate each block.
-        For multi-GPU simulations, the method should be called multiple times
-        using different GPU IDs from different threads, but with the same
-        block index.
-
-        GPU IDs are zero-based. They correspond to the indices of the array
-        used in the call to set_gpus(), NOT directly to CUDA device IDs.
+        Multiple compute devices can be used to simulate each block.
+        For multi-device simulations, the method should be called multiple
+        times using different device IDs from different threads, but with
+        the same block index. Device IDs are zero-based.
 
         This method should be called only after setting all required options.
 
@@ -139,9 +140,9 @@ class Simulator(object):
 
         Args:
             block_index (int): The simulation block index.
-            gpu_id (Optional[int]): The GPU ID to use for this call.
+            device_id (Optional[int]): The device ID to use for this call.
         """
-        _simulator_lib.run_block(self._capsule, block_index, gpu_id)
+        _simulator_lib.run_block(self._capsule, block_index, device_id)
 
 
     def run(self):
@@ -154,37 +155,22 @@ class Simulator(object):
         _simulator_lib.run(self._capsule)
 
 
-    def generate_visibilities(self, wavelength, flatten=False):
+    def set_coords_only(self, value):
+        """Sets whether the simulator provides baseline coordinates only.
+
+        Args:
+            value (bool): If set, simulate coordinates only.
         """
-        """
-        self.check_init()
-        for block_id in range(self.num_vis_blocks()):
-            self.reset_work_unit_index()
-            self.run_block(block_id)
-            block = self.finalise_block(block_id)
-            xcorr_ = block.cross_correlations()
-            uu_ = block.baseline_uu_metres() / wavelength
-            vv_ = block.baseline_vv_metres() / wavelength
-            ww_ = block.baseline_ww_metres() / wavelength
-            amp = xcorr_ if block_id == 0 else np.concatenate((amp, xcorr_))
-            uu = uu_ if block_id == 0 else np.concatenate((uu, uu_))
-            vv = vv_ if block_id == 0 else np.concatenate((vv, vv_))
-            ww = ww_ if block_id == 0 else np.concatenate((ww, ww_))
-        self.finalise()
-        uu, vv, ww = uu.squeeze(), vv.squeeze(), ww.squeeze()
-        amp = np.squeeze(amp)
-        if flatten:
-            uu, vv, ww = uu.flatten(), vv.flatten(), ww.flatten()
-            amp = amp.flatten()
-        return uu, vv, ww, amp
+        _simulator_lib.set_coords_only(self._capsule, value)
 
 
     def set_gpus(self, device_ids):
         """Sets the GPU device IDs to use.
 
         Args:
-            device_ids (int, array-like):
+            device_ids (int, array-like or None):
                 A list of the GPU IDs to use, or -1 to use all.
+                If None, then no GPUs will be used.
         """
         _simulator_lib.set_gpus(self._capsule, device_ids)
 
@@ -205,6 +191,21 @@ class Simulator(object):
             value (int): Number of time samples per block.
         """
         _simulator_lib.set_max_times_per_block(self._capsule, value)
+
+
+    def set_num_devices(self, value):
+        """Sets the number of compute devices to use.
+
+        A compute device may be either a local CPU core, or a GPU.
+        To use only a single CPU core for simulation, and no GPUs, call:
+
+        set_gpus(None)
+        set_num_devices(1)
+
+        Args:
+            value (int): Number of compute devices to use.
+        """
+        _simulator_lib.set_num_devices(self._capsule, value)
 
 
     def set_observation_frequency(self, start_frequency_hz,
@@ -266,7 +267,7 @@ class Simulator(object):
         """Sets the sky model used for the simulation.
 
         Args:
-            sky_model (Sky): Sky model object.
+            sky_model (oskar.Sky): Sky model object.
             max_sources_per_chunk (int): Maximum number of sources per chunk.
         """
         _simulator_lib.set_sky_model(self._capsule,
@@ -277,7 +278,7 @@ class Simulator(object):
         """Sets the telescope model used for the simulation.
 
         Args:
-            telescope_model (Telescope): Telescope model object.
+            telescope_model (oskar.Telescope): Telescope model object.
         """
         _simulator_lib.set_telescope_model(self._capsule,
             telescope_model._capsule)
@@ -294,3 +295,28 @@ class Simulator(object):
             block_index (int): The simulation block index to write.
         """
         _simulator_lib.write_block(self._capsule, block._capsule, block_index)
+
+
+    def generate_visibilities(self, wavelength, flatten=False):
+        """
+        """
+        self.check_init()
+        for block_id in range(self.num_vis_blocks()):
+            self.reset_work_unit_index()
+            self.run_block(block_id)
+            block = self.finalise_block(block_id)
+            xcorr_ = block.cross_correlations()
+            uu_ = block.baseline_uu_metres() / wavelength
+            vv_ = block.baseline_vv_metres() / wavelength
+            ww_ = block.baseline_ww_metres() / wavelength
+            amp = xcorr_ if block_id == 0 else np.concatenate((amp, xcorr_))
+            uu = uu_ if block_id == 0 else np.concatenate((uu, uu_))
+            vv = vv_ if block_id == 0 else np.concatenate((vv, vv_))
+            ww = ww_ if block_id == 0 else np.concatenate((ww, ww_))
+        self.finalise()
+        uu, vv, ww = uu.squeeze(), vv.squeeze(), ww.squeeze()
+        amp = np.squeeze(amp)
+        if flatten:
+            uu, vv, ww = uu.flatten(), vv.flatten(), ww.flatten()
+            amp = amp.flatten()
+        return uu, vv, ww, amp

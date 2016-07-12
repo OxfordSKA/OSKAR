@@ -363,8 +363,7 @@ void oskar_imager_set_num_w_planes(oskar_Imager* h, int value)
 }
 
 
-void oskar_imager_set_weighting_type(oskar_Imager* h, const char* type,
-        int* status)
+void oskar_imager_set_weighting(oskar_Imager* h, const char* type, int* status)
 {
     if (!strncmp(type, "N", 1) || !strncmp(type, "n", 1))
         h->weighting = OSKAR_WEIGHTING_NATURAL;

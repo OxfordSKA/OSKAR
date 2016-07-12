@@ -153,14 +153,9 @@ const int* oskar_vis_block_baseline_station2_const(const oskar_VisBlock* vis)
 
 void oskar_vis_block_set_num_times(oskar_VisBlock* vis, int value, int* status)
 {
-    if (*status) return;
-
-    /* Only allow shrinking of the dimension, as the block capacity is
-     * not known. */
-    if (value <= vis->dim_start_size[2])
-        vis->dim_start_size[2] = value;
-    else
-        *status = OSKAR_ERR_OUT_OF_RANGE;
+    oskar_vis_block_resize(vis, value,
+            oskar_vis_block_num_channels(vis),
+            oskar_vis_block_num_stations(vis), status);
 }
 
 void oskar_vis_block_set_start_channel_index(oskar_VisBlock* vis,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,10 +57,6 @@ void oskar_log_write(oskar_Log* log, FILE* stream, char priority, char code,
     width = log ? log->value_width : OSKAR_LOG_DEFAULT_VALUE_WIDTH;
     is_file = (stream == stdout || stream == stderr) ? 0 : 1;
 
-#ifdef _OPENMP
-    omp_set_lock(&log->mutex); /* Lock the mutex. */
-#endif
-
     /* Write the entry to the terminal */
     if (!is_file && should_print_term_entry(log, priority))
     {
@@ -74,10 +70,6 @@ void oskar_log_write(oskar_Log* log, FILE* stream, char priority, char code,
         print_entry(log->file, priority, code, depth, prefix, width, format, args);
         oskar_log_update_record(log, code);
     }
-
-#ifdef _OPENMP
-    omp_unset_lock(&log->mutex); /* Unlock the mutex. */
-#endif
 }
 
 /*

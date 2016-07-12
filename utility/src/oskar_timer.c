@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OSKAR_HAVE_CUDA
-#include <cuda_runtime_api.h>
-#endif
-
-#include <private_timer.h>
 #include <oskar_timer.h>
+#include <oskar_mutex.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -47,9 +43,29 @@
 #include <omp.h>
 #endif
 
+#ifdef OSKAR_HAVE_CUDA
+#include <cuda_runtime_api.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct oskar_Timer
+{
+    int type;
+    int paused;
+    double elapsed;
+    double start;
+    oskar_Mutex* mutex;
+#ifdef OSKAR_HAVE_CUDA
+    cudaEvent_t start_cuda;
+    cudaEvent_t end_cuda;
+#endif
+#ifdef OSKAR_OS_WIN
+    double freq;
+#endif
+};
 
 static double oskar_get_wtime(oskar_Timer* timer)
 {
@@ -94,6 +110,7 @@ oskar_Timer* oskar_timer_create(int type)
 
     /* Create the structure. */
     timer = (oskar_Timer*) calloc(1, sizeof(oskar_Timer));
+    timer->mutex = oskar_mutex_create();
 
 #ifdef OSKAR_OS_WIN
     QueryPerformanceFrequency(&freq);
@@ -110,9 +127,6 @@ oskar_Timer* oskar_timer_create(int type)
         cudaEventCreate(&timer->end_cuda);
     }
 #endif
-#ifdef _OPENMP
-    omp_init_lock(&timer->mutex);
-#endif
     return timer;
 }
 
@@ -126,9 +140,7 @@ void oskar_timer_free(oskar_Timer* timer)
         cudaEventDestroy(timer->end_cuda);
     }
 #endif
-#ifdef _OPENMP
-    omp_destroy_lock(&timer->mutex);
-#endif
+    oskar_mutex_free(timer->mutex);
     free(timer);
 }
 
@@ -145,9 +157,8 @@ double oskar_timer_elapsed(oskar_Timer* timer)
     if (timer->type == OSKAR_TIMER_CUDA)
     {
         float millisec = 0.0f;
-#ifdef _OPENMP
-        omp_set_lock(&timer->mutex); /* Lock the mutex */
-#endif
+        oskar_mutex_lock(timer->mutex);
+
         /* Get elapsed time since start. */
         cudaEventRecord(timer->end_cuda, 0);
         cudaEventSynchronize(timer->end_cuda);
@@ -158,14 +169,12 @@ double oskar_timer_elapsed(oskar_Timer* timer)
 
         /* Restart. */
         cudaEventRecord(timer->start_cuda, 0);
-#ifdef _OPENMP
-        omp_unset_lock(&timer->mutex); /* Unlock the mutex. */
-#endif
+        oskar_mutex_unlock(timer->mutex);
         return timer->elapsed;
     }
 #endif
+    oskar_mutex_lock(timer->mutex);
 #ifdef _OPENMP
-    omp_set_lock(&timer->mutex); /* Lock the mutex */
     /* OpenMP timer. */
     if (timer->type == OSKAR_TIMER_OMP)
         now = omp_get_wtime();
@@ -177,9 +186,7 @@ double oskar_timer_elapsed(oskar_Timer* timer)
     /* Increment elapsed time and restart. */
     timer->elapsed += (now - timer->start);
     timer->start = now;
-#ifdef _OPENMP
-    omp_unset_lock(&timer->mutex); /* Unlock the mutex. */
-#endif
+    oskar_mutex_unlock(timer->mutex);
     return timer->elapsed;
 }
 

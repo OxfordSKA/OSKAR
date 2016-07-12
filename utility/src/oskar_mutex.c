@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,56 +26,66 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_log.h>
-#include <oskar_log.h>
-
-#include <stdio.h>
+#include <oskar_mutex.h>
 #include <stdlib.h>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-char* oskar_log_file_data(oskar_Log* log, size_t* size)
+
+struct oskar_Mutex
 {
-    char* data = 0;
-    if (!size || !log) return 0;
+#ifdef _OPENMP
+    omp_lock_t lock;
+#endif
+};
 
-    /* If log exists, then read the whole file. */
-    if (log->file)
-    {
-        FILE* temp_handle = 0;
+oskar_Mutex* oskar_mutex_create(void)
+{
+    oskar_Mutex* mutex;
 
-        /* Determine the current size of the file. */
-        fflush(log->file);
-        temp_handle = fopen(log->name, "rb");
-        if (temp_handle)
-        {
-            fseek(temp_handle, 0, SEEK_END);
-            *size = ftell(temp_handle);
+    /* Create the structure. */
+    mutex = (oskar_Mutex*) calloc(1, sizeof(oskar_Mutex));
 
-            /* Read the file into memory. */
-            if (*size != 0)
-            {
-                size_t bytes_read = 0;
-                data = (char*) malloc(*size * sizeof(char));
-                if (data != 0)
-                {
-                    rewind(temp_handle);
-                    bytes_read = fread(data, 1, *size, temp_handle);
-                    if (bytes_read != *size)
-                    {
-                        free(data);
-                        data = 0;
-                    }
-                }
-            }
-            fclose(temp_handle);
-        }
-    }
-
-    return data;
+#ifdef _OPENMP
+    omp_init_lock(&mutex->lock);
+#endif
+    return mutex;
 }
+
+
+void oskar_mutex_free(oskar_Mutex* mutex)
+{
+    if (!mutex) return;
+#ifdef _OPENMP
+    omp_destroy_lock(&mutex->lock);
+#endif
+    free(mutex);
+}
+
+
+void oskar_mutex_lock(oskar_Mutex* mutex)
+{
+    if (!mutex) return;
+#ifdef _OPENMP
+    omp_set_lock(&mutex->lock);
+#endif
+}
+
+
+void oskar_mutex_unlock(oskar_Mutex* mutex)
+{
+    if (!mutex) return;
+#ifdef _OPENMP
+    omp_unset_lock(&mutex->lock);
+#endif
+}
+
 
 #ifdef __cplusplus
 }

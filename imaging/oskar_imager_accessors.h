@@ -438,8 +438,7 @@ void oskar_imager_set_num_w_planes(oskar_Imager* h, int value);
  * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_set_weighting_type(oskar_Imager* h, const char* type,
-        int* status);
+void oskar_imager_set_weighting(oskar_Imager* h, const char* type, int* status);
 
 #ifdef __cplusplus
 }
