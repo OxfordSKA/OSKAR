@@ -14,6 +14,7 @@ if (PYTHON_FOUND AND CUDA_FOUND)
     oskar_py_module(_sky_lib src/oskar_sky_lib.c LIBS oskar oskar_apps)
     oskar_py_module(_telescope_lib src/oskar_telescope_lib.c LIBS oskar oskar_apps)
     oskar_py_module(_vis_block_lib src/oskar_vis_block_lib.c LIBS oskar)
+    oskar_py_module(_vis_header_lib src/oskar_vis_header_lib.c LIBS oskar)
 
     configure_file(${PROJECT_SOURCE_DIR}/python/version.py.in
         ${PROJECT_BINARY_DIR}/python/version.py @ONLY)

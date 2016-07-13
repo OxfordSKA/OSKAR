@@ -37,18 +37,14 @@ import _sky_lib
 class Sky(object):
     """This class provides a Python interface to an OSKAR sky model."""
 
-    def __init__(self, precision="double", settings_path=None):
+    def __init__(self, precision='double'):
         """Creates a handle to an OSKAR sky model.
 
         Args:
-            precision (str): Either 'double' or 'single' to specify
+            precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the data.
-            settings_path (str): Path to an OSKAR settings file.
         """
-        if settings_path is not None:
-            self._capsule = _sky_lib.set_up(settings_path)
-        else:
-            self._capsule = _sky_lib.create(precision)
+        self._capsule = _sky_lib.create(precision)
 
 
     def append(self, other):
@@ -124,13 +120,11 @@ class Sky(object):
 
 
     @classmethod
-    def generate_grid(cls, precision, ra0_deg, dec0_deg, side_length, fov_deg,
-            mean_flux_jy=1.0, std_flux_jy=0.0, seed=1):
+    def generate_grid(cls, ra0_deg, dec0_deg, side_length, fov_deg,
+            mean_flux_jy=1.0, std_flux_jy=0.0, seed=1, precision='double'):
         """Generates a grid of sources and returns it as a new sky model.
 
         Args:
-            precision (str):      Either 'double' or 'single' to specify
-                the numerical precision of the data.
             ra0_deg (float):      Right Ascension of grid centre, in degrees.
             dec0_deg (float):     Declination of grid centre, in degrees.
             side_length (int):    Side length of generated grid.
@@ -138,30 +132,32 @@ class Sky(object):
             mean_flux_jy (float): Mean Stokes-I source flux, in Jy.
             std_flux_jy (float):  Standard deviation Stokes-I source flux, in Jy.
             seed (int):           Random generator seed.
+            precision (Optional[str]): Either 'double' or 'single' to specify
+                the numerical precision of the data.
         """
         t = Sky()
-        t._capsule = _sky_lib.generate_grid(precision, ra0_deg, 
-            dec0_deg, side_length, fov_deg, mean_flux_jy, std_flux_jy, seed)
+        t._capsule = _sky_lib.generate_grid(ra0_deg, dec0_deg, side_length,
+            fov_deg, mean_flux_jy, std_flux_jy, seed, precision)
         return t
 
 
     @classmethod
-    def generate_random_power_law(cls, precision, num_sources,
-            min_flux_jy, max_flux_jy, power_law_index, seed=1):
+    def generate_random_power_law(cls, num_sources, min_flux_jy, max_flux_jy,
+            power_law_index, seed=1, precision='double'):
         """Generates sources scattered randomly over the sphere.
 
         Args:
-            precision (str):         Either 'double' or 'single' to specify
-                the numerical precision of the data.
             num_sources (int):       The number of sources to generate.
             min_flux_jy (float):     Minimum Stokes-I source flux, in Jy.
             max_flux_jy (float):     Maximum Stokes-I source flux, in Jy.
             power_law_index (float): Power law index/exponent.
             seed (int):              Random generator seed.
+            precision (Optional[str]): Either 'double' or 'single' to specify
+                the numerical precision of the data.
         """
         t = Sky()
-        t._capsule = _sky_lib.generate_random_power_law(precision, 
-            num_sources, min_flux_jy, max_flux_jy, power_law_index, seed)
+        t._capsule = _sky_lib.generate_random_power_law(num_sources,
+            min_flux_jy, max_flux_jy, power_law_index, seed, precision)
         return t
 
 

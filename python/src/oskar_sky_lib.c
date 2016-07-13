@@ -323,8 +323,8 @@ static PyObject* generate_grid(PyObject* self, PyObject* args)
     int prec, side_length = 0, seed = 1, status = 0;
     const char* type = 0;
     double ra0, dec0, fov, mean_flux_jy, std_flux_jy;
-    if (!PyArg_ParseTuple(args, "sddidddi", &type, &ra0, &dec0,
-            &side_length, &fov, &mean_flux_jy, &std_flux_jy, &seed)) return 0;
+    if (!PyArg_ParseTuple(args, "ddidddis", &ra0, &dec0, &side_length,
+            &fov, &mean_flux_jy, &std_flux_jy, &seed, &type)) return 0;
 
     /* Generate the grid. */
     prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
@@ -356,8 +356,8 @@ static PyObject* generate_random_power_law(PyObject* self, PyObject* args)
     int prec, num_sources = 0, seed = 1, status = 0;
     const char* type = 0;
     double min_flux_jy = 0.0, max_flux_jy = 0.0, power = 0.0;
-    if (!PyArg_ParseTuple(args, "sidddi", &type,
-            &num_sources, &min_flux_jy, &max_flux_jy, &power, &seed)) return 0;
+    if (!PyArg_ParseTuple(args, "idddis", &num_sources, &min_flux_jy,
+            &max_flux_jy, &power, &seed, &type)) return 0;
 
     /* Generate the sources. */
     prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
@@ -462,8 +462,8 @@ static PyMethodDef methods[] =
         {"generate_grid", (PyCFunction)generate_grid, METH_VARARGS,
                 "generate_grid()"},
         {"generate_random_power_law", (PyCFunction)generate_random_power_law,
-                METH_VARARGS, "generate_random_power_law(type, num_sources, "
-                        "min_flux_jy, max_flux_jy, power, seed)"},
+                METH_VARARGS, "generate_random_power_law(num_sources, "
+                        "min_flux_jy, max_flux_jy, power, seed, type)"},
         {"set_up", (PyCFunction)set_up, METH_VARARGS, "set_up(settings_path)"},
         {NULL, NULL, 0, NULL}
 };

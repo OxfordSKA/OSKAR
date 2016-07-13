@@ -90,6 +90,36 @@ static oskar_VisHeader* get_handle_header(PyObject* capsule)
 }
 
 
+static PyObject* auto_correlations(PyObject* self, PyObject* args)
+{
+    oskar_VisBlock* h = 0;
+    oskar_Mem* m = 0;
+    PyObject *capsule = 0;
+    PyArrayObject *array = 0;
+    npy_intp dims[4];
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_block(capsule))) return 0;
+
+    /* Check that auto-correlations exist. */
+    if (!oskar_vis_block_has_auto_correlations(h))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "No auto-correlations in block.");
+        return 0;
+    }
+
+    /* Return an array reference to Python. */
+    m = oskar_vis_block_auto_correlations(h);
+    dims[0] = oskar_vis_block_num_times(h);
+    dims[1] = oskar_vis_block_num_channels(h);
+    dims[2] = oskar_vis_block_num_stations(h);
+    dims[3] = oskar_vis_block_num_pols(h);
+    array = (PyArrayObject*)PyArray_SimpleNewFromData(4, dims,
+            (oskar_mem_is_double(m) ? NPY_CDOUBLE : NPY_CFLOAT),
+            oskar_mem_void(m));
+    return Py_BuildValue("N", array); /* Don't increment refcount. */
+}
+
+
 static PyObject* create_from_header(PyObject* self, PyObject* args)
 {
     oskar_VisBlock* h = 0;
@@ -219,9 +249,81 @@ static PyObject* cross_correlations(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* num_baselines(PyObject* self, PyObject* args)
+{
+    oskar_VisBlock* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_block(capsule))) return 0;
+    return Py_BuildValue("i", oskar_vis_block_num_baselines(h));
+}
+
+
+static PyObject* num_channels(PyObject* self, PyObject* args)
+{
+    oskar_VisBlock* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_block(capsule))) return 0;
+    return Py_BuildValue("i", oskar_vis_block_num_channels(h));
+}
+
+
+static PyObject* num_pols(PyObject* self, PyObject* args)
+{
+    oskar_VisBlock* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_block(capsule))) return 0;
+    return Py_BuildValue("i", oskar_vis_block_num_pols(h));
+}
+
+
+static PyObject* num_stations(PyObject* self, PyObject* args)
+{
+    oskar_VisBlock* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_block(capsule))) return 0;
+    return Py_BuildValue("i", oskar_vis_block_num_stations(h));
+}
+
+
+static PyObject* num_times(PyObject* self, PyObject* args)
+{
+    oskar_VisBlock* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_block(capsule))) return 0;
+    return Py_BuildValue("i", oskar_vis_block_num_times(h));
+}
+
+
+static PyObject* start_channel_index(PyObject* self, PyObject* args)
+{
+    oskar_VisBlock* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_block(capsule))) return 0;
+    return Py_BuildValue("i", oskar_vis_block_start_channel_index(h));
+}
+
+
+static PyObject* start_time_index(PyObject* self, PyObject* args)
+{
+    oskar_VisBlock* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_block(capsule))) return 0;
+    return Py_BuildValue("i", oskar_vis_block_start_time_index(h));
+}
+
+
 /* Method table. */
 static PyMethodDef methods[] =
 {
+        {"auto_correlations", (PyCFunction)auto_correlations,
+                METH_VARARGS, "auto_correlations()"},
         {"create_from_header", (PyCFunction)create_from_header,
                 METH_VARARGS, "create_from_header(header)"},
         {"baseline_uu_metres", (PyCFunction)baseline_uu_metres,
@@ -232,6 +334,20 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "baseline_ww_metres()"},
         {"cross_correlations", (PyCFunction)cross_correlations,
                 METH_VARARGS, "cross_correlations()"},
+        {"num_baselines", (PyCFunction)num_baselines,
+                METH_VARARGS, "num_baselines()"},
+        {"num_channels", (PyCFunction)num_channels,
+                METH_VARARGS, "num_channels()"},
+        {"num_pols", (PyCFunction)num_pols,
+                METH_VARARGS, "num_pols()"},
+        {"num_stations", (PyCFunction)num_stations,
+                METH_VARARGS, "num_stations()"},
+        {"num_times", (PyCFunction)num_times,
+                METH_VARARGS, "num_times()"},
+        {"start_channel_index", (PyCFunction)start_channel_index,
+                METH_VARARGS, "start_channel_index()"},
+        {"start_time_index", (PyCFunction)start_time_index,
+                METH_VARARGS, "start_time_index()"},
         {NULL, NULL, 0, NULL}
 };
 

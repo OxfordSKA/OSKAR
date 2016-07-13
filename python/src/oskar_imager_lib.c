@@ -90,6 +90,25 @@ static oskar_VisBlock* get_handle_vis_block(PyObject* capsule)
 }
 
 
+static oskar_VisHeader* get_handle_vis_header(PyObject* capsule)
+{
+    oskar_VisHeader* h = 0;
+    if (!PyCapsule_CheckExact(capsule))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
+        return 0;
+    }
+    h = (oskar_VisHeader*) PyCapsule_GetPointer(capsule, "oskar_VisHeader");
+    if (!h)
+    {
+        PyErr_SetString(PyExc_RuntimeError,
+                "Unable to convert PyCapsule object to oskar_VisHeader.");
+        return 0;
+    }
+    return h;
+}
+
+
 static int oskar_type_from_numpy(PyArrayObject* arr)
 {
     switch (PyArray_TYPE(arr))
@@ -644,19 +663,21 @@ fail:
 static PyObject* update_block(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
-    oskar_VisBlock* b = 0;
-    PyObject *obj[] = {0, 0};
+    oskar_VisBlock* block = 0;
+    oskar_VisHeader* header = 0;
+    PyObject *obj[] = {0, 0, 0};
     int status = 0;
 
     /* Parse inputs. */
-    if (!PyArg_ParseTuple(args, "OO", &obj[0], &obj[1]))
+    if (!PyArg_ParseTuple(args, "OOO", &obj[0], &obj[1], &obj[2]))
         return 0;
     if (!(h = get_handle_imager(obj[0]))) return 0;
-    if (!(b = get_handle_vis_block(obj[1]))) return 0;
+    if (!(header = get_handle_vis_header(obj[1]))) return 0;
+    if (!(block = get_handle_vis_block(obj[2]))) return 0;
 
     /* Update the imager with the supplied visibility data. */
     Py_BEGIN_ALLOW_THREADS
-    oskar_imager_update_block(h, b, &status);
+    oskar_imager_update_block(h, header, block, &status);
     Py_END_ALLOW_THREADS
 
     /* Check for errors. */

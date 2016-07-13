@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,16 +46,18 @@ extern "C" {
  * memory.
  *
  * @details
- * This function returns the value of one element in a scalar array at the
+ * This function returns the value of one element in an array at the
  * specified index. The array may be either in CPU or GPU memory.
+ *
+ * The index is with respect to the precision of the base data type,
+ * so this can also be used to return part of a complex number.
  *
  * @param[in] mem           Pointer to the memory block.
  * @param[in] index         Array index to return.
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-double oskar_mem_get_element_scalar(const oskar_Mem* mem, size_t index,
-        int* status);
+double oskar_mem_get_element(const oskar_Mem* mem, size_t index, int* status);
 
 /**
  * @brief

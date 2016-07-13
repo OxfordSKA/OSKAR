@@ -41,7 +41,7 @@ from telescope import Telescope
 from simulator import Simulator
 from imager import Imager
 from vis_block import VisBlock
-from barrier import Barrier
+from vis_header import VisHeader
 import bda
 
 #import sky

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,58 +37,52 @@
 extern "C" {
 #endif
 
-double oskar_mem_get_element_scalar(const oskar_Mem* mem, size_t index,
-        int* status)
+double oskar_mem_get_element(const oskar_Mem* mem, size_t index, int* status)
 {
-    size_t n;
-    int type, location;
+    int precision, location;
 
     /* Check if safe to proceed. */
     if (*status) return 0.0;
 
-    /* Get the data type, location, and number of elements. */
-    type = mem->type;
+    /* Get the data precision and location. */
+    precision = oskar_type_precision(mem->type);
     location = mem->location;
-    n = mem->num_elements;
-    if (index >= n)
-    {
-        *status = OSKAR_ERR_OUT_OF_RANGE;
-        return 0.0;
-    }
 
     /* Get the data. */
     if (location == OSKAR_CPU)
     {
-        if (type == OSKAR_DOUBLE)
+        switch (precision)
         {
+        case OSKAR_DOUBLE:
             return ((double*)(mem->data))[index];
-        }
-        else if (type == OSKAR_SINGLE)
-        {
+        case OSKAR_SINGLE:
             return ((float*)(mem->data))[index];
-        }
-        else
+        default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
     else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_DOUBLE)
+        switch (precision)
+        {
+        case OSKAR_DOUBLE:
         {
             double val;
             cudaMemcpy(&val, (double*)(mem->data) + index, sizeof(double),
                     cudaMemcpyDeviceToHost);
             return val;
         }
-        else if (type == OSKAR_SINGLE)
+        case OSKAR_SINGLE:
         {
             float val;
             cudaMemcpy(&val, (float*)(mem->data) + index, sizeof(float),
                     cudaMemcpyDeviceToHost);
             return val;
         }
-        else
+        default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

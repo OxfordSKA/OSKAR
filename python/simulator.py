@@ -32,16 +32,19 @@
 # 
 
 import _simulator_lib
+from threading import Thread
 from vis_block import VisBlock
+from vis_header import VisHeader
+from barrier import Barrier
 
 class Simulator(object):
     """This class provides a Python interface to the OSKAR simulator."""
 
-    def __init__(self, precision="double"):
+    def __init__(self, precision='double'):
         """Creates a handle to an OSKAR simulator.
 
         Args:
-            type (str): Either 'double' or 'single' to specify 
+            precision (str): Either 'double' or 'single' to specify 
                 the numerical precision of the simulation.
         """
         self._capsule = _simulator_lib.create(precision)
@@ -66,7 +69,7 @@ class Simulator(object):
             block_index (int): The simulation block index to finalise.
 
         Returns:
-            block (oskar.VisBlock): A temporary handle to the finalised block.
+            block (oskar.VisBlock): A handle to the finalised block.
                 This is only valid until the next block is simulated.
         """
         block = VisBlock()
@@ -111,6 +114,20 @@ class Simulator(object):
         return _simulator_lib.num_vis_blocks(self._capsule)
 
 
+    def process_block(self, block, block_index):
+        """Virtual function to process each visibility block in a worker thread.
+
+        The default implementation simply calls write_block() to write the
+        data to any open files. Inherit this class and override this method
+        to process the visibilities differently.
+
+        Args:
+            block (oskar.VisBlock): A handle to the block to be processed.
+            block_index (int):      The index of the visibility block.
+        """
+        self.write_block(block, block_index)
+
+
     def reset_cache(self):
         """Low-level function to reset the simulator's internal memory.
         """
@@ -145,12 +162,31 @@ class Simulator(object):
         _simulator_lib.run_block(self._capsule, block_index, device_id)
 
 
+    def run_blocks(self):
+        """Sets up and starts worker threads to simulate all visibility blocks.
+
+        This is a high-level function that can be used instead of run() to
+        simulate visibility data using multiple threads from within Python.
+
+        The virtual method process_block() is called for each visibility block,
+        where a handle to the block is supplied as an argument.
+
+        Inherit this class and override process_block() to process the
+        visibilities differently.
+        """
+        num_threads = self.num_devices() + 1
+        self.barrier = Barrier(num_threads)
+        threads = []
+        for i in range(num_threads):
+            threads.append(Thread(target=self._run_blocks, args=[i]))
+        for t in threads: t.start()
+        for t in threads: t.join()
+
+
     def run(self):
         """Runs the simulator.
 
         This method should be called only after setting all required options.
-
-        Call finalise() to finalise the simulator after calling this method.
         """
         _simulator_lib.run(self._capsule)
 
@@ -284,6 +320,17 @@ class Simulator(object):
             telescope_model._capsule)
 
 
+    def vis_header(self):
+        """Returns the visibility header.
+
+        Returns:
+            header (oskar.VisHeader): A handle to the visibility header.
+        """
+        header = VisHeader()
+        header._capsule = _simulator_lib.vis_header(self._capsule)
+        return header
+
+
     def write_block(self, block, block_index):
         """Writes a finalised visibility block.
 
@@ -296,3 +343,40 @@ class Simulator(object):
         """
         _simulator_lib.write_block(self._capsule, block._capsule, block_index)
 
+
+    def _run_blocks(self, thread_id):
+        """
+        Private method to simulate and process visibility blocks concurrently.
+
+        Each thread executes this function.
+        For N devices, there must be N+1 threads.
+        Thread 0 is used to finalise the block on the host.
+        Threads 1 to N (mapped to compute devices) do the simulation.
+
+        Note that no finalisation is performed on the first iteration (as no
+        data are ready yet), and no simulation is performed for the last
+        iteration (which corresponds to the last block + 1) as this iteration
+        simply finalises the last block.
+
+        Args:
+            thread_id (int): Zero-based thread ID.
+        """
+        # Loop over visibility blocks.
+        num_blocks = self.num_vis_blocks()
+        for b in range(num_blocks + 1):
+            # Run simulation in threads 1 to N.
+            if thread_id > 0 and b < num_blocks:
+                self.run_block(b, thread_id - 1)
+
+            # Finalise and process the previous block in thread 0.
+            if thread_id == 0 and b > 0:
+                block = self.finalise_block(b - 1)
+                self.process_block(block, b - 1)
+
+            # Barrier 1: Reset work unit index.
+            self.barrier.wait()
+            if thread_id == 0:
+                self.reset_work_unit_index()
+
+            # Barrier 2: Synchronise before moving to the next block.
+            self.barrier.wait()

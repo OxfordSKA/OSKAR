@@ -214,7 +214,6 @@ static PyObject* num_devices(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
     PyObject* capsule = 0;
-    int status = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle_simulator(capsule))) return 0;
     return Py_BuildValue("i", oskar_simulator_num_devices(h));
@@ -225,7 +224,6 @@ static PyObject* num_gpus(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
     PyObject* capsule = 0;
-    int status = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle_simulator(capsule))) return 0;
     return Py_BuildValue("i", oskar_simulator_num_gpus(h));
@@ -236,7 +234,6 @@ static PyObject* num_vis_blocks(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
     PyObject* capsule = 0;
-    int status = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle_simulator(capsule))) return 0;
     return Py_BuildValue("i", oskar_simulator_num_vis_blocks(h));
@@ -577,6 +574,28 @@ static PyObject* set_zero_failed_gaussians(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* vis_header(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    const oskar_VisHeader* hdr = 0;
+    PyObject *capsule = 0, *header = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    hdr = oskar_simulator_vis_header(h);
+
+    /* Check for NULL pointer. */
+    if (!hdr)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "Visibility header doesn't exist. Call check_init() first.");
+        return 0;
+    }
+
+    header = PyCapsule_New((void*)hdr, "oskar_VisHeader", NULL);
+    return Py_BuildValue("N", header); /* Don't increment refcount. */
+}
+
+
 static PyObject* write_block(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
@@ -657,6 +676,7 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "set_telescope_model(telescope)"},
         {"set_zero_failed_gaussians", (PyCFunction)set_zero_failed_gaussians,
                 METH_VARARGS, "set_zero_failed_gaussians(value)"},
+        {"vis_header", (PyCFunction)vis_header, METH_VARARGS, "vis_header()"},
         {"write_block", (PyCFunction)write_block,
                 METH_VARARGS, "write_block(block_index)"},
         {NULL, NULL, 0, NULL}

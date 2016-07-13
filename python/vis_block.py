@@ -37,33 +37,66 @@ class VisBlock(object):
     """This class provides a Python interface to an OSKAR visibility block."""
 
     def __init__(self):
-        """Constructs a handle to a visibility block.
-        """
+        """Constructs a handle to a visibility block."""
         self._capsule = 0
 
 
+    def auto_correlations(self):
+        """Returns an array reference to the auto correlations in the block."""
+        return _vis_block_lib.auto_correlations(self._capsule)
+
+
     def baseline_uu_metres(self):
-        """Returns an array reference to the block baseline uu coordinates.
-        """
+        """Returns an array reference to the block baseline uu coordinates."""
         return _vis_block_lib.baseline_uu_metres(self._capsule)
 
 
     def baseline_vv_metres(self):
-        """Returns an array reference to the block baseline vv coordinates.
-        """
+        """Returns an array reference to the block baseline vv coordinates."""
         return _vis_block_lib.baseline_vv_metres(self._capsule)
 
 
     def baseline_ww_metres(self):
-        """Returns an array reference to the block baseline ww coordinates.
-        """
+        """Returns an array reference to the block baseline ww coordinates."""
         return _vis_block_lib.baseline_ww_metres(self._capsule)
 
 
     def cross_correlations(self):
-        """Returns an array reference to the cross correlations in the block.
-        """
+        """Returns an array reference to the cross correlations in the block."""
         return _vis_block_lib.cross_correlations(self._capsule)
 
 
+    def num_baselines(self):
+        """Returns the number of baselines in the block."""
+        return _vis_block_lib.num_baselines(self._capsule)
+
+
+    def num_channels(self):
+        """Returns the number of frequency channels in the block."""
+        return _vis_block_lib.num_channels(self._capsule)
+
+
+    def num_pols(self):
+        """Returns the number of polarisations in the block."""
+        return _vis_block_lib.num_pols(self._capsule)
+
+
+    def num_stations(self):
+        """Returns the number of stations in the block."""
+        return _vis_block_lib.num_stations(self._capsule)
+
+
+    def num_times(self):
+        """Returns the number of time samples in the block."""
+        return _vis_block_lib.num_times(self._capsule)
+
+
+    def start_channel_index(self):
+        """Returns the start channel index of the block."""
+        return _vis_block_lib.start_channel_index(self._capsule)
+
+
+    def start_time_index(self):
+        """Returns the start time index of the block."""
+        return _vis_block_lib.start_time_index(self._capsule)
 

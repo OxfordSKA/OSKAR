@@ -39,7 +39,7 @@ class Telescope(object):
     """This class provides a Python interface to an OSKAR telescope model.
     """
 
-    def __init__(self, precision="double", settings_path=None):
+    def __init__(self, precision='double', settings_path=None):
         """Creates a handle to an OSKAR telescope model.
 
         Args:

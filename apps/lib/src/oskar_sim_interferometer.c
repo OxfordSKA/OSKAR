@@ -864,17 +864,16 @@ void oskar_simulator_set_zero_failed_gaussians(oskar_Simulator* h, int value)
 }
 
 
+const oskar_VisHeader* oskar_simulator_vis_header(oskar_Simulator* h)
+{
+    return h->header;
+}
+
+
 void oskar_simulator_write_block(oskar_Simulator* h,
         const oskar_VisBlock* block, int block_index, int* status)
 {
     if (*status) return;
-
-    /* Check at least one file handle is open. */
-    if (!h->ms && !h->vis)
-    {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
-    }
 
     /* Write the block to whichever file handles are open. */
     oskar_timer_resume(h->tmr_write);

@@ -369,16 +369,18 @@ class Imager(object):
             start_channel, end_channel)
 
 
-    def update_block(self, block):
+    def update_block(self, header, block):
         """Runs imager for supplied visibilities, applying optional selection.
 
         Call finalise() to finalise the images after calling this function.
 
         Args:
+            header (oskar.VisHeader):
+                Handle to an OSKAR visibility header.
             block (oskar.VisBlock):
                 Handle to an OSKAR visibility block.
         """
-        _imager_lib.update_block(self._capsule, block._capsule)
+        _imager_lib.update_block(self._capsule, header._capsule, block._capsule)
 
 
     def update_plane(self, uu, vv, ww, amps, weight, plane, plane_norm,
@@ -418,7 +420,7 @@ class Imager(object):
 
     @staticmethod
     def make_image(uu, vv, ww, amps, fov_deg, size,
-            weighting='Natural', algorithm='FFT', weight=None, wprojplanes=-1):
+            weighting='Natural', algorithm='FFT', weight=None, wprojplanes=0):
         """Makes an image from visibility data.
 
         Args:
@@ -440,7 +442,7 @@ class Imager(object):
                 Visibility weights.
             wprojplanes (Optional[int]):
                 Number of W-projection planes to use, if using W-projection.
-                If < 0, this will be determined automatically.
+                If <= 0, this will be determined automatically.
                 It will not be less than 16.
 
         Returns:
