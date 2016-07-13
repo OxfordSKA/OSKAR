@@ -660,7 +660,7 @@ fail:
 }
 
 
-static PyObject* update_block(PyObject* self, PyObject* args)
+static PyObject* update_from_block(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
     oskar_VisBlock* block = 0;
@@ -677,7 +677,7 @@ static PyObject* update_block(PyObject* self, PyObject* args)
 
     /* Update the imager with the supplied visibility data. */
     Py_BEGIN_ALLOW_THREADS
-    oskar_imager_update_block(h, header, block, &status);
+    oskar_imager_update_from_block(h, header, block, &status);
     Py_END_ALLOW_THREADS
 
     /* Check for errors. */
@@ -1061,8 +1061,8 @@ static PyMethodDef methods[] =
         {"update", (PyCFunction)update, METH_VARARGS,
                 "update(num_baselines, uu, vv, ww, amps, weight, "
                 "num_pols, start_time, end_time, start_chan, end_chan)"},
-        {"update_block", (PyCFunction)update_block, METH_VARARGS,
-                "update_block(vis_block)"},
+        {"update_from_block", (PyCFunction)update_from_block, METH_VARARGS,
+                "update_from_block(vis_header, vis_block)"},
         {"update_plane", (PyCFunction)update_plane, METH_VARARGS,
                 "update_plane(uu, vv, ww, amps, weight, plane, plane_norm)"},
         {NULL, NULL, 0, NULL}

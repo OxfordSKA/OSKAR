@@ -5,7 +5,7 @@ import oskar
 import time
 
 class MySimulator(oskar.Simulator):
-    """Simulates and images visibilities concurrently in blocks using threads.
+    """Simulates and images visibilities concurrently.
 
     This class inherits the oskar.Simulator class to process each block
     in the process_block() method.
@@ -43,8 +43,8 @@ class MySimulator(oskar.Simulator):
             block (oskar.VisBlock): A handle to the block to be processed.
             block_index (int):      The index of the visibility block.
         """
-        self.write_block(block, block_index)
-        for i in self.imagers: i.update_block(self.vis_header(), block)
+        oskar.Simulator.process_block(self, block, block_index)
+        for i in self.imagers: i.update_from_block(self.vis_header(), block)
 
 
     def set_coords_only(self, value):

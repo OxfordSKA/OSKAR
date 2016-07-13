@@ -369,8 +369,8 @@ class Imager(object):
             start_channel, end_channel)
 
 
-    def update_block(self, header, block):
-        """Runs imager for supplied visibilities, applying optional selection.
+    def update_from_block(self, header, block):
+        """Runs imager for visibility block, applying optional selection.
 
         Call finalise() to finalise the images after calling this function.
 
@@ -380,7 +380,8 @@ class Imager(object):
             block (oskar.VisBlock):
                 Handle to an OSKAR visibility block.
         """
-        _imager_lib.update_block(self._capsule, header._capsule, block._capsule)
+        _imager_lib.update_from_block(self._capsule, 
+            header._capsule, block._capsule)
 
 
     def update_plane(self, uu, vv, ww, amps, weight, plane, plane_norm,

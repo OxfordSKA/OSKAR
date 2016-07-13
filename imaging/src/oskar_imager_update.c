@@ -54,8 +54,9 @@ static void oskar_imager_update_weights_grid(oskar_Imager* h, int num_points,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
         const oskar_Mem* weight, oskar_Mem* weights_grid, int* status);
 
-void oskar_imager_update_block(oskar_Imager* h, const oskar_VisHeader* header,
-        const oskar_VisBlock* block, int* status)
+void oskar_imager_update_from_block(oskar_Imager* h,
+        const oskar_VisHeader* header, const oskar_VisBlock* block,
+        int* status)
 {
     int start_time, end_time, start_chan, end_chan;
     int num_baselines, num_channels, num_pols, num_times;

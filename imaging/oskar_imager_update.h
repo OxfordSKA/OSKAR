@@ -48,7 +48,7 @@ extern "C" {
  *
  * @details
  * This function updates the internal imager state using the
- * supplied visibilities.
+ * supplied visibility block.
  *
  * Visibility selection/filtering and phase rotation are performed
  * if necessary.
@@ -59,8 +59,9 @@ extern "C" {
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_update_block(oskar_Imager* h, const oskar_VisHeader* header,
-        const oskar_VisBlock* block, int* status);
+void oskar_imager_update_from_block(oskar_Imager* h,
+        const oskar_VisHeader* header, const oskar_VisBlock* block,
+        int* status);
 
 /**
  * @brief
