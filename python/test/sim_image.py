@@ -55,8 +55,6 @@ if __name__ == '__main__':
     simulator.set_observation_frequency(100.0e6)
     simulator.set_observation_time(start_time_mjd_utc=51545.0,
         length_sec=43200.0, num_time_steps=48)
-    simulator.set_gpus(None)
-    simulator.set_num_devices(4) # Use 4 CPU threads.
     simulator.set_output_vis_file(output_root+'.vis')
     #simulator.set_output_measurement_set(output_root+'.ms')
 

@@ -74,11 +74,11 @@ struct DeviceData
 
     /* Device memory. */
     int previous_chunk_index;
-    oskar_VisBlock* vis_block; /* Device memory block. */
+    oskar_VisBlock* vis_block;  /* Device memory block. */
     oskar_Mem *u, *v, *w;
-    oskar_Sky* sky_chunk; /* The unmodified sky chunk being processed. */
-    oskar_Sky* local_sky; /* A copy of the sky chunk after horizon clipping. */
-    oskar_Telescope* tel; /* Telescope model, created as a copy. */
+    oskar_Sky* chunk;           /* The unmodified sky chunk being processed. */
+    oskar_Sky* chunk_clip;      /* Copy of the chunk after horizon clipping. */
+    oskar_Telescope* tel;       /* Telescope model, created as a copy. */
     oskar_Jones *J, *R, *E, *K, *Z;
     oskar_StationWork* station_work;
 
@@ -107,11 +107,11 @@ struct oskar_Simulator
 
     /* State. */
     int init_sky;
-    int chunk_time_index;
+    int work_unit_index;
     oskar_Mutex* mutex;
 
     /* Sky model and telescope model. */
-    int num_chunks;
+    int num_sky_chunks;
     oskar_Sky** sky_chunks;
     oskar_Telescope* tel;
 
@@ -180,7 +180,7 @@ void oskar_simulator_check_init(oskar_Simulator* h, int* status)
         /* Compute source direction cosines relative to phase centre. */
         ra0 = oskar_telescope_phase_centre_ra_rad(h->tel);
         dec0 = oskar_telescope_phase_centre_dec_rad(h->tel);
-        for (i = 0; i < h->num_chunks; ++i)
+        for (i = 0; i < h->num_sky_chunks; ++i)
         {
             oskar_sky_evaluate_relative_directions(h->sky_chunks[i],
                     ra0, dec0, status);
@@ -304,7 +304,12 @@ void oskar_simulator_free(oskar_Simulator* h, int* status)
 {
     int i;
     oskar_simulator_reset_cache(h, status);
-    for (i = 0; i < h->num_chunks; ++i)
+    for (i = 0; i < h->num_gpus; ++i)
+    {
+        oskar_device_set(h->gpu_ids[i], status);
+        oskar_device_reset();
+    }
+    for (i = 0; i < h->num_sky_chunks; ++i)
         oskar_sky_free(h->sky_chunks[i], status);
     oskar_telescope_free(h->tel, status);
     oskar_mem_free(h->temp, status);
@@ -356,21 +361,21 @@ void oskar_simulator_reset_cache(oskar_Simulator* h, int* status)
 
 void oskar_simulator_reset_work_unit_index(oskar_Simulator* h)
 {
-    h->chunk_time_index = 0;
+    h->work_unit_index = 0;
 }
 
 
 void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
         int device_id, int* status)
 {
-    double obs_start_mjd, dt_dump_days, gast, mjd;
+    double obs_start_mjd, dt_dump_days;
     int i_active, time_index_start, time_index_end;
-    int block_length, num_channels, num_times_block, total_chunks, total_times;
+    int num_channels, num_times_block, total_chunks, total_times;
     DeviceData* d;
     if (*status) return;
 
     /* Check that initialisation has happened. We can't initialise here,
-     * as we may be already multi-threaded at this point. */
+     * as we're already multi-threaded at this point. */
     if (!h->header)
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
@@ -399,14 +404,13 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
     oskar_vis_block_clear(d->vis_block, status);
 
     /* Set the visibility block meta-data. */
-    total_chunks = h->num_chunks;
-    block_length = h->max_times_per_block;
+    total_chunks = h->num_sky_chunks;
     num_channels = h->num_channels;
     total_times = h->num_time_steps;
     obs_start_mjd = h->time_start_mjd_utc;
     dt_dump_days = h->time_inc_sec / 86400.0;
-    time_index_start = block_index * block_length;
-    time_index_end = time_index_start + block_length - 1;
+    time_index_start = block_index * h->max_times_per_block;
+    time_index_end = time_index_start + h->max_times_per_block - 1;
     if (time_index_end >= total_times)
         time_index_end = total_times - 1;
     num_times_block = 1 + time_index_end - time_index_start;
@@ -420,36 +424,35 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
     while (!h->coords_only)
     {
         oskar_Sky* sky;
-        int i_chunk_time, i_chunk, i_time, i_channel, sim_time_idx;
+        int i_work_unit, i_chunk, i_time, i_channel, sim_time_idx;
 
         oskar_mutex_lock(h->mutex);
-        i_chunk_time = (h->chunk_time_index)++;
+        i_work_unit = (h->work_unit_index)++;
         oskar_mutex_unlock(h->mutex);
-        if ((i_chunk_time >= num_times_block * total_chunks) || *status) break;
+        if ((i_work_unit >= num_times_block * total_chunks) || *status) break;
 
         /* Convert slice index to chunk/time index. */
-        i_chunk = i_chunk_time / num_times_block;
-        i_time  = i_chunk_time - i_chunk * num_times_block;
+        i_chunk      = i_work_unit / num_times_block;
+        i_time       = i_work_unit - i_chunk * num_times_block;
+        sim_time_idx = time_index_start + i_time;
 
         /* Copy sky chunk to device only if different from the previous one. */
         if (i_chunk != d->previous_chunk_index)
         {
-            d->previous_chunk_index = i_chunk;
             oskar_timer_resume(d->tmr_copy);
-            oskar_sky_copy(d->sky_chunk, h->sky_chunks[i_chunk], status);
+            oskar_sky_copy(d->chunk, h->sky_chunks[i_chunk], status);
             oskar_timer_pause(d->tmr_copy);
         }
+        sky = h->apply_horizon_clip ? d->chunk_clip : d->chunk;
 
-        /* Apply horizon clip, if enabled. */
-        sim_time_idx = time_index_start + i_time;
-        sky = d->sky_chunk;
+        /* Apply horizon clip if required. */
         if (h->apply_horizon_clip)
         {
+            double gast, mjd;
             mjd = obs_start_mjd + dt_dump_days * (sim_time_idx + 0.5);
             gast = oskar_convert_mjd_to_gast_fast(mjd);
-            sky = d->local_sky;
             oskar_timer_resume(d->tmr_clip);
-            oskar_sky_horizon_clip(sky, d->sky_chunk, d->tel, gast,
+            oskar_sky_horizon_clip(d->chunk_clip, d->chunk, d->tel, gast,
                     d->station_work, status);
             oskar_timer_pause(d->tmr_clip);
         }
@@ -471,6 +474,7 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
             }
             sim_baselines(h, d, sky, i_channel, i_time, sim_time_idx, status);
         }
+        d->previous_chunk_index = i_chunk;
     }
 
     /* Copy the visibility block to host memory. */
@@ -560,12 +564,12 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
                 oskar_simulator_write_block(h, block, b - 1, status);
             }
 
-            /* Barrier1: Reset chunk / time work unit index. */
+            /* Barrier 1: Reset work unit index. */
 #pragma omp barrier
             if (thread_id == 0)
                 oskar_simulator_reset_work_unit_index(h);
 
-            /* Barrier2: Synchronise before moving to the next block. */
+            /* Barrier 2: Synchronise before moving to the next block. */
 #pragma omp barrier
             if (thread_id == 0 && b < num_vis_blocks && h->log && !*status)
                 oskar_log_message(h->log, 'S', 0, "Block %*i/%i (%3.0f%%) "
@@ -597,7 +601,7 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
     if (h->log && oskar_telescope_noise_enabled(h->tel) && !*status)
     {
         int have_sources, amp_calibrated;
-        have_sources = (h->num_chunks > 0 &&
+        have_sources = (h->num_sky_chunks > 0 &&
                 oskar_sky_num_sources(h->sky_chunks[0]) > 0);
         amp_calibrated = oskar_station_normalise_final_beam(
                 oskar_telescope_station_const(h->tel, 0));
@@ -787,16 +791,16 @@ void oskar_simulator_set_sky_model(oskar_Simulator* h, const oskar_Sky* sky,
     if (*status) return;
 
     /* Clear the old chunk set. */
-    for (i = 0; i < h->num_chunks; ++i)
+    for (i = 0; i < h->num_sky_chunks; ++i)
         oskar_sky_free(h->sky_chunks[i], status);
     free(h->sky_chunks);
     h->sky_chunks = 0;
-    h->num_chunks = 0;
+    h->num_sky_chunks = 0;
 
     /* Split up the sky model into chunks and store them. */
     h->max_sources_per_chunk = max_sources_per_chunk;
     if (oskar_sky_num_sources(sky) > 0)
-        oskar_sky_append_to_set(&h->num_chunks, &h->sky_chunks,
+        oskar_sky_append_to_set(&h->num_sky_chunks, &h->sky_chunks,
                 max_sources_per_chunk, sky, status);
     h->init_sky = 0;
 }
@@ -1104,9 +1108,7 @@ static void set_up_device_data(oskar_Simulator* h, int* status)
     for (i = 0; i < h->num_devices; ++i)
     {
         DeviceData* d = &h->d[i];
-
-        /* Check if device memory has already been set up. */
-        if (d->vis_block) continue;
+        d->previous_chunk_index = -1;
 
         /* Select the device. */
         if (i < h->num_gpus)
@@ -1119,48 +1121,53 @@ static void set_up_device_data(oskar_Simulator* h, int* status)
             dev_loc = OSKAR_CPU;
         }
 
-        /* Host memory. */
-        d->vis_block_cpu[0] = oskar_vis_block_create_from_header(OSKAR_CPU,
-                h->header, status);
-        d->vis_block_cpu[1] = oskar_vis_block_create_from_header(OSKAR_CPU,
-                h->header, status);
+        /* Timers. */
+        if (!d->tmr_compute)
+        {
+            d->tmr_compute   = oskar_timer_create(OSKAR_TIMER_NATIVE);
+            d->tmr_copy      = oskar_timer_create(OSKAR_TIMER_NATIVE);
+            d->tmr_clip      = oskar_timer_create(OSKAR_TIMER_NATIVE);
+            d->tmr_E         = oskar_timer_create(OSKAR_TIMER_NATIVE);
+            d->tmr_K         = oskar_timer_create(OSKAR_TIMER_NATIVE);
+            d->tmr_join      = oskar_timer_create(OSKAR_TIMER_NATIVE);
+            d->tmr_correlate = oskar_timer_create(OSKAR_TIMER_NATIVE);
+        }
 
-        /* Device memory. */
-        d->previous_chunk_index = -1;
-        d->vis_block = oskar_vis_block_create_from_header(dev_loc,
-                h->header, status);
-        d->u = oskar_mem_create(h->prec, dev_loc, num_stations, status);
-        d->v = oskar_mem_create(h->prec, dev_loc, num_stations, status);
-        d->w = oskar_mem_create(h->prec, dev_loc, num_stations, status);
-        d->sky_chunk = oskar_sky_create(h->prec, dev_loc, num_src, status);
-        d->local_sky = oskar_sky_create(h->prec, dev_loc, num_src, status);
-        d->tel = oskar_telescope_create_copy(h->tel, dev_loc, status);
-        d->J = oskar_jones_create(vistype, dev_loc, num_stations, num_src,
-                status);
-        d->R = oskar_type_is_matrix(vistype) ? oskar_jones_create(vistype,
-                dev_loc, num_stations, num_src, status) : 0;
-        d->E = oskar_jones_create(vistype, dev_loc, num_stations, num_src,
-                status);
-        d->K = oskar_jones_create(complx, dev_loc, num_stations, num_src,
-                status);
-        d->Z = 0;
-        d->station_work = oskar_station_work_create(h->prec, dev_loc, status);
-
-        /* Clear all visibility blocks. */
+        /* Visibility blocks. */
+        if (!d->vis_block)
+        {
+            d->vis_block = oskar_vis_block_create_from_header(dev_loc,
+                    h->header, status);
+            d->vis_block_cpu[0] = oskar_vis_block_create_from_header(OSKAR_CPU,
+                    h->header, status);
+            d->vis_block_cpu[1] = oskar_vis_block_create_from_header(OSKAR_CPU,
+                    h->header, status);
+        }
         oskar_vis_block_clear(d->vis_block, status);
         oskar_vis_block_clear(d->vis_block_cpu[0], status);
         oskar_vis_block_clear(d->vis_block_cpu[1], status);
 
-        /* Timers. */
-        d->tmr_compute   = oskar_timer_create(OSKAR_TIMER_NATIVE);
-        d->tmr_copy      = oskar_timer_create(OSKAR_TIMER_NATIVE);
-        d->tmr_clip      = oskar_timer_create(OSKAR_TIMER_NATIVE);
-        d->tmr_E         = oskar_timer_create(OSKAR_TIMER_NATIVE);
-        d->tmr_K         = oskar_timer_create(OSKAR_TIMER_NATIVE);
-        d->tmr_join      = oskar_timer_create(OSKAR_TIMER_NATIVE);
-        d->tmr_correlate = oskar_timer_create(OSKAR_TIMER_NATIVE);
-        if (i < h->num_gpus)
-            oskar_device_synchronize();
+        /* Device scratch memory. */
+        if (!d->tel)
+        {
+            d->u = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+            d->v = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+            d->w = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+            d->chunk = oskar_sky_create(h->prec, dev_loc, num_src, status);
+            d->chunk_clip = oskar_sky_create(h->prec, dev_loc, num_src, status);
+            d->tel = oskar_telescope_create_copy(h->tel, dev_loc, status);
+            d->J = oskar_jones_create(vistype, dev_loc, num_stations, num_src,
+                    status);
+            d->R = oskar_type_is_matrix(vistype) ? oskar_jones_create(vistype,
+                    dev_loc, num_stations, num_src, status) : 0;
+            d->E = oskar_jones_create(vistype, dev_loc, num_stations, num_src,
+                    status);
+            d->K = oskar_jones_create(complx, dev_loc, num_stations, num_src,
+                    status);
+            d->Z = 0;
+            d->station_work = oskar_station_work_create(h->prec, dev_loc,
+                    status);
+        }
     }
 }
 
@@ -1175,20 +1182,6 @@ static void free_device_data(oskar_Simulator* h, int* status)
         if (!d) continue;
         if (i < h->num_gpus)
             oskar_device_set(h->gpu_ids[i], status);
-        oskar_vis_block_free(d->vis_block_cpu[0], status);
-        oskar_vis_block_free(d->vis_block_cpu[1], status);
-        oskar_vis_block_free(d->vis_block, status);
-        oskar_mem_free(d->u, status);
-        oskar_mem_free(d->v, status);
-        oskar_mem_free(d->w, status);
-        oskar_sky_free(d->sky_chunk, status);
-        oskar_sky_free(d->local_sky, status);
-        oskar_telescope_free(d->tel, status);
-        oskar_station_work_free(d->station_work, status);
-        oskar_jones_free(d->J, status);
-        oskar_jones_free(d->E, status);
-        oskar_jones_free(d->K, status);
-        oskar_jones_free(d->R, status);
         oskar_timer_free(d->tmr_compute);
         oskar_timer_free(d->tmr_copy);
         oskar_timer_free(d->tmr_clip);
@@ -1196,9 +1189,21 @@ static void free_device_data(oskar_Simulator* h, int* status)
         oskar_timer_free(d->tmr_K);
         oskar_timer_free(d->tmr_join);
         oskar_timer_free(d->tmr_correlate);
+        oskar_vis_block_free(d->vis_block_cpu[0], status);
+        oskar_vis_block_free(d->vis_block_cpu[1], status);
+        oskar_vis_block_free(d->vis_block, status);
+        oskar_mem_free(d->u, status);
+        oskar_mem_free(d->v, status);
+        oskar_mem_free(d->w, status);
+        oskar_sky_free(d->chunk, status);
+        oskar_sky_free(d->chunk_clip, status);
+        oskar_telescope_free(d->tel, status);
+        oskar_station_work_free(d->station_work, status);
+        oskar_jones_free(d->J, status);
+        oskar_jones_free(d->E, status);
+        oskar_jones_free(d->K, status);
+        oskar_jones_free(d->R, status);
         memset(d, 0, sizeof(DeviceData));
-        if (i < h->num_gpus)
-            oskar_device_reset();
     }
 }
 

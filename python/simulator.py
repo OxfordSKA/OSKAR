@@ -82,7 +82,8 @@ class Simulator(object):
         """Finalises the simulator.
 
         This method should be called after all blocks have been simulated.
-        It is not necessary to call this if using the run() method.
+        It is not necessary to call this if using the run() or run_blocks()
+        method.
         """
         _simulator_lib.finalise(self._capsule)
 
@@ -152,7 +153,7 @@ class Simulator(object):
 
         This method should be called only after setting all required options.
 
-        Call finalise_block() with the same block ID to finalise the block 
+        Call finalise_block() with the same block index to finalise the block
         after calling this method.
 
         Args:
@@ -166,21 +167,24 @@ class Simulator(object):
         """Sets up and starts worker threads to simulate all visibility blocks.
 
         This is a high-level function that can be used instead of run() to
-        simulate visibility data using multiple threads from within Python.
+        simulate and manipulate visibility data from within Python.
 
-        The virtual method process_block() is called for each visibility block,
+        The method process_block() is called for each visibility block,
         where a handle to the block is supplied as an argument.
 
         Inherit this class and override process_block() to process the
         visibilities differently.
         """
+        self.check_init()
+        self.reset_work_unit_index()
         num_threads = self.num_devices() + 1
-        self.barrier = Barrier(num_threads)
+        self._barrier = Barrier(num_threads)
         threads = []
         for i in range(num_threads):
             threads.append(Thread(target=self._run_blocks, args=[i]))
         for t in threads: t.start()
         for t in threads: t.join()
+        self.finalise()
 
 
     def run(self):
@@ -349,8 +353,8 @@ class Simulator(object):
         Private method to simulate and process visibility blocks concurrently.
 
         Each thread executes this function.
-        For N devices, there must be N+1 threads.
-        Thread 0 is used to finalise the block on the host.
+        For N devices, there will be N+1 threads.
+        Thread 0 is used to finalise the block.
         Threads 1 to N (mapped to compute devices) do the simulation.
 
         Note that no finalisation is performed on the first iteration (as no
@@ -374,9 +378,9 @@ class Simulator(object):
                 self.process_block(block, b - 1)
 
             # Barrier 1: Reset work unit index.
-            self.barrier.wait()
+            self._barrier.wait()
             if thread_id == 0:
                 self.reset_work_unit_index()
 
             # Barrier 2: Synchronise before moving to the next block.
-            self.barrier.wait()
+            self._barrier.wait()

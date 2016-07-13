@@ -7,15 +7,14 @@ import time
 class MySimulator(oskar.Simulator):
     """Simulates and images visibilities concurrently.
 
-    This class inherits the oskar.Simulator class to process each block
-    in the process_block() method.
+    Inherits oskar.Simulator to image each block in the process_block() method.
     """
 
     def __init__(self, imagers, precision='double'):
         """Creates the simulator, storing a handle to the imagers.
 
         Args:
-            imagers (oskar.Imager list): Handles to OSKAR imagers to use.
+            imagers (oskar.Imager list): List of OSKAR imagers to use.
             precision (str): Either 'double' or 'single' to specify
                 the numerical precision of the simulation.
         """
@@ -23,21 +22,14 @@ class MySimulator(oskar.Simulator):
         self.imagers = imagers
 
 
-    def check_init(self):
-        """Calls check_init() on simulator and imager objects."""
-        oskar.Simulator.check_init(self)
-        for i in self.imagers: i.check_init()
-
-
     def finalise(self):
-        """Calls finalise() on simulator and imager objects."""
+        """Called automatically by the base class at the end of run_blocks()."""
         oskar.Simulator.finalise(self)
         for i in self.imagers: i.finalise()
 
 
     def process_block(self, block, block_index):
-        """Images the block, and writes it to any open file(s).
-        Write your own visibility block processor here!
+        """Writes the visibility block to any open file(s), and images it.
 
         Args:
             block (oskar.VisBlock): A handle to the block to be processed.
@@ -103,23 +95,14 @@ if __name__ == '__main__':
     simulator.set_observation_frequency(100e6)
     simulator.set_observation_time(start_time_mjd_utc=51545.0,
         length_sec=43200.0, num_time_steps=48)
-    simulator.set_gpus(None)
-    simulator.set_num_devices(4) # Use 4 CPU threads.
 
-    # Generate visibility coordinates only.
-    # (Needed for uniform weighting, or W-projection.)
+    # Simulate and image visibilities.
+    # Coordinates are needed first for uniform weighting or W-projection.
     start = time.time()
-    print('Generating coordinates...')
+    print('Simulating and imaging...')
     simulator.set_coords_only(True)
     simulator.run_blocks()
-    simulator.set_coords_only(False)
-
-    # Initialise, generate visibilities, and finalise.
-    print('Preparing for visibility run...')
     #simulator.set_output_measurement_set(output_root+'.ms')
-    simulator.check_init()
-    print('Simulating and imaging visibilities...')
+    simulator.set_coords_only(False)
     simulator.run_blocks()
-    print('Finalising...')
-    simulator.finalise()
     print('Completed after %.3f seconds.' % (time.time() - start))
