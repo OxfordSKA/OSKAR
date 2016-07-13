@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,12 +73,6 @@ struct oskar_Sky
     oskar_Mem* gaussian_a;     /**< Gaussian source width parameter */
     oskar_Mem* gaussian_b;     /**< Gaussian source width parameter */
     oskar_Mem* gaussian_c;     /**< Gaussian source width parameter */
-
-#if 0
-    int num_filter_bands;              /* TODO DEPRECATED */
-    oskar_Mem* filter_band_radius_rad; /* TODO DEPRECATED */
-    oskar_Mem* filter_band_flux_jy;    /* TODO DEPRECATED */
-#endif
 };
 
 #ifndef OSKAR_SKY_TYPEDEF_

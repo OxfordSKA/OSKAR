@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,12 +90,6 @@ oskar_Sky* oskar_sky_create(int type, int location, int num_sources,
     model->gaussian_a = oskar_mem_create(type, location, capacity, status);
     model->gaussian_b = oskar_mem_create(type, location, capacity, status);
     model->gaussian_c = oskar_mem_create(type, location, capacity, status);
-
-#if 0
-    model->num_filter_bands = 0;
-    model->filter_band_radius_rad = oskar_mem_create(type, location, 0, status);
-    model->filter_band_flux_jy = oskar_mem_create(type, location, 0, status);
-#endif
 
     /* Return pointer to sky model. */
     return model;

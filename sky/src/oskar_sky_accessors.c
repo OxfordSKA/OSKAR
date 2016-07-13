@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -252,33 +252,6 @@ const oskar_Mem* oskar_sky_gaussian_c_const(const oskar_Sky* sky)
 {
     return sky->gaussian_c;
 }
-
-#if 0
-int oskar_sky_num_filter_bands(const oskar_Sky* sky)
-{
-    return sky->num_filter_bands;
-}
-
-oskar_Mem* oskar_sky_filter_band_radius_rad(oskar_Sky* sky)
-{
-    return sky->filter_band_radius_rad;
-}
-
-const oskar_Mem* oskar_sky_filter_band_radius_rad_const(const oskar_Sky* sky)
-{
-    return sky->filter_band_radius_rad;
-}
-
-oskar_Mem* oskar_sky_filter_band_flux_jy(oskar_Sky* sky)
-{
-    return sky->filter_band_flux_jy;
-}
-
-const oskar_Mem* oskar_sky_filter_band_flux_jy_const(const oskar_Sky* sky)
-{
-    return sky->filter_band_flux_jy;
-}
-#endif
 
 #ifdef __cplusplus
 }

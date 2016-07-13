@@ -10,10 +10,8 @@ set(sky_SRC
     src/oskar_sky_accessors.c
     src/oskar_sky_append_to_set.c
     src/oskar_sky_append.c
-    src/oskar_sky_combine_set.c
     src/oskar_sky_copy.c
     src/oskar_sky_copy_contents.c
-    #src/oskar_sky_copy_filter_bands.c
     src/oskar_sky_copy_source_data.c
     src/oskar_sky_create.c
     src/oskar_sky_create_copy.c
@@ -33,7 +31,6 @@ set(sky_SRC
     src/oskar_sky_rotate_to_position.c
     src/oskar_sky_save.c
     src/oskar_sky_scale_flux_with_frequency.c
-    #src/oskar_sky_set_filter_bands.c
     src/oskar_sky_set_gaussian_parameters.c
     src/oskar_sky_set_source.c
     src/oskar_sky_set_spectral_index.c
