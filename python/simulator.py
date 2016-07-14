@@ -82,13 +82,21 @@ class Simulator(object):
         """Finalises the simulator.
 
         This method should be called after all blocks have been simulated.
-        It is not necessary to call this if using the run() or run_blocks()
-        method.
+        It is not necessary to call this if using the run() method.
         """
         _simulator_lib.finalise(self._capsule)
 
 
-    def num_devices(self):
+    def get_coords_only(self):
+        """Returns whether the simulator provides baseline coordinates only.
+
+        Returns:
+            bool: If set, simulate coordinates only.
+        """
+        return _simulator_lib.coords_only(self._capsule)
+
+
+    def get_num_devices(self):
         """Returns the number of compute devices selected.
 
         Returns:
@@ -97,7 +105,7 @@ class Simulator(object):
         return _simulator_lib.num_devices(self._capsule)
 
 
-    def num_gpus(self):
+    def get_num_gpus(self):
         """Returns the number of GPUs selected.
 
         Returns:
@@ -106,7 +114,7 @@ class Simulator(object):
         return _simulator_lib.num_gpus(self._capsule)
 
 
-    def num_vis_blocks(self):
+    def get_num_vis_blocks(self):
         """Returns the number of visibility blocks required for the simulation.
 
         Returns:
@@ -163,36 +171,33 @@ class Simulator(object):
         _simulator_lib.run_block(self._capsule, block_index, device_id)
 
 
-    def run_blocks(self):
-        """Sets up and starts worker threads to simulate all visibility blocks.
+    def run(self, process_blocks=False):
+        """Runs the simulator.
 
-        This is a high-level function that can be used instead of run() to
-        simulate and manipulate visibility data from within Python.
-
-        The method process_block() is called for each visibility block,
-        where a handle to the block is supplied as an argument.
+        If the process_blocks argument is true, the method process_block()
+        is called for each visibility block, where a handle to the block is
+        supplied as an argument.
 
         Inherit this class and override process_block() to process the
         visibilities differently.
+
+        Args:
+            process_blocks (bool): 
+                If true, call process_block() for each visibility block.
         """
-        self.check_init()
-        self.reset_work_unit_index()
-        num_threads = self.num_devices() + 1
-        self._barrier = Barrier(num_threads)
-        threads = []
-        for i in range(num_threads):
-            threads.append(Thread(target=self._run_blocks, args=[i]))
-        for t in threads: t.start()
-        for t in threads: t.join()
-        self.finalise()
-
-
-    def run(self):
-        """Runs the simulator.
-
-        This method should be called only after setting all required options.
-        """
-        _simulator_lib.run(self._capsule)
+        if process_blocks:
+            self.check_init()
+            self.reset_work_unit_index()
+            num_threads = self.num_devices + 1
+            self._barrier = Barrier(num_threads)
+            threads = []
+            for i in range(num_threads):
+                threads.append(Thread(target=self._run_blocks, args=[i]))
+            for t in threads: t.start()
+            for t in threads: t.join()
+            self.finalise()
+        else:
+            _simulator_lib.run(self._capsule)
 
 
     def set_coords_only(self, value):
@@ -348,6 +353,13 @@ class Simulator(object):
         _simulator_lib.write_block(self._capsule, block._capsule, block_index)
 
 
+    # Properties.
+    coords_only      = property(get_coords_only, set_coords_only)
+    num_devices      = property(get_num_devices, set_num_devices)
+    num_gpus         = property(get_num_gpus)
+    num_vis_blocks   = property(get_num_vis_blocks)
+
+
     def _run_blocks(self, thread_id):
         """
         Private method to simulate and process visibility blocks concurrently.
@@ -366,7 +378,7 @@ class Simulator(object):
             thread_id (int): Zero-based thread ID.
         """
         # Loop over visibility blocks.
-        num_blocks = self.num_vis_blocks()
+        num_blocks = self.num_vis_blocks
         for b in range(num_blocks + 1):
             # Run simulation in threads 1 to N.
             if thread_id > 0 and b < num_blocks:

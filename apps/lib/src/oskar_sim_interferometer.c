@@ -160,16 +160,9 @@ void oskar_simulator_check_init(oskar_Simulator* h, int* status)
         return;
     }
 
-    /* Create the visibility header and set up the output files if required. */
+    /* Create the visibility header if required. */
     if (!h->header)
         set_up_vis_header(h, status);
-    if (h->vis_name && !h->vis)
-        h->vis = oskar_vis_header_write(h->header, h->vis_name, status);
-#ifndef OSKAR_NO_MS
-    if (h->ms_name && !h->ms)
-        h->ms = oskar_vis_header_write_ms(h->header, h->ms_name, OSKAR_TRUE,
-                h->force_polarised_ms, status);
-#endif
 
     /* Calculate source parameters if required. */
     if (!h->init_sky)
@@ -207,6 +200,12 @@ void oskar_simulator_check_init(oskar_Simulator* h, int* status)
 
     /* Check that each compute device has been set up. */
     set_up_device_data(h, status);
+}
+
+
+int oskar_simulator_coords_only(const oskar_Simulator* h)
+{
+    return h->coords_only;
 }
 
 
@@ -879,11 +878,16 @@ void oskar_simulator_write_block(oskar_Simulator* h,
 {
     if (*status) return;
 
-    /* Write the block to whichever file handles are open. */
+    /* Open files only if required, and write the block into them. */
     oskar_timer_resume(h->tmr_write);
 #ifndef OSKAR_NO_MS
+    if (h->ms_name && !h->ms)
+        h->ms = oskar_vis_header_write_ms(h->header, h->ms_name, OSKAR_TRUE,
+                h->force_polarised_ms, status);
     if (h->ms) oskar_vis_block_write_ms(block, h->header, h->ms, status);
 #endif
+    if (h->vis_name && !h->vis)
+        h->vis = oskar_vis_header_write(h->header, h->vis_name, status);
     if (h->vis) oskar_vis_block_write(block, h->vis, block_index, status);
     oskar_timer_pause(h->tmr_write);
 }

@@ -9,7 +9,7 @@ if __name__ == '__main__':
     precision = 'single'
     phase_centre_ra_deg = 0.0
     phase_centre_dec_deg = 60.0
-    output_root = 'test'
+    output_root = 'test_files'
 
     # Define a telescope layout.
     num_stations = 300
@@ -38,16 +38,12 @@ if __name__ == '__main__':
     imagers = []
     for i in range(2):
         imagers.append(oskar.Imager(precision))
-        imagers[i].set_size(2048)
-        imagers[i].set_fov(2.0)
-        imagers[i].set_algorithm('W-projection')
-        imagers[i].set_input_file(output_root+'.vis')
-    imagers[0].set_output_root(output_root+'_uniform')
-    imagers[0].set_weighting('Uniform')
-    imagers[1].set_output_root(output_root+'_natural')
-    imagers[1].set_weighting('Natural')
+        imagers[i].set(fov_deg=2.0, image_size=2048, algorithm='W-projection', 
+            input_file=output_root+'.ms')
+    imagers[0].set(weighting='Natural', output_root=output_root+'_natural')
+    imagers[1].set(weighting='Uniform', output_root=output_root+'_uniform')
 
-    # Set up the simulator.
+    # Set up the basic simulator.
     simulator = oskar.Simulator(precision)
     simulator.set_settings_path(os.path.abspath(__file__))
     simulator.set_sky_model(sky)
@@ -55,10 +51,9 @@ if __name__ == '__main__':
     simulator.set_observation_frequency(100.0e6)
     simulator.set_observation_time(start_time_mjd_utc=51545.0,
         length_sec=43200.0, num_time_steps=48)
-    simulator.set_output_vis_file(output_root+'.vis')
-    #simulator.set_output_measurement_set(output_root+'.ms')
+    simulator.set_output_measurement_set(output_root+'.ms')
 
-    # Run the simulator and imagers in sequence.
+    # Simulate and image visibilities.
     start = time.time()
     print('Running simulator...')
     simulator.run()
@@ -66,3 +61,4 @@ if __name__ == '__main__':
         print('Running imager %d...' % i)
         imager.run()
     print('Completed after %.3f seconds.' % (time.time() - start))
+

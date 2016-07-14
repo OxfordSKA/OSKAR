@@ -39,6 +39,7 @@ from version import __version__
 from sky import Sky
 from telescope import Telescope
 from simulator import Simulator
+from imaging_simulator import ImagingSimulator
 from imager import Imager
 from vis_block import VisBlock
 from vis_header import VisHeader

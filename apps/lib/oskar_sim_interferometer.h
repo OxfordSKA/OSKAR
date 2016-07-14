@@ -54,6 +54,9 @@ OSKAR_APPS_EXPORT
 void oskar_simulator_check_init(oskar_Simulator* h, int* status);
 
 OSKAR_APPS_EXPORT
+int oskar_simulator_coords_only(const oskar_Simulator* h);
+
+OSKAR_APPS_EXPORT
 oskar_Simulator* oskar_simulator_create(int precision, int* status);
 
 OSKAR_APPS_EXPORT

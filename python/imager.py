@@ -83,16 +83,88 @@ class Imager(object):
         _imager_lib.finalise_plane(self._capsule, plane, plane_norm)
 
 
-    def num_w_planes(self):
-        """Returns the number of W-planes in use.
+    def get_algorithm(self):
+        """Returns a string describing the imager algorithm.
 
         Returns:
-            int: The number of W-planes in use.
+            str: The imager algorithm.
+        """
+        return _imager_lib.algorithm(self._capsule)
+
+
+    def get_coords_only(self):
+        """Returns flag specifying whether imager is in coordinate-only mode.
+
+        Returns:
+            bool: If true, imager is in coordinate-only mode.
+        """
+        return _imager_lib.coords_only(self._capsule)
+
+
+    def get_fov(self):
+        """Returns the image field-of-view, in degrees.
+
+        Returns:
+            double: The image field-of-view, in degrees.
+        """
+        return _imager_lib.fov(self._capsule)
+
+
+    def get_image_size(self):
+        """Returns the image side length, in pixels.
+
+        Returns:
+            int: The image side length, in pixels.
+        """
+        return _imager_lib.image_size(self._capsule)
+
+
+    def get_image_type(self):
+        """Returns a string describing the image (polarisation) type.
+
+        Returns:
+            str: The image (polarisation) type.
+        """
+        return _imager_lib.image_type(self._capsule)
+
+
+    def get_input_file(self):
+        """Returns a string containing the input file name.
+
+        Returns:
+            str: The input file name.
+        """
+        return _imager_lib.input_file(self._capsule)
+
+
+    def get_ms_column(self):
+        """Returns a string containing the Measurement Set column to use.
+
+        Returns:
+            str: The column name.
+        """
+        return _imager_lib.ms_column(self._capsule)
+
+
+    def get_num_w_planes(self):
+        """Returns the number of W-planes used.
+
+        Returns:
+            int: The number of W-planes used.
         """
         return _imager_lib.num_w_planes(self._capsule)
 
 
-    def plane_size(self):
+    def get_output_root(self):
+        """Returns a string containing the output root file name.
+
+        Returns:
+            str: The output root file name.
+        """
+        return _imager_lib.output_root(self._capsule)
+
+
+    def get_plane_size(self):
         """Returns the required plane size.
 
         This may be different to the image size, for example if using 
@@ -102,6 +174,24 @@ class Imager(object):
             int: Plane side length.
         """
         return _imager_lib.plane_size(self._capsule)
+
+
+    def get_size(self):
+        """Returns the image side length, in pixels.
+
+        Returns:
+            int: The image side length, in pixels.
+        """
+        return _imager_lib.size(self._capsule)
+
+
+    def get_weighting(self):
+        """Returns a string describing the weighting scheme.
+
+        Returns:
+            str: The weighting scheme.
+        """
+        return _imager_lib.weighting(self._capsule)
 
 
     def reset_cache(self):
@@ -118,6 +208,15 @@ class Imager(object):
         The input filename must be set using set_input_file().
         """
         _imager_lib.run(self._capsule)
+
+
+    def set(self, **kwargs):
+        """Sets multiple properties at once.
+
+        For example: set(fov=2.0, image_size=2048, algorithm='W-projection')
+        """
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
     def set_algorithm(self, algorithm_type):
@@ -205,6 +304,15 @@ class Imager(object):
         """
         _imager_lib.set_grid_kernel(self._capsule, kernel_type,
             support, oversample)
+
+
+    def set_image_size(self, size):
+        """Sets image side length.
+
+        Args:
+            size (int): Image side length in pixels.
+        """
+        self.set_size(size)
 
 
     def set_image_type(self, image_type):
@@ -417,6 +525,23 @@ class Imager(object):
         """
         return _imager_lib.update_plane(self._capsule, uu, vv, ww, 
             amps, weight, plane, plane_norm, weights_grid)
+
+
+    # Properties.
+    algorithm      = property(get_algorithm, set_algorithm)
+    coords_only    = property(get_coords_only, set_coords_only)
+    fov            = property(get_fov, set_fov)
+    fov_deg        = property(get_fov, set_fov)
+    image_size     = property(get_image_size, set_image_size)
+    image_type     = property(get_image_type, set_image_type)
+    input_file     = property(get_input_file, set_input_file)
+    ms_column      = property(get_ms_column, set_ms_column)
+    num_w_planes   = property(get_num_w_planes, set_num_w_planes)
+    output_root    = property(get_output_root, set_output_root)
+    plane_size     = property(get_plane_size)
+    size           = property(get_size, set_size)
+    weighting      = property(get_weighting, set_weighting)
+    wprojplanes    = property(get_num_w_planes, set_num_w_planes)
 
 
     @staticmethod

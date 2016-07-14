@@ -42,13 +42,110 @@ extern "C" {
 
 /**
  * @brief
+ * Returns the imager algorithm.
+ *
+ * @details
+ * Returns a string describing the algorithm used by the imager.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_algorithm(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the flag specifying whether the imager is in coordinate-only mode.
+ *
+ * @details
+ * Returns the flag specifying whether the imager is in coordinate-only mode.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_coords_only(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the image field of view.
+ *
+ * @details
+ * Returns the field of view of the output images, in degrees.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+double oskar_imager_fov(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the image side length.
+ *
+ * @details
+ * Returns the image side length in pixels.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_image_size(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the image (polarisation) type
+ *
+ * @details
+ * Returns a string describing the image (polarisation) type made by the imager.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_image_type(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the input file or Measurement Set.
+ *
+ * @details
+ * Returns the input file or Measurement Set.
+ * This is used when calling oskar_imager_run().
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_input_file(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the Measurement Set column to use.
+ *
+ * @details
+ * Returns the Measurement Set column to use.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_ms_column(const oskar_Imager* h);
+
+/**
+ * @brief
  * Returns the number of W-planes in use.
  *
  * @details
  * Returns the number of W-planes in use.
  */
 OSKAR_EXPORT
-int oskar_imager_num_w_planes(oskar_Imager* h);
+int oskar_imager_num_w_planes(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the output filename root.
+ *
+ * @details
+ * Returns the output filename root.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_output_root(const oskar_Imager* h);
 
 /**
  * @brief
@@ -59,7 +156,7 @@ int oskar_imager_num_w_planes(oskar_Imager* h);
  * This will be different to the image size when using W-projection.
  */
 OSKAR_EXPORT
-int oskar_imager_plane_size(oskar_Imager* h);
+int oskar_imager_plane_size(const oskar_Imager* h);
 
 /**
  * @brief
@@ -222,6 +319,19 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
 OSKAR_EXPORT
 void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
         int support, int oversample, int* status);
+
+/**
+ * @brief
+ * Sets image side length.
+ *
+ * @details
+ * Sets the image side length in pixels.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     size       Image side length in pixels.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_image_size(oskar_Imager* h, int size);
 
 /**
  * @brief
@@ -431,7 +541,7 @@ void oskar_imager_set_num_w_planes(oskar_Imager* h, int value);
  *
  * @details
  * Sets the visibility weighting scheme to use,
- * either "Natural", "Radial" or "Gridless".
+ * either "Natural", "Radial" or "Uniform".
  *
  * @param[in,out] h            Handle to imager.
  * @param[in] type             Visibility weighting type string, as above.
@@ -439,6 +549,30 @@ void oskar_imager_set_num_w_planes(oskar_Imager* h, int value);
  */
 OSKAR_EXPORT
 void oskar_imager_set_weighting(oskar_Imager* h, const char* type, int* status);
+
+/**
+ * @brief
+ * Returns the image side length.
+ *
+ * @details
+ * Returns the image side length in pixels.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_size(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the visibility weighting scheme.
+ *
+ * @details
+ * Returns a string describing the visibility weighting scheme.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_weighting(const oskar_Imager* h);
 
 #ifdef __cplusplus
 }

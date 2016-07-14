@@ -148,6 +148,18 @@ static PyObject* check_init(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* coords_only(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int flag;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    flag = oskar_simulator_coords_only(h);
+    return Py_BuildValue("O", flag ? Py_True : Py_False);
+}
+
+
 static PyObject* create(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
@@ -627,11 +639,14 @@ static PyObject* write_block(PyObject* self, PyObject* args)
 static PyMethodDef methods[] =
 {
         {"check_init", (PyCFunction)check_init, METH_VARARGS, "check_init()"},
+        {"coords_only", (PyCFunction)coords_only,
+                METH_VARARGS, "coords_only()"},
         {"create", (PyCFunction)create, METH_VARARGS, "create(type)"},
         {"finalise_block", (PyCFunction)finalise_block,
                 METH_VARARGS, "finalise_block(block_index)"},
         {"finalise", (PyCFunction)finalise, METH_VARARGS, "finalise()"},
-        {"num_devices", (PyCFunction)num_devices, METH_VARARGS, "num_devices()"},
+        {"num_devices", (PyCFunction)num_devices,
+                METH_VARARGS, "num_devices()"},
         {"num_gpus", (PyCFunction)num_gpus, METH_VARARGS, "num_gpus()"},
         {"num_vis_blocks", (PyCFunction)num_vis_blocks,
                 METH_VARARGS, "num_vis_blocks()"},
