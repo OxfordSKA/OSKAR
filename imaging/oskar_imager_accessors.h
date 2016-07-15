@@ -54,6 +54,54 @@ const char* oskar_imager_algorithm(const oskar_Imager* h);
 
 /**
  * @brief
+ * Returns the image cell size.
+ *
+ * @details
+ * Returns the cell (pixel) size of the output images, in arcsec.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+double oskar_imager_cellsize(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the end channel to image.
+ *
+ * @details
+ * Returns the end channel to image. A value less than 0 means 'all'.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_channel_end(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the flag specifying whether to image each channel separately.
+ *
+ * @details
+ * Returns the flag specifying whether to image each channel separately.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_channel_snapshots(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the start channel to image.
+ *
+ * @details
+ * Returns the start channel to image.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_channel_start(const oskar_Imager* h);
+
+/**
+ * @brief
  * Returns the flag specifying whether the imager is in coordinate-only mode.
  *
  * @details
@@ -185,21 +233,56 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
 
 /**
  * @brief
- * Sets the visibility channel range used by the imager.
+ * Sets the image cell size.
  *
  * @details
- * Sets the visibility channel range used by the imager,
- * and whether frequency-synthesis should be used.
+ * Sets the cell (pixel) size of the output images.
+ *
+ * @param[in,out] h                  Handle to imager.
+ * @param[in]     cellsize_arcsec    Cell size, in arcsec.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_cellsize(oskar_Imager* h, double cellsize_arcsec);
+
+/**
+ * @brief
+ * Sets the end channel to image.
+ *
+ * @details
+ * Sets the end channel to image. A value less than 0 means 'all'.
  *
  * @param[in,out] h          Handle to imager.
- * @param[in]     start      Start channel index.
- * @param[in]     end        End channel index (-1 for all channels).
- * @param[in]     snapshots  If true, image each channel separately;
+ * @param[in]     value      End channel index (-1 for all times).
+ */
+OSKAR_EXPORT
+void oskar_imager_set_channel_end(oskar_Imager* h, int value);
+
+/**
+ * @brief
+ * Sets the flag specifying whether to image each channel separately.
+ *
+ * @details
+ * Sets the flag specifying whether to image each channel separately.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      If true, image each channel separately;
  *                           if false, use frequency synthesis.
  */
 OSKAR_EXPORT
-void oskar_imager_set_channel_range(oskar_Imager* h, int start, int end,
-        int snapshots);
+void oskar_imager_set_channel_snapshots(oskar_Imager* h, int value);
+
+/**
+ * @brief
+ * Sets the start channel to image.
+ *
+ * @details
+ * Sets the start channel to image.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      Start channel index.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_channel_start(oskar_Imager* h, int value);
 
 /**
  * @brief
@@ -329,9 +412,10 @@ void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
  *
  * @param[in,out] h          Handle to imager.
  * @param[in]     size       Image side length in pixels.
+ * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_set_image_size(oskar_Imager* h, int size);
+void oskar_imager_set_image_size(oskar_Imager* h, int size, int* status);
 
 /**
  * @brief
@@ -444,27 +528,50 @@ void oskar_imager_set_oversample(oskar_Imager* h, int value);
  *
  * @param[in,out] h          Handle to imager.
  * @param[in]     size       Image side length in pixels.
+ * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_set_size(oskar_Imager* h, int size);
+void oskar_imager_set_size(oskar_Imager* h, int size, int* status);
 
 /**
  * @brief
- * Sets the visibility time range used by the imager.
+ * Sets the end time index to image.
  *
  * @details
- * Sets the visibility time range used by the imager,
- * and whether time-synthesis should be used.
+ * Sets the end time index to image. A value less than 0 means 'all'.
  *
  * @param[in,out] h          Handle to imager.
- * @param[in]     start      Start time index.
- * @param[in]     end        End time index (-1 for all times).
- * @param[in]     snapshots  If true, image each time slice separately;
+ * @param[in]     value      End time index (-1 for all times).
+ */
+OSKAR_EXPORT
+void oskar_imager_set_time_end(oskar_Imager* h, int value);
+
+/**
+ * @brief
+ * Sets the flag specifying whether to image each time index separately.
+ *
+ * @details
+ * Sets the flag specifying whether to image each time index separately.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      If true, image each time slice separately;
  *                           if false, use time synthesis.
  */
 OSKAR_EXPORT
-void oskar_imager_set_time_range(oskar_Imager* h, int start, int end,
-        int snapshots);
+void oskar_imager_set_time_snapshots(oskar_Imager* h, int value);
+
+/**
+ * @brief
+ * Sets the start time index to image.
+ *
+ * @details
+ * Sets the start time index to image.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      Start time index.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_time_start(oskar_Imager* h, int value);
 
 /**
  * @brief
@@ -561,6 +668,42 @@ void oskar_imager_set_weighting(oskar_Imager* h, const char* type, int* status);
  */
 OSKAR_EXPORT
 int oskar_imager_size(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the end time index to image.
+ *
+ * @details
+ * Returns the end time index to image. A value less than 0 means 'all'.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_time_end(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the flag specifying whether to image each time index separately.
+ *
+ * @details
+ * Returns the flag specifying whether to image each time index separately.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_time_snapshots(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the start time index to image.
+ *
+ * @details
+ * Returns the start time index to image.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_time_start(const oskar_Imager* h);
 
 /**
  * @brief

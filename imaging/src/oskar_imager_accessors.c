@@ -29,11 +29,13 @@
 #include <private_imager.h>
 #include <oskar_imager.h>
 
+#include <oskar_convert_cellsize_to_fov.h>
 #include <oskar_convert_fov_to_cellsize.h>
 #include <oskar_device_utils.h>
 #include <private_imager_free_gpu_data.h>
 #include <private_imager_set_num_planes.h>
 
+#include <oskar_cmath.h>
 #include <float.h>
 #include <stdio.h>
 #include <string.h>
@@ -56,6 +58,30 @@ const char* oskar_imager_algorithm(const oskar_Imager* h)
     case OSKAR_ALGORITHM_DFT_3D: return "DFT 3D";
     default:                     return "";
     }
+}
+
+
+double oskar_imager_cellsize(const oskar_Imager* h)
+{
+    return (h->cellsize_rad * (180.0 / M_PI)) * 3600.0;
+}
+
+
+int oskar_imager_channel_end(const oskar_Imager* h)
+{
+    return h->chan_range[1];
+}
+
+
+int oskar_imager_channel_snapshots(const oskar_Imager* h)
+{
+    return h->chan_snaps;
+}
+
+
+int oskar_imager_channel_start(const oskar_Imager* h)
+{
+    return h->chan_range[0];
 }
 
 
@@ -151,12 +177,31 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
 }
 
 
-void oskar_imager_set_channel_range(oskar_Imager* h, int start, int end,
-        int snapshots)
+void oskar_imager_set_cellsize(oskar_Imager* h, double cellsize_arcsec)
 {
-    h->chan_range[0] = start;
-    h->chan_range[1] = end;
-    h->chan_snaps = snapshots;
+    h->set_cellsize = 1;
+    h->set_fov = 0;
+    h->cellsize_rad = (cellsize_arcsec / 3600.0) * (M_PI / 180.0);
+    h->fov_deg = oskar_convert_cellsize_to_fov(
+            h->cellsize_rad, h->image_size) * (180.0 / M_PI);
+}
+
+
+void oskar_imager_set_channel_end(oskar_Imager* h, int value)
+{
+    h->chan_range[1] = value;
+}
+
+
+void oskar_imager_set_channel_snapshots(oskar_Imager* h, int value)
+{
+    h->chan_snaps = value;
+}
+
+
+void oskar_imager_set_channel_start(oskar_Imager* h, int value)
+{
+    h->chan_range[0] = value;
 }
 
 
@@ -198,9 +243,11 @@ void oskar_imager_set_direction(oskar_Imager* h, double ra_deg, double dec_deg)
 
 void oskar_imager_set_fov(oskar_Imager* h, double fov_deg)
 {
+    h->set_cellsize = 0;
+    h->set_fov = 1;
     h->fov_deg = fov_deg;
-    h->cellsize_rad = oskar_convert_fov_to_cellsize(h->fov_deg * M_PI/180,
-            h->image_size);
+    h->cellsize_rad = oskar_convert_fov_to_cellsize(
+            h->fov_deg * (M_PI / 180.0), h->image_size);
 }
 
 
@@ -278,9 +325,9 @@ void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
 }
 
 
-void oskar_imager_set_image_size(oskar_Imager* h, int size)
+void oskar_imager_set_image_size(oskar_Imager* h, int size, int* status)
 {
-    oskar_imager_set_size(h, size);
+    oskar_imager_set_size(h, size, status);
 }
 
 
@@ -386,21 +433,39 @@ void oskar_imager_set_oversample(oskar_Imager* h, int value)
 }
 
 
-void oskar_imager_set_size(oskar_Imager* h, int size)
+void oskar_imager_set_size(oskar_Imager* h, int size, int* status)
 {
+    if (size < 2 || size % 2 != 0)
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
     h->image_size = size;
     h->grid_size = size;
-    h->cellsize_rad = oskar_convert_fov_to_cellsize(h->fov_deg * M_PI/180,
-            h->image_size);
+    if (h->set_fov)
+        h->cellsize_rad = oskar_convert_fov_to_cellsize(
+                h->fov_deg * (M_PI / 180.0), h->image_size);
+    else if (h->set_cellsize)
+        h->fov_deg = oskar_convert_cellsize_to_fov(
+                h->cellsize_rad, h->image_size) * (180.0 / M_PI);
 }
 
 
-void oskar_imager_set_time_range(oskar_Imager* h, int start, int end,
-        int snapshots)
+void oskar_imager_set_time_end(oskar_Imager* h, int value)
 {
-    h->time_range[0] = start;
-    h->time_range[1] = end;
-    h->time_snaps = snapshots;
+    h->time_range[1] = value;
+}
+
+
+void oskar_imager_set_time_snapshots(oskar_Imager* h, int value)
+{
+    h->time_snaps = value;
+}
+
+
+void oskar_imager_set_time_start(oskar_Imager* h, int value)
+{
+    h->time_range[0] = value;
 }
 
 
@@ -453,6 +518,24 @@ void oskar_imager_set_weighting(oskar_Imager* h, const char* type, int* status)
 int oskar_imager_size(const oskar_Imager* h)
 {
     return h->image_size;;
+}
+
+
+int oskar_imager_time_end(const oskar_Imager* h)
+{
+    return h->time_range[1];
+}
+
+
+int oskar_imager_time_snapshots(const oskar_Imager* h)
+{
+    return h->time_snaps;
+}
+
+
+int oskar_imager_time_start(const oskar_Imager* h)
+{
+    return h->time_range[0];
 }
 
 

@@ -308,7 +308,9 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     {
         oskar_log_warning(h->log,
                 "Irregular data detected. Using full time synthesis.");
-        oskar_imager_set_time_range(h, 0, -1, 0);
+        oskar_imager_set_time_start(h, 0);
+        oskar_imager_set_time_end(h, -1);
+        oskar_imager_set_time_snapshots(h, 0);
     }
 
     /* Set visibility meta-data. */

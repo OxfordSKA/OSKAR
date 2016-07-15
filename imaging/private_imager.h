@@ -57,9 +57,9 @@ struct oskar_Imager
     int chan_snaps, time_snaps, chan_range[2], time_range[2];
     int im_type, im_num_times, im_num_channels, im_num_pols, pol_offset;
     int algorithm, image_size, use_ms, use_stokes, support, oversample;
-    int weighting;
+    int weighting, set_cellsize, set_fov;
     char direction_type, kernel_type, *input_file, *image_root, *ms_column;
-    double fov_deg, im_centre_deg[2];
+    double cellsize_rad, fov_deg, im_centre_deg[2];
 
     /* Visibility meta-data. */
     int vis_time_range[2], vis_chan_range[2];
@@ -79,7 +79,6 @@ struct oskar_Imager
     oskar_Mem *l, *m, *n;
 
     /* FFT imager data. */
-    double cellsize_rad;
     int grid_size;
     oskar_Mem *conv_func, *corr_func, *fftpack_wsave, *fftpack_work;
 #ifdef OSKAR_HAVE_CUDA

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_fov_to_cellsize.h>
+#include <oskar_convert_cellsize_to_fov.h>
 
 #include <math.h>
 
@@ -34,9 +34,9 @@
 extern "C" {
 #endif
 
-double oskar_convert_fov_to_cellsize(double fov_rad, int num_pixels)
+double oskar_convert_cellsize_to_fov(double cellsize_rad, int num_pixels)
 {
-    return asin(2.0 * sin(0.5 * fov_rad) / num_pixels);
+    return 2.0 * asin(0.5 * num_pixels * sin(cellsize_rad));
 }
 
 #ifdef __cplusplus

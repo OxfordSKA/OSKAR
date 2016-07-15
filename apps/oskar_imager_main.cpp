@@ -96,16 +96,20 @@ int main(int argc, char** argv)
     oskar_imager_set_ms_column(h, s.to_string("ms_column", &e).c_str(), &e);
     oskar_imager_set_output_root(h, s.to_string("root_path", &e).c_str(), &e);
     oskar_imager_set_image_type(h, s.to_string("image_type", &e).c_str(), &e);
-    oskar_imager_set_fov(h, s.to_double("fov_deg", &e));
-    oskar_imager_set_size(h, s.to_int("size", &e));
+    if (s.to_int("specify_cellsize", &e))
+        oskar_imager_set_cellsize(h, s.to_double("cellsize_arcsec", &e));
+    else
+        oskar_imager_set_fov(h, s.to_double("fov_deg", &e));
+    oskar_imager_set_size(h, s.to_int("size", &e), &e);
+    oskar_imager_set_channel_snapshots(h, s.to_int("channel_snapshots", &e));
+    oskar_imager_set_channel_start(h, s.to_int("channel_start", &e));
     end = s.starts_with("channel_end", "max", &e) ? -1 :
             s.to_int("channel_end", &e);
-    oskar_imager_set_channel_range(h, s.to_int("channel_start", &e), end,
-            s.to_int("channel_snapshots", &e));
-    end = s.starts_with("time_end", "max", &e) ? -1 :
-            s.to_int("time_end", &e);
-    oskar_imager_set_time_range(h, s.to_int("time_start", &e), end,
-            s.to_int("time_snapshots", &e));
+    oskar_imager_set_channel_end(h, end);
+    oskar_imager_set_time_snapshots(h, s.to_int("time_snapshots", &e));
+    oskar_imager_set_time_start(h, s.to_int("time_start", &e));
+    end = s.starts_with("time_end", "max", &e) ? -1 : s.to_int("time_end", &e);
+    oskar_imager_set_time_end(h, end);
     oskar_imager_set_algorithm(h, s.to_string("algorithm", &e).c_str(), &e);
     oskar_imager_set_weighting(h, s.to_string("weighting", &e).c_str(), &e);
     if (s.starts_with("algorithm", "FFT", &e) ||
@@ -116,8 +120,8 @@ int main(int argc, char** argv)
                 s.to_int("fft/support", &e),
                 s.to_int("fft/oversample", &e), &e);
     }
-    if (!s.starts_with("wproj/w_planes", "auto", &e))
-        oskar_imager_set_num_w_planes(h, s.to_int("wproj/w_planes", &e));
+    if (!s.starts_with("wproj/num_w_planes", "auto", &e))
+        oskar_imager_set_num_w_planes(h, s.to_int("wproj/num_w_planes", &e));
     oskar_imager_set_fft_on_gpu(h, s.to_int("fft/use_gpu", &e));
     if (s.first_letter("direction", &e) == 'R')
     {

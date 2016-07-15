@@ -26,19 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_fov_to_cellsize.h>
+#ifndef OSKAR_CONVERT_CELLSIZE_TO_FOV_H_
+#define OSKAR_CONVERT_CELLSIZE_TO_FOV_H_
 
-#include <math.h>
+/**
+ * @file oskar_convert_cellsize_to_fov.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-double oskar_convert_fov_to_cellsize(double fov_rad, int num_pixels)
-{
-    return asin(2.0 * sin(0.5 * fov_rad) / num_pixels);
-}
+/**
+ * @brief
+ * Converts image cell size to field of view.
+ *
+ * @details
+ * Converts image cell size to field of view, in radians.
+ *
+ * @param[in] cellsize_rad Cell size, in radians.
+ * @param[in] num_pixels   Side length of image.
+ */
+OSKAR_EXPORT
+double oskar_convert_cellsize_to_fov(double cellsize_rad, int num_pixels);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_CONVERT_CELLSIZE_TO_FOV_H_ */
