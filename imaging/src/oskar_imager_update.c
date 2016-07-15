@@ -315,7 +315,7 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
     /* Just update the grid of weights if we're in coordinate-only mode. */
     if (h->coords_only)
     {
-        oskar_imager_update_weights_grid(h, num_vis, uu, vv, ww, weight,
+        oskar_imager_update_weights_grid(h, num_vis, pu, pv, pw, ph,
                 weights_grid, status);
     }
     else
