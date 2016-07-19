@@ -148,6 +148,7 @@ fitsfile* create_fits_file(const char* filename, int precision,
             start_time_mjd, delta_time_sec, 1.0, 0.0, status);
 
     /* Write other headers. */
+    fits_write_key_str(f, "BUNIT", "JY/BEAM", "Brightness units", status);
     fits_write_key_str(f, "TIMESYS", "UTC", NULL, status);
     fits_write_key_str(f, "TIMEUNIT", "s", "Time axis units", status);
     fits_write_key_dbl(f, "MJD-OBS", start_time_mjd, 10, "Start time", status);
