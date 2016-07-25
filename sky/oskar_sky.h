@@ -81,11 +81,13 @@ enum OSKAR_SKY_TAGS
 #include <oskar_sky_filter_by_flux.h>
 #include <oskar_sky_filter_by_radius.h>
 #include <oskar_sky_free.h>
+#include <oskar_sky_from_fits_file.h>
+#include <oskar_sky_from_healpix_ring.h>
+#include <oskar_sky_from_image.h>
 #include <oskar_sky_generate_grid.h>
 #include <oskar_sky_generate_random_power_law.h>
 #include <oskar_sky_horizon_clip.h>
 #include <oskar_sky_load.h>
-#include <oskar_sky_load_gsm.h>
 #include <oskar_sky_override_polarisation.h>
 #include <oskar_sky_read.h>
 #include <oskar_sky_resize.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,6 +100,8 @@ typedef struct oskar_SettingsSkyOskar oskar_SettingsSkyOskar;
 struct oskar_SettingsSkyGsm
 {
     char* file;    /**< Filename of GSM file to load. */
+    double freq_hz; /**< Frequency at which to apply K -> Jy conversion. */
+    double spectral_index; /**< Spectral index of pixels. */
     oskar_SettingsSkyFilter filter;
     oskar_SettingsSkyExtendedSources extended_sources;
 };
@@ -114,10 +116,12 @@ struct oskar_SettingsSkyFitsImage
 {
     int num_files;            /**< Number of FITS image files to load. */
     char** file;              /**< List of FITS image files. */
-    double spectral_index;    /**< Spectral index value of pixels in file. */
-    double noise_floor;       /**< Noise floor in Jy. */
     double min_peak_fraction; /**< Minimum fraction of peak value to accept. */
-    int downsample_factor;    /**< Factor by which to downsample pixel grid. */
+    double min_abs_val;       /**< Noise floor in Jy. */
+    char* default_map_units;  /**< Units of input map. */
+    int override_map_units;   /**< Set if overriding units with the default. */
+    double spectral_index;    /**< Spectral index value of pixels in file. */
+    oskar_SettingsSkyFilter filter;
 };
 typedef struct oskar_SettingsSkyFitsImage oskar_SettingsSkyFitsImage;
 
@@ -130,19 +134,17 @@ struct oskar_SettingsSkyHealpixFits
 {
     int num_files;  /**< Number of HEALPix-FITS files to load. */
     char** file;    /**< List of HEALPix-FITS input sky model files. */
+    double min_peak_fraction; /**< Minimum fraction of peak value to accept. */
+    double min_abs_val;       /**< Noise floor in Jy. */
     int coord_sys;  /**< Coordinate system to apply (enumerator). */
-    int map_units;  /**< Units of input map (enumerator). */
+    char* default_map_units;  /**< Units of input map. */
+    int override_map_units;   /**< Set if overriding units with the default. */
+    double freq_hz; /**< Frequency at which to apply K -> Jy conversion. */
+    double spectral_index; /**< Spectral index of pixels. */
     oskar_SettingsSkyFilter filter;
     oskar_SettingsSkyExtendedSources extended_sources;
 };
 typedef struct oskar_SettingsSkyHealpixFits oskar_SettingsSkyHealpixFits;
-
-enum OSKAR_MAP_UNITS
-{
-    OSKAR_MAP_UNITS_JY,
-    OSKAR_MAP_UNITS_K_PER_SR,
-    OSKAR_MAP_UNITS_MK_PER_SR
-};
 
 /**
  * @struct oskar_SettingsSkyGeneratorPowerLaw

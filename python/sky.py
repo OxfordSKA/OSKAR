@@ -111,12 +111,46 @@ class Sky(object):
 
 
     def append_file(self, filename):
-        """Appends data to the sky model from a file.
+        """Appends data to the sky model from a text file.
 
         Args:
-            filename (str): Name of file to open.
+            filename (str): Name of file to load.
         """
         _sky_lib.append_file(self._capsule, filename)
+
+
+    @classmethod
+    def from_fits_file(cls, filename, min_peak_fraction=0.0, min_abs_val=0.0,
+            default_map_units='K', override_units=False,
+            frequency_hz=0.0, spectral_index=-0.7, precision='double'):
+        """Loads data from a FITS file and returns it as a new sky model.
+
+        The file can be either a regular FITS image
+        or a HEALPix FITS file in RING format.
+
+        Args:
+            filename (str): Name of FITS file to load.
+            min_peak_fraction (Optional[float]):
+                Minimum pixel value loaded, as a fraction of the image peak.
+            min_abs_val (Optional[float]):
+                Minimum pixel value loaded.
+            default_map_units (Optional[str]):
+                Default map units, if not found in the file.
+                Can be 'Jy/beam', 'Jy/pixel', 'K' or 'mK'.
+            override_units (Optional[boolean]):
+                If true, override image units with the default.
+            frequency_hz (Optional[float]):
+                Frequency of the image data in Hz, if not found in the file.
+            spectral_index (Optional[float]):
+                Spectral index value to give to each pixel.
+            precision (Optional[str]): Either 'double' or 'single' to specify
+                the numerical precision of the data.
+        """
+        t = Sky()
+        t._capsule = _sky_lib.from_fits_file(filename, min_peak_fraction,
+            min_abs_val, default_map_units, override_units, frequency_hz,
+            spectral_index, precision)
+        return t
 
 
     @classmethod
@@ -158,6 +192,20 @@ class Sky(object):
         t = Sky()
         t._capsule = _sky_lib.generate_random_power_law(num_sources,
             min_flux_jy, max_flux_jy, power_law_index, seed, precision)
+        return t
+
+
+    @classmethod
+    def load(cls, filename, precision='double'):
+        """Loads data from a text file and returns it as a new sky model.
+
+        Args:
+            filename (str): Name of file to load.
+            precision (Optional[str]): Either 'double' or 'single' to specify
+                the numerical precision of the data.
+        """
+        t = Sky()
+        t._capsule = _sky_lib.load(filename, precision)
         return t
 
 

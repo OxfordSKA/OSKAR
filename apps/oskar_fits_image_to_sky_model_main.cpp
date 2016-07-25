@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,19 +27,18 @@
  */
 
 #include "apps/lib/oskar_OptionParser.h"
-#include "fits/oskar_fits_image_to_sky_model.h"
 
-#include <oskar_sky.h>
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
+#include <oskar_sky.h>
 #include <oskar_version_string.h>
 
 #include <cstdio>
+#include <cstring>
 
 int main(int argc, char** argv)
 {
-    // Check if built with FITS support.
-    int error = OSKAR_SUCCESS;
+    int error = 0;
 
     oskar_OptionParser opt("oskar_fits_image_to_sky_model",
             oskar_version_string());
@@ -52,36 +51,23 @@ int main(int argc, char** argv)
             "be given to each pixel in the output sky model.", 1, "0.0");
     opt.addFlag("-f", "Minimum allowed fraction of image peak. Pixel values "
             "below this fraction will be ignored.", 1, "0.0");
-    opt.addFlag("-d", "Downsample factor. This is an integer that must "
-            "be >= 1, and is the factor by which the image is downsampled "
-            "before saving the regrouped pixel values in the sky model. "
-            "For example, a downsample factor of 2 would scale the image down "
-            "by 50% in both dimensions before the format conversion.", 1, "1");
-    opt.addFlag("-n", "Noise floor in Jy/PIXEL. Pixels below this value "
-            "will be ignored.", 1, "0.0");
+    opt.addFlag("-n", "Noise floor in units of original image. "
+            "Pixels below this value will be ignored.", 1, "0.0");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
 
     // Parse command line.
     double spectral_index = 0.0;
     double min_peak_fraction = 0.0;
-    double noise_floor = 0.0;
-    int downsample_factor = 1;
-    opt.get("-d")->getInt(downsample_factor);
+    double min_abs_val = 0.0;
     opt.get("-f")->getDouble(min_peak_fraction);
-    opt.get("-n")->getDouble(noise_floor);
+    opt.get("-n")->getDouble(min_abs_val);
     opt.get("-s")->getDouble(spectral_index);
 
-    // Load the FITS file as a sky model.
-    oskar_Sky* sky = oskar_sky_create(OSKAR_DOUBLE,
-            OSKAR_CPU, 0, &error);
-    error = oskar_fits_image_to_sky_model(0, opt.getArg(0), sky,
-            spectral_index, min_peak_fraction, noise_floor, downsample_factor);
-    if (error)
-    {
-        oskar_log_error(0, oskar_get_error_string(error));
-        return error;
-    }
+    // Load the FITS image data.
+    oskar_Sky* sky = oskar_sky_from_fits_file(OSKAR_DOUBLE, opt.getArg(0),
+            min_peak_fraction, min_abs_val, "Jy/beam", 0, 0.0, spectral_index,
+            &error);
 
     // Write out the sky model.
     oskar_sky_save(opt.getArg(1), sky, &error);
@@ -92,5 +78,5 @@ int main(int argc, char** argv)
     }
 
     oskar_sky_free(sky, &error);
-    return OSKAR_SUCCESS;
+    return 0;
 }

@@ -310,8 +310,36 @@ static PyObject* create(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "s", &type)) return 0;
     prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
     h = oskar_sky_create(prec, OSKAR_CPU, 0, &status);
-    capsule = PyCapsule_New((void*)h, name,
-            (PyCapsule_Destructor)sky_free);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+}
+
+
+static PyObject* from_fits_file(PyObject* self, PyObject* args)
+{
+    oskar_Sky* h = 0;
+    PyObject* capsule = 0;
+    int status = 0, override_units = 0, prec = 0;
+    double frequency_hz, spectral_index, min_peak_fraction, min_abs_val;
+    const char *default_map_units = 0, *filename = 0, *type = 0;
+    if (!PyArg_ParseTuple(args, "sddsidds", &filename,
+            &min_peak_fraction, &min_abs_val, &default_map_units,
+            &override_units, &frequency_hz, &spectral_index, &type))
+        return 0;
+    prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
+    h = oskar_sky_from_fits_file(prec, filename, min_peak_fraction,
+            min_abs_val, default_map_units, override_units, frequency_hz,
+            spectral_index, &status);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_from_fits_file() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
@@ -343,8 +371,7 @@ static PyObject* generate_grid(PyObject* self, PyObject* args)
         oskar_sky_free(h, &status);
         return 0;
     }
-    capsule = PyCapsule_New((void*)h, name,
-            (PyCapsule_Destructor)sky_free);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
@@ -373,8 +400,30 @@ static PyObject* generate_random_power_law(PyObject* self, PyObject* args)
         oskar_sky_free(h, &status);
         return 0;
     }
-    capsule = PyCapsule_New((void*)h, name,
-            (PyCapsule_Destructor)sky_free);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+}
+
+
+static PyObject* load(PyObject* self, PyObject* args)
+{
+    oskar_Sky* h = 0;
+    PyObject* capsule = 0;
+    int status = 0, prec = 0;
+    const char *filename = 0, *type = 0;
+    if (!PyArg_ParseTuple(args, "ss", &filename, &type)) return 0;
+    prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
+    h = oskar_sky_load(filename, prec, &status);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_load() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
@@ -442,8 +491,7 @@ static PyObject* set_up(PyObject* self, PyObject* args)
 
     /* Create the PyCapsule and return it. */
     oskar_settings_old_free(&s_old);
-    capsule = PyCapsule_New((void*)h, name,
-            (PyCapsule_Destructor)sky_free);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
@@ -451,19 +499,25 @@ static PyObject* set_up(PyObject* self, PyObject* args)
 /* Method table. */
 static PyMethodDef methods[] =
 {
-        {"create", (PyCFunction)create, METH_VARARGS, "create(type)"},
+        {"create", (PyCFunction)create, METH_VARARGS, "create(precision)"},
         {"append", (PyCFunction)append, METH_VARARGS, "append(sky)"},
         {"append_sources", (PyCFunction)append_sources, METH_VARARGS,
                 "append_sources(ra, dec, I, Q, U, V, ref_freq, spectral_index, "
                 "rotation_measure, major, minor, position_angle)"},
-        {"append_file", (PyCFunction)append_file, METH_VARARGS,
-                "append_file(filename)"},
-        {"save", (PyCFunction)save, METH_VARARGS, "save(filename)"},
-        {"generate_grid", (PyCFunction)generate_grid, METH_VARARGS,
-                "generate_grid()"},
+        {"append_file", (PyCFunction)append_file,
+                METH_VARARGS, "append_file(filename)"},
+        {"from_fits_file", (PyCFunction)from_fits_file,
+                METH_VARARGS, "from_fits_file(filename, min_peak_fraction, "
+                "min_abs_val, default_map_units, override_map_units, "
+                "frequency_hz, spectral_index, precision)"},
+        {"generate_grid", (PyCFunction)generate_grid,
+                METH_VARARGS, "generate_grid(ra0, dec0, side_length, "
+                "fov, mean_flux_jy, std_flux_jy, seed, precision)"},
         {"generate_random_power_law", (PyCFunction)generate_random_power_law,
                 METH_VARARGS, "generate_random_power_law(num_sources, "
-                        "min_flux_jy, max_flux_jy, power, seed, type)"},
+                        "min_flux_jy, max_flux_jy, power, seed, precision)"},
+        {"load", (PyCFunction)load, METH_VARARGS, "load(filename, precision)"},
+        {"save", (PyCFunction)save, METH_VARARGS, "save(filename)"},
         {"set_up", (PyCFunction)set_up, METH_VARARGS, "set_up(settings_path)"},
         {NULL, NULL, 0, NULL}
 };

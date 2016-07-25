@@ -8,6 +8,7 @@ set(${name}_SRC
     src/oskar_convert_apparent_ha_dec_to_enu_directions.c # Deprecated
     src/oskar_convert_apparent_ra_dec_to_az_el.c # Deprecated
     src/oskar_convert_apparent_ra_dec_to_enu_directions.c # Deprecated
+    src/oskar_convert_brightness_to_jy.c
     src/oskar_convert_cellsize_to_fov.c
     src/oskar_convert_cirs_ra_dec_to_enu_directions.c
     src/oskar_convert_cirs_relative_directions_to_enu_directions.c

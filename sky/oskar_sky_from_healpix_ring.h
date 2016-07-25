@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FITS_HEALPIX_TO_SKY_MODEL_H_
-#define OSKAR_FITS_HEALPIX_TO_SKY_MODEL_H_
+#ifndef OSKAR_SKY_FROM_HEALPIX_RING_H_
+#define OSKAR_SKY_FROM_HEALPIX_RING_H_
 
 /**
- * @file oskar_fits_healpix_to_sky_model.h
+ * @file oskar_sky_from_healpix_ring.h
  */
 
 #include <oskar_global.h>
 #include <oskar_sky.h>
-#include <oskar_SettingsSky.h>
-#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,24 +42,28 @@ extern "C" {
 
 /**
  * @brief
- * Reads a FITS file into a sky model structure.
+ * Creates a sky model from an array of HEALPix pixels.
  *
  * @details
- * This function reads data from a FITS file into an OSKAR sky model structure.
+ * Creates a sky model from an array of HEALPix pixels.
+ * The pixellisation must be in RING format.
  *
- * @param[in,out] log    Pointer to log structure to use.
- * @param[in] filename   File name of FITS image to write.
- * @param[in] settings   Pointer to settings structure to use when reading files.
- * @param[out] sky       Pointer to sky model to fill.
- * @param[in,out] status Status return code.
+ * @param[in] precision           Enumerated precision of the output sky model.
+ * @param[in] data                HEALPix data array (values in Jy).
+ * @param[in] frequency_hz        Reference frequency, in Hz.
+ * @param[in] spectral_index      Spectral index to give to each pixel.
+ * @param[in] nside               HEALPix resolution parameter.
+ * @param[in] galactic_coords     If true, map is in Galactic coordinates;
+ *                                otherwise, equatorial coordinates.
+ * @param[in,out] status          Status return code.
  */
-OSKAR_FITS_EXPORT
-void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
-        const oskar_SettingsSkyHealpixFits* settings, oskar_Sky* sky,
-        int* status);
+OSKAR_EXPORT
+oskar_Sky* oskar_sky_from_healpix_ring(int precision, const oskar_Mem* data,
+        double frequency_hz, double spectral_index, int nside,
+        int galactic_coords, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_FITS_HEALPIX_TO_SKY_MODEL_H_ */
+#endif /* OSKAR_SKY_FROM_HEALPIX_RING_H_ */

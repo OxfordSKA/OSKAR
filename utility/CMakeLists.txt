@@ -38,6 +38,8 @@ set(utility_SRC
     src/oskar_mem_random_range.c
     src/oskar_mem_random_uniform.c
     src/oskar_mem_read_binary_raw.c
+    src/oskar_mem_read_fits_image_plane.c
+    src/oskar_mem_read_healpix_fits.c
     src/oskar_mem_realloc.c
     src/oskar_mem_save_ascii.c
     src/oskar_mem_scale_real.c
@@ -45,6 +47,7 @@ set(utility_SRC
     src/oskar_mem_set_element.c
     src/oskar_mem_set_value_real.c
     src/oskar_mem_stats.c
+    src/oskar_mem_write_healpix_fits.c
     src/oskar_mutex.c
     src/oskar_scan_binary_file.c
     src/oskar_string_to_array.c

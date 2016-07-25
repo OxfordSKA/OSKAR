@@ -110,9 +110,6 @@ enum OSKAR_ERROR_CODES
     /* Indicates an invalid range selection. */
     OSKAR_ERR_INVALID_RANGE            = -21,
 
-    /* Indicates a problem with FITS I/O. */
-    OSKAR_ERR_FITS_IO                  = -22,
-
     /* Indicates coordinate type mismatch. */
     OSKAR_ERR_COORD_TYPE_MISMATCH      = -23,
 
@@ -324,11 +321,6 @@ enum OSKAR_DIRECTION_TYPE
 #    define OSKAR_EXPORT OSKAR_DECL_EXPORT
 #else
 #    define OSKAR_EXPORT OSKAR_DECL_IMPORT
-#endif
-#ifdef oskar_fits_EXPORTS
-#    define OSKAR_FITS_EXPORT OSKAR_DECL_EXPORT
-#else
-#    define OSKAR_FITS_EXPORT OSKAR_DECL_IMPORT
 #endif
 #ifdef oskar_ms_EXPORTS
 #    define OSKAR_MS_EXPORT OSKAR_DECL_EXPORT

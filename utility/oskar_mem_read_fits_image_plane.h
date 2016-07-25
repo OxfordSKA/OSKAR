@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_LOAD_GSM_H_
-#define OSKAR_SKY_LOAD_GSM_H_
+#ifndef OSKAR_MEM_READ_FITS_IMAGE_PLANE_H_
+#define OSKAR_MEM_READ_FITS_IMAGE_PLANE_H_
 
 /**
- * @file oskar_sky_load_gsm.h
+ * @file oskar_mem_read_fits_image_plane.h
  */
 
 #include <oskar_global.h>
@@ -41,39 +41,36 @@ extern "C" {
 
 /**
  * @brief
- * Loads pixels from a GSM text file into an OSKAR sky model structure.
+ * Reads pixel data from a FITS image file.
  *
  * @details
- * This function loads data from a GSM text file.
- * The data must be given in the HEALPix RING scheme.
+ * Reads pixel data from a FITS image file.
  *
- * N.B. This function assumes that the values of pixels in the input GSM
- * data file are in units of Kelvin per steradian. These are converted to
- * Jansky per pixel using the following method:
+ * The returned \p brightness_units string is allocated internally,
+ * and must be freed by the caller.
  *
- * First obtain Kelvin per pixel by dividing the values of the input points
- * by the number of pixels per steradian.
- *
- * Then convert Kelvin per pixel to Jansky per pixel using the relation
- * between antenna temperature T and flux S:
- * S(Jy) = 2 * k_B * T(K) * 1e26.
- *
- * Note that this assumes that any wavelength dependence is already
- * in the input temperature data, so there is NO division by the square of
- * the wavelength.
- *
- * Lines beginning with a hash symbol (#) are treated as comments and therefore
- * ignored.
- *
- * @param[out] sky       Pointer to sky model structure to fill.
- * @param[in]  filename  Path to the a source list file.
- * @param[in,out] status Status return code.
+ * @param[in] filename            Name of HEALPix FITS file to read.
+ * @param[in] i_time              Zero-based time index of the plane to read.
+ * @param[in] i_chan              Zero-based channel index of the plane to read.
+ * @param[in] i_stokes            Zero-based Stokes index of the plane to read.
+ * @param[out] image_ra_deg       Image centre Right Ascension, in degrees.
+ * @param[out] image_dec_deg      Image centre Declination, in degrees.
+ * @param[out] image_cellsize_deg Image centre Declination, in degrees.
+ * @param[out] image_time         Time value of the plane.
+ * @param[out] image_freq         Frequency value of the plane.
+ * @param[out] beam_area_pixels   Beam area, in pixels (if found).
+ * @param[out] brightness_units   Brightness units (contents of BUNIT keyword).
+ * @param[in,out] status          Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename, int* status);
+oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
+        int i_chan, int i_stokes, int* image_width, int* image_height,
+        double* image_ra_deg, double* image_dec_deg, double* image_cellsize_deg,
+        double* image_time, double* image_freq, double* beam_area_pixels,
+        char** brightness_units, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_LOAD_GSM_H_ */
+#endif /* OSKAR_MEM_READ_FITS_IMAGE_PLANE_H_ */

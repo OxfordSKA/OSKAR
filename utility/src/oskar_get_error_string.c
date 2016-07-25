@@ -94,8 +94,6 @@ const char* oskar_get_error_string(int error)
             return "unable to fit ellipse";
         case OSKAR_ERR_INVALID_RANGE:
             return "invalid range";
-        case OSKAR_ERR_FITS_IO:
-            return "problem reading or writing FITS file";
         case OSKAR_ERR_COORD_TYPE_MISMATCH:
             return "coordinate type mismatch";
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FITS_HEALPIX_WRITE_MEM_H_
-#define OSKAR_FITS_HEALPIX_WRITE_MEM_H_
+#ifndef OSKAR_CONVERT_BRIGHTNESS_TO_JY_H_
+#define OSKAR_CONVERT_BRIGHTNESS_TO_JY_H_
 
 /**
- * @file oskar_fits_healpix_write_mem.h
+ * @file oskar_convert_brightness_to_jy.h
  */
 
 #include <oskar_global.h>
@@ -42,14 +42,32 @@ extern "C" {
 
 /**
  * @brief
+ * Converts brightness values to Jy/pixel, if required.
+ *
  * @details
+ * Converts brightness values to Jy/pixel, if required.
+ *
+ * The unit strings can be either "Jy/pixel", "Jy/beam", "K" or "mK".
+ *
+ * @param[in,out] data             Array of pixels to convert.
+ * @param[in] beam_area_pixels     Beam area, in pixels, if input is Jy/beam.
+ * @param[in] pixel_area_sr        Pixel area, in steradians, if input is K.
+ * @param[in] frequency_hz         Image frequency in Hz.
+ * @param[in] min_peak_fraction    Minimum allowed fraction of image peak.
+ * @param[in] min_abs_val          Minimum absolute value, in original units.
+ * @param[in] reported_map_units   String describing units of input map.
+ * @param[in] default_map_units    String describing default units of input map.
+ * @param[in] override_input_units If set, override reported units with default.
+ * @param[in,out] status           Status return code.
  */
-OSKAR_FITS_EXPORT
-void oskar_fits_healpix_write_mem(const char* filename, oskar_Mem* data,
-        int nside, int* status);
+OSKAR_EXPORT
+void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
+        double pixel_area_sr, double frequency_hz, double min_peak_fraction,
+        double min_abs_val, const char* reported_map_units,
+        const char* default_map_units, int override_input_units, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_FITS_HEALPIX_WRITE_MEM_H_ */
+#endif /* OSKAR_CONVERT_BRIGHTNESS_TO_JY_H_ */

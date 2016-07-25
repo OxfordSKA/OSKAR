@@ -76,7 +76,8 @@ if (CUDA_FOUND)
     target_link_libraries(${libname}
         oskar_settings_struct
         oskar_log
-        oskar_binary)
+        oskar_binary
+        cfitsio)
 
     if (OSKAR_USE_LAPACK)
         target_link_libraries(${libname} ${OSKAR_LAPACK})
@@ -102,7 +103,6 @@ endif ()
 
 # === Build other oskar libraries.
 add_subdirectory(apps)
-add_subdirectory(fits)
 add_subdirectory(ms)
 add_subdirectory(settings)
 add_subdirectory(imaging)
@@ -150,6 +150,7 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/."
     PATTERN *dierckx* EXCLUDE
     PATTERN src  EXCLUDE
     PATTERN test EXCLUDE
+    PATTERN tests EXCLUDE
     PATTERN extern EXCLUDE
     PATTERN .svn EXCLUDE
     PATTERN .git EXCLUDE)

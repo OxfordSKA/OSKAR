@@ -19,12 +19,14 @@ set(sky_SRC
     src/oskar_sky_evaluate_relative_directions.c
     src/oskar_sky_filter_by_flux.c
     src/oskar_sky_filter_by_radius.c
+    src/oskar_sky_from_fits_file.c
+    src/oskar_sky_from_healpix_ring.c
+    src/oskar_sky_from_image.c
     src/oskar_sky_free.c
     src/oskar_sky_generate_grid.c
     src/oskar_sky_generate_random_power_law.c
     src/oskar_sky_horizon_clip.c
     src/oskar_sky_load.c
-    src/oskar_sky_load_gsm.c
     src/oskar_sky_override_polarisation.c
     src/oskar_sky_read.c
     src/oskar_sky_resize.c

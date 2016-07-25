@@ -60,7 +60,7 @@ if (CUDA_FOUND)
         oskar_vis_to_ascii_table)
 
     set(name oskar_fits_image_to_sky_model)
-    oskar_app(${name} ${name}_main.cpp EXTRA_LIBS oskar_fits)
+    oskar_app(${name} ${name}_main.cpp)
 endif ()
 
 if (QT4_FOUND AND CUDA_FOUND)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,17 +97,19 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
     get_extended_params(s, &sky->oskar_sky_model.extended_sources);
     s.endGroup();
 
-    // FIXME GSM file - needs reference frequency.
-//    s.beginGroup("gsm");
-//    t = s.value("file").toByteArray();
-//    if (t.size() > 0)
-//    {
-//        sky->gsm.file = (char*)malloc(t.size() + 1);
-//        strcpy(sky->gsm.file, t.constData());
-//    }
-//    get_filter_params(s, &sky->gsm.filter);
-//    get_extended_params(s, &sky->gsm.extended_sources);
-//    s.endGroup();
+    // GSM file.
+    s.beginGroup("gsm");
+    t = s.value("file").toByteArray();
+    if (t.size() > 0)
+    {
+        sky->gsm.file = (char*)malloc(t.size() + 1);
+        strcpy(sky->gsm.file, t.constData());
+    }
+    sky->gsm.freq_hz = s.value("freq_hz", 408e6).toDouble();
+    sky->gsm.spectral_index = s.value("spectral_index", -0.7).toDouble();
+    get_filter_params(s, &sky->gsm.filter);
+    get_extended_params(s, &sky->gsm.extended_sources);
+    s.endGroup();
 
     // Input FITS image files.
     s.beginGroup("fits_image");
@@ -121,14 +123,16 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
         sky->fits_image.file[i] = (char*)malloc(t.size() + 1);
         strcpy(sky->fits_image.file[i], t.constData());
     }
-    sky->fits_image.downsample_factor =
-            s.value("downsample_factor", 1).toInt();
     sky->fits_image.min_peak_fraction =
             s.value("min_peak_fraction", 0.02).toDouble();
-    sky->fits_image.noise_floor =
-            s.value("noise_floor", 0.0).toDouble();
-    sky->fits_image.spectral_index =
-            s.value("spectral_index", 0.0).toDouble();
+    sky->fits_image.min_abs_val = s.value("min_abs_val", 0.0).toDouble();
+    t = s.value("default_map_units", "Jy/beam").toByteArray();
+    sky->fits_image.default_map_units = (char*)malloc(t.size() + 1);
+    strcpy(sky->fits_image.default_map_units, t.constData());
+    sky->fits_image.override_map_units =
+            s.value("override_map_units", false).toBool();
+    sky->fits_image.spectral_index = s.value("spectral_index", 0.0).toDouble();
+    get_filter_params(s, &sky->fits_image.filter);
     s.endGroup();
 
     // Input HEALPix FITS files.
@@ -143,18 +147,21 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
         sky->healpix_fits.file[i] = (char*)malloc(t.size() + 1);
         strcpy(sky->healpix_fits.file[i], t.constData());
     }
+    sky->healpix_fits.min_peak_fraction =
+            s.value("min_peak_fraction", 0.0).toDouble();
+    sky->healpix_fits.min_abs_val = s.value("min_abs_val", 0.0).toDouble();
     temp = s.value("coord_sys", "Galactic").toString();
     if (temp.startsWith('G', Qt::CaseInsensitive))
         sky->healpix_fits.coord_sys = OSKAR_SPHERICAL_TYPE_GALACTIC;
     else
         sky->healpix_fits.coord_sys = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
-    temp = s.value("map_units", "mK/sr").toString();
-    if (temp.startsWith("mK", Qt::CaseInsensitive))
-        sky->healpix_fits.map_units = OSKAR_MAP_UNITS_MK_PER_SR;
-    else if (temp.startsWith("K", Qt::CaseInsensitive))
-        sky->healpix_fits.map_units = OSKAR_MAP_UNITS_K_PER_SR;
-    else
-        sky->healpix_fits.map_units = OSKAR_MAP_UNITS_JY;
+    t = s.value("default_map_units", "K").toByteArray();
+    sky->healpix_fits.default_map_units = (char*)malloc(t.size() + 1);
+    strcpy(sky->healpix_fits.default_map_units, t.constData());
+    sky->healpix_fits.override_map_units =
+            s.value("override_map_units", false).toBool();
+    sky->healpix_fits.freq_hz = s.value("freq_hz", 408e6).toDouble();
+    sky->healpix_fits.spectral_index = s.value("spectral_index", -0.7).toDouble();
     get_filter_params(s, &sky->healpix_fits.filter);
     get_extended_params(s, &sky->healpix_fits.extended_sources);
     s.endGroup();

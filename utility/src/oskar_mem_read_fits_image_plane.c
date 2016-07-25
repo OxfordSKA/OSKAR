@@ -1,0 +1,208 @@
+/*
+ * Copyright (c) 2016, The University of Oxford
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of the University of Oxford nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <oskar_mem.h>
+#include <fitsio.h>
+#include <math.h>
+#include <string.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define MAX_AXES 10
+#define FACTOR (2.0*sqrt(2.0*log(2.0)))
+
+oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
+        int i_chan, int i_stokes, int* image_width, int* image_height,
+        double* image_ra_deg, double* image_dec_deg, double* image_cellsize_deg,
+        double* image_time, double* image_freq, double* beam_area_pixels,
+        char** brightness_units, int* status)
+{
+    int i, naxis = 0, imagetype = 0, anynul = 0;
+    int status1 = 0, status2 = 0, type_fits = 0, type_oskar = 0;
+    int axis_time = -1, axis_chan = -1, axis_stokes = -1;
+    long num_pixels, naxes[MAX_AXES], firstpix[MAX_AXES];
+    char card[FLEN_CARD], *ctype[MAX_AXES], ctype_str[MAX_AXES][FLEN_VALUE];
+    double crval[MAX_AXES], crpix[MAX_AXES], cdelt[MAX_AXES];
+    double nul = 0.0, bmaj = 0.0, bmin = 0.0;
+    fitsfile* fptr = 0;
+    oskar_Mem* data = 0;
+
+    /* Check if safe to proceed. */
+    if (*status) return 0;
+
+    /* Open the file. */
+    fits_open_file(&fptr, filename, READONLY, status);
+    if (*status || !fptr)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return 0;
+    }
+
+    /* Get the image parameters. */
+    fits_get_img_param(fptr, MAX_AXES, &imagetype, &naxis, naxes, status);
+    if (*status) goto file_error;
+
+    /* Set the data type. */
+    if (imagetype != FLOAT_IMG && imagetype != DOUBLE_IMG) goto file_error;
+    type_fits  = (imagetype == FLOAT_IMG) ? TFLOAT : TDOUBLE;
+    type_oskar = (imagetype == FLOAT_IMG) ? OSKAR_SINGLE : OSKAR_DOUBLE;
+
+    /* Check that the FITS image contains at least two dimensions. */
+    if (naxis < 2 || naxis > MAX_AXES) goto file_error;
+    num_pixels = naxes[0] * naxes[1];
+
+    /* Read all CTYPE, CDELT, CRPIX, CRVAL values. */
+    for (i = 0; i < MAX_AXES; ++i)
+    {
+        ctype[i] = ctype_str[i];
+        cdelt[i] = 0.0;
+        crpix[i] = 0.0;
+        crval[i] = 0.0;
+        firstpix[i] = 1;
+    }
+    fits_read_keys_str(fptr, "CTYPE", 1, naxis, ctype, &i, status);
+    fits_read_keys_dbl(fptr, "CDELT", 1, naxis, cdelt, &i, status);
+    fits_read_keys_dbl(fptr, "CRPIX", 1, naxis, crpix, &i, status);
+    fits_read_keys_dbl(fptr, "CRVAL", 1, naxis, crval, &i, status);
+
+    /* Identify the axes. */
+    for (i = 0; i < naxis; ++i)
+    {
+        if (strncmp(ctype[i], "STOKES", 6) == 0)
+            axis_stokes = i;
+        else if (strncmp(ctype[i], "FREQ", 4) == 0)
+            axis_chan = i;
+        else if (strncmp(ctype[i], "TIME", 4) == 0)
+            axis_time = i;
+    }
+
+    /* Check ranges and set the dimensions to read. */
+    if (axis_stokes >= 0)
+    {
+        if (i_stokes >= naxes[axis_stokes])
+            goto range_error;
+        firstpix[axis_stokes] = 1 + i_stokes;
+    }
+    else if (i_stokes > 0)
+        goto range_error;
+    if (axis_chan >= 0)
+    {
+        if (i_chan >= naxes[axis_chan])
+            goto range_error;
+        firstpix[axis_chan] = 1 + i_chan;
+    }
+    else if (i_chan > 0)
+        goto range_error;
+    if (axis_time >= 0)
+    {
+        if (i_time >= naxes[axis_time])
+            goto range_error;
+        firstpix[axis_time] = 1 + i_time;
+    }
+    else if (i_time > 0)
+        goto range_error;
+
+    /* Return requested image metadata. */
+    if (image_width)
+        *image_width   = naxes[0];
+    if (image_height)
+        *image_height  = naxes[1];
+    if (image_ra_deg)
+        *image_ra_deg  = crval[0];
+    if (image_dec_deg)
+        *image_dec_deg = crval[1];
+    if (image_cellsize_deg)
+        *image_cellsize_deg = fabs(cdelt[1]);
+    if (image_freq && axis_chan >= 0)
+        *image_freq    = crval[axis_chan] + i_chan * cdelt[axis_chan];
+    if (image_time && axis_time >= 0)
+        *image_time    = crval[axis_time] + i_time * cdelt[axis_time];
+
+    /* Search for beam size in header keywords first. */
+    fits_read_key(fptr, TDOUBLE, "BMAJ", &bmaj, 0, &status1);
+    fits_read_key(fptr, TDOUBLE, "BMIN", &bmin, 0, &status2);
+    if (status1 || status2)
+    {
+        int cards = 0;
+
+        /* If header keywords don't exist, search all the history cards. */
+        fits_get_hdrspace(fptr, &cards, 0, status);
+        if (*status) goto file_error;
+        for (i = 0; i < cards; ++i)
+        {
+            fits_read_record(fptr, i, card, status);
+            if (!strncmp(card, "HISTORY AIPS   CLEAN BMAJ", 25))
+            {
+                sscanf(card + 26, "%lf", &bmaj);
+                sscanf(card + 44, "%lf", &bmin);
+                break;
+            }
+        }
+    }
+
+    /* Calculate beam area. */
+    if (beam_area_pixels)
+        *beam_area_pixels = 2.0 * M_PI * (bmaj * bmin)
+                        / (FACTOR * FACTOR * cdelt[0] * cdelt[0]);
+
+    /* Get brightness units if present. */
+    status1 = 0;
+    fits_read_key(fptr, TSTRING, "BUNIT", card, 0, &status1);
+    i = strlen(card);
+    if (!status1 && i > 0)
+    {
+        *brightness_units = (char*) realloc (*brightness_units, i + 1);
+        strcpy(*brightness_units, card);
+    }
+
+    /* Read image pixel data. */
+    data = oskar_mem_create(type_oskar, OSKAR_CPU, num_pixels, status);
+    fits_read_pix(fptr, type_fits, firstpix, num_pixels,
+            &nul, oskar_mem_void(data), &anynul, status);
+    fits_close_file(fptr, status);
+    return data;
+
+    /* Error conditions. */
+range_error:
+    oskar_mem_free(data, status);
+    fits_close_file(fptr, status);
+    *status = OSKAR_ERR_OUT_OF_RANGE;
+    return 0;
+
+file_error:
+    oskar_mem_free(data, status);
+    fits_close_file(fptr, status);
+    *status = OSKAR_ERR_FILE_IO;
+    return 0;
+}
+
+#ifdef __cplusplus
+}
+#endif

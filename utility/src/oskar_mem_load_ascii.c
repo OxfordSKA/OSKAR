@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,7 +121,7 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
             /* Resize the array if it isn't big enough to hold the new data. */
             if (oskar_mem_length(mem_handle[i]) <= row_index)
             {
-                oskar_mem_realloc(mem_handle[i], row_index + 100, status);
+                oskar_mem_realloc(mem_handle[i], row_index + 1000, status);
                 if (*status) break;
             }
 

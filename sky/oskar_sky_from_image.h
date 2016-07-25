@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FITS_WRITE_AXIS_HEADER_H_
-#define OSKAR_FITS_WRITE_AXIS_HEADER_H_
+#ifndef OSKAR_SKY_FROM_IMAGE_H_
+#define OSKAR_SKY_FROM_IMAGE_H_
 
 /**
- * @file oskar_fits_write_axis_header.h
+ * @file oskar_sky_from_image.h
  */
 
 #include <oskar_global.h>
-#include <fitsio.h>
+#include <oskar_sky.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,18 +42,22 @@ extern "C" {
 
 /**
  * @brief
- * Writes axis header keywords and data to a FITS file.
+ * Creates a sky model from an array of image pixels.
  *
  * @details
- * This function writes axis header keywords and data to a FITS file.
+ * Creates a sky model from an array of image pixels.
+ *
+ * @param[in] precision           Enumerated precision of the output sky model.
+ * @param[in] image               2D image data (ordered as in FITS image).
  */
-OSKAR_FITS_EXPORT
-void oskar_fits_write_axis_header(fitsfile* fits_file, int axis_id,
-        const char* ctype, const char* ctype_comment, double crval,
-        double cdelt, double crpix, double crota, int* status);
+OSKAR_EXPORT
+oskar_Sky* oskar_sky_from_image(int precision, const oskar_Mem* image,
+        int image_width, int image_height, double image_ra_deg,
+        double image_dec_deg, double image_cellsize_deg, double image_freq_hz,
+        double spectral_index, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_FITS_WRITE_AXIS_HEADER_H_ */
+#endif /* OSKAR_SKY_FROM_IMAGE_H_ */
