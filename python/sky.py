@@ -31,6 +31,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # 
 
+import math
 import numpy
 import _sky_lib
 
@@ -117,6 +118,42 @@ class Sky(object):
             filename (str): Name of file to load.
         """
         _sky_lib.append_file(self._capsule, filename)
+
+
+    def create_copy(self):
+        """Creates a copy of the sky model."""
+        t = Sky()
+        t._capsule = _sky_lib.create_copy(self._capsule)
+        return t
+
+
+    def filter_by_flux(self, min_flux_jy, max_flux_jy):
+        """Filters the sky model according to Stokes-I flux.
+
+        Sources with flux values outside the range are deleted.
+
+        Args:
+            min_flux_jy (float): Minimum allowed flux, in Jy.
+            max_flux_jy (float): Maximum allowed flux, in Jy.
+        """
+        _sky_lib.filter_by_flux(self._capsule, min_flux_jy, max_flux_jy)
+
+
+    def filter_by_radius(self, inner_radius_deg, outer_radius_deg, 
+            ra0_deg, dec0_deg):
+        """Filters the sky model according to source radius from phase centre.
+
+        Sources outside the range are deleted.
+
+        Args:
+            inner_radius_deg (float): Minimum allowed radius, in degrees.
+            outer_radius_deg (float): Maximum allowed radius, in degrees.
+            ra0_deg (float): Right Ascension of phase centre, in degrees.
+            dec0_deg (float): Declination of phase centre, in degrees.
+        """
+        _sky_lib.filter_by_radius(self._capsule, 
+            math.radians(inner_radius_deg), math.radians(outer_radius_deg), 
+            math.radians(ra0_deg), math.radians(dec0_deg))
 
 
     @classmethod
