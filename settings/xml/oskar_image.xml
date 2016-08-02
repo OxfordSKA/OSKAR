@@ -110,6 +110,11 @@
         </logic>
     </s>
     <s k="wproj"><label>W-projection options</label>
+        <s k="generate_w_kernels_on_gpu">
+            <label>Use GPU to generate W-kernels</label>
+            <type name="bool" default="true"/>
+            <desc>If true, use the GPU to generate the W-kernels.</desc>
+        </s>
         <s k="num_w_planes"><label>Number of W-planes</label>
             <type name="int" default="0"/>
             <desc>The number of W-planes to use.

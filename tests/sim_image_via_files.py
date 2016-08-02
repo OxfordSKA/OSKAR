@@ -1,15 +1,15 @@
 #!/usr/bin/python
 import numpy
+import os
 import oskar
 import time
-
 
 if __name__ == '__main__':
     # Global options.
     precision = 'single'
     phase_centre_ra_deg = 0.0
     phase_centre_dec_deg = 60.0
-    output_root = 'test_overlapping'
+    output_root = 'test_via_files'
 
     # Define a telescope layout.
     num_stations = 300
@@ -38,22 +38,27 @@ if __name__ == '__main__':
     imagers = []
     for i in range(2):
         imagers.append(oskar.Imager(precision))
-        imagers[i].set(fov_deg=2.0, image_size=2048, algorithm='W-projection')
-    imagers[0].set(weighting='Natural', output_root=output_root+'_natural')
-    imagers[1].set(weighting='Uniform', output_root=output_root+'_uniform')
+        imagers[i].set(fov_deg=2.0, image_size=2048, algorithm='W-projection', 
+            input_file=output_root+'.ms')
+    imagers[0].set(weighting='Natural', output_root=output_root+'_Natural')
+    imagers[1].set(weighting='Uniform', output_root=output_root+'_Uniform')
 
-    # Set up the imaging simulator.
-    simulator = oskar.ImagingSimulator(imagers, precision)
+    # Set up the basic simulator.
+    simulator = oskar.Simulator(precision)
+    simulator.set_settings_path(os.path.abspath(__file__))
     simulator.set_sky_model(sky)
     simulator.set_telescope_model(tel)
-    simulator.set_observation_frequency(100e6)
+    simulator.set_observation_frequency(100.0e6)
     simulator.set_observation_time(start_time_mjd_utc=51545.0,
         length_sec=43200.0, num_time_steps=48)
-    #simulator.set_output_measurement_set(output_root+'.ms') # Not required.
+    simulator.set_output_measurement_set(output_root+'.ms')
 
     # Simulate and image visibilities.
     start = time.time()
-    print('Simulating and imaging...')
+    print('Running simulator...')
     simulator.run()
+    for i, imager in enumerate(imagers):
+        print('Running imager %d...' % i)
+        imager.run()
     print('Completed after %.3f seconds.' % (time.time() - start))
 

@@ -56,14 +56,19 @@ class Imager(object):
         _imager_lib.check_init(self._capsule)
 
 
-    def finalise(self, image=None):
-        """Finalises the image or images and writes them to file.
+    def finalise(self, return_images=False, return_grids=False):
+        """Finalises the image or images.
+
+        Images or grids can be returned in a Python dictionary
+        of numpy arrays, if required.
+        The image cube can be accessed using the 'images' key, and
+        the grid cube can be accessed using the 'grids' key.
 
         Args:
-            image (Optional[float, array-like]):
-                If given, the output image is returned in this array.
+            return_images (boolean): If true, return images.
+            return_grids (boolean): If true, return grids.
         """
-        _imager_lib.finalise(self._capsule, image)
+        return _imager_lib.finalise(self._capsule, return_images, return_grids)
 
 
     def finalise_plane(self, plane, plane_norm):
@@ -138,6 +143,15 @@ class Imager(object):
         return _imager_lib.coords_only(self._capsule)
 
 
+    def get_fft_on_gpu(self):
+        """Returns flag specifying whether to use the GPU for FFTs.
+
+        Returns:
+            boolean: If true, use the GPU for FFTs.
+        """
+        return _imager_lib.fft_on_gpu(self._capsule)
+
+
     def get_fov(self):
         """Returns the image field-of-view, in degrees.
 
@@ -145,6 +159,15 @@ class Imager(object):
             float: The image field-of-view, in degrees.
         """
         return _imager_lib.fov(self._capsule)
+
+
+    def get_generate_w_kernels_on_gpu(self):
+        """Returns flag specifying whether to use the GPU to generate W-kernels.
+
+        Returns:
+            boolean: If true, use the GPU to generate W-kernels.
+        """
+        return _imager_lib.generate_w_kernels_on_gpu(self._capsule)
 
 
     def get_image_size(self):
@@ -267,12 +290,21 @@ class Imager(object):
         _imager_lib.reset_cache(self._capsule)
 
 
-    def run(self):
+    def run(self, return_images=False, return_grids=False):
         """Runs the imager on a visibility file.
 
         The input filename must be set using set_input_file().
+
+        Images or grids can be returned in a Python dictionary
+        of numpy arrays, if required.
+        The image cube can be accessed using the 'images' key, and
+        the grid cube can be accessed using the 'grids' key.
+
+        Args:
+            return_images (boolean): If true, return images.
+            return_grids (boolean): If true, return grids.
         """
-        _imager_lib.run(self._capsule)
+        _imager_lib.run(self._capsule, return_images, return_grids)
 
 
     def set(self, **kwargs):
@@ -388,6 +420,15 @@ class Imager(object):
             fov_deg (float): Field of view, in degrees.
         """
         _imager_lib.set_fov(self._capsule, fov_deg)
+
+
+    def set_generate_w_kernels_on_gpu(self, value):
+        """Sets whether to use the GPU to generate W-kernels.
+
+        Args:
+            value (boolean): If true, use the GPU to generate W-kernels.
+        """
+        _imager_lib.set_generate_w_kernels_on_gpu(self._capsule, value)
 
 
     def set_grid_kernel(self, kernel_type, support, oversample):
@@ -639,33 +680,37 @@ class Imager(object):
 
 
     # Properties.
-    algorithm         = property(get_algorithm, set_algorithm)
-    cell              = property(get_cellsize, set_cellsize)
-    cellsize          = property(get_cellsize, set_cellsize)
-    cellsize_arcsec   = property(get_cellsize, set_cellsize)
-    cell_size         = property(get_cellsize, set_cellsize)
-    cell_size_arcsec  = property(get_cellsize, set_cellsize)
-    channel_end       = property(get_channel_end, set_channel_end)
-    channel_snapshots = property(get_channel_snapshots, set_channel_snapshots)
-    channel_start     = property(get_channel_start, set_channel_start)
-    coords_only       = property(get_coords_only, set_coords_only)
-    fov               = property(get_fov, set_fov)
-    fov_deg           = property(get_fov, set_fov)
-    image_size        = property(get_image_size, set_image_size)
-    image_type        = property(get_image_type, set_image_type)
-    input_file        = property(get_input_file, set_input_file)
-    input_vis_data    = property(get_input_file, set_input_file)
-    ms_column         = property(get_ms_column, set_ms_column)
-    num_w_planes      = property(get_num_w_planes, set_num_w_planes)
-    output_root       = property(get_output_root, set_output_root)
-    plane_size        = property(get_plane_size)
-    root_path         = property(get_output_root, set_output_root)
-    size              = property(get_size, set_size)
-    time_end          = property(get_time_end, set_time_end)
-    time_snapshots    = property(get_time_snapshots, set_time_snapshots)
-    time_start        = property(get_time_start, set_time_start)
-    weighting         = property(get_weighting, set_weighting)
-    wprojplanes       = property(get_num_w_planes, set_num_w_planes)
+    algorithm                 = property(get_algorithm, set_algorithm)
+    cell                      = property(get_cellsize, set_cellsize)
+    cellsize                  = property(get_cellsize, set_cellsize)
+    cellsize_arcsec           = property(get_cellsize, set_cellsize)
+    cell_size                 = property(get_cellsize, set_cellsize)
+    cell_size_arcsec          = property(get_cellsize, set_cellsize)
+    channel_end               = property(get_channel_end, set_channel_end)
+    channel_snapshots         = property(get_channel_snapshots,
+                                    set_channel_snapshots)
+    channel_start             = property(get_channel_start, set_channel_start)
+    coords_only               = property(get_coords_only, set_coords_only)
+    fft_on_gpu                = property(get_fft_on_gpu, set_fft_on_gpu)
+    fov                       = property(get_fov, set_fov)
+    fov_deg                   = property(get_fov, set_fov)
+    generate_w_kernels_on_gpu = property(get_generate_w_kernels_on_gpu,
+                                    set_generate_w_kernels_on_gpu)
+    image_size                = property(get_image_size, set_image_size)
+    image_type                = property(get_image_type, set_image_type)
+    input_file                = property(get_input_file, set_input_file)
+    input_vis_data            = property(get_input_file, set_input_file)
+    ms_column                 = property(get_ms_column, set_ms_column)
+    num_w_planes              = property(get_num_w_planes, set_num_w_planes)
+    output_root               = property(get_output_root, set_output_root)
+    plane_size                = property(get_plane_size)
+    root_path                 = property(get_output_root, set_output_root)
+    size                      = property(get_size, set_size)
+    time_end                  = property(get_time_end, set_time_end)
+    time_snapshots            = property(get_time_snapshots, set_time_snapshots)
+    time_start                = property(get_time_start, set_time_start)
+    weighting                 = property(get_weighting, set_weighting)
+    wprojplanes               = property(get_num_w_planes, set_num_w_planes)
 
 
     @staticmethod

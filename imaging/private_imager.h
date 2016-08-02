@@ -58,6 +58,7 @@ struct oskar_Imager
     int im_type, im_num_times, im_num_channels, im_num_pols, pol_offset;
     int algorithm, image_size, use_ms, use_stokes, support, oversample;
     int weighting, set_cellsize, set_fov;
+    int generate_w_kernels_on_gpu;
     char direction_type, kernel_type, *input_file, *image_root, *ms_column;
     double cellsize_rad, fov_deg, im_centre_deg[2];
 

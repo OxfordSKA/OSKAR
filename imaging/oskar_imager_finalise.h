@@ -48,13 +48,20 @@ extern "C" {
  * This low-level function must be called to finalise and write images,
  * after using oskar_imager_update().
  *
- * @param[in,out] h            Handle to imager.
- * @param[in,out] output_plane If not NULL, image plane 0 is returned here.
- * @param[in,out] status       Status return code.
+ * Copies of the image and/or grid planes can be returned if required
+ * by supplying arrays as input arguments. Set these to NULL if not required.
+ *
+ * @param[in,out] h             Handle to imager.
+ * @param[in] num_output_images Number of output image planes supplied.
+ * @param[in] output_images     Array of image planes.
+ * @param[in] num_output_grids  Number of output grid planes supplied.
+ * @param[in] output_grids      Array of grid planes.
+ * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_finalise(oskar_Imager* h, oskar_Mem* output_plane,
-        int* status);
+void oskar_imager_finalise(oskar_Imager* h,
+        int num_output_images, oskar_Mem** output_images,
+        int num_output_grids, oskar_Mem** output_grids, int* status);
 
 /**
  * @brief

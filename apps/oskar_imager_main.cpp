@@ -123,6 +123,8 @@ int main(int argc, char** argv)
     if (!s.starts_with("wproj/num_w_planes", "auto", &e))
         oskar_imager_set_num_w_planes(h, s.to_int("wproj/num_w_planes", &e));
     oskar_imager_set_fft_on_gpu(h, s.to_int("fft/use_gpu", &e));
+    oskar_imager_set_generate_w_kernels_on_gpu(h,
+            s.to_int("wproj/generate_w_kernels_on_gpu", &e));
     if (s.first_letter("direction", &e) == 'R')
     {
         oskar_imager_set_direction(h,
@@ -136,7 +138,7 @@ int main(int argc, char** argv)
     {
         oskar_log_section(log, 'M', "Starting imager...");
         oskar_timer_resume(tmr);
-        oskar_imager_run(h, &e);
+        oskar_imager_run(h, 0, 0, 0, 0, &e);
     }
 
     // Check for errors.

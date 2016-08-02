@@ -50,13 +50,20 @@ class ImagingSimulator(Simulator):
         """
         Simulator.__init__(self, precision)
         self._imagers = imagers
+        self._return_images = False
+        self._return_grids = False
 
 
     def finalise(self):
         """Called automatically by the base class at the end of run()."""
         Simulator.finalise(self)
-        for im in self._imagers:
-            im.finalise()
+        if not self.coords_only:
+            imager_output_data = []
+            for im in self._imagers:
+                imager_output_data.append(im.finalise(
+                    return_images=self._return_images,
+                    return_grids=self._return_grids))
+            return imager_output_data
 
 
     def process_block(self, block, block_index):
@@ -72,8 +79,17 @@ class ImagingSimulator(Simulator):
             im.update_from_block(self.vis_header(), block)
 
 
-    def run(self):
-        """Runs the simulator and imagers."""
+    def run(self, return_images=False, return_grids=False):
+        """Runs the simulator and imagers.
+
+        Args:
+            return_images (boolean): If true, return images.
+            return_grids (boolean): If true, return grids.
+        """
+        # Save flags for use in finalise().
+        self._return_images = return_images
+        self._return_grids = return_grids
+
         # Iterate imagers to find any with uniform weighting or W-projection.
         need_coords_first = False
         for im in self._imagers:
@@ -83,11 +99,11 @@ class ImagingSimulator(Simulator):
         # Simulate coordinates first, if required.
         if need_coords_first:
             self.set_coords_only(True)
-            Simulator.run(self, process_blocks=True)
+            Simulator.run(self)
             self.set_coords_only(False)
 
         # Simulate and image the visibilities.
-        Simulator.run(self, process_blocks=True)
+        return Simulator.run(self)
 
 
     def set_coords_only(self, value):

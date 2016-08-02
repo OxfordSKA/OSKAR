@@ -91,9 +91,21 @@ int oskar_imager_coords_only(const oskar_Imager* h)
 }
 
 
+int oskar_imager_fft_on_gpu(const oskar_Imager* h)
+{
+    return h->fft_on_gpu;
+}
+
+
 double oskar_imager_fov(const oskar_Imager* h)
 {
     return h->fov_deg;
+}
+
+
+int oskar_imager_generate_w_kernels_on_gpu(const oskar_Imager* h)
+{
+    return h->generate_w_kernels_on_gpu;
 }
 
 
@@ -135,6 +147,12 @@ const char* oskar_imager_ms_column(const oskar_Imager* h)
 }
 
 
+int oskar_imager_num_image_planes(const oskar_Imager* h)
+{
+    return h->num_planes;
+}
+
+
 int oskar_imager_num_w_planes(const oskar_Imager* h)
 {
     return h->num_w_planes;
@@ -150,6 +168,19 @@ const char* oskar_imager_output_root(const oskar_Imager* h)
 int oskar_imager_plane_size(const oskar_Imager* h)
 {
     return h->grid_size;
+}
+
+
+int oskar_imager_plane_type(const oskar_Imager* h)
+{
+    if (h->num_planes <= 0 || !h->planes) return 0;
+    return oskar_mem_type(h->planes[0]);
+}
+
+
+int oskar_imager_precision(const oskar_Imager* h)
+{
+    return h->imager_prec;
 }
 
 
@@ -254,6 +285,12 @@ void oskar_imager_set_fov(oskar_Imager* h, double fov_deg)
 void oskar_imager_set_fft_on_gpu(oskar_Imager* h, int value)
 {
     h->fft_on_gpu = value;
+}
+
+
+void oskar_imager_set_generate_w_kernels_on_gpu(oskar_Imager* h, int value)
+{
+    h->generate_w_kernels_on_gpu = value;
 }
 
 

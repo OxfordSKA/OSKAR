@@ -51,33 +51,46 @@ static void write_plane(oskar_Imager* h, oskar_Mem* plane,
         int t, int c, int p, int* status);
 
 
-void oskar_imager_finalise(oskar_Imager* h, oskar_Mem* output_plane,
-        int* status)
+void oskar_imager_finalise(oskar_Imager* h,
+        int num_output_images, oskar_Mem** output_images,
+        int num_output_grids, oskar_Mem** output_grids, int* status)
 {
     int t, c, p, i;
     if (*status || !h->planes) return;
 
-    /* Finalise all the planes. */
-    for (i = 0; i < h->num_planes; ++i)
+    /* Copy grids to output grid planes if given. */
+    for (i = 0; (i < h->num_planes) && (i < num_output_grids); ++i)
     {
-        oskar_imager_finalise_plane(h, h->planes[i], h->plane_norm[i], status);
-        oskar_imager_trim_image(h->planes[i],
-                h->grid_size, h->image_size, status);
+        oskar_mem_copy(output_grids[i], h->planes[i], status);
+        oskar_mem_scale_real(output_grids[i], 1.0 / h->plane_norm[i], status);
     }
 
-    /* Copy plane 0 to output image plane if given. */
-    if (output_plane && h->num_planes > 0)
+    /* Check if images are required. */
+    if (h->fits_file[0] || output_images)
     {
-        memcpy(oskar_mem_void(output_plane),
-                oskar_mem_void_const(h->planes[0]), h->image_size *
-                h->image_size * oskar_mem_element_size(h->imager_prec));
-    }
+        /* Finalise all the planes. */
+        for (i = 0; i < h->num_planes; ++i)
+        {
+            oskar_imager_finalise_plane(h,
+                    h->planes[i], h->plane_norm[i], status);
+            oskar_imager_trim_image(h->planes[i],
+                    h->grid_size, h->image_size, status);
+        }
 
-    /* Write to files if required. */
-    for (t = 0, i = 0; t < h->im_num_times; ++t)
-        for (c = 0; c < h->im_num_channels; ++c)
-            for (p = 0; p < h->im_num_pols; ++p, ++i)
-                write_plane(h, h->planes[i], t, c, p, status);
+        /* Copy images to output image planes if given. */
+        for (i = 0; (i < h->num_planes) && (i < num_output_images); ++i)
+        {
+            memcpy(oskar_mem_void(output_images[i]),
+                    oskar_mem_void_const(h->planes[i]), h->image_size *
+                    h->image_size * oskar_mem_element_size(h->imager_prec));
+        }
+
+        /* Write to files if required. */
+        for (t = 0, i = 0; t < h->im_num_times; ++t)
+            for (c = 0; c < h->im_num_channels; ++c)
+                for (p = 0; p < h->im_num_pols; ++p, ++i)
+                    write_plane(h, h->planes[i], t, c, p, status);
+    }
 
     /* Reset imager memory. */
     oskar_imager_reset_cache(h, status);
@@ -90,79 +103,78 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
     int size, num_cells;
     DeviceData* d;
     if (*status) return;
+
+    /* Apply normalisation. */
     if (plane_norm > 0.0 || plane_norm < 0.0)
         oskar_mem_scale_real(plane, 1.0 / plane_norm, status);
-    if (h->algorithm == OSKAR_ALGORITHM_FFT ||
-            h->algorithm == OSKAR_ALGORITHM_WPROJ)
+    if (h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
+            h->algorithm == OSKAR_ALGORITHM_DFT_3D)
+        return;
+
+    /* Check plane is complex type, as plane must be gridded visibilities. */
+    if (!oskar_mem_is_complex(plane))
     {
-        size = h->grid_size;
-        num_cells = size * size;
-        d = &h->d[0];
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
 
-        /* Check plane is complex type. */
-        if (!oskar_mem_is_complex(plane))
+    /* Make image using FFT and apply grid correction. */
+    size = h->grid_size;
+    num_cells = size * size;
+    d = &h->d[0];
+    if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
+    {
+        oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
+        if (h->fft_on_gpu)
         {
-            *status = OSKAR_ERR_TYPE_MISMATCH;
-            return;
-        }
-
-        /* Make image using FFT and apply grid correction. */
-        if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
-        {
-            oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
-            if (h->fft_on_gpu)
-            {
 #ifdef OSKAR_HAVE_CUDA
-                oskar_device_set(h->cuda_device_ids[0], status);
-                oskar_mem_copy(d->plane_gpu, plane, status);
-                cufftExecZ2Z(h->cufft_plan, oskar_mem_void(d->plane_gpu),
-                        oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
-                oskar_mem_copy(plane, d->plane_gpu, status);
+            oskar_device_set(h->cuda_device_ids[0], status);
+            oskar_mem_copy(d->plane_gpu, plane, status);
+            cufftExecZ2Z(h->cufft_plan, oskar_mem_void(d->plane_gpu),
+                    oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
+            oskar_mem_copy(plane, d->plane_gpu, status);
 #else
-                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
-            }
-            else
-            {
-                oskar_fftpack_cfft2f(size, size, size,
-                        oskar_mem_double(plane, status),
-                        oskar_mem_double(h->fftpack_wsave, status),
-                        oskar_mem_double(h->fftpack_work, status));
-                oskar_mem_scale_real(plane, (double)num_cells, status);
-            }
-            oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
-            oskar_grid_correction_d(size,
-                    oskar_mem_double(h->corr_func, status),
-                    oskar_mem_double(plane, status));
         }
         else
         {
-            oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
-            if (h->fft_on_gpu)
-            {
-#ifdef OSKAR_HAVE_CUDA
-                oskar_device_set(h->cuda_device_ids[0], status);
-                oskar_mem_copy(d->plane_gpu, plane, status);
-                cufftExecC2C(h->cufft_plan, oskar_mem_void(d->plane_gpu),
-                        oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
-                oskar_mem_copy(plane, d->plane_gpu, status);
-#else
-                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-            }
-            else
-            {
-                oskar_fftpack_cfft2f_f(size, size, size,
-                        oskar_mem_float(plane, status),
-                        oskar_mem_float(h->fftpack_wsave, status),
-                        oskar_mem_float(h->fftpack_work, status));
-                oskar_mem_scale_real(plane, (double)num_cells, status);
-            }
-            oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
-            oskar_grid_correction_f(size,
-                    oskar_mem_double(h->corr_func, status),
-                    oskar_mem_float(plane, status));
+            oskar_fftpack_cfft2f(size, size, size,
+                    oskar_mem_double(plane, status),
+                    oskar_mem_double(h->fftpack_wsave, status),
+                    oskar_mem_double(h->fftpack_work, status));
+            oskar_mem_scale_real(plane, (double)num_cells, status);
         }
+        oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
+        oskar_grid_correction_d(size, oskar_mem_double(h->corr_func, status),
+                oskar_mem_double(plane, status));
+    }
+    else
+    {
+        oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
+        if (h->fft_on_gpu)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            oskar_device_set(h->cuda_device_ids[0], status);
+            oskar_mem_copy(d->plane_gpu, plane, status);
+            cufftExecC2C(h->cufft_plan, oskar_mem_void(d->plane_gpu),
+                    oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
+            oskar_mem_copy(plane, d->plane_gpu, status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else
+        {
+            oskar_fftpack_cfft2f_f(size, size, size,
+                    oskar_mem_float(plane, status),
+                    oskar_mem_float(h->fftpack_wsave, status),
+                    oskar_mem_float(h->fftpack_work, status));
+            oskar_mem_scale_real(plane, (double)num_cells, status);
+        }
+        oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
+        oskar_grid_correction_f(size, oskar_mem_double(h->corr_func, status),
+                oskar_mem_float(plane, status));
     }
 }
 

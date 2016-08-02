@@ -1,15 +1,15 @@
 #!/usr/bin/python
 import numpy
-import os
 import oskar
 import time
+from astropy.io import fits
 
 if __name__ == '__main__':
     # Global options.
     precision = 'single'
     phase_centre_ra_deg = 0.0
     phase_centre_dec_deg = 60.0
-    output_root = 'test_files'
+    output_root = 'test_via_memory'
 
     # Define a telescope layout.
     num_stations = 300
@@ -38,27 +38,43 @@ if __name__ == '__main__':
     imagers = []
     for i in range(2):
         imagers.append(oskar.Imager(precision))
-        imagers[i].set(fov_deg=2.0, image_size=2048, algorithm='W-projection', 
-            input_file=output_root+'.ms')
-    imagers[0].set(weighting='Natural', output_root=output_root+'_natural')
-    imagers[1].set(weighting='Uniform', output_root=output_root+'_uniform')
+        imagers[i].set(fov_deg=2.0, image_size=2048, algorithm='W-projection')
+    imagers[0].set(weighting='Natural')
+    imagers[1].set(weighting='Uniform')
 
-    # Set up the basic simulator.
-    simulator = oskar.Simulator(precision)
-    simulator.set_settings_path(os.path.abspath(__file__))
+    # Set up the imaging simulator.
+    simulator = oskar.ImagingSimulator(imagers, precision)
     simulator.set_sky_model(sky)
     simulator.set_telescope_model(tel)
-    simulator.set_observation_frequency(100.0e6)
+    simulator.set_observation_frequency(100e6)
     simulator.set_observation_time(start_time_mjd_utc=51545.0,
         length_sec=43200.0, num_time_steps=48)
-    simulator.set_output_measurement_set(output_root+'.ms')
 
     # Simulate and image visibilities.
     start = time.time()
-    print('Running simulator...')
-    simulator.run()
-    for i, imager in enumerate(imagers):
-        print('Running imager %d...' % i)
-        imager.run()
+    print('Simulating and imaging...')
+    imager_data = simulator.run(return_images=True, return_grids=True)
     print('Completed after %.3f seconds.' % (time.time() - start))
+
+    # Save FITS files (via Python using astropy, not directly from the imager).
+    for i in range(len(imagers)):
+        # Write the image.
+        hdr = fits.header.Header()
+        hdr.append(('CTYPE1', 'RA---SIN'))
+        hdr.append(('CRVAL1', phase_centre_ra_deg))
+        hdr.append(('CRPIX1', imagers[i].image_size / 2 + 1))
+        hdr.append(('CDELT1', -imagers[i].cellsize_arcsec / 3600.0))
+        hdr.append(('CROTA1', 0.0))
+        hdr.append(('CTYPE2', 'DEC--SIN'))
+        hdr.append(('CRVAL2', phase_centre_dec_deg))
+        hdr.append(('CRPIX2', imagers[i].image_size / 2 + 1))
+        hdr.append(('CDELT2', imagers[i].cellsize_arcsec / 3600.0))
+        hdr.append(('CROTA2', 0.0))
+        hdr.append(('BUNIT', 'Jy/beam'))
+        fits.writeto(output_root+'_image_'+imagers[i].weighting+'.fits',
+            imager_data[i]['images'][0,:,:], hdr, clobber=True)
+
+        # Write the grid.
+        fits.writeto(output_root+'_grid_'+imagers[i].weighting+'.fits',
+            numpy.abs(imager_data[i]['grids'][0,:,:]), clobber=True)
 

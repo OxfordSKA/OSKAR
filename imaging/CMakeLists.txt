@@ -42,6 +42,7 @@ set(${libname}_SRC
     src/private_imager_free_fft.c
     src/private_imager_free_gpu_data.c
     src/private_imager_free_wproj.c
+    src/private_imager_generate_w_phase_screen.c
     src/private_imager_init_dft.c
     src/private_imager_init_fft.c
     src/private_imager_init_wproj.c
@@ -53,7 +54,16 @@ set(${libname}_SRC
     src/private_imager_weight_uniform.c
 )
 
-add_library(${libname} ${${libname}_SRC})
+if (CUDA_FOUND)
+    list(APPEND ${libname}_SRC
+        src/private_imager_generate_w_phase_screen_cuda.cu
+    )
+    cuda_add_library(${libname} ${${libname}_SRC})
+else()
+    add_library(${libname} ${${libname}_SRC})
+endif()
+
+
 target_link_libraries(${libname}
     cfitsio
     oskar_log

@@ -171,33 +171,24 @@ class Simulator(object):
         _simulator_lib.run_block(self._capsule, block_index, device_id)
 
 
-    def run(self, process_blocks=False):
+    def run(self):
         """Runs the simulator.
 
-        If the process_blocks argument is true, the method process_block()
-        is called for each visibility block, where a handle to the block is
-        supplied as an argument.
-
+        The method process_block() is called for each simulated visibility
+        block, where a handle to the block is supplied as an argument.
         Inherit this class and override process_block() to process the
         visibilities differently.
-
-        Args:
-            process_blocks (bool): 
-                If true, call process_block() for each visibility block.
         """
-        if process_blocks:
-            self.check_init()
-            self.reset_work_unit_index()
-            num_threads = self.num_devices + 1
-            self._barrier = Barrier(num_threads)
-            threads = []
-            for i in range(num_threads):
-                threads.append(Thread(target=self._run_blocks, args=[i]))
-            for t in threads: t.start()
-            for t in threads: t.join()
-            self.finalise()
-        else:
-            _simulator_lib.run(self._capsule)
+        self.check_init()
+        self.reset_work_unit_index()
+        num_threads = self.num_devices + 1
+        self._barrier = Barrier(num_threads)
+        threads = []
+        for i in range(num_threads):
+            threads.append(Thread(target=self._run_blocks, args=[i]))
+        for t in threads: t.start()
+        for t in threads: t.join()
+        return self.finalise()
 
 
     def set_coords_only(self, value):

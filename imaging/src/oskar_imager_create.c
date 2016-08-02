@@ -65,6 +65,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     /* Set sensible defaults. */
     oskar_imager_set_gpus(h, -1, 0, status);
     oskar_imager_set_fft_on_gpu(h, 0);
+    oskar_imager_set_generate_w_kernels_on_gpu(h, 1);
     oskar_imager_set_fov(h, 1.0);
     oskar_imager_set_size(h, 256, status);
     oskar_imager_set_channel_start(h, 0);
