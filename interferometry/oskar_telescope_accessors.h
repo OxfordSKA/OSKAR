@@ -850,7 +850,7 @@ void oskar_telescope_set_enable_numerical_patterns(oskar_Telescope* model,
  * @param[in] ref_freq_hz Reference frequency at which the FWHM applies, in Hz.
  */
 OSKAR_EXPORT
-void oskar_telescope_set_gaussian_station_beam_values(oskar_Telescope* model,
+void oskar_telescope_set_gaussian_station_beam_width(oskar_Telescope* model,
         double fwhm_deg, double ref_freq_hz);
 
 /**
@@ -876,14 +876,14 @@ void oskar_telescope_set_noise_freq_file(oskar_Telescope* model,
  * Sets the frequencies for which thermal noise is defined.
  *
  * @param[in] model            Pointer to telescope model.
- * @param[in] num_channels     Number of frequency channels.
  * @param[in] start_hz         Frequency of the first channel, in Hz.
  * @param[in] inc_hz           Frequency increment, in Hz.
+ * @param[in] num_channels     Number of frequency channels.
  * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_telescope_set_noise_freq_range(oskar_Telescope* model,
-        int num_channels, double start_hz, double inc_hz, int* status);
+void oskar_telescope_set_noise_freq(oskar_Telescope* model,
+        double start_hz, double inc_hz, int num_channels, int* status);
 
 /**
  * @brief
@@ -916,7 +916,7 @@ void oskar_telescope_set_noise_rms_file(oskar_Telescope* model,
  * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_telescope_set_noise_rms_range(oskar_Telescope* model,
+void oskar_telescope_set_noise_rms(oskar_Telescope* model,
         double start, double end, int* status);
 
 /**

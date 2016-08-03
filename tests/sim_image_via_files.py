@@ -32,7 +32,7 @@ if __name__ == '__main__':
     # Set station properties after stations have been defined.
     tel.set_phase_centre(phase_centre_ra_deg, phase_centre_dec_deg)
     tel.set_station_type('Gaussian beam')
-    tel.set_gaussian_station_beam_values(5.0, 100e6)
+    tel.set_gaussian_station_beam_width(5.0, 100e6)
 
     # Set up two imagers for natural and uniform weighting.
     imagers = []

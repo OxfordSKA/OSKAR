@@ -162,7 +162,7 @@ static PyObject* set_enable_numerical_patterns(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* set_gaussian_station_beam_values(PyObject* self,
+static PyObject* set_gaussian_station_beam_width(PyObject* self,
         PyObject* args)
 {
     oskar_Telescope* h = 0;
@@ -178,19 +178,19 @@ static PyObject* set_gaussian_station_beam_values(PyObject* self,
         PyErr_Format(PyExc_RuntimeError, "No stations in telescope model!");
         return 0;
     }
-    oskar_telescope_set_gaussian_station_beam_values(h, fwhm_deg, ref_freq_hz);
+    oskar_telescope_set_gaussian_station_beam_width(h, fwhm_deg, ref_freq_hz);
     return Py_BuildValue("");
 }
 
 
-static PyObject* set_noise_freq_range(PyObject* self, PyObject* args)
+static PyObject* set_noise_freq(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
     int num_channels = 0, status = 0;
     double start_hz = 0.0, inc_hz = 0.0;
-    if (!PyArg_ParseTuple(args, "Oidd", &capsule, &num_channels, &start_hz,
-            &inc_hz)) return 0;
+    if (!PyArg_ParseTuple(args, "Oddi", &capsule, &start_hz, &inc_hz,
+            &num_channels)) return 0;
     if (!(h = get_handle(capsule))) return 0;
 
     /* Check stations exist. */
@@ -199,14 +199,13 @@ static PyObject* set_noise_freq_range(PyObject* self, PyObject* args)
         PyErr_Format(PyExc_RuntimeError, "No stations in telescope model!");
         return 0;
     }
-    oskar_telescope_set_noise_freq_range(h, num_channels, start_hz, inc_hz,
-            &status);
+    oskar_telescope_set_noise_freq(h, start_hz, inc_hz, num_channels, &status);
 
     /* Check for errors. */
     if (status)
     {
         PyErr_Format(PyExc_RuntimeError,
-                "oskar_telescope_set_noise_freq_range() failed with code %d (%s).",
+                "oskar_telescope_set_noise_freq() failed with code %d (%s).",
                 status, oskar_get_error_string(status));
         return 0;
     }
@@ -214,7 +213,7 @@ static PyObject* set_noise_freq_range(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* set_noise_rms_range(PyObject* self, PyObject* args)
+static PyObject* set_noise_rms(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
@@ -229,13 +228,13 @@ static PyObject* set_noise_rms_range(PyObject* self, PyObject* args)
         PyErr_Format(PyExc_RuntimeError, "No stations in telescope model!");
         return 0;
     }
-    oskar_telescope_set_noise_rms_range(h, start, end, &status);
+    oskar_telescope_set_noise_rms(h, start, end, &status);
 
     /* Check for errors. */
     if (status)
     {
         PyErr_Format(PyExc_RuntimeError,
-                "oskar_telescope_set_noise_rms_range() failed "
+                "oskar_telescope_set_noise_rms() failed "
                 "with code %d (%s).\n\n"
                 "Remember to set noise frequencies first!",
                 status, oskar_get_error_string(status));
@@ -662,15 +661,13 @@ static PyMethodDef methods[] =
         {"set_enable_numerical_patterns",
                 (PyCFunction)set_enable_numerical_patterns, METH_VARARGS,
                 "set_enable_numerical_patterns(value)"},
-        {"set_gaussian_station_beam_values",
-                (PyCFunction)set_gaussian_station_beam_values, METH_VARARGS,
-                "set_gaussian_station_beam_values(fwhm_deg, ref_freq_hz)"},
-        {"set_noise_freq_range",
-                (PyCFunction)set_noise_freq_range, METH_VARARGS,
-                "set_noise_freq_range(num_channels, start_freq_hz, inc_hz)"},
-        {"set_noise_rms_range",
-                (PyCFunction)set_noise_rms_range, METH_VARARGS,
-                "set_noise_rms_range(start, end)"},
+        {"set_gaussian_station_beam_width",
+                (PyCFunction)set_gaussian_station_beam_width, METH_VARARGS,
+                "set_gaussian_station_beam_width(fwhm_deg, ref_freq_hz)"},
+        {"set_noise_freq", (PyCFunction)set_noise_freq, METH_VARARGS,
+                "set_noise_freq(start_freq_hz, inc_hz, num_channels)"},
+        {"set_noise_rms", (PyCFunction)set_noise_rms, METH_VARARGS,
+                "set_noise_rms(start, end)"},
         {"set_phase_centre", (PyCFunction)set_phase_centre, METH_VARARGS,
                 "set_phase_centre(ra_rad, dec_rad)"},
         {"set_pol_mode", (PyCFunction)set_pol_mode, METH_VARARGS,

@@ -358,7 +358,7 @@ static void oskar_telescope_set_gaussian_station_beam_p(oskar_Station* station,
     }
 }
 
-void oskar_telescope_set_gaussian_station_beam_values(oskar_Telescope* model,
+void oskar_telescope_set_gaussian_station_beam_width(oskar_Telescope* model,
         double fwhm_deg, double ref_freq_hz)
 {
     int i;
@@ -380,8 +380,8 @@ void oskar_telescope_set_noise_freq_file(oskar_Telescope* model,
     }
 }
 
-void oskar_telescope_set_noise_freq_range(oskar_Telescope* model,
-        int num_channels, double start_hz, double inc_hz, int* status)
+void oskar_telescope_set_noise_freq(oskar_Telescope* model,
+        double start_hz, double inc_hz, int num_channels, int* status)
 {
     int i;
     oskar_Mem* noise_freq_hz;
@@ -421,7 +421,7 @@ void oskar_telescope_set_noise_rms_file(oskar_Telescope* model,
     }
 }
 
-void oskar_telescope_set_noise_rms_range(oskar_Telescope* model,
+void oskar_telescope_set_noise_rms(oskar_Telescope* model,
         double start, double end, int* status)
 {
     int i, j, num_channels;
