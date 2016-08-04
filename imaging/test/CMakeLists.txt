@@ -7,6 +7,7 @@ if (CUDA_FOUND)
     include_directories(${CUDA_INCLUDE_DIRS})
     set(${name}_SRC
         main.cpp
+        Test_fits_write.cpp
         Test_grid_sum.cpp
     )
     add_executable(${name} ${${name}_SRC})

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_SET_FILTER_BANDS_H_
-#define OSKAR_SKY_SET_FILTER_BANDS_H_
+#ifndef OSKAR_MEM_READ_FITS_IMAGE_PLANE_H_
+#define OSKAR_MEM_READ_FITS_IMAGE_PLANE_H_
 
 /**
- * @file oskar_sky_set_filter_bands.h
+ * @file oskar_mem_read_fits_image_plane.h
  */
 
 #include <oskar_global.h>
@@ -41,24 +41,36 @@ extern "C" {
 
 /**
  * @brief
- * Sets filter band data into a sky model.
+ * Reads pixel data from a FITS image file.
  *
  * @details
- * This function sets filter band data into a sky model.
+ * Reads pixel data from a FITS image file.
  *
- * @param[in,out] sky            Pointer to sky model.
- * @param[in] num_bands          Number of filter bands.
- * @param[in] band_radii_deg     Array of filter band radii, in degrees.
- * @param[in] band_fluxes_jy     Array of filter band fluxes, in Jy.
- * @param[in,out] status         Status return code.
+ * The returned \p brightness_units string is allocated internally,
+ * and must be freed by the caller.
+ *
+ * @param[in] filename            Name of HEALPix FITS file to read.
+ * @param[in] i_time              Zero-based time index of the plane to read.
+ * @param[in] i_chan              Zero-based channel index of the plane to read.
+ * @param[in] i_stokes            Zero-based Stokes index of the plane to read.
+ * @param[out] image_ra_deg       Image centre Right Ascension, in degrees.
+ * @param[out] image_dec_deg      Image centre Declination, in degrees.
+ * @param[out] image_cellsize_deg Image centre Declination, in degrees.
+ * @param[out] image_time         Time value of the plane.
+ * @param[out] image_freq         Frequency value of the plane.
+ * @param[out] beam_area_pixels   Beam area, in pixels (if found).
+ * @param[out] brightness_units   Brightness units (contents of BUNIT keyword).
+ * @param[in,out] status          Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_set_filter_bands(oskar_Sky* sky, int num_bands,
-        const double* band_radii_deg, const double* band_fluxes_jy,
-        int* status);
+oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
+        int i_chan, int i_stokes, int* image_width, int* image_height,
+        double* image_ra_deg, double* image_dec_deg, double* image_cellsize_deg,
+        double* image_time, double* image_freq, double* beam_area_pixels,
+        char** brightness_units, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_SET_FILTER_BANDS_H_ */
+#endif /* OSKAR_MEM_READ_FITS_IMAGE_PLANE_H_ */

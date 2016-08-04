@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_COPY_FILTER_BANDS_H_
-#define OSKAR_SKY_COPY_FILTER_BANDS_H_
+#ifndef OSKAR_MEM_WRITE_HEALPIX_FITS_H_
+#define OSKAR_MEM_WRITE_HEALPIX_FITS_H_
 
 /**
- * @file oskar_sky_copy_filter_bands.h
+ * @file oskar_mem_write_healpix_fits.h
  */
 
 #include <oskar_global.h>
@@ -40,21 +40,27 @@ extern "C" {
 #endif
 
 /**
- * @brief Copies filter bands from one sky model into another.
+ * @brief
+ * Writes the given array as a HEALPix FITS binary table.
  *
  * @details
- * Copies filter bands from one sky model into another.
+ * Writes the given array as a HEALPix FITS binary table.
  *
- * @param[out] dst         Sky model to copy into.
- * @param[in]  src         Sky model to copy from.
+ * @param[in] data         Array to write.
+ * @param[in] filename     Name of HEALPix FITS file to write.
+ * @param[in] overwrite    If true, overwrite the file if it exists,
+ *                         otherwise append a new FITS binary table.
+ * @param[in] nside        HEALPix resolution parameter.
+ * @param[in] ordering     'R' for RING, 'N' for NESTED.
+ * @param[in] coordsys     'G' for Galactic, 'C' for equatorial.
  * @param[in,out] status   Status return code.
-*/
+ */
 OSKAR_EXPORT
-void oskar_sky_copy_filter_bands(oskar_Sky* dst, const oskar_Sky* src,
-        int* status);
+void oskar_mem_write_healpix_fits(oskar_Mem* data, const char* filename,
+        int overwrite, int nside, char ordering, char coordsys, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_COPY_FILTER_BANDS_H_ */
+#endif /* OSKAR_MEM_WRITE_HEALPIX_FITS_H_ */

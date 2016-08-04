@@ -36,10 +36,7 @@ extern "C" {
 
 double oskar_convert_fov_to_cellsize(double fov_rad, int num_pixels)
 {
-    double max, inc;
-    max = sin(0.5 * fov_rad);
-    inc = 2.0 * max / num_pixels;
-    return asin(inc);
+    return asin(2.0 * sin(0.5 * fov_rad) / num_pixels);
 }
 
 #ifdef __cplusplus

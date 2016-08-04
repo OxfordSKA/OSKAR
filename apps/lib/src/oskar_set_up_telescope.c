@@ -105,7 +105,7 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings_old* settings,
             settings->obs.phase_centre_lon_rad[0],
             settings->obs.phase_centre_lat_rad[0]);
     oskar_telescope_set_station_type(t, settings->telescope.station_type);
-    oskar_telescope_set_gaussian_station_beam_values(t,
+    oskar_telescope_set_gaussian_station_beam_width(t,
             settings->telescope.gaussian_beam.fwhm_deg,
             settings->telescope.gaussian_beam.ref_freq_hz);
 
@@ -115,16 +115,18 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings_old* settings,
     switch (noise_freq_spec)
     {
     case OSKAR_SYSTEM_NOISE_RANGE:
-        oskar_telescope_set_noise_freq_range(t,
-                settings->interferometer.noise.freq.number,
+        oskar_telescope_set_noise_freq(t,
                 settings->interferometer.noise.freq.start,
-                settings->interferometer.noise.freq.inc, status);
+                settings->interferometer.noise.freq.inc,
+                settings->interferometer.noise.freq.number,
+                status);
         break;
     case OSKAR_SYSTEM_NOISE_OBS_SETTINGS:
-        oskar_telescope_set_noise_freq_range(t,
-                settings->obs.num_channels,
+        oskar_telescope_set_noise_freq(t,
                 settings->obs.start_frequency_hz,
-                settings->obs.frequency_inc_hz, status);
+                settings->obs.frequency_inc_hz,
+                settings->obs.num_channels,
+                status);
         break;
     case OSKAR_SYSTEM_NOISE_DATA_FILE:
         oskar_telescope_set_noise_freq_file(t,
@@ -134,7 +136,7 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings_old* settings,
     switch (noise_rms_spec)
     {
     case OSKAR_SYSTEM_NOISE_RANGE:
-        oskar_telescope_set_noise_rms_range(t,
+        oskar_telescope_set_noise_rms(t,
                 settings->interferometer.noise.rms.start,
                 settings->interferometer.noise.rms.end, status);
         break;

@@ -51,11 +51,13 @@ void oskar_settings_old_free(oskar_Settings_old* settings)
     for (i = 0; i < settings->sky.fits_image.num_files; ++i)
         free(settings->sky.fits_image.file[i]);
     free(settings->sky.fits_image.file);
+    free(settings->sky.fits_image.default_map_units);
 
     /* Free HEALPix FITS file names. */
     for (i = 0; i < settings->sky.healpix_fits.num_files; ++i)
         free(settings->sky.healpix_fits.file[i]);
     free(settings->sky.healpix_fits.file);
+    free(settings->sky.healpix_fits.default_map_units);
 
     /* Free GSM file name. */
     free(settings->sky.gsm.file);

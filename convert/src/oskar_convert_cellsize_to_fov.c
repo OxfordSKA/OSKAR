@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FITS_WRITE_AXIS_HEADER_H_
-#define OSKAR_FITS_WRITE_AXIS_HEADER_H_
+#include <oskar_convert_cellsize_to_fov.h>
 
-/**
- * @file oskar_fits_write_axis_header.h
- */
-
-#include <oskar_global.h>
-#include <fitsio.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Writes axis header keywords and data to a FITS file.
- *
- * @details
- * This function writes axis header keywords and data to a FITS file.
- */
-OSKAR_FITS_EXPORT
-void oskar_fits_write_axis_header(fitsfile* fits_file, int axis_id,
-        const char* ctype, const char* ctype_comment, double crval,
-        double cdelt, double crpix, double crota, int* status);
+double oskar_convert_cellsize_to_fov(double cellsize_rad, int num_pixels)
+{
+    return 2.0 * asin(0.5 * num_pixels * sin(cellsize_rad));
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_FITS_WRITE_AXIS_HEADER_H_ */

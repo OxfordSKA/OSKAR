@@ -148,6 +148,18 @@ static PyObject* check_init(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* coords_only(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int flag;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    flag = oskar_simulator_coords_only(h);
+    return Py_BuildValue("O", flag ? Py_True : Py_False);
+}
+
+
 static PyObject* create(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
@@ -214,7 +226,6 @@ static PyObject* num_devices(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
     PyObject* capsule = 0;
-    int status = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle_simulator(capsule))) return 0;
     return Py_BuildValue("i", oskar_simulator_num_devices(h));
@@ -225,7 +236,6 @@ static PyObject* num_gpus(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
     PyObject* capsule = 0;
-    int status = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle_simulator(capsule))) return 0;
     return Py_BuildValue("i", oskar_simulator_num_gpus(h));
@@ -236,7 +246,6 @@ static PyObject* num_vis_blocks(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
     PyObject* capsule = 0;
-    int status = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle_simulator(capsule))) return 0;
     return Py_BuildValue("i", oskar_simulator_num_vis_blocks(h));
@@ -577,6 +586,28 @@ static PyObject* set_zero_failed_gaussians(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* vis_header(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    const oskar_VisHeader* hdr = 0;
+    PyObject *capsule = 0, *header = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    hdr = oskar_simulator_vis_header(h);
+
+    /* Check for NULL pointer. */
+    if (!hdr)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "Visibility header doesn't exist. Call check_init() first.");
+        return 0;
+    }
+
+    header = PyCapsule_New((void*)hdr, "oskar_VisHeader", NULL);
+    return Py_BuildValue("N", header); /* Don't increment refcount. */
+}
+
+
 static PyObject* write_block(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
@@ -608,11 +639,14 @@ static PyObject* write_block(PyObject* self, PyObject* args)
 static PyMethodDef methods[] =
 {
         {"check_init", (PyCFunction)check_init, METH_VARARGS, "check_init()"},
+        {"coords_only", (PyCFunction)coords_only,
+                METH_VARARGS, "coords_only()"},
         {"create", (PyCFunction)create, METH_VARARGS, "create(type)"},
         {"finalise_block", (PyCFunction)finalise_block,
                 METH_VARARGS, "finalise_block(block_index)"},
         {"finalise", (PyCFunction)finalise, METH_VARARGS, "finalise()"},
-        {"num_devices", (PyCFunction)num_devices, METH_VARARGS, "num_devices()"},
+        {"num_devices", (PyCFunction)num_devices,
+                METH_VARARGS, "num_devices()"},
         {"num_gpus", (PyCFunction)num_gpus, METH_VARARGS, "num_gpus()"},
         {"num_vis_blocks", (PyCFunction)num_vis_blocks,
                 METH_VARARGS, "num_vis_blocks()"},
@@ -657,6 +691,7 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "set_telescope_model(telescope)"},
         {"set_zero_failed_gaussians", (PyCFunction)set_zero_failed_gaussians,
                 METH_VARARGS, "set_zero_failed_gaussians(value)"},
+        {"vis_header", (PyCFunction)vis_header, METH_VARARGS, "vis_header()"},
         {"write_block", (PyCFunction)write_block,
                 METH_VARARGS, "write_block(block_index)"},
         {NULL, NULL, 0, NULL}

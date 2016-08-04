@@ -11,14 +11,24 @@
         <desc>A comma-separated string containing device (GPU) IDs to use on
             a multi-GPU system, or 'all' to use all devices.</desc>
     </s>
-    <s k="fov_deg"><label>Field-of-view [deg]</label>
+    <s k="specify_cellsize"><label>Specify cellsize</label>
+        <type name="bool" default="false"/>
+        <desc>If set, specify cellsize; otherwise, specify field of view.</desc>
+    </s>
+    <s k="fov_deg"><label>Field of view [deg]</label>
         <type name="UnsignedDouble" default="2.0"/>
         <desc>Total field of view in degrees.</desc>
+        <depends k="image/specify_cellsize" v="false"/>
+    </s>
+    <s k="cellsize_arcsec"><label>Cellsize [arcsec]</label>
+        <type name="UnsignedDouble" default="1.0"/>
+        <desc>The cell (pixel) size in arcseconds.</desc>
+        <depends k="image/specify_cellsize" v="true"/>
     </s>
     <s k="size"><label>Image dimension [pixels]</label>
         <type name="IntPositive" default="256"/>
         <desc>Image width in one dimension (e.g. a value of 256 would give a
-            256 by 256 image).</desc>
+            256 by 256 image). This must be even.</desc>
     </s>
     <s k="image_type"><label>Image type</label>
         <type name="OptionList" default="I">
@@ -100,7 +110,12 @@
         </logic>
     </s>
     <s k="wproj"><label>W-projection options</label>
-        <s k="w_planes"><label>Number of W-planes</label>
+        <s k="generate_w_kernels_on_gpu">
+            <label>Use GPU to generate W-kernels</label>
+            <type name="bool" default="true"/>
+            <desc>If true, use the GPU to generate the W-kernels.</desc>
+        </s>
+        <s k="num_w_planes"><label>Number of W-planes</label>
             <type name="int" default="0"/>
             <desc>The number of W-planes to use.
             Values less than 1 mean "auto".</desc>

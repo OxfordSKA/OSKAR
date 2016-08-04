@@ -73,12 +73,12 @@ void oskar_telescope_set_station_coords_ecef(oskar_Telescope* telescope,
         double hor[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
         /* Get coordinates from input arrays. */
-        ecef[0] = oskar_mem_get_element_scalar(x, i, status);
-        ecef[1] = oskar_mem_get_element_scalar(y, i, status);
-        ecef[2] = oskar_mem_get_element_scalar(z, i, status);
-        ecef[3] = oskar_mem_get_element_scalar(x_err, i, status);
-        ecef[4] = oskar_mem_get_element_scalar(y_err, i, status);
-        ecef[5] = oskar_mem_get_element_scalar(z_err, i, status);
+        ecef[0] = oskar_mem_get_element(x, i, status);
+        ecef[1] = oskar_mem_get_element(y, i, status);
+        ecef[2] = oskar_mem_get_element(z, i, status);
+        ecef[3] = oskar_mem_get_element(x_err, i, status);
+        ecef[4] = oskar_mem_get_element(y_err, i, status);
+        ecef[5] = oskar_mem_get_element(z_err, i, status);
 
         /* Get "true" coordinates ([3, 4, 5]) from "measured" coordinates. */
         ecef[3] += ecef[0];

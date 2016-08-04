@@ -27,9 +27,9 @@
  */
 
 #include "apps/lib/oskar_set_up_sky.h"
-#include <fits/oskar_fits_healpix_to_sky_model.h>
-#include <fits/oskar_fits_image_to_sky_model.h>
+#include <oskar_convert_brightness_to_jy.h>
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
+#include <oskar_healpix_npix_to_nside.h>
 #include <oskar_random_gaussian.h>
 #include <oskar_random_broken_power_law.h>
 #include <oskar_generate_random_coordinate.h>
@@ -50,7 +50,8 @@ static void set_up_osm(oskar_Sky* sky, oskar_Log* log,
 static void set_up_gsm(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGsm* s, double ra0, double dec0, int* status);
 static void set_up_fits_image(oskar_Sky* sky, oskar_Log* log,
-        const oskar_SettingsSkyFitsImage* s, int* status);
+        const oskar_SettingsSkyFitsImage* s, double ra0, double dec0,
+        int* status);
 static void set_up_healpix_fits(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyHealpixFits* s, double ra0, double dec0,
         int* status);
@@ -75,7 +76,6 @@ static void set_up_extended(oskar_Sky* sky,
 static void set_up_pol(oskar_Sky* sky,
         const oskar_SettingsSkyPolarisation* pol, int* status);
 
-
 oskar_Sky* oskar_set_up_sky(const oskar_Settings_old* settings, oskar_Log* log,
         int* status)
 {
@@ -97,7 +97,7 @@ oskar_Sky* oskar_set_up_sky(const oskar_Settings_old* settings, oskar_Log* log,
     /* Load sky model data files. */
     set_up_osm(sky, log, &settings->sky.oskar_sky_model, ra0, dec0, status);
     set_up_gsm(sky, log, &settings->sky.gsm, ra0, dec0, status);
-    set_up_fits_image(sky, log, &settings->sky.fits_image, status);
+    set_up_fits_image(sky, log, &settings->sky.fits_image, ra0, dec0, status);
     set_up_healpix_fits(sky, log, &settings->sky.healpix_fits,
             ra0, dec0, status);
 
@@ -171,13 +171,12 @@ oskar_Sky* oskar_set_up_sky(const oskar_Settings_old* settings, oskar_Log* log,
 static void set_up_osm(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyOskar* s, double ra0, double dec0, int* status)
 {
-    int i, type;
+    int i;
     const char* filename;
     oskar_Sky* t;
 
     /* Load OSKAR sky model files. */
     if (*status) return;
-    type = oskar_sky_precision(sky);
     for (i = 0; i < s->num_files; ++i)
     {
         filename = s->file[i];
@@ -193,7 +192,7 @@ static void set_up_osm(oskar_Sky* sky, oskar_Log* log,
             /* If this fails, read it as an ASCII file. */
             t = oskar_sky_read(filename, OSKAR_CPU, &binary_file_error);
             if (binary_file_error)
-                t = oskar_sky_load(filename, type, status);
+                t = oskar_sky_load(filename, oskar_sky_precision(sky), status);
 
             /* Apply filters and extended source over-ride. */
             set_up_filter(t, &s->filter, ra0, dec0, status);
@@ -211,64 +210,88 @@ static void set_up_osm(oskar_Sky* sky, oskar_Log* log,
 static void set_up_gsm(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGsm* s, double ra0, double dec0, int* status)
 {
+    int num_pixels, nside;
     const char* filename;
     oskar_Sky* t;
+    oskar_Mem* data;
 
     /* GSM sky model file. */
-    if (*status) return;
     filename = s->file;
-    if (filename && strlen(filename) > 0)
+    if (*status || !filename || strlen(filename) == 0)
+        return;
+
+    /* Load the file. */
+    oskar_log_message(log, 'M', 0, "Loading GSM data...");
+    data = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    num_pixels = (int) oskar_mem_load_ascii(filename, 1, status, data, "");
+
+    /* Compute nside from npix. */
+    nside = oskar_healpix_npix_to_nside(num_pixels);
+    if (12 * nside * nside != num_pixels)
     {
-        /* Load the sky model data into a temporary sky model. */
-        t = oskar_sky_create(oskar_sky_precision(sky), OSKAR_CPU, 0, status);
-        oskar_log_message(log, 'M', 0, "Loading GSM data...");
-        oskar_sky_load_gsm(t, filename, status);
-
-        /* Apply filters and extended source over-ride. */
-        set_up_filter(t, &s->filter, ra0, dec0, status);
-        set_up_extended(t, &s->extended_sources, status);
-
-        /* Append to sky model. */
-        oskar_sky_append(sky, t, status);
-        oskar_sky_free(t, status);
-        oskar_log_message(log, 'M', 1, "done.");
+        oskar_mem_free(data, status);
+        *status = OSKAR_ERR_BAD_GSM_FILE;
+        return;
     }
+
+    /* Convert brightness temperature to Jy. */
+    oskar_convert_brightness_to_jy(data, 0.0, (4.0 * M_PI) / num_pixels,
+            s->freq_hz, 0.0, 0.0, "K", "K", 1, status);
+
+    /* Create a temporary sky model. */
+    t = oskar_sky_from_healpix_ring(oskar_sky_precision(sky), data,
+            s->freq_hz, s->spectral_index, nside, 1, status);
+    oskar_mem_free(data, status);
+
+    /* Apply filters and extended source over-ride. */
+    set_up_filter(t, &s->filter, ra0, dec0, status);
+    set_up_extended(t, &s->extended_sources, status);
+
+    /* Append to sky model. */
+    oskar_sky_append(sky, t, status);
+    oskar_sky_free(t, status);
+    oskar_log_message(log, 'M', 1, "done.");
 }
 
 
 static void set_up_fits_image(oskar_Sky* sky, oskar_Log* log,
-        const oskar_SettingsSkyFitsImage* s, int* status)
+        const oskar_SettingsSkyFitsImage* s, double ra0, double dec0,
+        int* status)
 {
-    int i, type;
-    const char* filename;
-    oskar_Sky* t;
+    int i;
 
     /* Load FITS image files. */
     if (*status) return;
-    type = oskar_sky_precision(sky);
     for (i = 0; i < s->num_files; ++i)
     {
-        filename = s->file[i];
-        if (filename && strlen(filename) > 0)
-        {
-            /* Load into a temporary structure. */
-            t = oskar_sky_create(type, OSKAR_CPU, 0, status);
-            oskar_log_message(log, 'M', 0, "Loading FITS file '%s' ...",
-                    filename);
-            *status = oskar_fits_image_to_sky_model(log, filename, t,
-                    s->spectral_index, s->min_peak_fraction, s->noise_floor,
-                    s->downsample_factor);
-            if (*status)
-            {
-                oskar_sky_free(t, status);
-                return;
-            }
+        const char* filename;
+        oskar_Sky* t;
 
-            /* Append to sky model. */
-            oskar_sky_append(sky, t, status);
-            oskar_sky_free(t, status);
-            oskar_log_message(log, 'M', 1, "done.");
-        }
+        /* Get the filename. */
+        filename = s->file[i];
+        if (!filename || strlen(filename) == 0)
+            continue;
+
+        /* Load the image pixels. */
+        oskar_log_message(log, 'M', 0, "Loading FITS file '%s' ...", filename);
+
+        /* Convert the image into a sky model. */
+        t = oskar_sky_from_fits_file(oskar_sky_precision(sky), filename,
+                s->min_peak_fraction, s->min_abs_val, s->default_map_units,
+                s->override_map_units, 0.0, s->spectral_index, status);
+        if (*status == OSKAR_ERR_BAD_UNITS)
+            oskar_log_error(log,
+                    "Units error: Need K, mK, Jy/pixel or "
+                    "Jy/beam and beam size.");
+
+        /* Apply filters. */
+        set_up_filter(t, &s->filter, ra0, dec0, status);
+
+        /* Append to sky model. */
+        oskar_sky_append(sky, t, status);
+        oskar_sky_free(t, status);
+        if (*status) return;
+        oskar_log_message(log, 'M', 1, "done.");
     }
 }
 
@@ -277,33 +300,42 @@ static void set_up_healpix_fits(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyHealpixFits* s, double ra0, double dec0,
         int* status)
 {
-    int i, type;
-    const char* filename;
-    oskar_Sky* t;
+    int i;
 
     /* Load HEALPix FITS image files. */
     if (*status) return;
-    type = oskar_sky_precision(sky);
     for (i = 0; i < s->num_files; ++i)
     {
+        oskar_Sky* t;
+        const char* filename = s->file[i];
+
+        /* Get the filename. */
         filename = s->file[i];
-        if (filename && strlen(filename) > 0)
-        {
-            /* Load into a temporary sky model. */
-            t = oskar_sky_create(type, OSKAR_CPU, 0, status);
-            oskar_log_message(log, 'M', 0, "Loading HEALPix FITS file '%s' ...",
-                    filename);
-            oskar_fits_healpix_to_sky_model(log, filename, s, t, status);
+        if (!filename || strlen(filename) == 0)
+            continue;
 
-            /* Apply filters and extended source over-ride. */
-            set_up_filter(t, &s->filter, ra0, dec0, status);
-            set_up_extended(t, &s->extended_sources, status);
+        /* Read the data from file. */
+        oskar_log_message(log, 'M', 0, "Loading HEALPix FITS file '%s' ...",
+                filename);
 
-            /* Append to sky model. */
-            oskar_sky_append(sky, t, status);
-            oskar_sky_free(t, status);
-            oskar_log_message(log, 'M', 1, "done.");
-        }
+        /* Convert the image into a sky model. */
+        t = oskar_sky_from_fits_file(oskar_sky_precision(sky), filename,
+                s->min_peak_fraction, s->min_abs_val, s->default_map_units,
+                s->override_map_units, s->freq_hz, s->spectral_index, status);
+        if (*status == OSKAR_ERR_BAD_UNITS)
+            oskar_log_error(log,
+                    "Units error: Need K, mK, Jy/pixel or "
+                    "Jy/beam and beam size.");
+
+        /* Apply filters and extended source over-ride. */
+        set_up_filter(t, &s->filter, ra0, dec0, status);
+        set_up_extended(t, &s->extended_sources, status);
+
+        /* Append to sky model. */
+        oskar_sky_append(sky, t, status);
+        oskar_sky_free(t, status);
+        if (*status) return;
+        oskar_log_message(log, 'M', 1, "done.");
     }
 }
 
@@ -470,6 +502,7 @@ static void set_up_pol(oskar_Sky* sky,
             pol->std_pol_fraction, pol->mean_pol_angle_rad,
             pol->std_pol_angle_rad, pol->seed, status);
 }
+
 
 #ifdef __cplusplus
 }

@@ -36,14 +36,14 @@ set(CUDA_GENERATED_OUTPUT_DIR
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_apps.dir/src)
 cuda_add_library(oskar_apps ${apps_SRC})
 
-# Link in oskar_ms and oskar_fits if avaliable.
+# Link in oskar_ms if avaliable.
 set(settings_libs oskar_settings_containers oskar_settings_load oskar_settings_log)
 if(CASACORE_FOUND)
-    target_link_libraries(oskar_apps oskar oskar_ms oskar_fits
+    target_link_libraries(oskar_apps oskar oskar_ms
         ${settings_libs} ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY}
         ${CUDA_LIBRARIES})
 else()
-    target_link_libraries(oskar_apps oskar oskar_fits ${settings_libs}
+    target_link_libraries(oskar_apps oskar ${settings_libs}
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES})
 endif()
 

@@ -42,13 +42,192 @@ extern "C" {
 
 /**
  * @brief
+ * Returns the imager algorithm.
+ *
+ * @details
+ * Returns a string describing the algorithm used by the imager.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_algorithm(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the image cell size.
+ *
+ * @details
+ * Returns the cell (pixel) size of the output images, in arcsec.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+double oskar_imager_cellsize(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the end channel to image.
+ *
+ * @details
+ * Returns the end channel to image. A value less than 0 means 'all'.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_channel_end(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the flag specifying whether to image each channel separately.
+ *
+ * @details
+ * Returns the flag specifying whether to image each channel separately.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_channel_snapshots(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the start channel to image.
+ *
+ * @details
+ * Returns the start channel to image.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_channel_start(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the flag specifying whether the imager is in coordinate-only mode.
+ *
+ * @details
+ * Returns the flag specifying whether the imager is in coordinate-only mode.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_coords_only(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the flag specifying whether to use the GPU for FFTs.
+ *
+ * @details
+ * Returns the flag specifying whether to use the GPU for FFTs.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_fft_on_gpu(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the image field of view.
+ *
+ * @details
+ * Returns the field of view of the output images, in degrees.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+double oskar_imager_fov(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the flag specifying whether to use the GPU to generate W-kernels.
+ *
+ * @details
+ * Returns the flag specifying whether to use the GPU to generate W-kernels.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_generate_w_kernels_on_gpu(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the image side length.
+ *
+ * @details
+ * Returns the image side length in pixels.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_image_size(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the image (polarisation) type
+ *
+ * @details
+ * Returns a string describing the image (polarisation) type made by the imager.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_image_type(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the input file or Measurement Set.
+ *
+ * @details
+ * Returns the input file or Measurement Set.
+ * This is used when calling oskar_imager_run().
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_input_file(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the Measurement Set column to use.
+ *
+ * @details
+ * Returns the Measurement Set column to use.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_ms_column(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the number of image planes in use.
+ *
+ * @details
+ * Returns the number of image planes in use.
+ */
+OSKAR_EXPORT
+int oskar_imager_num_image_planes(const oskar_Imager* h);
+
+/**
+ * @brief
  * Returns the number of W-planes in use.
  *
  * @details
  * Returns the number of W-planes in use.
  */
 OSKAR_EXPORT
-int oskar_imager_num_w_planes(oskar_Imager* h);
+int oskar_imager_num_w_planes(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the output filename root.
+ *
+ * @details
+ * Returns the output filename root.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_output_root(const oskar_Imager* h);
 
 /**
  * @brief
@@ -59,7 +238,27 @@ int oskar_imager_num_w_planes(oskar_Imager* h);
  * This will be different to the image size when using W-projection.
  */
 OSKAR_EXPORT
-int oskar_imager_plane_size(oskar_Imager* h);
+int oskar_imager_plane_size(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the enumerated grid data type.
+ *
+ * @details
+ * Returns the enumerated grid data type.
+ */
+OSKAR_EXPORT
+int oskar_imager_plane_type(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the enumerated imager precision.
+ *
+ * @details
+ * Returns the enumerated imager precision (OSKAR_SINGLE or OSKAR_DOUBLE).
+ */
+OSKAR_EXPORT
+int oskar_imager_precision(const oskar_Imager* h);
 
 /**
  * @brief
@@ -88,21 +287,56 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
 
 /**
  * @brief
- * Sets the visibility channel range used by the imager.
+ * Sets the image cell size.
  *
  * @details
- * Sets the visibility channel range used by the imager,
- * and whether frequency-synthesis should be used.
+ * Sets the cell (pixel) size of the output images.
+ *
+ * @param[in,out] h                  Handle to imager.
+ * @param[in]     cellsize_arcsec    Cell size, in arcsec.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_cellsize(oskar_Imager* h, double cellsize_arcsec);
+
+/**
+ * @brief
+ * Sets the end channel to image.
+ *
+ * @details
+ * Sets the end channel to image. A value less than 0 means 'all'.
  *
  * @param[in,out] h          Handle to imager.
- * @param[in]     start      Start channel index.
- * @param[in]     end        End channel index (-1 for all channels).
- * @param[in]     snapshots  If true, image each channel separately;
+ * @param[in]     value      End channel index (-1 for all times).
+ */
+OSKAR_EXPORT
+void oskar_imager_set_channel_end(oskar_Imager* h, int value);
+
+/**
+ * @brief
+ * Sets the flag specifying whether to image each channel separately.
+ *
+ * @details
+ * Sets the flag specifying whether to image each channel separately.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      If true, image each channel separately;
  *                           if false, use frequency synthesis.
  */
 OSKAR_EXPORT
-void oskar_imager_set_channel_range(oskar_Imager* h, int start, int end,
-        int snapshots);
+void oskar_imager_set_channel_snapshots(oskar_Imager* h, int value);
+
+/**
+ * @brief
+ * Sets the start channel to image.
+ *
+ * @details
+ * Sets the start channel to image.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      Start channel index.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_channel_start(oskar_Imager* h, int value);
 
 /**
  * @brief
@@ -189,6 +423,19 @@ void oskar_imager_set_fft_on_gpu(oskar_Imager* h, int value);
 
 /**
  * @brief
+ * Sets whether to use the GPU to generate W-kernels.
+ *
+ * @details
+ * Sets whether to use the GPU to generate W-kernels.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      If true, use the GPU to generate the W-kernels.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_generate_w_kernels_on_gpu(oskar_Imager* h, int value);
+
+/**
+ * @brief
  * Sets which GPUs will be used by the imager.
  *
  * @details
@@ -222,6 +469,20 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
 OSKAR_EXPORT
 void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
         int support, int oversample, int* status);
+
+/**
+ * @brief
+ * Sets image side length.
+ *
+ * @details
+ * Sets the image side length in pixels.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     size       Image side length in pixels.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_image_size(oskar_Imager* h, int size, int* status);
 
 /**
  * @brief
@@ -334,27 +595,50 @@ void oskar_imager_set_oversample(oskar_Imager* h, int value);
  *
  * @param[in,out] h          Handle to imager.
  * @param[in]     size       Image side length in pixels.
+ * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_set_size(oskar_Imager* h, int size);
+void oskar_imager_set_size(oskar_Imager* h, int size, int* status);
 
 /**
  * @brief
- * Sets the visibility time range used by the imager.
+ * Sets the end time index to image.
  *
  * @details
- * Sets the visibility time range used by the imager,
- * and whether time-synthesis should be used.
+ * Sets the end time index to image. A value less than 0 means 'all'.
  *
  * @param[in,out] h          Handle to imager.
- * @param[in]     start      Start time index.
- * @param[in]     end        End time index (-1 for all times).
- * @param[in]     snapshots  If true, image each time slice separately;
+ * @param[in]     value      End time index (-1 for all times).
+ */
+OSKAR_EXPORT
+void oskar_imager_set_time_end(oskar_Imager* h, int value);
+
+/**
+ * @brief
+ * Sets the flag specifying whether to image each time index separately.
+ *
+ * @details
+ * Sets the flag specifying whether to image each time index separately.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      If true, image each time slice separately;
  *                           if false, use time synthesis.
  */
 OSKAR_EXPORT
-void oskar_imager_set_time_range(oskar_Imager* h, int start, int end,
-        int snapshots);
+void oskar_imager_set_time_snapshots(oskar_Imager* h, int value);
+
+/**
+ * @brief
+ * Sets the start time index to image.
+ *
+ * @details
+ * Sets the start time index to image.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      Start time index.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_time_start(oskar_Imager* h, int value);
 
 /**
  * @brief
@@ -431,7 +715,7 @@ void oskar_imager_set_num_w_planes(oskar_Imager* h, int value);
  *
  * @details
  * Sets the visibility weighting scheme to use,
- * either "Natural", "Radial" or "Gridless".
+ * either "Natural", "Radial" or "Uniform".
  *
  * @param[in,out] h            Handle to imager.
  * @param[in] type             Visibility weighting type string, as above.
@@ -439,6 +723,66 @@ void oskar_imager_set_num_w_planes(oskar_Imager* h, int value);
  */
 OSKAR_EXPORT
 void oskar_imager_set_weighting(oskar_Imager* h, const char* type, int* status);
+
+/**
+ * @brief
+ * Returns the image side length.
+ *
+ * @details
+ * Returns the image side length in pixels.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_size(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the end time index to image.
+ *
+ * @details
+ * Returns the end time index to image. A value less than 0 means 'all'.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_time_end(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the flag specifying whether to image each time index separately.
+ *
+ * @details
+ * Returns the flag specifying whether to image each time index separately.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_time_snapshots(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the start time index to image.
+ *
+ * @details
+ * Returns the start time index to image.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_time_start(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the visibility weighting scheme.
+ *
+ * @details
+ * Returns a string describing the visibility weighting scheme.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+const char* oskar_imager_weighting(const oskar_Imager* h);
 
 #ifdef __cplusplus
 }

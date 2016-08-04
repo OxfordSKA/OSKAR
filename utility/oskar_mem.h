@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,6 +92,8 @@ enum OSKAR_MEM_LOCATION
 #include <oskar_mem_random_range.h>
 #include <oskar_mem_random_uniform.h>
 #include <oskar_mem_read_binary_raw.h>
+#include <oskar_mem_read_fits_image_plane.h>
+#include <oskar_mem_read_healpix_fits.h>
 #include <oskar_mem_realloc.h>
 #include <oskar_mem_save_ascii.h>
 #include <oskar_mem_scale_real.h>
@@ -99,5 +101,6 @@ enum OSKAR_MEM_LOCATION
 #include <oskar_mem_set_element.h>
 #include <oskar_mem_set_value_real.h>
 #include <oskar_mem_stats.h>
+#include <oskar_mem_write_healpix_fits.h>
 
 #endif /* OSKAR_MEM_H_ */

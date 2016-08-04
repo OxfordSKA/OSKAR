@@ -38,6 +38,7 @@
 #include <oskar_sky.h>
 #include <oskar_telescope.h>
 #include <oskar_vis_block.h>
+#include <oskar_vis_header.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,6 +52,9 @@ typedef struct oskar_Simulator oskar_Simulator;
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_check_init(oskar_Simulator* h, int* status);
+
+OSKAR_APPS_EXPORT
+int oskar_simulator_coords_only(const oskar_Simulator* h);
 
 OSKAR_APPS_EXPORT
 oskar_Simulator* oskar_simulator_create(int precision, int* status);
@@ -148,6 +152,9 @@ void oskar_simulator_set_source_flux_range(oskar_Simulator* h,
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_zero_failed_gaussians(oskar_Simulator* h, int value);
+
+OSKAR_APPS_EXPORT
+const oskar_VisHeader* oskar_simulator_vis_header(oskar_Simulator* h);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_write_block(oskar_Simulator* h,

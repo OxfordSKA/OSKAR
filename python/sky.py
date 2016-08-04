@@ -31,24 +31,21 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # 
 
+import math
 import numpy
 import _sky_lib
 
 class Sky(object):
     """This class provides a Python interface to an OSKAR sky model."""
 
-    def __init__(self, precision="double", settings_path=None):
+    def __init__(self, precision='double'):
         """Creates a handle to an OSKAR sky model.
 
         Args:
-            precision (str): Either 'double' or 'single' to specify
+            precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the data.
-            settings_path (str): Path to an OSKAR settings file.
         """
-        if settings_path is not None:
-            self._capsule = _sky_lib.set_up(settings_path)
-        else:
-            self._capsule = _sky_lib.create(precision)
+        self._capsule = _sky_lib.create(precision)
 
 
     def append(self, other):
@@ -115,22 +112,90 @@ class Sky(object):
 
 
     def append_file(self, filename):
-        """Appends data to the sky model from a file.
+        """Appends data to the sky model from a text file.
 
         Args:
-            filename (str): Name of file to open.
+            filename (str): Name of file to load.
         """
         _sky_lib.append_file(self._capsule, filename)
 
 
+    def create_copy(self):
+        """Creates a copy of the sky model."""
+        t = Sky()
+        t._capsule = _sky_lib.create_copy(self._capsule)
+        return t
+
+
+    def filter_by_flux(self, min_flux_jy, max_flux_jy):
+        """Filters the sky model according to Stokes-I flux.
+
+        Sources with flux values outside the range are deleted.
+
+        Args:
+            min_flux_jy (float): Minimum allowed flux, in Jy.
+            max_flux_jy (float): Maximum allowed flux, in Jy.
+        """
+        _sky_lib.filter_by_flux(self._capsule, min_flux_jy, max_flux_jy)
+
+
+    def filter_by_radius(self, inner_radius_deg, outer_radius_deg, 
+            ra0_deg, dec0_deg):
+        """Filters the sky model according to source radius from phase centre.
+
+        Sources outside the range are deleted.
+
+        Args:
+            inner_radius_deg (float): Minimum allowed radius, in degrees.
+            outer_radius_deg (float): Maximum allowed radius, in degrees.
+            ra0_deg (float): Right Ascension of phase centre, in degrees.
+            dec0_deg (float): Declination of phase centre, in degrees.
+        """
+        _sky_lib.filter_by_radius(self._capsule, 
+            math.radians(inner_radius_deg), math.radians(outer_radius_deg), 
+            math.radians(ra0_deg), math.radians(dec0_deg))
+
+
     @classmethod
-    def generate_grid(cls, precision, ra0_deg, dec0_deg, side_length, fov_deg,
-            mean_flux_jy=1.0, std_flux_jy=0.0, seed=1):
+    def from_fits_file(cls, filename, min_peak_fraction=0.0, min_abs_val=0.0,
+            default_map_units='K', override_units=False,
+            frequency_hz=0.0, spectral_index=-0.7, precision='double'):
+        """Loads data from a FITS file and returns it as a new sky model.
+
+        The file can be either a regular FITS image
+        or a HEALPix FITS file in RING format.
+
+        Args:
+            filename (str): Name of FITS file to load.
+            min_peak_fraction (Optional[float]):
+                Minimum pixel value loaded, as a fraction of the image peak.
+            min_abs_val (Optional[float]):
+                Minimum pixel value loaded.
+            default_map_units (Optional[str]):
+                Default map units, if not found in the file.
+                Can be 'Jy/beam', 'Jy/pixel', 'K' or 'mK'.
+            override_units (Optional[boolean]):
+                If true, override image units with the default.
+            frequency_hz (Optional[float]):
+                Frequency of the image data in Hz, if not found in the file.
+            spectral_index (Optional[float]):
+                Spectral index value to give to each pixel.
+            precision (Optional[str]): Either 'double' or 'single' to specify
+                the numerical precision of the data.
+        """
+        t = Sky()
+        t._capsule = _sky_lib.from_fits_file(filename, min_peak_fraction,
+            min_abs_val, default_map_units, override_units, frequency_hz,
+            spectral_index, precision)
+        return t
+
+
+    @classmethod
+    def generate_grid(cls, ra0_deg, dec0_deg, side_length, fov_deg,
+            mean_flux_jy=1.0, std_flux_jy=0.0, seed=1, precision='double'):
         """Generates a grid of sources and returns it as a new sky model.
 
         Args:
-            precision (str):      Either 'double' or 'single' to specify
-                the numerical precision of the data.
             ra0_deg (float):      Right Ascension of grid centre, in degrees.
             dec0_deg (float):     Declination of grid centre, in degrees.
             side_length (int):    Side length of generated grid.
@@ -138,30 +203,46 @@ class Sky(object):
             mean_flux_jy (float): Mean Stokes-I source flux, in Jy.
             std_flux_jy (float):  Standard deviation Stokes-I source flux, in Jy.
             seed (int):           Random generator seed.
+            precision (Optional[str]): Either 'double' or 'single' to specify
+                the numerical precision of the data.
         """
         t = Sky()
-        t._capsule = _sky_lib.generate_grid(precision, ra0_deg, 
-            dec0_deg, side_length, fov_deg, mean_flux_jy, std_flux_jy, seed)
+        t._capsule = _sky_lib.generate_grid(ra0_deg, dec0_deg, side_length,
+            fov_deg, mean_flux_jy, std_flux_jy, seed, precision)
         return t
 
 
     @classmethod
-    def generate_random_power_law(cls, precision, num_sources,
-            min_flux_jy, max_flux_jy, power_law_index, seed=1):
+    def generate_random_power_law(cls, num_sources, min_flux_jy, max_flux_jy,
+            power_law_index, seed=1, precision='double'):
         """Generates sources scattered randomly over the sphere.
 
         Args:
-            precision (str):         Either 'double' or 'single' to specify
-                the numerical precision of the data.
             num_sources (int):       The number of sources to generate.
             min_flux_jy (float):     Minimum Stokes-I source flux, in Jy.
             max_flux_jy (float):     Maximum Stokes-I source flux, in Jy.
             power_law_index (float): Power law index/exponent.
             seed (int):              Random generator seed.
+            precision (Optional[str]): Either 'double' or 'single' to specify
+                the numerical precision of the data.
         """
         t = Sky()
-        t._capsule = _sky_lib.generate_random_power_law(precision, 
-            num_sources, min_flux_jy, max_flux_jy, power_law_index, seed)
+        t._capsule = _sky_lib.generate_random_power_law(num_sources,
+            min_flux_jy, max_flux_jy, power_law_index, seed, precision)
+        return t
+
+
+    @classmethod
+    def load(cls, filename, precision='double'):
+        """Loads data from a text file and returns it as a new sky model.
+
+        Args:
+            filename (str): Name of file to load.
+            precision (Optional[str]): Either 'double' or 'single' to specify
+                the numerical precision of the data.
+        """
+        t = Sky()
+        t._capsule = _sky_lib.load(filename, precision)
         return t
 
 

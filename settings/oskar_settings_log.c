@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,12 +153,14 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings_old* s)
                     s->sky.fits_image.file[i]);
         }
         --depth;
-        LVI("Downsample factor", s->sky.fits_image.downsample_factor);
         LV("Minimum fraction of peak", "%.2f",
                 s->sky.fits_image.min_peak_fraction);
-        LV("Noise floor [Jy/pixel]", "%.3e",
-                s->sky.fits_image.noise_floor);
+        LV("Minimum absolute value", "%.3e",
+                s->sky.fits_image.min_abs_val);
+        LVS("Default map units", s->sky.fits_image.default_map_units);
+        LVB("Override map units", s->sky.fits_image.override_map_units);
         LV("Spectral index", "%.1f", s->sky.fits_image.spectral_index);
+        oskar_log_settings_sky_filter(log, depth, &s->sky.fits_image.filter);
     }
 
     /* Input HEALPix FITS file settings. */
@@ -174,20 +176,19 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings_old* s)
                     s->sky.healpix_fits.file[i]);
         }
         --depth;
+        LV("Minimum fraction of peak", "%.2f",
+                s->sky.healpix_fits.min_peak_fraction);
+        LV("Minimum absolute value", "%.3e",
+                s->sky.healpix_fits.min_abs_val);
         if (s->sky.healpix_fits.coord_sys == OSKAR_SPHERICAL_TYPE_GALACTIC)
             LVS("Coordinate system", "Galactic");
         else if (s->sky.healpix_fits.coord_sys == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
             LVS("Coordinate system", "Equatorial");
         else
             LVS("Coordinate system", "Unknown");
-        if (s->sky.healpix_fits.map_units == OSKAR_MAP_UNITS_MK_PER_SR)
-            LVS("Map units", "mK/sr");
-        else if (s->sky.healpix_fits.map_units == OSKAR_MAP_UNITS_K_PER_SR)
-            LVS("Map units", "K/sr");
-        else if (s->sky.healpix_fits.map_units == OSKAR_MAP_UNITS_JY)
-            LVS("Map units", "Jy/pixel");
-        else
-            LVS("Map units", "Unknown");
+        LVS("Default map units", s->sky.healpix_fits.default_map_units);
+        LVB("Override map units", s->sky.healpix_fits.override_map_units);
+        LV("Spectral index", "%.1f", s->sky.healpix_fits.spectral_index);
         oskar_log_settings_sky_filter(log, depth, &s->sky.healpix_fits.filter);
         oskar_log_settings_sky_extended(log, depth,
                 &s->sky.healpix_fits.extended_sources);

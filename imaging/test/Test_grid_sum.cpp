@@ -42,8 +42,8 @@ TEST(imager, grid_sum)
     // Create and set up the imager.
     oskar_Imager* im = oskar_imager_create(type, &status);
     oskar_imager_set_grid_kernel(im, "pillbox", 1, 1, &status);
-    oskar_imager_set_size(im, size);
     oskar_imager_set_fov(im, 5.0);
+    oskar_imager_set_size(im, size, &status);
     oskar_Mem* grid = oskar_mem_create(type | OSKAR_COMPLEX, OSKAR_CPU,
             grid_size, &status);
     ASSERT_EQ(0, status);

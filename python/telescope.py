@@ -39,7 +39,7 @@ class Telescope(object):
     """This class provides a Python interface to an OSKAR telescope model.
     """
 
-    def __init__(self, precision="double", settings_path=None):
+    def __init__(self, precision='double', settings_path=None):
         """Creates a handle to an OSKAR telescope model.
 
         Args:
@@ -86,7 +86,7 @@ class Telescope(object):
         Args:
             channel_bandwidth_hz (float): The channel bandwidth, in Hz.
         """
-        _telescope_lib.set_channel_bandwidth(self._capsule, 
+        _telescope_lib.set_channel_bandwidth(self._capsule,
             channel_bandwidth_hz)
 
 
@@ -109,7 +109,7 @@ class Telescope(object):
         _telescope_lib.set_enable_numerical_patterns(self._capsule, value)
 
 
-    def set_gaussian_station_beam_values(self, fwhm_deg, ref_freq_hz):
+    def set_gaussian_station_beam_width(self, fwhm_deg, ref_freq_hz):
         """Sets the parameters used for stations with Gaussian beams.
 
         Args:
@@ -118,32 +118,34 @@ class Telescope(object):
             ref_freq_hz (float):
                 The reference frequency at which the FWHM applies, in Hz.
         """
-        _telescope_lib.set_gaussian_station_beam_values(self._capsule, 
+        _telescope_lib.set_gaussian_station_beam_width(self._capsule,
             fwhm_deg, ref_freq_hz)
 
 
-    def set_noise_freq_range(self, num_channels, start_hz, inc_hz):
-        """Sets the noise frequency range.
+    def set_noise_freq(self, start_hz, inc_hz=0.0, num_channels=1):
+        """Sets the frequencies at which noise is defined.
 
         Args:
-            num_channels (int): Number of channels.
-            start_hz (float): Start frequency, in Hz.
-            inc_hz (float): Frequency increment, in Hz.
+            start_hz (float):             Start frequency, in Hz.
+            inc_hz (Optional[float]):     Frequency increment, in Hz. Default 0.
+            num_channels (Optioanl[int]): Number of channels. Default 1.
         """
-        _telescope_lib.set_noise_freq_range(self._capsule, 
-            num_channels, start_hz, inc_hz)
+        _telescope_lib.set_noise_freq(self._capsule,
+            start_hz, inc_hz, num_channels)
 
 
-    def set_noise_rms_range(self, start, end):
+    def set_noise_rms(self, start, end=None):
         """Sets the noise RMS range.
 
-        Call this only after set_noise_freq_range().
+        Call this only after set_noise_freq().
 
         Args:
             start (float): Value at first frequency, in Jy.
-            end (float): Value at last frequency, in Jy.
+            end (Optional[float]): Value at last frequency, in Jy.
         """
-        _telescope_lib.set_noise_rms_range(self._capsule, start, end)
+        if end == None:
+            end = start
+        _telescope_lib.set_noise_rms(self._capsule, start, end)
 
 
     def set_phase_centre(self, ra_deg, dec_deg):
@@ -153,7 +155,7 @@ class Telescope(object):
             ra_deg (float): Right Ascension, in degrees.
             dec_deg (float): Declination, in degrees.
         """
-        _telescope_lib.set_phase_centre(self._capsule, 
+        _telescope_lib.set_phase_centre(self._capsule,
             math.radians(ra_deg), math.radians(dec_deg))
 
 

@@ -31,6 +31,7 @@
 #endif
 
 #include <private_imager.h>
+#include <private_imager_generate_w_phase_screen.h>
 #include <private_imager_free_wproj.h>
 #include <private_imager_init_wproj.h>
 #include <oskar_fftpack_cfft.h>
@@ -50,9 +51,6 @@ extern "C" {
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
 static int oskar_composite_nearest_even(int value, int* smaller, int *larger);
-static void generate_w_phase_screen(const int iw, const int conv_size,
-        const int inner, const double sampling, const double w_scale,
-        const double* taper_func, oskar_Mem* screen, int* status);
 
 /*
  * W-kernel generation is based on CASA implementation
@@ -60,17 +58,19 @@ static void generate_w_phase_screen(const int iw, const int conv_size,
  */
 void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 {
-    size_t max_mem_bytes, max_bytes_per_plane;
+    size_t max_mem_bytes, max_bytes_per_plane, element_size, copy_len;
     int i, iw, ix, iy, *supp, new_conv_size, oversample;
     int conv_size, conv_size_half, inner, nearest;
     double l_max, max_conv_size, max_uvw, max_val, sampling, sum, ww_mid;
-    double *taper_func, *maxes;
+    double *maxes;
     double image_padding = 1.2;
 #ifdef OSKAR_HAVE_CUDA
     cufftHandle cufft_plan = 0;
 #endif
-    oskar_Mem *screen = 0, *screen_gpu = 0, *wsave = 0, *work = 0;
-    int fft_on_gpu = 1;
+    oskar_Mem *screen = 0, *screen_gpu = 0, *screen_ptr = 0;
+    oskar_Mem *taper = 0, *taper_gpu = 0, *taper_ptr = 0;
+    oskar_Mem *wsave = 0, *work = 0;
+    char *ptr_out, *ptr_in;
 
     /* Clear old kernels. */
     oskar_imager_free_wproj(h, status);
@@ -117,6 +117,7 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
             ((size_t) h->num_w_planes) * ((size_t) conv_size_half) *
             ((size_t) conv_size_half), status);
     supp = oskar_mem_int(h->w_support, status);
+    element_size = oskar_mem_element_size(oskar_mem_type(h->w_kernels));
     if (*status) return;
 
     /* Get size of inner region of kernel and padded grid size. */
@@ -131,20 +132,20 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     /* Create scratch arrays and FFT plan for the phase screens. */
     screen = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
             OSKAR_CPU, conv_size * conv_size, status);
-    if (fft_on_gpu)
-    {
+    screen_ptr = screen;
 #ifdef OSKAR_HAVE_CUDA
+    if (h->generate_w_kernels_on_gpu)
+    {
         screen_gpu = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
                 OSKAR_GPU, conv_size * conv_size, status);
+        screen_ptr = screen_gpu;
         if (h->imager_prec == OSKAR_DOUBLE)
             cufftPlan2d(&cufft_plan, conv_size, conv_size, CUFFT_Z2Z);
         else
             cufftPlan2d(&cufft_plan, conv_size, conv_size, CUFFT_C2C);
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
     }
     else
+#endif
     {
         int len_save = 4 * conv_size +
                 2 * (int)(log((double)conv_size) / log(2.0)) + 8;
@@ -160,99 +161,108 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     }
 
     /* Generate 1D spheroidal tapering function to cover the inner region. */
-    taper_func = (double*) calloc(inner, sizeof(double));
-    for (i = 0; i < inner; ++i)
+    taper = oskar_mem_create(h->imager_prec, OSKAR_CPU, inner, status);
+    taper_ptr = taper;
+    if (h->imager_prec == OSKAR_DOUBLE)
     {
-        double nu;
-        nu = (i - (inner / 2)) / ((double)(inner / 2));
-        taper_func[i] = oskar_grid_function_spheroidal(fabs(nu));
+        double* t = oskar_mem_double(taper, status);
+        for (i = 0; i < inner; ++i)
+        {
+            double nu;
+            nu = (i - (inner / 2)) / ((double)(inner / 2));
+            t[i] = oskar_grid_function_spheroidal(fabs(nu));
+        }
     }
+    else
+    {
+        float* t = oskar_mem_float(taper, status);
+        for (i = 0; i < inner; ++i)
+        {
+            double nu;
+            nu = (i - (inner / 2)) / ((double)(inner / 2));
+            t[i] = oskar_grid_function_spheroidal(fabs(nu));
+        }
+    }
+#ifdef OSKAR_HAVE_CUDA
+    if (h->generate_w_kernels_on_gpu)
+    {
+        taper_gpu = oskar_mem_create_copy(taper, OSKAR_GPU, status);
+        taper_ptr = taper_gpu;
+    }
+#endif
 
     /* Evaluate kernels. */
+    ptr_in   = oskar_mem_char(screen);
+    copy_len = element_size * conv_size_half;
     maxes = (double*) calloc(h->num_w_planes, sizeof(double));
     for (iw = 0; iw < h->num_w_planes; ++iw)
     {
-        int ind1, ind2, offset;
+        size_t in = 0, out = 0, offset;
 
         /* Generate the tapered phase screen. */
-        generate_w_phase_screen(iw, conv_size, inner, sampling,
-                h->w_scale, taper_func, screen, status);
+        oskar_imager_generate_w_phase_screen(iw, conv_size, inner, sampling,
+                h->w_scale, taper_ptr, screen_ptr, status);
         if (*status) break;
 
         /* Perform the FFT to get the kernel. No shifts are required. */
-        if (fft_on_gpu)
-        {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_mem_copy(screen_gpu, screen, status);
+        if (h->generate_w_kernels_on_gpu)
+        {
             if (oskar_mem_precision(screen) == OSKAR_DOUBLE)
-                cufftExecZ2Z(cufft_plan, oskar_mem_void(screen_gpu),
-                        oskar_mem_void(screen_gpu), CUFFT_FORWARD);
+                cufftExecZ2Z(cufft_plan, oskar_mem_void(screen_ptr),
+                        oskar_mem_void(screen_ptr), CUFFT_FORWARD);
             else
-                cufftExecC2C(cufft_plan, oskar_mem_void(screen_gpu),
-                        oskar_mem_void(screen_gpu), CUFFT_FORWARD);
-            oskar_mem_copy(screen, screen_gpu, status);
-#endif
+                cufftExecC2C(cufft_plan, oskar_mem_void(screen_ptr),
+                        oskar_mem_void(screen_ptr), CUFFT_FORWARD);
+            oskar_mem_copy(screen, screen_ptr, status);
         }
         else
+#endif
         {
-            if (oskar_mem_precision(screen) == OSKAR_DOUBLE)
+            if (oskar_mem_precision(screen_ptr) == OSKAR_DOUBLE)
                 oskar_fftpack_cfft2f(conv_size, conv_size, conv_size,
-                        oskar_mem_double(screen, status),
+                        oskar_mem_double(screen_ptr, status),
                         oskar_mem_double(wsave, status),
                         oskar_mem_double(work, status));
             else
                 oskar_fftpack_cfft2f_f(conv_size, conv_size, conv_size,
-                        oskar_mem_float(screen, status),
+                        oskar_mem_float(screen_ptr, status),
                         oskar_mem_float(wsave, status),
                         oskar_mem_float(work, status));
         }
         if (*status) break;
 
-        /* Save only the first quarter of the kernel; the rest is redundant. */
-        offset = iw * conv_size_half * conv_size_half;
-        if (oskar_mem_precision(h->w_kernels) == OSKAR_DOUBLE)
+        /* Get the maximum (from the first element). */
+        if (oskar_mem_precision(screen) == OSKAR_DOUBLE)
         {
-            double *ptr, *scr;
-            ptr = oskar_mem_double(h->w_kernels, status);
-            scr = oskar_mem_double(screen, status);
-            maxes[iw] = sqrt(scr[0]*scr[0] + scr[1]*scr[1]);
-            for (iy = 0; iy < conv_size_half; ++iy)
-            {
-                for (ix = 0; ix < conv_size_half; ++ix)
-                {
-                    ind1 = 2 * (offset + iy * conv_size_half + ix);
-                    ind2 = 2 * (conv_size * iy + ix);
-                    ptr[ind1 + 0] = scr[ind2 + 0];
-                    ptr[ind1 + 1] = scr[ind2 + 1];
-                }
-            }
+            const double* t = (const double*) oskar_mem_void_const(screen);
+            maxes[iw] = sqrt(t[0]*t[0] + t[1]*t[1]);
         }
         else
         {
-            float *ptr, *scr;
-            ptr = oskar_mem_float(h->w_kernels, status);
-            scr = oskar_mem_float(screen, status);
-            maxes[iw] = sqrt(scr[0]*scr[0] + scr[1]*scr[1]);
-            for (iy = 0; iy < conv_size_half; ++iy)
-            {
-                for (ix = 0; ix < conv_size_half; ++ix)
-                {
-                    ind1 = 2 * (offset + iy * conv_size_half + ix);
-                    ind2 = 2 * (conv_size * iy + ix);
-                    ptr[ind1 + 0] = (float) (scr[ind2 + 0]);
-                    ptr[ind1 + 1] = (float) (scr[ind2 + 1]);
-                }
-            }
+            const float* t = (const float*) oskar_mem_void_const(screen);
+            maxes[iw] = sqrt(t[0]*t[0] + t[1]*t[1]);
+        }
+
+        /* Save only the first quarter of the kernel; the rest is redundant. */
+        offset = iw * conv_size_half * conv_size_half * element_size;
+        ptr_out = oskar_mem_char(h->w_kernels) + offset;
+        for (iy = 0; iy < conv_size_half; ++iy)
+        {
+            memcpy(ptr_out + out, ptr_in + in, copy_len);
+            in += conv_size * element_size;
+            out += copy_len;
         }
     }
 
     /* Clean up. */
-    free(taper_func);
 #ifdef OSKAR_HAVE_CUDA
     cufftDestroy(cufft_plan);
 #endif
     oskar_mem_free(screen, status);
     oskar_mem_free(screen_gpu, status);
+    oskar_mem_free(taper, status);
+    oskar_mem_free(taper_gpu, status);
     oskar_mem_free(wsave, status);
     oskar_mem_free(work, status);
 
@@ -267,12 +277,13 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     for (iw = 0; iw < h->num_w_planes; ++iw)
     {
         int trial = 0, found = 0, plane_offset, ind1, ind2;
+        double v1, v2;
         if (*status) break;
         plane_offset = conv_size_half * conv_size_half * iw;
         if (oskar_mem_precision(h->w_kernels) == OSKAR_DOUBLE)
         {
-            double *ptr, v1, v2;
-            ptr = oskar_mem_double(h->w_kernels, status);
+            const double *restrict ptr = oskar_mem_double_const(
+                    h->w_kernels, status);
             for (trial = conv_size_half - 1; trial > 0; trial--)
             {
                 ind1 = 2 * (trial * conv_size_half + plane_offset);
@@ -288,8 +299,8 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         }
         else
         {
-            float *ptr, v1, v2;
-            ptr = oskar_mem_float(h->w_kernels, status);
+            const float *restrict ptr = oskar_mem_float_const(
+                    h->w_kernels, status);
             for (trial = conv_size_half - 1; trial > 0; trial--)
             {
                 ind1 = 2 * (trial * conv_size_half + plane_offset);
@@ -320,9 +331,8 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     {
         char *ptr;
         int new_conv_size_half;
-        size_t in = 0, out = 0, copy_len = 0, element_size = 0;
+        size_t in = 0, out = 0;
         ptr = oskar_mem_char(h->w_kernels);
-        element_size = oskar_mem_element_size(oskar_mem_type(h->w_kernels));
         new_conv_size_half = new_conv_size / 2 - 2;
         copy_len = element_size * new_conv_size_half;
 
@@ -409,73 +419,6 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         else
             oskar_fftpack_cfft2i_f(h->grid_size, h->grid_size,
                     oskar_mem_float(h->fftpack_wsave, status));
-    }
-}
-
-
-static void generate_w_phase_screen(const int iw, const int conv_size,
-        const int inner, const double sampling, const double w_scale,
-        const double* taper_func, oskar_Mem* screen, int* status)
-{
-    int iy;
-    const double f = (2.0 * M_PI * iw * iw) / w_scale;
-    const int inner_half = inner / 2;
-
-    oskar_mem_clear_contents(screen, status);
-    if (*status) return;
-    if (oskar_mem_precision(screen) == OSKAR_SINGLE)
-    {
-        float* scr = oskar_mem_float(screen, status);
-        for (iy = -inner_half; iy < inner_half; ++iy)
-        {
-            int ix, ind, offset;
-            double l, m, msq, phase, rsq, taper, taper_x, taper_y;
-            taper_y = taper_func[iy + inner_half];
-            m = sampling * (double)iy;
-            msq = m*m;
-            offset = (iy > -1 ? iy : (iy + conv_size)) * conv_size;
-            for (ix = -inner_half; ix < inner_half; ++ix)
-            {
-                l = sampling * (double)ix;
-                rsq = l*l + msq;
-                if (rsq < 1.0)
-                {
-                    taper_x = taper_func[ix + inner_half];
-                    taper = taper_x * taper_y;
-                    ind = 2 * (offset + (ix > -1 ? ix : (ix + conv_size)));
-                    phase = f * (sqrt(1.0 - rsq) - 1.0);
-                    scr[ind]     = taper * cos(phase);
-                    scr[ind + 1] = taper * sin(phase);
-                }
-            }
-        }
-    }
-    else
-    {
-        double* scr = oskar_mem_double(screen, status);
-        for (iy = -inner_half; iy < inner_half; ++iy)
-        {
-            int ix, ind, offset;
-            double l, m, msq, phase, rsq, taper, taper_x, taper_y;
-            taper_y = taper_func[iy + inner_half];
-            m = sampling * (double)iy;
-            msq = m*m;
-            offset = (iy > -1 ? iy : (iy + conv_size)) * conv_size;
-            for (ix = -inner_half; ix < inner_half; ++ix)
-            {
-                l = sampling * (double)ix;
-                rsq = l*l + msq;
-                if (rsq < 1.0)
-                {
-                    taper_x = taper_func[ix + inner_half];
-                    taper = taper_x * taper_y;
-                    ind = 2 * (offset + (ix > -1 ? ix : (ix + conv_size)));
-                    phase = f * (sqrt(1.0 - rsq) - 1.0);
-                    scr[ind]     = taper * cos(phase);
-                    scr[ind + 1] = taper * sin(phase);
-                }
-            }
-        }
     }
 }
 

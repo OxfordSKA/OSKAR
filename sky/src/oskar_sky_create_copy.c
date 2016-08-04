@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,15 +74,6 @@ oskar_Sky* oskar_sky_create_copy(const oskar_Sky* src, int location,
     oskar_mem_copy(model->gaussian_a, src->gaussian_a, status);
     oskar_mem_copy(model->gaussian_b, src->gaussian_b, status);
     oskar_mem_copy(model->gaussian_c, src->gaussian_c, status);
-
-#if 0
-    /* Copy the filter parameters. */
-    model->num_filter_bands = src->num_filter_bands;
-    oskar_mem_copy(model->filter_band_flux_jy,
-            src->filter_band_flux_jy, status);
-    oskar_mem_copy(model->filter_band_radius_rad,
-            src->filter_band_radius_rad, status);
-#endif
 
     /* Return pointer to new sky model. */
     return model;

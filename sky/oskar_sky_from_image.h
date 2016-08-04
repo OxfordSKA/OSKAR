@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_SKY_FROM_IMAGE_H_
+#define OSKAR_SKY_FROM_IMAGE_H_
+
+/**
+ * @file oskar_sky_from_image.h
+ */
+
+#include <oskar_global.h>
 #include <oskar_sky.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-oskar_Sky* oskar_sky_combine_set(oskar_Sky* const* model_set,
-        int num_models, int* status)
-{
-    int i;
-    oskar_Sky* model;
-
-    /* Check if safe to proceed. */
-    if (*status) return 0;
-
-    /* Check that at least one model exists. */
-    if (num_models == 0 || *model_set == 0)
-    {
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-        return 0;
-    }
-
-    /* Create a new model. */
-    model = oskar_sky_create(oskar_sky_precision(model_set[0]),
-            OSKAR_CPU, 0, status);
-
-    /* Append each model in the set to the new model. */
-    for (i = 0; i < num_models; ++i)
-    {
-        oskar_sky_append(model, model_set[i], status);
-    }
-
-    /* Return a handle to the new model. */
-    return model;
-}
+/**
+ * @brief
+ * Creates a sky model from an array of image pixels.
+ *
+ * @details
+ * Creates a sky model from an array of image pixels.
+ *
+ * @param[in] precision           Enumerated precision of the output sky model.
+ * @param[in] image               2D image data (ordered as in FITS image).
+ */
+OSKAR_EXPORT
+oskar_Sky* oskar_sky_from_image(int precision, const oskar_Mem* image,
+        int image_width, int image_height, double image_ra_deg,
+        double image_dec_deg, double image_cellsize_deg, double image_freq_hz,
+        double spectral_index, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SKY_FROM_IMAGE_H_ */

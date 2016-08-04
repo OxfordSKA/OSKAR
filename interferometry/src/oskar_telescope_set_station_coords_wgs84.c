@@ -68,9 +68,9 @@ void oskar_telescope_set_station_coords_wgs84(oskar_Telescope* telescope,
         double hor[] = {0.0, 0.0, 0.0};
 
         /* Get coordinates from input arrays. */
-        wgs[0] = oskar_mem_get_element_scalar(lon_deg, i, status);
-        wgs[1] = oskar_mem_get_element_scalar(lat_deg, i, status);
-        wgs[2] = oskar_mem_get_element_scalar(alt_m, i, status);
+        wgs[0] = oskar_mem_get_element(lon_deg, i, status);
+        wgs[1] = oskar_mem_get_element(lat_deg, i, status);
+        wgs[2] = oskar_mem_get_element(alt_m, i, status);
 
         /* Convert geodetic spherical to ECEF. */
         wgs[0] *= M_PI / 180.0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_COMBINE_SET_H_
-#define OSKAR_SKY_COMBINE_SET_H_
-
-/**
- * @file oskar_sky_combine_set.h
- */
+#ifndef OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN_CUDA_H_
+#define OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN_CUDA_H_
 
 #include <oskar_global.h>
 
@@ -39,21 +35,16 @@
 extern "C" {
 #endif
 
-/**
- * @brief Combines an array of sky models into a new single sky model.
- *
- * @param[in] model_set     Set of sky models to combine.
- * @param[in] num_models    Number of models in the set.
- * @param[in,out]  status   Status return code.
- *
- * @return A handle to the new sky model.
- */
-OSKAR_EXPORT
-oskar_Sky* oskar_sky_combine_set(oskar_Sky* const* model_set,
-        int num_models, int* status);
+void oskar_imager_generate_w_phase_screen_cuda_f(int iw, int conv_size,
+        int inner, float sampling, float w_scale, const float* taper_func,
+        float* scr);
+
+void oskar_imager_generate_w_phase_screen_cuda_d(int iw, int conv_size,
+        int inner, double sampling, double w_scale, const double* taper_func,
+        double* scr);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_COMBINE_SET_H_ */
+#endif /* OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN_CUDA_H_ */

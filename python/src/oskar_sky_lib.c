@@ -310,8 +310,113 @@ static PyObject* create(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "s", &type)) return 0;
     prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
     h = oskar_sky_create(prec, OSKAR_CPU, 0, &status);
-    capsule = PyCapsule_New((void*)h, name,
-            (PyCapsule_Destructor)sky_free);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+}
+
+
+static PyObject* create_copy(PyObject* self, PyObject* args)
+{
+    oskar_Sky *h = 0, *t = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    t = oskar_sky_create_copy(h, OSKAR_CPU, &status);
+
+    /* Check for errors. */
+    if (status || !t)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_create_copy() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        oskar_sky_free(t, &status);
+        return 0;
+    }
+
+    capsule = PyCapsule_New((void*)t, name, (PyCapsule_Destructor)sky_free);
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+}
+
+
+static PyObject* filter_by_flux(PyObject* self, PyObject* args)
+{
+    oskar_Sky *h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    double min_flux_jy = 0.0, max_flux_jy = 0.0;
+    if (!PyArg_ParseTuple(args, "Odd", &capsule, &min_flux_jy, &max_flux_jy))
+        return 0;
+    if (!(h = get_handle(capsule))) return 0;
+
+    /* Filter the sky model. */
+    oskar_sky_filter_by_flux(h, min_flux_jy, max_flux_jy, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_filter_by_flux() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
+static PyObject* filter_by_radius(PyObject* self, PyObject* args)
+{
+    oskar_Sky *h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    double inner_radius_rad = 0.0, outer_radius_rad = 0.0;
+    double ra0_rad = 0.0, dec0_rad = 0.0;
+    if (!PyArg_ParseTuple(args, "Odddd", &capsule,
+            &inner_radius_rad, &outer_radius_rad, &ra0_rad, &dec0_rad))
+        return 0;
+    if (!(h = get_handle(capsule))) return 0;
+
+    /* Filter the sky model. */
+    oskar_sky_filter_by_radius(h, inner_radius_rad, outer_radius_rad,
+            ra0_rad, dec0_rad, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_filter_by_radius() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
+static PyObject* from_fits_file(PyObject* self, PyObject* args)
+{
+    oskar_Sky* h = 0;
+    PyObject* capsule = 0;
+    int status = 0, override_units = 0, prec = 0;
+    double frequency_hz, spectral_index, min_peak_fraction, min_abs_val;
+    const char *default_map_units = 0, *filename = 0, *type = 0;
+    if (!PyArg_ParseTuple(args, "sddsidds", &filename,
+            &min_peak_fraction, &min_abs_val, &default_map_units,
+            &override_units, &frequency_hz, &spectral_index, &type))
+        return 0;
+    prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
+    h = oskar_sky_from_fits_file(prec, filename, min_peak_fraction,
+            min_abs_val, default_map_units, override_units, frequency_hz,
+            spectral_index, &status);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_from_fits_file() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
@@ -323,8 +428,8 @@ static PyObject* generate_grid(PyObject* self, PyObject* args)
     int prec, side_length = 0, seed = 1, status = 0;
     const char* type = 0;
     double ra0, dec0, fov, mean_flux_jy, std_flux_jy;
-    if (!PyArg_ParseTuple(args, "sddidddi", &type, &ra0, &dec0,
-            &side_length, &fov, &mean_flux_jy, &std_flux_jy, &seed)) return 0;
+    if (!PyArg_ParseTuple(args, "ddidddis", &ra0, &dec0, &side_length,
+            &fov, &mean_flux_jy, &std_flux_jy, &seed, &type)) return 0;
 
     /* Generate the grid. */
     prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
@@ -343,8 +448,7 @@ static PyObject* generate_grid(PyObject* self, PyObject* args)
         oskar_sky_free(h, &status);
         return 0;
     }
-    capsule = PyCapsule_New((void*)h, name,
-            (PyCapsule_Destructor)sky_free);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
@@ -356,8 +460,8 @@ static PyObject* generate_random_power_law(PyObject* self, PyObject* args)
     int prec, num_sources = 0, seed = 1, status = 0;
     const char* type = 0;
     double min_flux_jy = 0.0, max_flux_jy = 0.0, power = 0.0;
-    if (!PyArg_ParseTuple(args, "sidddi", &type,
-            &num_sources, &min_flux_jy, &max_flux_jy, &power, &seed)) return 0;
+    if (!PyArg_ParseTuple(args, "idddis", &num_sources, &min_flux_jy,
+            &max_flux_jy, &power, &seed, &type)) return 0;
 
     /* Generate the sources. */
     prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
@@ -373,8 +477,30 @@ static PyObject* generate_random_power_law(PyObject* self, PyObject* args)
         oskar_sky_free(h, &status);
         return 0;
     }
-    capsule = PyCapsule_New((void*)h, name,
-            (PyCapsule_Destructor)sky_free);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+}
+
+
+static PyObject* load(PyObject* self, PyObject* args)
+{
+    oskar_Sky* h = 0;
+    PyObject* capsule = 0;
+    int status = 0, prec = 0;
+    const char *filename = 0, *type = 0;
+    if (!PyArg_ParseTuple(args, "ss", &filename, &type)) return 0;
+    prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
+    h = oskar_sky_load(filename, prec, &status);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_load() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
@@ -442,8 +568,7 @@ static PyObject* set_up(PyObject* self, PyObject* args)
 
     /* Create the PyCapsule and return it. */
     oskar_settings_old_free(&s_old);
-    capsule = PyCapsule_New((void*)h, name,
-            (PyCapsule_Destructor)sky_free);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
@@ -451,19 +576,32 @@ static PyObject* set_up(PyObject* self, PyObject* args)
 /* Method table. */
 static PyMethodDef methods[] =
 {
-        {"create", (PyCFunction)create, METH_VARARGS, "create(type)"},
+        {"create", (PyCFunction)create, METH_VARARGS, "create(precision)"},
+        {"create_copy", (PyCFunction)create_copy,
+                METH_VARARGS, "create_copy(sky)"},
         {"append", (PyCFunction)append, METH_VARARGS, "append(sky)"},
         {"append_sources", (PyCFunction)append_sources, METH_VARARGS,
                 "append_sources(ra, dec, I, Q, U, V, ref_freq, spectral_index, "
                 "rotation_measure, major, minor, position_angle)"},
-        {"append_file", (PyCFunction)append_file, METH_VARARGS,
-                "append_file(filename)"},
-        {"save", (PyCFunction)save, METH_VARARGS, "save(filename)"},
-        {"generate_grid", (PyCFunction)generate_grid, METH_VARARGS,
-                "generate_grid()"},
+        {"append_file", (PyCFunction)append_file,
+                METH_VARARGS, "append_file(filename)"},
+        {"filter_by_flux", (PyCFunction)filter_by_flux,
+                METH_VARARGS, "filter_by_flux(min_flux_jy, max_flux_jy)"},
+        {"filter_by_radius", (PyCFunction)filter_by_radius,
+                METH_VARARGS, "filter_by_radius(inner_radius_rad, "
+                "outer_radius_rad, ra0_rad, dec0_rad)"},
+        {"from_fits_file", (PyCFunction)from_fits_file,
+                METH_VARARGS, "from_fits_file(filename, min_peak_fraction, "
+                "min_abs_val, default_map_units, override_map_units, "
+                "frequency_hz, spectral_index, precision)"},
+        {"generate_grid", (PyCFunction)generate_grid,
+                METH_VARARGS, "generate_grid(ra0, dec0, side_length, "
+                "fov, mean_flux_jy, std_flux_jy, seed, precision)"},
         {"generate_random_power_law", (PyCFunction)generate_random_power_law,
-                METH_VARARGS, "generate_random_power_law(type, num_sources, "
-                        "min_flux_jy, max_flux_jy, power, seed)"},
+                METH_VARARGS, "generate_random_power_law(num_sources, "
+                "min_flux_jy, max_flux_jy, power, seed, precision)"},
+        {"load", (PyCFunction)load, METH_VARARGS, "load(filename, precision)"},
+        {"save", (PyCFunction)save, METH_VARARGS, "save(filename)"},
         {"set_up", (PyCFunction)set_up, METH_VARARGS, "set_up(settings_path)"},
         {NULL, NULL, 0, NULL}
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,26 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
-#include <private_sky.h>
+#ifndef OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN_H_
+#define OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN_H_
+
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_sky_copy_filter_bands(oskar_Sky* dst, const oskar_Sky* src,
-        int* status)
-{
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    dst->num_filter_bands = src->num_filter_bands;
-    oskar_mem_copy(dst->filter_band_flux_jy, src->filter_band_flux_jy,
-            status);
-    oskar_mem_copy(dst->filter_band_radius_rad, src->filter_band_radius_rad,
-            status);
-}
+void oskar_imager_generate_w_phase_screen(const int iw, const int conv_size,
+        const int inner, const double sampling, const double w_scale,
+        const oskar_Mem* taper_func, oskar_Mem* screen, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN_H_ */

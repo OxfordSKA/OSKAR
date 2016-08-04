@@ -29,11 +29,13 @@
 #include <private_imager.h>
 #include <oskar_imager.h>
 
+#include <oskar_convert_cellsize_to_fov.h>
 #include <oskar_convert_fov_to_cellsize.h>
 #include <oskar_device_utils.h>
 #include <private_imager_free_gpu_data.h>
 #include <private_imager_set_num_planes.h>
 
+#include <oskar_cmath.h>
 #include <float.h>
 #include <stdio.h>
 #include <string.h>
@@ -46,15 +48,139 @@ static void oskar_imager_data_range(const int settings_range[2],
         int num_data_values, int range[2], int* status);
 
 
-int oskar_imager_num_w_planes(oskar_Imager* h)
+const char* oskar_imager_algorithm(const oskar_Imager* h)
+{
+    switch (h->algorithm)
+    {
+    case OSKAR_ALGORITHM_FFT:    return "FFT";
+    case OSKAR_ALGORITHM_WPROJ:  return "W-projection";
+    case OSKAR_ALGORITHM_DFT_2D: return "DFT 2D";
+    case OSKAR_ALGORITHM_DFT_3D: return "DFT 3D";
+    default:                     return "";
+    }
+}
+
+
+double oskar_imager_cellsize(const oskar_Imager* h)
+{
+    return (h->cellsize_rad * (180.0 / M_PI)) * 3600.0;
+}
+
+
+int oskar_imager_channel_end(const oskar_Imager* h)
+{
+    return h->chan_range[1];
+}
+
+
+int oskar_imager_channel_snapshots(const oskar_Imager* h)
+{
+    return h->chan_snaps;
+}
+
+
+int oskar_imager_channel_start(const oskar_Imager* h)
+{
+    return h->chan_range[0];
+}
+
+
+int oskar_imager_coords_only(const oskar_Imager* h)
+{
+    return h->coords_only;
+}
+
+
+int oskar_imager_fft_on_gpu(const oskar_Imager* h)
+{
+    return h->fft_on_gpu;
+}
+
+
+double oskar_imager_fov(const oskar_Imager* h)
+{
+    return h->fov_deg;
+}
+
+
+int oskar_imager_generate_w_kernels_on_gpu(const oskar_Imager* h)
+{
+    return h->generate_w_kernels_on_gpu;
+}
+
+
+int oskar_imager_image_size(const oskar_Imager* h)
+{
+    return h->image_size;
+}
+
+
+const char* oskar_imager_image_type(const oskar_Imager* h)
+{
+    switch (h->im_type)
+    {
+    case OSKAR_IMAGE_TYPE_STOKES: return "Stokes";
+    case OSKAR_IMAGE_TYPE_I:      return "I";
+    case OSKAR_IMAGE_TYPE_Q:      return "Q";
+    case OSKAR_IMAGE_TYPE_U:      return "U";
+    case OSKAR_IMAGE_TYPE_V:      return "V";
+    case OSKAR_IMAGE_TYPE_LINEAR: return "Linear";
+    case OSKAR_IMAGE_TYPE_XX:     return "XX";
+    case OSKAR_IMAGE_TYPE_XY:     return "XY";
+    case OSKAR_IMAGE_TYPE_YX:     return "YX";
+    case OSKAR_IMAGE_TYPE_YY:     return "YY";
+    case OSKAR_IMAGE_TYPE_PSF:    return "PSF";
+    default:                      return "";
+    }
+}
+
+
+const char* oskar_imager_input_file(const oskar_Imager* h)
+{
+    return h->input_file;
+}
+
+
+const char* oskar_imager_ms_column(const oskar_Imager* h)
+{
+    return h->ms_column;
+}
+
+
+int oskar_imager_num_image_planes(const oskar_Imager* h)
+{
+    return h->num_planes;
+}
+
+
+int oskar_imager_num_w_planes(const oskar_Imager* h)
 {
     return h->num_w_planes;
 }
 
 
-int oskar_imager_plane_size(oskar_Imager* h)
+const char* oskar_imager_output_root(const oskar_Imager* h)
+{
+    return h->image_root;
+}
+
+
+int oskar_imager_plane_size(const oskar_Imager* h)
 {
     return h->grid_size;
+}
+
+
+int oskar_imager_plane_type(const oskar_Imager* h)
+{
+    if (h->num_planes <= 0 || !h->planes) return 0;
+    return oskar_mem_type(h->planes[0]);
+}
+
+
+int oskar_imager_precision(const oskar_Imager* h)
+{
+    return h->imager_prec;
 }
 
 
@@ -82,12 +208,31 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
 }
 
 
-void oskar_imager_set_channel_range(oskar_Imager* h, int start, int end,
-        int snapshots)
+void oskar_imager_set_cellsize(oskar_Imager* h, double cellsize_arcsec)
 {
-    h->chan_range[0] = start;
-    h->chan_range[1] = end;
-    h->chan_snaps = snapshots;
+    h->set_cellsize = 1;
+    h->set_fov = 0;
+    h->cellsize_rad = (cellsize_arcsec / 3600.0) * (M_PI / 180.0);
+    h->fov_deg = oskar_convert_cellsize_to_fov(
+            h->cellsize_rad, h->image_size) * (180.0 / M_PI);
+}
+
+
+void oskar_imager_set_channel_end(oskar_Imager* h, int value)
+{
+    h->chan_range[1] = value;
+}
+
+
+void oskar_imager_set_channel_snapshots(oskar_Imager* h, int value)
+{
+    h->chan_snaps = value;
+}
+
+
+void oskar_imager_set_channel_start(oskar_Imager* h, int value)
+{
+    h->chan_range[0] = value;
 }
 
 
@@ -129,15 +274,23 @@ void oskar_imager_set_direction(oskar_Imager* h, double ra_deg, double dec_deg)
 
 void oskar_imager_set_fov(oskar_Imager* h, double fov_deg)
 {
+    h->set_cellsize = 0;
+    h->set_fov = 1;
     h->fov_deg = fov_deg;
-    h->cellsize_rad = oskar_convert_fov_to_cellsize(h->fov_deg * M_PI/180,
-            h->image_size);
+    h->cellsize_rad = oskar_convert_fov_to_cellsize(
+            h->fov_deg * (M_PI / 180.0), h->image_size);
 }
 
 
 void oskar_imager_set_fft_on_gpu(oskar_Imager* h, int value)
 {
     h->fft_on_gpu = value;
+}
+
+
+void oskar_imager_set_generate_w_kernels_on_gpu(oskar_Imager* h, int value)
+{
+    h->generate_w_kernels_on_gpu = value;
 }
 
 
@@ -206,6 +359,12 @@ void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
     else if (!strncmp(type, "P", 1) || !strncmp(type, "p", 1))
         h->kernel_type = 'P';
     else *status = OSKAR_ERR_SETTINGS_IMAGE;
+}
+
+
+void oskar_imager_set_image_size(oskar_Imager* h, int size, int* status)
+{
+    oskar_imager_set_size(h, size, status);
 }
 
 
@@ -311,21 +470,39 @@ void oskar_imager_set_oversample(oskar_Imager* h, int value)
 }
 
 
-void oskar_imager_set_size(oskar_Imager* h, int size)
+void oskar_imager_set_size(oskar_Imager* h, int size, int* status)
 {
+    if (size < 2 || size % 2 != 0)
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
     h->image_size = size;
     h->grid_size = size;
-    h->cellsize_rad = oskar_convert_fov_to_cellsize(h->fov_deg * M_PI/180,
-            h->image_size);
+    if (h->set_fov)
+        h->cellsize_rad = oskar_convert_fov_to_cellsize(
+                h->fov_deg * (M_PI / 180.0), h->image_size);
+    else if (h->set_cellsize)
+        h->fov_deg = oskar_convert_cellsize_to_fov(
+                h->cellsize_rad, h->image_size) * (180.0 / M_PI);
 }
 
 
-void oskar_imager_set_time_range(oskar_Imager* h, int start, int end,
-        int snapshots)
+void oskar_imager_set_time_end(oskar_Imager* h, int value)
 {
-    h->time_range[0] = start;
-    h->time_range[1] = end;
-    h->time_snaps = snapshots;
+    h->time_range[1] = value;
+}
+
+
+void oskar_imager_set_time_snapshots(oskar_Imager* h, int value)
+{
+    h->time_snaps = value;
+}
+
+
+void oskar_imager_set_time_start(oskar_Imager* h, int value)
+{
+    h->time_range[0] = value;
 }
 
 
@@ -371,9 +548,43 @@ void oskar_imager_set_weighting(oskar_Imager* h, const char* type, int* status)
         h->weighting = OSKAR_WEIGHTING_RADIAL;
     else if (!strncmp(type, "U", 1) || !strncmp(type, "u", 1))
         h->weighting = OSKAR_WEIGHTING_UNIFORM;
-    else if (!strncmp(type, "G", 1) || !strncmp(type, "g", 1))
-        h->weighting = OSKAR_WEIGHTING_GRIDLESS_UNIFORM;
     else *status = OSKAR_ERR_SETTINGS_IMAGE;
+}
+
+
+int oskar_imager_size(const oskar_Imager* h)
+{
+    return h->image_size;;
+}
+
+
+int oskar_imager_time_end(const oskar_Imager* h)
+{
+    return h->time_range[1];
+}
+
+
+int oskar_imager_time_snapshots(const oskar_Imager* h)
+{
+    return h->time_snaps;
+}
+
+
+int oskar_imager_time_start(const oskar_Imager* h)
+{
+    return h->time_range[0];
+}
+
+
+const char* oskar_imager_weighting(const oskar_Imager* h)
+{
+    switch (h->weighting)
+    {
+    case OSKAR_WEIGHTING_NATURAL: return "Natural";
+    case OSKAR_WEIGHTING_RADIAL:  return "Radial";
+    case OSKAR_WEIGHTING_UNIFORM: return "Uniform";
+    default:                      return "";
+    }
 }
 
 

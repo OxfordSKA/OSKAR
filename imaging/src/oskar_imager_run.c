@@ -50,7 +50,9 @@ static void oskar_imager_run_vis(oskar_Imager* h, const char* filename,
         int* status);
 
 
-void oskar_imager_run(oskar_Imager* h, int* status)
+void oskar_imager_run(oskar_Imager* h,
+        int num_output_images, oskar_Mem** output_images,
+        int num_output_grids, oskar_Mem** output_grids, int* status)
 {
     int len, use_ms;
     if (*status) return;
@@ -81,7 +83,8 @@ void oskar_imager_run(oskar_Imager* h, int* status)
     if (h->log)
         oskar_log_message(h->log, 'M', 0, "Finalising %d image plane(s)...",
                 h->num_planes);
-    oskar_imager_finalise(h, 0, status);
+    oskar_imager_finalise(h, num_output_images, output_images,
+            num_output_grids, output_grids, status);
 }
 
 
@@ -308,7 +311,9 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     {
         oskar_log_warning(h->log,
                 "Irregular data detected. Using full time synthesis.");
-        oskar_imager_set_time_range(h, 0, -1, 0);
+        oskar_imager_set_time_start(h, 0);
+        oskar_imager_set_time_end(h, -1);
+        oskar_imager_set_time_snapshots(h, 0);
     }
 
     /* Set visibility meta-data. */

@@ -36,6 +36,7 @@
 #include <oskar_global.h>
 #include <oskar_mem.h>
 #include <oskar_vis_block.h>
+#include <oskar_vis_header.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,21 +44,23 @@ extern "C" {
 
 /**
  * @brief
- * Intermediate-level function to run the imager and apply visibility selection.
+ * High-level function to run the imager and apply visibility selection.
  *
  * @details
  * This function updates the internal imager state using the
- * supplied visibilities.
+ * supplied visibility block.
  *
  * Visibility selection/filtering and phase rotation are performed
  * if necessary.
  *
  * @param[in,out] h             Handle to imager.
- * @param[in]     b             Handle to visibility block.
+ * @param[in]     header        Handle to visibility header.
+ * @param[in]     block         Handle to visibility block.
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_update_block(oskar_Imager* h, const oskar_VisBlock* b,
+void oskar_imager_update_from_block(oskar_Imager* h,
+        const oskar_VisHeader* header, const oskar_VisBlock* block,
         int* status);
 
 /**

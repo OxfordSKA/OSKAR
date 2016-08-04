@@ -56,14 +56,19 @@ class Imager(object):
         _imager_lib.check_init(self._capsule)
 
 
-    def finalise(self, image=None):
-        """Finalises the image or images and writes them to file.
+    def finalise(self, return_images=False, return_grids=False):
+        """Finalises the image or images.
+
+        Images or grids can be returned in a Python dictionary
+        of numpy arrays, if required.
+        The image cube can be accessed using the 'images' key, and
+        the grid cube can be accessed using the 'grids' key.
 
         Args:
-            image (Optional[float, array-like]):
-                If given, the output image is returned in this array.
+            return_images (boolean): If true, return images.
+            return_grids (boolean): If true, return grids.
         """
-        _imager_lib.finalise(self._capsule, image)
+        return _imager_lib.finalise(self._capsule, return_images, return_grids)
 
 
     def finalise_plane(self, plane, plane_norm):
@@ -83,16 +88,143 @@ class Imager(object):
         _imager_lib.finalise_plane(self._capsule, plane, plane_norm)
 
 
-    def num_w_planes(self):
-        """Returns the number of W-planes in use.
+    def get_algorithm(self):
+        """Returns a string describing the imager algorithm.
 
         Returns:
-            int: The number of W-planes in use.
+            str: The imager algorithm.
+        """
+        return _imager_lib.algorithm(self._capsule)
+
+
+    def get_cellsize(self):
+        """Returns the image cell (pixel) size.
+
+        Returns:
+            float: The cell size, in arcsec.
+        """
+        return _imager_lib.cellsize(self._capsule)
+
+
+    def get_channel_end(self):
+        """Returns the end channel to image.
+
+        Returns:
+            int: End channel index (-1 for all channels).
+        """
+        return _imager_lib.channel_end(self._capsule)
+
+
+    def get_channel_snapshots(self):
+        """Returns the flag specifying whether to image each channel separately.
+
+        Returns:
+            boolean: If true, image each channel index separately;
+                if false, use frequency synthesis.
+        """
+        return _imager_lib.channel_snapshots(self._capsule)
+
+
+    def get_channel_start(self):
+        """Returns the start channel to image.
+
+        Returns:
+            int: Start channel index.
+        """
+        return _imager_lib.channel_start(self._capsule)
+
+
+    def get_coords_only(self):
+        """Returns flag specifying whether imager is in coordinate-only mode.
+
+        Returns:
+            boolean: If true, imager is in coordinate-only mode.
+        """
+        return _imager_lib.coords_only(self._capsule)
+
+
+    def get_fft_on_gpu(self):
+        """Returns flag specifying whether to use the GPU for FFTs.
+
+        Returns:
+            boolean: If true, use the GPU for FFTs.
+        """
+        return _imager_lib.fft_on_gpu(self._capsule)
+
+
+    def get_fov(self):
+        """Returns the image field-of-view, in degrees.
+
+        Returns:
+            float: The image field-of-view, in degrees.
+        """
+        return _imager_lib.fov(self._capsule)
+
+
+    def get_generate_w_kernels_on_gpu(self):
+        """Returns flag specifying whether to use the GPU to generate W-kernels.
+
+        Returns:
+            boolean: If true, use the GPU to generate W-kernels.
+        """
+        return _imager_lib.generate_w_kernels_on_gpu(self._capsule)
+
+
+    def get_image_size(self):
+        """Returns the image side length, in pixels.
+
+        Returns:
+            int: The image side length, in pixels.
+        """
+        return _imager_lib.image_size(self._capsule)
+
+
+    def get_image_type(self):
+        """Returns a string describing the image (polarisation) type.
+
+        Returns:
+            str: The image (polarisation) type.
+        """
+        return _imager_lib.image_type(self._capsule)
+
+
+    def get_input_file(self):
+        """Returns a string containing the input file name.
+
+        Returns:
+            str: The input file name.
+        """
+        return _imager_lib.input_file(self._capsule)
+
+
+    def get_ms_column(self):
+        """Returns a string containing the Measurement Set column to use.
+
+        Returns:
+            str: The column name.
+        """
+        return _imager_lib.ms_column(self._capsule)
+
+
+    def get_num_w_planes(self):
+        """Returns the number of W-planes used.
+
+        Returns:
+            int: The number of W-planes used.
         """
         return _imager_lib.num_w_planes(self._capsule)
 
 
-    def plane_size(self):
+    def get_output_root(self):
+        """Returns a string containing the output root file name.
+
+        Returns:
+            str: The output root file name.
+        """
+        return _imager_lib.output_root(self._capsule)
+
+
+    def get_plane_size(self):
         """Returns the required plane size.
 
         This may be different to the image size, for example if using 
@@ -104,6 +236,52 @@ class Imager(object):
         return _imager_lib.plane_size(self._capsule)
 
 
+    def get_size(self):
+        """Returns the image side length, in pixels.
+
+        Returns:
+            int: The image side length, in pixels.
+        """
+        return _imager_lib.size(self._capsule)
+
+
+    def get_time_end(self):
+        """Returns the end time index to image.
+
+        Returns:
+            int: End time index (-1 for all channels).
+        """
+        return _imager_lib.time_end(self._capsule)
+
+
+    def get_time_snapshots(self):
+        """Returns the flag specifying whether to image each time separately.
+
+        Returns:
+            boolean: If true, image each time index separately;
+                if false, use time synthesis.
+        """
+        return _imager_lib.time_snapshots(self._capsule)
+
+
+    def get_time_start(self):
+        """Returns the start time index to image.
+
+        Returns:
+            int: Start time index.
+        """
+        return _imager_lib.time_start(self._capsule)
+
+
+    def get_weighting(self):
+        """Returns a string describing the weighting scheme.
+
+        Returns:
+            str: The weighting scheme.
+        """
+        return _imager_lib.weighting(self._capsule)
+
+
     def reset_cache(self):
         """Low-level function to reset the imager's internal memory.
 
@@ -112,12 +290,30 @@ class Imager(object):
         _imager_lib.reset_cache(self._capsule)
 
 
-    def run(self):
+    def run(self, return_images=False, return_grids=False):
         """Runs the imager on a visibility file.
 
         The input filename must be set using set_input_file().
+
+        Images or grids can be returned in a Python dictionary
+        of numpy arrays, if required.
+        The image cube can be accessed using the 'images' key, and
+        the grid cube can be accessed using the 'grids' key.
+
+        Args:
+            return_images (boolean): If true, return images.
+            return_grids (boolean): If true, return grids.
         """
-        _imager_lib.run(self._capsule)
+        _imager_lib.run(self._capsule, return_images, return_grids)
+
+
+    def set(self, **kwargs):
+        """Sets multiple properties at once.
+
+        Example: set(fov_deg=2.0, image_size=2048, algorithm='W-projection')
+        """
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
     def set_algorithm(self, algorithm_type):
@@ -129,16 +325,45 @@ class Imager(object):
         _imager_lib.set_algorithm(self._capsule, algorithm_type)
 
 
-    def set_channel_range(self, start, end, snapshots):
-        """Sets the visibility channel range used by the imager.
+    def set_cellsize(self, cellsize_arcsec):
+        """Sets the cell (pixel) size.
+
+        This can be used instead of set_fov() if required.
+        After calling this method, changing the image size
+        will change the field of view.
 
         Args:
-            start (int): Start channel index.
-            end (int):   End channel index (-1 for all channels).
-            snapshots (boolean): If true, image each channel separately; 
+            cellsize_arcsec (float): Image cell size, in arcsec.
+        """
+        _imager_lib.set_cellsize(self._capsule, cellsize_arcsec)
+
+
+    def set_channel_end(self, value):
+        """Sets the end channel to image.
+
+        Args:
+            value (int): End channel index (-1 for all channels).
+        """
+        _imager_lib.set_channel_end(self._capsule, value)
+
+
+    def set_channel_snapshots(self, value):
+        """Sets the flag specifying whether to image each channel separately.
+
+        Args:
+            value (boolean): If true, image each channel separately;
                 if false, use frequency synthesis.
         """
-        _imager_lib.set_channel_range(self._capsule, start, end, snapshots)
+        _imager_lib.set_channel_snapshots(self._capsule, value)
+
+
+    def set_channel_start(self, value):
+        """Sets the start channel to image.
+
+        Args:
+            value (int): Start channel index.
+        """
+        _imager_lib.set_channel_start(self._capsule, value)
 
 
     def set_coords_only(self, flag):
@@ -187,10 +412,23 @@ class Imager(object):
     def set_fov(self, fov_deg):
         """Sets the field of view to image.
 
+        This can be used instead of set_cellsize() if required.
+        After calling this method, changing the image size
+        will change the image resolution.
+
         Args:
             fov_deg (float): Field of view, in degrees.
         """
         _imager_lib.set_fov(self._capsule, fov_deg)
+
+
+    def set_generate_w_kernels_on_gpu(self, value):
+        """Sets whether to use the GPU to generate W-kernels.
+
+        Args:
+            value (boolean): If true, use the GPU to generate W-kernels.
+        """
+        _imager_lib.set_generate_w_kernels_on_gpu(self._capsule, value)
 
 
     def set_grid_kernel(self, kernel_type, support, oversample):
@@ -205,6 +443,15 @@ class Imager(object):
         """
         _imager_lib.set_grid_kernel(self._capsule, kernel_type,
             support, oversample)
+
+
+    def set_image_size(self, size):
+        """Sets image side length.
+
+        Args:
+            size (int): Image side length in pixels.
+        """
+        self.set_size(size)
 
 
     def set_image_type(self, image_type):
@@ -262,22 +509,35 @@ class Imager(object):
         Args:
             size (int): Image side length in pixels.
         """
-        if size % 2 != 0:
-            raise RuntimeError("Image size must be even.")
-            return
         _imager_lib.set_size(self._capsule, size)
 
 
-    def set_time_range(self, start, end, snapshots):
-        """Sets the visibility time range used by the imager.
+    def set_time_end(self, value):
+        """Sets the end time index to image.
 
         Args:
-            start (int): Start time index.
-            end (int):   End time index (-1 for all time).
-            snapshots (boolean): If true, image each time slice separately; 
+            value (int): End channel index (-1 for all channels).
+        """
+        _imager_lib.set_time_end(self._capsule, value)
+
+
+    def set_time_snapshots(self, value):
+        """Sets the flag specifying whether to image each time separately.
+
+        Args:
+            value (boolean): If true, image each time index separately;
                 if false, use time synthesis.
         """
-        _imager_lib.set_time_range(self._capsule, start, end, snapshots)
+        _imager_lib.set_time_snapshots(self._capsule, value)
+
+
+    def set_time_start(self, value):
+        """Sets the start time index to image.
+
+        Args:
+            value (int): Start time index.
+        """
+        _imager_lib.set_time_start(self._capsule, value)
 
 
     def set_vis_frequency(self, ref_hz, inc_hz=0.0, num_channels=1):
@@ -369,16 +629,19 @@ class Imager(object):
             start_channel, end_channel)
 
 
-    def update_block(self, block):
-        """Runs imager for supplied visibilities, applying optional selection.
+    def update_from_block(self, header, block):
+        """Runs imager for visibility block, applying optional selection.
 
         Call finalise() to finalise the images after calling this function.
 
         Args:
+            header (oskar.VisHeader):
+                Handle to an OSKAR visibility header.
             block (oskar.VisBlock):
                 Handle to an OSKAR visibility block.
         """
-        _imager_lib.update_block(self._capsule, block._capsule)
+        _imager_lib.update_from_block(self._capsule, 
+            header._capsule, block._capsule)
 
 
     def update_plane(self, uu, vv, ww, amps, weight, plane, plane_norm,
@@ -416,9 +679,85 @@ class Imager(object):
             amps, weight, plane, plane_norm, weights_grid)
 
 
+    # Properties.
+    algorithm                 = property(get_algorithm, set_algorithm)
+    cell                      = property(get_cellsize, set_cellsize)
+    cellsize                  = property(get_cellsize, set_cellsize)
+    cellsize_arcsec           = property(get_cellsize, set_cellsize)
+    cell_size                 = property(get_cellsize, set_cellsize)
+    cell_size_arcsec          = property(get_cellsize, set_cellsize)
+    channel_end               = property(get_channel_end, set_channel_end)
+    channel_snapshots         = property(get_channel_snapshots,
+                                    set_channel_snapshots)
+    channel_start             = property(get_channel_start, set_channel_start)
+    coords_only               = property(get_coords_only, set_coords_only)
+    fft_on_gpu                = property(get_fft_on_gpu, set_fft_on_gpu)
+    fov                       = property(get_fov, set_fov)
+    fov_deg                   = property(get_fov, set_fov)
+    generate_w_kernels_on_gpu = property(get_generate_w_kernels_on_gpu,
+                                    set_generate_w_kernels_on_gpu)
+    image_size                = property(get_image_size, set_image_size)
+    image_type                = property(get_image_type, set_image_type)
+    input_file                = property(get_input_file, set_input_file)
+    input_vis_data            = property(get_input_file, set_input_file)
+    ms_column                 = property(get_ms_column, set_ms_column)
+    num_w_planes              = property(get_num_w_planes, set_num_w_planes)
+    output_root               = property(get_output_root, set_output_root)
+    plane_size                = property(get_plane_size)
+    root_path                 = property(get_output_root, set_output_root)
+    size                      = property(get_size, set_size)
+    time_end                  = property(get_time_end, set_time_end)
+    time_snapshots            = property(get_time_snapshots, set_time_snapshots)
+    time_start                = property(get_time_start, set_time_start)
+    weighting                 = property(get_weighting, set_weighting)
+    wprojplanes               = property(get_num_w_planes, set_num_w_planes)
+
+
+    @staticmethod
+    def cellsize_to_fov(cellsize_rad, size):
+        """Convert image cellsize and size along one dimension in pixels to FoV.
+
+        Args:
+            cellsize_rad (float): Image cell size, in radians.
+            size (int):           Image size in one dimension in pixels.
+
+        Returns:
+            float: Image field-of-view, in radians.
+        """
+        return 2.0 * math.asin(0.5 * size * math.sin(cellsize_rad))
+
+
+    @staticmethod
+    def fov_to_cellsize(fov_rad, size):
+        """Convert image FoV and size along one dimension in pixels to cellsize.
+
+        Args:
+            fov_rad (float):      Image field-of-view, in radians.
+            size (int):           Image size in one dimension in pixels.
+
+        Returns:
+            float: Image cellsize, in radians.
+        """
+        return math.asin(2.0 * math.sin(0.5 * fov_rad) / size)
+
+
+    @staticmethod
+    def fov_to_uv_cellsize(fov_rad, size):
+        """Convert image FoV and size along one dimension in pixels to cellsize.
+
+        Args:
+            fov_rad (float): Image field-of-view, in radians.
+            size (int):      Image size in one dimension in pixels.
+
+        Returns:
+            float: UV cellsize, in wavelengths.
+        """
+        return 1.0 / (size * Imager.fov_to_cellsize(fov_rad, size))
+
+
     @staticmethod
     def make_image(uu, vv, ww, amps, fov_deg, size,
-            weighting='Natural', algorithm='FFT', weight=None, wprojplanes=-1):
+            weighting='Natural', algorithm='FFT', weight=None, wprojplanes=0):
         """Makes an image from visibility data.
 
         Args:
@@ -440,45 +779,12 @@ class Imager(object):
                 Visibility weights.
             wprojplanes (Optional[int]):
                 Number of W-projection planes to use, if using W-projection.
-                If < 0, this will be determined automatically.
+                If <= 0, this will be determined automatically.
                 It will not be less than 16.
 
         Returns:
             array: Image as a 2D numpy array. Data are ordered as in FITS image.
         """
-        if size % 2 != 0:
-            raise RuntimeError("Image size must be even.")
-            return
         return _imager_lib.make_image(uu, vv, ww, amps, fov_deg, size,
             weighting, algorithm, weight, wprojplanes)
-
-
-    @staticmethod
-    def fov_to_cellsize(fov_rad, size):
-        """Convert image FoV and size along one dimension in pixels to cellsize.
-
-        Args:
-            fov_rad (float): Image field-of-view, in radians.
-            size (int):      Image size in one dimension in pixels.
-
-        Returns:
-            float: Image cellsize, in radians.
-        """
-        rmax = math.sin(0.5 * fov_rad)
-        inc = 2.0 * rmax / size
-        return math.asin(inc)
-
-
-    @staticmethod
-    def fov_to_uv_cellsize(fov_rad, size):
-        """Convert image FoV and size along one dimension in pixels to cellsize.
-
-        Args:
-            fov_rad (float): Image field-of-view, in radians.
-            size (int):      Image size in one dimension in pixels.
-
-        Returns:
-            float: UV cellsize, in wavelengths.
-        """
-        return 1.0 / (size * Imager.fov_to_cellsize(fov_rad, size))
 

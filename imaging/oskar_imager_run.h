@@ -51,11 +51,20 @@ extern "C" {
  * Call oskar_imager_set_input_file() to set the filename.
  * When using Measurement Sets, the filename must end with ".ms" or ".MS".
  *
- * @param[in,out] h          Handle to imager.
- * @param[in,out] status     Status return code.
+ * Copies of the image and/or grid planes can be returned if required
+ * by supplying arrays as input arguments. Set these to NULL if not required.
+ *
+ * @param[in,out] h             Handle to imager.
+ * @param[in] num_output_images Number of output image planes supplied.
+ * @param[in] output_images     Array of image planes.
+ * @param[in] num_output_grids  Number of output grid planes supplied.
+ * @param[in] output_grids      Array of grid planes.
+ * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_run(oskar_Imager* h, int* status);
+void oskar_imager_run(oskar_Imager* h,
+        int num_output_images, oskar_Mem** output_images,
+        int num_output_grids, oskar_Mem** output_grids, int* status);
 
 #ifdef __cplusplus
 }

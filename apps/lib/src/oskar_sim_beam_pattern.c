@@ -30,6 +30,7 @@
 
 #include <oskar_beam_pattern_generate_coordinates.h>
 #include <oskar_cmath.h>
+#include <oskar_convert_fov_to_cellsize.h>
 #include <oskar_convert_mjd_to_gast_fast.h>
 #include <oskar_cuda_mem_log.h>
 #include <oskar_device_utils.h>
@@ -51,7 +52,6 @@
 #include <oskar_version.h>
 #include <private_cond2_2x2.h>
 
-#include <fits/oskar_fits_write_axis_header.h>
 #include <fitsio.h>
 
 #include "settings/xml/oskar_sim_beam_pattern_xml_all.h"
@@ -221,7 +221,9 @@ static void set_up_device_data(DeviceData* d, const HostData* h, int* status);
 static void free_device_data(int num_gpus, int* cuda_device_ids,
         DeviceData* d, int* status);
 static void free_host_data(HostData* h, int* status);
-static double fov_to_cellsize(double fov_deg, int num_pixels);
+static void write_axis(fitsfile* fptr, int axis_id, const char* ctype,
+        const char* ctype_comment, double crval, double cdelt, double crpix,
+        int* status);
 static fitsfile* create_fits_file(const char* filename, int precision,
         int width, int height, int num_times, int num_channels,
         double centre_deg[2], double fov_deg[2], double start_time_mjd,
@@ -1557,12 +1559,24 @@ static void create_averaged_products(HostData* h, int ta, int ca, int* status)
 }
 
 
-static double fov_to_cellsize(double fov_deg, int num_pixels)
+static void write_axis(fitsfile* fptr, int axis_id, const char* ctype,
+        const char* ctype_comment, double crval, double cdelt, double crpix,
+        int* status)
 {
-    double max, inc;
-    max = sin(fov_deg * M_PI / 360.0); /* Divide by 2. */
-    inc = max / (0.5 * num_pixels);
-    return asin(inc) * 180.0 / M_PI;
+    char key[FLEN_KEYWORD], value[FLEN_VALUE], comment[FLEN_COMMENT];
+    int decimals = 10;
+    strncpy(comment, ctype_comment, FLEN_COMMENT-1);
+    strncpy(value, ctype, FLEN_VALUE-1);
+    fits_make_keyn("CTYPE", axis_id, key, status);
+    fits_write_key_str(fptr, key, value, comment, status);
+    fits_make_keyn("CRVAL", axis_id, key, status);
+    fits_write_key_dbl(fptr, key, crval, decimals, NULL, status);
+    fits_make_keyn("CDELT", axis_id, key, status);
+    fits_write_key_dbl(fptr, key, cdelt, decimals, NULL, status);
+    fits_make_keyn("CRPIX", axis_id, key, status);
+    fits_write_key_dbl(fptr, key, crpix, decimals, NULL, status);
+    fits_make_keyn("CROTA", axis_id, key, status);
+    fits_write_key_dbl(fptr, key, 0.0, decimals, NULL, status);
 }
 
 
@@ -1576,6 +1590,8 @@ static fitsfile* create_fits_file(const char* filename, int precision,
     int imagetype;
     long naxes[4], naxes_dummy[4] = {1l, 1l, 1l, 1l};
     double delta;
+    const double deg2rad = M_PI / 180.0;
+    const double rad2deg = 180.0 / M_PI;
     fitsfile* f = 0;
     const char* line;
     size_t length;
@@ -1597,26 +1613,26 @@ static fitsfile* create_fits_file(const char* filename, int precision,
     /* Write axis headers. */
     if (horizon_mode)
     {
-        delta = fov_to_cellsize(180.0, width);
-        oskar_fits_write_axis_header(f, 1, "-----SIN", "Azimuthal angle",
-                0.0, -delta, (width + 1) / 2.0, 0.0, status);
-        delta = fov_to_cellsize(180.0, height);
-        oskar_fits_write_axis_header(f, 2, "-----SIN", "Elevation",
-                90.0, delta, (height + 1) / 2.0, 0.0, status);
+        delta = oskar_convert_fov_to_cellsize(M_PI, width);
+        write_axis(f, 1, "-----SIN", "Azimuthal angle",
+                0.0, -delta * rad2deg, (width + 1) / 2.0, status);
+        delta = oskar_convert_fov_to_cellsize(M_PI, height);
+        write_axis(f, 2, "-----SIN", "Elevation",
+                90.0, delta * rad2deg, (height + 1) / 2.0, status);
     }
     else
     {
-        delta = fov_to_cellsize(fov_deg[0], width);
-        oskar_fits_write_axis_header(f, 1, "RA---SIN", "Right Ascension",
-                centre_deg[0], -delta, (width + 1) / 2.0, 0.0, status);
-        delta = fov_to_cellsize(fov_deg[1], height);
-        oskar_fits_write_axis_header(f, 2, "DEC--SIN", "Declination",
-                centre_deg[1], delta, (height + 1) / 2.0, 0.0, status);
+        delta = oskar_convert_fov_to_cellsize(fov_deg[0] * deg2rad, width);
+        write_axis(f, 1, "RA---SIN", "Right Ascension",
+                centre_deg[0], -delta * rad2deg, (width + 1) / 2.0, status);
+        delta = oskar_convert_fov_to_cellsize(fov_deg[1] * deg2rad, height);
+        write_axis(f, 2, "DEC--SIN", "Declination",
+                centre_deg[1], delta * rad2deg, (height + 1) / 2.0, status);
     }
-    oskar_fits_write_axis_header(f, 3, "FREQ", "Frequency",
-            start_freq_hz, delta_freq_hz, 1.0, 0.0, status);
-    oskar_fits_write_axis_header(f, 4, "UTC", "Time",
-            start_time_mjd, delta_time_sec, 1.0, 0.0, status);
+    write_axis(f, 3, "FREQ", "Frequency",
+            start_freq_hz, delta_freq_hz, 1.0, status);
+    write_axis(f, 4, "UTC", "Time",
+            start_time_mjd, delta_time_sec, 1.0, status);
 
     /* Write other headers. */
     fits_write_key_str(f, "TIMESYS", "UTC", NULL, status);
