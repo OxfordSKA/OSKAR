@@ -40,6 +40,11 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
         int* status)
 {
     if (*status) return;
+    if (index >= sky->num_sources)
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
 
     oskar_mem_set_element_real(sky->ra_rad, index, ra_rad, status);
     oskar_mem_set_element_real(sky->dec_rad, index, dec_rad, status);
