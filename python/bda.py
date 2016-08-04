@@ -1,6 +1,3 @@
-# 
-#  This file is part of OSKAR.
-# 
 # Copyright (c) 2016, The University of Oxford
 # All rights reserved.
 #
@@ -17,7 +14,7 @@
 #  3. Neither the name of the University of Oxford nor the names of its
 #     contributors may be used to endorse or promote products derived from this
 #     software without specific prior written permission.
-# 
+#
 #  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,17 +26,15 @@
 #  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 """
-=====================================================
-bda.py : OSKAR BDA functions
-=====================================================
-
-This module provides an interface to the OSKAR BDA utilities.
-
+=============
+BDA functions
+=============
 """
+from __future__ import division, absolute_import, print_function
+from . import _bda_utils
 
-import _bda_utils
 
 class BDA(object):
     def __init__(self, num_antennas, num_pols=1):
@@ -59,9 +54,36 @@ class BDA(object):
         _bda_utils.bda_set_initial_coords(self._capsule, uu, vv, ww)
 
     def add_data(self, time_index, vis, uu_next, vv_next, ww_next):
-        _bda_utils.bda_add_data(self._capsule, time_index, vis, 
+        _bda_utils.bda_add_data(self._capsule, time_index, vis,
             uu_next, vv_next, ww_next)
 
     def finalise(self):
         return _bda_utils.bda_finalise(self._capsule)
 
+
+def apply_gains(vis_amp, gains):
+    """
+    Apply agains to visibility amplitudes.
+
+    Args:
+        vis_amp (array_like):
+        gains (array_like):
+
+    returns:
+        array of visibilities with gains applied.
+
+    """
+    #FIXME(BM) mixed types?
+    if vis_amp.dtype == 'c8' and gains.dtype == 'c8':
+        return _bda_utils.apply_gains_2(vis_amp, gains)
+    else:
+        return _bda_utils.apply_gains(vis_amp, gains)
+
+
+def vis_list_to_matrix(vis_list, num_antennas):
+    """
+    """
+    if vis_list.dtype  == 'c8':
+        return _bda_utils.vis_list_to_matrix_2(vis_list, num_antennas)
+    else:
+        return _bda_utils.vis_list_to_matrix(vis_list, num_antennas)
