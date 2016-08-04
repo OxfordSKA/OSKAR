@@ -31,5 +31,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/utility
     ${PROJECT_SOURCE_DIR}/utility/binary
 )
+
 set(GTEST_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include/gtest)
 set(EZOPT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/ezOptionParser-0.2.0)

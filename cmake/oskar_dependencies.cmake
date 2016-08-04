@@ -40,8 +40,8 @@ endif()
 #    find_package(Qt5Core)
 #endif()
 find_package(CasaCore)               # liboskar_ms
-#find_package(Matlab)                # mex functions
 #find_package(PNG QUIET)             # For writing PNG images
+
 find_package(PythonLibs 2.7)         # For python interface
 find_package(NumPy 1.8)              # For python interface
 
@@ -49,7 +49,6 @@ find_package(NumPy 1.8)              # For python interface
 if (PYTHONLIBS_FOUND AND NUMPY_FOUND AND PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR EQUAL 2)
     set(PYTHON_FOUND TRUE)
 endif()
-
 
 # ==== Work out which libraries to build.
 if (NOT CUDA_FOUND)
@@ -118,12 +117,12 @@ endif ()
 #    message("===============================================================================")
 #endif()
 
-#if (NOT PYTHON_FOUND)
-#    message("===============================================================================")
-#    message("-- WARNING: Python 2.7 not found: "
-#            "Unable to build the OSKAR Python interface.")
-#    message("===============================================================================")
-#endif()
+if (NOT PYTHON_FOUND)
+    message("===============================================================================")
+    message("-- WARNING: Python 2.7 not found: "
+            "Unable to build the OSKAR Python interface.")
+    message("===============================================================================")
+endif()
 
 # Prints a message saying which components are being built.
 message("===============================================================================")
@@ -156,9 +155,9 @@ endif()
 #if (MATLAB_FOUND AND CUDA_FOUND)
 #    message("-- INFO:   - OSKAR MATLAB interface functions")
 #endif()
-#if (PYTHON_FOUND AND CUDA_FOUND)
-#    message("-- INFO:   - OSKAR Python interface functions (experimental)")
-#endif()
+if (PYTHON_FOUND AND CUDA_FOUND)
+    message("-- INFO:   - OSKAR Python interface functions (experimental)")
+endif()
 message("===============================================================================")
 
 message("===============================================================================")

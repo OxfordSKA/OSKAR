@@ -337,16 +337,15 @@ endmacro(OSKAR_MEX)
 # Macro to build and install oskar python modules.
 #
 # Usage:
-#       oskar_python_module(name
+#       oskar_py_module(name
 #           source
-#           [EXTRA_LIBS lib1 lib2 ...])
+#           [LIBS lib1 lib2 ...])
 #
-#       name       = name of mex function
-#       source     = source file containing mex function
-#       EXTRA_LIBS = list of additional libraries to link against.
+#       name       = name of python module
+#       source     = source file containing python module
+#       LIBS       = list of libraries to link against.
 #
 macro(OSKAR_PY_MODULE)
-
     parse_arguments(PY   # prefix
         "LIBS"           # arg names
         ""               # option names
@@ -356,6 +355,8 @@ macro(OSKAR_PY_MODULE)
     CDR(PY_SOURCES ${PY_DEFAULT_ARGS})
 
     # Over-ride compiler flags for python modules
+    # FIXME(BM) are these flags local?! also true for other macros in this file?
+    # ==> At the moment these are needed or the python module seems to break...
     set(CMAKE_C_FLAGS "-fpic -std=c99")
     set(CMAKE_C_FLAGS_RELEASE "-O2")
     set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
