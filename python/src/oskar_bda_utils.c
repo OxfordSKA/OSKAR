@@ -44,6 +44,12 @@ typedef struct DComplex {
     double im;
 } DComplex;
 
+typedef struct Complex {
+    float re;
+    float im;
+} Complex;
+
+
 /**
  * @brief
  * @details
@@ -109,6 +115,62 @@ fail:
  * @brief
  * @details
  */
+static PyObject* apply_gains_2(PyObject* self, PyObject* args)
+{
+    /* Read input arguments */
+    PyObject *vis_in_o = NULL, *gains_o = NULL;
+    if (!PyArg_ParseTuple(args, "OO", &vis_in_o, &gains_o))
+        return NULL;
+
+    /* Return an ndarray from the python objects */
+    int typenum = NPY_CFLOAT;
+    int requirements = NPY_ARRAY_IN_ARRAY;
+    PyObject* pyo_vis_in = PyArray_FROM_OTF(vis_in_o, typenum, requirements);
+    if (!pyo_vis_in) goto fail;
+    PyObject* pyo_gains = PyArray_FROM_OTF(gains_o, typenum, requirements);
+    if (!pyo_gains) goto fail;
+
+    /* TODO(BM) Error checking on the dims! */
+    int nd_vis = PyArray_NDIM((PyArrayObject*)pyo_vis_in);
+    npy_intp* vis_dims = PyArray_DIMS((PyArrayObject*)pyo_vis_in);
+    int num_vis = vis_dims[0];
+
+    int nd_gains = PyArray_NDIM((PyArrayObject*)pyo_gains);
+    npy_intp* gains_dims = PyArray_DIMS((PyArrayObject*)pyo_gains);
+    int num_antennas = gains_dims[0];
+
+    /* Create PyObject for output visibilities */
+    PyObject* pyo_vis_out = PyArray_SimpleNew(nd_vis, vis_dims, NPY_CFLOAT);
+
+    /* Apply the gains: v_out = gp * v_in * conj(gq) */
+    Complex* v_out = (Complex*)PyArray_DATA((PyArrayObject*)pyo_vis_out);
+    Complex* g = (Complex*)PyArray_DATA((PyArrayObject*)pyo_gains);
+    Complex* v_in = (Complex*)PyArray_DATA((PyArrayObject*)pyo_vis_in);
+    for (int i = 0, p = 0; p < num_antennas; ++p) {
+        for (int q = p + 1; q < num_antennas; ++q, ++i) {
+            float a = v_in[i].re * g[p].re - v_in[i].im * g[p].im;
+            float b = v_in[i].im * g[p].re + v_in[i].re * g[p].im;
+            v_out[i].re = a * g[q].re + b * g[q].im;
+            v_out[i].im = b * g[q].re - a * g[q].im;
+        }
+    }
+    /* Decrement references to temporary array objects. */
+    Py_DECREF(pyo_vis_in);
+    Py_DECREF(pyo_gains);
+    return Py_BuildValue("N", pyo_vis_out);
+
+fail:
+    Py_XDECREF(pyo_gains);
+    Py_XDECREF(pyo_vis_in);
+    return NULL;
+}
+
+
+
+/**
+ * @brief
+ * @details
+ */
 static PyObject* vis_list_to_matrix(PyObject* self, PyObject* args)
 {
     /* Read input arguments */
@@ -154,6 +216,59 @@ fail:
     Py_XDECREF(pyo_vis_list);
     return NULL;
 }
+
+
+/**
+ * @brief
+ * @details
+ */
+static PyObject* vis_list_to_matrix_2(PyObject* self, PyObject* args)
+{
+    /* Read input arguments */
+    PyObject* vis_list_ = NULL;
+    int num_ant = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &vis_list_, &num_ant))
+        return NULL;
+
+    /* Convert to an ndarray */
+    PyObject* pyo_vis_list = PyArray_FROM_OTF(vis_list_, NPY_CFLOAT,
+                                              NPY_ARRAY_IN_ARRAY);
+    if (!pyo_vis_list) goto fail;
+
+    /* TODO(BM) Error checking on the dims! */
+    int nd_vis = PyArray_NDIM((PyArrayObject*)pyo_vis_list);
+    npy_intp* vis_dims = PyArray_DIMS((PyArrayObject*)pyo_vis_list);
+    int num_vis = vis_dims[0];
+
+    /* Create PyObject for output visibilities */
+    npy_intp dims[] = { num_ant, num_ant };
+    PyObject* pyo_vis_matrix = PyArray_SimpleNew(2, dims, NPY_CFLOAT);
+
+    Complex* v_list = (Complex*)PyArray_DATA((PyArrayObject*)pyo_vis_list);
+    Complex* v_matrix = (Complex*)PyArray_DATA((PyArrayObject*)pyo_vis_matrix);
+    for (int i = 0, p = 0; p < num_ant; ++p) {
+        for (int q = p + 1; q < num_ant; ++q, ++i) {
+            v_matrix[p * num_ant + q].re = v_list[i].re;
+            v_matrix[p * num_ant + q].im = -v_list[i].im;
+            v_matrix[q * num_ant + p].re = v_list[i].re;
+            v_matrix[q * num_ant + p].im = v_list[i].im;
+        }
+    }
+    for (int i = 0; i < num_ant; ++i) {
+        v_matrix[i * num_ant + i].re = 0.0;
+        v_matrix[i * num_ant + i].im = 0.0;
+    }
+
+    /* Decrement references to temporary array objects. */
+    Py_DECREF(pyo_vis_list);
+    return Py_BuildValue("N", pyo_vis_matrix);
+
+fail:
+    Py_XDECREF(pyo_vis_list);
+    return NULL;
+}
+
+
 
 static PyObject* check_ref_count(PyObject* self, PyObject* args)
 {
@@ -700,13 +815,25 @@ static PyMethodDef methods[] =
     {
         "apply_gains",
         (PyCFunction)apply_gains, METH_VARARGS,
-        "vis_amp = apply_gains(gains, vis_amp)\n"
+        "vis_amp = apply_gains(vis_amp, gains)\n"
+        "Applies gains.\n"
+    },
+    {
+        "apply_gains_2",
+        (PyCFunction)apply_gains_2, METH_VARARGS,
+        "vis_amp = apply_gains_2(vis_amp, gains)\n"
         "Applies gains.\n"
     },
     {
         "vis_list_to_matrix",
         (PyCFunction)vis_list_to_matrix, METH_VARARGS,
         "vis_matrix = vis_list_to_matrix(vis_list)\n"
+        "Converts a list of visibilities to matrix form.\n"
+    },
+    {
+        "vis_list_to_matrix_2",
+        (PyCFunction)vis_list_to_matrix_2, METH_VARARGS,
+        "vis_matrix = vis_list_to_matrix_2(vis_list)\n"
         "Converts a list of visibilities to matrix form.\n"
     },
     {
@@ -804,5 +931,3 @@ void init_bda_utils(void)
     return;
 }
 #endif
-
-

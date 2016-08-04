@@ -4,7 +4,7 @@ if (NOT CHECKED_DEPENDENCIES)
     message(FATAL_ERROR "Please include oskar_dependencies.cmake before this script!")
 endif ()
 
-# Automatically set the build type to release or debug if not specified.
+# Automatically set the build type if not specified.
 if (NOT CMAKE_BUILD_TYPE)
     # Use debug mode if building in dbg or debug directory.
     get_filename_component(dirname ${CMAKE_BINARY_DIR} NAME)
@@ -18,91 +18,20 @@ endif()
 
 set(BUILD_SHARED_LIBS ON)
 
-# Set the include path to include the top-level folder and sub-folders for
-# main oskar library.
-# ------------------------------------------------------------------------------
-include_directories(
-    ${PROJECT_SOURCE_DIR}
-    ${PROJECT_BINARY_DIR}
-    ${PROJECT_SOURCE_DIR}/apps
-    ${PROJECT_SOURCE_DIR}/apps/lib
-    ${PROJECT_SOURCE_DIR}/apps/log
-    ${PROJECT_SOURCE_DIR}/convert
-    ${PROJECT_SOURCE_DIR}/correlate
-    ${PROJECT_SOURCE_DIR}/element
-    ${PROJECT_SOURCE_DIR}/extern
-    ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
-    ${PROJECT_SOURCE_DIR}/extern/rapidxml-1.13
-    ${PROJECT_SOURCE_DIR}/extern/cfitsio-3.37
-    ${PROJECT_SOURCE_DIR}/extern/Random123
-    ${PROJECT_SOURCE_DIR}/extern/Random123/features
-    ${PROJECT_SOURCE_DIR}/imaging
-    ${PROJECT_SOURCE_DIR}/interferometry
-    ${PROJECT_SOURCE_DIR}/jones
-    ${PROJECT_SOURCE_DIR}/math
-    ${PROJECT_SOURCE_DIR}/ms
-    ${PROJECT_SOURCE_DIR}/settings
-    ${PROJECT_SOURCE_DIR}/settings/containers
-    ${PROJECT_SOURCE_DIR}/settings/load
-    ${PROJECT_SOURCE_DIR}/settings/struct
-    ${PROJECT_SOURCE_DIR}/settings/types
-    ${PROJECT_SOURCE_DIR}/settings/utility
-    ${PROJECT_SOURCE_DIR}/settings/widgets
-    ${PROJECT_SOURCE_DIR}/sky
-    ${PROJECT_SOURCE_DIR}/splines
-    ${PROJECT_SOURCE_DIR}/station
-    ${PROJECT_SOURCE_DIR}/utility
-    ${PROJECT_SOURCE_DIR}/utility/binary
-)
-set(GTEST_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include/gtest)
-set(EZOPT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/ezOptionParser-0.2.0)
-
-
 # Build the various version strings to be passed to the code.
-set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
-set(OSKAR_VERSION_STR "${OSKAR_VERSION}")
-if (OSKAR_VERSION_SUFFIX AND NOT OSKAR_VERSION_SUFFIX STREQUAL "")
-    find_package(Git QUIET)
-    if (GIT_FOUND)
-        execute_process(
-          COMMAND git log -1 --format=%h
-          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-          OUTPUT_VARIABLE GIT_COMMIT_HASH
-          OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        execute_process(
-          COMMAND git log -1 --format=%cd --date=short
-          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-          OUTPUT_VARIABLE GIT_COMMIT_DATE
-          OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-        set(GIT_COMMIT_INFO "${GIT_COMMIT_DATE} ${GIT_COMMIT_HASH}")
-    endif()
-    set(OSKAR_VERSION_STR "${OSKAR_VERSION}-${OSKAR_VERSION_SUFFIX}")
-    if (GIT_COMMIT_INFO)
-        set(OSKAR_VERSION_STR "${OSKAR_VERSION_STR} ${GIT_COMMIT_INFO}")
-    endif()
-    if (CMAKE_BUILD_TYPE MATCHES [dD]ebug)
-        set(OSKAR_VERSION_STR "${OSKAR_VERSION_STR} -debug-")
-    endif()
-
-endif()
 if (CMAKE_VERSION VERSION_GREATER 2.8.11)
     string(TIMESTAMP OSKAR_BUILD_DATE "%Y-%m-%d %H:%M:%S")
 endif()
 
-configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_version.h.in
-    ${PROJECT_BINARY_DIR}/oskar_version.h @ONLY)
+macro(APPEND_FLAGS FLAG_VAR)
+    foreach (flag ${ARGN})
+        set(${FLAG_VAR} "${${FLAG_VAR}} ${flag}")
+    endforeach()    
+endmacro()
 
 # Set general compiler flags.
 if (NOT WIN32)
-    # Common compiler options. Note C code is compiled as gnu89 in order to
-    # allow for a number of non C89 compiler extensions such as sinf, powf,
-    # strtok_r as well as gnu inline mode which is needed for CUDA Thurst with
-    # some compilers.
-    set(CMAKE_C_FLAGS "-fPIC -std=gnu89")
-    # TODO-BM: could probably change to c99 now MSVC 2015 is complient?
-    # set(CMAKE_C_FLAGS "-fPIC -std=c99")
+    set(CMAKE_C_FLAGS "-fPIC -std=c99")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
     set(CMAKE_C_FLAGS_DEBUG "-O0 -g -Wall")
     set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g -Wall")
@@ -114,67 +43,48 @@ if (NOT WIN32)
     set(CMAKE_CXX_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
 
     if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-        # Using Clang or GNU compilers.
-
         # Treat external code as system headers.
         # This avoids a number of warning supression flags.
-        set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -isystem ${CUDA_INCLUDE_DIRS}")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${GTEST_INCLUDE_DIR}")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${GTEST_INCLUDE_DIR}/internal")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CASACORE_INCLUDE_DIR}/casacore")
+        append_flags(CMAKE_C_FLAGS -isystem ${CUDA_INCLUDE_DIRS})
+        append_flags(CMAKE_CXX_FLAGS 
+            -isystem ${CUDA_INCLUDE_DIRS}
+            -isystem ${GTEST_INCLUDE_DIR}
+            -isystem ${GTEST_INCLUDE_DIR}/internal
+            -isystem ${CASACORE_INCLUDE_DIR}/casacore
+        )
+        append_flags(CMAKE_C_FLAGS 
+            -fvisibility=hidden 
+            -fdiagnostics-show-option)
 
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-show-option")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wextra")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -pedantic")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-qual")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-align")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wmissing-prototypes")
-        ############ TEST FLAGS ##########
-        #set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wbad-function-cast")
-#        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wstack-protector")
-#        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wpacked")
-#        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wredundant-decls")
-#        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wshadow")
-#        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wwrite-strings")
-#        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Waggregate-return")
-#        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wstrict-prototypes")
-#        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wstrict-aliasing")
-#        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wdeclaration-after-statement")
-        #############
-        # long-long is required for C as cfitsio headers pull this into OSKAR
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-long-long")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-variadic-macros")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-unused-function")
-        set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -Wno-unused-function")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-show-option")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wextra")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pedantic")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-qual")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-align")
-        # long-long is required for C++ as ezOptionParser, gTest, and Qt headers
-        # all pull this into OSKAR.
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-long-long")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-variadic-macros")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-function")
-        set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -Wno-unused-function")
-        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        # Note: long-long is required for cfitsio
+        append_flags(CMAKE_C_FLAGS_DEBUG 
+            -Wextra -pedantic -Wcast-qual -Wcast-align
+            -Wmissing-prototypes -Wno-long-long
+            -Wno-variadic-macros -Wno-unused-function
+         )
+         # Additional test flags
+#        append_flags(CMAKE_C_FLAGS_DEBUG 
+#            -Wbad-function-cast -Wstack-protector -Wpacked
+#            -Wredundant-decls -Wshadow -Wwrite-strings 
+#            -Waggregate-return -Wstrict-prototypes
+#            -Wstrict-aliasing -Wdeclaration-after-statement
+#        )
+        append_flags(CMAKE_C_FLAGS_RELWITHDEBINFO -Wno-unused-function)
+        append_flags(CMAKE_CXX_FLAGS
+            -fvisibility=hidden -fvisibility-inlines-hidden
+            -fdiagnostics-show-option    
+        )
+        append_flags(CMAKE_CXX_FLAGS_DEBUG
+            -Wextra -pedantic -Wcast-qual -Wcast-align -Wno-long-long
+            -Wno-variadic-macros -Wno-unused-function
+        )
+        append_flags(CMAKE_CXX_FLAGS_RELWITHDEBINFO -Wno-unused-function)
+
+        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND FORCE_LIBSTDC++)
             # Tell Clang to use libstdc++ rather than libc++
             # This is required if any of the OSKAR dependencies are built
-            # against libstdc++. libc++ seems not to be ABI compatible with
-            # libstdc++ so this is currently required.
+            # against libstdc++ due to ABI incompatibility with libc++.
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
-        endif()
-
-        # Check GNU compiler version
-        if (CMAKE_COMPILER_IS_GNUCC)
-            execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-#            if (GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
-#                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++98")
-#            endif()
         endif()
 
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
@@ -218,9 +128,15 @@ if (CUDA_FOUND)
         set(CUDA_NVCC_FLAGS_DEBUG "-O0 -g --generate-line-info")
         set(CUDA_NVCC_FLAGS_RELWIDTHDEBINFO "-02 -g --generate-line-info")
         set(CUDA_NVCC_FLAGS_MINSIZEREL -01)
+        if (DEFINED NVCC_COMPILER_BINDIR)
+            append_flags(CUDA_NVCC_FLAGS_RELEASE -ccbin=${NVCC_COMPILER_BINDIR})
+            append_flags(CUDA_NVCC_FLAGS_DEBUG -ccbin=${NVCC_COMPILER_BINDIR})
+            append_flags(CUDA_NVCC_FLAGS_RELWIDTHDEBINFO -ccbin=${NVCC_COMPILER_BINDIR})
+            append_flags(CUDA_NVCC_FLAGS_MINSIZEREL -ccbin=${NVCC_COMPILER_BINDIR})
+        endif()
 
         # Options passed to the compiler NVCC encapsulates.
-        if (APPLE)
+        if (FORCE_LIBSTDC++)
             list(APPEND CUDA_NVCC_FLAGS -Xcompiler;-stdlib=libstdc++;)
         endif()
         list(APPEND CUDA_NVCC_FLAGS_RELEASE -Xcompiler;-O2)
@@ -242,7 +158,9 @@ if (CUDA_FOUND)
         list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-missing-field-initializers;)
         # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
         list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-function;)
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-local-typedef;)
+        if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-local-typedef;)
+        endif()
         # PTX compiler options
         #list(APPEND CUDA_NVCC_FLAGS_RELEASE --ptxas-options=-v;)
     endif ()
@@ -327,27 +245,36 @@ message("-- INFO: Build type     ${CMAKE_BUILD_TYPE}")
 message("-- INFO: Compiler ID    ${CMAKE_C_COMPILER_ID}:${CMAKE_CXX_COMPILER_ID}")
 message("===============================================================================")
 
-#set(BUILD_INFO OFF) # Enable with -DBUILD_INFO=ON when running cmake
 if (BUILD_INFO)
     message("===============================================================================")
     message(STATUS "C++ compiler  : ${CMAKE_CXX_COMPILER}")
     message(STATUS "C compiler    : ${CMAKE_C_COMPILER}")
+    if (DEFINED NVCC_COMPILER_BINDIR)
+        message(STATUS "nvcc bindir   : ${NVCC_COMPILER_BINDIR}")
+    endif()
+    if (FORCE_LIBSTDC++)
+        message(STATUS "Forcing linking with libstdc++")
+    endif()
     if (${CMAKE_BUILD_TYPE} MATCHES [Rr]elease)
         message(STATUS "C++ flags     : ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
         message(STATUS "C flags       : ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
         message(STATUS "CUDA flags    : ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_RELEASE}")
+        message(STATUS "OpenMP flags  : ${OpenMP_CXX_FLAGS}")
     elseif (${CMAKE_BUILD_TYPE} MATCHES [Dd]ebug)
         message(STATUS "C++ flags     : ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
         message(STATUS "C flags       : ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
         message(STATUS "CUDA flags    : ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_DEBUG}")
+        message(STATUS "OpenMP flags  : ${OpenMP_CXX_FLAGS}")
     elseif (${CMAKE_BUILD_TYPE} MATCHES [Rr]elWithDebInfo)
         message(STATUS "C++ flags     : ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
         message(STATUS "C flags       : ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELWITHDEBINFO}")
         message(STATUS "CUDA flags    : ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_RELWITHDEBINFO}")
+        message(STATUS "OpenMP flags  : ${OpenMP_CXX_FLAGS}")
     elseif (${CMAKE_BUILD_TYPE} MATCHES [Mm]inSizeRel)
         message(STATUS "C++ flags     : ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_MINSIZEREL}")
         message(STATUS "C flags       : ${CMAKE_C_FLAGS}$ {CMAKE_C_FLAGS_MINSIZEREL}")
         message(STATUS "CUDA flags    : ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_MINSIZEREL}")
+        message(STATUS "OpenMP flags  : ${OpenMP_CXX_FLAGS}")
     endif()
     message("===============================================================================")
 endif (BUILD_INFO)
