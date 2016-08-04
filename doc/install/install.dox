@@ -110,37 +110,24 @@ These are as listed below.
   - Note: This should only be used in special cases, where the version of CasaCore headers installed in the system include path can't be used to build OSKAR.
 
 - <tt><b>-DNVCC_COMPILER_BINDIR=\<path\></b></tt> (default: None)
-  - Specifies a nvcc compiler binary directory over-ride. see nvcc help.
-  - Note: This is likely only to be needed on os x when the version of the
-    compiler picked up by nvcc which is related to the version of xcode being
-    used is incompatible with the current version of cuda.
+  - Specifies a nvcc compiler binary directory over-ride. see nvcc help. 
+  - Note: This is likely only to be needed on os x when the version of the compiler picked up by nvcc which is related to the version of xcode being used is incompatible with the current version of cuda.
 
 - <tt><b>-DFORCE_LIBSTDC++=\<ON, or OFF\></b></tt> (default: OFF)
   - If ON forces the use of libstdc++ with the clang compiler
-  - Note: Used for controlling linking behaviour when using clang or clang-omp 
-    compilers with dependencies which may have been compiled against libstdc++
+  - Note: Used for controlling linking behaviour when using clang or clang-omp compilers with dependencies which may have been compiled against libstdc++
 
 - <tt><b>-DBUILD_INFO=\<ON, or OFF\></b></tt> (default: OFF)
-  - If ON enables the display of diagnostic build information when running
-    cmake.
+  - If ON enables the display of diagnostic build information when running cmake.
 
-<!--
-- <tt><b>-DMATLAB_ROOT=\<path\></b></tt> (default: searches common system install locations)
-  - Specifies a custom path in which to search for MATLAB libraries and library headers.
-  - Note: This should only be used in special cases, where MATLAB is installed in a non-standard location, or where several versions of MATLAB are installed, and a particular version is favoured.
+- <tt><b>-DPYTHON_LIBRARY=\<path to library\></b></tt> (default: None)
+  - Path to the Python library which can be used to specify a specific 
+    installation of Python to use.
 
-\subsection install_build_env Environment Variables
+- <tt><b>-DPYTHON_INCLUDE_DIR=\<path to Python.h\></b></tt> (default: None)
+  - Path to Python.h which can be used to specify a specific installation of 
+    Python to use.
 
-The following environment variables affect the CMake build system:
-
-- MATLAB_ROOT
-  - The MATLAB root install directory used by CMake when searching for the
-    MATLAB dependency. This directory should contain the MATLAB 'extern'
-    directory. (Note that this variable should not normally need to be set,
-    but can be used if the default CMake macros fail to find MATLAB on your
-    system.)
-
--->
 
 \subsection install_build_qt4 Custom (Non-System) Qt4 Installations
 
