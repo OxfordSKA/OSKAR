@@ -1,7 +1,15 @@
-.project
-.cproject
-.settings
-.DS_Store
-release
-debug
-build
+*.DS_Store
+
+# Eclipse project files
+/.project
+/.cproject
+/.settings/
+
+# PyCharm project files
+/.idea/
+
+# Build directories
+/release/
+/debug/
+/build/
+

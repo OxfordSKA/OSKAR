@@ -1,6 +1,7 @@
-# 
+# -*- coding: utf-8 -*-
+#
 #  This file is part of OSKAR.
-# 
+#
 # Copyright (c) 2014-2016, The University of Oxford
 # All rights reserved.
 #
@@ -17,7 +18,7 @@
 #  3. Neither the name of the University of Oxford nor the names of its
 #     contributors may be used to endorse or promote products derived from this
 #     software without specific prior written permission.
-# 
+#
 #  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,23 +30,28 @@
 #  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
-# 
+#
+"""
+This module provides a Python interface to OSKAR imaging functions.
+"""
 
+from __future__ import absolute_import, division
 import math
-import _imager_lib
+import numpy as np
+from . import _imager_lib
+
 
 class Imager(object):
     """This class provides a Python interface to the OSKAR imager."""
 
     def __init__(self, precision="double"):
-        """Creates a handle to an OSKAR imager.
+        """Creates an OSKAR imager object.
 
         Args:
-            type (str): Either 'double' or 'single' to specify
+            precision (str): Either 'double' or 'single' to specify
                 the numerical precision of the images.
         """
         self._capsule = _imager_lib.create(precision)
-
 
     def check_init(self):
         """Initialises the imager algorithm if it has not already been done.
@@ -54,7 +60,6 @@ class Imager(object):
         before calling this function.
         """
         _imager_lib.check_init(self._capsule)
-
 
     def finalise(self, return_images=False, return_grids=False):
         """Finalises the image or images.
@@ -69,7 +74,6 @@ class Imager(object):
             return_grids (boolean): If true, return grids.
         """
         return _imager_lib.finalise(self._capsule, return_images, return_grids)
-
 
     def finalise_plane(self, plane, plane_norm):
         """Finalises an image plane.
@@ -87,7 +91,6 @@ class Imager(object):
         """
         _imager_lib.finalise_plane(self._capsule, plane, plane_norm)
 
-
     def get_algorithm(self):
         """Returns a string describing the imager algorithm.
 
@@ -95,7 +98,6 @@ class Imager(object):
             str: The imager algorithm.
         """
         return _imager_lib.algorithm(self._capsule)
-
 
     def get_cellsize(self):
         """Returns the image cell (pixel) size.
@@ -105,7 +107,6 @@ class Imager(object):
         """
         return _imager_lib.cellsize(self._capsule)
 
-
     def get_channel_end(self):
         """Returns the end channel to image.
 
@@ -113,7 +114,6 @@ class Imager(object):
             int: End channel index (-1 for all channels).
         """
         return _imager_lib.channel_end(self._capsule)
-
 
     def get_channel_snapshots(self):
         """Returns the flag specifying whether to image each channel separately.
@@ -124,7 +124,6 @@ class Imager(object):
         """
         return _imager_lib.channel_snapshots(self._capsule)
 
-
     def get_channel_start(self):
         """Returns the start channel to image.
 
@@ -132,7 +131,6 @@ class Imager(object):
             int: Start channel index.
         """
         return _imager_lib.channel_start(self._capsule)
-
 
     def get_coords_only(self):
         """Returns flag specifying whether imager is in coordinate-only mode.
@@ -142,7 +140,6 @@ class Imager(object):
         """
         return _imager_lib.coords_only(self._capsule)
 
-
     def get_fft_on_gpu(self):
         """Returns flag specifying whether to use the GPU for FFTs.
 
@@ -150,7 +147,6 @@ class Imager(object):
             boolean: If true, use the GPU for FFTs.
         """
         return _imager_lib.fft_on_gpu(self._capsule)
-
 
     def get_fov(self):
         """Returns the image field-of-view, in degrees.
@@ -160,7 +156,6 @@ class Imager(object):
         """
         return _imager_lib.fov(self._capsule)
 
-
     def get_generate_w_kernels_on_gpu(self):
         """Returns flag specifying whether to use the GPU to generate W-kernels.
 
@@ -168,7 +163,6 @@ class Imager(object):
             boolean: If true, use the GPU to generate W-kernels.
         """
         return _imager_lib.generate_w_kernels_on_gpu(self._capsule)
-
 
     def get_image_size(self):
         """Returns the image side length, in pixels.
@@ -178,7 +172,6 @@ class Imager(object):
         """
         return _imager_lib.image_size(self._capsule)
 
-
     def get_image_type(self):
         """Returns a string describing the image (polarisation) type.
 
@@ -186,7 +179,6 @@ class Imager(object):
             str: The image (polarisation) type.
         """
         return _imager_lib.image_type(self._capsule)
-
 
     def get_input_file(self):
         """Returns a string containing the input file name.
@@ -196,7 +188,6 @@ class Imager(object):
         """
         return _imager_lib.input_file(self._capsule)
 
-
     def get_ms_column(self):
         """Returns a string containing the Measurement Set column to use.
 
@@ -204,7 +195,6 @@ class Imager(object):
             str: The column name.
         """
         return _imager_lib.ms_column(self._capsule)
-
 
     def get_num_w_planes(self):
         """Returns the number of W-planes used.
@@ -214,7 +204,6 @@ class Imager(object):
         """
         return _imager_lib.num_w_planes(self._capsule)
 
-
     def get_output_root(self):
         """Returns a string containing the output root file name.
 
@@ -222,7 +211,6 @@ class Imager(object):
             str: The output root file name.
         """
         return _imager_lib.output_root(self._capsule)
-
 
     def get_plane_size(self):
         """Returns the required plane size.
@@ -235,7 +223,6 @@ class Imager(object):
         """
         return _imager_lib.plane_size(self._capsule)
 
-
     def get_size(self):
         """Returns the image side length, in pixels.
 
@@ -244,7 +231,6 @@ class Imager(object):
         """
         return _imager_lib.size(self._capsule)
 
-
     def get_time_end(self):
         """Returns the end time index to image.
 
@@ -252,7 +238,6 @@ class Imager(object):
             int: End time index (-1 for all channels).
         """
         return _imager_lib.time_end(self._capsule)
-
 
     def get_time_snapshots(self):
         """Returns the flag specifying whether to image each time separately.
@@ -263,7 +248,6 @@ class Imager(object):
         """
         return _imager_lib.time_snapshots(self._capsule)
 
-
     def get_time_start(self):
         """Returns the start time index to image.
 
@@ -271,7 +255,6 @@ class Imager(object):
             int: Start time index.
         """
         return _imager_lib.time_start(self._capsule)
-
 
     def get_weighting(self):
         """Returns a string describing the weighting scheme.
@@ -281,14 +264,12 @@ class Imager(object):
         """
         return _imager_lib.weighting(self._capsule)
 
-
     def reset_cache(self):
         """Low-level function to reset the imager's internal memory.
 
         This is used to clear any data added using update().
         """
         _imager_lib.reset_cache(self._capsule)
-
 
     def run(self, return_images=False, return_grids=False):
         """Runs the imager on a visibility file.
@@ -306,7 +287,6 @@ class Imager(object):
         """
         _imager_lib.run(self._capsule, return_images, return_grids)
 
-
     def set(self, **kwargs):
         """Sets multiple properties at once.
 
@@ -315,15 +295,14 @@ class Imager(object):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-
     def set_algorithm(self, algorithm_type):
         """Sets the algorithm used by the imager.
 
         Args:
-            type (str): Either 'FFT', 'DFT 2D', 'DFT 3D' or 'W-projection'.
+            algorithm_type (str): Either 'FFT', 'DFT 2D', 'DFT 3D' or
+                'W-projection'.
         """
         _imager_lib.set_algorithm(self._capsule, algorithm_type)
-
 
     def set_cellsize(self, cellsize_arcsec):
         """Sets the cell (pixel) size.
@@ -337,7 +316,6 @@ class Imager(object):
         """
         _imager_lib.set_cellsize(self._capsule, cellsize_arcsec)
 
-
     def set_channel_end(self, value):
         """Sets the end channel to image.
 
@@ -345,7 +323,6 @@ class Imager(object):
             value (int): End channel index (-1 for all channels).
         """
         _imager_lib.set_channel_end(self._capsule, value)
-
 
     def set_channel_snapshots(self, value):
         """Sets the flag specifying whether to image each channel separately.
@@ -356,7 +333,6 @@ class Imager(object):
         """
         _imager_lib.set_channel_snapshots(self._capsule, value)
 
-
     def set_channel_start(self, value):
         """Sets the start channel to image.
 
@@ -364,7 +340,6 @@ class Imager(object):
             value (int): Start channel index.
         """
         _imager_lib.set_channel_start(self._capsule, value)
-
 
     def set_coords_only(self, flag):
         """Sets the imager to ignore visibility data and use coordinates only.
@@ -384,11 +359,9 @@ class Imager(object):
         """
         _imager_lib.set_coords_only(self._capsule, flag)
 
-
     def set_default_direction(self):
         """Clears any direction override."""
         _imager_lib.set_default_direction(self._capsule)
-
 
     def set_direction(self, ra_deg, dec_deg):
         """Sets the image centre different to the observation phase centre.
@@ -399,7 +372,6 @@ class Imager(object):
         """
         _imager_lib.set_direction(self._capsule, ra_deg, dec_deg)
 
-
     def set_fft_on_gpu(self, value):
         """Sets whether to use the GPU for FFTs.
 
@@ -407,7 +379,6 @@ class Imager(object):
             value (boolean): If true, use the GPU for FFTs.
         """
         _imager_lib.set_fft_on_gpu(self._capsule, value)
-
 
     def set_fov(self, fov_deg):
         """Sets the field of view to image.
@@ -421,7 +392,6 @@ class Imager(object):
         """
         _imager_lib.set_fov(self._capsule, fov_deg)
 
-
     def set_generate_w_kernels_on_gpu(self, value):
         """Sets whether to use the GPU to generate W-kernels.
 
@@ -430,20 +400,18 @@ class Imager(object):
         """
         _imager_lib.set_generate_w_kernels_on_gpu(self._capsule, value)
 
-
     def set_grid_kernel(self, kernel_type, support, oversample):
         """Sets the convolution kernel used for gridding visibilities.
 
         Args:
-            type (str): Type of convolution kernel; 
+            kernel_type (str): Type of convolution kernel;
                 either 'Spheroidal' or 'Pillbox'.
             support (int): Support size of kernel. 
                 The kernel width is 2 * support + 1.
             oversample (int): Oversample factor used for look-up table.
         """
         _imager_lib.set_grid_kernel(self._capsule, kernel_type,
-            support, oversample)
-
+                                    support, oversample)
 
     def set_image_size(self, size):
         """Sets image side length.
@@ -453,16 +421,14 @@ class Imager(object):
         """
         self.set_size(size)
 
-
     def set_image_type(self, image_type):
         """Sets the image (polarisation) type.
 
         Args:
-            type (str): Either 'STOKES', 'I', 'Q', 'U', 'V', 
+            image_type (str): Either 'STOKES', 'I', 'Q', 'U', 'V',
                 'LINEAR', 'XX', 'XY', 'YX', 'YY' or 'PSF'.
         """
         _imager_lib.set_image_type(self._capsule, image_type)
-
 
     def set_input_file(self, filename):
         """Sets the input visibility file or Measurement Set.
@@ -473,7 +439,6 @@ class Imager(object):
         """
         _imager_lib.set_input_file(self._capsule, filename)
 
-
     def set_ms_column(self, column):
         """Sets the data column to use from a Measurement Set.
 
@@ -481,7 +446,6 @@ class Imager(object):
             column (str): Name of the column to use.
         """
         _imager_lib.set_ms_column(self._capsule, column)
-
 
     def set_num_w_planes(self, num_planes):
         """Sets the number of W-planes to use, if using W-projection.
@@ -493,7 +457,6 @@ class Imager(object):
         """
         _imager_lib.set_num_w_planes(self._capsule, num_planes)
 
-
     def set_output_root(self, filename):
         """Sets the root path of output images.
 
@@ -501,7 +464,6 @@ class Imager(object):
             filename (str): Root path.
         """
         _imager_lib.set_output_root(self._capsule, filename)
-
 
     def set_size(self, size):
         """Sets image side length.
@@ -511,7 +473,6 @@ class Imager(object):
         """
         _imager_lib.set_size(self._capsule, size)
 
-
     def set_time_end(self, value):
         """Sets the end time index to image.
 
@@ -519,7 +480,6 @@ class Imager(object):
             value (int): End channel index (-1 for all channels).
         """
         _imager_lib.set_time_end(self._capsule, value)
-
 
     def set_time_snapshots(self, value):
         """Sets the flag specifying whether to image each time separately.
@@ -530,7 +490,6 @@ class Imager(object):
         """
         _imager_lib.set_time_snapshots(self._capsule, value)
 
-
     def set_time_start(self, value):
         """Sets the start time index to image.
 
@@ -538,7 +497,6 @@ class Imager(object):
             value (int): Start time index.
         """
         _imager_lib.set_time_start(self._capsule, value)
-
 
     def set_vis_frequency(self, ref_hz, inc_hz=0.0, num_channels=1):
         """Sets the visibility start frequency.
@@ -552,8 +510,7 @@ class Imager(object):
                 Number of channels in visibility data. Default 1.
         """
         _imager_lib.set_vis_frequency(self._capsule,
-            ref_hz, inc_hz, num_channels)
-
+                                      ref_hz, inc_hz, num_channels)
 
     def set_vis_phase_centre(self, ra_deg, dec_deg):
         """Sets the coordinates of the visibility phase centre.
@@ -563,7 +520,6 @@ class Imager(object):
             dec_deg (float): Declination of phase centre, in degrees.
         """
         _imager_lib.set_vis_phase_centre(self._capsule, ra_deg, dec_deg)
-
 
     def set_vis_time(self, ref_mjd_utc, inc_sec=0.0, num_times=1):
         """Sets the visibility start time.
@@ -578,7 +534,6 @@ class Imager(object):
         """
         _imager_lib.set_vis_time(self._capsule, ref_mjd_utc, inc_sec, num_times)
 
-
     def set_weighting(self, weighting):
         """Sets the type of visibility weighting to use.
 
@@ -587,9 +542,8 @@ class Imager(object):
         """
         _imager_lib.set_weighting(self._capsule, weighting)
 
-
     def update(self, num_baselines, uu, vv, ww, amps, weight, num_pols=1,
-            start_time=0, end_time=0, start_channel=0, end_channel=0):
+               start_time=0, end_time=0, start_channel=0, end_channel=0):
         """Runs imager for supplied visibilities, applying optional selection.
 
         The visibility amplitude data dimension order must be:
@@ -609,7 +563,7 @@ class Imager(object):
                 Time-baseline ordered vv coordinates, in metres.
             ww (float, array-like, shape (n,)):
                 Time-baseline ordered ww coordinates, in metres.
-            amp (complex float, array-like, shape (n,)):
+            amps (complex float, array-like, shape (n,)):
                 Baseline visibility amplitudes. Length as described above.
             weight (float, array-like, shape (n,)):
                 Visibility weights. Length as described above.
@@ -619,15 +573,14 @@ class Imager(object):
                 Start time index of the visibility block. Default 0.
             end_time (Optional[int]):
                 End time index of the visibility block. Default 0.
-            start_chan (Optional[int]):
+            start_channel (Optional[int]):
                 Start channel index of the visibility block. Default 0.
-            end_chan (Optional[int]):
+            end_channel (Optional[int]):
                 End channel index of the visibility block. Default 0.
         """
-        _imager_lib.update(self._capsule, num_baselines, uu, vv, ww, 
-            amps, weight, num_pols, start_time, end_time, 
-            start_channel, end_channel)
-
+        _imager_lib.update(self._capsule, num_baselines, uu, vv, ww,
+                           amps, weight, num_pols, start_time, end_time,
+                           start_channel, end_channel)
 
     def update_from_block(self, header, block):
         """Runs imager for visibility block, applying optional selection.
@@ -640,12 +593,11 @@ class Imager(object):
             block (oskar.VisBlock):
                 Handle to an OSKAR visibility block.
         """
-        _imager_lib.update_from_block(self._capsule, 
-            header._capsule, block._capsule)
-
+        _imager_lib.update_from_block(self._capsule, header._capsule,
+                                      block._capsule)
 
     def update_plane(self, uu, vv, ww, amps, weight, plane, plane_norm,
-            weights_grid=None):
+                     weights_grid=None):
         """Updates the supplied plane with the supplied visibilities.
 
         This is a low-level function that can be used to generate 
@@ -675,43 +627,41 @@ class Imager(object):
         Returns:
             float: Updated plane normalisation.
         """
-        return _imager_lib.update_plane(self._capsule, uu, vv, ww, 
-            amps, weight, plane, plane_norm, weights_grid)
-
+        return _imager_lib.update_plane(self._capsule, uu, vv, ww, amps,
+                                        weight, plane, plane_norm, weights_grid)
 
     # Properties.
-    algorithm                 = property(get_algorithm, set_algorithm)
-    cell                      = property(get_cellsize, set_cellsize)
-    cellsize                  = property(get_cellsize, set_cellsize)
-    cellsize_arcsec           = property(get_cellsize, set_cellsize)
-    cell_size                 = property(get_cellsize, set_cellsize)
-    cell_size_arcsec          = property(get_cellsize, set_cellsize)
-    channel_end               = property(get_channel_end, set_channel_end)
-    channel_snapshots         = property(get_channel_snapshots,
-                                    set_channel_snapshots)
-    channel_start             = property(get_channel_start, set_channel_start)
-    coords_only               = property(get_coords_only, set_coords_only)
-    fft_on_gpu                = property(get_fft_on_gpu, set_fft_on_gpu)
-    fov                       = property(get_fov, set_fov)
-    fov_deg                   = property(get_fov, set_fov)
+    algorithm = property(get_algorithm, set_algorithm)
+    cell = property(get_cellsize, set_cellsize)
+    cellsize = property(get_cellsize, set_cellsize)
+    cellsize_arcsec = property(get_cellsize, set_cellsize)
+    cell_size = property(get_cellsize, set_cellsize)
+    cell_size_arcsec = property(get_cellsize, set_cellsize)
+    channel_end = property(get_channel_end, set_channel_end)
+    channel_snapshots = property(get_channel_snapshots,
+                                 set_channel_snapshots)
+    channel_start = property(get_channel_start, set_channel_start)
+    coords_only = property(get_coords_only, set_coords_only)
+    fft_on_gpu = property(get_fft_on_gpu, set_fft_on_gpu)
+    fov = property(get_fov, set_fov)
+    fov_deg = property(get_fov, set_fov)
     generate_w_kernels_on_gpu = property(get_generate_w_kernels_on_gpu,
-                                    set_generate_w_kernels_on_gpu)
-    image_size                = property(get_image_size, set_image_size)
-    image_type                = property(get_image_type, set_image_type)
-    input_file                = property(get_input_file, set_input_file)
-    input_vis_data            = property(get_input_file, set_input_file)
-    ms_column                 = property(get_ms_column, set_ms_column)
-    num_w_planes              = property(get_num_w_planes, set_num_w_planes)
-    output_root               = property(get_output_root, set_output_root)
-    plane_size                = property(get_plane_size)
-    root_path                 = property(get_output_root, set_output_root)
-    size                      = property(get_size, set_size)
-    time_end                  = property(get_time_end, set_time_end)
-    time_snapshots            = property(get_time_snapshots, set_time_snapshots)
-    time_start                = property(get_time_start, set_time_start)
-    weighting                 = property(get_weighting, set_weighting)
-    wprojplanes               = property(get_num_w_planes, set_num_w_planes)
-
+                                         set_generate_w_kernels_on_gpu)
+    image_size = property(get_image_size, set_image_size)
+    image_type = property(get_image_type, set_image_type)
+    input_file = property(get_input_file, set_input_file)
+    input_vis_data = property(get_input_file, set_input_file)
+    ms_column = property(get_ms_column, set_ms_column)
+    num_w_planes = property(get_num_w_planes, set_num_w_planes)
+    output_root = property(get_output_root, set_output_root)
+    plane_size = property(get_plane_size)
+    root_path = property(get_output_root, set_output_root)
+    size = property(get_size, set_size)
+    time_end = property(get_time_end, set_time_end)
+    time_snapshots = property(get_time_snapshots, set_time_snapshots)
+    time_start = property(get_time_start, set_time_start)
+    weighting = property(get_weighting, set_weighting)
+    wprojplanes = property(get_num_w_planes, set_num_w_planes)
 
     @staticmethod
     def cellsize_to_fov(cellsize_rad, size):
@@ -726,7 +676,6 @@ class Imager(object):
         """
         return 2.0 * math.asin(0.5 * size * math.sin(cellsize_rad))
 
-
     @staticmethod
     def fov_to_cellsize(fov_rad, size):
         """Convert image FoV and size along one dimension in pixels to cellsize.
@@ -739,7 +688,6 @@ class Imager(object):
             float: Image cellsize, in radians.
         """
         return math.asin(2.0 * math.sin(0.5 * fov_rad) / size)
-
 
     @staticmethod
     def fov_to_uv_cellsize(fov_rad, size):
@@ -754,10 +702,83 @@ class Imager(object):
         """
         return 1.0 / (size * Imager.fov_to_cellsize(fov_rad, size))
 
+    @staticmethod
+    def uv_cellsize_to_fov(uv_cellsize, size):
+        """Convert a uv cellsize in wavelengths to an image FoV, in radians.
+
+        uv cellsize is the size of a uv grid pixel in the grid used when
+        imaging using an FFT.
+
+        Args:
+            uv_cellsize (float): Grid pixel size in wavelengths
+            size (int): Size of the uv grid in pixels.
+
+        Returns:
+            float: Image field-of-view, in radians
+        """
+        return Imager.cellsize_to_fov(1 / (size * uv_cellsize), size)
 
     @staticmethod
-    def make_image(uu, vv, ww, amps, fov_deg, size,
-            weighting='Natural', algorithm='FFT', weight=None, wprojplanes=0):
+    def extent_pixels(size):
+        """Obtain the image or grid extent in pixel space
+
+        Args:
+            size (int): Image or grid size (number of pixels)
+
+        Returns:
+            numpy.ndarray: Image or grid extent in pixels ordered as follows
+            [x_min, x_max, y_min, y_max]
+        """
+        c = size // 2
+        return np.array([c + 0.5, -c + 0.5, -c - 0.5, c - 0.5])
+
+    @staticmethod
+    def image_extent_lm(fov_deg, size):
+        """Return the image extent in direction cosines.
+
+        The image extent is a list of 4 elements describing the
+        dimensions of the image in the x (l) and y (m) axes.
+        This can be used for example, to label images produced using the OSKAR
+        imager when plotted with matplotlib's imshow() method.
+
+        Args:
+            fov_deg (float): Image field-of-view, in degrees
+            size (int): Image size (number of pixels)
+
+        Returns:
+            numpy.ndarray: Image extent in direction cosines ordered as follows
+            [l_min, l_max, m_min, m_max]
+        """
+        extent = np.array(Imager.extent_pixels(size))
+        cellsize_rad = Imager.fov_to_cellsize(math.radians(fov_deg), size)
+        cellsize_lm = math.sin(cellsize_rad)
+        extent *= cellsize_lm
+        return extent
+
+    @staticmethod
+    def grid_extent_wavelengths(fov_deg, size):
+        """Return the the uv grid extent in wavelengths.
+
+        The grid extent is a list of 4 elements describing the
+        dimensions of the uv grid in the x (uu) and y (vv) axes.
+        This can be used for example, to label uv grid images produced
+        using the OSKAR imager when plotted with matplotlib's imshow() method.
+
+        Args:
+            fov_deg (float): Image field-of-view, in degrees
+            size (int): Grid / image size (number of pixels)
+
+        Returns:
+            numpy.ndarray: Grid extent in wavelengths ordered as follows
+            [uu_min, uu_max, vv_min, vv_max]
+        """
+        cellsize = Imager.fov_to_uv_cellsize(math.radians(fov_deg), size)
+        extent = Imager.extent_pixels(size) * cellsize
+        return extent
+
+    @staticmethod
+    def make_image(uu, vv, ww, amps, fov_deg, size, weighting='Natural',
+                   algorithm='FFT', weight=None, wprojplanes=0):
         """Makes an image from visibility data.
 
         Args:
@@ -786,5 +807,4 @@ class Imager(object):
             array: Image as a 2D numpy array. Data are ordered as in FITS image.
         """
         return _imager_lib.make_image(uu, vv, ww, amps, fov_deg, size,
-            weighting, algorithm, weight, wprojplanes)
-
+                                      weighting, algorithm, weight, wprojplanes)
