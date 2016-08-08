@@ -92,13 +92,13 @@ def test1():
     image = hdu_list[0].data.squeeze()
     im_size = hdu_list[0].header['NAXIS1']
     freq_hz = hdu_list[0].header['CRVAL3']
+    cell_size_deg = fabs(hdu_list[0].header['CDELT1'])
 
     # FT the image back to the grid.
     ft_image = np.fft.fftshift(np.fft.ifft2(np.fft.fftshift(image)))
 
     # Get the image and grid coordiante extent (required for plotting)
     wavelength = const.c.value / freq_hz
-    cell_size_deg = fabs(hdu_list[0].header['CDELT1'])
     fov_deg = degrees(Imager.cellsize_to_fov(radians(cell_size_deg), im_size))
     extent_lm = Imager.image_extent_lm(fov_deg, im_size)
     extent_uv_m = Imager.grid_extent_wavelengths(fov_deg, im_size) * wavelength
