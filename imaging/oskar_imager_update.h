@@ -81,24 +81,24 @@ void oskar_imager_update_from_block(oskar_Imager* h,
  * (slowest) time, channel, baseline, polarisation (fastest).
  *
  * @param[in,out] h             Handle to imager.
- * @param[in]     start_time    Start time index of the visibility block.
- * @param[in]     end_time      End time index of the visibility block.
- * @param[in]     start_chan    Start channel index of the visibility block.
- * @param[in]     end_chan      End channel index of the visibility block.
- * @param[in]     num_pols      Number of polarisations in the visibility block.
- * @param[in]     num_baselines Number of baselines in the visibility block.
  * @param[in]     uu            Time-baseline ordered U-coordinates, in metres.
  * @param[in]     vv            Time-baseline ordered V-coordinates, in metres.
  * @param[in]     ww            Time-baseline ordered W-coordinates, in metres.
  * @param[in]     amps          Complex visibility amplitudes.
  * @param[in]     weight        Visibility weights.
+ * @param[in]     start_time    Start time index of the visibility block.
+ * @param[in]     end_time      End time index of the visibility block.
+ * @param[in]     start_chan    Start channel index of the visibility block.
+ * @param[in]     end_chan      End channel index of the visibility block.
+ * @param[in]     num_baselines Number of baselines in the visibility block.
+ * @param[in]     num_pols      Number of polarisations in the visibility block.
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
-        int start_chan, int end_chan, int num_pols, int num_baselines,
-        const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* amps, const oskar_Mem* weight, int* status);
+void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
+		const oskar_Mem* vv, const oskar_Mem* ww, const oskar_Mem* amps,
+		const oskar_Mem* weight, int start_time, int end_time, int start_chan,
+		int end_chan, int num_baselines, int num_pols, int* status);
 
 /**
  * @brief

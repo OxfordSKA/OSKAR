@@ -191,9 +191,9 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
                         OSKAR_VIS_BLOCK_TAG_BASELINE_VV, i_block, status);
                 oskar_binary_read_mem(vis_file, ww, OSKAR_TAG_GROUP_VIS_BLOCK,
                         OSKAR_VIS_BLOCK_TAG_BASELINE_WW, i_block, status);
-                oskar_imager_update(h, start_time, end_time,
-                        start_chan, end_chan, num_pols, num_baselines,
-                        uu, vv, ww, 0, weight, status);
+                oskar_imager_update(h, uu, vv, ww, 0, weight,
+                        start_time, end_time, start_chan, end_chan,
+                        num_baselines, num_pols, status);
             }
 
             /* Update progress. */
@@ -252,13 +252,13 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
                 (start_time <= h->time_range[1] || h->time_range[1] < 0))
         {
             oskar_vis_block_read(blk, hdr, vis_file, i_block, status);
-            oskar_imager_update(h, start_time, end_time, start_chan, end_chan,
-                    oskar_vis_block_num_pols(blk),
-                    oskar_vis_block_num_baselines(blk),
+            oskar_imager_update(h,
                     oskar_vis_block_baseline_uu_metres(blk),
                     oskar_vis_block_baseline_vv_metres(blk),
                     oskar_vis_block_baseline_ww_metres(blk),
-                    oskar_vis_block_cross_correlations(blk), weight, status);
+                    oskar_vis_block_cross_correlations(blk), weight,
+                    start_time, end_time, start_chan, end_chan,
+                    num_baselines, num_pols, status);
         }
 
         /* Update progress. */
@@ -306,7 +306,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     num_times = num_rows / num_baselines;
     start_chan = 0; end_chan = num_channels - 1;
 
-    /* Check for irregular data and override synthesis mode if required. */
+    /* Check for irregular data and override time synthesis mode if required. */
     if (num_rows % num_baselines != 0)
     {
         oskar_log_warning(h->log,
@@ -396,8 +396,8 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
             }
 
             /* Add the baseline data. */
-            oskar_imager_update(h, start_time, end_time, start_chan, end_chan,
-                    num_pols, block_size, u, v, w, 0, weight, status);
+            oskar_imager_update(h, u, v, w, 0, weight, start_time, end_time,
+                    start_chan, end_chan, block_size, num_pols, status);
             start_time += 1;
             end_time += 1;
 
@@ -488,8 +488,8 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
         }
 
         /* Add the baseline data. */
-        oskar_imager_update(h, start_time, end_time, start_chan, end_chan,
-                num_pols, block_size, u, v, w, ptr, weight, status);
+        oskar_imager_update(h, u, v, w, ptr, weight, start_time, end_time,
+                start_chan, end_chan, block_size, num_pols, status);
         start_time += 1;
         end_time += 1;
 

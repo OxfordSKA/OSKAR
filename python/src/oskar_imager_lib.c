@@ -1014,13 +1014,13 @@ static PyObject* update(PyObject* self, PyObject* args)
     oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *weight_c;
     PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0;
     int start_time = 0, end_time = 0, start_chan = 0, end_chan = 0;
-    int num_pols = 1, num_baselines = 0, vis_type;
+    int num_baselines = 0, num_pols = 1, vis_type;
     int num_times, num_chan, num_coords, num_vis, num_weights, status = 0;
 
     /* Parse inputs. */
-    if (!PyArg_ParseTuple(args, "OiOOOOOiiiii", &obj[0],
-            &num_baselines, &obj[1], &obj[2], &obj[3], &obj[4], &obj[5],
-            &num_pols, &start_time, &end_time, &start_chan, &end_chan))
+    if (!PyArg_ParseTuple(args, "OOOOOOiiiiii", &obj[0], &obj[1], &obj[2],
+            &obj[3], &obj[4], &obj[5], &start_time, &end_time,
+            &start_chan, &end_chan, &num_baselines, &num_pols))
         return 0;
     if (!(h = get_handle_imager(obj[0]))) return 0;
 
@@ -1029,9 +1029,15 @@ static PyObject* update(PyObject* self, PyObject* args)
     vv     = (PyArrayObject*) PyArray_FROM_OF(obj[2], NPY_ARRAY_IN_ARRAY);
     ww     = (PyArrayObject*) PyArray_FROM_OF(obj[3], NPY_ARRAY_IN_ARRAY);
     amps   = (PyArrayObject*) PyArray_FROM_OF(obj[4], NPY_ARRAY_IN_ARRAY);
-    weight = (PyArrayObject*) PyArray_FROM_OF(obj[5], NPY_ARRAY_IN_ARRAY);
-    if (!uu || !vv || !ww || !amps || !weight)
+    if (!uu || !vv || !ww || !amps)
         goto fail;
+
+    /* Check if weights are present. */
+    if (obj[5] != Py_None)
+    {
+        weight = (PyArrayObject*) PyArray_FROM_OF(obj[5], NPY_ARRAY_IN_ARRAY);
+        if (!weight) goto fail;
+    }
 
     /* Check visibility data are complex. */
     if (!PyArray_ISCOMPLEX(amps))
@@ -1041,7 +1047,17 @@ static PyObject* update(PyObject* self, PyObject* args)
         goto fail;
     }
 
+    /* Check number of polarisations. */
+    if (num_pols != 1 && num_pols != 4)
+    {
+        PyErr_SetString(PyExc_ValueError,
+                "Unknown number of polarisations. Must be 1 or 4.");
+        goto fail;
+    }
+
     /* Get dimensions. */
+    if (num_baselines == 0)
+        num_baselines = (int) PyArray_SIZE(amps);
     num_times = 1 + end_time - start_time;
     num_chan = 1 + end_chan - start_chan;
     num_coords = num_times * num_baselines;
@@ -1059,14 +1075,24 @@ static PyObject* update(PyObject* self, PyObject* args)
             oskar_type_from_numpy(ww), OSKAR_CPU, num_coords, &status);
     amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amps),
             vis_type, OSKAR_CPU, num_vis, &status);
-    weight_c = oskar_mem_create_alias_from_raw(PyArray_DATA(weight),
-            oskar_type_from_numpy(weight), OSKAR_CPU, num_weights, &status);
+    if (weight)
+    {
+        weight_c = oskar_mem_create_alias_from_raw(PyArray_DATA(weight),
+                oskar_type_from_numpy(weight), OSKAR_CPU, num_weights, &status);
+    }
+    else
+    {
+        /* Set weights to 1 if not supplied. */
+        weight_c = oskar_mem_create(oskar_type_precision(vis_type), OSKAR_CPU,
+                num_weights, &status);
+        oskar_mem_set_value_real(weight_c, 1.0, 0, num_weights, &status);
+    }
 
     /* Update the imager with the supplied visibility data. */
     Py_BEGIN_ALLOW_THREADS
-    oskar_imager_update(h, start_time, end_time, start_chan, end_chan,
-            num_pols, num_baselines, uu_c, vv_c, ww_c, amp_c, weight_c,
-            &status);
+    oskar_imager_update(h, uu_c, vv_c, ww_c, amp_c, weight_c,
+            start_time, end_time, start_chan, end_chan,
+            num_baselines, num_pols, &status);
     Py_END_ALLOW_THREADS
     oskar_mem_free(uu_c, &status);
     oskar_mem_free(vv_c, &status);
@@ -1549,8 +1575,8 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "time_snapshots()"},
         {"time_start", (PyCFunction)time_start, METH_VARARGS, "time_start()"},
         {"update", (PyCFunction)update, METH_VARARGS,
-                "update(num_baselines, uu, vv, ww, amps, weight, "
-                "num_pols, start_time, end_time, start_chan, end_chan)"},
+                "update(uu, vv, ww, amps, weight, start_time, end_time, "
+                "start_chan, end_chan, num_baselines, num_pols)"},
         {"update_from_block", (PyCFunction)update_from_block,
                 METH_VARARGS, "update_from_block(vis_header, vis_block)"},
         {"update_plane", (PyCFunction)update_plane, METH_VARARGS,

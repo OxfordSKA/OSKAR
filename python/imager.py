@@ -37,14 +37,14 @@ This module provides a Python interface to OSKAR imaging functions.
 
 from __future__ import absolute_import, division
 import math
-import numpy as np
+import numpy
 from . import _imager_lib
 
 
 class Imager(object):
     """This class provides a Python interface to the OSKAR imager."""
 
-    def __init__(self, precision="double"):
+    def __init__(self, precision='double'):
         """Creates an OSKAR imager object.
 
         Args:
@@ -70,8 +70,8 @@ class Imager(object):
         the grid cube can be accessed using the 'grids' key.
 
         Args:
-            return_images (boolean): If true, return images.
-            return_grids (boolean): If true, return grids.
+            return_images (Optional[boolean]): If true, return images.
+            return_grids (Optional[boolean]): If true, return grids.
         """
         return _imager_lib.finalise(self._capsule, return_images, return_grids)
 
@@ -271,10 +271,25 @@ class Imager(object):
         """
         _imager_lib.reset_cache(self._capsule)
 
-    def run(self, return_images=False, return_grids=False):
-        """Runs the imager on a visibility file.
+    def run(self, uu=None, vv=None, ww=None, amps=None, weight=None,
+            start_time=0, end_time=0, start_channel=0, end_channel=0,
+            num_baselines=0, num_pols=1, return_images=False,
+            return_grids=False):
+        """Runs the imager.
 
-        The input filename must be set using set_input_file().
+        Visibilities will be used either from the input file or Measurement Set,
+        if one is set, or from the supplied arrays.
+        If using a file, the input filename must be set using set_input_file().
+        If using arrays, the visibility meta-data must be set prior to calling
+        this method using set_vis_* methods.
+
+        The visibility amplitude data dimension order must be:
+        (slowest) time, channel, baseline, polarisation (fastest).
+
+        The visibility weight data dimension order must be:
+        (slowest) time, baseline, polarisation (fastest).
+
+        If not given, the weights will be treated as all 1.
 
         Images or grids can be returned in a Python dictionary
         of numpy arrays, if required.
@@ -282,10 +297,37 @@ class Imager(object):
         the grid cube can be accessed using the 'grids' key.
 
         Args:
-            return_images (boolean): If true, return images.
-            return_grids (boolean): If true, return grids.
+            uu (float, array-like, shape (n,)):
+                Time-baseline ordered uu coordinates, in metres.
+            vv (float, array-like, shape (n,)):
+                Time-baseline ordered vv coordinates, in metres.
+            ww (float, array-like, shape (n,)):
+                Time-baseline ordered ww coordinates, in metres.
+            amps (complex float, array-like, shape (n,)):
+                Baseline visibility amplitudes. Length as described above.
+            weight (Optional[float, array-like, shape (m,)]):
+                Visibility weights. Length as described above.
+            start_time (Optional[int]):
+                Start time index of the visibility block. Default 0.
+            end_time (Optional[int]):
+                End time index of the visibility block. Default 0.
+            start_channel (Optional[int]):
+                Start channel index of the visibility block. Default 0.
+            end_channel (Optional[int]):
+                End channel index of the visibility block. Default 0.
+            num_baselines (Optional[int]):
+                Number of baselines in the visibility block. Default n.
+            num_pols (Optional[int]):
+                Number of polarisations in the visibility block. Default 1.
+            return_images (Optional[boolean]): If true, return images.
+            return_grids (Optional[boolean]): If true, return grids.
         """
-        _imager_lib.run(self._capsule, return_images, return_grids)
+        if amps is None:
+            return _imager_lib.run(self._capsule, return_images, return_grids)
+        else:
+            self.update(uu, vv, ww, amps, weight, start_time, end_time,
+                        start_channel, end_channel, num_baselines, num_pols)
+            return self.finalise(return_images, return_grids)
 
     def set(self, **kwargs):
         """Sets multiple properties at once.
@@ -542,9 +584,12 @@ class Imager(object):
         """
         _imager_lib.set_weighting(self._capsule, weighting)
 
-    def update(self, num_baselines, uu, vv, ww, amps, weight, num_pols=1,
-               start_time=0, end_time=0, start_channel=0, end_channel=0):
+    def update(self, uu, vv, ww, amps, weight=None, start_time=0, end_time=0,
+               start_channel=0, end_channel=0, num_baselines=0, num_pols=1):
         """Runs imager for supplied visibilities, applying optional selection.
+
+        The visibility meta-data must be set prior to calling this method
+        using set_vis_* methods.
 
         The visibility amplitude data dimension order must be:
         (slowest) time, channel, baseline, polarisation (fastest).
@@ -552,11 +597,11 @@ class Imager(object):
         The visibility weight data dimension order must be:
         (slowest) time, baseline, polarisation (fastest).
 
+        If not given, the weights will be treated as all 1.
+
         Call finalise() to finalise the images after calling this function.
 
         Args:
-            num_baselines (int):
-                Number of baselines in the visibility block.
             uu (float, array-like, shape (n,)):
                 Time-baseline ordered uu coordinates, in metres.
             vv (float, array-like, shape (n,)):
@@ -565,10 +610,8 @@ class Imager(object):
                 Time-baseline ordered ww coordinates, in metres.
             amps (complex float, array-like, shape (n,)):
                 Baseline visibility amplitudes. Length as described above.
-            weight (float, array-like, shape (n,)):
+            weight (Optional[float, array-like, shape (m,)]):
                 Visibility weights. Length as described above.
-            num_pols (Optional[int]):
-                Number of polarisations in the visibility block. Default 1.
             start_time (Optional[int]):
                 Start time index of the visibility block. Default 0.
             end_time (Optional[int]):
@@ -577,10 +620,14 @@ class Imager(object):
                 Start channel index of the visibility block. Default 0.
             end_channel (Optional[int]):
                 End channel index of the visibility block. Default 0.
+            num_baselines (Optional[int]):
+                Number of baselines in the visibility block. Default n.
+            num_pols (Optional[int]):
+                Number of polarisations in the visibility block. Default 1.
         """
-        _imager_lib.update(self._capsule, num_baselines, uu, vv, ww,
-                           amps, weight, num_pols, start_time, end_time,
-                           start_channel, end_channel)
+        _imager_lib.update(self._capsule, uu, vv, ww, amps, weight,
+                           start_time, end_time, start_channel, end_channel,
+                           num_baselines, num_pols)
 
     def update_from_block(self, header, block):
         """Runs imager for visibility block, applying optional selection.
@@ -730,7 +777,7 @@ class Imager(object):
             [x_min, x_max, y_min, y_max]
         """
         c = size // 2
-        return np.array([c + 0.5, -c + 0.5, -c - 0.5, c - 0.5])
+        return numpy.array([c + 0.5, -c + 0.5, -c - 0.5, c - 0.5])
 
     @staticmethod
     def image_extent_lm(fov_deg, size):
@@ -749,7 +796,7 @@ class Imager(object):
             numpy.ndarray: Image extent in direction cosines ordered as follows
             [l_min, l_max, m_min, m_max]
         """
-        extent = np.array(Imager.extent_pixels(size))
+        extent = numpy.array(Imager.extent_pixels(size))
         cellsize_rad = Imager.fov_to_cellsize(math.radians(fov_deg), size)
         cellsize_lm = math.sin(cellsize_rad)
         extent *= cellsize_lm
