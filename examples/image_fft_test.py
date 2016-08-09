@@ -54,7 +54,6 @@ def make_image(uu_m, vv_m, amps, freq_hz, im_size, cell_size_uv_m,
     """
     ra_deg, dec_deg = 0, 90
     ww_m = np.zeros_like(uu_m)
-    weight = np.ones_like(uu_m)
     image_type = 'I'
     wavelength = const.c.value / freq_hz
     uv_cellsize_wavelengths = cell_size_uv_m / wavelength
@@ -63,12 +62,11 @@ def make_image(uu_m, vv_m, amps, freq_hz, im_size, cell_size_uv_m,
     # Create FITS image
     imager = Imager(precision='double')
     imager.set(fov_deg=degrees(fov_rad), size=im_size, algorithm=algorithm,
-               weighting='natural', image_type=image_type,
+               weighting='natural', image_type=image_type, wprojplanes=-1,
                output_root=image_root_name)
     imager.set_vis_frequency(freq_hz)
     imager.set_vis_phase_centre(ra_deg, dec_deg)
-    imager.update(len(uu_m), uu_m, vv_m, ww_m, amps, weight)
-    imager_data = imager.finalise(return_grids=True)
+    imager_data = imager.run(uu_m, vv_m, ww_m, amps, return_grids=True)
     image_grid = imager_data['grids'].squeeze()
     return image_grid, '%s_%s.fits' % (image_root_name, image_type)
 
@@ -84,7 +82,7 @@ def test1():
     grid, image_filename = make_image(uu_m, vv_m, amps, freq_hz=const.c.value,
                                       im_size=128, cell_size_uv_m=1,
                                       image_root_name='TEST',
-                                      algorithm='fft')
+                                      algorithm='FFT')
 
     # Load created FITS image and extract the image data and header
     # information relating to its coordinates.

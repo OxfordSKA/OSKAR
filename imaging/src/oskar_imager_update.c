@@ -107,21 +107,21 @@ void oskar_imager_update_from_block(oskar_Imager* h,
     }
 
     /* Update the imager with the block data. */
-    oskar_imager_update(h, start_time, end_time, start_chan, end_chan,
-            num_pols, num_baselines,
+    oskar_imager_update(h,
             oskar_vis_block_baseline_uu_metres_const(block),
             oskar_vis_block_baseline_vv_metres_const(block),
             oskar_vis_block_baseline_ww_metres_const(block),
-            oskar_vis_block_cross_correlations_const(block),
-            weight_ptr, status);
+            oskar_vis_block_cross_correlations_const(block), weight_ptr,
+            start_time, end_time, start_chan, end_chan,
+            num_baselines, num_pols, status);
     oskar_mem_free(weight, status);
 }
 
 
-void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
-        int start_chan, int end_chan, int num_pols, int num_baselines,
-        const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* amps, const oskar_Mem* weight, int* status)
+void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
+        const oskar_Mem* vv, const oskar_Mem* ww, const oskar_Mem* amps,
+        const oskar_Mem* weight, int start_time, int end_time, int start_chan,
+        int end_chan, int num_baselines, int num_pols, int* status)
 {
     int t, c, p, plane, num_times, num_channels, max_num_vis;
     oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
@@ -129,6 +129,8 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
     if (*status) return;
 
     /* Set dimensions. */
+    if (num_baselines <= 0)
+        num_baselines = (int) oskar_mem_length(amps);
     num_times = 1 + end_time - start_time;
     num_channels = 1 + end_chan - start_chan;
 
