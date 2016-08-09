@@ -824,6 +824,46 @@ class Imager(object):
         return extent
 
     @staticmethod
+    def grid_pixels(grid_cellsize, size):
+        """Return grid pixel coordinates the same units as grid_cellsize.
+
+        Returns the x and y coordinates of the uv grid pixels for a grid / image
+        of size x size pixels where the grid pixel separation is given by
+        grid_cellsize. The output pixel coordinates will be in the same units
+        as that of the supplied grid_cellsize.
+
+        Args:
+            grid_cellsize (float): Pixel separation in the grid
+            size (int): Size of the grid / image
+
+        Returns:
+            tupple(gx, gy): where gx and gy are the pixel coordinates of each
+            grid cell. gx and gy are 2d arrays of dimensions size x size.
+        """
+        x = np.arange(-size // 2, size // 2) * grid_cellsize
+        gx, gy = np.meshgrid(-x, x)
+        return gx, gy
+
+    @staticmethod
+    def image_pixels(fov_deg, im_size):
+        """Return image pixel coordinates in lm (direction cosine) space.
+
+        Args:
+            fov_deg: Image field-of-view in degrees
+            im_size: Image size in pixels.
+
+        Returns:
+            tupple (l, m): where l and m are the coordinates of each
+            image pixel in the l (x) and m (y) directions. l and m are
+            2d arrays of dimensions im_size by im_size
+        """
+        cell_size_rad = Imager.fov_to_cellsize(math.radians(fov_deg), im_size)
+        cell_size_lm = math.sin(cell_size_rad)
+        x = np.arange(-im_size // 2, im_size // 2) * cell_size_lm
+        l, m = np.meshgrid(-x, x)
+        return l, m
+
+    @staticmethod
     def make_image(uu, vv, ww, amps, fov_deg, size, weighting='Natural',
                    algorithm='FFT', weight=None, wprojplanes=0):
         """Makes an image from visibility data.
