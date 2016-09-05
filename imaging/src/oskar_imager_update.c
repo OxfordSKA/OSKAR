@@ -32,6 +32,7 @@
 #include <oskar_convert_lon_lat_to_relative_directions.h>
 #include <oskar_grid_weights.h>
 #include <oskar_imager.h>
+#include <oskar_cmath.h>
 #include <private_imager_create_fits_files.h>
 #include <private_imager_set_num_planes.h>
 #include <private_imager_update_plane_dft.h>
