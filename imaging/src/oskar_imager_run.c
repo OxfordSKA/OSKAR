@@ -33,6 +33,7 @@
 #include <oskar_imager.h>
 #include <oskar_vis_block.h>
 #include <oskar_vis_header.h>
+#include <oskar_cmath.h>
 
 #include <ms/oskar_measurement_set.h>
 
