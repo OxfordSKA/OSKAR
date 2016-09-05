@@ -325,6 +325,12 @@ class Imager(object):
         if amps is None:
             return _imager_lib.run(self._capsule, return_images, return_grids)
         else:
+            self.reset_cache()
+            if self.weighting == 'Uniform' or self.algorithm == 'W-projection':
+                self.set_coords_only(True)
+                self.update(uu, vv, ww, amps, weight, start_time, end_time,
+                            start_channel, end_channel, num_baselines, num_pols)
+                self.set_coords_only(False)
             self.update(uu, vv, ww, amps, weight, start_time, end_time,
                         start_channel, end_channel, num_baselines, num_pols)
             return self.finalise(return_images, return_grids)
