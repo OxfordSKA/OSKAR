@@ -26,7 +26,7 @@ endif()
 macro(APPEND_FLAGS FLAG_VAR)
     foreach (flag ${ARGN})
         set(${FLAG_VAR} "${${FLAG_VAR}} ${flag}")
-    endforeach()    
+    endforeach()
 endmacro()
 
 # Set general compiler flags.
@@ -46,33 +46,33 @@ if (NOT WIN32)
         # Treat external code as system headers.
         # This avoids a number of warning supression flags.
         append_flags(CMAKE_C_FLAGS -isystem ${CUDA_INCLUDE_DIRS})
-        append_flags(CMAKE_CXX_FLAGS 
+        append_flags(CMAKE_CXX_FLAGS
             -isystem ${CUDA_INCLUDE_DIRS}
             -isystem ${GTEST_INCLUDE_DIR}
             -isystem ${GTEST_INCLUDE_DIR}/internal
             -isystem ${CASACORE_INCLUDE_DIR}/casacore
         )
-        append_flags(CMAKE_C_FLAGS 
-            -fvisibility=hidden 
+        append_flags(CMAKE_C_FLAGS
+            -fvisibility=hidden
             -fdiagnostics-show-option)
 
         # Note: long-long is required for cfitsio
-        append_flags(CMAKE_C_FLAGS_DEBUG 
+        append_flags(CMAKE_C_FLAGS_DEBUG
             -Wextra -pedantic -Wcast-qual -Wcast-align
             -Wmissing-prototypes -Wno-long-long
             -Wno-variadic-macros -Wno-unused-function
          )
          # Additional test flags
-#        append_flags(CMAKE_C_FLAGS_DEBUG 
+#        append_flags(CMAKE_C_FLAGS_DEBUG
 #            -Wbad-function-cast -Wstack-protector -Wpacked
-#            -Wredundant-decls -Wshadow -Wwrite-strings 
+#            -Wredundant-decls -Wshadow -Wwrite-strings
 #            -Waggregate-return -Wstrict-prototypes
 #            -Wstrict-aliasing -Wdeclaration-after-statement
 #        )
         append_flags(CMAKE_C_FLAGS_RELWITHDEBINFO -Wno-unused-function)
         append_flags(CMAKE_CXX_FLAGS
             -fvisibility=hidden -fvisibility-inlines-hidden
-            -fdiagnostics-show-option    
+            -fdiagnostics-show-option
         )
         append_flags(CMAKE_CXX_FLAGS_DEBUG
             -Wextra -pedantic -Wcast-qual -Wcast-align -Wno-long-long
@@ -167,16 +167,21 @@ if (CUDA_FOUND)
 
     message("===============================================================================")
     if (NOT DEFINED CUDA_ARCH OR CUDA_ARCH MATCHES ALL|[Aa]ll)
-        message("-- INFO: Building CUDA device code for Fermi, Kepler and Maxwell architectures")
+        message("-- INFO: Building CUDA device code for Fermi, Kepler,")
+        message("-- INFO: Maxwell and Pascal architectures")
         message("-- INFO: The target CUDA architecture can be specified by using the option:")
         message("-- INFO:   -DCUDA_ARCH=<arch>")
         message("-- INFO: where <arch> is one of:")
-        message("-- INFO:   1.3, 2.0, 2.1, 3.0, 3.5, 5.0 or ALL.")
+        message("-- INFO:   1.3, 2.0, 2.1, 3.0, 3.5, 3.7, 5.0, 5.2, 6.0, 6.1 or ALL.")
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_21)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_30,code=sm_30)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_35,code=sm_35)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_37,code=sm_37)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_50,code=sm_50)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_52,code=sm_52)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_60,code=sm_60)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_61,code=sm_61)
     elseif (CUDA_ARCH MATCHES 1.3)
         message("-- INFO: Building CUDA device code for architecture 1.3")
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_13,code=sm_13)
@@ -192,9 +197,24 @@ if (CUDA_FOUND)
     elseif (CUDA_ARCH MATCHES 3.5)
         message("-- INFO: Building CUDA device code for architecture 3.5")
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_35,code=sm_35)
+    elseif (CUDA_ARCH MATCHES 3.7)
+        message("-- INFO: Building CUDA device code for architecture 3.7")
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_37,code=sm_37)
     elseif (CUDA_ARCH MATCHES 5.0)
         message("-- INFO: Building CUDA device code for architecture 5.0")
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_50,code=sm_50)
+    elseif (CUDA_ARCH MATCHES 5.2)
+        message("-- INFO: Building CUDA device code for architecture 5.2")
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_52,code=sm_52)
+    elseif (CUDA_ARCH MATCHES 6.0)
+        message("-- INFO: Building CUDA device code for architecture 6.0")
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_60,code=sm_60)
+    elseif (CUDA_ARCH MATCHES 6.1)
+        message("-- INFO: Building CUDA device code for architecture 6.1")
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_61,code=sm_61)
+    elseif (CUDA_ARCH MATCHES 6.2)
+        message("-- INFO: Building CUDA device code for architecture 6.2")
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_62,code=sm_62)
     else()
         message(FATAL_ERROR "-- CUDA_ARCH ${CUDA_ARCH} not recognised!")
     endif()
