@@ -51,7 +51,7 @@ extern "C" {
  * The separation of the key and value is specified by the log width parameter
  * which is set by the oskar_log_set_value_width() method. The default
  * width for value messages places the value of the message is determined
- * by the OSKAR_LOG_DEFAULT_VALUE_WIDTH macro in the oskar_Log.h header.
+ * by the OSKAR_LOG_DEFAULT_VALUE_WIDTH macro in the oskar_log.h header.
  *
  * Value log entries have a depth which, if positive, will indent the message
  * by 2 spaces per depth value and prefix the message with a list bullet.
