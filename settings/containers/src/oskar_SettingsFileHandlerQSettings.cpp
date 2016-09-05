@@ -33,6 +33,7 @@
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
 #include <iostream>
+#include <cstdio>
 
 using namespace std;
 
@@ -146,4 +147,3 @@ void oskar_settings_file_handler_qsettings_free(
 {
     delete handler;
 }
-
