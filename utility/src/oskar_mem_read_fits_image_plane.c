@@ -27,8 +27,8 @@
  */
 
 #include <oskar_mem.h>
+#include <oskar_cmath.h>
 #include <fitsio.h>
-#include <math.h>
 #include <string.h>
 
 #ifdef __cplusplus
