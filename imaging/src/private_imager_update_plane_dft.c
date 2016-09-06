@@ -32,6 +32,7 @@
 #include <oskar_dft_c2r_3d_cuda.h>
 #include <oskar_device_utils.h>
 #include <oskar_imager.h>
+#include <oskar_cmath.h>
 #include <private_imager_update_plane_dft.h>
 
 #include <stdlib.h>
