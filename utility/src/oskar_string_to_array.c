@@ -45,7 +45,7 @@ extern "C" {
 size_t oskar_string_to_array_i(char* str, size_t n, int* data)
 {
     size_t i = 0;
-    char *save_ptr, *token;
+    char *save_ptr = 0, *token = 0;
     do
     {
         token = strtok_r(str, DELIMITERS, &save_ptr);
@@ -62,7 +62,7 @@ size_t oskar_string_to_array_i(char* str, size_t n, int* data)
 size_t oskar_string_to_array_f(char* str, size_t n, float* data)
 {
     size_t i = 0;
-    char *save_ptr, *token;
+    char *save_ptr = 0, *token = 0;
     do
     {
         token = strtok_r(str, DELIMITERS, &save_ptr);
@@ -79,7 +79,7 @@ size_t oskar_string_to_array_f(char* str, size_t n, float* data)
 size_t oskar_string_to_array_d(char* str, size_t n, double* data)
 {
     size_t i = 0;
-    char *save_ptr, *token;
+    char *save_ptr = 0, *token = 0;
     do
     {
         token = strtok_r(str, DELIMITERS, &save_ptr);
@@ -96,7 +96,7 @@ size_t oskar_string_to_array_d(char* str, size_t n, double* data)
 size_t oskar_string_to_array_s(char* str, size_t n, char** data)
 {
     size_t i;
-    char *save_ptr;
+    char *save_ptr = 0;
     for (i = 0; i < n; ++i)
     {
         data[i] = strtok_r(str, DELIMITERS, &save_ptr);
@@ -111,7 +111,7 @@ size_t oskar_string_to_array_s(char* str, size_t n, char** data)
 size_t oskar_string_to_array_realloc_s(char* str, size_t* n, char*** data)
 {
     size_t i;
-    char *save_ptr, *token;
+    char *save_ptr = 0, *token = 0;
     for (i = 0; ; ++i)
     {
         token = strtok_r(str, DELIMITERS, &save_ptr);
