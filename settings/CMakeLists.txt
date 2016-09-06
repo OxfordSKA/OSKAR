@@ -90,6 +90,7 @@ set(${name}_SRC
     oskar_settings_log.c
 )
 add_library(${name} ${lib_type} ${${name}_SRC})
+target_link_libraries(${name} oskar_log)
 
 # Settings file library (Qt4 ini file loaded based)
 # -----------------------------------------------------------------------------
