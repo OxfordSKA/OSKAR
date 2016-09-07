@@ -383,18 +383,18 @@ void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
         return;
     }
 
+#ifdef _OPENMP
     if (!h->coords_only)
     {
-#ifdef _OPENMP
         /* Disable any nested parallelism. */
         omp_set_num_threads(1);
         omp_set_nested(0);
+    }
 #endif
 
-        /* Set the GPU to use. (Supposed to be a very low-overhead call.) */
-        if (device_id >= 0 && device_id < h->num_gpus)
-            oskar_device_set(h->gpu_ids[device_id], status);
-    }
+    /* Set the GPU to use. (Supposed to be a very low-overhead call.) */
+    if (device_id >= 0 && device_id < h->num_gpus)
+        oskar_device_set(h->gpu_ids[device_id], status);
 
     /* Clear the visibility block. */
     i_active = block_index % 2; /* Index of the active buffer. */

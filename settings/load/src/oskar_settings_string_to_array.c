@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ extern "C" {
 #ifdef _WIN32
 #define strtok_r(s,d,p) strtok_s(s,d,p)
 #else
-/* HACK(BM): Declare strtok_r to fix some issues on Wilkes using gcc 4.9.2 */
+/* Ensure function is declared for strange string.h header. */
 char* strtok_r(char*, const char*, char**);
 #endif
 
