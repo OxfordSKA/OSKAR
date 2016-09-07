@@ -31,8 +31,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* HACK(BM): Declare strtok_r to fix some issues on Wilkes using gcc 4.9.2 */
-char* strtok_r(char*, const char*, char**);
 
 
 #ifdef __cplusplus
@@ -41,6 +39,9 @@ extern "C" {
 
 #ifdef _WIN32
 #define strtok_r(s,d,p) strtok_s(s,d,p)
+#else
+/* HACK(BM): Declare strtok_r to fix some issues on Wilkes using gcc 4.9.2 */
+char* strtok_r(char*, const char*, char**);
 #endif
 
 #define DELIMITERS ", \t"
