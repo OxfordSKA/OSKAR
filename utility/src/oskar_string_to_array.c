@@ -29,9 +29,11 @@
 #include <oskar_string_to_array.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define _POSIX_C_SOURCE 200112L
-#define _GNU_SOURCE
 #include <string.h>
+
+/* HACK(BM): Declare strtok_r to fix some issues on Wilkes using gcc 4.9.2 */
+char* strtok_r(char*, const char*, char**);
+
 
 #ifdef __cplusplus
 extern "C" {
