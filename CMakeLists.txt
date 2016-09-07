@@ -81,9 +81,6 @@ if (CUDA_FOUND)
         oskar_binary
         cfitsio)
 
-    if (OSKAR_USE_LAPACK)
-        target_link_libraries(${libname} ${OSKAR_LAPACK})
-    endif ()
     if (MSVC)
         set_target_properties(${libname} PROPERTIES
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"

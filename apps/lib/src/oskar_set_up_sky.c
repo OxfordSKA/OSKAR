@@ -144,9 +144,6 @@ oskar_Sky* oskar_set_up_sky(const oskar_Settings_old* settings, oskar_Log* log,
     /* Print summary data. */
     oskar_log_message(log, 'M', 0, "Sky model summary");
     oskar_log_value(log, 'M', 1, "Num. sources", "%d", num_sources);
-#if defined(OSKAR_NO_LAPACK)
-    oskar_log_warning(log, "Extended sources disabled (LAPACK not found).");
-#endif
 
     /* Write text file. */
     filename = settings->sky.output_text_file;

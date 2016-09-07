@@ -22,6 +22,7 @@ set(math_SRC
     src/oskar_fit_ellipse.c
     src/oskar_gaussian.c
     src/oskar_healpix_npix_to_nside.c
+    src/oskar_lapack_subset.c
     src/oskar_linspace.c
     src/oskar_matrix_multiply.c
     src/oskar_meshgrid.c

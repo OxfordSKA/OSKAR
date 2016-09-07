@@ -178,11 +178,9 @@ void oskar_simulator_check_init(oskar_Simulator* h, int* status)
             oskar_sky_evaluate_relative_directions(h->sky_chunks[i],
                     ra0, dec0, status);
 
-#if !defined(OSKAR_NO_LAPACK)
             /* Evaluate extended source parameters. */
             oskar_sky_evaluate_gaussian_source_parameters(h->sky_chunks[i],
                     h->zero_failed_gaussians, ra0, dec0, &num_failed, status);
-#endif
         }
         if (num_failed > 0)
         {

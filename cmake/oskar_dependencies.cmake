@@ -8,25 +8,13 @@
 #   CUDA (>= 4.0)   (oskar, oskar_apps, OSKAR applications)
 #   OpenMP          (for multi-GPU support)
 #   Qt4 (>=4.6)     (oskar_apps, GUI, OSKAR applications)
-#   MKL             (oskar -> to enable extended sources)
-#   LAPACK          (oskar -> to enable extended sources)
 #   casacore        (oskar_ms)
 #
 # =============================================================================
 
-if (DEFINED LAPACK_LIB_DIR)
-    list(INSERT CMAKE_LIBRARY_PATH 0 ${LAPACK_LIB_DIR})
-endif()
-
 # ==== Find dependencies.
 find_package(CUDA 5.5)              # liboskar
 find_package(OpenMP)                # liboskar
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-    find_package(MKL)               # liboskar
-endif()
-if (NOT MKL_FOUND)
-    find_package(LAPACK)            # liboskar
-endif ()
 find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtNetwork) # liboskar_apps, apps
 # HACK for using Qt4 frameworks on OS X.
 # Avoids having to symlink headers and libraries from the Qt binary installer
@@ -66,28 +54,6 @@ if (CUDA_FOUND)
 else ()
     add_definitions(-DOSKAR_NO_CUDA)
 endif ()
-
-if (MKL_FOUND)
-    message("===============================================================================")
-    message("-- INFO: Using MKL for LAPACK.")
-    message("===============================================================================")
-    set(OSKAR_LAPACK ${MKL_LIBRARIES})
-    include_directories(${MKL_INCLUDE_DIR})
-    set(OSKAR_USE_LAPACK YES)
-    add_definitions(-DOSKAR_MKL_FOUND)
-else ()
-    if (LAPACK_FOUND)
-        set(OSKAR_LAPACK ${LAPACK_LIBRARIES})
-        set(OSKAR_USE_LAPACK YES)
-    endif ()
-endif ()
-
-if (NOT OSKAR_USE_LAPACK)
-    message("===============================================================================")
-    message("-- WARNING: LAPACK not found.")
-    message("===============================================================================")
-    add_definitions(-DOSKAR_NO_LAPACK)
-endif()
 
 if (NOT QT4_FOUND)
     message("===============================================================================")
@@ -178,9 +144,6 @@ message("=======================================================================
 # Optional verbose printing.
 if (BUILD_INFO)
 message("===============================================================================")
-if (LAPACK_FOUND)
-    message("-- INFO: LAPACK   : ${LAPACK_LIBRARIES}")
-endif ()
 if (CASACORE_FOUND)
     message("-- INFO: CASACORE : ${CASACORE_LIBRARIES}")
 endif()

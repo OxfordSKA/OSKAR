@@ -179,11 +179,9 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
     html.append("<li>NVIDIA CUDA "
                 "(<a href=\"http://www.nvidia.com/object/cuda_home.html\">"
                 "http://www.nvidia.com/object/cuda_home.html</a>)</li>");
-#ifndef OSKAR_NO_LAPACK
     html.append("<li>LAPACK "
                 "(<a href=\"http://www.netlib.org/lapack/\">"
                 "http://www.netlib.org/lapack/</a>)</li>");
-#endif
     html.append("<li>DIERCKX for surface fitting using splines "
                 "(<a href=\"http://netlib.org/dierckx/\">"
                 "http://netlib.org/dierckx/</a>)</li>");
