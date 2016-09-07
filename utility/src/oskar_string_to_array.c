@@ -29,6 +29,7 @@
 #include <oskar_string_to_array.h>
 #include <stdio.h>
 #include <stdlib.h>
+#define _GNU_SOURCE
 #include <string.h>
 
 #ifdef __cplusplus
@@ -136,4 +137,3 @@ size_t oskar_string_to_array_realloc_s(char* str, size_t* n, char*** data)
 #ifdef __cplusplus
 }
 #endif
-
