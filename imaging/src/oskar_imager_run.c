@@ -515,7 +515,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     oskar_mem_free(weight, status);
     oskar_ms_close(ms);
 #else
-    oskar_log_error(log, "OSKAR was compiled without Measurement Set support.");
+    oskar_log_error(h->log, "OSKAR was compiled without Measurement Set support.");
 #endif
 }
 
