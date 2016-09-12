@@ -215,7 +215,7 @@ class Imager(object):
     def get_plane_size(self):
         """Returns the required plane size.
 
-        This may be different to the image size, for example if using 
+        This may be different to the image size, for example if using
         W-projection. It will only be valid after a call to check_init().
 
         Returns:
@@ -454,7 +454,7 @@ class Imager(object):
         Args:
             kernel_type (str): Type of convolution kernel;
                 either 'Spheroidal' or 'Pillbox'.
-            support (int): Support size of kernel. 
+            support (int): Support size of kernel.
                 The kernel width is 2 * support + 1.
             oversample (int): Oversample factor used for look-up table.
         """
@@ -482,7 +482,7 @@ class Imager(object):
         """Sets the input visibility file or Measurement Set.
 
         Args:
-            filename (str): 
+            filename (str):
                 Path to input Measurement Set or OSKAR visibility file.
         """
         _imager_lib.set_input_file(self._capsule, filename)
@@ -653,7 +653,7 @@ class Imager(object):
                      weights_grid=None):
         """Updates the supplied plane with the supplied visibilities.
 
-        This is a low-level function that can be used to generate 
+        This is a low-level function that can be used to generate
         gridded visibilities if required.
 
         Call finalise_plane() to finalise the image after calling this function.
@@ -846,8 +846,8 @@ class Imager(object):
             tupple(gx, gy): where gx and gy are the pixel coordinates of each
             grid cell. gx and gy are 2d arrays of dimensions size x size.
         """
-        x = np.arange(-size // 2, size // 2) * grid_cellsize
-        gx, gy = np.meshgrid(-x, x)
+        x = numpy.arange(-size // 2, size // 2) * grid_cellsize
+        gx, gy = numpy.meshgrid(-x, x)
         return gx, gy
 
     @staticmethod
@@ -865,8 +865,8 @@ class Imager(object):
         """
         cell_size_rad = Imager.fov_to_cellsize(math.radians(fov_deg), im_size)
         cell_size_lm = math.sin(cell_size_rad)
-        x = np.arange(-im_size // 2, im_size // 2) * cell_size_lm
-        l, m = np.meshgrid(-x, x)
+        x = numpy.arange(-im_size // 2, im_size // 2) * cell_size_lm
+        l, m = numpy.meshgrid(-x, x)
         return l, m
 
     @staticmethod
