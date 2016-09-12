@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,6 +93,9 @@ TEST(fit_ellipse, test1)
     }
 
     // Compare results.
+    EXPECT_NEAR(maj_d, 0.3608619735, 1e-9);
+    EXPECT_NEAR(min_d, 0.0494223702, 1e-9);
+    EXPECT_NEAR(pa_d, -1.3865537748, 1e-9);
     EXPECT_NEAR(maj_d, maj_f, 1e-5);
     EXPECT_NEAR(min_d, min_f, 1e-5);
     EXPECT_NEAR(pa_d, pa_f, 1e-5);

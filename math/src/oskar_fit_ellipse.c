@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include <oskar_fit_ellipse.h>
 #include <oskar_matrix_multiply.h>
+#include <oskar_lapack_subset.h>
 
 #include <oskar_cmath.h>
 #include <string.h> /* For memset() */
@@ -38,22 +39,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#ifndef OSKAR_NO_LAPACK
-/* http://www.netlib.org/lapack/double/dgetrf.f */
-extern void dgetrf_(const long* m, const long* n, double* A, const long* lda,
-        long* ipiv, long* info);
-extern void sgetrf_(const long* m, const long* n, float* A, const long* lda,
-        long* ipiv, long* info);
-/* http://www.netlib.org/lapack/double/dgetrs.f */
-extern void dgetrs_(const char* trans, const long* n, const long* nrhs,
-        double* A, const long* lda, long* ipiv, double* B, const long* lba,
-        long* info);
-extern void sgetrs_(const char* trans, const long* n, const long* nrhs,
-        float* A, const long* lda, long* ipiv, float* B, const long* lba,
-        long* info);
-#endif
-
 
 /* Single precision. */
 void oskar_fit_ellipse_f(float* major, float* minor,
@@ -109,24 +94,17 @@ void oskar_fit_ellipse_f(float* major, float* minor,
             OSKAR_TRUE, OSKAR_FALSE, work1_X, work1_X, status);
     if (*status) return;
 
-#ifndef OSKAR_NO_LAPACK
     {
-        long ipiv[5], n, m = 5, lda = 5, ldb = 5, info = 0, nrhs = 1;
+        int ipiv[5], n, m = 5, lda = 5, ldb = 5, info = 0, nrhs = 1;
         char trans = 'N';
         /* Solve system of linear equations using LU factorisation in XX. */
         memset(ipiv, 0, sizeof(ipiv));
         n = num_points;
-        sgetrf_(&m, &n, work2_XX, &lda, ipiv, &info); /* LU factorisation. */
+        oskar_sgetrf(m, n, work2_XX, lda, ipiv, &info); /* LU factorisation. */
         if (info != 0)
             *status = OSKAR_ERR_ELLIPSE_FIT_FAILED;
-        sgetrs_(&trans, &m, &nrhs, work2_XX, &lda, ipiv, sumX, &ldb, &info);
-        if (info != 0)
-            *status = OSKAR_ERR_ELLIPSE_FIT_FAILED;
+        oskar_sgetrs(&trans, m, nrhs, work2_XX, lda, ipiv, sumX, ldb);
     }
-#else
-    *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-    return;
-#endif
 
     /* Extract resulting conic equation parameters from sumX. */
     a = sumX[0]; b = sumX[1]; c = sumX[2]; d = sumX[3]; e = sumX[4];
@@ -229,24 +207,17 @@ void oskar_fit_ellipse_d(double* major, double* minor,
             OSKAR_TRUE, OSKAR_FALSE, work1_X, work1_X, status);
     if (*status) return;
 
-#ifndef OSKAR_NO_LAPACK
     {
-        long ipiv[5], n, m = 5, lda = 5, ldb = 5, info = 0, nrhs = 1;
+        int ipiv[5], n, m = 5, lda = 5, ldb = 5, info = 0, nrhs = 1;
         char trans = 'N';
         /* Solve system of linear equations using LU factorisation in XX. */
         memset(ipiv, 0, sizeof(ipiv));
         n = num_points;
-        dgetrf_(&m, &n, work2_XX, &lda, ipiv, &info); /* LU factorisation. */
+        oskar_dgetrf(m, n, work2_XX, lda, ipiv, &info); /* LU factorisation. */
         if (info != 0)
             *status = OSKAR_ERR_ELLIPSE_FIT_FAILED;
-        dgetrs_(&trans, &m, &nrhs, work2_XX, &lda, ipiv, sumX, &ldb, &info);
-        if (info != 0)
-            *status = OSKAR_ERR_ELLIPSE_FIT_FAILED;
+        oskar_dgetrs(&trans, m, nrhs, work2_XX, lda, ipiv, sumX, ldb);
     }
-#else
-    *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-    return;
-#endif
 
     /* Extract resulting conic equation parameters from sumX. */
     a = sumX[0]; b = sumX[1]; c = sumX[2]; d = sumX[3]; e = sumX[4];

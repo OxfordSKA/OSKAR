@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +49,6 @@ extern "C" {
  *
  * There must be at least 5 points in the arrays for this function to work.
  *
- * It requires the LAPACK functions SGETRS and SGETRF.
- *
  * @param[out] major               Major axis of the fitted ellipse.
  * @param[out] minor               Minor axis of the fitted ellipse.
  * @param[out] position_angle_rad  Position angle of the ellipse, in radians.
@@ -76,8 +74,6 @@ void oskar_fit_ellipse_f(float* major, float* minor,
  * \p x and \p y.
  *
  * There must be at least 5 points in the arrays for this function to work.
- *
- * It requires the LAPACK functions DGETRS and DGETRF.
  *
  * @param[out] major               Major axis of the fitted ellipse.
  * @param[out] minor               Minor axis of the fitted ellipse.

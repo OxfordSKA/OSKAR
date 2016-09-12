@@ -111,7 +111,6 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
 
     if (*status) return;
 
-#if !defined(OSKAR_NO_LAPACK)
     /* Set the use extended flag if needed. */
     for (j = (*set_size-1 > 0) ? *set_size-1 : 0;
             j < *set_size + num_extra_models; ++j)
@@ -151,7 +150,6 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
             }
         }
     }
-#endif
 
     /* Update the set size */
     *set_size += num_extra_models;

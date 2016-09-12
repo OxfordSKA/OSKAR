@@ -2,7 +2,7 @@
 
 OSKAR is licensed under the terms of the Modified BSD License as follows:
 
-Copyright (c) 2011-2015, The University of Oxford
+Copyright (c) 2011-2016, The University of Oxford
 
 All rights reserved.
 
