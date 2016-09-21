@@ -13,6 +13,7 @@
 # =============================================================================
 
 # ==== Find dependencies.
+find_package(OpenCL)
 find_package(CUDA 5.5)              # liboskar
 find_package(OpenMP)                # liboskar
 find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtNetwork) # liboskar_apps, apps

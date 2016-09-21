@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,153 +42,56 @@
  */
 enum OSKAR_ERROR_CODES
 {
-    /* Indicates that no error has occurred. */
-    OSKAR_SUCCESS                      = 0,
+    OSKAR_SUCCESS                                      =  0,
+    OSKAR_ERR_EOF                                      = -1,
+    OSKAR_ERR_FILE_IO                                  = -2,
+    OSKAR_ERR_INVALID_ARGUMENT                         = -3,
+    OSKAR_ERR_FUNCTION_NOT_AVAILABLE                   = -4,
+    OSKAR_ERR_OUT_OF_RANGE                             = -5,
+    OSKAR_ERR_MEMORY_ALLOC_FAILURE                     = -6,
+    OSKAR_ERR_MEMORY_NOT_ALLOCATED                     = -7,
+    OSKAR_ERR_TYPE_MISMATCH                            = -8,
+    OSKAR_ERR_LOCATION_MISMATCH                        = -9,
+    OSKAR_ERR_DIMENSION_MISMATCH                       = -10,
+    OSKAR_ERR_VALUE_MISMATCH                           = -11,
+    OSKAR_ERR_BAD_DATA_TYPE                            = -12,
+    OSKAR_ERR_BAD_LOCATION                             = -13,
+    OSKAR_ERR_BAD_UNITS                                = -14,
+    OSKAR_ERR_CUDA_NOT_AVAILABLE                       = -15,
+    OSKAR_ERR_OPENCL_NOT_AVAILABLE                     = -16,
+    OSKAR_ERR_COMPUTE_DEVICES                          = -17,
 
-    /* Indicates that an end-of-file condition was encountered.
-     * This is compatible with the standard C EOF macro (-1). */
-    OSKAR_ERR_EOF                      = -1,
-
-    /* Indicates a file I/O error. */
-    OSKAR_ERR_FILE_IO                  = -2,
-
-    /* Could indicate that an invalid NULL pointer is passed to a function. */
-    OSKAR_ERR_INVALID_ARGUMENT         = -3,
-
-    /* Indicates that host memory allocation failed. */
-    OSKAR_ERR_MEMORY_ALLOC_FAILURE     = -4,
-
-    /* Indicates that an array has not been allocated
-     * (NULL pointer dereference). */
-    OSKAR_ERR_MEMORY_NOT_ALLOCATED     = -5,
-
-    /* Indicates that the data types used for an operation are incompatible. */
-    OSKAR_ERR_TYPE_MISMATCH            = -6,
-
-    /* Indicates that the data dimensions do not match. */
-    OSKAR_ERR_DIMENSION_MISMATCH       = -7,
-
-    /* Indicates that the memory pointer location is not supported. */
-    OSKAR_ERR_BAD_LOCATION             = -8,
-
-    /* Indicates that the data type is not supported. */
-    OSKAR_ERR_BAD_DATA_TYPE            = -9,
-
-    /* Indicates that the data type of a Jones matrix is not supported. */
-    OSKAR_ERR_BAD_JONES_TYPE           = -10,
-
-    /* Indicates that the memory location is out of range. */
-    OSKAR_ERR_OUT_OF_RANGE             = -11,
-
-    /* Indicates that the OSKAR version is not compatible. */
-    OSKAR_ERR_VERSION_MISMATCH         = -12,
-
-    /* Indicates that there is an error in units of some quantity. */
-    OSKAR_ERR_BAD_UNITS                = -13,
-
-    /* Indicates that arrays are in different locations. */
-    OSKAR_ERR_LOCATION_MISMATCH        = -14,
-
-    /* Indicates that spline coefficient computation failed. */
-    OSKAR_ERR_SPLINE_COEFF_FAIL        = -15,
-
-    /* Indicates that spline evaluation failed. */
-    OSKAR_ERR_SPLINE_EVAL_FAIL         = -16,
-
-    /* Indicates an inconsistent phase centre. */
-    OSKAR_ERR_PHASE_CENTRE_MISMATCH    = -17,
-
-    /* Indicates that there are not enough CUDA devices available. */
-    OSKAR_ERR_CUDA_DEVICES             = -18,
-
-    /* Indicates that the specified functionality isn't available for use. */
-    OSKAR_ERR_FUNCTION_NOT_AVAILABLE   = -19,
-
-    /* Indicates the fitting elliptical source failed. */
-    OSKAR_ERR_ELLIPSE_FIT_FAILED       = -20,
-
-    /* Indicates an invalid range selection. */
-    OSKAR_ERR_INVALID_RANGE            = -21,
-
-    /* Indicates coordinate type mismatch. */
-    OSKAR_ERR_COORD_TYPE_MISMATCH      = -23,
+    /* The following enumerators are under review... */
+    OSKAR_ERR_SPLINE_COEFF_FAIL                        = -18,
+    OSKAR_ERR_SPLINE_EVAL_FAIL                         = -19,
+    OSKAR_ERR_ELLIPSE_FIT_FAILED                       = -20,
+    OSKAR_ERR_SETTINGS                                 = -21,
+    OSKAR_ERR_SETTINGS_OBSERVATION                     = -22,
+    OSKAR_ERR_SETTINGS_TELESCOPE                       = -23,
+    OSKAR_ERR_SETTINGS_INTERFEROMETER                  = -24,
+    OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE            = -25,
+    OSKAR_ERR_SETTINGS_BEAM_PATTERN                    = -26,
+    OSKAR_ERR_SETTINGS_IMAGE                           = -27,
+    OSKAR_ERR_SETTINGS_IONOSPHERE                      = -28,
+    OSKAR_ERR_SETUP_FAIL                               = -30,
+    OSKAR_ERR_SETUP_FAIL_SKY                           = -31,
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE                     = -32,
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH    = -33,
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING = -34,
+    OSKAR_ERR_BAD_SKY_FILE                             = -35,
+    OSKAR_ERR_BAD_POINTING_FILE                        = -36,
+    OSKAR_ERR_BAD_GSM_FILE                             = -37,
 
     /*
-     * Codes -100 to -149 are reserved for binary file format errors.
+     * Codes -75 to -99 are reserved for settings errors.
+     *
+     * Codes -100 to -125 are reserved for binary format errors.
      * See oskar_binary.h
      */
 
-    /*
-     * Codes -150 to -199 are reserved for settings errors.
-     */
-
-    /* Indicates that CUDA was not found by the build system. */
-    OSKAR_ERR_CUDA_NOT_AVAILABLE       = -400,
-
-    /* Indicates an error relating to settings (in general). */
-    OSKAR_ERR_SETTINGS                 = -500,
-
-    /* Indicates an error relating to the simulator settings */
-    OSKAR_ERR_SETTINGS_SIMULATOR       = -501,
-
-    /* Indicates an error relating to the sky settings */
-    OSKAR_ERR_SETTINGS_SKY             = -502,
-
-    /* Indicates an error relating to the observation settings */
-    OSKAR_ERR_SETTINGS_OBSERVATION     = -503,
-
-    /* Indicates an error relating to the telescope model settings */
-    OSKAR_ERR_SETTINGS_TELESCOPE       = -504,
-
-    /* Indicates an error relating to the interferometer settings */
-    OSKAR_ERR_SETTINGS_INTERFEROMETER  = -505,
-
-    /* Indicates an error relating to the interferometer noise settings */
-    OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE  = -506,
-
-    /* Indicates an error relating to the beam pattern settings */
-    OSKAR_ERR_SETTINGS_BEAM_PATTERN    = -507,
-
-    /* Indicates an error relating to the image settings */
-    OSKAR_ERR_SETTINGS_IMAGE           = -508,
-
-    /* Indicates an error relating to ionospheric model settings */
-    OSKAR_ERR_SETTINGS_IONOSPHERE      = -509,
-
-    /* Indicates a failure to set up a model data structure */
-    OSKAR_ERR_SETUP_FAIL               = -600,
-
-    /* Indicates a failure to set up the telescope model */
-    OSKAR_ERR_SETUP_FAIL_TELESCOPE     = -700,
-
-    /* Indicates that the number of directories in the telescope model is
-     * inconsistent with the number that are listed in the layout file. */
-    OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH = -701,
-
-    /* Indicates that a config file is missing from a directory in the
-     * telescope model. */
-    OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING = -702,
-
-    /* Indicates a failure to set up the sky model */
-    OSKAR_ERR_SETUP_FAIL_SKY           = -800,
-
-    /* Indicates a badly formed pointing file. */
-    OSKAR_ERR_BAD_POINTING_FILE        = -900,
-
-    /* Indicates a badly formed global sky model file. */
-    OSKAR_ERR_BAD_GSM_FILE             = -910,
-
-    /* Indicates a badly formed global sky model file. */
-    OSKAR_ERR_BAD_SKY_FILE             = -911,
-
-    /* Indicates inconsistent reference frequencies. */
-    OSKAR_ERR_REF_FREQ_MISMATCH        = -920,
-
-    /* Indicates that an unknown error occurred. */
-    OSKAR_ERR_UNKNOWN                  = -1000,
-    OSKAR_FAIL                         = -1001
+    OSKAR_FAIL                                         = -126,
+    OSKAR_ERR_UNKNOWN                                  = -127
 };
-
 
 /**
  * @brief

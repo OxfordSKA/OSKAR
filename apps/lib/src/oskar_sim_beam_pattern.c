@@ -318,7 +318,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
     {
         oskar_log_error(log, "More CUDA devices were requested than found.");
         free_host_data(h, status);
-        *status = OSKAR_ERR_CUDA_DEVICES;
+        *status = OSKAR_ERR_COMPUTE_DEVICES;
         return;
     }
 

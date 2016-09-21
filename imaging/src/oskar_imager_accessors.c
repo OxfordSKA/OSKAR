@@ -313,7 +313,7 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
     {
         if (num > num_gpus_avail)
         {
-            *status = OSKAR_ERR_CUDA_DEVICES;
+            *status = OSKAR_ERR_COMPUTE_DEVICES;
             return;
         }
         h->num_gpus = num;
@@ -595,15 +595,17 @@ void oskar_imager_data_range(const int settings_range[2],
     if (settings_range[0] >= num_data_values ||
             settings_range[1] >= num_data_values)
     {
-        *status = OSKAR_ERR_INVALID_RANGE;
+        *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
     range[0] = settings_range[0] < 0 ? 0 : settings_range[0];
     range[1] = settings_range[1] < 0 ? num_data_values - 1 : settings_range[1];
     if (range[0] > range[1])
     {
-        *status = OSKAR_ERR_INVALID_RANGE;
-        return;
+        int t;
+        t = range[0];
+        range[0] = range[1];
+        range[1] = t;
     }
 }
 

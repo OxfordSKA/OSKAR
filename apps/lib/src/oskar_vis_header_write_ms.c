@@ -140,7 +140,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         /* Check the reference frequencies match. */
         if (fabs(oskar_ms_ref_freq_hz(ms) - ref_freq_hz) > 1e-10)
         {
-            *status = OSKAR_ERR_REF_FREQ_MISMATCH;
+            *status = OSKAR_ERR_VALUE_MISMATCH;
             oskar_ms_close(ms);
             return 0;
         }
@@ -149,7 +149,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         if (fabs(oskar_ms_phase_centre_ra_rad(ms) - ra_rad) > 1e-10 ||
                 fabs(oskar_ms_phase_centre_dec_rad(ms) - dec_rad) > 1e-10)
         {
-            *status = OSKAR_ERR_PHASE_CENTRE_MISMATCH;
+            *status = OSKAR_ERR_VALUE_MISMATCH;
             oskar_ms_close(ms);
             return 0;
         }

@@ -696,7 +696,7 @@ void oskar_simulator_set_gpus(oskar_Simulator* h, int num,
         if (num > num_gpus_avail)
         {
             oskar_log_error(h->log, "More GPUs were requested than found.");
-            *status = OSKAR_ERR_CUDA_DEVICES;
+            *status = OSKAR_ERR_COMPUTE_DEVICES;
             return;
         }
         h->num_gpus = num;

@@ -278,7 +278,7 @@ static void evaluate_jones_Z_station(oskar_Mem* Z_station,
     }
     else
     {
-        *status = OSKAR_ERR_BAD_JONES_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
 }
 

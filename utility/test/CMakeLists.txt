@@ -24,8 +24,20 @@ set(${name}_SRC
     Test_Timer.cpp
 )
 
+if (OpenCL_FOUND)
+    list(APPEND ${name}_SRC
+        Test_cl.cpp
+    )
+endif()
+
 add_executable(${name} ${${name}_SRC})
-target_link_libraries(${name} oskar gtest)
+
+if (OpenCL_FOUND)
+    target_link_libraries(${name} oskar gtest ${OpenCL_LIBRARIES})
+else()
+    target_link_libraries(${name} oskar gtest)
+endif()
+
 set_target_properties(${name} PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")

@@ -152,7 +152,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
     /* Check that the data is of the right type. */
     if (!oskar_type_is_matrix(jones_type))
     {
-        *status = OSKAR_ERR_BAD_JONES_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
     if (base_type != oskar_mem_precision(ra_rad) ||

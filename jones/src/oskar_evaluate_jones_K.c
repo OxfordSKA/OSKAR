@@ -169,7 +169,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
     if (!oskar_type_is_complex(jones_type) ||
             oskar_type_is_matrix(jones_type))
     {
-        *status = OSKAR_ERR_BAD_JONES_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
     if (base_type != oskar_mem_type(l) || base_type != oskar_mem_type(m) ||
