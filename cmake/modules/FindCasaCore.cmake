@@ -57,9 +57,11 @@ endif ()
 # mmm this only works by luck by the looks of things...!
 if (LAPACK_FOUND)
     set(CASACORE_LINKER_FLAGS ${LAPACK_LINKER_FLAGS})
-    find_path(CASACORE_INCLUDE_DIR casacore 
+    find_path(CASACORE_INCLUDE_DIR MeasurementSets.h
         HINTS ${CASACORE_INC_DIR}
-        PATH_SUFFIXES include)
+        PATH_SUFFIXES casacore/ms ms)
+    get_filename_component(CASACORE_INCLUDE_DIR ${CASACORE_INCLUDE_DIR} DIRECTORY)
+    get_filename_component(CASACORE_INCLUDE_DIR ${CASACORE_INCLUDE_DIR} DIRECTORY)
     foreach (module ${casacore_modules})
         find_library(CASACORE_LIBRARY_${module} NAMES ${module}
            HINTS ${CASACORE_LIB_DIR}
