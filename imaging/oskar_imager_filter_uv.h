@@ -26,74 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_H_
-#define OSKAR_IMAGER_H_
+#ifndef OSKAR_IMAGER_FILTER_UV_H_
+#define OSKAR_IMAGER_FILTER_UV_H_
 
 /**
- * @file oskar_imager.h
+ * @file oskar_imager_filter_uv.h
  */
 
-/* Public interface. */
+#include <oskar_global.h>
+#include <oskar_mem.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_Imager;
-#ifndef OSKAR_IMAGER_TYPEDEF_
-#define OSKAR_IMAGER_TYPEDEF_
-typedef struct oskar_Imager oskar_Imager;
-#endif /* OSKAR_IMAGER_TYPEDEF_ */
-
-enum OSKAR_IMAGE_TYPE
-{
-    OSKAR_IMAGE_TYPE_STOKES, /* IQUV */
-    OSKAR_IMAGE_TYPE_I,
-    OSKAR_IMAGE_TYPE_Q,
-    OSKAR_IMAGE_TYPE_U,
-    OSKAR_IMAGE_TYPE_V,
-    OSKAR_IMAGE_TYPE_LINEAR, /* all linear polarisations XX,XY,YX,YY */
-    OSKAR_IMAGE_TYPE_XX,
-    OSKAR_IMAGE_TYPE_YY,
-    OSKAR_IMAGE_TYPE_XY,
-    OSKAR_IMAGE_TYPE_YX,
-    OSKAR_IMAGE_TYPE_PSF
-};
-
-enum OSKAR_IMAGE_ALGORITHM
-{
-    OSKAR_ALGORITHM_FFT,
-    OSKAR_ALGORITHM_DFT_2D,
-    OSKAR_ALGORITHM_DFT_3D,
-    OSKAR_ALGORITHM_WPROJ,
-    OSKAR_ALGORITHM_AWPROJ
-};
-
-enum OSKAR_IMAGE_WEIGHTING
-{
-    OSKAR_WEIGHTING_NATURAL,
-    OSKAR_WEIGHTING_RADIAL,
-    OSKAR_WEIGHTING_UNIFORM,
-    OSKAR_WEIGHTING_GRIDLESS_UNIFORM
-};
+/**
+ * @brief
+ * Filters supplied visibility data using the baseline UV range.
+ *
+ * @details
+ * Filters supplied visibility data using the baseline UV range,
+ * if it has been set. If not set, this function returns immediately.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in,out] num_vis    On input, number of supplied visibilities;
+ *                           on output, number of visibilities remaining.
+ * @param[in,out] uu         Baseline uu coordinates, in wavelengths.
+ * @param[in,out] vv         Baseline vv coordinates, in wavelengths.
+ * @param[in,out] ww         Baseline ww coordinates, in wavelengths.
+ * @param[in,out] amp        Baseline complex visibility amplitudes.
+ * @param[in,out] weight     Baseline visibility weights.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_imager_filter_uv(oskar_Imager* h, size_t* num_vis, oskar_Mem* uu,
+        oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amp, oskar_Mem* weight,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#include <oskar_imager_accessors.h>
-#include <oskar_imager_check_init.h>
-#include <oskar_imager_create.h>
-#include <oskar_imager_filter_uv.h>
-#include <oskar_imager_finalise.h>
-#include <oskar_imager_free.h>
-#include <oskar_imager_linear_to_stokes.h>
-#include <oskar_imager_reset_cache.h>
-#include <oskar_imager_rotate_coords.h>
-#include <oskar_imager_rotate_vis.h>
-#include <oskar_imager_run.h>
-#include <oskar_imager_select_coords.h>
-#include <oskar_imager_select_vis.h>
-#include <oskar_imager_update.h>
-
-#endif /* OSKAR_IMAGER_H_ */
+#endif /* OSKAR_IMAGER_FILTER_UV_H_ */

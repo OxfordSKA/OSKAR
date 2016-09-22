@@ -22,6 +22,9 @@
     * Added option to use natural, radial or uniform visibility weighting
       when making images.
 
+    * Added option to imager to filter input by UV baseline length,
+      in wavelengths.
+
     * Fix to ensure pixel coordinates are consistent between
       the DFT and FFT algorithms.
 

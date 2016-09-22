@@ -506,6 +506,18 @@ void oskar_imager_set_time_start(oskar_Imager* h, int value)
 }
 
 
+void oskar_imager_set_uv_filter_max(oskar_Imager* h, double max_wavelength)
+{
+    h->uv_filter_max = max_wavelength;
+}
+
+
+void oskar_imager_set_uv_filter_min(oskar_Imager* h, double min_wavelength)
+{
+    h->uv_filter_min = min_wavelength;
+}
+
+
 void oskar_imager_set_vis_frequency(oskar_Imager* h,
         double ref_hz, double inc_hz, int num, int* status)
 {
@@ -573,6 +585,18 @@ int oskar_imager_time_snapshots(const oskar_Imager* h)
 int oskar_imager_time_start(const oskar_Imager* h)
 {
     return h->time_range[0];
+}
+
+
+double oskar_imager_uv_filter_max(const oskar_Imager* h)
+{
+    return h->uv_filter_max;
+}
+
+
+double oskar_imager_uv_filter_min(const oskar_Imager* h)
+{
+    return h->uv_filter_min;
 }
 
 

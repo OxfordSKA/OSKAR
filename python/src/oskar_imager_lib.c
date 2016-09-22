@@ -905,6 +905,30 @@ static PyObject* set_time_start(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* set_uv_filter_max(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    double value = 0.0;
+    if (!PyArg_ParseTuple(args, "Od", &capsule, &value)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_uv_filter_max(h, value);
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_uv_filter_min(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    double value = 0.0;
+    if (!PyArg_ParseTuple(args, "Od", &capsule, &value)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_uv_filter_min(h, value);
+    return Py_BuildValue("");
+}
+
+
 static PyObject* set_vis_frequency(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -1291,6 +1315,26 @@ fail:
 }
 
 
+static PyObject* uv_filter_max(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    return Py_BuildValue("d", oskar_imager_uv_filter_max(h));
+}
+
+
+static PyObject* uv_filter_min(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    return Py_BuildValue("d", oskar_imager_uv_filter_min(h));
+}
+
+
 static PyObject* weighting(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -1561,6 +1605,10 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "set_time_snapshots(value)"},
         {"set_time_start", (PyCFunction)set_time_start,
                 METH_VARARGS, "set_time_start(value)"},
+        {"set_uv_filter_max", (PyCFunction)set_uv_filter_max,
+                METH_VARARGS, "set_uv_filter_max(max_wavelengths)"},
+        {"set_uv_filter_min", (PyCFunction)set_uv_filter_min,
+                METH_VARARGS, "set_uv_filter_min(min_wavelengths)"},
         {"set_vis_frequency", (PyCFunction)set_vis_frequency, METH_VARARGS,
                 "set_vis_frequency(ref_hz, inc_hz, num_channels)"},
         {"set_vis_phase_centre", (PyCFunction)set_vis_phase_centre,
@@ -1581,6 +1629,10 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "update_from_block(vis_header, vis_block)"},
         {"update_plane", (PyCFunction)update_plane, METH_VARARGS,
                 "update_plane(uu, vv, ww, amps, weight, plane, plane_norm)"},
+        {"uv_filter_max", (PyCFunction)uv_filter_max,
+                METH_VARARGS, "uv_filter_max()"},
+        {"uv_filter_min", (PyCFunction)uv_filter_min,
+                METH_VARARGS, "uv_filter_min()"},
         {"weighting", (PyCFunction)weighting, METH_VARARGS, "weighting()"},
         {NULL, NULL, 0, NULL}
 };

@@ -74,6 +74,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     oskar_imager_set_time_start(h, 0);
     oskar_imager_set_time_end(h, -1);
     oskar_imager_set_time_snapshots(h, 0);
+    oskar_imager_set_uv_filter_max(h, -1.0);
     oskar_imager_set_image_type(h, "I", status);
     oskar_imager_set_algorithm(h, "FFT", status);
     oskar_imager_set_weighting(h, "Natural", status);

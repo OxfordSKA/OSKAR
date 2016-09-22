@@ -642,6 +642,33 @@ void oskar_imager_set_time_start(oskar_Imager* h, int value);
 
 /**
  * @brief
+ * Sets the maximum UV baseline length to image.
+ *
+ * @details
+ * Sets the maximum UV baseline length to image, in wavelengths.
+ * A value less than 0 means no maximum.
+ *
+ * @param[in,out] h               Handle to imager.
+ * @param[in]     max_wavelength  Maximum UV distance, in wavelengths.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_uv_filter_max(oskar_Imager* h, double max_wavelength);
+
+/**
+ * @brief
+ * Sets the minimum UV baseline length to image.
+ *
+ * @details
+ * Sets the minimum UV baseline length to image, in wavelengths.
+ *
+ * @param[in,out] h               Handle to imager.
+ * @param[in]     min_wavelength  Minimum UV distance, in wavelengths.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_uv_filter_min(oskar_Imager* h, double min_wavelength);
+
+/**
+ * @brief
  * Sets the visibility start frequency.
  *
  * @details
@@ -771,6 +798,30 @@ int oskar_imager_time_snapshots(const oskar_Imager* h);
  */
 OSKAR_EXPORT
 int oskar_imager_time_start(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the maximum UV baseline length to image.
+ *
+ * @details
+ * Returns the maximum UV baseline length to image, in wavelengths.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+double oskar_imager_uv_filter_max(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the minimum UV baseline length to image.
+ *
+ * @details
+ * Returns the minimum UV baseline length to image, in wavelengths.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+double oskar_imager_uv_filter_min(const oskar_Imager* h);
 
 /**
  * @brief

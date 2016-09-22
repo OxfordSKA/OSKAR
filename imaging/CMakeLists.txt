@@ -27,6 +27,7 @@ set(${libname}_SRC
     src/oskar_imager_accessors.c
     src/oskar_imager_check_init.c
     src/oskar_imager_create.c
+    src/oskar_imager_filter_uv.c
     src/oskar_imager_finalise.c
     src/oskar_imager_free.c
     src/oskar_imager_linear_to_stokes.c

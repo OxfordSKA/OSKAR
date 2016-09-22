@@ -256,6 +256,22 @@ class Imager(object):
         """
         return _imager_lib.time_start(self._capsule)
 
+    def get_uv_filter_max(self):
+        """Returns the maximum UV baseline length to image, in wavelengths.
+
+        Returns:
+            float: Maximum UV baseline length to image, in wavelengths.
+        """
+        return _imager_lib.uv_filter_max(self._capsule)
+
+    def get_uv_filter_min(self):
+        """Returns the minimum UV baseline length to image, in wavelengths.
+
+        Returns:
+            float: Minimum UV baseline length to image, in wavelengths.
+        """
+        return _imager_lib.uv_filter_min(self._capsule)
+
     def get_weighting(self):
         """Returns a string describing the weighting scheme.
 
@@ -546,6 +562,25 @@ class Imager(object):
         """
         _imager_lib.set_time_start(self._capsule, value)
 
+    def set_uv_filter_max(self, max_wavelength):
+        """Sets the maximum UV baseline length to image, in wavelengths.
+
+        A value less than zero means no maximum (i.e. all baseline
+        lengths are allowed).
+
+        Args:
+            max_wavelength (float): Maximum UV distance, in wavelengths.
+        """
+        _imager_lib.set_uv_filter_max(self._capsule, max_wavelength)
+
+    def set_uv_filter_min(self, min_wavelength):
+        """Sets the minimum UV baseline length to image, in wavelengths.
+
+        Args:
+            min_wavelength (float): Minimum UV distance, in wavelengths.
+        """
+        _imager_lib.set_uv_filter_min(self._capsule, min_wavelength)
+
     def set_vis_frequency(self, ref_hz, inc_hz=0.0, num_channels=1):
         """Sets the visibility start frequency.
 
@@ -713,6 +748,8 @@ class Imager(object):
     time_end = property(get_time_end, set_time_end)
     time_snapshots = property(get_time_snapshots, set_time_snapshots)
     time_start = property(get_time_start, set_time_start)
+    uv_filter_max = property(get_uv_filter_max, set_uv_filter_max)
+    uv_filter_min = property(get_uv_filter_min, set_uv_filter_min)
     weighting = property(get_weighting, set_weighting)
     wprojplanes = property(get_num_w_planes, set_num_w_planes)
 

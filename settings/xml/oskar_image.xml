@@ -76,6 +76,14 @@
         <type name="IntRangeExt" default="max">0,MAX,max</type>
         <desc>The end time index to include in the image or image cube.</desc>
     </s>
+    <s k="uv_filter_min"><label>UV filter min [wavelengths]</label>
+        <type name="UnsignedDouble" default="0.0"/>
+        <desc>The minimum UV baseline length to image, in wavelengths.</desc>
+    </s>
+    <s k="uv_filter_max"><label>UV filter max [wavelengths]</label>
+        <type name="DoubleRangeExt" default="max">0,MAX,max</type>
+        <desc>The maximum UV baseline length to image, in wavelengths.</desc>
+    </s>
     <s k="algorithm"><label>Algorithm</label>
         <type name="OptionList" default="FFT">FFT, DFT 2D, DFT 3D, W-projection</type>
         <desc>The type of transform used to generate the image.</desc>

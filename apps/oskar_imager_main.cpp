@@ -53,6 +53,7 @@ using std::pair;
 int main(int argc, char** argv)
 {
     int e = 0, end, prec;
+    double uv_max;
     vector<pair<string, string> > failed_keys;
 
     oskar_OptionParser opt("oskar_imager", oskar_version_string());
@@ -110,6 +111,10 @@ int main(int argc, char** argv)
     oskar_imager_set_time_start(h, s.to_int("time_start", &e));
     end = s.starts_with("time_end", "max", &e) ? -1 : s.to_int("time_end", &e);
     oskar_imager_set_time_end(h, end);
+    oskar_imager_set_uv_filter_min(h, s.to_double("uv_filter_min", &e));
+    uv_max = s.starts_with("uv_filter_max", "max", &e) ? -1.0 :
+            s.to_double("uv_filter_max", &e);
+    oskar_imager_set_uv_filter_max(h, uv_max);
     oskar_imager_set_algorithm(h, s.to_string("algorithm", &e).c_str(), &e);
     oskar_imager_set_weighting(h, s.to_string("weighting", &e).c_str(), &e);
     if (s.starts_with("algorithm", "FFT", &e) ||

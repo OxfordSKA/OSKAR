@@ -269,6 +269,10 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
                     *status = OSKAR_ERR_DIMENSION_MISMATCH;
                 }
 
+                /* Apply baseline length filter if required. */
+                oskar_imager_filter_uv(h, &num_vis, h->uu_im, h->vv_im,
+                        h->ww_im, h->vis_im, h->weight_im, status);
+
                 /* Update this image plane with the visibilities. */
                 plane = h->im_num_pols * (t * h->im_num_channels + c) + p;
                 if (h->coords_only)
@@ -299,7 +303,7 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
 {
     oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
     const oskar_Mem *pu, *pv, *pw, *pa, *ph;
-    if (*status) return;
+    if (*status || num_vis == 0) return;
 
     /* Convert precision of input data if required. */
     pu = uu; pv = vv; pw = ww; ph = weight;
