@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_ELEMENT_TYPES_H_
-#define OSKAR_TELESCOPE_LOAD_ELEMENT_TYPES_H_
+#ifndef OSKAR_TELESCOPE_LOADER_NOISE_H_
+#define OSKAR_TELESCOPE_LOADER_NOISE_H_
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-class TelescopeLoadElementTypes : public oskar_TelescopeLoadAbstract
+
+class TelescopeLoaderNoise : public oskar_TelescopeLoadAbstract
 {
 public:
-    TelescopeLoadElementTypes() {}
+    TelescopeLoaderNoise();
+    ~TelescopeLoaderNoise();
 
-    virtual ~TelescopeLoadElementTypes() {}
-
-    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
-            int num_subdirs, std::map<std::string, std::string>& filemap,
-            int* status);
-
-    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
-            int num_subdirs, int depth,
+    void load(oskar_Telescope* telescope, const oskar_Dir& cwd, int num_subdirs,
             std::map<std::string, std::string>& filemap, int* status);
+
+    void load(oskar_Station* station, const oskar_Dir& cwd, int num_subdirs,
+            int depth, std::map<std::string, std::string>& filemap,
+            int* status);
 
     virtual std::string name() const;
 
 private:
-    static const std::string element_types_file;
+    // Updates set of files to load.
+    void update_map(std::map<std::string, std::string>& filemap,
+            const oskar_Dir& cwd);
+
+    // Obtains the noise RMS values and sets then into the telescope model.
+    void set_noise_rms(oskar_Station* model,
+            const std::map<std::string, std::string>& filemap, int* status);
+
+private:
+    enum FileIds_ { FREQ, RMS };
+    oskar_Mem* freqs_;
+    oskar_Telescope* telescope_;
+    std::map<FileIds_, std::string> files_;
 };
 
-#endif /* OSKAR_TELESCOPE_LOAD_ELEMENT_TYPES_H_ */
+#endif /* OSKAR_TELESCOPE_LOADER_NOISE_H_ */

@@ -95,6 +95,7 @@ const char* oskar_get_error_string(int error)
                 "telescope model directory tree";
     case OSKAR_ERR_BAD_SKY_FILE:           return "bad OSKAR sky model file";
     case OSKAR_ERR_BAD_POINTING_FILE:      return "bad pointing file";
+    case OSKAR_ERR_BAD_COORD_FILE:         return "bad coordinate file";
     case OSKAR_ERR_BAD_GSM_FILE:           return "bad Global Sky Model file";
 
     /* OSKAR binary file errors. */

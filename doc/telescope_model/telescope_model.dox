@@ -115,6 +115,12 @@ it is sufficient to specify only one station directory at each level:
 This section shows the names of files that may be present in the various
 directories of the telescope model.
 
+\par position.txt
+Centre reference position of telescope array.<br>
+<b>See</b> \ref telescope_position <br>
+<b>Required:</b> Yes.<br>
+<b>Allowed locations:</b> Telescope model root directory.
+
 \subsubsection telescope_element_data Element Data
 
 \par layout.txt
@@ -198,14 +204,25 @@ Flux density RMS noise values, in Jy, as a function of frequency.<br>
 <b>Allowed locations:</b> Telescope model root directory, or top-level
 station directory. (Inherited.)
 
-Fields in text files can be space-separated and/or comma-separated. 
-Characters appearing after a hash ('#') symbol are treated as comments, 
-and any further characters on that line are ignored. 
+Fields in text files can be space-separated and/or comma-separated.
+Characters appearing after a hash ('#') symbol are treated as comments,
+and any further characters on that line are ignored.
 Empty lines are also ignored.
 
 \latexonly
 \newpage
 \endlatexonly
+
+\section telescope_position Position File
+
+The top-level "position.txt" file must specify the longitude and latitude
+of the telescope origin. It must contain one line with two or three numbers:
+
+| Column | Description                            | Comment
+| ------ | -------------------------------------- | ---------------------------
+| 1      | WGS84 longitude, in degrees            | Required
+| 2      | WGS84 latitude, in degrees             | Required
+| 3      | Altitude, in metres                    | Optional (default 0.0)
 
 \section telescope_layout_files Layout Files
 
@@ -218,15 +235,15 @@ The top-level "layout.txt" file contains a table of ASCII text to represent
 station positions relative to the centre of the interferometer array.
 Each line contains up to six values, which correspond to positions
 represented as horizontal (x, y, z) coordinates in metres relative to a
-local tangent (horizon) plane, where x is towards geographic east, y is towards 
-geographic north, and z is towards the local zenith. (The telescope centre 
-position on Earth is specified using longitude and latitude values in the 
+local tangent (horizon) plane, where x is towards geographic east, y is towards
+geographic north, and z is towards the local zenith. (The telescope centre
+position on Earth is specified using longitude and latitude values in the
 main OSKAR settings file, which is described in a separate document.)
 
 Coordinate errors can also be specified using optional columns.
 The first three columns are the "measured" positions, while
 the "true" positions are obtained by adding the supplied offsets to the
-measured values. Coordinates are given in metres. 
+measured values. Coordinates are given in metres.
 In order, the parameter columns are:
 
 | Column | Description                            | Comment
@@ -243,7 +260,7 @@ In order, the parameter columns are:
 Many radio interferometers specify station positions in Earth-centred
 coordinates. It is possible to do the same in OSKAR by using a file
 named "layout_ecef.txt" instead of "layout.txt" in the top-level
-telescope directory. Coordinates are given in metres. 
+telescope directory. Coordinates are given in metres.
 In order, the parameter columns are:
 
 | Column | Description                                         | Comment
@@ -265,17 +282,17 @@ The format of the element layout file is the same as that used for the
 telescope-level station coordinates in the horizon frame. It is not possible
 to use Earth-centred coordinates to specify element locations within a station.
 
-\note The station layouts are defined with respect to the plane of 
-the station platform. Use caution if the mount type of the station 
-platform is not 'Fixed', as these coordinates will then not correspond 
+\note The station layouts are defined with respect to the plane of
+the station platform. Use caution if the mount type of the station
+platform is not 'Fixed', as these coordinates will then not correspond
 to geographic directions.
 
 \section telescope_element_types  Element Types
 
 In each station directory, there may be optionally an "element_types.txt"
 file to specify the type of each element in the station. This type index is
-used in conjunction with element pattern data to select the correct file 
-of fitted coefficients or functional type. If the element types file is 
+used in conjunction with element pattern data to select the correct file
+of fitted coefficients or functional type. If the element types file is
 omitted, all elements have an implicit type of 0.
 
 In order, the parameter columns are:
@@ -321,10 +338,10 @@ deviations \f$ G_{\rm std} \f$  and \f$ \phi_{\rm std} \f$ respectively.
 
 \section telescope_element_apodisation Element Apodisation Files
 
-In each station directory, there may be optionally an "apodisation.txt" 
-(or "apodization.txt") file to specify additional complex multiplicative 
-beamforming weights to modify the shape of the station beam. If present, 
-these weights are multiplied with the DFT weights calculated for the beam 
+In each station directory, there may be optionally an "apodisation.txt"
+(or "apodization.txt") file to specify additional complex multiplicative
+beamforming weights to modify the shape of the station beam. If present,
+these weights are multiplied with the DFT weights calculated for the beam
 direction required at each time-step.
 
 In order, the parameter columns are:
@@ -363,10 +380,10 @@ In each station directory, there may be optionally a "mount_type.txt"
 file to specify the mount type of the station platform.
 
 Allowed types are 'Fixed' (where the elements are fixed to the
-ground, as in an aperture array), 'Alt-az' (where the elements are mounted on 
-a platform that tracks the sky relative to the horizon) or 'Equatorial' (where 
-the elements are mounted on a platform that tracks the sky relative to the 
-equator). Only the first letter of each type is checked. 
+ground, as in an aperture array), 'Alt-az' (where the elements are mounted on
+a platform that tracks the sky relative to the horizon) or 'Equatorial' (where
+the elements are mounted on a platform that tracks the sky relative to the
+equator). Only the first letter of each type is checked.
 
 If the file is omitted, the station platform has a mount type of 'Fixed'.
 
@@ -385,9 +402,9 @@ assumed that the station can form a beam anywhere on the sky. If the file is
 present, then the nearest permitted direction to the computed phase centre
 will be selected for each time step.
 
-\note The permitted beam directions are defined with respect to the plane of 
-the station platform. Use caution if the mount type of the station 
-platform is not 'Fixed', as these angles will then not correspond to azimuth 
+\note The permitted beam directions are defined with respect to the plane of
+the station platform. Use caution if the mount type of the station
+platform is not 'Fixed', as these angles will then not correspond to azimuth
 and elevation in the normal sense.
 
 In order, the parameter columns are:
@@ -407,9 +424,9 @@ In order, the parameter columns are:
 
 Numerically-defined antenna element pattern data can be used for the
 simulation. OSKAR currently supports the loading of ASCII text files produced
-by the CST (Computer Simulation Technology) software package. Since 
-version 2.7.0, either the theta-phi or the Ludwig-3 polarisation system can 
-be used to represent the data. These files must contain eight columns, 
+by the CST (Computer Simulation Technology) software package. Since
+version 2.7.0, either the theta-phi or the Ludwig-3 polarisation system can
+be used to represent the data. These files must contain eight columns,
 in the following order:
 
 -# Theta [deg]
@@ -423,7 +440,7 @@ in the following order:
 
 (Columns marked * are ignored during the load, but must still be present.)
 
-Ludwig-3-format data are detected by the presence of the word "Horiz" on the 
+Ludwig-3-format data are detected by the presence of the word "Horiz" on the
 first (header) line of the file; otherwise, the theta-phi system is assumed.
 
 Since version 2.6.0, "unpolarised" (scalar) numerical element pattern data
@@ -451,7 +468,7 @@ element_pattern_fit_[x|y|scalar]_<element type index>_<frequency in MHz>.bin
 \endverbatim
 
 <b>The element type index should be 0 unless there is more than one type of
-element in the station</b> (as specified in the station's "element_types.txt"), 
+element in the station</b> (as specified in the station's "element_types.txt"),
 and the frequency is the frequency in MHz for which
 the element pattern data are valid: so, for example,
 <tt>element_pattern_fit_x_0_600.bin</tt> would contain fitted
@@ -472,14 +489,14 @@ parameters (adjustable using the OSKAR settings file), <b>it is essential that
 each fitted surface is inspected graphically to ensure that there are no
 artefacts introduced by the fitting process</b>. This can be done by saving a
 FITS image of the element pattern (created by evaluating the fitted
-coefficients) by making an image of the station beam from a single-element 
+coefficients) by making an image of the station beam from a single-element
 station.
 
 
 \subsection telescope_element_patterns_functional Functional Element Patterns
 
 Since version 2.7.0, functionally-defined element patterns can be specified
-for a given element type, so that functional and numerical elements can be 
+for a given element type, so that functional and numerical elements can be
 mixed within a station.
 
 To be recognised and loaded, the functional element data must be supplied in
@@ -490,32 +507,32 @@ element_pattern_[x|y]_<element type index>.txt
 \endverbatim
 
 <b>The element type index should be 0 unless there is more than one type of
-element in the station</b> (as specified in the station's "element_types.txt"): 
-so, for example, <tt>element_pattern_x_1.txt</tt> would contain the functional 
-pattern for the <i>second</i> type of X-dipole (and for this to actually be 
-used in a simulation for this example, at least one element in the station 
-would need to have a type index of 1 rather than 0, where type 0 represents 
+element in the station</b> (as specified in the station's "element_types.txt"):
+so, for example, <tt>element_pattern_x_1.txt</tt> would contain the functional
+pattern for the <i>second</i> type of X-dipole (and for this to actually be
+used in a simulation for this example, at least one element in the station
+would need to have a type index of 1 rather than 0, where type 0 represents
 the default element type).
 
-The content of the file must be a single line, which can contain 
+The content of the file must be a single line, which can contain
 columns in the following order:
 
 - <b>Element base type code.</b> <br>
-  This is the base type of the element pattern. Currently supported type 
+  This is the base type of the element pattern. Currently supported type
   codes are 'I' (for isotropic) or 'D' (for dipole).
 - <b>(For a dipole element) The length of the dipole.</b>
 - <b>(For a dipole element) The dipole length unit code.</b><br>
   Supported type codes are 'M' for metres or 'W' for wavelengths.
 - <b>Taper type code.</b><br>
-  This is the type of taper applied on top of the base type. Currently 
-  supported type codes are 'N' (no taper; the default), 'C' (cosine) 
+  This is the type of taper applied on top of the base type. Currently
+  supported type codes are 'N' (no taper; the default), 'C' (cosine)
   or 'G' (Gaussian).
 - <b>(For a cosine taper) The power of the cosine.</b>
-- <b>(For a Gaussian taper) The FWHM of the Gaussian, in degrees, at the 
+- <b>(For a Gaussian taper) The FWHM of the Gaussian, in degrees, at the
   reference frequency.</b>
 - <b>(For a Gaussian taper) The reference frequency, in Hz.</b>
 
-<b> Note that if a column is not relevant for a particular option, it must be 
+<b> Note that if a column is not relevant for a particular option, it must be
 omitted.</b>
 
 These files define the patterns used for the nominal X- and Y-dipoles.
@@ -523,14 +540,14 @@ The location of these files defines their scope: if placed in the top-level
 directory, then they are used for all stations; if placed in a station
 directory, they are used only for that station.
 
-If no element pattern is specified for a station, the default behaviour is 
+If no element pattern is specified for a station, the default behaviour is
 to use an un-tapered half-wavelength dipole.
 
 \subsubsection telescope_element_patterns_examples Examples
 
-An isotropic (unpolarised) element pattern with a Gaussian FWHM taper 
-of 20 degrees at 100 MHz would specify <tt>I G 20.0 100e6</tt>, while a 
-half-wavelength dipole with a \f$\cos^{2}\f$ taper would specify 
+An isotropic (unpolarised) element pattern with a Gaussian FWHM taper
+of 20 degrees at 100 MHz would specify <tt>I G 20.0 100e6</tt>, while a
+half-wavelength dipole with a \f$\cos^{2}\f$ taper would specify
 <tt>D&nbsp;0.5&nbsp;W&nbsp;C&nbsp;2.0</tt>.
 
 
@@ -645,16 +662,17 @@ character are treated as comments, and empty lines are ignored.
 <tr><td>7</td><td>2015-05-16</td>
     <td>[2.6.0] Updated description of numerical element pattern data to
     allow for scalar-only element responses. Updated description of
-    telescope layout files to allow for station position errors. Added section 
-    to describe element feed angles and removed old "orientation.txt" file 
+    telescope layout files to allow for station position errors. Added section
+    to describe element feed angles and removed old "orientation.txt" file
     description. Removed old "config.txt" file description, as these files have
     been deprecated since version 2.3, and can no longer be
     supported. Updated description of system noise files which are now
     greatly simplified.</td></tr>
 <tr><td>8</td><td>2015-07-06</td>
-    <td>[2.7.0] Updated description of feed angle specification to include 
-    the remaining two Euler angles. Added description of new "mount_type.txt" 
-    and "element_pattern*.txt" files. Added description of Ludwig-3 format 
+    <td>[2.7.0] Added description of required new "position.txt" file.
+    Updated description of feed angle specification to include
+    the remaining two Euler angles. Added description of new "mount_type.txt"
+    and "element_pattern*.txt" files. Added description of Ludwig-3 format
     element data files.</td></tr>
 </table>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadMountTypes.h"
-#include "apps/lib/oskar_dir.h"
+#ifndef OSKAR_TELESCOPE_LOAD_POSITION_H_
+#define OSKAR_TELESCOPE_LOAD_POSITION_H_
 
-using std::map;
-using std::string;
+/**
+ * @file oskar_telescope_load_position.h
+ */
 
-const string TelescopeLoadMountTypes::element_types_file = "mount_types.txt";
+#include <oskar_global.h>
 
-void TelescopeLoadMountTypes::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
-{
-    // Nothing to do at the telescope level.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Loads the telescope centre longitude, latitude and altitude.
+ *
+ * @details
+ * Loads the telescope centre longitude, latitude and altitude.
+ *
+ * @param[in,out] telescope  Telescope model structure to be populated.
+ * @param[in] filename       File name path to a telescope coordinate file.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_telescope_load_position(oskar_Telescope* telescope,
+        const char* filename, int* status);
+
+#ifdef __cplusplus
 }
+#endif
 
-void TelescopeLoadMountTypes::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of "mount_types.txt".
-    if (cwd.exists(element_types_file))
-    {
-        oskar_station_load_mount_types(station,
-                cwd.absoluteFilePath(element_types_file).c_str(), status);
-    }
-}
-
-string TelescopeLoadMountTypes::name() const
-{
-    return string("mount types file loader");
-}
+#endif /* OSKAR_TELESCOPE_LOAD_POSITION_H_ */

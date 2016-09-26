@@ -1,5 +1,8 @@
 2016-XX-YY  OSKAR-2.7.0
 
+    * Removed telescope longitude, latitude and altitude from settings file.
+      These are now specified using "position.txt" in the telescope model.
+
     * Added option to specify whether to use GPUs for simulations.
 
     * Added option to specify the number of compute devices for simulations

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2014-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_MOUNT_TYPES_H_
-#define OSKAR_TELESCOPE_LOAD_MOUNT_TYPES_H_
+#include "apps/lib/private_TelescopeLoaderElementTypes.h"
+#include <oskar_dir.h>
 
-#include "apps/lib/oskar_TelescopeLoadAbstract.h"
+using std::map;
+using std::string;
 
-class TelescopeLoadMountTypes : public oskar_TelescopeLoadAbstract
+const string TelescopeLoaderElementTypes::element_types_file =
+        "element_types.txt";
+
+void TelescopeLoaderElementTypes::load(oskar_Telescope* /*telescope*/,
+        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
+        map<string, string>& /*filemap*/, int* /*status*/)
 {
-public:
-    TelescopeLoadMountTypes() {}
+    // Nothing to do at the telescope level.
+}
 
-    virtual ~TelescopeLoadMountTypes() {}
+void TelescopeLoaderElementTypes::load(oskar_Station* station,
+        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
+{
+    // Check for presence of "element_types.txt".
+    if (cwd.exists(element_types_file))
+    {
+        oskar_station_load_element_types(station,
+                cwd.absoluteFilePath(element_types_file).c_str(), status);
+    }
+}
 
-    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
-            int num_subdirs, std::map<std::string, std::string>& filemap,
-            int* status);
-
-    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
-            int num_subdirs, int depth,
-            std::map<std::string, std::string>& filemap, int* status);
-
-    virtual std::string name() const;
-
-private:
-    static const std::string element_types_file;
-};
-
-#endif /* OSKAR_TELESCOPE_LOAD_MOUNT_TYPES_H_ */
+string TelescopeLoaderElementTypes::name() const
+{
+    return string("element types file loader");
+}

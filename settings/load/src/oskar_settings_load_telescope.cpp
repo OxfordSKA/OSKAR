@@ -70,11 +70,6 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         strcpy(tel->input_directory, t.constData());
     }
 
-    // Telescope location.
-    tel->longitude_rad = s.value("longitude_deg", 0.0).toDouble() * D2R;
-    tel->latitude_rad  = s.value("latitude_deg", 0.0).toDouble() * D2R;
-    tel->altitude_m    = s.value("altitude_m", 0.0).toDouble();
-
     // Station type.
     temp = s.value("station_type", "Aperture array").toString();
     tel->station_type = (char*) calloc(2, sizeof(char));

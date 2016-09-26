@@ -26,19 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadLayout.h"
-#include "apps/lib/oskar_dir.h"
+#include "apps/lib/private_TelescopeLoaderLayout.h"
+#include <oskar_dir.h>
 
 using std::map;
 using std::string;
 
-const string TelescopeLoadLayout::layout_file = "layout.txt";
-const string TelescopeLoadLayout::layout_enu_file = "layout_enu.txt";
-const string TelescopeLoadLayout::layout_ecef_file = "layout_ecef.txt";
-const string TelescopeLoadLayout::layout_wgs84_file = "layout_wgs84.txt";
+const string TelescopeLoaderLayout::layout_file = "layout.txt";
+const string TelescopeLoaderLayout::layout_enu_file = "layout_enu.txt";
+const string TelescopeLoaderLayout::layout_ecef_file = "layout_ecef.txt";
+const string TelescopeLoaderLayout::layout_wgs84_file = "layout_wgs84.txt";
 
 
-void TelescopeLoadLayout::load(oskar_Telescope* telescope,
+void TelescopeLoaderLayout::load(oskar_Telescope* telescope,
         const oskar_Dir& cwd, int num_subdirs,
         map<string, string>& /*filemap*/, int* status)
 {
@@ -100,7 +100,7 @@ void TelescopeLoadLayout::load(oskar_Telescope* telescope,
     }
 }
 
-void TelescopeLoadLayout::load(oskar_Station* station,
+void TelescopeLoaderLayout::load(oskar_Station* station,
         const oskar_Dir& cwd, int num_subdirs, int /*depth*/,
         map<string, string>& /*filemap*/, int* status)
 {
@@ -136,7 +136,7 @@ void TelescopeLoadLayout::load(oskar_Station* station,
     }
 }
 
-string TelescopeLoadLayout::name() const
+string TelescopeLoaderLayout::name() const
 {
     return string("layout file loader");
 }

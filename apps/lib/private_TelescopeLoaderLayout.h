@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,40 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadApodisation.h"
-#include "apps/lib/oskar_dir.h"
+#ifndef OSKAR_TELESCOPE_LOADER_LAYOUT_H_
+#define OSKAR_TELESCOPE_LOADER_LAYOUT_H_
 
-using std::map;
-using std::string;
+#include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-const string TelescopeLoadApodisation::apodisation_file = "apodisation.txt";
-const string TelescopeLoadApodisation::apodization_file = "apodization.txt";
-
-void TelescopeLoadApodisation::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
+class TelescopeLoaderLayout : public oskar_TelescopeLoadAbstract
 {
-    // Nothing to do at the telescope level.
-}
+public:
+    TelescopeLoaderLayout() {}
 
-void TelescopeLoadApodisation::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of "apodisation.txt" or "apodization.txt".
-    if (cwd.exists(apodisation_file))
-    {
-        oskar_station_load_apodisation(station,
-                cwd.absoluteFilePath(apodisation_file).c_str(), status);
-    }
-    else if (cwd.exists(apodization_file))
-    {
-        oskar_station_load_apodisation(station,
-                cwd.absoluteFilePath(apodization_file).c_str(), status);
-    }
-}
+    virtual ~TelescopeLoaderLayout() {}
 
-string TelescopeLoadApodisation::name() const
-{
-    return string("element apodisation weight file loader");
-}
+    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+            int num_subdirs, std::map<std::string, std::string>& filemap,
+            int* status);
+
+    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
+
+    virtual std::string name() const;
+
+private:
+    static const std::string layout_file;
+    static const std::string layout_enu_file;
+    static const std::string layout_wgs84_file;
+    static const std::string layout_ecef_file;
+};
+
+#endif /* OSKAR_TELESCOPE_LOADER_LAYOUT_H_ */

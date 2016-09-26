@@ -80,7 +80,8 @@ enum OSKAR_ERROR_CODES
     OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING = -34,
     OSKAR_ERR_BAD_SKY_FILE                             = -35,
     OSKAR_ERR_BAD_POINTING_FILE                        = -36,
-    OSKAR_ERR_BAD_GSM_FILE                             = -37,
+    OSKAR_ERR_BAD_COORD_FILE                           = -37,
+    OSKAR_ERR_BAD_GSM_FILE                             = -38,
 
     /*
      * Codes -75 to -99 are reserved for settings errors.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,46 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_FILTER_UV_H_
-#define OSKAR_IMAGER_FILTER_UV_H_
+#ifndef OSKAR_TELESCOPE_LOADER_PERMITTED_BEAMS_H_
+#define OSKAR_TELESCOPE_LOADER_PERMITTED_BEAMS_H_
 
-/**
- * @file oskar_imager_filter_uv.h
- */
+#include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-#include <oskar_global.h>
-#include <oskar_mem.h>
-#include <stddef.h>
+class TelescopeLoaderPermittedBeams : public oskar_TelescopeLoadAbstract
+{
+public:
+    TelescopeLoaderPermittedBeams() {}
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    virtual ~TelescopeLoaderPermittedBeams() {}
 
-/**
- * @brief
- * Filters supplied visibility data using the baseline UV range.
- *
- * @details
- * Filters supplied visibility data using the baseline UV range,
- * if it has been set. If not set, this function returns immediately.
- *
- * @param[in,out] h          Handle to imager.
- * @param[in,out] num_vis    On input, number of supplied visibilities;
- *                           on output, number of visibilities remaining.
- * @param[in,out] uu         Baseline uu coordinates, in wavelengths.
- * @param[in,out] vv         Baseline vv coordinates, in wavelengths.
- * @param[in,out] ww         Baseline ww coordinates, in wavelengths.
- * @param[in,out] amp        Baseline complex visibility amplitudes.
- * @param[in,out] weight     Baseline visibility weights.
- * @param[in,out] status     Status return code.
- */
-OSKAR_EXPORT
-void oskar_imager_filter_uv(const oskar_Imager* h, size_t* num_vis,
-        oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amp,
-        oskar_Mem* weight, int* status);
+    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+            int num_subdirs, std::map<std::string, std::string>& filemap,
+            int* status);
 
-#ifdef __cplusplus
-}
-#endif
+    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
 
-#endif /* OSKAR_IMAGER_FILTER_UV_H_ */
+    virtual std::string name() const;
+
+private:
+    static const std::string permitted_beams_file;
+};
+
+#endif /* OSKAR_TELESCOPE_LOADER_PERMITTED_BEAMS_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_
-#define OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_
+#include "apps/lib/private_TelescopeLoaderGainPhase.h"
+#include <oskar_dir.h>
 
-#include "apps/lib/oskar_TelescopeLoadAbstract.h"
+using std::map;
+using std::string;
 
-class TelescopeLoadGainPhase : public oskar_TelescopeLoadAbstract
+const string TelescopeLoaderGainPhase::gain_phase_file = "gain_phase.txt";
+
+void TelescopeLoaderGainPhase::load(oskar_Telescope* /*telescope*/,
+        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
+        map<string, string>& /*filemap*/, int* /*status*/)
 {
-public:
-    TelescopeLoadGainPhase() {}
+    // Nothing to do at the telescope level.
+}
 
-    virtual ~TelescopeLoadGainPhase() {}
+void TelescopeLoaderGainPhase::load(oskar_Station* station,
+        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
+{
+    // Check for presence of "gain_phase.txt".
+    if (cwd.exists(gain_phase_file))
+    {
+        oskar_station_load_gain_phase(station,
+                cwd.absoluteFilePath(gain_phase_file).c_str(), status);
+    }
+}
 
-    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
-            int num_subdirs, std::map<std::string, std::string>& filemap,
-            int* status);
-
-    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
-            int num_subdirs, int depth,
-            std::map<std::string, std::string>& filemap, int* status);
-
-    virtual std::string name() const;
-
-private:
-    static const std::string gain_phase_file;
-};
-
-#endif /* OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_ */
+string TelescopeLoaderGainPhase::name() const
+{
+    return string("element gain and phase file loader");
+}

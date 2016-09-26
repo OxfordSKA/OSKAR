@@ -11,6 +11,7 @@ set(interferometry_SRC
     src/oskar_telescope_duplicate_first_station.c
     src/oskar_telescope_free.c
     src/oskar_telescope_load_pointing_file.c
+    src/oskar_telescope_load_position.c
     src/oskar_telescope_load_station_coords_ecef.c
     src/oskar_telescope_load_station_coords_enu.c
     src/oskar_telescope_load_station_coords_wgs84.c

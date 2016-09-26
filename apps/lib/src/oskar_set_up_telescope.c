@@ -61,10 +61,6 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings_old* settings,
 
     /* Set telescope model options from settings. */
     /* This must be done before station data are loaded. */
-    oskar_telescope_set_position(t,
-            settings->telescope.longitude_rad,
-            settings->telescope.latitude_rad,
-            settings->telescope.altitude_m);
     oskar_telescope_set_allow_station_beam_duplication(t,
             settings->telescope.allow_station_beam_duplication);
     oskar_telescope_set_channel_bandwidth(t,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_APODISATION_H_
-#define OSKAR_TELESCOPE_LOAD_APODISATION_H_
+#ifndef OSKAR_TELESCOPE_LOADER_APODISATION_H_
+#define OSKAR_TELESCOPE_LOADER_APODISATION_H_
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-class TelescopeLoadApodisation : public oskar_TelescopeLoadAbstract
+class TelescopeLoaderApodisation : public oskar_TelescopeLoadAbstract
 {
 public:
-    TelescopeLoadApodisation() {}
+    TelescopeLoaderApodisation() {}
 
-    virtual ~TelescopeLoadApodisation() {}
+    virtual ~TelescopeLoaderApodisation() {}
 
     virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
             int num_subdirs, std::map<std::string, std::string>& filemap,
@@ -53,4 +53,4 @@ private:
     static const std::string apodization_file;
 };
 
-#endif /* OSKAR_TELESCOPE_LOAD_APODISATION_H_ */
+#endif /* OSKAR_TELESCOPE_LOADER_APODISATION_H_ */

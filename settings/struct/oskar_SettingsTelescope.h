@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -156,9 +156,6 @@ struct oskar_SettingsTelescope
 {
     char* input_directory;
     char* output_directory;
-    double longitude_rad;
-    double latitude_rad;
-    double altitude_m;
     char* station_type;
     int normalise_beams_at_phase_centre;
     int pol_mode;

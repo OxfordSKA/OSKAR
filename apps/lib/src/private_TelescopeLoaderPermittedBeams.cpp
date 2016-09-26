@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,46 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_FILTER_UV_H_
-#define OSKAR_IMAGER_FILTER_UV_H_
+#include "apps/lib/private_TelescopeLoaderPermittedBeams.h"
+#include <oskar_dir.h>
 
-/**
- * @file oskar_imager_filter_uv.h
- */
+using std::map;
+using std::string;
 
-#include <oskar_global.h>
-#include <oskar_mem.h>
-#include <stddef.h>
+const string TelescopeLoaderPermittedBeams::permitted_beams_file =
+        "permitted_beams.txt";
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
-/**
- * @brief
- * Filters supplied visibility data using the baseline UV range.
- *
- * @details
- * Filters supplied visibility data using the baseline UV range,
- * if it has been set. If not set, this function returns immediately.
- *
- * @param[in,out] h          Handle to imager.
- * @param[in,out] num_vis    On input, number of supplied visibilities;
- *                           on output, number of visibilities remaining.
- * @param[in,out] uu         Baseline uu coordinates, in wavelengths.
- * @param[in,out] vv         Baseline vv coordinates, in wavelengths.
- * @param[in,out] ww         Baseline ww coordinates, in wavelengths.
- * @param[in,out] amp        Baseline complex visibility amplitudes.
- * @param[in,out] weight     Baseline visibility weights.
- * @param[in,out] status     Status return code.
- */
-OSKAR_EXPORT
-void oskar_imager_filter_uv(const oskar_Imager* h, size_t* num_vis,
-        oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amp,
-        oskar_Mem* weight, int* status);
-
-#ifdef __cplusplus
+void TelescopeLoaderPermittedBeams::load(oskar_Telescope* /*telescope*/,
+        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
+        map<string, string>& /*filemap*/, int* /*status*/)
+{
+    // Nothing to do at the telescope level.
 }
-#endif
 
-#endif /* OSKAR_IMAGER_FILTER_UV_H_ */
+void TelescopeLoaderPermittedBeams::load(oskar_Station* station,
+        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
+{
+    // Check for presence of "permitted_beams.txt".
+    if (cwd.exists(permitted_beams_file))
+    {
+        oskar_station_load_permitted_beams(station,
+                cwd.absoluteFilePath(permitted_beams_file).c_str(), status);
+    }
+}
+
+string TelescopeLoaderPermittedBeams::name() const
+{
+    return string("permitted beams file loader");
+}

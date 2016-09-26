@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_MODEL_APPS_H_
-#define OSKAR_SETTINGS_MODEL_APPS_H_
+#ifndef OSKAR_TELESCOPE_LOADER_GAIN_PHASE_H_
+#define OSKAR_TELESCOPE_LOADER_GAIN_PHASE_H_
 
-/**
- * @file oskar_SettingsModelApps.h
- */
+#include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-#include <oskar_global.h>
-#include <oskar_SettingsModel.h>
-
-class oskar_SettingsModelApps : public oskar_SettingsModel
+class TelescopeLoaderGainPhase : public oskar_TelescopeLoadAbstract
 {
-    Q_OBJECT
-
 public:
-    oskar_SettingsModelApps(QObject* parent = 0);
-    virtual ~oskar_SettingsModelApps();
+    TelescopeLoaderGainPhase() {}
+
+    virtual ~TelescopeLoaderGainPhase() {}
+
+    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+            int num_subdirs, std::map<std::string, std::string>& filemap,
+            int* status);
+
+    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
+
+    virtual std::string name() const;
 
 private:
-    void init_settings_simulator();
-    void init_settings_sky_model();
-    void init_settings_observation();
-    void init_settings_telescope_model();
-    void init_settings_element_fit();
-    void init_settings_interferometer();
-    void init_settings_system_noise_model(const QString& root);
-    void init_settings_beampattern();
-    void init_settings_image();
-    void init_settings_ionosphere();
-    void add_filter_group(const QString& group);
-    void add_extended_group(const QString& group);
-    void add_polarisation_group(const QString& group);
+    static const std::string gain_phase_file;
 };
 
-#endif /* OSKAR_SETTINGS_MODEL_APPS_H_ */
+#endif /* OSKAR_TELESCOPE_LOADER_GAIN_PHASE_H_ */

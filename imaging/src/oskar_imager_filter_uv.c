@@ -35,9 +35,9 @@
 extern "C" {
 #endif
 
-void oskar_imager_filter_uv(oskar_Imager* h, size_t* num_vis, oskar_Mem* uu,
-        oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amp, oskar_Mem* weight,
-        int* status)
+void oskar_imager_filter_uv(const oskar_Imager* h, size_t* num_vis,
+        oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amp,
+        oskar_Mem* weight, int* status)
 {
     size_t i, n;
     double r, range[2];

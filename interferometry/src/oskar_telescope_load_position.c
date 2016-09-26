@@ -26,46 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_FILTER_UV_H_
-#define OSKAR_IMAGER_FILTER_UV_H_
-
-/**
- * @file oskar_imager_filter_uv.h
- */
-
-#include <oskar_global.h>
-#include <oskar_mem.h>
-#include <stddef.h>
+#include <oskar_telescope.h>
+#include <private_telescope.h>
+#include <oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Filters supplied visibility data using the baseline UV range.
- *
- * @details
- * Filters supplied visibility data using the baseline UV range,
- * if it has been set. If not set, this function returns immediately.
- *
- * @param[in,out] h          Handle to imager.
- * @param[in,out] num_vis    On input, number of supplied visibilities;
- *                           on output, number of visibilities remaining.
- * @param[in,out] uu         Baseline uu coordinates, in wavelengths.
- * @param[in,out] vv         Baseline vv coordinates, in wavelengths.
- * @param[in,out] ww         Baseline ww coordinates, in wavelengths.
- * @param[in,out] amp        Baseline complex visibility amplitudes.
- * @param[in,out] weight     Baseline visibility weights.
- * @param[in,out] status     Status return code.
- */
-OSKAR_EXPORT
-void oskar_imager_filter_uv(const oskar_Imager* h, size_t* num_vis,
-        oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amp,
-        oskar_Mem* weight, int* status);
+void oskar_telescope_load_position(oskar_Telescope* telescope,
+        const char* filename, int* status)
+{
+    int num_coords;
+    oskar_Mem *lon, *lat, *alt;
+
+    /* Load columns from file. */
+    lon = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    lat = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    alt = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    num_coords = (int) oskar_mem_load_ascii(filename, 3, status,
+            lon, "", lat, "", alt, "0.0");
+
+    /* Set the telescope centre coordinates. */
+    if (num_coords == 1)
+    {
+        telescope->lon_rad = (oskar_mem_double(lon, status))[0] * M_PI / 180.0;
+        telescope->lat_rad = (oskar_mem_double(lat, status))[0] * M_PI / 180.0;
+        telescope->alt_metres = (oskar_mem_double(alt, status))[0];
+    }
+    else
+    {
+        *status = OSKAR_ERR_BAD_COORD_FILE;
+    }
+
+    /* Free memory. */
+    oskar_mem_free(lon, status);
+    oskar_mem_free(lat, status);
+    oskar_mem_free(alt, status);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_IMAGER_FILTER_UV_H_ */

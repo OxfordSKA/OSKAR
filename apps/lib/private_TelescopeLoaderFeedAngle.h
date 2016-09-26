@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadElementTypes.h"
-#include "apps/lib/oskar_dir.h"
+#ifndef OSKAR_TELESCOPE_LOADER_FEED_ANGLE_H_
+#define OSKAR_TELESCOPE_LOADER_FEED_ANGLE_H_
 
-using std::map;
-using std::string;
+#include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-const string TelescopeLoadElementTypes::element_types_file = "element_types.txt";
-
-void TelescopeLoadElementTypes::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
+class TelescopeLoaderFeedAngle : public oskar_TelescopeLoadAbstract
 {
-    // Nothing to do at the telescope level.
-}
+public:
+    TelescopeLoaderFeedAngle() {}
 
-void TelescopeLoadElementTypes::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of "element_types.txt".
-    if (cwd.exists(element_types_file))
-    {
-        oskar_station_load_element_types(station,
-                cwd.absoluteFilePath(element_types_file).c_str(), status);
-    }
-}
+    virtual ~TelescopeLoaderFeedAngle() {}
 
-string TelescopeLoadElementTypes::name() const
-{
-    return string("element types file loader");
-}
+    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+            int num_subdirs, std::map<std::string, std::string>& filemap,
+            int* status);
+
+    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
+
+    virtual std::string name() const;
+
+private:
+    static const std::string feed_angle_file;
+    static const std::string feed_angle_file_x;
+    static const std::string feed_angle_file_y;
+};
+
+#endif /* OSKAR_TELESCOPE_LOADER_FEED_ANGLE_H_ */

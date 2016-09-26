@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_PERMITTED_BEAMS_H_
-#define OSKAR_TELESCOPE_LOAD_PERMITTED_BEAMS_H_
+#ifndef OSKAR_TELESCOPE_LOADER_POSITION_H_
+#define OSKAR_TELESCOPE_LOADER_POSITION_H_
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-class TelescopeLoadPermittedBeams : public oskar_TelescopeLoadAbstract
+class TelescopeLoaderPosition : public oskar_TelescopeLoadAbstract
 {
 public:
-    TelescopeLoadPermittedBeams() {}
+    TelescopeLoaderPosition() {}
 
-    virtual ~TelescopeLoadPermittedBeams() {}
+    virtual ~TelescopeLoaderPosition() {}
 
     virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
             int num_subdirs, std::map<std::string, std::string>& filemap,
@@ -49,7 +49,7 @@ public:
     virtual std::string name() const;
 
 private:
-    static const std::string permitted_beams_file;
+    static const std::string position_file;
 };
 
-#endif /* OSKAR_TELESCOPE_LOAD_PERMITTED_BEAMS_H_ */
+#endif /* OSKAR_TELESCOPE_LOADER_POSITION_H_ */

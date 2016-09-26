@@ -27,15 +27,16 @@
  */
 
 #include "apps/lib/oskar_telescope_load.h"
-#include "apps/lib/private_TelescopeLoadApodisation.h"
-#include "apps/lib/private_TelescopeLoadElementTypes.h"
-#include "apps/lib/private_TelescopeLoadElementPattern.h"
-#include "apps/lib/private_TelescopeLoadFeedAngle.h"
-#include "apps/lib/private_TelescopeLoadGainPhase.h"
-#include "apps/lib/private_TelescopeLoadLayout.h"
-#include "apps/lib/private_TelescopeLoadMountTypes.h"
-#include "apps/lib/private_TelescopeLoadNoise.h"
-#include "apps/lib/private_TelescopeLoadPermittedBeams.h"
+#include "apps/lib/private_TelescopeLoaderApodisation.h"
+#include "apps/lib/private_TelescopeLoaderElementPattern.h"
+#include "apps/lib/private_TelescopeLoaderElementTypes.h"
+#include "apps/lib/private_TelescopeLoaderFeedAngle.h"
+#include "apps/lib/private_TelescopeLoaderGainPhase.h"
+#include "apps/lib/private_TelescopeLoaderLayout.h"
+#include "apps/lib/private_TelescopeLoaderMountTypes.h"
+#include "apps/lib/private_TelescopeLoaderNoise.h"
+#include "apps/lib/private_TelescopeLoaderPermittedBeams.h"
+#include "apps/lib/private_TelescopeLoaderPosition.h"
 #include <oskar_dir.h>
 #include <oskar_get_error_string.h>
 
@@ -78,16 +79,19 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
 
     // Create the loaders.
     vector<oskar_TelescopeLoadAbstract*> loaders;
-    // The layout loader must be first, because it defines the stations.
-    loaders.push_back(new TelescopeLoadLayout);
-    loaders.push_back(new TelescopeLoadGainPhase);
-    loaders.push_back(new TelescopeLoadApodisation);
-    loaders.push_back(new TelescopeLoadFeedAngle);
-    loaders.push_back(new TelescopeLoadElementTypes);
-    loaders.push_back(new TelescopeLoadMountTypes);
-    loaders.push_back(new TelescopeLoadPermittedBeams);
-    loaders.push_back(new TelescopeLoadElementPattern);
-    loaders.push_back(new TelescopeLoadNoise);
+    // The position loader must be first, because it defines the
+    // reference coordinates. The layout loader must be next, because
+    // it defines the stations.
+    loaders.push_back(new TelescopeLoaderPosition);
+    loaders.push_back(new TelescopeLoaderLayout);
+    loaders.push_back(new TelescopeLoaderGainPhase);
+    loaders.push_back(new TelescopeLoaderApodisation);
+    loaders.push_back(new TelescopeLoaderFeedAngle);
+    loaders.push_back(new TelescopeLoaderElementTypes);
+    loaders.push_back(new TelescopeLoaderMountTypes);
+    loaders.push_back(new TelescopeLoaderPermittedBeams);
+    loaders.push_back(new TelescopeLoaderElementPattern);
+    loaders.push_back(new TelescopeLoaderNoise);
 
     // Load everything recursively from the telescope directory tree.
     map<string, string> filemap;

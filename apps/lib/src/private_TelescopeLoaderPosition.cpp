@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,48 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadFeedAngle.h"
-#include "apps/lib/oskar_dir.h"
+#include "apps/lib/private_TelescopeLoaderPosition.h"
+#include <oskar_dir.h>
 
 using std::map;
 using std::string;
 
-const string TelescopeLoadFeedAngle::feed_angle_file = "feed_angle.txt";
-const string TelescopeLoadFeedAngle::feed_angle_file_x = "feed_angle_x.txt";
-const string TelescopeLoadFeedAngle::feed_angle_file_y = "feed_angle_y.txt";
+const string TelescopeLoaderPosition::position_file = "position.txt";
 
-void TelescopeLoadFeedAngle::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
-{
-    // Nothing to do at the telescope level.
-}
 
-void TelescopeLoadFeedAngle::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
+void TelescopeLoaderPosition::load(oskar_Telescope* telescope,
+        const oskar_Dir& cwd, int /*num_subdirs*/,
         map<string, string>& /*filemap*/, int* status)
 {
-    // Check for presence of feed angle files.
-    if (cwd.exists(feed_angle_file))
+    // Load the telescope centre coordinates.
+    if (cwd.exists(position_file))
     {
-        oskar_station_load_feed_angle(station,
-                cwd.absoluteFilePath(feed_angle_file).c_str(), 1, status);
-        oskar_station_load_feed_angle(station,
-                cwd.absoluteFilePath(feed_angle_file).c_str(), 0, status);
+        oskar_telescope_load_position(telescope,
+                cwd.absoluteFilePath(position_file).c_str(), status);
     }
-    if (cwd.exists(feed_angle_file_x))
+    else
     {
-        oskar_station_load_feed_angle(station,
-                cwd.absoluteFilePath(feed_angle_file_x).c_str(), 1, status);
-    }
-    if (cwd.exists(feed_angle_file_y))
-    {
-        oskar_station_load_feed_angle(station,
-                cwd.absoluteFilePath(feed_angle_file_y).c_str(), 0, status);
+        *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
     }
 }
 
-string TelescopeLoadFeedAngle::name() const
+void TelescopeLoaderPosition::load(oskar_Station* /*station*/,
+        const oskar_Dir& /*cwd*/, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* /*status*/)
 {
-    return string("element feed angle file loader");
+    // Nothing to do at the station level.
+}
+
+string TelescopeLoaderPosition::name() const
+{
+    return string("position file loader");
 }

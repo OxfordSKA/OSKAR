@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_
-#define OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_
+#ifndef OSKAR_TELESCOPE_LOADER_ELEMENT_PATTERN_H_
+#define OSKAR_TELESCOPE_LOADER_ELEMENT_PATTERN_H_
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
@@ -35,12 +35,12 @@ struct oskar_Log;
 
 #include <vector>
 
-class TelescopeLoadElementPattern : public oskar_TelescopeLoadAbstract
+class TelescopeLoaderElementPattern : public oskar_TelescopeLoadAbstract
 {
 public:
-    TelescopeLoadElementPattern();
+    TelescopeLoaderElementPattern();
 
-    virtual ~TelescopeLoadElementPattern();
+    virtual ~TelescopeLoaderElementPattern();
 
     virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
             int num_subdirs, std::map<std::string, std::string>& filemap,
@@ -74,4 +74,4 @@ private:
     std::map<std::string, int> models;
 };
 
-#endif /* OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_ */
+#endif /* OSKAR_TELESCOPE_LOADER_ELEMENT_PATTERN_H_ */

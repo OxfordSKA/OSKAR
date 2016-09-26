@@ -14,15 +14,16 @@ set(apps_SRC
     src/oskar_sim_tec_screen.cpp
     src/oskar_telescope_load.cpp
     src/oskar_telescope_save.cpp
-    src/private_TelescopeLoadApodisation.cpp
-    src/private_TelescopeLoadElementPattern.cpp
-    src/private_TelescopeLoadElementTypes.cpp
-    src/private_TelescopeLoadFeedAngle.cpp
-    src/private_TelescopeLoadGainPhase.cpp
-    src/private_TelescopeLoadLayout.cpp
-    src/private_TelescopeLoadMountTypes.cpp
-    src/private_TelescopeLoadNoise.cpp
-    src/private_TelescopeLoadPermittedBeams.cpp)
+    src/private_TelescopeLoaderApodisation.cpp
+    src/private_TelescopeLoaderElementPattern.cpp
+    src/private_TelescopeLoaderElementTypes.cpp
+    src/private_TelescopeLoaderFeedAngle.cpp
+    src/private_TelescopeLoaderGainPhase.cpp
+    src/private_TelescopeLoaderLayout.cpp
+    src/private_TelescopeLoaderMountTypes.cpp
+    src/private_TelescopeLoaderNoise.cpp
+    src/private_TelescopeLoaderPermittedBeams.cpp
+    src/private_TelescopeLoaderPosition.cpp)
 if(CASACORE_FOUND)
     list(APPEND apps_SRC
         src/oskar_vis_block_write_ms.c

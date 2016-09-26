@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadGainPhase.h"
-#include "apps/lib/oskar_dir.h"
+#include "apps/lib/private_TelescopeLoaderFeedAngle.h"
+#include <oskar_dir.h>
 
 using std::map;
 using std::string;
 
-const string TelescopeLoadGainPhase::gain_phase_file = "gain_phase.txt";
+const string TelescopeLoaderFeedAngle::feed_angle_file = "feed_angle.txt";
+const string TelescopeLoaderFeedAngle::feed_angle_file_x = "feed_angle_x.txt";
+const string TelescopeLoaderFeedAngle::feed_angle_file_y = "feed_angle_y.txt";
 
-void TelescopeLoadGainPhase::load(oskar_Telescope* /*telescope*/,
+void TelescopeLoaderFeedAngle::load(oskar_Telescope* /*telescope*/,
         const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
         map<string, string>& /*filemap*/, int* /*status*/)
 {
     // Nothing to do at the telescope level.
 }
 
-void TelescopeLoadGainPhase::load(oskar_Station* station,
+void TelescopeLoaderFeedAngle::load(oskar_Station* station,
         const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
         map<string, string>& /*filemap*/, int* status)
 {
-    // Check for presence of "gain_phase.txt".
-    if (cwd.exists(gain_phase_file))
+    // Check for presence of feed angle files.
+    if (cwd.exists(feed_angle_file))
     {
-        oskar_station_load_gain_phase(station,
-                cwd.absoluteFilePath(gain_phase_file).c_str(), status);
+        oskar_station_load_feed_angle(station,
+                cwd.absoluteFilePath(feed_angle_file).c_str(), 1, status);
+        oskar_station_load_feed_angle(station,
+                cwd.absoluteFilePath(feed_angle_file).c_str(), 0, status);
+    }
+    if (cwd.exists(feed_angle_file_x))
+    {
+        oskar_station_load_feed_angle(station,
+                cwd.absoluteFilePath(feed_angle_file_x).c_str(), 1, status);
+    }
+    if (cwd.exists(feed_angle_file_y))
+    {
+        oskar_station_load_feed_angle(station,
+                cwd.absoluteFilePath(feed_angle_file_y).c_str(), 0, status);
     }
 }
 
-string TelescopeLoadGainPhase::name() const
+string TelescopeLoaderFeedAngle::name() const
 {
-    return string("element gain and phase file loader");
+    return string("element feed angle file loader");
 }

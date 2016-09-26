@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadElementPattern.h"
-#include "apps/lib/oskar_dir.h"
+#include "apps/lib/private_TelescopeLoaderElementPattern.h"
+#include <oskar_dir.h>
 #include <oskar_log.h>
 #include <oskar_file_exists.h>
 
@@ -37,10 +37,10 @@ using std::vector;
 using std::map;
 using std::string;
 
-const string TelescopeLoadElementPattern::root_name =
+const string TelescopeLoaderElementPattern::root_name =
         "element_pattern_fit_";
 
-TelescopeLoadElementPattern::TelescopeLoadElementPattern()
+TelescopeLoaderElementPattern::TelescopeLoaderElementPattern()
 {
     telescope_ = 0;
     root_x = root_name + "x_";
@@ -48,11 +48,11 @@ TelescopeLoadElementPattern::TelescopeLoadElementPattern()
     root_scalar = root_name + "scalar_";
 }
 
-TelescopeLoadElementPattern::~TelescopeLoadElementPattern()
+TelescopeLoaderElementPattern::~TelescopeLoaderElementPattern()
 {
 }
 
-void TelescopeLoadElementPattern::load(oskar_Telescope* telescope,
+void TelescopeLoaderElementPattern::load(oskar_Telescope* telescope,
         const oskar_Dir& cwd, int num_subdirs, map<string, string>& filemap,
         int* status)
 {
@@ -72,7 +72,7 @@ void TelescopeLoadElementPattern::load(oskar_Telescope* telescope,
     }
 }
 
-void TelescopeLoadElementPattern::load(oskar_Station* station,
+void TelescopeLoaderElementPattern::load(oskar_Station* station,
         const oskar_Dir& cwd, int num_subdirs, int /*depth*/,
         map<string, string>& filemap, int* status)
 {
@@ -86,12 +86,12 @@ void TelescopeLoadElementPattern::load(oskar_Station* station,
     }
 }
 
-string TelescopeLoadElementPattern::name() const
+string TelescopeLoaderElementPattern::name() const
 {
     return string("element pattern loader");
 }
 
-double TelescopeLoadElementPattern::frequency_from_filename(
+double TelescopeLoaderElementPattern::frequency_from_filename(
         const string& filename, int* status)
 {
     double freq = 0.0;
@@ -131,7 +131,7 @@ double TelescopeLoadElementPattern::frequency_from_filename(
     return freq * 1e6; // Convert from MHz to Hz.
 }
 
-int TelescopeLoadElementPattern::index_from_filename(
+int TelescopeLoaderElementPattern::index_from_filename(
         const string& filename, int* status)
 {
     int ind = 0;
@@ -171,7 +171,7 @@ int TelescopeLoadElementPattern::index_from_filename(
     return ind;
 }
 
-void TelescopeLoadElementPattern::load_element_patterns(
+void TelescopeLoaderElementPattern::load_element_patterns(
         oskar_Station* station, const map<string, string>& filemap, int* status)
 {
     // Check if safe to proceed.
@@ -216,7 +216,7 @@ void TelescopeLoadElementPattern::load_element_patterns(
         load(0, station, keys_scalar, paths_scalar, status);
 }
 
-void TelescopeLoadElementPattern::load(int port, oskar_Station* station,
+void TelescopeLoaderElementPattern::load(int port, oskar_Station* station,
         const vector<string>& keys, const vector<string>& paths, int* status)
 {
     if (*status) return;
@@ -242,7 +242,7 @@ void TelescopeLoadElementPattern::load(int port, oskar_Station* station,
     }
 }
 
-void TelescopeLoadElementPattern::update_map(map<string, string>& filemap,
+void TelescopeLoaderElementPattern::update_map(map<string, string>& filemap,
         const oskar_Dir& cwd)
 {
     // Update the map of element files for the current directory.

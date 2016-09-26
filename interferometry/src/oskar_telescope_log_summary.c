@@ -27,6 +27,7 @@
  */
 
 #include <oskar_telescope.h>
+#include <oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +38,12 @@ void oskar_telescope_log_summary(const oskar_Telescope* telescope,
 {
     if (*status) return;
     oskar_log_message(log, 'M', 0, "Telescope model summary");
+    oskar_log_value(log, 'M', 1, "Longitude [deg]", "%.3f",
+            oskar_telescope_lon_rad(telescope) * 180.0 / M_PI);
+    oskar_log_value(log, 'M', 1, "Latitude [deg]", "%.3f",
+            oskar_telescope_lat_rad(telescope) * 180.0 / M_PI);
+    oskar_log_value(log, 'M', 1, "Altitude [m]", "%.0f",
+            oskar_telescope_alt_metres(telescope));
     oskar_log_value(log, 'M', 1, "Num. stations", "%d",
             oskar_telescope_num_stations(telescope));
     oskar_log_value(log, 'M', 1, "Max station size", "%d",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,32 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_FEED_ANGLE_H_
-#define OSKAR_TELESCOPE_LOAD_FEED_ANGLE_H_
+#include "apps/lib/private_TelescopeLoaderApodisation.h"
+#include <oskar_dir.h>
 
-#include "apps/lib/oskar_TelescopeLoadAbstract.h"
+using std::map;
+using std::string;
 
-class TelescopeLoadFeedAngle : public oskar_TelescopeLoadAbstract
+const string TelescopeLoaderApodisation::apodisation_file = "apodisation.txt";
+const string TelescopeLoaderApodisation::apodization_file = "apodization.txt";
+
+void TelescopeLoaderApodisation::load(oskar_Telescope* /*telescope*/,
+        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
+        map<string, string>& /*filemap*/, int* /*status*/)
 {
-public:
-    TelescopeLoadFeedAngle() {}
+    // Nothing to do at the telescope level.
+}
 
-    virtual ~TelescopeLoadFeedAngle() {}
+void TelescopeLoaderApodisation::load(oskar_Station* station,
+        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
+{
+    // Check for presence of "apodisation.txt" or "apodization.txt".
+    if (cwd.exists(apodisation_file))
+    {
+        oskar_station_load_apodisation(station,
+                cwd.absoluteFilePath(apodisation_file).c_str(), status);
+    }
+    else if (cwd.exists(apodization_file))
+    {
+        oskar_station_load_apodisation(station,
+                cwd.absoluteFilePath(apodization_file).c_str(), status);
+    }
+}
 
-    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
-            int num_subdirs, std::map<std::string, std::string>& filemap,
-            int* status);
-
-    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
-            int num_subdirs, int depth,
-            std::map<std::string, std::string>& filemap, int* status);
-
-    virtual std::string name() const;
-
-private:
-    static const std::string feed_angle_file;
-    static const std::string feed_angle_file_x;
-    static const std::string feed_angle_file_y;
-};
-
-#endif /* OSKAR_TELESCOPE_LOAD_FEED_ANGLE_H_ */
+string TelescopeLoaderApodisation::name() const
+{
+    return string("element apodisation weight file loader");
+}

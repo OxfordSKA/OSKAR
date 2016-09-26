@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,33 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_LAYOUT_H_
-#define OSKAR_TELESCOPE_LOAD_LAYOUT_H_
+#include "apps/lib/private_TelescopeLoaderMountTypes.h"
+#include <oskar_dir.h>
 
-#include "apps/lib/oskar_TelescopeLoadAbstract.h"
+using std::map;
+using std::string;
 
-class TelescopeLoadLayout : public oskar_TelescopeLoadAbstract
+const string TelescopeLoaderMountTypes::element_types_file = "mount_types.txt";
+
+void TelescopeLoaderMountTypes::load(oskar_Telescope* /*telescope*/,
+        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
+        map<string, string>& /*filemap*/, int* /*status*/)
 {
-public:
-    TelescopeLoadLayout() {}
+    // Nothing to do at the telescope level.
+}
 
-    virtual ~TelescopeLoadLayout() {}
+void TelescopeLoaderMountTypes::load(oskar_Station* station,
+        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
+{
+    // Check for presence of "mount_types.txt".
+    if (cwd.exists(element_types_file))
+    {
+        oskar_station_load_mount_types(station,
+                cwd.absoluteFilePath(element_types_file).c_str(), status);
+    }
+}
 
-    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
-            int num_subdirs, std::map<std::string, std::string>& filemap,
-            int* status);
-
-    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
-            int num_subdirs, int depth,
-            std::map<std::string, std::string>& filemap, int* status);
-
-    virtual std::string name() const;
-
-private:
-    static const std::string layout_file;
-    static const std::string layout_enu_file;
-    static const std::string layout_wgs84_file;
-    static const std::string layout_ecef_file;
-};
-
-#endif /* OSKAR_TELESCOPE_LOAD_LAYOUT_H_ */
+string TelescopeLoaderMountTypes::name() const
+{
+    return string("mount types file loader");
+}

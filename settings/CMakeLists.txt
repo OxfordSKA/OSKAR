@@ -45,7 +45,7 @@ if (QT4_FOUND)
         ${dir_}/oskar_DoubleSpinBox.cpp
         #${dir_}/oskar_SettingsDelegate.cpp
         ${dir_}/oskar_SettingsDelegate_new.cpp
-        ${dir_}/oskar_SettingsItem.cpp
+        #${dir_}/oskar_SettingsItem.cpp
         #${dir_}/oskar_SettingsModel.cpp
         ${dir_}/oskar_SettingsModel_new.cpp
         #${dir_}/oskar_SettingsModelXML.cpp

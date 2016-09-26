@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadNoise.h"
+#include "apps/lib/private_TelescopeLoaderNoise.h"
 #include <oskar_dir.h>
 
 #include <cfloat>
@@ -36,14 +36,14 @@
 using std::map;
 using std::string;
 
-TelescopeLoadNoise::TelescopeLoadNoise()
+TelescopeLoaderNoise::TelescopeLoaderNoise()
 : oskar_TelescopeLoadAbstract(), freqs_(0), telescope_(0)
 {
     files_[FREQ] = "noise_frequencies.txt";
     files_[RMS]  = "rms.txt";
 }
 
-TelescopeLoadNoise::~TelescopeLoadNoise()
+TelescopeLoaderNoise::~TelescopeLoaderNoise()
 {
     int status = 0;
     oskar_mem_free(freqs_, &status);
@@ -53,7 +53,7 @@ TelescopeLoadNoise::~TelescopeLoadNoise()
 // Depth = 0
 // - Set up frequency data as this is the same for all stations
 //   and if defined by files these have to be at depth 0.
-void TelescopeLoadNoise::load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+void TelescopeLoaderNoise::load(oskar_Telescope* telescope, const oskar_Dir& cwd,
         int num_subdirs, map<string, string>& filemap, int* status)
 {
     string filename;
@@ -88,7 +88,7 @@ void TelescopeLoadNoise::load(oskar_Telescope* telescope, const oskar_Dir& cwd,
 
 
 // Depth > 0
-void TelescopeLoadNoise::load(oskar_Station* station,
+void TelescopeLoaderNoise::load(oskar_Station* station,
         const oskar_Dir& cwd, int /*num_subdirs*/, int depth,
         map<string, string>& filemap, int* status)
 {
@@ -114,13 +114,13 @@ void TelescopeLoadNoise::load(oskar_Station* station,
     }
 }
 
-string TelescopeLoadNoise::name() const
+string TelescopeLoaderNoise::name() const
 {
     return string("noise loader");
 }
 
 
-void TelescopeLoadNoise::update_map(map<string, string>& filemap,
+void TelescopeLoaderNoise::update_map(map<string, string>& filemap,
         const oskar_Dir& cwd)
 {
     for (map<FileIds_, string>::const_iterator it = files_.begin();
@@ -133,7 +133,7 @@ void TelescopeLoadNoise::update_map(map<string, string>& filemap,
 }
 
 
-void TelescopeLoadNoise::set_noise_rms(oskar_Station* station,
+void TelescopeLoaderNoise::set_noise_rms(oskar_Station* station,
         const map<string, string>& filemap, int* status)
 {
     string filename;

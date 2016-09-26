@@ -353,9 +353,6 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings_old* s)
     oskar_log_message(log, 'M', depth, "Telescope model settings");
     depth = 1;
     LVS0("Input directory", s->telescope.input_directory);
-    LV("Longitude [deg]", "%.1f", s->telescope.longitude_rad * R2D);
-    LV("Latitude [deg]", "%.1f", s->telescope.latitude_rad * R2D);
-    LV("Altitude [m]", "%.1f", s->telescope.altitude_m);
     LVB("Normalise beams at phase centre",
             s->telescope.normalise_beams_at_phase_centre);
     LVS("Polarisation mode",
