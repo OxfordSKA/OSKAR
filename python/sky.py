@@ -31,9 +31,10 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 # 
 
+from __future__ import absolute_import, division
 import math
 import numpy
-import _sky_lib
+from . import _sky_lib
 
 class Sky(object):
     """This class provides a Python interface to an OSKAR sky model."""
@@ -47,7 +48,6 @@ class Sky(object):
         """
         self._capsule = _sky_lib.create(precision)
 
-
     def append(self, other):
         """Appends data from another sky model.
 
@@ -55,7 +55,6 @@ class Sky(object):
             other (oskar.Sky): Another sky model.
         """
         _sky_lib.append(self._capsule, other._capsule)
-
 
     def append_sources(self, ra_deg, dec_deg, I, Q=None, U=None, V=None, 
             ref_freq_hz=None, spectral_index=None, rotation_measure=None,
@@ -110,7 +109,6 @@ class Sky(object):
             numpy.radians(minor_axis_arcsec / 3600.0), 
             numpy.radians(position_angle_deg))
 
-
     def append_file(self, filename):
         """Appends data to the sky model from a text file.
 
@@ -119,13 +117,11 @@ class Sky(object):
         """
         _sky_lib.append_file(self._capsule, filename)
 
-
     def create_copy(self):
         """Creates a copy of the sky model."""
         t = Sky()
         t._capsule = _sky_lib.create_copy(self._capsule)
         return t
-
 
     def filter_by_flux(self, min_flux_jy, max_flux_jy):
         """Filters the sky model according to Stokes-I flux.
@@ -137,7 +133,6 @@ class Sky(object):
             max_flux_jy (float): Maximum allowed flux, in Jy.
         """
         _sky_lib.filter_by_flux(self._capsule, min_flux_jy, max_flux_jy)
-
 
     def filter_by_radius(self, inner_radius_deg, outer_radius_deg, 
             ra0_deg, dec0_deg):
@@ -154,7 +149,6 @@ class Sky(object):
         _sky_lib.filter_by_radius(self._capsule, 
             math.radians(inner_radius_deg), math.radians(outer_radius_deg), 
             math.radians(ra0_deg), math.radians(dec0_deg))
-
 
     @classmethod
     def from_fits_file(cls, filename, min_peak_fraction=0.0, min_abs_val=0.0,
@@ -189,7 +183,6 @@ class Sky(object):
             spectral_index, precision)
         return t
 
-
     @classmethod
     def generate_grid(cls, ra0_deg, dec0_deg, side_length, fov_deg,
             mean_flux_jy=1.0, std_flux_jy=0.0, seed=1, precision='double'):
@@ -211,7 +204,6 @@ class Sky(object):
             fov_deg, mean_flux_jy, std_flux_jy, seed, precision)
         return t
 
-
     @classmethod
     def generate_random_power_law(cls, num_sources, min_flux_jy, max_flux_jy,
             power_law_index, seed=1, precision='double'):
@@ -231,6 +223,13 @@ class Sky(object):
             min_flux_jy, max_flux_jy, power_law_index, seed, precision)
         return t
 
+    def get_num_sources(self):
+        """Returns the number of sources in the sky model.
+
+        Returns:
+            int: Number of sources in the sky model.
+        """
+        return _sky_lib.num_sources(self._capsule)
 
     @classmethod
     def load(cls, filename, precision='double'):
@@ -245,7 +244,6 @@ class Sky(object):
         t._capsule = _sky_lib.load(filename, precision)
         return t
 
-
     def save(self, filename):
         """Saves data to a sky model text file.
 
@@ -254,3 +252,5 @@ class Sky(object):
         """
         _sky_lib.save(self._capsule, filename)
 
+    # Properties
+    num_sources = property(get_num_sources)

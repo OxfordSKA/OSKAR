@@ -505,6 +505,16 @@ static PyObject* load(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* num_sources(PyObject* self, PyObject* args)
+{
+    oskar_Sky *h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    return Py_BuildValue("i", oskar_sky_num_sources(h));
+}
+
+
 static PyObject* save(PyObject* self, PyObject* args)
 {
     oskar_Sky *h = 0;
@@ -601,6 +611,8 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "generate_random_power_law(num_sources, "
                 "min_flux_jy, max_flux_jy, power, seed, precision)"},
         {"load", (PyCFunction)load, METH_VARARGS, "load(filename, precision)"},
+        {"num_sources", (PyCFunction)num_sources,
+                METH_VARARGS, "num_sources()"},
         {"save", (PyCFunction)save, METH_VARARGS, "save(filename)"},
         {"set_up", (PyCFunction)set_up, METH_VARARGS, "set_up(settings_path)"},
         {NULL, NULL, 0, NULL}
