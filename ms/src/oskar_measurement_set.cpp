@@ -31,6 +31,7 @@
 #include <ms/MeasurementSets.h>
 #include <tables/Tables.h>
 #include <casa/Arrays/Vector.h>
+#include <casa/Arrays/Cube.h>
 
 #include <string>
 #include <sstream>
@@ -317,22 +318,19 @@ void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p,
     MSMainColumns* msmc = p->msmc;
     if (!msmc) return;
 
-    // Allocate storage for a (u,v,w) coordinate,
-    // a visibility matrix, a visibility weight, and a flag matrix.
-    unsigned int n_pols = p->num_pols;
-    unsigned int n_channels = p->num_channels;
+    // Allocate storage for a (u,v,w) coordinate and a visibility weight.
+    unsigned int num_pols = p->num_pols;
+    unsigned int num_channels = p->num_channels;
     Vector<Double> uvw(3);
-    Matrix<Complex> vis_data(n_pols, n_channels);
-    Matrix<Bool> flag(n_pols, n_channels, false);
-    Vector<Float> weight(n_pols, 1.0);
-    Vector<Float> sigma(n_pols, 1.0);
+    Matrix<Complex> vis_data(num_pols, num_channels);
+    Vector<Float> weight(num_pols, 1.0);
+    Vector<Float> sigma(num_pols, 1.0);
 
     // Get references to columns.
     ArrayColumn<Double>& col_uvw = msmc->uvw();
     ArrayColumn<Complex>& col_data = msmc->data();
     ScalarColumn<Int>& col_antenna1 = msmc->antenna1();
     ScalarColumn<Int>& col_antenna2 = msmc->antenna2();
-    ArrayColumn<Bool>& col_flag = msmc->flag();
     ArrayColumn<Float>& col_weight = msmc->weight();
     ArrayColumn<Float>& col_sigma = msmc->sigma();
     ScalarColumn<Double>& col_exposure = msmc->exposure();
@@ -346,14 +344,14 @@ void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p,
         unsigned int row = r + start_row;
 
         // Get a pointer to the start of the visibility matrix for this row.
-        const double* vis_row = vis + (2 * n_pols * n_channels) * r;
+        const double* vis_row = vis + (2 * num_pols * num_channels) * r;
 
         // Fill the visibility matrix (polarisation and channel data).
-        for (unsigned int c = 0; c < n_channels; ++c)
+        for (unsigned int c = 0; c < num_channels; ++c)
         {
-            for (unsigned int p = 0; p < n_pols; ++p)
+            for (unsigned int p = 0; p < num_pols; ++p)
             {
-                unsigned int b = 2 * (p + c * n_pols);
+                unsigned int b = 2 * (p + c * num_pols);
                 vis_data(p, c) = Complex(vis_row[b], vis_row[b + 1]);
             }
         }
@@ -364,7 +362,6 @@ void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p,
         col_antenna1.put(row, ant1[r]);
         col_antenna2.put(row, ant2[r]);
         col_data.put(row, vis_data);
-        col_flag.put(row, flag);
         col_weight.put(row, weight);
         col_sigma.put(row, sigma);
         col_exposure.put(row, exposure);
@@ -379,31 +376,25 @@ void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p,
     p->time_inc_sec = interval;
 }
 
-void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p,
-        unsigned int start_row, unsigned int num_baselines,
-        const float* u, const float* v, const float* w, const float* vis,
-        const int* ant1, const int* ant2, double exposure, double interval,
-        double time)
+void oskar_ms_write_baselines_d(oskar_MeasurementSet* p,
+        unsigned int time_index, unsigned int num_baselines,
+        const double* uu, const double* vv, const double* ww, const int* ant1,
+        const int* ant2, double exposure, double interval, double time)
 {
     MSMainColumns* msmc = p->msmc;
     if (!msmc) return;
 
-    // Allocate storage for a (u,v,w) coordinate,
-    // a visibility matrix, a visibility weight, and a flag matrix.
-    unsigned int n_pols = p->num_pols;
-    unsigned int n_channels = p->num_channels;
+    // Allocate storage for a (u,v,w) coordinate and a visibility weight.
+    unsigned int num_pols = p->num_pols;
+    unsigned int num_channels = p->num_channels;
     Vector<Double> uvw(3);
-    Matrix<Complex> vis_data(n_pols, n_channels);
-    Matrix<Bool> flag(n_pols, n_channels, false);
-    Vector<Float> weight(n_pols, 1.0);
-    Vector<Float> sigma(n_pols, 1.0);
+    Vector<Float> weight(num_pols, 1.0);
+    Vector<Float> sigma(num_pols, 1.0);
 
     // Get references to columns.
     ArrayColumn<Double>& col_uvw = msmc->uvw();
-    ArrayColumn<Complex>& col_data = msmc->data();
     ScalarColumn<Int>& col_antenna1 = msmc->antenna1();
     ScalarColumn<Int>& col_antenna2 = msmc->antenna2();
-    ArrayColumn<Bool>& col_flag = msmc->flag();
     ArrayColumn<Float>& col_weight = msmc->weight();
     ArrayColumn<Float>& col_sigma = msmc->sigma();
     ScalarColumn<Double>& col_exposure = msmc->exposure();
@@ -411,31 +402,20 @@ void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p,
     ScalarColumn<Double>& col_time = msmc->time();
     ScalarColumn<Double>& col_timeCentroid = msmc->timeCentroid();
 
-    // Loop over rows / visibilities.
+    // Add new rows if required.
+    if (oskar_ms_num_rows(p) < (time_index + 1) * num_baselines)
+        oskar_ms_set_num_rows(p, (time_index + 1) * num_baselines);
+
+    // Loop over rows to add.
     for (unsigned int r = 0; r < num_baselines; ++r)
     {
-        unsigned int row = r + start_row;
-
-        // Get a pointer to the start of the visibility matrix for this row.
-        const float* vis_row = vis + (2 * n_pols * n_channels) * r;
-
-        // Fill the visibility matrix (polarisation and channel data).
-        for (unsigned int c = 0; c < n_channels; ++c)
-        {
-            for (unsigned int p = 0; p < n_pols; ++p)
-            {
-                unsigned int b = 2 * (p + c * n_pols);
-                vis_data(p, c) = Complex(vis_row[b], vis_row[b + 1]);
-            }
-        }
+        unsigned int row = r + (time_index * num_baselines);
 
         // Write the data to the Measurement Set.
-        uvw(0) = u[r]; uvw(1) = v[r]; uvw(2) = w[r];
+        uvw(0) = uu[r]; uvw(1) = vv[r]; uvw(2) = ww[r];
         col_uvw.put(row, uvw);
         col_antenna1.put(row, ant1[r]);
         col_antenna2.put(row, ant2[r]);
-        col_data.put(row, vis_data);
-        col_flag.put(row, flag);
         col_weight.put(row, weight);
         col_sigma.put(row, sigma);
         col_exposure.put(row, exposure);
@@ -448,6 +428,152 @@ void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p,
     if (time < p->start_time) p->start_time = time - interval/2.0;
     if (time > p->end_time) p->end_time = time + interval/2.0;
     p->time_inc_sec = interval;
+}
+
+void oskar_ms_write_baselines_f(oskar_MeasurementSet* p,
+        unsigned int time_index, unsigned int num_baselines,
+        const float* uu, const float* vv, const float* ww, const int* ant1,
+        const int* ant2, double exposure, double interval, double time)
+{
+    MSMainColumns* msmc = p->msmc;
+    if (!msmc) return;
+
+    // Allocate storage for a (u,v,w) coordinate and a visibility weight.
+    unsigned int num_pols = p->num_pols;
+    unsigned int num_channels = p->num_channels;
+    Vector<Double> uvw(3);
+    Vector<Float> weight(num_pols, 1.0);
+    Vector<Float> sigma(num_pols, 1.0);
+
+    // Get references to columns.
+    ArrayColumn<Double>& col_uvw = msmc->uvw();
+    ScalarColumn<Int>& col_antenna1 = msmc->antenna1();
+    ScalarColumn<Int>& col_antenna2 = msmc->antenna2();
+    ArrayColumn<Float>& col_weight = msmc->weight();
+    ArrayColumn<Float>& col_sigma = msmc->sigma();
+    ScalarColumn<Double>& col_exposure = msmc->exposure();
+    ScalarColumn<Double>& col_interval = msmc->interval();
+    ScalarColumn<Double>& col_time = msmc->time();
+    ScalarColumn<Double>& col_timeCentroid = msmc->timeCentroid();
+
+    // Add new rows if required.
+    if (oskar_ms_num_rows(p) < (time_index + 1) * num_baselines)
+        oskar_ms_set_num_rows(p, (time_index + 1) * num_baselines);
+
+    // Loop over rows to add.
+    for (unsigned int r = 0; r < num_baselines; ++r)
+    {
+        unsigned int row = r + (time_index * num_baselines);
+
+        // Write the data to the Measurement Set.
+        uvw(0) = uu[r]; uvw(1) = vv[r]; uvw(2) = ww[r];
+        col_uvw.put(row, uvw);
+        col_antenna1.put(row, ant1[r]);
+        col_antenna2.put(row, ant2[r]);
+        col_weight.put(row, weight);
+        col_sigma.put(row, sigma);
+        col_exposure.put(row, exposure);
+        col_interval.put(row, interval);
+        col_time.put(row, time);
+        col_timeCentroid.put(row, time);
+    }
+
+    // Check/update time range.
+    if (time < p->start_time) p->start_time = time - interval/2.0;
+    if (time > p->end_time) p->end_time = time + interval/2.0;
+    p->time_inc_sec = interval;
+}
+
+void oskar_ms_write_vis_d(oskar_MeasurementSet* p,
+        unsigned int start_time, unsigned int start_channel,
+        unsigned int num_times, unsigned int num_channels,
+        unsigned int num_baselines, const double* vis)
+{
+    MSMainColumns* msmc = p->msmc;
+    if (!msmc) return;
+
+    // Allocate storage for the block of visibility data.
+    unsigned int num_pols = p->num_pols;
+    IPosition shape(3, num_pols, num_channels, num_times * num_baselines);
+    Array<Complex> vis_data(shape);
+    Cube<Complex> cube;
+    cube.reference(vis_data);
+
+    // Copy OSKAR visibility data into the CASA container.
+    for (unsigned int t = 0; t < num_times; ++t)
+    {
+        for (unsigned int c = 0; c < num_channels; ++c)
+        {
+            for (unsigned int b = 0; b < num_baselines; ++b)
+            {
+                for (unsigned int p = 0; p < num_pols; ++p)
+                {
+                    unsigned int i = 2 * (num_pols * (num_baselines *
+                            (t * num_channels + c) + b) + p);
+                    cube(p, c, t * num_baselines + b) =
+                            Complex(vis[i], vis[i + 1]);
+                }
+            }
+        }
+    }
+
+    // Create the slicers for the column.
+    IPosition start1(1, start_time * num_baselines);
+    IPosition length1(1, num_times * num_baselines);
+    Slicer row_range(start1, length1);
+    IPosition start2(2, 0, start_channel);
+    IPosition length2(2, num_pols, num_channels);
+    Slicer array_section(start2, length2);
+
+    // Write visibilities to DATA column.
+    ArrayColumn<Complex>& col_data = msmc->data();
+    col_data.putColumnRange(row_range, array_section, vis_data);
+}
+
+void oskar_ms_write_vis_f(oskar_MeasurementSet* p,
+        unsigned int start_time, unsigned int start_channel,
+        unsigned int num_times, unsigned int num_channels,
+        unsigned int num_baselines, const float* vis)
+{
+    MSMainColumns* msmc = p->msmc;
+    if (!msmc) return;
+
+    // Allocate storage for the block of visibility data.
+    unsigned int num_pols = p->num_pols;
+    IPosition shape(3, num_pols, num_channels, num_times * num_baselines);
+    Array<Complex> vis_data(shape);
+    Cube<Complex> cube;
+    cube.reference(vis_data);
+
+    // Copy OSKAR visibility data into the CASA container.
+    for (unsigned int t = 0; t < num_times; ++t)
+    {
+        for (unsigned int c = 0; c < num_channels; ++c)
+        {
+            for (unsigned int b = 0; b < num_baselines; ++b)
+            {
+                for (unsigned int p = 0; p < num_pols; ++p)
+                {
+                    unsigned int i = 2 * (num_pols * (num_baselines *
+                            (t * num_channels + c) + b) + p);
+                    cube(p, c, t * num_baselines + b) =
+                            Complex(vis[i], vis[i + 1]);
+                }
+            }
+        }
+    }
+
+    // Create the slicers for the column.
+    IPosition start1(1, start_time * num_baselines);
+    IPosition length1(1, num_times * num_baselines);
+    Slicer row_range(start1, length1);
+    IPosition start2(2, 0, start_channel);
+    IPosition length2(2, num_pols, num_channels);
+    Slicer array_section(start2, length2);
+
+    // Write visibilities to DATA column.
+    ArrayColumn<Complex>& col_data = msmc->data();
+    col_data.putColumnRange(row_range, array_section, vis_data);
 }
 
 void oskar_ms_set_num_rows(oskar_MeasurementSet* p, unsigned int num)

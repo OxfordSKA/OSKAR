@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     double dt_dump_sec, t_start_mjd, t_start_sec, ra_rad, dec_rad, ref_freq_hz;
     unsigned int a1, a2, num_baseln_in, num_baseln_out, num_channels;
     unsigned int num_pols_in, num_pols_out, num_stations, num_times, b, c, t;
-    unsigned int i, i_out, prec, start_row, start_time_index;
+    unsigned int i, i_out, prec, start_row, start_time_index, start_chan_index;
     unsigned int have_autocorr, have_crosscorr;
     const int *baseline_s1, *baseline_s2;
     const void *xcorr, *acorr;
@@ -73,6 +73,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     have_autocorr    = oskar_vis_block_has_auto_correlations(blk);
     have_crosscorr   = oskar_vis_block_has_cross_correlations(blk);
     start_time_index = oskar_vis_block_start_time_index(blk);
+    start_chan_index = oskar_vis_block_start_channel_index(blk);
     ra_rad           = oskar_vis_header_phase_centre_ra_deg(header) * D2R;
     dec_rad          = oskar_vis_header_phase_centre_dec_deg(header) * D2R;
     dt_dump_sec      = oskar_vis_header_time_inc_sec(header);
@@ -99,8 +100,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     }
 
     /* Check the dimensions match. */
-    if (oskar_ms_num_channels(ms) != num_channels ||
-            oskar_ms_num_pols(ms) != num_pols_out ||
+    if (oskar_ms_num_pols(ms) != num_pols_out ||
             oskar_ms_num_stations(ms) != num_stations)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
@@ -172,22 +172,19 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
             /* Construct the amplitude data for the given time. */
             if (num_pols_in == 4)
             {
-                for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
+                for (c = 0, i_out = 0; c < num_channels; ++c)
                 {
-                    if (have_autocorr)
+                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
-                        for (c = 0; c < num_channels; ++c)
+                        if (have_autocorr)
                         {
                             i = num_stations * (t * num_channels + c) + a1;
                             ((double4c*)out)[i_out++] =
                                     ((const double4c*)acorr)[i];
                         }
-                    }
-                    if (have_crosscorr)
-                    {
-                        for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                        if (have_crosscorr)
                         {
-                            for (c = 0; c < num_channels; ++c)
+                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
                             {
                                 i = num_baseln_in * (t * num_channels + c) + b;
                                 ((double4c*)out)[i_out++] =
@@ -199,22 +196,19 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
             }
             else if (num_pols_in == 1 && num_pols_out == 1)
             {
-                for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
+                for (c = 0, i_out = 0; c < num_channels; ++c)
                 {
-                    if (have_autocorr)
+                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
-                        for (c = 0; c < num_channels; ++c)
+                        if (have_autocorr)
                         {
                             i = num_stations * (t * num_channels + c) + a1;
                             ((double2*)out)[i_out++] =
                                     ((const double2*)acorr)[i];
                         }
-                    }
-                    if (have_crosscorr)
-                    {
-                        for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                        if (have_crosscorr)
                         {
-                            for (c = 0; c < num_channels; ++c)
+                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
                             {
                                 i = num_baseln_in * (t * num_channels + c) + b;
                                 ((double2*)out)[i_out++] =
@@ -228,11 +222,11 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
             {
                 double2 vis_amp, *out_;
                 out_ = (double2*)out;
-                for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
+                for (c = 0, i_out = 0; c < num_channels; ++c)
                 {
-                    if (have_autocorr)
+                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
-                        for (c = 0; c < num_channels; ++c, i_out += 4)
+                        if (have_autocorr)
                         {
                             i = num_stations * (t * num_channels + c) + a1;
                             vis_amp = ((const double2*)acorr)[i];
@@ -242,13 +236,11 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                             out_[i_out + 2].x = 0.0;    /* YX */
                             out_[i_out + 2].y = 0.0;    /* YX */
                             out_[i_out + 3] = vis_amp;  /* YY */
+                            i_out += 4;
                         }
-                    }
-                    if (have_crosscorr)
-                    {
-                        for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                        if (have_crosscorr)
                         {
-                            for (c = 0; c < num_channels; ++c, i_out += 4)
+                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
                             {
                                 i = num_baseln_in * (t * num_channels + c) + b;
                                 vis_amp = ((const double2*)xcorr)[i];
@@ -258,16 +250,18 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                                 out_[i_out + 2].x = 0.0;    /* YX */
                                 out_[i_out + 2].y = 0.0;    /* YX */
                                 out_[i_out + 3] = vis_amp;  /* YY */
+                                i_out += 4;
                             }
                         }
                     }
                 }
             }
-            oskar_ms_write_all_for_time_d(ms, start_row + t * num_baseln_out,
-                    num_baseln_out, uu_out, vv_out, ww_out,
-                    (const double*)out, baseline_s1, baseline_s2,
+            oskar_ms_write_baselines_d(ms, start_time_index + t, num_baseln_out,
+                    uu_out, vv_out, ww_out, baseline_s1, baseline_s2,
                     oskar_vis_header_time_average_sec(header),
                     dt_dump_sec, t_start_sec + (t * dt_dump_sec));
+            oskar_ms_write_vis_d(ms, start_time_index + t, start_chan_index,
+                    1, num_channels, num_baseln_out, (const double*)out);
         }
     }
     else if (prec == OSKAR_SINGLE)
@@ -307,22 +301,19 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
             /* Construct the amplitude data for the given time. */
             if (num_pols_in == 4)
             {
-                for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
+                for (c = 0, i_out = 0; c < num_channels; ++c)
                 {
-                    if (have_autocorr)
+                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
-                        for (c = 0; c < num_channels; ++c)
+                        if (have_autocorr)
                         {
                             i = num_stations * (t * num_channels + c) + a1;
                             ((float4c*)out)[i_out++] =
                                     ((const float4c*)acorr)[i];
                         }
-                    }
-                    if (have_crosscorr)
-                    {
-                        for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                        if (have_crosscorr)
                         {
-                            for (c = 0; c < num_channels; ++c)
+                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
                             {
                                 i = num_baseln_in * (t * num_channels + c) + b;
                                 ((float4c*)out)[i_out++] =
@@ -334,22 +325,19 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
             }
             else if (num_pols_in == 1 && num_pols_out == 1)
             {
-                for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
+                for (c = 0, i_out = 0; c < num_channels; ++c)
                 {
-                    if (have_autocorr)
+                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
-                        for (c = 0; c < num_channels; ++c)
+                        if (have_autocorr)
                         {
                             i = num_stations * (t * num_channels + c) + a1;
                             ((float2*)out)[i_out++] =
                                     ((const float2*)acorr)[i];
                         }
-                    }
-                    if (have_crosscorr)
-                    {
-                        for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                        if (have_crosscorr)
                         {
-                            for (c = 0; c < num_channels; ++c)
+                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
                             {
                                 i = num_baseln_in * (t * num_channels + c) + b;
                                 ((float2*)out)[i_out++] =
@@ -363,11 +351,11 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
             {
                 float2 vis_amp, *out_;
                 out_ = (float2*)out;
-                for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
+                for (c = 0, i_out = 0; c < num_channels; ++c)
                 {
-                    if (have_autocorr)
+                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
-                        for (c = 0; c < num_channels; ++c, i_out += 4)
+                        if (have_autocorr)
                         {
                             i = num_stations * (t * num_channels + c) + a1;
                             vis_amp = ((const float2*)acorr)[i];
@@ -377,13 +365,11 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                             out_[i_out + 2].x = 0.0;    /* YX */
                             out_[i_out + 2].y = 0.0;    /* YX */
                             out_[i_out + 3] = vis_amp;  /* YY */
+                            i_out += 4;
                         }
-                    }
-                    if (have_crosscorr)
-                    {
-                        for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                        if (have_crosscorr)
                         {
-                            for (c = 0; c < num_channels; ++c, i_out += 4)
+                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
                             {
                                 i = num_baseln_in * (t * num_channels + c) + b;
                                 vis_amp = ((const float2*)xcorr)[i];
@@ -393,16 +379,18 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                                 out_[i_out + 2].x = 0.0;    /* YX */
                                 out_[i_out + 2].y = 0.0;    /* YX */
                                 out_[i_out + 3] = vis_amp;  /* YY */
+                                i_out += 4;
                             }
                         }
                     }
                 }
             }
-            oskar_ms_write_all_for_time_f(ms, start_row + t * num_baseln_out,
-                    num_baseln_out, uu_out, vv_out, ww_out,
-                    (const float*)out, baseline_s1, baseline_s2,
+            oskar_ms_write_baselines_f(ms, start_time_index + t, num_baseln_out,
+                    uu_out, vv_out, ww_out, baseline_s1, baseline_s2,
                     oskar_vis_header_time_average_sec(header),
                     dt_dump_sec, t_start_sec + (t * dt_dump_sec));
+            oskar_ms_write_vis_f(ms, start_time_index + t, start_chan_index,
+                    1, num_channels, num_baseln_out, (const float*)out);
         }
     }
     else

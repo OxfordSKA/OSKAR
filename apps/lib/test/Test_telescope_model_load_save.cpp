@@ -54,6 +54,7 @@ TEST(telescope_model_load_save, test_0_level)
     double altitude_m = 1.0;
 
     {
+        FILE* f;
         int num_stations = 10;
 
         // Create a telescope model directory.
@@ -62,13 +63,13 @@ TEST(telescope_model_load_save, test_0_level)
         cwd.cd(path);
 
         // Write the top-level layout file only.
-        QFile file(cwd.absoluteFilePath("layout.txt"));
-        file.open(QFile::WriteOnly);
-        QTextStream stream(&file);
+        f = fopen(cwd.absoluteFilePath("layout.txt").toLatin1().data(), "w");
         for (int i = 0; i < num_stations; ++i)
-        {
-            stream << i * 10.0 << "," << i * 20.0 << "," << i * 30.0 << endl;
-        }
+            fprintf(f, "%.1f, %.1f, %.1f\n", i * 10.0, i * 20.0, i * 30.0);
+        fclose(f);
+        f = fopen(cwd.absoluteFilePath("position.txt").toLatin1().data(), "w");
+        fprintf(f, "0.0, 0.0\n");
+        fclose(f);
     }
 
     // Load it back again.
@@ -574,6 +575,16 @@ static void generate_noisy_telescope(const QString& dir,
         QTextStream out(&file);
         for (int i = 0; i < num_stations; ++i)
             out << "0,0" << endl;
+    }
+
+    // Write position file.
+    {
+        QString config_file = "position.txt";
+        QFile file(dir + QDir::separator() + config_file);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+            return;
+        QTextStream out(&file);
+        out << "0,0" << endl;
     }
 
     // Write frequency file.

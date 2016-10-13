@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -151,7 +151,15 @@ const int* oskar_vis_block_baseline_station2_const(const oskar_VisBlock* vis)
     return oskar_mem_int_const(vis->a2, &status);
 }
 
-void oskar_vis_block_set_num_times(oskar_VisBlock* vis, int value, int* status)
+void oskar_vis_block_set_num_channels(oskar_VisBlock* vis,
+        int value, int* status)
+{
+    oskar_vis_block_resize(vis, oskar_vis_block_num_times(vis),
+            value, oskar_vis_block_num_stations(vis), status);
+}
+
+void oskar_vis_block_set_num_times(oskar_VisBlock* vis,
+        int value, int* status)
 {
     oskar_vis_block_resize(vis, value,
             oskar_vis_block_num_channels(vis),

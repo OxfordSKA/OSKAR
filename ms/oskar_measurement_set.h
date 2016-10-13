@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -298,7 +298,7 @@ double oskar_ms_time_inc_sec(const oskar_MeasurementSet* p);
 
 /**
  * @details
- * Writes visibility data to the main table.
+ * DEPRECATAED. Writes visibility data to the main table.
  *
  * @details
  * This function writes the given block of visibility data to the main table of
@@ -346,39 +346,23 @@ void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p,
 
 /**
  * @details
- * Writes visibility data to the main table.
+ * Writes baseline data to the main table.
  *
  * @details
- * This function writes the given block of visibility data to the main table of
- * the Measurement Set. The dimensionality of the complex \p vis data block
- * is num_pols * num_channels * num_baselines, with num_pols the
- * fastest varying dimension, then num_channels, and finally num_baselines.
+ * This function writes the given block of baseline coordinates to the
+ * main table of the Measurement Set, extending it if necessary.
  *
- * Each row of the main table holds data from a single baseline for a
- * single time stamp. The data block is repeated as many times as necessary.
+ * This function should be called for each time step to write out the
+ * baseline coordinate data.
  *
  * The time is given in units of (MJD) * 86400, i.e. seconds since
  * Julian date 2400000.5.
  *
- * The layout of \p vis corresponding to a three-element interferometer with
- * four polarisations and two channels would be (for C-ordered memory):
- *
- * ant0-1
- *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
- *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
- * ant0-2
- *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
- *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
- * ant1-2
- *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
- *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
- *
- * @param[in] start_row     The start row index of the Measurement Set.
- * @param[in] num_baselines Number of rows to add to the main table (see note).
+ * @param[in] time_index    The simulation time index this block corresponds to.
+ * @param[in] num_baselines Number of rows to add to the main table.
  * @param[in] u             Baseline u-coordinates, in metres.
- * @param[in] v             Baseline v-coordinate, in metres.
- * @param[in] w             Baseline w-coordinate, in metres.
- * @param[in] vis           Matrix of complex visibilities per row (see note).
+ * @param[in] v             Baseline v-coordinates, in metres.
+ * @param[in] w             Baseline w-coordinates, in metres.
  * @param[in] ant1          Indices of antenna 1 for each baseline.
  * @param[in] ant2          Indices of antenna 2 for each baseline.
  * @param[in] exposure      The exposure length per visibility, in seconds.
@@ -386,11 +370,89 @@ void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p,
  * @param[in] time          Timestamp of visibility block.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p,
-        unsigned int start_row, unsigned int num_baselines,
-        const float* u, const float* v, const float* w, const float* vis,
-        const int* ant1, const int* ant2, double exposure, double interval,
-        double time);
+void oskar_ms_write_baselines_d(oskar_MeasurementSet* p,
+        unsigned int time_index, unsigned int num_baselines,
+        const double* uu, const double* vv, const double* ww, const int* ant1,
+        const int* ant2, double exposure, double interval, double time);
+
+/**
+ * @details
+ * Writes baseline data to the main table.
+ *
+ * @details
+ * This function writes the given block of baseline coordinates to the
+ * main table of the Measurement Set, extending it if necessary.
+ *
+ * This function should be called for each time step to write out the
+ * baseline coordinate data.
+ *
+ * The time is given in units of (MJD) * 86400, i.e. seconds since
+ * Julian date 2400000.5.
+ *
+ * @param[in] time_index    The simulation time index this block corresponds to.
+ * @param[in] num_baselines Number of rows to add to the main table.
+ * @param[in] u             Baseline u-coordinates, in metres.
+ * @param[in] v             Baseline v-coordinates, in metres.
+ * @param[in] w             Baseline w-coordinates, in metres.
+ * @param[in] ant1          Indices of antenna 1 for each baseline.
+ * @param[in] ant2          Indices of antenna 2 for each baseline.
+ * @param[in] exposure      The exposure length per visibility, in seconds.
+ * @param[in] interval      The interval length per visibility, in seconds.
+ * @param[in] time          Timestamp of visibility block.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_write_baselines_f(oskar_MeasurementSet* p,
+        unsigned int time_index, unsigned int num_baselines,
+        const float* uu, const float* vv, const float* ww, const int* ant1,
+        const int* ant2, double exposure, double interval, double time);
+
+/**
+ * @details
+ * Writes visibility data to the main table.
+ *
+ * @details
+ * This function writes the given block of visibility data to the data column
+ * of the Measurement Set. The dimensionality of the complex \p vis data block
+ * is num_times * num_channels * num_baselines * num_pols, with num_pols the
+ * fastest varying dimension, then num_baselines, then num_channels,
+ * and num_times the slowest.
+ *
+ * @param[in] start_time    The start time index of the visibility block.
+ * @param[in] start_channel The start channel index of the visibility block.
+ * @param[in] num_times     The number of times in the visibility block.
+ * @param[in] num_channels  The number of channels in the visibility block.
+ * @param[in] num_baselines The number of baselines in the visibility block.
+ * @param[in] vis           Pointer to complex visibility block.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_write_vis_d(oskar_MeasurementSet* p,
+        unsigned int start_time, unsigned int start_channel,
+        unsigned int num_times, unsigned int num_channels,
+        unsigned int num_baselines, const double* vis);
+
+/**
+ * @details
+ * Writes visibility data to the main table.
+ *
+ * @details
+ * This function writes the given block of visibility data to the data column
+ * of the Measurement Set. The dimensionality of the complex \p vis data block
+ * is num_times * num_channels * num_baselines * num_pols, with num_pols the
+ * fastest varying dimension, then num_baselines, then num_channels,
+ * and num_times the slowest.
+ *
+ * @param[in] start_time    The start time index of the visibility block.
+ * @param[in] start_channel The start channel index of the visibility block.
+ * @param[in] num_times     The number of times in the visibility block.
+ * @param[in] num_channels  The number of channels in the visibility block.
+ * @param[in] num_baselines The number of baselines in the visibility block.
+ * @param[in] vis           Pointer to complex visibility block.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_write_vis_f(oskar_MeasurementSet* p,
+        unsigned int start_time, unsigned int start_channel,
+        unsigned int num_times, unsigned int num_channels,
+        unsigned int num_baselines, const float* vis);
 
 /**
  * @brief Sets the number of rows in the main table.

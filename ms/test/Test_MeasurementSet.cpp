@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,7 @@ TEST(MeasurementSet, test_create_simple)
     oskar_ms_close(ms);
 }
 
+
 TEST(MeasurementSet, test_multi_channel)
 {
     int status = 0;
@@ -67,7 +68,7 @@ TEST(MeasurementSet, test_multi_channel)
     int n_ant = 3;           // Number of antennas.
     int n_pol = 4;           // Number of polarisations.
     int n_chan = 10;         // Number of channels.
-    int n_dumps = 2;         // Number of total correlator dumps.
+    int n_times = 2;         // Number of correlator dumps.
 
     // Define other meta-data.
     const char* filename = "multi_channel.ms";
@@ -95,78 +96,77 @@ TEST(MeasurementSet, test_multi_channel)
 
     // Create test data (without complex conjugate).
     int n_baselines = n_ant * (n_ant - 1) / 2;
-    int n_rows = n_baselines * n_dumps;
-    std::vector<double> u(n_rows), v(n_rows), w(n_rows);
-    std::vector< std::complex<double> > vis_data(n_pol * n_chan * n_rows);
-    std::vector<int> ant1(n_rows), ant2(n_rows);
-
-    oskar_ms_set_num_rows(ms, n_rows);
+    std::vector<double> u(n_baselines), v(n_baselines), w(n_baselines);
+    std::vector< std::complex<double> > vis_data(n_pol * n_chan * n_baselines);
+    std::vector<int> ant1(n_baselines), ant2(n_baselines);
 
     // Fill the vectors.
-    for (int d = 0, r = 0; d < n_dumps; ++d)
+    for (int t = 0; t < n_times; ++t)
     {
-        int start_row = d * n_baselines;
-        for (int ai = 0; ai < n_ant; ++ai)
+        for (int ai = 0, b = 0; ai < n_ant; ++ai)
         {
-            for (int aj = ai+1; aj < n_ant; ++aj)
+            for (int aj = ai+1; aj < n_ant; ++b, ++aj)
             {
                 // Create the u,v,w coordinates.
-                u[r] = 10.0 * r;
-                v[r] = 50.0 * r;
-                w[r] = 100.0 * r;
+                u[b] = 10.0 * (t + 1) + b;
+                v[b] = 100.0 * (t + 1) + b;
+                w[b] = 1000.0 * (t + 1) + b;
 
-                // Create the visibility data.
-                for (int c = 0; c < n_chan; ++c)
+                // Create the antenna index pairs.
+                ant1[b] = ai;
+                ant2[b] = aj;
+            }
+        }
+        oskar_ms_write_baselines_d(ms, t, n_baselines, &u[0], &v[0], &w[0],
+                &ant1[0], &ant2[0], exposure, interval, (double)t);
+
+        for (int c = 0; c < n_chan; ++c)
+        {
+            for (int ai = 0, b = 0; ai < n_ant; ++ai)
+            {
+                for (int aj = ai+1; aj < n_ant; ++b, ++aj)
                 {
+                    // Create the visibility data.
                     for (int p = 0; p < n_pol; ++p)
                     {
-                        int vi = r * n_pol * n_chan + c * n_pol + p;
+                        int vi = c * n_baselines * n_pol + b * n_pol + p;
                         double re = (p + 1) * (c + 1) * 10.0;
-                        double im = (double)r;
+                        double im = 10.0 * (t + 1) + b;
                         vis_data[vi] = std::complex<double>(re, im);
                     }
                 }
-
-                // Create the antenna index pairs.
-                ant1[r] = ai;
-                ant2[r] = aj;
-
-                // Increment the row index.
-                ++r;
             }
         }
-        oskar_ms_write_all_for_time_d(ms, start_row, n_baselines,
-                &u[start_row], &v[start_row], &w[start_row],
-                (double*)(&vis_data[start_row]), &ant1[start_row],
-                &ant2[start_row], exposure, interval, (double)d);
+        oskar_ms_write_vis_d(ms, t, 0, 1, n_chan,
+                n_baselines, (double*)(&vis_data[0]));
     }
 
     // Read the data back again.
-    size_t vis_size = n_baselines * n_dumps * n_chan * n_pol *
+    size_t vis_size = n_baselines * n_times * n_chan * n_pol *
             sizeof(std::complex<float>);
-    size_t uvw_size = n_baselines * n_dumps * sizeof(double) * 3;
+    size_t uvw_size = n_baselines * n_times * sizeof(double) * 3;
     size_t required_vis_size = 0, required_uvw_size = 0;
     void* vis = malloc(vis_size);
     void* uvw = malloc(uvw_size);
-    oskar_ms_get_column(ms, "DATA", 0, n_baselines * n_dumps, vis_size, vis,
+    oskar_ms_get_column(ms, "DATA", 0, n_baselines * n_times, vis_size, vis,
             &required_vis_size, &status);
-    oskar_ms_get_column(ms, "UVW", 0, n_baselines * n_dumps, uvw_size, uvw,
+    oskar_ms_get_column(ms, "UVW", 0, n_baselines * n_times, uvw_size, uvw,
             &required_uvw_size, &status);
     ASSERT_EQ(0, status);
     ASSERT_EQ(required_vis_size, vis_size);
     ASSERT_EQ(required_uvw_size, uvw_size);
 
     // Check the data.
-    for (int d = 0, r = 0; d < n_dumps; ++d)
+    for (int t = 0, r = 0; t < n_times; ++t)
     {
-        for (int ai = 0; ai < n_ant; ++ai)
+        for (int ai = 0, b = 0; ai < n_ant; ++ai)
         {
-            for (int aj = ai+1; aj < n_ant; ++aj, ++r)
+            for (int aj = ai+1; aj < n_ant; ++b, ++aj, ++r)
             {
                 // Read the u,v,w coordinates.
-                ASSERT_EQ(((double*)uvw)[r*3 + 0], u[r]);
-                ASSERT_EQ(((double*)uvw)[r*3 + 1], v[r]);
-                ASSERT_EQ(((double*)uvw)[r*3 + 2], w[r]);
+                ASSERT_EQ(((double*)uvw)[r*3 + 0], 10.0 * (t + 1) + b);
+                ASSERT_EQ(((double*)uvw)[r*3 + 1], 100.0 * (t + 1) + b);
+                ASSERT_EQ(((double*)uvw)[r*3 + 2], 1000.0 * (t + 1) + b);
 
                 // Read the visibility data.
                 for (int c = 0; c < n_chan; ++c)
@@ -175,8 +175,9 @@ TEST(MeasurementSet, test_multi_channel)
                     {
                         int vi = r * n_pol * n_chan + c * n_pol + p;
                         double re = (p + 1) * (c + 1) * 10.0;
-                        double im = (double)r;
-                        vis_data[vi] = std::complex<double>(re, im);
+                        double im = 10.0 * (t + 1) + b;
+                        ASSERT_EQ(((float*)vis)[2 * vi], re);
+                        ASSERT_EQ(((float*)vis)[2 * vi + 1], im);
                     }
                 }
             }

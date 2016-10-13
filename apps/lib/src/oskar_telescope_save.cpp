@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include "apps/lib/oskar_dir.h"
 #include "apps/lib/oskar_telescope_save.h"
 #include <apps/lib/oskar_dir.h>
+#include <oskar_cmath.h>
 
 #include <QtCore/QDir>
 #include <QtCore/QStringList>
@@ -83,6 +84,20 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
 
     if (depth == 0)
     {
+        // Write the reference position.
+        QByteArray path_position = dir.filePath("position.txt").toLatin1();
+        FILE* file = fopen(path_position, "w");
+        if (!file)
+        {
+            *status = OSKAR_ERR_FILE_IO;
+            return;
+        }
+        fprintf(file, "%.12f, %.12f, %.12f\n",
+                oskar_telescope_lon_rad(telescope) * 180.0 / M_PI,
+                oskar_telescope_lat_rad(telescope) * 180.0 / M_PI,
+                oskar_telescope_alt_metres(telescope));
+        fclose(file);
+
         // Write the station coordinates.
         QByteArray path = dir.filePath(layout_name).toLatin1();
         oskar_telescope_save_layout(telescope, path, status);
