@@ -1,6 +1,6 @@
-# 
+#
 #  This file is part of OSKAR.
-# 
+#
 # Copyright (c) 2016, The University of Oxford
 # All rights reserved.
 #
@@ -17,7 +17,7 @@
 #  3. Neither the name of the University of Oxford nor the names of its
 #     contributors may be used to endorse or promote products derived from this
 #     software without specific prior written permission.
-# 
+#
 #  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,9 +29,10 @@
 #  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 
-from simulator import Simulator
+from __future__ import absolute_import, division
+from .simulator import Simulator
 
 
 class ImagingSimulator(Simulator):
@@ -53,7 +54,6 @@ class ImagingSimulator(Simulator):
         self._return_images = False
         self._return_grids = False
 
-
     def finalise(self):
         """Called automatically by the base class at the end of run()."""
         Simulator.finalise(self)
@@ -64,7 +64,6 @@ class ImagingSimulator(Simulator):
                     return_images=self._return_images,
                     return_grids=self._return_grids))
             return imager_output_data
-
 
     def process_block(self, block, block_index):
         """Writes the visibility block to any open file(s), and images it.
@@ -77,7 +76,6 @@ class ImagingSimulator(Simulator):
             self.write_block(block, block_index)
         for im in self._imagers:
             im.update_from_block(self.vis_header(), block)
-
 
     def run(self, return_images=False, return_grids=False):
         """Runs the simulator and imagers.
@@ -105,10 +103,8 @@ class ImagingSimulator(Simulator):
         # Simulate and image the visibilities.
         return Simulator.run(self)
 
-
     def set_coords_only(self, value):
         """Calls set_coords_only() on simulator and imager objects."""
         Simulator.set_coords_only(self, value)
         for im in self._imagers:
             im.set_coords_only(value)
-

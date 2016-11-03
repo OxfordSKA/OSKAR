@@ -1,6 +1,6 @@
-# 
+#
 #  This file is part of OSKAR.
-# 
+#
 # Copyright (c) 2016, The University of Oxford
 # All rights reserved.
 #
@@ -17,7 +17,7 @@
 #  3. Neither the name of the University of Oxford nor the names of its
 #     contributors may be used to endorse or promote products derived from this
 #     software without specific prior written permission.
-# 
+#
 #  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,21 +29,22 @@
 #  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 
 from __future__ import absolute_import, division
 from . import _measurement_set_lib
 
+
 class MeasurementSet(object):
-    """This class provides a Python interface to the OSKAR Measurement Set wrapper."""
+    """This class provides a Python interface to a Measurement Set."""
 
     def __init__(self):
         """The default constructor does nothing. Use create() or open()."""
         self._capsule = 0
 
     @classmethod
-    def create(cls, file_name, num_stations, num_channels, num_pols, 
-               ref_freq_hz, chan_width_hz, write_autocorr=False, 
+    def create(cls, file_name, num_stations, num_channels, num_pols,
+               ref_freq_hz, chan_width_hz, write_autocorr=False,
                write_crosscorr=True):
         """Creates a new, empty Measurement Set with the given name.
 
@@ -63,7 +64,7 @@ class MeasurementSet(object):
         """
         t = MeasurementSet()
         t._capsule = _measurement_set_lib.create(
-            file_name, num_stations, num_channels, num_pols, 
+            file_name, num_stations, num_channels, num_pols,
             ref_freq_hz, chan_width_hz, write_autocorr, write_crosscorr)
         return t
 
@@ -134,7 +135,7 @@ class MeasurementSet(object):
             array: visibility data block.
         """
         return _measurement_set_lib.read_vis(
-            self._capsule, start_row, start_channel, 
+            self._capsule, start_row, start_channel,
             num_channels, num_baselines, column)
 
     def set_phase_centre(self, longitude_rad, latitude_rad):
@@ -147,7 +148,7 @@ class MeasurementSet(object):
         return _measurement_set_lib.set_phase_centre(
             self._capsule, longitude_rad, latitude_rad)
 
-    def write_coords(self, start_row, num_baselines, uu, vv, ww, 
+    def write_coords(self, start_row, num_baselines, uu, vv, ww,
                      exposure_sec, interval_sec, time_stamp):
         """Writes baseline coordinate data to the main table.
 
@@ -183,7 +184,7 @@ class MeasurementSet(object):
                   num_baselines, vis):
         """Writes visibility data to the main table.
 
-        This function writes the given block of visibility data to the 
+        This function writes the given block of visibility data to the
         data column of the Measurement Set, extending it if necessary.
 
         The dimensionality of the complex vis data block is:

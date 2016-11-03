@@ -1,6 +1,6 @@
-# 
+#
 #  This file is part of OSKAR.
-# 
+#
 # Copyright (c) 2016, The University of Oxford
 # All rights reserved.
 #
@@ -17,7 +17,7 @@
 #  3. Neither the name of the University of Oxford nor the names of its
 #     contributors may be used to endorse or promote products derived from this
 #     software without specific prior written permission.
-# 
+#
 #  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,12 +29,13 @@
 #  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 
 from __future__ import absolute_import, division
 import math
 import numpy
 from . import _sky_lib
+
 
 class Sky(object):
     """This class provides a Python interface to an OSKAR sky model."""
@@ -56,10 +57,10 @@ class Sky(object):
         """
         _sky_lib.append(self._capsule, other._capsule)
 
-    def append_sources(self, ra_deg, dec_deg, I, Q=None, U=None, V=None, 
-            ref_freq_hz=None, spectral_index=None, rotation_measure=None,
-            major_axis_arcsec=None, minor_axis_arcsec=None, 
-            position_angle_deg=None):
+    def append_sources(self, ra_deg, dec_deg, I, Q=None, U=None, V=None,
+                       ref_freq_hz=None, spectral_index=None,
+                       rotation_measure=None, major_axis_arcsec=None,
+                       minor_axis_arcsec=None, position_angle_deg=None):
         """Appends source data to an OSKAR sky model from arrays in memory.
 
         Args:
@@ -102,11 +103,11 @@ class Sky(object):
             minor_axis_arcsec = numpy.zeros_like(I)
         if position_angle_deg is None:
             position_angle_deg = numpy.zeros_like(I)
-        _sky_lib.append_sources(self._capsule, 
-            numpy.radians(ra_deg), numpy.radians(dec_deg), I, Q, U, V, 
-            ref_freq_hz, spectral_index, rotation_measure, 
-            numpy.radians(major_axis_arcsec / 3600.0), 
-            numpy.radians(minor_axis_arcsec / 3600.0), 
+        _sky_lib.append_sources(
+            self._capsule, numpy.radians(ra_deg), numpy.radians(dec_deg),
+            I, Q, U, V, ref_freq_hz, spectral_index, rotation_measure,
+            numpy.radians(major_axis_arcsec / 3600.0),
+            numpy.radians(minor_axis_arcsec / 3600.0),
             numpy.radians(position_angle_deg))
 
     def append_file(self, filename):
@@ -134,8 +135,8 @@ class Sky(object):
         """
         _sky_lib.filter_by_flux(self._capsule, min_flux_jy, max_flux_jy)
 
-    def filter_by_radius(self, inner_radius_deg, outer_radius_deg, 
-            ra0_deg, dec0_deg):
+    def filter_by_radius(self, inner_radius_deg, outer_radius_deg,
+                         ra0_deg, dec0_deg):
         """Filters the sky model according to source radius from phase centre.
 
         Sources outside the range are deleted.
@@ -146,14 +147,16 @@ class Sky(object):
             ra0_deg (float): Right Ascension of phase centre, in degrees.
             dec0_deg (float): Declination of phase centre, in degrees.
         """
-        _sky_lib.filter_by_radius(self._capsule, 
-            math.radians(inner_radius_deg), math.radians(outer_radius_deg), 
+        _sky_lib.filter_by_radius(
+            self._capsule, math.radians(inner_radius_deg),
+            math.radians(outer_radius_deg),
             math.radians(ra0_deg), math.radians(dec0_deg))
 
     @classmethod
     def from_fits_file(cls, filename, min_peak_fraction=0.0, min_abs_val=0.0,
-            default_map_units='K', override_units=False,
-            frequency_hz=0.0, spectral_index=-0.7, precision='double'):
+                       default_map_units='K', override_units=False,
+                       frequency_hz=0.0, spectral_index=-0.7,
+                       precision='double'):
         """Loads data from a FITS file and returns it as a new sky model.
 
         The file can be either a regular FITS image
@@ -178,14 +181,15 @@ class Sky(object):
                 the numerical precision of the data.
         """
         t = Sky()
-        t._capsule = _sky_lib.from_fits_file(filename, min_peak_fraction,
-            min_abs_val, default_map_units, override_units, frequency_hz,
-            spectral_index, precision)
+        t._capsule = _sky_lib.from_fits_file(
+            filename, min_peak_fraction, min_abs_val, default_map_units,
+            override_units, frequency_hz, spectral_index, precision)
         return t
 
     @classmethod
     def generate_grid(cls, ra0_deg, dec0_deg, side_length, fov_deg,
-            mean_flux_jy=1.0, std_flux_jy=0.0, seed=1, precision='double'):
+                      mean_flux_jy=1.0, std_flux_jy=0.0, seed=1,
+                      precision='double'):
         """Generates a grid of sources and returns it as a new sky model.
 
         Args:
@@ -194,19 +198,20 @@ class Sky(object):
             side_length (int):    Side length of generated grid.
             fov_deg (float):      Grid field-of-view, in degrees.
             mean_flux_jy (float): Mean Stokes-I source flux, in Jy.
-            std_flux_jy (float):  Standard deviation Stokes-I source flux, in Jy.
+            std_flux_jy (float):  Standard deviation Stokes-I flux, in Jy.
             seed (int):           Random generator seed.
             precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the data.
         """
         t = Sky()
-        t._capsule = _sky_lib.generate_grid(ra0_deg, dec0_deg, side_length,
-            fov_deg, mean_flux_jy, std_flux_jy, seed, precision)
+        t._capsule = _sky_lib.generate_grid(
+            ra0_deg, dec0_deg, side_length, fov_deg, mean_flux_jy,
+            std_flux_jy, seed, precision)
         return t
 
     @classmethod
     def generate_random_power_law(cls, num_sources, min_flux_jy, max_flux_jy,
-            power_law_index, seed=1, precision='double'):
+                                  power_law_index, seed=1, precision='double'):
         """Generates sources scattered randomly over the sphere.
 
         Args:
@@ -219,8 +224,9 @@ class Sky(object):
                 the numerical precision of the data.
         """
         t = Sky()
-        t._capsule = _sky_lib.generate_random_power_law(num_sources,
-            min_flux_jy, max_flux_jy, power_law_index, seed, precision)
+        t._capsule = _sky_lib.generate_random_power_law(
+            num_sources, min_flux_jy, max_flux_jy, power_law_index, seed,
+            precision)
         return t
 
     def get_num_sources(self):
