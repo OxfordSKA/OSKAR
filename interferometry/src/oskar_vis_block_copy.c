@@ -55,8 +55,6 @@ void oskar_vis_block_copy(oskar_VisBlock* dst, const oskar_VisBlock* src,
     oskar_mem_copy(dst->baseline_ww_metres, src->baseline_ww_metres, status);
     oskar_mem_copy(dst->auto_correlations, src->auto_correlations, status);
     oskar_mem_copy(dst->cross_correlations, src->cross_correlations, status);
-    oskar_mem_copy(dst->a1, src->a1, status);
-    oskar_mem_copy(dst->a2, src->a2, status);
 }
 
 #ifdef __cplusplus

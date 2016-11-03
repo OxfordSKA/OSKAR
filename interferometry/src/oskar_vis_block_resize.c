@@ -37,13 +37,9 @@ void oskar_vis_block_resize(oskar_VisBlock* vis, int num_times,
         int num_channels, int num_stations, int* status)
 {
     int num_autocorr = 0, num_xcorr = 0, num_baselines = 0, num_coords = 0;
-    int old_num_stations;
 
     /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Get the old number of stations. */
-    old_num_stations  = vis->dim_start_size[5];
 
     /* Set dimensions. */
     if (vis->has_cross_correlations)
@@ -63,34 +59,6 @@ void oskar_vis_block_resize(oskar_VisBlock* vis, int num_times,
     oskar_mem_realloc(vis->baseline_ww_metres, num_coords, status);
     oskar_mem_realloc(vis->auto_correlations, num_autocorr, status);
     oskar_mem_realloc(vis->cross_correlations, num_xcorr, status);
-    oskar_mem_realloc(vis->a1, num_baselines + num_stations, status);
-    oskar_mem_realloc(vis->a2, num_baselines + num_stations, status);
-
-    /* Re-evaluate baseline index arrays for Measurement Set if required. */
-    if (num_stations != old_num_stations &&
-            (vis->has_cross_correlations || vis->has_auto_correlations))
-    {
-        int *b_s1, *b_s2, i, s1, s2;
-        b_s1 = oskar_mem_int(vis->a1, status);
-        b_s2 = oskar_mem_int(vis->a2, status);
-        for (s1 = 0, i = 0; s1 < num_stations; ++s1)
-        {
-            if (vis->has_auto_correlations)
-            {
-                b_s1[i] = s1;
-                b_s2[i] = s1;
-                ++i;
-            }
-            if (vis->has_cross_correlations)
-            {
-                for (s2 = s1 + 1; s2 < num_stations; ++i, ++s2)
-                {
-                    b_s1[i] = s1;
-                    b_s2[i] = s2;
-                }
-            }
-        }
-    }
 }
 
 #ifdef __cplusplus

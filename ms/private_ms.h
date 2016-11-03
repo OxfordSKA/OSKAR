@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_block.h>
-#include <oskar_vis_block.h>
+#include <ms/MeasurementSets.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void oskar_vis_block_free(oskar_VisBlock* vis, int* status)
+struct oskar_MeasurementSet
 {
-    if (!vis) return;
+    casa::MeasurementSet* ms;   // Pointer to the Measurement Set.
+    casa::MSColumns* msc;       // Pointer to the sub-tables.
+    casa::MSMainColumns* msmc;  // Pointer to the main columns.
+    char* app_name;
+    unsigned int *a1, *a2;
+    unsigned int num_pols, num_channels, num_stations, num_receptors;
+    double ref_freq, chan_width;
+    double phase_centre_ra, phase_centre_dec;
+    double start_time, end_time, time_inc_sec;
+};
+#ifndef OSKAR_MEASUREMENT_SET_TYPEDEF_
+#define OSKAR_MEASUREMENT_SET_TYPEDEF_
+typedef struct oskar_MeasurementSet oskar_MeasurementSet;
+#endif /* OSKAR_MEASUREMENT_SET_TYPEDEF_ */
 
-    /* Free memory. */
-    oskar_mem_free(vis->baseline_uu_metres, status);
-    oskar_mem_free(vis->baseline_vv_metres, status);
-    oskar_mem_free(vis->baseline_ww_metres, status);
-    oskar_mem_free(vis->auto_correlations, status);
-    oskar_mem_free(vis->cross_correlations, status);
-
-    /* Free the structure itself. */
-    free(vis);
-}
-
-#ifdef __cplusplus
-}
-#endif

@@ -139,18 +139,6 @@ const oskar_Mem* oskar_vis_block_cross_correlations_const(
     return vis->cross_correlations;
 }
 
-const int* oskar_vis_block_baseline_station1_const(const oskar_VisBlock* vis)
-{
-    int status = 0;
-    return oskar_mem_int_const(vis->a1, &status);
-}
-
-const int* oskar_vis_block_baseline_station2_const(const oskar_VisBlock* vis)
-{
-    int status = 0;
-    return oskar_mem_int_const(vis->a2, &status);
-}
-
 void oskar_vis_block_set_num_channels(oskar_VisBlock* vis,
         int value, int* status)
 {

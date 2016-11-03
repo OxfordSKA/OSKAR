@@ -75,9 +75,6 @@ oskar_VisBlock* oskar_vis_block_create(int location, int amp_type,
     vis->baseline_ww_metres = oskar_mem_create(type, location, 0, status);
     vis->auto_correlations  = oskar_mem_create(amp_type, location, 0, status);
     vis->cross_correlations = oskar_mem_create(amp_type, location, 0, status);
-    /* TODO Move these to oskar_MeasurementSet. */
-    vis->a1 = oskar_mem_create(OSKAR_INT, OSKAR_CPU, 0, status);
-    vis->a2 = oskar_mem_create(OSKAR_INT, OSKAR_CPU, 0, status);
 
     /* Set dimensions. */
     oskar_vis_block_resize(vis, num_times, num_channels, num_stations, status);

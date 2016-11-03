@@ -43,6 +43,7 @@ from imaging_simulator import ImagingSimulator
 from imager import Imager
 from vis_block import VisBlock
 from vis_header import VisHeader
+from measurement_set import MeasurementSet
 import bda
 
 #import sky

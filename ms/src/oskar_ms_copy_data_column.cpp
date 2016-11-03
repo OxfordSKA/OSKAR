@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_block.h>
-#include <oskar_vis_block.h>
+#include <oskar_measurement_set.h>
+#include <private_ms.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <tables/Tables.h>
 
-void oskar_vis_block_free(oskar_VisBlock* vis, int* status)
+#include <cstring>
+
+using namespace casa;
+
+void oskar_ms_copy_data_column(oskar_MeasurementSet* p, const char* source,
+        const char* dest)
 {
-    if (!vis) return;
+    if (!p->ms || !p->msmc) return;
 
-    /* Free memory. */
-    oskar_mem_free(vis->baseline_uu_metres, status);
-    oskar_mem_free(vis->baseline_vv_metres, status);
-    oskar_mem_free(vis->baseline_ww_metres, status);
-    oskar_mem_free(vis->auto_correlations, status);
-    oskar_mem_free(vis->cross_correlations, status);
+    unsigned int n_rows = p->ms->nrow();
+    ArrayColumn<Complex>* source_column;
+    ArrayColumn<Complex>* dest_column;
 
-    /* Free the structure itself. */
-    free(vis);
+    // Get the source column.
+    if (!strcmp(source, "DATA"))
+        source_column = &p->msmc->data();
+    else if (!strcmp(source, "MODEL_DATA"))
+        source_column = &p->msmc->modelData();
+    else if (!strcmp(source, "CORRECTED_DATA"))
+        source_column = &p->msmc->correctedData();
+    else
+        return;
+
+    // Get the destination column.
+    if (!strcmp(dest, "DATA"))
+        dest_column = &p->msmc->data();
+    else if (!strcmp(dest, "MODEL_DATA"))
+        dest_column = &p->msmc->modelData();
+    else if (!strcmp(dest, "CORRECTED_DATA"))
+        dest_column = &p->msmc->correctedData();
+    else
+        return;
+
+    // Copy the data.
+    for (unsigned int i = 0; i < n_rows; ++i)
+    {
+        dest_column->put(i, *source_column);
+    }
 }
-
-#ifdef __cplusplus
-}
-#endif

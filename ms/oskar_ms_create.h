@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_block.h>
-#include <oskar_vis_block.h>
+#ifndef OSKAR_MS_CREATE_H_
+#define OSKAR_MS_CREATE_H_
+
+/**
+ * @file oskar_ms_create.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_vis_block_free(oskar_VisBlock* vis, int* status)
-{
-    if (!vis) return;
-
-    /* Free memory. */
-    oskar_mem_free(vis->baseline_uu_metres, status);
-    oskar_mem_free(vis->baseline_vv_metres, status);
-    oskar_mem_free(vis->baseline_ww_metres, status);
-    oskar_mem_free(vis->auto_correlations, status);
-    oskar_mem_free(vis->cross_correlations, status);
-
-    /* Free the structure itself. */
-    free(vis);
-}
+/**
+ * @brief Creates a new Measurement Set.
+ *
+ * @details
+ * Creates a new, empty Measurement Set with the given name.
+ *
+ * @param[in] file_name       The file name to use.
+ * @param[in] app_name        The name of the application creating the MS.
+ * @param[in] num_stations    The number of antennas/stations.
+ * @param[in] num_channels    The number of channels in the band.
+ * @param[in] num_pols        The number of polarisations (1, 2 or 4).
+ * @param[in] ref_freq_hz     The frequency at the centre of channel 0, in Hz.
+ * @param[in] chan_width_hz   The width of each channel, in Hz.
+ * @param[in] write_autocorr  If set, write auto-correlation data.
+ * @param[in] write_crosscorr If set, write cross-correlation data.
+ */
+OSKAR_MS_EXPORT
+oskar_MeasurementSet* oskar_ms_create(const char* file_name,
+        const char* app_name, unsigned int num_stations,
+        unsigned int num_channels, unsigned int num_pols, double ref_freq_hz,
+        double chan_width_hz, int write_autocorr, int write_crosscorr);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_MS_CREATE_H_ */

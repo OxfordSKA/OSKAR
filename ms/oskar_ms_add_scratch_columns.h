@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_block.h>
-#include <oskar_vis_block.h>
+#ifndef OSKAR_MS_ADD_SCRATCH_COLUMNS_H_
+#define OSKAR_MS_ADD_SCRATCH_COLUMNS_H_
+
+/**
+ * @file oskar_ms_add_scratch_columns.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_vis_block_free(oskar_VisBlock* vis, int* status)
-{
-    if (!vis) return;
-
-    /* Free memory. */
-    oskar_mem_free(vis->baseline_uu_metres, status);
-    oskar_mem_free(vis->baseline_vv_metres, status);
-    oskar_mem_free(vis->baseline_ww_metres, status);
-    oskar_mem_free(vis->auto_correlations, status);
-    oskar_mem_free(vis->cross_correlations, status);
-
-    /* Free the structure itself. */
-    free(vis);
-}
+/**
+ * @brief Adds scratch columns CORRECTED_DATA and MODEL_DATA.
+ *
+ * @details
+ * Add the scratch columns CORRECTED_DATA and MODEL_DATA to the Measurement Set
+ * main table.
+ *
+ * @param[in] add_model     If true, add the MODEL_DATA column.
+ * @param[in] add_corrected If true, add the CORRECTED_DATA column.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_add_scratch_columns(oskar_MeasurementSet* p,
+        int add_model, int add_corrected);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_MS_ADD_SCRATCH_COLUMNS_H_ */

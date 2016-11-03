@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_block.h>
-#include <oskar_vis_block.h>
+#ifndef OSKAR_MS_ADD_HISTORY_H_
+#define OSKAR_MS_ADD_HISTORY_H_
+
+/**
+ * @file oskar_ms_add_history.h
+ */
+
+#include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_vis_block_free(oskar_VisBlock* vis, int* status)
-{
-    if (!vis) return;
-
-    /* Free memory. */
-    oskar_mem_free(vis->baseline_uu_metres, status);
-    oskar_mem_free(vis->baseline_vv_metres, status);
-    oskar_mem_free(vis->baseline_ww_metres, status);
-    oskar_mem_free(vis->auto_correlations, status);
-    oskar_mem_free(vis->cross_correlations, status);
-
-    /* Free the structure itself. */
-    free(vis);
-}
+/**
+ * @brief Adds messages to the HISTORY table.
+ *
+ * @details
+ * Adds the supplied string to the HISTORY table.
+ * The string is split into lines, and each is added as its own
+ * HISTORY entry.
+ *
+ * @param[in] origin The string written to the ORIGIN column.
+ * @param[in] str    The string to write, which may contain multiple lines.
+ * @param[in] size   The length of the string.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_add_history(oskar_MeasurementSet* p, const char* origin,
+        const char* str, size_t size);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_MS_ADD_HISTORY_H_ */

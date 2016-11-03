@@ -44,12 +44,12 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
 {
     const oskar_Mem *in_acorr, *in_xcorr, *in_uu, *in_vv, *in_ww;
     oskar_Mem *temp_vis = 0, *temp_uu = 0, *temp_vv = 0, *temp_ww = 0;
-    double dt_dump_sec, t_start_mjd, t_start_sec, ra_rad, dec_rad, ref_freq_hz;
+    double exposure_sec, interval_sec, t_start_mjd, t_start_sec;
+    double ra_rad, dec_rad, ref_freq_hz;
     unsigned int a1, a2, num_baseln_in, num_baseln_out, num_channels;
     unsigned int num_pols_in, num_pols_out, num_stations, num_times, b, c, t;
-    unsigned int i, i_out, prec, start_row, start_time_index, start_chan_index;
+    unsigned int i, i_out, prec, start_time_index, start_chan_index;
     unsigned int have_autocorr, have_crosscorr;
-    const int *baseline_s1, *baseline_s2;
     const void *xcorr, *acorr;
     void* out;
 
@@ -68,20 +68,19 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     in_uu            = oskar_vis_block_baseline_uu_metres_const(blk);
     in_vv            = oskar_vis_block_baseline_vv_metres_const(blk);
     in_ww            = oskar_vis_block_baseline_ww_metres_const(blk);
-    baseline_s1      = oskar_vis_block_baseline_station1_const(blk);
-    baseline_s2      = oskar_vis_block_baseline_station2_const(blk);
     have_autocorr    = oskar_vis_block_has_auto_correlations(blk);
     have_crosscorr   = oskar_vis_block_has_cross_correlations(blk);
     start_time_index = oskar_vis_block_start_time_index(blk);
     start_chan_index = oskar_vis_block_start_channel_index(blk);
     ra_rad           = oskar_vis_header_phase_centre_ra_deg(header) * D2R;
     dec_rad          = oskar_vis_header_phase_centre_dec_deg(header) * D2R;
-    dt_dump_sec      = oskar_vis_header_time_inc_sec(header);
+    exposure_sec     = oskar_vis_header_time_average_sec(header);
+    interval_sec     = oskar_vis_header_time_inc_sec(header);
     t_start_mjd      = oskar_vis_header_time_start_mjd_utc(header);
     ref_freq_hz      = oskar_vis_header_freq_start_hz(header);
     prec             = oskar_mem_precision(in_xcorr);
     t_start_sec      = t_start_mjd * 86400.0 +
-            dt_dump_sec * (start_time_index + 0.5);
+            interval_sec * (start_time_index + 0.5);
 
     /* Check that there is something to write. */
     if (!have_autocorr && !have_crosscorr) return;
@@ -122,10 +121,6 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
         return;
     }
 
-    /* Set size of the main table. */
-    start_row = oskar_ms_num_rows(ms);
-    oskar_ms_set_num_rows(ms, start_row + num_times * num_baseln_out);
-
     /* Add visibilities and u,v,w coordinates. */
     temp_vis = oskar_mem_create(prec | OSKAR_COMPLEX, OSKAR_CPU,
             num_baseln_out * num_channels * num_pols_out, status);
@@ -148,6 +143,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
         for (t = 0; t < num_times; ++t)
         {
             /* Construct the baseline coordinates for the given time. */
+            int start_row = (start_time_index + t) * num_baseln_out;
             for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
             {
                 if (have_autocorr)
@@ -169,10 +165,10 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                 }
             }
 
-            /* Construct the amplitude data for the given time. */
-            if (num_pols_in == 4)
+            for (c = 0, i_out = 0; c < num_channels; ++c)
             {
-                for (c = 0, i_out = 0; c < num_channels; ++c)
+                /* Construct amplitude data for the given time and channel. */
+                if (num_pols_in == 4)
                 {
                     for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
@@ -193,10 +189,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                         }
                     }
                 }
-            }
-            else if (num_pols_in == 1 && num_pols_out == 1)
-            {
-                for (c = 0, i_out = 0; c < num_channels; ++c)
+                else if (num_pols_in == 1 && num_pols_out == 1)
                 {
                     for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
@@ -217,13 +210,10 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                         }
                     }
                 }
-            }
-            else
-            {
-                double2 vis_amp, *out_;
-                out_ = (double2*)out;
-                for (c = 0, i_out = 0; c < num_channels; ++c)
+                else
                 {
+                    double2 vis_amp, *out_;
+                    out_ = (double2*)out;
                     for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
                         if (have_autocorr)
@@ -256,12 +246,11 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                     }
                 }
             }
-            oskar_ms_write_baselines_d(ms, start_time_index + t, num_baseln_out,
-                    uu_out, vv_out, ww_out, baseline_s1, baseline_s2,
-                    oskar_vis_header_time_average_sec(header),
-                    dt_dump_sec, t_start_sec + (t * dt_dump_sec));
-            oskar_ms_write_vis_d(ms, start_time_index + t, start_chan_index,
-                    1, num_channels, num_baseln_out, (const double*)out);
+            oskar_ms_write_coords_d(ms, start_row, num_baseln_out,
+                    uu_out, vv_out, ww_out, exposure_sec, interval_sec,
+                    t_start_sec + (t * interval_sec));
+            oskar_ms_write_vis_d(ms, start_row, start_chan_index,
+                    num_channels, num_baseln_out, (const double*)out);
         }
     }
     else if (prec == OSKAR_SINGLE)
@@ -277,6 +266,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
         for (t = 0; t < num_times; ++t)
         {
             /* Construct the baseline coordinates for the given time. */
+            int start_row = (start_time_index + t) * num_baseln_out;
             for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
             {
                 if (have_autocorr)
@@ -298,10 +288,10 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                 }
             }
 
-            /* Construct the amplitude data for the given time. */
-            if (num_pols_in == 4)
+            for (c = 0, i_out = 0; c < num_channels; ++c)
             {
-                for (c = 0, i_out = 0; c < num_channels; ++c)
+                /* Construct amplitude data for the given time and channel. */
+                if (num_pols_in == 4)
                 {
                     for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
@@ -322,10 +312,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                         }
                     }
                 }
-            }
-            else if (num_pols_in == 1 && num_pols_out == 1)
-            {
-                for (c = 0, i_out = 0; c < num_channels; ++c)
+                else if (num_pols_in == 1 && num_pols_out == 1)
                 {
                     for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
@@ -346,13 +333,10 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                         }
                     }
                 }
-            }
-            else
-            {
-                float2 vis_amp, *out_;
-                out_ = (float2*)out;
-                for (c = 0, i_out = 0; c < num_channels; ++c)
+                else
                 {
+                    float2 vis_amp, *out_;
+                    out_ = (float2*)out;
                     for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                     {
                         if (have_autocorr)
@@ -385,12 +369,11 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                     }
                 }
             }
-            oskar_ms_write_baselines_f(ms, start_time_index + t, num_baseln_out,
-                    uu_out, vv_out, ww_out, baseline_s1, baseline_s2,
-                    oskar_vis_header_time_average_sec(header),
-                    dt_dump_sec, t_start_sec + (t * dt_dump_sec));
-            oskar_ms_write_vis_f(ms, start_time_index + t, start_chan_index,
-                    1, num_channels, num_baseln_out, (const float*)out);
+            oskar_ms_write_coords_f(ms, start_row, num_baseln_out,
+                    uu_out, vv_out, ww_out, exposure_sec, interval_sec,
+                    t_start_sec + (t * interval_sec));
+            oskar_ms_write_vis_f(ms, start_row, start_chan_index,
+                    num_channels, num_baseln_out, (const float*)out);
         }
     }
     else

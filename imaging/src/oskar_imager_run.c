@@ -75,6 +75,10 @@ void oskar_imager_run(oskar_Imager* h,
     use_ms = (len >= 3) && (
             !strcmp(&(h->input_file[len-3]), ".MS") ||
             !strcmp(&(h->input_file[len-3]), ".ms") ) ? 1 : 0;
+
+    /* Clear imager cache. */
+    oskar_imager_reset_cache(h, status);
+
     if (use_ms)
         oskar_imager_run_ms(h, h->input_file, status);
     else
@@ -137,9 +141,6 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
         oskar_binary_free(vis_file);
         return;
     }
-
-    /* Clear imager cache. */
-    oskar_imager_reset_cache(h, status);
 
     /* Create weights array and set all to 1. */
     weight = oskar_mem_create(
@@ -333,9 +334,6 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
         return;
     }
 
-    /* Clear imager cache. */
-    oskar_imager_reset_cache(h, status);
-
     /* Create arrays. */
     uvw = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             3 * num_baselines, status);
@@ -381,11 +379,11 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
             if (block_size > num_baselines) block_size = num_baselines;
             allocated = oskar_mem_length(uvw) *
                     oskar_mem_element_size(oskar_mem_type(uvw));
-            oskar_ms_get_column(ms, "UVW", start_row, block_size,
+            oskar_ms_read_column(ms, "UVW", start_row, block_size,
                     allocated, oskar_mem_void(uvw), &required, status);
             allocated = oskar_mem_length(weight) *
                     oskar_mem_element_size(oskar_mem_type(weight));
-            oskar_ms_get_column(ms, "WEIGHT", start_row, block_size,
+            oskar_ms_read_column(ms, "WEIGHT", start_row, block_size,
                     allocated, oskar_mem_void(weight), &required, status);
 
             /* Split up baseline coordinates. */
@@ -444,15 +442,15 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
         if (block_size > num_baselines) block_size = num_baselines;
         allocated = oskar_mem_length(uvw) *
                 oskar_mem_element_size(oskar_mem_type(uvw));
-        oskar_ms_get_column(ms, "UVW", start_row, block_size,
+        oskar_ms_read_column(ms, "UVW", start_row, block_size,
                 allocated, oskar_mem_void(uvw), &required, status);
         allocated = oskar_mem_length(weight) *
                 oskar_mem_element_size(oskar_mem_type(weight));
-        oskar_ms_get_column(ms, "WEIGHT", start_row, block_size,
+        oskar_ms_read_column(ms, "WEIGHT", start_row, block_size,
                 allocated, oskar_mem_void(weight), &required, status);
         allocated = oskar_mem_length(data) *
                 oskar_mem_element_size(oskar_mem_type(data));
-        oskar_ms_get_column(ms, h->ms_column, start_row, block_size,
+        oskar_ms_read_column(ms, h->ms_column, start_row, block_size,
                 allocated, oskar_mem_void(data), &required, status);
         ptr = data;
         if (*status) break;

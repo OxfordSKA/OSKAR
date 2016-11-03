@@ -106,12 +106,6 @@ const oskar_Mem* oskar_vis_block_cross_correlations_const(
         const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-const int* oskar_vis_block_baseline_station1_const(const oskar_VisBlock* vis);
-
-OSKAR_EXPORT
-const int* oskar_vis_block_baseline_station2_const(const oskar_VisBlock* vis);
-
-OSKAR_EXPORT
 void oskar_vis_block_set_num_channels(oskar_VisBlock* vis,
         int value, int* status);
 

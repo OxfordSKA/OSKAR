@@ -40,9 +40,9 @@ TEST(MeasurementSet, test_create_simple)
     double ay[] = {0, 0, 0};
     double az[] = {0, 0, 0};
     int na = sizeof(ax) / sizeof(double);
-    ms = oskar_ms_create("simple.ms", "test", 0.0, 1.570796, 1, 1,
-            400e6, 1.0, na, 0, 1);
+    ms = oskar_ms_create("simple.ms", "test", na, 1, 1, 400e6, 1.0, 0, 1);
     ASSERT_TRUE(ms);
+    oskar_ms_set_phase_centre(ms, 0, 0.0, 1.570796);
     oskar_ms_set_station_coords_d(ms, na, ax, ay, az);
 
     // Add test visibilities (don't include conjugated versions).
@@ -50,12 +50,9 @@ TEST(MeasurementSet, test_create_simple)
     double v[] = {0.0, -241.02, 1678.04};
     double w[] = {0.0, -56.0, 145.0};
     double vis[] = {1.0, 0.0, 0.00, 0.0, 0.00, 0.0};
-    int ant1[] = {0, 0, 1};
-    int ant2[] = {1, 2, 2};
-    int nv = sizeof(u) / sizeof(double);
-    oskar_ms_set_num_rows(ms, nv);
-    oskar_ms_write_all_for_time_d(ms, 0, nv, u, v, w, vis,
-            ant1, ant2, 90, 90, 1.0);
+    int num_baselines = sizeof(u) / sizeof(double);
+    oskar_ms_write_coords_d(ms, 0, num_baselines, u, v, w, 90.0, 90.0, 1.0);
+    oskar_ms_write_vis_d(ms, 0, 0, 1, num_baselines, vis);
     oskar_ms_close(ms);
 }
 
@@ -80,9 +77,10 @@ TEST(MeasurementSet, test_multi_channel)
     double chan_width = 25e3; // Channel width in Hz.
 
     // Create the Measurement Set.
-    oskar_MeasurementSet* ms = oskar_ms_create(filename, "test", ra, dec,
-            n_pol, n_chan, freq, chan_width, n_ant, 0, 1);
+    oskar_MeasurementSet* ms = oskar_ms_create(filename, "test",
+            n_ant, n_chan, n_pol, freq, chan_width, 0, 1);
     ASSERT_TRUE(ms);
+    oskar_ms_set_phase_centre(ms, 0, ra, dec);
 
     // Add some dummy antenna positions.
     std::vector<double> ax(n_ant), ay(n_ant), az(n_ant);
@@ -98,7 +96,6 @@ TEST(MeasurementSet, test_multi_channel)
     int n_baselines = n_ant * (n_ant - 1) / 2;
     std::vector<double> u(n_baselines), v(n_baselines), w(n_baselines);
     std::vector< std::complex<double> > vis_data(n_pol * n_chan * n_baselines);
-    std::vector<int> ant1(n_baselines), ant2(n_baselines);
 
     // Fill the vectors.
     for (int t = 0; t < n_times; ++t)
@@ -111,14 +108,10 @@ TEST(MeasurementSet, test_multi_channel)
                 u[b] = 10.0 * (t + 1) + b;
                 v[b] = 100.0 * (t + 1) + b;
                 w[b] = 1000.0 * (t + 1) + b;
-
-                // Create the antenna index pairs.
-                ant1[b] = ai;
-                ant2[b] = aj;
             }
         }
-        oskar_ms_write_baselines_d(ms, t, n_baselines, &u[0], &v[0], &w[0],
-                &ant1[0], &ant2[0], exposure, interval, (double)t);
+        oskar_ms_write_coords_d(ms, t * n_baselines, n_baselines,
+                &u[0], &v[0], &w[0], exposure, interval, (double)t);
 
         for (int c = 0; c < n_chan; ++c)
         {
@@ -137,8 +130,8 @@ TEST(MeasurementSet, test_multi_channel)
                 }
             }
         }
-        oskar_ms_write_vis_d(ms, t, 0, 1, n_chan,
-                n_baselines, (double*)(&vis_data[0]));
+        oskar_ms_write_vis_d(ms, t * n_baselines, 0, n_chan, n_baselines,
+                (double*)(&vis_data[0]));
     }
 
     // Read the data back again.
@@ -148,9 +141,9 @@ TEST(MeasurementSet, test_multi_channel)
     size_t required_vis_size = 0, required_uvw_size = 0;
     void* vis = malloc(vis_size);
     void* uvw = malloc(uvw_size);
-    oskar_ms_get_column(ms, "DATA", 0, n_baselines * n_times, vis_size, vis,
+    oskar_ms_read_column(ms, "DATA", 0, n_baselines * n_times, vis_size, vis,
             &required_vis_size, &status);
-    oskar_ms_get_column(ms, "UVW", 0, n_baselines * n_times, uvw_size, uvw,
+    oskar_ms_read_column(ms, "UVW", 0, n_baselines * n_times, uvw_size, uvw,
             &required_uvw_size, &status);
     ASSERT_EQ(0, status);
     ASSERT_EQ(required_vis_size, vis_size);

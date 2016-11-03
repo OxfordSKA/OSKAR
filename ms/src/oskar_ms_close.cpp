@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_block.h>
-#include <oskar_vis_block.h>
+#include <oskar_measurement_set.h>
+#include <private_ms.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cstdlib>
 
-void oskar_vis_block_free(oskar_VisBlock* vis, int* status)
+void oskar_ms_close(oskar_MeasurementSet* p)
 {
-    if (!vis) return;
-
-    /* Free memory. */
-    oskar_mem_free(vis->baseline_uu_metres, status);
-    oskar_mem_free(vis->baseline_vv_metres, status);
-    oskar_mem_free(vis->baseline_ww_metres, status);
-    oskar_mem_free(vis->auto_correlations, status);
-    oskar_mem_free(vis->cross_correlations, status);
-
-    /* Free the structure itself. */
-    free(vis);
+    if (!p) return;
+    oskar_ms_set_time_range(p);
+    if (p->msmc)
+        delete p->msmc;
+    if (p->msc)
+        delete p->msc;
+    if (p->ms)
+        delete p->ms;
+    free(p->a1);
+    free(p->a2);
+    free(p->app_name);
+    free(p);
 }
-
-#ifdef __cplusplus
-}
-#endif

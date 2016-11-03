@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         const char* ms_path, int overwrite, int force_polarised, int* status)
 {
     const oskar_Mem *x_metres, *y_metres, *z_metres;
-    double ref_freq_hz, chan_width, ra_rad, dec_rad;
+    double ref_freq_hz, chan_width_hz, ra_rad, dec_rad;
     int amp_type, autocorr, crosscorr, dir_exists;
     unsigned int num_stations, num_pols, num_channels;
     oskar_MeasurementSet* ms = 0;
@@ -51,29 +51,29 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     if (*status) return 0;
 
     /* Pull data from visibility structure. */
-    amp_type     = oskar_vis_header_amp_type(hdr);
-    num_stations = oskar_vis_header_num_stations(hdr);
-    num_channels = oskar_vis_header_num_channels_total(hdr);
-    ra_rad       = oskar_vis_header_phase_centre_ra_deg(hdr) * M_PI / 180.0;
-    dec_rad      = oskar_vis_header_phase_centre_dec_deg(hdr) * M_PI / 180.0;
-    ref_freq_hz  = oskar_vis_header_freq_start_hz(hdr);
+    amp_type      = oskar_vis_header_amp_type(hdr);
+    num_stations  = oskar_vis_header_num_stations(hdr);
+    num_channels  = oskar_vis_header_num_channels_total(hdr);
+    ra_rad        = oskar_vis_header_phase_centre_ra_deg(hdr) * M_PI / 180.0;
+    dec_rad       = oskar_vis_header_phase_centre_dec_deg(hdr) * M_PI / 180.0;
+    ref_freq_hz   = oskar_vis_header_freq_start_hz(hdr);
     /* NOTE Should the chan_width be freq_inc or channel bandwidth?
      * (These are different numbers in general.) */
-    chan_width   = oskar_vis_header_freq_inc_hz(hdr);
-    x_metres     = oskar_vis_header_station_x_offset_ecef_metres_const(hdr);
-    y_metres     = oskar_vis_header_station_y_offset_ecef_metres_const(hdr);
-    z_metres     = oskar_vis_header_station_z_offset_ecef_metres_const(hdr);
-    autocorr     = oskar_vis_header_write_auto_correlations(hdr);
-    crosscorr    = oskar_vis_header_write_cross_correlations(hdr);
-    num_pols     = oskar_type_is_matrix(amp_type) ? 4 : 1;
+    chan_width_hz = oskar_vis_header_freq_inc_hz(hdr);
+    x_metres      = oskar_vis_header_station_x_offset_ecef_metres_const(hdr);
+    y_metres      = oskar_vis_header_station_y_offset_ecef_metres_const(hdr);
+    z_metres      = oskar_vis_header_station_z_offset_ecef_metres_const(hdr);
+    autocorr      = oskar_vis_header_write_auto_correlations(hdr);
+    crosscorr     = oskar_vis_header_write_cross_correlations(hdr);
+    num_pols      = oskar_type_is_matrix(amp_type) ? 4 : 1;
 
     /* Force creation of polarised output data if flag is set. */
     if (force_polarised) num_pols = 4;
 
     /* Set channel width to be greater than 0, if it isn't already.
      * This is required for the Measurement Set to be valid. */
-    if (! (chan_width > 0.0))
-        chan_width = 1.0;
+    if (! (chan_width_hz > 0.0))
+        chan_width_hz = 1.0;
 
     /* If directory doesn't exist, or if overwrite flag is set,
      * create a new one. */
@@ -86,13 +86,16 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
 
         /* Create the Measurement Set. */
         ms = oskar_ms_create(ms_path, "OSKAR " OSKAR_VERSION_STR,
-                ra_rad, dec_rad, num_pols, num_channels, ref_freq_hz,
-                chan_width, num_stations, autocorr, crosscorr);
+                num_stations, num_channels, num_pols,
+                ref_freq_hz, chan_width_hz, autocorr, crosscorr);
         if (!ms)
         {
             *status = OSKAR_ERR_FILE_IO;
             return 0;
         }
+
+        /* Set the phase centre. */
+        oskar_ms_set_phase_centre(ms, 0, ra_rad, dec_rad);
 
         /* Set the station positions. */
         if (oskar_mem_type(x_metres) == OSKAR_DOUBLE)

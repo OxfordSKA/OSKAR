@@ -75,11 +75,6 @@ struct oskar_VisBlock
     oskar_Mem* baseline_uu_metres; /* Baseline coordinates, in metres. */
     oskar_Mem* baseline_vv_metres; /* Baseline coordinates, in metres. */
     oskar_Mem* baseline_ww_metres; /* Baseline coordinates, in metres. */
-
-    /* These arrays hold antenna/station indices for each baseline, and are
-     * only used when writing data to a Measurement Set. They are
-     * initialised in host memory on creation, and are not saved otherwise. */
-    oskar_Mem *a1, *a2;
 };
 
 #ifndef OSKAR_VIS_BLOCK_TYPEDEF_

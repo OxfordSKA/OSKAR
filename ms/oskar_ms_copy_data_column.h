@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_block.h>
-#include <oskar_vis_block.h>
+#ifndef OSKAR_MS_COPY_DATA_COLUMN_H_
+#define OSKAR_MS_COPY_DATA_COLUMN_H_
+
+/**
+ * @file oskar_ms_copy_data_column.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_vis_block_free(oskar_VisBlock* vis, int* status)
-{
-    if (!vis) return;
-
-    /* Free memory. */
-    oskar_mem_free(vis->baseline_uu_metres, status);
-    oskar_mem_free(vis->baseline_vv_metres, status);
-    oskar_mem_free(vis->baseline_ww_metres, status);
-    oskar_mem_free(vis->auto_correlations, status);
-    oskar_mem_free(vis->cross_correlations, status);
-
-    /* Free the structure itself. */
-    free(vis);
-}
+/**
+ * @brief Copies data from one column to another.
+ *
+ * @details
+ * Copies data from one column to another.
+ * Both columns must contain arrays of the same shape and data type.
+ *
+ * @param[in] source     Name of source column to copy.
+ * @param[in] dest       Name of destination column to copy into.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_copy_data_column(oskar_MeasurementSet* p,
+        const char* source, const char* dest);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_MS_COPY_DATA_COLUMN_H_ */

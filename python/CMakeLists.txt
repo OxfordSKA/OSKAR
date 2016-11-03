@@ -2,12 +2,17 @@
 # src/python/CMakeLists.txt
 #
 
-if (PYTHON_FOUND AND CUDA_FOUND)
+if (PYTHON_FOUND)
 
     include_directories(${PYTHON_INCLUDE_DIRS})
     include_directories(${NUMPY_INCLUDE_DIRS})
 
     set(OSKAR_PYTHON_INSTALL_DIR "${OSKAR_PYTHON_INSTALL_DIR}/oskar")
+
+    if (CASACORE_FOUND)
+        oskar_py_module(_measurement_set_lib src/oskar_measurement_set_lib.c LIBS oskar_ms)
+    endif()
+
     oskar_py_module(_bda_utils src/oskar_bda_utils.c)
     oskar_py_module(_imager_lib src/oskar_imager_lib.c LIBS oskar oskar_imager)
     if (CASACORE_FOUND)
