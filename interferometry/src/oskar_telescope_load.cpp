@@ -26,19 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_telescope_load.h"
-#include "apps/lib/private_TelescopeLoaderApodisation.h"
-#include "apps/lib/private_TelescopeLoaderElementPattern.h"
-#include "apps/lib/private_TelescopeLoaderElementTypes.h"
-#include "apps/lib/private_TelescopeLoaderFeedAngle.h"
-#include "apps/lib/private_TelescopeLoaderGainPhase.h"
-#include "apps/lib/private_TelescopeLoaderLayout.h"
-#include "apps/lib/private_TelescopeLoaderMountTypes.h"
-#include "apps/lib/private_TelescopeLoaderNoise.h"
-#include "apps/lib/private_TelescopeLoaderPermittedBeams.h"
-#include "apps/lib/private_TelescopeLoaderPosition.h"
+#include <oskar_telescope_load.h>
 #include <oskar_dir.h>
 #include <oskar_get_error_string.h>
+#include <private_TelescopeLoaderApodisation.h>
+#include <private_TelescopeLoaderElementPattern.h>
+#include <private_TelescopeLoaderElementTypes.h>
+#include <private_TelescopeLoaderFeedAngle.h>
+#include <private_TelescopeLoaderGainPhase.h>
+#include <private_TelescopeLoaderLayout.h>
+#include <private_TelescopeLoaderMountTypes.h>
+#include <private_TelescopeLoaderNoise.h>
+#include <private_TelescopeLoaderPermittedBeams.h>
+#include <private_TelescopeLoaderPosition.h>
 
 #include <cstdlib>
 #include <map>
@@ -49,12 +49,10 @@ using std::map;
 using std::string;
 using std::vector;
 
-// Private function prototype.
 static void load_directories(oskar_Telescope* telescope,
-        const oskar_Dir& cwd, oskar_Station* station, int depth,
+        const string& cwd, oskar_Station* station, int depth,
         const vector<oskar_TelescopeLoadAbstract*>& loaders,
         map<string, string> filemap, oskar_Log* log, int* status);
-
 
 extern "C"
 void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
@@ -95,9 +93,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
 
     // Load everything recursively from the telescope directory tree.
     map<string, string> filemap;
-    string path_str = string(path);
-    oskar_Dir telescope_dir(path_str);
-    load_directories(telescope, telescope_dir, NULL, 0, loaders,
+    load_directories(telescope, string(path), NULL, 0, loaders,
             filemap, log, status);
     if (*status)
     {
@@ -120,16 +116,18 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
 // Must pass filemap by value rather than by reference; otherwise, recursive
 // behaviour will not work as intended.
 static void load_directories(oskar_Telescope* telescope,
-        const oskar_Dir& cwd, oskar_Station* station, int depth,
+        const string& cwd, oskar_Station* station, int depth,
         const vector<oskar_TelescopeLoadAbstract*>& loaders,
         map<string, string> filemap, oskar_Log* log, int* status)
 {
+    int num_dirs = 0;
+    char** children = 0;
+
     // Check if safe to proceed.
     if (*status) return;
 
     // Get a list of all (child) stations in this directory, sorted by name.
-    vector<string> children = cwd.allSubDirs();
-    int num_dirs = children.size();
+    oskar_dir_items(cwd.c_str(), NULL, 0, 1, &num_dirs, &children);
 
     // Top-level depth.
     if (depth == 0)
@@ -141,19 +139,18 @@ static void load_directories(oskar_Telescope* telescope,
             if (*status)
             {
                 string s = string("Error in ") + loaders[i]->name() +
-                        string(" in '") + cwd.absolutePath() + string("'.");
+                        string(" in '") + cwd + string("'.");
                 oskar_log_error(log, "%s", s.c_str());
-                return;
+                goto fail;
             }
         }
 
         if (num_dirs == 1)
         {
             // One station directory. Load and copy it to all the others.
-            oskar_Dir child_dir(cwd.filePath(children[0]));
-
             // Recursive call to load the station.
-            load_directories(telescope, child_dir,
+            load_directories(telescope,
+                    oskar_TelescopeLoadAbstract::get_path(cwd, children[0]),
                     oskar_telescope_station(telescope, 0), depth + 1,
                     loaders, filemap, log, status);
 
@@ -166,17 +163,15 @@ static void load_directories(oskar_Telescope* telescope,
             if (num_dirs != oskar_telescope_num_stations(telescope))
             {
                 *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH;
-                return;
+                goto fail;
             }
 
             // Loop over and descend into all stations.
             for (int i = 0; i < num_dirs; ++i)
             {
-                // Get the child directory.
-                oskar_Dir child_dir(cwd.filePath(children[i]));
-
                 // Recursive call to load the station.
-                load_directories(telescope, child_dir,
+                load_directories(telescope,
+                        oskar_TelescopeLoadAbstract::get_path(cwd, children[i]),
                         oskar_telescope_station(telescope, i), depth + 1,
                         loaders, filemap, log, status);
             }
@@ -193,19 +188,18 @@ static void load_directories(oskar_Telescope* telescope,
             if (*status)
             {
                 string s = string("Error in ") + loaders[i]->name() +
-                        string(" in '") + cwd.absolutePath() + string("'.");
+                        string(" in '") + cwd + string("'.");
                 oskar_log_error(log, "%s", s.c_str());
-                return;
+                goto fail;
             }
         }
 
         if (num_dirs == 1)
         {
             // One station directory. Load and copy it to all the others.
-            oskar_Dir child_dir(cwd.filePath(children[0]));
-
             // Recursive call to load the station.
-            load_directories(telescope, child_dir,
+            load_directories(telescope,
+                    oskar_TelescopeLoadAbstract::get_path(cwd, children[0]),
                     oskar_station_child(station, 0), depth + 1, loaders,
                     filemap, log, status);
 
@@ -218,20 +212,22 @@ static void load_directories(oskar_Telescope* telescope,
             if (num_dirs != oskar_station_num_elements(station))
             {
                 *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH;
-                return;
+                goto fail;
             }
 
             // Loop over and descend into all stations.
             for (int i = 0; i < num_dirs; ++i)
             {
-                // Get the child directory.
-                oskar_Dir child_dir(cwd.filePath(children[i]));
-
                 // Recursive call to load the station.
-                load_directories(telescope, child_dir,
+                load_directories(telescope,
+                        oskar_TelescopeLoadAbstract::get_path(cwd, children[i]),
                         oskar_station_child(station, i), depth + 1, loaders,
                         filemap, log, status);
             }
         } // End check on number of directories.
     } // End check on depth.
+
+fail:
+    for (int i = 0; i < num_dirs; ++i) free(children[i]);
+    free(children);
 }

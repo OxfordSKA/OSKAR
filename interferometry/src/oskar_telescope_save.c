@@ -26,28 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_dir.h"
-#include "apps/lib/oskar_telescope_save.h"
-#include <apps/lib/oskar_dir.h>
+#include <oskar_telescope_save.h>
+#include <oskar_dir.h>
 #include <oskar_cmath.h>
 
-#include <QtCore/QDir>
-#include <QtCore/QStringList>
-
-static const char layout_name[] = "layout.txt";
-static const char apodisaion_name[] = "apodisation.txt";
-static const char feed_x_name[] = "feed_angle_x.txt";
-static const char feed_y_name[] = "feed_angle_y.txt";
-static const char element_types_name[] = "element_types.txt";
-static const char mount_types_name[] = "mount_types.txt";
-static const char gain_phase_name[] = "gain_phase.txt";
-static const char permitted_beams_name[] = "permitted_beams.txt";
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 static void oskar_telescope_save_private(const oskar_Telescope* telescope,
         const char* dir_path, const oskar_Station* station, int depth,
         int* status);
 
-extern "C"
 void oskar_telescope_save(const oskar_Telescope* telescope,
         const char* dir_path, int* status)
 {
@@ -58,11 +48,12 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
         const char* dir_path, const oskar_Station* station, int depth,
         int* status)
 {
-    int num_stations = 0;
+    char* path;
+    int i = 0, num_stations = 0;
 
     if (depth == 0)
     {
-        // Check if directory already exists, and remove it if so.
+        /* Check if directory already exists, and remove it if so. */
         if (oskar_dir_exists(dir_path))
         {
             if (!oskar_dir_remove(dir_path))
@@ -73,20 +64,17 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
         }
     }
 
-    // Create the directory if it doesn't exist.
-    QDir dir;
-    dir.setPath(dir_path);
-    if (!dir.exists())
-    {
-        QDir temp;
-        temp.mkpath(QString(dir_path));
-    }
+    /* Create the directory if it doesn't exist. */
+    if (!oskar_dir_exists(dir_path))
+        oskar_dir_mkpath(dir_path);
 
     if (depth == 0)
     {
-        // Write the reference position.
-        QByteArray path_position = dir.filePath("position.txt").toLatin1();
-        FILE* file = fopen(path_position, "w");
+        /* Write the reference position. */
+        FILE* file;
+        path = oskar_dir_get_path(dir_path, "position.txt");
+        file = fopen(path, "w");
+        free(path);
         if (!file)
         {
             *status = OSKAR_ERR_FILE_IO;
@@ -98,63 +86,79 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
                 oskar_telescope_alt_metres(telescope));
         fclose(file);
 
-        // Write the station coordinates.
-        QByteArray path = dir.filePath(layout_name).toLatin1();
+        /* Write the station coordinates. */
+        path = oskar_dir_get_path(dir_path, "layout.txt");
         oskar_telescope_save_layout(telescope, path, status);
+        free(path);
 
-        // Get the number of stations.
+        /* Get the number of stations. */
         num_stations = oskar_telescope_num_stations(telescope);
     }
     else
     {
-        // Write the station configuration data.
-        QByteArray path;
-        path = dir.filePath(layout_name).toLatin1();
+        /* Write the station configuration data. */
+        path = oskar_dir_get_path(dir_path, "layout.txt");
         oskar_station_save_layout(path, station, status);
-        path = dir.filePath(feed_x_name).toLatin1();
-        oskar_station_save_feed_angle(path, station, 1, status);
-        path = dir.filePath(feed_y_name).toLatin1();
-        oskar_station_save_feed_angle(path, station, 0, status);
-        path = dir.filePath(mount_types_name).toLatin1();
+        free(path);
+        path = oskar_dir_get_path(dir_path, "mount_types.txt");
         oskar_station_save_mount_types(path, station, status);
+        free(path);
+        if (!oskar_station_has_child(station))
+        {
+            path = oskar_dir_get_path(dir_path, "feed_angle_x.txt");
+            oskar_station_save_feed_angle(path, station, 1, status);
+            free(path);
+            path = oskar_dir_get_path(dir_path, "feed_angle_y.txt");
+            oskar_station_save_feed_angle(path, station, 0, status);
+            free(path);
+        }
         if (oskar_station_apply_element_errors(station))
         {
-            path = dir.filePath(gain_phase_name).toLatin1();
+            path = oskar_dir_get_path(dir_path, "gain_phase.txt");
             oskar_station_save_gain_phase(path, station, status);
+            free(path);
         }
         if (oskar_station_apply_element_weight(station))
         {
-            path = dir.filePath(apodisaion_name).toLatin1();
+            path = oskar_dir_get_path(dir_path, "apodisation.txt");
             oskar_station_save_apodisation(path, station, status);
+            free(path);
         }
         if (oskar_station_num_element_types(station) > 1)
         {
-            path = dir.filePath(element_types_name).toLatin1();
+            path = oskar_dir_get_path(dir_path, "element_types.txt");
             oskar_station_save_element_types(path, station, status);
+            free(path);
         }
         if (oskar_station_num_permitted_beams(station) > 0)
         {
-            path = dir.filePath(permitted_beams_name).toLatin1();
+            path = oskar_dir_get_path(dir_path, "permitted_beams.txt");
             oskar_station_save_permitted_beams(path, station, status);
+            free(path);
         }
 
-        // Get the number of stations.
+        /* Get the number of stations. */
         if (oskar_station_has_child(station))
             num_stations = oskar_station_num_elements(station);
     }
 
-    // Recursive call to write stations.
-    for (int i = 0; i < num_stations; ++i)
+    /* Recursive call to write stations. */
+    for (i = 0; i < num_stations; ++i)
     {
-        // Get the name of the station, and a pointer to the station to save.
-        QByteArray station_name = dir.filePath(QString("level%1_%2").
-                arg(depth).arg(i, 3, 10, QChar('0'))).toLatin1();
+        /* Get station name, and a pointer to the station to save. */
         const oskar_Station* s;
+        char station_name[12], *path;
+        sprintf(station_name, "level%1d_%03d", depth, i);
         s = (depth == 0) ? oskar_telescope_station_const(telescope, i) :
                 oskar_station_child_const(station, i);
 
-        // Save this station.
-        oskar_telescope_save_private(telescope, station_name,
-                s, depth + 1, status);
+        /* Save this station. */
+        path = oskar_dir_get_path(dir_path, station_name);
+        oskar_telescope_save_private(telescope, path, s, depth + 1, status);
+        free(path);
     }
 }
+
+#ifdef __cplusplus
+}
+#endif

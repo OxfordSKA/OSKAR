@@ -26,36 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoaderPermittedBeams.h"
-#include <oskar_dir.h>
+#ifndef OSKAR_TELESCOPE_LOADER_NOISE_H_
+#define OSKAR_TELESCOPE_LOADER_NOISE_H_
 
-using std::map;
-using std::string;
+#include <oskar_TelescopeLoadAbstract.h>
 
-const string TelescopeLoaderPermittedBeams::permitted_beams_file =
-        "permitted_beams.txt";
-
-
-void TelescopeLoaderPermittedBeams::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
+class TelescopeLoaderNoise : public oskar_TelescopeLoadAbstract
 {
-    // Nothing to do at the telescope level.
-}
+public:
+    TelescopeLoaderNoise();
+    virtual ~TelescopeLoaderNoise();
+    void load(oskar_Telescope* telescope, const std::string& cwd, int num_subdirs,
+            std::map<std::string, std::string>& filemap, int* status);
+    void load(oskar_Station* station, const std::string& cwd, int num_subdirs,
+            int depth, std::map<std::string, std::string>& filemap,
+            int* status);
+    virtual std::string name() const;
 
-void TelescopeLoaderPermittedBeams::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of "permitted_beams.txt".
-    if (cwd.exists(permitted_beams_file))
-    {
-        oskar_station_load_permitted_beams(station,
-                cwd.absoluteFilePath(permitted_beams_file).c_str(), status);
-    }
-}
+private:
+    // Updates set of files to load.
+    void update_map(std::map<std::string, std::string>& filemap,
+            const std::string& cwd);
 
-string TelescopeLoaderPermittedBeams::name() const
-{
-    return string("permitted beams file loader");
-}
+    // Obtains the noise RMS values and sets then into the telescope model.
+    void set_noise_rms(oskar_Station* model,
+            const std::map<std::string, std::string>& filemap, int* status);
+
+private:
+    enum FileIds_ { FREQ, RMS };
+    oskar_Mem* freqs_;
+    oskar_Telescope* telescope_;
+    std::map<FileIds_, std::string> files_;
+};
+
+#endif /* OSKAR_TELESCOPE_LOADER_NOISE_H_ */

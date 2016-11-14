@@ -54,4 +54,12 @@
 
     <!-- Gaussian beam telescope settings group -->
     <import filename="oskar_telescope_gaussian.xml"/>
+    <!--
+    <s k="output_directory"><label>Output directory</label>
+        <type name="OutputFile" default=""/>
+        <desc>Path used to save the final telescope model directory, excluding
+            any element pattern data (useful for debugging). Leave blank if not
+            required.</desc>
+    </s>
+    -->
 </s>

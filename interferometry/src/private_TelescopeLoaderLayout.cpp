@@ -26,55 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoaderLayout.h"
+#include <private_TelescopeLoaderLayout.h>
 #include <oskar_dir.h>
 
 using std::map;
 using std::string;
 
-const string TelescopeLoaderLayout::layout_file = "layout.txt";
-const string TelescopeLoaderLayout::layout_enu_file = "layout_enu.txt";
-const string TelescopeLoaderLayout::layout_ecef_file = "layout_ecef.txt";
-const string TelescopeLoaderLayout::layout_wgs84_file = "layout_wgs84.txt";
+static const char* layout_file = "layout.txt";
+static const char* layout_enu_file = "layout_enu.txt";
+static const char* layout_ecef_file = "layout_ecef.txt";
+static const char* layout_wgs84_file = "layout_wgs84.txt";
 
 
 void TelescopeLoaderLayout::load(oskar_Telescope* telescope,
-        const oskar_Dir& cwd, int num_subdirs,
+        const string& cwd, int num_subdirs,
         map<string, string>& /*filemap*/, int* status)
 {
     // Check for presence of top-level layout files.
-    if (cwd.exists(layout_file))
+    if (oskar_dir_file_exists(cwd.c_str(), layout_file))
     {
         // Load the interferometer layout (horizon plane).
         oskar_telescope_load_station_coords_enu(telescope,
-                cwd.absoluteFilePath(layout_file).c_str(),
+                get_path(cwd, layout_file).c_str(),
                 oskar_telescope_lon_rad(telescope),
                 oskar_telescope_lat_rad(telescope),
                 oskar_telescope_alt_metres(telescope), status);
     }
-    else if (cwd.exists(layout_enu_file))
+    else if (oskar_dir_file_exists(cwd.c_str(), layout_enu_file))
     {
         // Load the interferometer layout (horizon plane).
         oskar_telescope_load_station_coords_enu(telescope,
-                cwd.absoluteFilePath(layout_enu_file).c_str(),
+                get_path(cwd, layout_enu_file).c_str(),
                 oskar_telescope_lon_rad(telescope),
                 oskar_telescope_lat_rad(telescope),
                 oskar_telescope_alt_metres(telescope), status);
     }
-    else if (cwd.exists(layout_ecef_file))
+    else if (oskar_dir_file_exists(cwd.c_str(), layout_ecef_file))
     {
         // Load the interferometer layout (ECEF system).
         oskar_telescope_load_station_coords_ecef(telescope,
-                cwd.absoluteFilePath(layout_ecef_file).c_str(),
+                get_path(cwd, layout_ecef_file).c_str(),
                 oskar_telescope_lon_rad(telescope),
                 oskar_telescope_lat_rad(telescope),
                 oskar_telescope_alt_metres(telescope), status);
     }
-    else if (cwd.exists(layout_wgs84_file))
+    else if (oskar_dir_file_exists(cwd.c_str(), layout_wgs84_file))
     {
         // Load the interferometer layout (WGS84 system).
         oskar_telescope_load_station_coords_wgs84(telescope,
-                cwd.absoluteFilePath(layout_wgs84_file).c_str(),
+                get_path(cwd, layout_wgs84_file).c_str(),
                 oskar_telescope_lon_rad(telescope),
                 oskar_telescope_lat_rad(telescope),
                 oskar_telescope_alt_metres(telescope), status);
@@ -101,19 +101,19 @@ void TelescopeLoaderLayout::load(oskar_Telescope* telescope,
 }
 
 void TelescopeLoaderLayout::load(oskar_Station* station,
-        const oskar_Dir& cwd, int num_subdirs, int /*depth*/,
+        const string& cwd, int num_subdirs, int /*depth*/,
         map<string, string>& /*filemap*/, int* status)
 {
     // Check for presence of station layout file.
-    if (cwd.exists(layout_file))
+    if (oskar_dir_file_exists(cwd.c_str(), layout_file))
     {
         oskar_station_load_layout(station,
-                cwd.absoluteFilePath(layout_file).c_str(), status);
+                get_path(cwd, layout_file).c_str(), status);
     }
-    else if (cwd.exists(layout_enu_file))
+    else if (oskar_dir_file_exists(cwd.c_str(), layout_enu_file))
     {
         oskar_station_load_layout(station,
-                cwd.absoluteFilePath(layout_enu_file).c_str(), status);
+                get_path(cwd, layout_enu_file).c_str(), status);
     }
     else
     {

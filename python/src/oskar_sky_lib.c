@@ -31,11 +31,7 @@
 
 #include <Python.h>
 
-#include <oskar_Settings_old.h>
-#include <oskar_settings_load.h>
-#include <oskar_settings_old_free.h>
 #include <oskar_sky.h>
-#include <oskar_set_up_sky.h>
 #include <oskar_get_error_string.h>
 #include <string.h>
 
@@ -539,50 +535,6 @@ static PyObject* save(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* set_up(PyObject* self, PyObject* args)
-{
-    oskar_Sky* h = 0;
-    PyObject* capsule = 0;
-    oskar_Settings_old s_old;
-    const char* filename = 0;
-    int status = 0;
-
-    /* Load the settings file. */
-    /* FIXME Stop using the old settings structures. */
-    if (!PyArg_ParseTuple(args, "s", &filename)) return 0;
-    oskar_settings_old_load(&s_old, 0, filename, &status);
-
-    /* Check for errors. */
-    if (status)
-    {
-        oskar_settings_old_free(&s_old);
-        PyErr_Format(PyExc_RuntimeError,
-                "Unable to load settings file (%s).",
-                oskar_get_error_string(status));
-        return 0;
-    }
-
-    /* Set up the sky model. */
-    h = oskar_set_up_sky(&s_old, 0, &status);
-
-    /* Check for errors. */
-    if (status || !h)
-    {
-        oskar_settings_old_free(&s_old);
-        oskar_sky_free(h, &status);
-        PyErr_Format(PyExc_RuntimeError,
-                "Sky model set up failed with code %d (%s).",
-                status, oskar_get_error_string(status));
-        return 0;
-    }
-
-    /* Create the PyCapsule and return it. */
-    oskar_settings_old_free(&s_old);
-    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
-    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
-}
-
-
 /* Method table. */
 static PyMethodDef methods[] =
 {
@@ -614,7 +566,6 @@ static PyMethodDef methods[] =
         {"num_sources", (PyCFunction)num_sources,
                 METH_VARARGS, "num_sources()"},
         {"save", (PyCFunction)save, METH_VARARGS, "save(filename)"},
-        {"set_up", (PyCFunction)set_up, METH_VARARGS, "set_up(settings_path)"},
         {NULL, NULL, 0, NULL}
 };
 

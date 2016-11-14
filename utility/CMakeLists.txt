@@ -9,6 +9,7 @@ set(utility_SRC
     src/oskar_binary_read_mem.c
     src/oskar_binary_write_mem.c
     src/oskar_device_utils.c
+    src/oskar_dir.c
     src/oskar_file_exists.c
     src/oskar_get_error_string.c
     src/oskar_get_memory_usage.c

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,40 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoaderApodisation.h"
+#include <private_TelescopeLoaderFeedAngle.h>
 #include <oskar_dir.h>
 
 using std::map;
 using std::string;
 
-const string TelescopeLoaderApodisation::apodisation_file = "apodisation.txt";
-const string TelescopeLoaderApodisation::apodization_file = "apodization.txt";
+static const char* feed_angle_file = "feed_angle.txt";
+static const char* feed_angle_file_x = "feed_angle_x.txt";
+static const char* feed_angle_file_y = "feed_angle_y.txt";
 
-void TelescopeLoaderApodisation::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
-{
-    // Nothing to do at the telescope level.
-}
-
-void TelescopeLoaderApodisation::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
+void TelescopeLoaderFeedAngle::load(oskar_Station* station,
+        const string& cwd, int /*num_subdirs*/, int /*depth*/,
         map<string, string>& /*filemap*/, int* status)
 {
-    // Check for presence of "apodisation.txt" or "apodization.txt".
-    if (cwd.exists(apodisation_file))
+    // Check for presence of feed angle files.
+    if (oskar_dir_file_exists(cwd.c_str(), feed_angle_file))
     {
-        oskar_station_load_apodisation(station,
-                cwd.absoluteFilePath(apodisation_file).c_str(), status);
+        string f = get_path(cwd, feed_angle_file);
+        oskar_station_load_feed_angle(station, f.c_str(), 1, status);
+        oskar_station_load_feed_angle(station, f.c_str(), 0, status);
     }
-    else if (cwd.exists(apodization_file))
+    if (oskar_dir_file_exists(cwd.c_str(), feed_angle_file_x))
     {
-        oskar_station_load_apodisation(station,
-                cwd.absoluteFilePath(apodization_file).c_str(), status);
+        oskar_station_load_feed_angle(station,
+                get_path(cwd, feed_angle_file_x).c_str(), 1, status);
+    }
+    if (oskar_dir_file_exists(cwd.c_str(), feed_angle_file_y))
+    {
+        oskar_station_load_feed_angle(station,
+                get_path(cwd, feed_angle_file_y).c_str(), 0, status);
     }
 }
 
-string TelescopeLoaderApodisation::name() const
+string TelescopeLoaderFeedAngle::name() const
 {
-    return string("element apodisation weight file loader");
+    return string("element feed angle file loader");
 }

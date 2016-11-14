@@ -7,6 +7,7 @@ set(${name}_SRC
     main.cpp
     Test_mem_binary.cpp
     Test_crc.cpp
+    Test_dir.cpp
     Test_getline.cpp
     Test_Mem_add.cpp
     Test_Mem_append.cpp

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,49 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_LOAD_H_
-#define OSKAR_ELEMENT_LOAD_H_
+#include <private_TelescopeLoaderApodisation.h>
+#include <oskar_dir.h>
 
-/**
- * @file oskar_element_load.h
- */
+using std::map;
+using std::string;
 
-#include <oskar_global.h>
+static const char* apodisation_file = "apodisation.txt";
+static const char* apodization_file = "apodization.txt";
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Loads element pattern parameters from a text file.
- *
- * @details
- * This function loads element pattern parameters from
- * a comma- or space-separated text file.
- *
- * The file may have one row containing the following columns,
- * in the following order:
- * - Character specifying the element pattern base type ('I' or 'D' for
- *   isotropic or dipole).
- * - If dipole, the length of the dipole.
- * - If dipole, the length units of the dipole ('M' or 'W' for
- *   metres or wavelengths).
- * - Character specifying tapering type ('C' or 'G' for cosine or Gaussian)
- * - Cosine power, or Gaussian FWHM, in degrees.
- * - Reference frequency for Gaussian FWHM value, in Hz.
- *
- * @param[out] element   Pointer to destination data structure to fill.
- * @param[in] filename   Name of the data file to load.
- * @param[in] x_pol      If set, load for x polarisation, else y polarisation.
- * @param[in,out] status Status return code.
- */
-OSKAR_EXPORT
-void oskar_element_load(oskar_Element* element, const char* filename,
-        int x_pol, int* status);
-
-#ifdef __cplusplus
+void TelescopeLoaderApodisation::load(oskar_Station* station,
+        const string& cwd, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
+{
+    // Check for presence of "apodisation.txt" or "apodization.txt".
+    if (oskar_dir_file_exists(cwd.c_str(), apodisation_file))
+    {
+        oskar_station_load_apodisation(station,
+                get_path(cwd, apodisation_file).c_str(), status);
+    }
+    else if (oskar_dir_file_exists(cwd.c_str(), apodization_file))
+    {
+        oskar_station_load_apodisation(station,
+                get_path(cwd, apodization_file).c_str(), status);
+    }
 }
-#endif
 
-#endif /* OSKAR_ELEMENT_LOAD_H_ */
+string TelescopeLoaderApodisation::name() const
+{
+    return string("element apodisation weight file loader");
+}

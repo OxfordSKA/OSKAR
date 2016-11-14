@@ -41,18 +41,14 @@ class Telescope(object):
     """This class provides a Python interface to an OSKAR telescope model.
     """
 
-    def __init__(self, precision='double', settings_path=None):
+    def __init__(self, precision='double'):
         """Creates a handle to an OSKAR telescope model.
 
         Args:
             precision (str): Either 'double' or 'single' to specify
                 the numerical precision of the data.
-            settings_path (str): Path to an OSKAR settings file.
         """
-        if settings_path is not None:
-            self._capsule = _telescope_lib.set_up(settings_path)
-        else:
-            self._capsule = _telescope_lib.create(precision)
+        self._capsule = _telescope_lib.create(precision)
 
     def load(self, dir_name):
         """Loads an OSKAR telescope model directory.

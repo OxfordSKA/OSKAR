@@ -10,6 +10,7 @@ set(interferometry_SRC
     src/oskar_telescope_create_copy.c
     src/oskar_telescope_duplicate_first_station.c
     src/oskar_telescope_free.c
+    src/oskar_telescope_load.cpp
     src/oskar_telescope_load_pointing_file.c
     src/oskar_telescope_load_position.c
     src/oskar_telescope_load_station_coords_ecef.c
@@ -17,6 +18,7 @@ set(interferometry_SRC
     src/oskar_telescope_load_station_coords_wgs84.c
     src/oskar_telescope_log_summary.c
     src/oskar_telescope_resize.c
+    src/oskar_telescope_save.c
     src/oskar_telescope_save_layout.c
     src/oskar_telescope_set_station_coords.c
     src/oskar_telescope_set_station_coords_ecef.c
@@ -38,6 +40,17 @@ set(interferometry_SRC
     src/oskar_vis_header_free.c
     src/oskar_vis_header_read.c
     src/oskar_vis_header_write.c
+    src/oskar_TelescopeLoadAbstract.cpp
+    src/private_TelescopeLoaderApodisation.cpp
+    src/private_TelescopeLoaderElementPattern.cpp
+    src/private_TelescopeLoaderElementTypes.cpp
+    src/private_TelescopeLoaderFeedAngle.cpp
+    src/private_TelescopeLoaderGainPhase.cpp
+    src/private_TelescopeLoaderLayout.cpp
+    src/private_TelescopeLoaderMountTypes.cpp
+    src/private_TelescopeLoaderNoise.cpp
+    src/private_TelescopeLoaderPermittedBeams.cpp
+    src/private_TelescopeLoaderPosition.cpp
 
     # Deprecated:
     src/oskar_vis_accessors.c
@@ -45,7 +58,6 @@ set(interferometry_SRC
     src/oskar_vis_free.c
     src/oskar_vis_read.c
     src/oskar_vis_write.c
-
 )
 
 set(interferometry_SRC "${interferometry_SRC}" PARENT_SCOPE)

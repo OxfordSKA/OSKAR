@@ -159,13 +159,7 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings_old& sett
         oskar_Log* log, const oskar_Telescope* tel)
 {
     int status = 0;
-    int num_sky_chunks = 0;
-    oskar_Sky** sky = oskar_set_up_sky(&settings, log, &num_sky_chunks,
-            &status);
-
-    // FIXME remove this restriction ... (loop over chunks)
-    if (num_sky_chunks != 1)
-        return OSKAR_ERR_SETUP_FAIL_SKY;
+    oskar_Sky* sky = oskar_set_up_sky(&settings, log, &status);
 
     // FIXME remove this restriction ... (see evaluate Z)
     if (settings.ionosphere.num_TID_screens != 1)
@@ -173,8 +167,7 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings_old& sett
 
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
-    oskar_Sky* chunk = sky[0];
-    int num_sources = oskar_sky_num_sources(chunk);
+    int num_sources = oskar_sky_num_sources(sky);
     oskar_Mem *hor_x, *hor_y, *hor_z;
     hor_x = oskar_mem_create(type, OSKAR_CPU, num_sources, &status);
     hor_y = oskar_mem_create(type, OSKAR_CPU, num_sources, &status);
@@ -242,9 +235,9 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings_old& sett
                 oskar_convert_apparent_ra_dec_to_enu_directions_d(
                         num_sources,
                         oskar_mem_double_const(
-                                oskar_sky_ra_rad_const(chunk), &status),
+                                oskar_sky_ra_rad_const(sky), &status),
                         oskar_mem_double_const(
-                                oskar_sky_dec_rad_const(chunk), &status),
+                                oskar_sky_dec_rad_const(sky), &status),
                         last, lat, oskar_mem_double(hor_x, &status),
                         oskar_mem_double(hor_y, &status),
                         oskar_mem_double(hor_z, &status));
@@ -254,9 +247,9 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings_old& sett
                 oskar_convert_apparent_ra_dec_to_enu_directions_f(
                         num_sources,
                         oskar_mem_float_const(
-                                oskar_sky_ra_rad_const(chunk), &status),
+                                oskar_sky_ra_rad_const(sky), &status),
                         oskar_mem_float_const(
-                                oskar_sky_dec_rad_const(chunk), &status),
+                                oskar_sky_dec_rad_const(sky), &status),
                         last, lat, oskar_mem_float(hor_x, &status),
                         oskar_mem_float(hor_y, &status),
                         oskar_mem_float(hor_z, &status));
@@ -285,8 +278,7 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings_old& sett
     oskar_mem_free(pp_st_lon, &status);
     oskar_mem_free(pp_st_lat, &status);
     oskar_mem_free(pp_st_rel_path, &status);
-    oskar_sky_free(sky[0], &status);
-    free(sky);
+    oskar_sky_free(sky, &status);
 
     return status;
 }

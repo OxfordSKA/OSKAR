@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOADER_APODISATION_H_
-#define OSKAR_TELESCOPE_LOADER_APODISATION_H_
+#include <oskar_TelescopeLoadAbstract.h>
+#include <oskar_dir.h>
 
-#include "apps/lib/oskar_TelescopeLoadAbstract.h"
+using std::map;
+using std::string;
 
-class TelescopeLoaderApodisation : public oskar_TelescopeLoadAbstract
+void oskar_TelescopeLoadAbstract::load(oskar_Telescope* telescope,
+        const string& cwd, int num_subdirs, map<string, string>& filemap,
+        int* status)
 {
-public:
-    TelescopeLoaderApodisation() {}
+    (void) telescope;
+    (void) cwd;
+    (void) num_subdirs;
+    (void) filemap;
+    (void) status;
+}
 
-    virtual ~TelescopeLoaderApodisation() {}
+void oskar_TelescopeLoadAbstract::load(oskar_Station* station,
+        const string& cwd, int num_subdirs, int depth,
+        map<string, string>& filemap, int* status)
+{
+    (void) station;
+    (void) cwd;
+    (void) num_subdirs;
+    (void) depth;
+    (void) filemap;
+    (void) status;
+}
 
-    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
-            int num_subdirs, std::map<std::string, std::string>& filemap,
-            int* status);
+string oskar_TelescopeLoadAbstract::get_path(const string& dir,
+        const string& item)
+{
+    char* path = oskar_dir_get_path(dir.c_str(), item.c_str());
+    string s = string(path);
+    free(path);
+    return s;
+}
 
-    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
-            int num_subdirs, int depth,
-            std::map<std::string, std::string>& filemap, int* status);
-
-    virtual std::string name() const;
-
-private:
-    static const std::string apodisation_file;
-    static const std::string apodization_file;
-};
-
-#endif /* OSKAR_TELESCOPE_LOADER_APODISATION_H_ */

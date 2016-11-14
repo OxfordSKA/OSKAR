@@ -61,6 +61,7 @@ enum OSKAR_POL_MODE_TYPE
 #include <oskar_telescope_create_copy.h>
 #include <oskar_telescope_duplicate_first_station.h>
 #include <oskar_telescope_free.h>
+#include <oskar_telescope_load.h>
 #include <oskar_telescope_load_pointing_file.h>
 #include <oskar_telescope_load_position.h>
 #include <oskar_telescope_load_station_coords_ecef.h>
@@ -68,6 +69,7 @@ enum OSKAR_POL_MODE_TYPE
 #include <oskar_telescope_load_station_coords_wgs84.h>
 #include <oskar_telescope_log_summary.h>
 #include <oskar_telescope_resize.h>
+#include <oskar_telescope_save.h>
 #include <oskar_telescope_save_layout.h>
 #include <oskar_telescope_set_station_coords.h>
 #include <oskar_telescope_set_station_coords_ecef.h>

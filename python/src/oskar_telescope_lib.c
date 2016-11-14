@@ -31,12 +31,7 @@
 
 #include <Python.h>
 
-#include <oskar_Settings_old.h>
-#include <oskar_settings_load.h>
-#include <oskar_settings_old_free.h>
 #include <oskar_telescope.h>
-#include <oskar_telescope_load.h>
-#include <oskar_set_up_telescope.h>
 #include <oskar_get_error_string.h>
 #include <string.h>
 
@@ -575,51 +570,6 @@ static PyObject* set_time_average(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* set_up(PyObject* self, PyObject* args)
-{
-    oskar_Telescope* h = 0;
-    PyObject* capsule = 0;
-    oskar_Settings_old s_old;
-    const char* filename = 0;
-    int status = 0;
-
-    /* Load the settings file. */
-    /* FIXME Stop using the old settings structures. */
-    if (!PyArg_ParseTuple(args, "s", &filename)) return 0;
-    oskar_settings_old_load(&s_old, 0, filename, &status);
-
-    /* Check for errors. */
-    if (status)
-    {
-        oskar_settings_old_free(&s_old);
-        PyErr_Format(PyExc_RuntimeError,
-                "Unable to load settings file (%s).",
-                oskar_get_error_string(status));
-        return 0;
-    }
-
-    /* Set up the telescope model. */
-    h = oskar_set_up_telescope(&s_old, 0, &status);
-
-    /* Check for errors. */
-    if (status || !h)
-    {
-        oskar_settings_old_free(&s_old);
-        oskar_telescope_free(h, &status);
-        PyErr_Format(PyExc_RuntimeError,
-                "Telescope model set up failed with code %d (%s).",
-                status, oskar_get_error_string(status));
-        return 0;
-    }
-
-    /* Create the PyCapsule and return it. */
-    oskar_settings_old_free(&s_old);
-    capsule = PyCapsule_New((void*)h, name,
-            (PyCapsule_Destructor)telescope_free);
-    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
-}
-
-
 static PyObject* set_uv_filter(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
@@ -688,7 +638,6 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "set_station_type(type_string)"},
         {"set_time_average", (PyCFunction)set_time_average,
                 METH_VARARGS, "set_time_average(time_average_sec)"},
-        {"set_up", (PyCFunction)set_up, METH_VARARGS, "set_up(settings_path)"},
         {"set_uv_filter", (PyCFunction)set_uv_filter, METH_VARARGS,
                 "set_uv_filter(uv_filter_min, uv_filter_max, units)"},
         {NULL, NULL, 0, NULL}

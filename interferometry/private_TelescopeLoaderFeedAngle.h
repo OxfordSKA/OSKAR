@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2015-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,39 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoaderPosition.h"
-#include <oskar_dir.h>
+#ifndef OSKAR_TELESCOPE_LOADER_FEED_ANGLE_H_
+#define OSKAR_TELESCOPE_LOADER_FEED_ANGLE_H_
 
-using std::map;
-using std::string;
+#include <oskar_TelescopeLoadAbstract.h>
 
-const string TelescopeLoaderPosition::position_file = "position.txt";
-
-
-void TelescopeLoaderPosition::load(oskar_Telescope* telescope,
-        const oskar_Dir& cwd, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* status)
+class TelescopeLoaderFeedAngle : public oskar_TelescopeLoadAbstract
 {
-    // Load the telescope centre coordinates.
-    if (cwd.exists(position_file))
-    {
-        oskar_telescope_load_position(telescope,
-                cwd.absoluteFilePath(position_file).c_str(), status);
-    }
-    else
-    {
-        *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
-    }
-}
+public:
+    TelescopeLoaderFeedAngle() {}
+    virtual ~TelescopeLoaderFeedAngle() {}
+    virtual void load(oskar_Station* station, const std::string& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
+    virtual std::string name() const;
+};
 
-void TelescopeLoaderPosition::load(oskar_Station* /*station*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
-{
-    // Nothing to do at the station level.
-}
-
-string TelescopeLoaderPosition::name() const
-{
-    return string("position file loader");
-}
+#endif /* OSKAR_TELESCOPE_LOADER_FEED_ANGLE_H_ */

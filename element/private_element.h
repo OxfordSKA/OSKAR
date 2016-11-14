@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,33 +29,41 @@
 #ifndef OSKAR_PRIVATE_ELEMENT_H_
 #define OSKAR_PRIVATE_ELEMENT_H_
 
-/**
- * @file private_element.h
- */
-
 #include <oskar_splines.h>
 #include <oskar_mem.h>
 
-/**
- * @brief Structure to hold antenna (embedded element) pattern data.
- *
- * @details
- * This structure holds the spline coefficients and knot positions for
- * both polarisations of the antenna element.
- */
 struct oskar_Element
 {
     int precision;
     int mem_location;
 
-    int element_type; /**< Dipole or isotropic. */
-    int taper_type; /**< Tapering type. */
-    int dipole_length_units; /**< Units of dipole length (metres or wavelengths). */
-    double dipole_length; /**< Length of dipole. */
-    double cosine_power; /**< For a cosine taper, the power of the cosine. */
-    double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
+    int x_element_type;               /* X element base type: dipole or isotropic. */
+    int y_element_type;               /* Y element base type: dipole or isotropic. */
+    int x_taper_type;                 /* X element taper function type. */
+    int y_taper_type;                 /* Y element taper function type. */
+    int x_dipole_length_units;        /* X element dipole length units (metres or wavelengths). */
+    int y_dipole_length_units;        /* Y element dipole length units (metres or wavelengths). */
+    double x_dipole_length;           /* X element dipole length. */
+    double y_dipole_length;           /* Y element dipole length. */
+    double x_taper_cosine_power;      /* X element taper cosine power. */
+    double y_taper_cosine_power;      /* Y element taper cosine power. */
+    double x_taper_gaussian_fwhm_rad; /* X element taper Gaussian FWHM, in radians. */
+    double y_taper_gaussian_fwhm_rad; /* Y element taper Gaussian FWHM, in radians. */
+    double x_taper_ref_freq_hz;       /* X element taper reference frequency, in Hz. */
+    double y_taper_ref_freq_hz;       /* Y element taper reference frequency, in Hz. */
 
-    /* These arrays of fitted data are per-frequency. */
+    /* OLD: */
+    int element_type; /* Dipole or isotropic. */
+    int taper_type; /* Tapering type. */
+    int dipole_length_units; /* Units of dipole length (metres or wavelengths). */
+    double dipole_length; /* Length of dipole. */
+    double cosine_power; /* For a cosine taper, the power of the cosine. */
+    double gaussian_fwhm_rad; /* For a Gaussian taper, the FWHM in radians. */
+
+    /* Data for numerically-defined element patterns. */
+    /* The arrays of fitted data are per-frequency. */
+    int coord_sys;
+    double max_radius_rad;
     int num_freq;
     double* freqs_hz; /* Array of frequencies in Hz. */
     oskar_Mem** filename_x;

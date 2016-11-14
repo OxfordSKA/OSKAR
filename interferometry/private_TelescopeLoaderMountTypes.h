@@ -26,34 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoaderMountTypes.h"
-#include <oskar_dir.h>
+#ifndef OSKAR_TELESCOPE_LOADER_MOUNT_TYPES_H_
+#define OSKAR_TELESCOPE_LOADER_MOUNT_TYPES_H_
 
-using std::map;
-using std::string;
+#include <oskar_TelescopeLoadAbstract.h>
 
-const string TelescopeLoaderMountTypes::element_types_file = "mount_types.txt";
-
-void TelescopeLoaderMountTypes::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
+class TelescopeLoaderMountTypes : public oskar_TelescopeLoadAbstract
 {
-    // Nothing to do at the telescope level.
-}
+public:
+    TelescopeLoaderMountTypes() {}
+    virtual ~TelescopeLoaderMountTypes() {}
+    virtual void load(oskar_Station* station, const std::string& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
+    virtual std::string name() const;
+};
 
-void TelescopeLoaderMountTypes::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of "mount_types.txt".
-    if (cwd.exists(element_types_file))
-    {
-        oskar_station_load_mount_types(station,
-                cwd.absoluteFilePath(element_types_file).c_str(), status);
-    }
-}
-
-string TelescopeLoaderMountTypes::name() const
-{
-    return string("mount types file loader");
-}
+#endif /* OSKAR_TELESCOPE_LOADER_MOUNT_TYPES_H_ */

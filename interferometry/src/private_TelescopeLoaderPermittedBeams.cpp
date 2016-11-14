@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOADER_MOUNT_TYPES_H_
-#define OSKAR_TELESCOPE_LOADER_MOUNT_TYPES_H_
+#include <private_TelescopeLoaderPermittedBeams.h>
+#include <oskar_dir.h>
 
-#include "apps/lib/oskar_TelescopeLoadAbstract.h"
+using std::map;
+using std::string;
 
-class TelescopeLoaderMountTypes : public oskar_TelescopeLoadAbstract
+static const char* permitted_beams_file = "permitted_beams.txt";
+
+void TelescopeLoaderPermittedBeams::load(oskar_Station* station,
+        const string& cwd, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
 {
-public:
-    TelescopeLoaderMountTypes() {}
+    // Check for presence of "permitted_beams.txt".
+    if (oskar_dir_file_exists(cwd.c_str(), permitted_beams_file))
+    {
+        oskar_station_load_permitted_beams(station,
+                get_path(cwd, permitted_beams_file).c_str(), status);
+    }
+}
 
-    virtual ~TelescopeLoaderMountTypes() {}
-
-    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
-            int num_subdirs, std::map<std::string, std::string>& filemap,
-            int* status);
-
-    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
-            int num_subdirs, int depth,
-            std::map<std::string, std::string>& filemap, int* status);
-
-    virtual std::string name() const;
-
-private:
-    static const std::string element_types_file;
-};
-
-#endif /* OSKAR_TELESCOPE_LOADER_MOUNT_TYPES_H_ */
+string TelescopeLoaderPermittedBeams::name() const
+{
+    return string("permitted beams file loader");
+}

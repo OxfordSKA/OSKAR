@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,41 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOADER_NOISE_H_
-#define OSKAR_TELESCOPE_LOADER_NOISE_H_
+#include <private_TelescopeLoaderPosition.h>
+#include <oskar_dir.h>
 
-#include "apps/lib/oskar_TelescopeLoadAbstract.h"
+using std::map;
+using std::string;
 
+static const char* position_file = "position.txt";
 
-class TelescopeLoaderNoise : public oskar_TelescopeLoadAbstract
+void TelescopeLoaderPosition::load(oskar_Telescope* telescope,
+        const string& cwd, int /*num_subdirs*/,
+        map<string, string>& /*filemap*/, int* status)
 {
-public:
-    TelescopeLoaderNoise();
-    ~TelescopeLoaderNoise();
+    // Load the telescope centre coordinates.
+    if (oskar_dir_file_exists(cwd.c_str(), position_file))
+    {
+        oskar_telescope_load_position(telescope,
+                get_path(cwd, position_file).c_str(), status);
+    }
+    else
+    {
+        *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
+    }
+}
 
-    void load(oskar_Telescope* telescope, const oskar_Dir& cwd, int num_subdirs,
-            std::map<std::string, std::string>& filemap, int* status);
-
-    void load(oskar_Station* station, const oskar_Dir& cwd, int num_subdirs,
-            int depth, std::map<std::string, std::string>& filemap,
-            int* status);
-
-    virtual std::string name() const;
-
-private:
-    // Updates set of files to load.
-    void update_map(std::map<std::string, std::string>& filemap,
-            const oskar_Dir& cwd);
-
-    // Obtains the noise RMS values and sets then into the telescope model.
-    void set_noise_rms(oskar_Station* model,
-            const std::map<std::string, std::string>& filemap, int* status);
-
-private:
-    enum FileIds_ { FREQ, RMS };
-    oskar_Mem* freqs_;
-    oskar_Telescope* telescope_;
-    std::map<FileIds_, std::string> files_;
-};
-
-#endif /* OSKAR_TELESCOPE_LOADER_NOISE_H_ */
+string TelescopeLoaderPosition::name() const
+{
+    return string("position file loader");
+}

@@ -30,7 +30,7 @@
 
 #include <apps/lib/oskar_vis_block_write_ms.h>
 #include <apps/lib/oskar_vis_header_write_ms.h>
-#include <apps/lib/oskar_dir.h>
+#include <oskar_dir.h>
 
 #include <oskar_convert_date_time_to_mjd.h>
 #include <oskar_vis_block.h>

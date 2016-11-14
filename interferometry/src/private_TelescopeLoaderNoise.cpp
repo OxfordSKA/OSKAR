@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoaderNoise.h"
+#include <private_TelescopeLoaderNoise.h>
 #include <oskar_dir.h>
 
 #include <cfloat>
@@ -53,7 +53,7 @@ TelescopeLoaderNoise::~TelescopeLoaderNoise()
 // Depth = 0
 // - Set up frequency data as this is the same for all stations
 //   and if defined by files these have to be at depth 0.
-void TelescopeLoaderNoise::load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+void TelescopeLoaderNoise::load(oskar_Telescope* telescope, const string& cwd,
         int num_subdirs, map<string, string>& filemap, int* status)
 {
     string filename;
@@ -89,7 +89,7 @@ void TelescopeLoaderNoise::load(oskar_Telescope* telescope, const oskar_Dir& cwd
 
 // Depth > 0
 void TelescopeLoaderNoise::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int depth,
+        const string& cwd, int /*num_subdirs*/, int depth,
         map<string, string>& filemap, int* status)
 {
     if (*status) return;
@@ -121,14 +121,14 @@ string TelescopeLoaderNoise::name() const
 
 
 void TelescopeLoaderNoise::update_map(map<string, string>& filemap,
-        const oskar_Dir& cwd)
+        const string& cwd)
 {
     for (map<FileIds_, string>::const_iterator it = files_.begin();
             it != files_.end(); ++it)
     {
         string file = it->second;
-        if (cwd.exists(file))
-            filemap[file] = cwd.absoluteFilePath(file);
+        if (oskar_dir_file_exists(cwd.c_str(), file.c_str()))
+            filemap[file] = get_path(cwd, file);
     }
 }
 

@@ -28,27 +28,24 @@
 
 #include <gtest/gtest.h>
 
-#include "apps/lib/oskar_dir.h"
-#include "apps/lib/oskar_telescope_save.h"
-#include "apps/lib/oskar_telescope_load.h"
-
-#include <oskar_telescope.h>
+#include <oskar_dir.h>
 #include <oskar_get_error_string.h>
 #include <oskar_mem.h>
-
-#include <QtCore/QtCore>
+#include <oskar_telescope.h>
 
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
 
-static void generate_noisy_telescope(const QString& dir,
-        int num_stations, int write_depth, const QVector<double>& freqs,
-        const QHash< QString, QVector<double> >& noise);
+using std::vector;
+
+static void generate_noisy_telescope(const char* dir, int num_stations,
+        const vector<double>& freqs, const vector<double>& noise);
 
 TEST(telescope_model_load_save, test_0_level)
 {
     int err = 0;
-    const char* path = "temp_test_telescope_0_level";
+    const char* tm = "temp_test_telescope_0_level";
     double longitude_rad = 0.1;
     double latitude_rad = 0.5;
     double altitude_m = 1.0;
@@ -56,20 +53,25 @@ TEST(telescope_model_load_save, test_0_level)
     {
         FILE* f;
         int num_stations = 10;
+        char* path;
 
         // Create a telescope model directory.
-        QDir cwd;
-        cwd.mkdir(path);
-        cwd.cd(path);
+        oskar_dir_mkpath(tm);
 
-        // Write the top-level layout file only.
-        f = fopen(cwd.absoluteFilePath("layout.txt").toLatin1().data(), "w");
+        // Write position file.
+        path = oskar_dir_get_path(tm, "position.txt");
+        f = fopen(path, "w");
+        fprintf(f, "0.0, 0.0\n");
+        fclose(f);
+        free(path);
+
+        // Write the top-level layout file.
+        path = oskar_dir_get_path(tm, "layout.txt");
+        f = fopen(path, "w");
         for (int i = 0; i < num_stations; ++i)
             fprintf(f, "%.1f, %.1f, %.1f\n", i * 10.0, i * 20.0, i * 30.0);
         fclose(f);
-        f = fopen(cwd.absoluteFilePath("position.txt").toLatin1().data(), "w");
-        fprintf(f, "0.0, 0.0\n");
-        fclose(f);
+        free(path);
     }
 
     // Load it back again.
@@ -79,20 +81,20 @@ TEST(telescope_model_load_save, test_0_level)
         oskar_telescope_set_position(telescope,
                 longitude_rad, latitude_rad, altitude_m);
         oskar_telescope_set_enable_numerical_patterns(telescope, 0);
-        oskar_telescope_load(telescope, path, NULL, &err);
+        oskar_telescope_load(telescope, tm, NULL, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
         oskar_telescope_free(telescope, &err);
     }
 
     // Remove test directory.
-    oskar_dir_remove(path);
+    oskar_dir_remove(tm);
 }
 
 
 TEST(telescope_model_load_save, test_1_level)
 {
     int err = 0;
-    const char* path = "temp_test_telescope_1_level";
+    const char* tm = "temp_test_telescope_1_level";
 
     // Create a telescope model.
     int num_stations = 10;
@@ -130,7 +132,7 @@ TEST(telescope_model_load_save, test_1_level)
     }
 
     // Save the telescope model.
-    oskar_telescope_save(telescope, path, &err);
+    oskar_telescope_save(telescope, tm, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
     // Load it back again.
@@ -139,7 +141,7 @@ TEST(telescope_model_load_save, test_1_level)
     oskar_telescope_set_position(telescope2,
             longitude_rad, latitude_rad, altitude_m);
     oskar_telescope_set_enable_numerical_patterns(telescope, 0);
-    oskar_telescope_load(telescope2, path, NULL, &err);
+    oskar_telescope_load(telescope2, tm, NULL, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
     // Check the contents.
@@ -202,7 +204,7 @@ TEST(telescope_model_load_save, test_1_level)
     }
 
     // Remove test directory.
-    oskar_dir_remove(path);
+    oskar_dir_remove(tm);
 
     // Free models.
     oskar_telescope_free(telescope, &err);
@@ -213,7 +215,7 @@ TEST(telescope_model_load_save, test_1_level)
 TEST(telescope_model_load_save, test_2_level)
 {
     int err = 0;
-    const char* path = "temp_test_telescope_2_level";
+    const char* tm = "temp_test_telescope_2_level";
 
     // Create a telescope model.
     int num_stations = 3;
@@ -266,14 +268,8 @@ TEST(telescope_model_load_save, test_2_level)
     }
 
     // Save the telescope model.
-    oskar_telescope_save(telescope, path, &err);
+    oskar_telescope_save(telescope, tm, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
-
-    // Add an element pattern file.
-    QFile file(path + QString("/level0_000/element_pattern_x.txt"));
-    file.open(QFile::WriteOnly);
-    file.write("\n");
-    file.close();
 
     // Load it back again.
     oskar_Telescope* telescope2 = oskar_telescope_create(OSKAR_SINGLE,
@@ -282,7 +278,7 @@ TEST(telescope_model_load_save, test_2_level)
             longitude_rad, latitude_rad, altitude_m);
     oskar_telescope_set_enable_numerical_patterns(telescope, 0);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    oskar_telescope_load(telescope2, path, NULL, &err);
+    oskar_telescope_load(telescope2, tm, NULL, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
     // Check the contents.
@@ -466,7 +462,7 @@ TEST(telescope_model_load_save, test_2_level)
     oskar_telescope_free(telescope3, &err);
 
     // Remove test directory.
-    oskar_dir_remove(path);
+    oskar_dir_remove(tm);
 }
 
 //
@@ -480,43 +476,30 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
     // -- number of noise values vs number of stddev
     // -- different modes of getting stddev and freq data.
 
-    QString root = "./temp_test_noise_rms";
+    const char* root = "temp_test_noise_rms";
     int err = 0;
     int num_stations = 2;
-    int depth = 0;
     int num_values = 5;
     int type = OSKAR_DOUBLE;
-    int location = OSKAR_CPU;
 
-    QVector<double> stddev(num_values);
+    // Generate the telescope model.
+    vector<double> stddev(num_values), freq_values(num_values);
     for (int i = 0; i < num_values; ++i)
     {
         stddev[i] = i * 0.25 + 0.5;
-    }
-
-    QVector<double> freq_values(num_values);
-    for (int i = 0; i < num_values; ++i)
-    {
         freq_values[i] = 20.0e6 + i * 10.0e6;
     }
+    generate_noisy_telescope(root, num_stations, freq_values, stddev);
 
-    QHash<QString, QVector<double> > noise_;
-    noise_["rms.txt"] = stddev;
-
-    // Generate the telescope
-    generate_noisy_telescope(root, num_stations, depth, freq_values, noise_);
-
+    // Load it back again.
     oskar_Telescope* telescope = oskar_telescope_create(type,
-            location, 0, &err);
-    oskar_telescope_set_position(telescope, 0.1, 0.5, 0.0);
+            OSKAR_CPU, 0, &err);
     oskar_telescope_set_enable_numerical_patterns(telescope, 0);
-    oskar_telescope_set_enable_noise(telescope, 1, 1);
-    QByteArray path = root.toLatin1();
-
-    oskar_telescope_load(telescope, path.constData(), NULL, &err);
+    oskar_telescope_set_enable_noise(telescope, true, 1);
+    oskar_telescope_load(telescope, root, NULL, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
+    ASSERT_EQ(num_stations, oskar_telescope_num_stations(telescope));
 
-    ASSERT_EQ(oskar_telescope_num_stations(telescope), num_stations);
     // Check the loaded std.dev. values
     for (int i = 0; i < num_stations; ++i)
     {
@@ -524,7 +507,8 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
         oskar_Mem *freq, *rms;
         freq = oskar_station_noise_freq_hz(s);
         rms = oskar_station_noise_rms_jy(s);
-        int num_values = (int)oskar_mem_length(freq);
+        ASSERT_EQ(num_values, (int)oskar_mem_length(rms));
+        ASSERT_EQ(num_values, (int)oskar_mem_length(freq));
         if (type == OSKAR_DOUBLE)
         {
             double* r = oskar_mem_double(rms, &err);
@@ -547,112 +531,55 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
         }
     }
 
-    oskar_dir_remove(path.data());
+    oskar_dir_remove(root);
     oskar_telescope_free(telescope, &err);
 }
 
 
-static void generate_noisy_telescope(const QString& dir,
-        int num_stations, int write_depth, const QVector<double>& freqs,
-        const QHash< QString, QVector<double> >& noise)
+static void generate_noisy_telescope(const char* dir, int num_stations,
+        const vector<double>& freqs, const vector<double>& noise)
 {
-    QDir root(dir);
+    FILE* f;
+    char* path;
 
-    if (root.exists())
-    {
-        QByteArray name_ = dir.toLatin1();
-        oskar_dir_remove(name_.data());
-    }
-
-    root.mkdir(root.absolutePath());
-
-    // Write top-level config file.
-    {
-        QString config_file = "layout.txt";
-        QFile file(dir + QDir::separator() + config_file);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-            return;
-        QTextStream out(&file);
-        for (int i = 0; i < num_stations; ++i)
-            out << "0,0" << endl;
-    }
+    // Create a telescope model directory.
+    if (oskar_dir_exists(dir)) oskar_dir_remove(dir);
+    oskar_dir_mkpath(dir);
 
     // Write position file.
-    {
-        QString config_file = "position.txt";
-        QFile file(dir + QDir::separator() + config_file);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-            return;
-        QTextStream out(&file);
-        out << "0,0" << endl;
-    }
+    path = oskar_dir_get_path(dir, "position.txt");
+    f = fopen(path, "w");
+    fprintf(f, "0,0\n");
+    fclose(f);
+    free(path);
+
+    // Write the layout file.
+    path = oskar_dir_get_path(dir, "layout.txt");
+    f = fopen(path, "w");
+    for (int i = 0; i < num_stations; ++i) fprintf(f, "0,0\n");
+    fclose(f);
+    free(path);
 
     // Write frequency file.
-    if (!freqs.isEmpty())
+    if (!freqs.empty())
     {
-        QString freq_file = "noise_frequencies.txt";
-        QFile file(dir + QDir::separator() + freq_file);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-            return;
-        QTextStream out(&file);
-        out.setRealNumberPrecision(10);
-        for (int i = 0; i < freqs.size(); ++i)
-            out << freqs[i] << endl;
+        path = oskar_dir_get_path(dir, "noise_frequencies.txt");
+        f = fopen(path, "w");
+        for (size_t i = 0; i < freqs.size(); ++i)
+            fprintf(f, "%.10f\n", freqs[i]);
+        fclose(f);
+        free(path);
     }
 
-    if (write_depth == 0)
+    // Write RMS noise values.
+    if (!noise.empty())
     {
-        QHash<QString, QVector<double> >::const_iterator noise_ = noise.constBegin();
-        while (noise_ != noise.constEnd())
-        {
-            QFile file(dir +  QDir::separator() + noise_.key());
-            if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-                return;
-            QTextStream out(&file);
-            out.setRealNumberPrecision(10);
-            for (int i = 0; i < noise_.value().size(); ++i)
-                out << noise_.value()[i] << endl;
-            ++noise_;
-        }
-    }
-
-
-    for (int i = 0; i < num_stations; ++i)
-    {
-        char name[200];
-        sprintf(name, "station%03i", i);
-        QString station_name = dir + QDir::separator() + QString(name);
-        QDir station_dir(station_name);
-        station_dir.mkdir(station_dir.absolutePath());
-
-        // Write station config file.
-        {
-            QString config_file = "layout.txt";
-            QFile file(station_name + QDir::separator() + config_file);
-            if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-                return;
-            QTextStream out(&file);
-            out << "0,0" << endl;
-        }
-
-        if (write_depth == 1)
-        {
-            for (int i = 0; i < num_stations; ++i)
-            {
-                QHash<QString, QVector<double> >::const_iterator noise_ = noise.constBegin();
-                while (noise_ != noise.constEnd())
-                {
-                    QFile file(dir +  QDir::separator() + noise_.key());
-                    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-                        return;
-                    QTextStream out(&file);
-                    out.setRealNumberPrecision(10);
-                    for (int i = 0; i < noise_.value().size(); ++i)
-                        out << noise_.value()[i] << endl;
-                    ++noise_;
-                }
-            }
-        }
+        path = oskar_dir_get_path(dir, "rms.txt");
+        f = fopen(path, "w");
+        for (size_t i = 0; i < noise.size(); ++i)
+            fprintf(f, "%.10f\n", noise[i]);
+        fclose(f);
+        free(path);
     }
 }
 

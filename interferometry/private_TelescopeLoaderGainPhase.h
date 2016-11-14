@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FIT_ELEMENT_DATA_H_
-#define OSKAR_FIT_ELEMENT_DATA_H_
+#ifndef OSKAR_TELESCOPE_LOADER_GAIN_PHASE_H_
+#define OSKAR_TELESCOPE_LOADER_GAIN_PHASE_H_
 
-/**
- * @file oskar_fit_element_data.h
- */
+#include <oskar_TelescopeLoadAbstract.h>
 
-#include <oskar_global.h>
-#include <oskar_log.h>
+class TelescopeLoaderGainPhase : public oskar_TelescopeLoadAbstract
+{
+public:
+    TelescopeLoaderGainPhase() {}
+    virtual ~TelescopeLoaderGainPhase() {}
+    virtual void load(oskar_Station* station, const std::string& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
+    virtual std::string name() const;
+};
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Main element pattern data fitting procedure.
- *
- * @details
- * This function acts as though it were a stand-alone executable.
- *
- * @param[in] settings_file Path to a settings file.
- * @param[in,out] log  Pointer to a log structure to use.
- */
-OSKAR_APPS_EXPORT
-void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
-        int* status);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* OSKAR_FIT_ELEMENT_DATA_H_ */
+#endif /* OSKAR_TELESCOPE_LOADER_GAIN_PHASE_H_ */

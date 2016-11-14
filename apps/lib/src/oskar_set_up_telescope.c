@@ -27,7 +27,6 @@
  */
 
 #include "apps/lib/oskar_set_up_telescope.h"
-#include "apps/lib/oskar_telescope_load.h"
 
 #include <oskar_telescope.h>
 #include <oskar_get_error_string.h>

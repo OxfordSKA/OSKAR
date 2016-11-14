@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,48 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoaderFeedAngle.h"
+#include <gtest/gtest.h>
 #include <oskar_dir.h>
+#include <cstdio>
 
-using std::map;
-using std::string;
 
-const string TelescopeLoaderFeedAngle::feed_angle_file = "feed_angle.txt";
-const string TelescopeLoaderFeedAngle::feed_angle_file_x = "feed_angle_x.txt";
-const string TelescopeLoaderFeedAngle::feed_angle_file_y = "feed_angle_y.txt";
-
-void TelescopeLoaderFeedAngle::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
+TEST(dir, create)
 {
-    // Nothing to do at the telescope level.
+    const char* top = "test1";
+    char path[32];
+    char sep = oskar_dir_separator();
+    sprintf(path, "%s%ctest2%ctest3", top, sep, sep);
+    ASSERT_TRUE(oskar_dir_mkpath(path));
+    ASSERT_TRUE(oskar_dir_remove(top));
 }
 
-void TelescopeLoaderFeedAngle::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of feed angle files.
-    if (cwd.exists(feed_angle_file))
-    {
-        oskar_station_load_feed_angle(station,
-                cwd.absoluteFilePath(feed_angle_file).c_str(), 1, status);
-        oskar_station_load_feed_angle(station,
-                cwd.absoluteFilePath(feed_angle_file).c_str(), 0, status);
-    }
-    if (cwd.exists(feed_angle_file_x))
-    {
-        oskar_station_load_feed_angle(station,
-                cwd.absoluteFilePath(feed_angle_file_x).c_str(), 1, status);
-    }
-    if (cwd.exists(feed_angle_file_y))
-    {
-        oskar_station_load_feed_angle(station,
-                cwd.absoluteFilePath(feed_angle_file_y).c_str(), 0, status);
-    }
-}
 
-string TelescopeLoaderFeedAngle::name() const
+TEST(dir, list)
 {
-    return string("element feed angle file loader");
+    int n = 0;
+    char** d = 0;
+
+    oskar_dir_items(".", NULL, true, true, &n, &d);
+//    for (int i = 0; i < n; ++i) printf("%15s: %s\n", "All items", d[i]);
+    oskar_dir_items(".", NULL, true, false, &n, &d);
+//    for (int i = 0; i < n; ++i) printf("%15s: %s\n", "File", d[i]);
+    oskar_dir_items(".", "oskar*", true, false, &n, &d);
+//    for (int i = 0; i < n; ++i) printf("%15s: %s\n", "File selection", d[i]);
+    oskar_dir_items(".", NULL, false, true, &n, &d);
+//    for (int i = 0; i < n; ++i) printf("%15s: %s\n", "Dir", d[i]);
+    oskar_dir_items(".", "s*", false, true, &n, &d);
+//    for (int i = 0; i < n; ++i) printf("%15s: %s\n", "Dir selection", d[i]);
+
+    for (int i = 0; i < n; ++i) free(d[i]);
+    free(d);
 }
