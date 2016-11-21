@@ -42,10 +42,10 @@
 #include <oskar_SettingsTree.hpp>
 
 // FIXME(FD) Replace these by querying the binary itself for its own XML.
-#include "settings/xml/oskar_sim_beam_pattern_xml_all.h"
-#include "settings/xml/oskar_sim_interferometer_xml_all.h"
-#include "settings/xml/oskar_imager_xml_all.h"
-#include "settings/xml/oskar_fit_element_data_xml_all.h"
+#include "apps/xml/oskar_sim_beam_pattern_xml_all.h"
+#include "apps/xml/oskar_sim_interferometer_xml_all.h"
+#include "apps/xml/oskar_imager_xml_all.h"
+#include "apps/xml/oskar_fit_element_data_xml_all.h"
 
 #include <QtGui/QAction>
 #include <QtGui/QApplication>

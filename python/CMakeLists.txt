@@ -1,5 +1,5 @@
 #
-# src/python/CMakeLists.txt
+# python/CMakeLists.txt
 #
 
 if (PYTHON_FOUND)
@@ -10,11 +10,11 @@ if (PYTHON_FOUND)
     set(OSKAR_PYTHON_INSTALL_DIR "${OSKAR_PYTHON_INSTALL_DIR}/oskar")
 
     if (CASACORE_FOUND)
-        oskar_py_module(_measurement_set_lib src/oskar_measurement_set_lib.c LIBS oskar_ms)
+        oskar_py_module(_measurement_set_lib src/oskar_measurement_set_lib.c LIBS oskar)
     endif()
 
     oskar_py_module(_bda_utils src/oskar_bda_utils.c)
-    oskar_py_module(_imager_lib src/oskar_imager_lib.c LIBS oskar oskar_imager)
+    oskar_py_module(_imager_lib src/oskar_imager_lib.c LIBS oskar)
     oskar_py_module(_simulator_lib src/oskar_simulator_lib.c LIBS oskar oskar_apps)
     oskar_py_module(_sky_lib src/oskar_sky_lib.c LIBS oskar)
     oskar_py_module(_telescope_lib src/oskar_telescope_lib.c LIBS oskar)

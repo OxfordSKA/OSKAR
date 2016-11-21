@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_vis_block_write_ms.h>
-#include <apps/lib/oskar_vis_header_write_ms.h>
-#include <apps/lib/oskar_OptionParser.h>
+#include <oskar_vis_block_write_ms.h>
+#include <oskar_vis_header_write_ms.h>
+#include <oskar_OptionParser.h>
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
 #include <oskar_vis_header.h>

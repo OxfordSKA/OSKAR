@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_OptionParser.h>
+#include <oskar_OptionParser.h>
 
 #include <oskar_get_error_string.h>
 #include <oskar_imager.h>
@@ -38,7 +38,7 @@
 #include <oskar_SettingsDeclareXml.hpp>
 #include <oskar_SettingsFileHandlerQSettings.hpp>
 
-#include "settings/xml/oskar_imager_xml_all.h"
+#include "apps/xml/oskar_imager_xml_all.h"
 
 #include <cstdio>
 #include <cstdlib>

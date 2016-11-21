@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_OptionParser.h>
+#include <oskar_OptionParser.h>
 #include <apps/lib/oskar_sim_tec_screen.h>
 #include <apps/lib/oskar_evaluate_station_pierce_points.h>
 #include <apps/lib/oskar_set_up_telescope.h>

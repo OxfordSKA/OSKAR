@@ -28,31 +28,10 @@ rm -rf _CPack_Packages
 
 # Remove OSKAR source module folders
 rm -rf apps
-rm -rf beam_pattern
-rm -rf convert
-rm -rf correlate
 rm -rf doc
-rm -rf element
 rm -rf extern
-rm -rf fits
-rm -rf imaging
-rm -rf interferometry
-rm -rf jones
-rm -rf math
-rm -rf matlab
-rm -rf ms
 rm -rf python
-rm -rf settings
-rm -rf sky
-rm -rf splines
-rm -rf station
-rm -rf utility
-
-# Remove configured header file
-rm -f oskar_version.h
-
-# Remove the main OSKAR library
-rm -rf liboskar*
+rm -rf oskar
 
 # Remove any example data (zip files or directories)
 rm -rf OSKAR-*-Example-Data
@@ -69,7 +48,6 @@ rm -f  *.log
 if [ "$1" == "-uninstall" ]; then
     rm -f  @CMAKE_INSTALL_PREFIX@/@OSKAR_BIN_INSTALL_DIR@/oskar*
     rm -f  @CMAKE_INSTALL_PREFIX@/@OSKAR_LIB_INSTALL_DIR@/liboskar*
-    rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_INCLUDE_INSTALL_DIR@
-    # rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_MATLAB_INSTALL_DIR@
+    rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_INCLUDE_INSTALL_DIR@/oskar
     # rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_PYTHON_INSTALL_DIR@
 fi

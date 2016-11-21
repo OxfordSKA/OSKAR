@@ -29,8 +29,8 @@
 #include <oskar_settings_load.h>
 #include <oskar_settings_log.h>
 
-#include <apps/lib/oskar_set_up_telescope.h>
-#include <apps/lib/oskar_OptionParser.h>
+#include <oskar_set_up_telescope.h>
+#include <oskar_OptionParser.h>
 
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_OptionParser.h"
+#include "oskar_OptionParser.h"
 
 #include <oskar_angular_distance.h>
 #include <oskar_bearing_angle.h>

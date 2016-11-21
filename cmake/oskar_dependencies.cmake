@@ -1,22 +1,13 @@
 #
-# src/cmake/oskar_dependencies.cmake:
+# cmake/oskar_dependencies.cmake:
 #
-#
-# Dependencies:
-#------------------------------------------------------------------------------
-#
-#   CUDA (>= 4.0)   (oskar, oskar_apps, OSKAR applications)
-#   OpenMP          (for multi-GPU support)
-#   Qt4 (>=4.6)     (oskar_apps, GUI, OSKAR applications)
-#   casacore        (oskar_ms)
-#
-# =============================================================================
 
 # ==== Find dependencies.
 find_package(OpenCL)
-find_package(CUDA 5.5)              # liboskar
-find_package(OpenMP)                # liboskar
-find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtNetwork) # liboskar_apps, apps
+find_package(CUDA 5.5)
+find_package(OpenMP)
+find_package(CasaCore)
+find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtNetwork)
 # HACK for using Qt4 frameworks on OS X.
 # Avoids having to symlink headers and libraries from the Qt binary installer
 # into the system paths.
@@ -28,21 +19,18 @@ endif()
 #if (NOT QT4_FOUND)
 #    find_package(Qt5Core)
 #endif()
-find_package(CasaCore)               # liboskar_ms
 #find_package(PNG QUIET)             # For writing PNG images
 
-find_package(PythonLibs 2.7)         # For python interface
-find_package(NumPy 1.8)              # For python interface
-
-
+find_package(PythonLibs 2.7)
+find_package(NumPy 1.8)
 if (PYTHONLIBS_FOUND AND NUMPY_FOUND AND PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR EQUAL 2)
     set(PYTHON_FOUND TRUE)
 endif()
 
-# ==== Work out which libraries to build.
+# ==== Work out what we can build.
 if (NOT CUDA_FOUND)
     message("===============================================================================")
-    message("-- WARNING: CUDA toolkit not found: Unable to build main OSKAR library.")
+    message("-- WARNING: CUDA toolkit not found: Unable to use any GPUs.")
     message("===============================================================================")
 elseif (NOT CUDA_CUDA_LIBRARY)
     # Leave this as a note only, as drivers may not be installed
@@ -52,8 +40,6 @@ endif ()
 
 if (CUDA_FOUND)
     add_definitions(-DOSKAR_HAVE_CUDA)
-else ()
-    add_definitions(-DOSKAR_NO_CUDA)
 endif ()
 
 if (NOT QT4_FOUND)
@@ -65,8 +51,7 @@ endif()
 
 if (NOT CASACORE_FOUND)
     message("===============================================================================")
-    message("-- WARNING: CasaCore not found: "
-        "Unable to build OSKAR Measurement Set library.")
+    message("-- WARNING: CASACORE not found: Unable to write Measurement Sets.")
     message("===============================================================================")
     add_definitions(-DOSKAR_NO_MS)
 endif()
@@ -77,51 +62,18 @@ if (NOT OPENMP_FOUND)
     message("===============================================================================")
 endif ()
 
-#if (NOT MATLAB_FOUND)
-#    message("===============================================================================")
-#    message("-- WARNING: MATLAB not found: "
-#            "Unable to build the OSKAR MATLAB interface.")
-#    message("===============================================================================")
-#endif()
-
-if (NOT PYTHON_FOUND)
-    message("===============================================================================")
-    message("-- WARNING: Python 2.7 not found: "
-            "Unable to build the OSKAR Python interface.")
-    message("===============================================================================")
-endif()
-
 # Prints a message saying which components are being built.
 message("===============================================================================")
 message("-- INFO: The following OSKAR components will be built:")
-set(component_count 0)
-if (CUDA_FOUND)
-    message("-- INFO:   - liboskar")
-    math(EXPR component_count '${component_count}+1')
-endif ()
+message("-- INFO:   - liboskar")
 if (CASACORE_FOUND)
     message("-- INFO:   - liboskar_ms")
-    math(EXPR component_count '${component_count}+1')
-endif ()
-if (QT4_FOUND AND CUDA_FOUND)
-    message("-- INFO:   - liboskar_apps")
-    message("-- INFO:   - OSKAR command line applications")
-    math(EXPR component_count '${component_count}+1')
 endif ()
 if (QT4_FOUND)
+    message("-- INFO:   - OSKAR command line applications")
     message("-- INFO:   - OSKAR GUI")
-    math(EXPR component_count '${component_count}+1')
 endif ()
-if ("${component_count}" EQUAL 0)
-    message("===============================================================================")
-    message("== ERROR: Unable to build any OSKAR components, check your dependencies!")
-    message("===============================================================================")
-    message(FATAL_ERROR "")
-endif()
-#if (MATLAB_FOUND AND CUDA_FOUND)
-#    message("-- INFO:   - OSKAR MATLAB interface functions")
-#endif()
-if (PYTHON_FOUND AND CUDA_FOUND)
+if (PYTHON_FOUND)
     message("-- INFO:   - OSKAR Python interface functions (experimental)")
 endif()
 message("===============================================================================")
@@ -130,13 +82,10 @@ message("=======================================================================
 message("-- INFO: 'make install' will install OSKAR to:")
 message("-- INFO:   - Libraries         ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}")
 message("-- INFO:   - Headers           ${CMAKE_INSTALL_PREFIX}/${OSKAR_INCLUDE_INSTALL_DIR}")
-if (QT4_FOUND AND CUDA_FOUND)
+if (QT4_FOUND)
 message("-- INFO:   - Applications      ${CMAKE_INSTALL_PREFIX}/${OSKAR_BIN_INSTALL_DIR}")
 endif()
-#if (MATLAB_FOUND AND CUDA_FOUND)
-#message("-- INFO:   - MATLAB interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_MATLAB_INSTALL_DIR}")
-#endif()
-if (PYTHON_FOUND AND CUDA_FOUND)
+if (PYTHON_FOUND)
 message("-- INFO:   - Python interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_PYTHON_INSTALL_DIR}")
 endif()
 #message("-- NOTE: These paths can be changed using: '-DCMAKE_INSTALL_PREFIX=<path>'")

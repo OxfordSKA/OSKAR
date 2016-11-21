@@ -26,3 +26,5 @@ set(gui_SRC
 
 set(gui_SRC "${gui_SRC}" PARENT_SCOPE)
 set(gui_MOC_SRC "${gui_MOC_SRC}" PARENT_SCOPE)
+
+add_subdirectory(widgets)

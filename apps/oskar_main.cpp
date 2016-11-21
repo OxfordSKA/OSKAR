@@ -33,7 +33,7 @@
 #else
 #   include <apps/gui/oskar_MainWindow.h>
 #endif
-#include <apps/lib/oskar_OptionParser.h>
+#include <oskar_OptionParser.h>
 
 #include <QtGui/QApplication>
 #include <cstdlib>

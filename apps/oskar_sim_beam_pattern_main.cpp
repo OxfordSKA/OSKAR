@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_sim_beam_pattern.h>
-#include <apps/lib/oskar_OptionParser.h>
+#include <oskar_sim_beam_pattern.h>
+#include <oskar_OptionParser.h>
 
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>

@@ -19,7 +19,7 @@ further.
 
 The list below summarises the main dependencies:
 
-* CMake (http://www.cmake.org), version >= 2.8.3
+* CMake (http://www.cmake.org), version >= 3.0.0
 * NVIDIA CUDA (http://developer.nvidia.com/cuda-downloads), version >= 5.5
 * Qt4 (http://www.qt.io), version >= 4.6
 * casacore (https://github.com/casacore/casacore), version >= 1.5.0

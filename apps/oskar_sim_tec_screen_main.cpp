@@ -28,8 +28,8 @@
 
 #include <oskar_settings_load.h>
 #include <oskar_settings_log.h>
-#include <apps/lib/oskar_sim_tec_screen.h>
-#include <apps/lib/oskar_OptionParser.h>
+#include <oskar_sim_tec_screen.h>
+#include <oskar_OptionParser.h>
 
 #include <oskar_get_error_string.h>
 #include <oskar_set_up_telescope.h>

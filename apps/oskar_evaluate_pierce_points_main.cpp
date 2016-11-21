@@ -30,8 +30,8 @@
 #include <oskar_log.h>
 #include <oskar_version_string.h>
 
-#include <apps/lib/oskar_evaluate_station_pierce_points.h>
-#include <apps/lib/oskar_OptionParser.h>
+#include <oskar_evaluate_station_pierce_points.h>
+#include <oskar_OptionParser.h>
 
 #include <cstdlib>
 #include <cstdio>

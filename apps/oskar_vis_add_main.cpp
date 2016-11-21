@@ -29,7 +29,7 @@
 #include <oskar_vis.h>
 #include <oskar_get_error_string.h>
 #include <oskar_version_string.h>
-#include <apps/lib/oskar_OptionParser.h>
+#include <oskar_OptionParser.h>
 
 #include <string>
 #include <cmath>

@@ -1,9 +1,9 @@
 #
-# src/apps/CMakeLists.txt
+# apps/CMakeLists.txt
 #
 
 add_subdirectory(test)
-add_subdirectory(log)
+add_subdirectory(xml)
 
 # === Include build macros used for apps and mex functions.
 include(${OSKAR_SOURCE_DIR}/cmake/oskar_build_macros.cmake)
@@ -41,32 +41,27 @@ if (QT4_FOUND)
             ${QT_QTNETWORK_LIBRARY})
 endif ()
 
-if (CUDA_FOUND)
-    macro(declare_oskar_apps)
-        foreach (name ${ARGN})
-            oskar_app(${name} ${name}_main.cpp)
-        endforeach()
-    endmacro()
+macro(declare_oskar_apps)
+    foreach (name ${ARGN})
+        oskar_app(${name} ${name}_main.cpp)
+    endforeach()
+endmacro()
 
-    declare_oskar_apps(
-        oskar_convert_ecef_to_enu
-        oskar_convert_geodetic_to_ecef
-        oskar_cuda_system_info
-        oskar_binary_file_query
-        oskar_filter_sky_model_clusters
-        oskar_vis_add
-        oskar_vis_summary
-        oskar_vis_upgrade_format
-        oskar_vis_to_ascii_table)
+declare_oskar_apps(
+    oskar_convert_ecef_to_enu
+    oskar_convert_geodetic_to_ecef
+    oskar_cuda_system_info
+    oskar_binary_file_query
+    oskar_filter_sky_model_clusters
+    oskar_vis_add
+    oskar_vis_summary
+    oskar_vis_upgrade_format
+    oskar_vis_to_ascii_table)
 
-    set(name oskar_fits_image_to_sky_model)
-    oskar_app(${name} ${name}_main.cpp)
-endif ()
+set(name oskar_fits_image_to_sky_model)
+oskar_app(${name} ${name}_main.cpp)
 
-if (QT4_FOUND AND CUDA_FOUND)
-    # Build oskar_app library
-    add_subdirectory(lib)
-
+if (QT4_FOUND)
     # BINARY: oskar_sim_interferometer
     set(name oskar_sim_interferometer)
     oskar_qt_app(${name} ${name}_main.cpp)
@@ -77,7 +72,7 @@ if (QT4_FOUND AND CUDA_FOUND)
 
     # BINARY: oskar_imager
     set(name oskar_imager)
-    oskar_qt_app(${name} ${name}_main.cpp EXTRA_LIBS oskar_imager)
+    oskar_qt_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar_fit_element_data
     set(name oskar_fit_element_data)
@@ -118,13 +113,11 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
         GROUP_READ GROUP_EXECUTE
         WORLD_READ WORLD_EXECUTE
     PATTERN "CMakeFiles" EXCLUDE
-    PATTERN "log" EXCLUDE
     PATTERN "gui" EXCLUDE
-    PATTERN "lib" EXCLUDE
     PATTERN "test" EXCLUDE
 )
 
-#if (CUDA_FOUND AND PNG_FOUND AND QT4_FOUND)
+#if (PNG_FOUND AND QT4_FOUND)
 #    include_directories(${PNG_INCLUDE_DIRS})
 #    set(name oskar_ionosphere_to_kml)
 #    oskar_app(${name} ${name}_main.cpp

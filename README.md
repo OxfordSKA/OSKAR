@@ -16,5 +16,5 @@ Only use the tagged versions at https://github.com/OxfordSKA/OSKAR/releases/
 Please email oskar@oerc.ox.ac.uk if you encounter problems using OSKAR.
 
 OSKAR is licensed under the terms of the Modified BSD License.
-Please see COPYING.md for details.
+Please see LICENSE for details.
 
