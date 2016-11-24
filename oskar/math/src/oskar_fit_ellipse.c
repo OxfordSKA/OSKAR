@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_fit_ellipse.h>
-#include <oskar_matrix_multiply.h>
-#include <oskar_lapack_subset.h>
+#include "math/oskar_fit_ellipse.h"
+#include "math/oskar_matrix_multiply.h"
+#include "math/oskar_lapack_subset.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <string.h> /* For memset() */
 
 #define MAX( a, b ) ( ((a) > (b)) ? (a) : (b) )

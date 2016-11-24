@@ -26,16 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_load.h>
-#include <oskar_settings_log.h>
-#include <oskar_sim_tec_screen.h>
-#include <oskar_OptionParser.h>
+#include "oskar_settings_load.h"
+#include "oskar_settings_log.h"
+#include "oskar_sim_tec_screen.h"
+#include "oskar_OptionParser.h"
 
-#include <oskar_get_error_string.h>
-#include <oskar_set_up_telescope.h>
-#include <oskar_log.h>
-#include <oskar_version_string.h>
-#include <oskar_cmath.h>
+#include "oskar_set_up_telescope.h"
+#include "log/oskar_log.h"
+#include "math/oskar_cmath.h"
+#include "utility/oskar_version_string.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <cstdlib>
 #include <cstdio>

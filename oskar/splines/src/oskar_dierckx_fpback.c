@@ -1,4 +1,4 @@
-#include <oskar_dierckx_fpback.h>
+#include "splines/oskar_dierckx_fpback.h"
 
 #ifdef __cplusplus
 extern "C" {

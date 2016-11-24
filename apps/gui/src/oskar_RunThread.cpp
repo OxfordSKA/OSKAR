@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/gui/oskar_RunThread.h>
+#include "apps/gui/oskar_RunThread.h"
 
 #include <QtCore/QProcess>
 

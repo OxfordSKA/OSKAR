@@ -29,10 +29,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_SettingsKey.hpp>
-#include <oskar_settings_types.hpp>
-#include <oskar_SettingsItem.hpp>
-#include <oskar_settings_utility_string.hpp>
+#include "oskar_SettingsKey.hpp"
+#include "oskar_settings_types.hpp"
+#include "oskar_SettingsItem.hpp"
+#include "oskar_settings_utility_string.hpp"
 #include <iostream>
 
 using namespace std;

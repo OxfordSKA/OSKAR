@@ -28,16 +28,16 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_linspace.h>
-#include <oskar_convert_cirs_relative_directions_to_enu_directions.h>
-#include <oskar_convert_lon_lat_to_relative_directions.h>
-#include <oskar_convert_lon_lat_to_xyz.h>
-#include <oskar_convert_relative_directions_to_lon_lat.h>
-#include <oskar_convert_xyz_to_lon_lat.h>
-#include <oskar_evaluate_image_lm_grid.h>
-#include <oskar_get_error_string.h>
+#include "convert/oskar_convert_cirs_relative_directions_to_enu_directions.h"
+#include "convert/oskar_convert_lon_lat_to_relative_directions.h"
+#include "convert/oskar_convert_lon_lat_to_xyz.h"
+#include "convert/oskar_convert_relative_directions_to_lon_lat.h"
+#include "convert/oskar_convert_xyz_to_lon_lat.h"
+#include "math/oskar_cmath.h"
+#include "math/oskar_evaluate_image_lm_grid.h"
+#include "math/oskar_linspace.h"
+#include "utility/oskar_get_error_string.h"
 
-#include <oskar_cmath.h>
 #include <cstdlib>
 #include <cstdio>
 

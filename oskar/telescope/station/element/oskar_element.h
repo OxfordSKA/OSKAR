@@ -86,18 +86,18 @@ enum OSKAR_ELEMENT_TAPER
 }
 #endif
 
-#include <oskar_element_accessors.h>
-#include <oskar_element_copy.h>
-#include <oskar_element_create.h>
-#include <oskar_element_different.h>
-#include <oskar_element_evaluate.h>
-#include <oskar_element_free.h>
-#include <oskar_element_load.h>
-#include <oskar_element_load_cst.h>
-#include <oskar_element_load_scalar.h>
-#include <oskar_element_resize_freq_data.h>
-#include <oskar_element_read.h>
-#include <oskar_element_save.h>
-#include <oskar_element_write.h>
+#include <telescope/station/element/oskar_element_accessors.h>
+#include <telescope/station/element/oskar_element_copy.h>
+#include <telescope/station/element/oskar_element_create.h>
+#include <telescope/station/element/oskar_element_different.h>
+#include <telescope/station/element/oskar_element_evaluate.h>
+#include <telescope/station/element/oskar_element_free.h>
+#include <telescope/station/element/oskar_element_load.h>
+#include <telescope/station/element/oskar_element_load_cst.h>
+#include <telescope/station/element/oskar_element_load_scalar.h>
+#include <telescope/station/element/oskar_element_resize_freq_data.h>
+#include <telescope/station/element/oskar_element_read.h>
+#include <telescope/station/element/oskar_element_save.h>
+#include <telescope/station/element/oskar_element_write.h>
 
 #endif /* OSKAR_ELEMENT_H_ */

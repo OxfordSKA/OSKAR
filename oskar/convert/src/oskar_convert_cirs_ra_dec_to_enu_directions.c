@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_cirs_ra_dec_to_enu_directions.h>
-#include <private_convert_cirs_relative_directions_to_enu_directions_inline.h>
-#include <private_evaluate_cirs_observed_parameters.h>
+#include "convert/oskar_convert_cirs_ra_dec_to_enu_directions.h"
+#include "convert/private_convert_cirs_relative_directions_to_enu_directions_inline.h"
+#include "convert/private_evaluate_cirs_observed_parameters.h"
 #include <math.h>
 
 #ifdef __cplusplus

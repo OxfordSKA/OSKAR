@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_cross_correlate.h>
-#include <oskar_telescope.h>
-#include <oskar_sky.h>
-#include <oskar_jones.h>
-#include <oskar_mem.h>
-#include <oskar_get_error_string.h>
-#include <oskar_timer.h>
+#include "correlate/oskar_cross_correlate.h"
+#include "telescope/oskar_telescope.h"
+#include "sky/oskar_sky.h"
+#include "simulator/oskar_jones.h"
+#include "mem/oskar_mem.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_timer.h"
 
-#include <oskar_OptionParser.h>
+#include "oskar_OptionParser.h"
 
 #ifndef _WIN32
 #   include <sys/time.h>

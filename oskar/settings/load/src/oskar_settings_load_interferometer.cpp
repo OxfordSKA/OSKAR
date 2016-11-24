@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_load_interferometer.h>
-#include <oskar_log.h>
+#include "oskar_settings_load_interferometer.h"
+#include "log/oskar_log.h"
 
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>

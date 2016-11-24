@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_jones_E.h>
-#include <oskar_jones_get_station_pointer.h>
-#include <oskar_evaluate_station_beam.h>
+#include "simulator/oskar_evaluate_jones_E.h"
+#include "simulator/oskar_jones_get_station_pointer.h"
+#include "telescope/station/oskar_evaluate_station_beam.h"
 
 #ifdef __cplusplus
 extern "C" {

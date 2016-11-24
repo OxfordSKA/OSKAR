@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager_weight_radial.h>
+#include "imager/private_imager_weight_radial.h"
 #include <math.h>
 
 #ifdef __cplusplus

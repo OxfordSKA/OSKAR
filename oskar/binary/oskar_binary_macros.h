@@ -55,11 +55,4 @@
 #    define OSKAR_BINARY_EXPORT OSKAR_DECL_IMPORT
 #endif
 
-#if __STDC_VERSION__ >= 199901L || defined(__cplusplus)
-    #define OSKAR_BINARY_INLINE static inline
-#else
-    #define OSKAR_BINARY_INLINE static
-#endif
-
-
 #endif /* OSKAR_BINARY_MACROS_H_ */

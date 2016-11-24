@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_relative_directions_to_lon_lat.h>
-#include <oskar_evaluate_image_lm_grid.h>
-#include <oskar_evaluate_image_lon_lat_grid.h>
-#include <oskar_mem.h>
+#include "convert/oskar_convert_relative_directions_to_lon_lat.h"
+#include "math/oskar_evaluate_image_lm_grid.h"
+#include "math/oskar_evaluate_image_lon_lat_grid.h"
+#include "mem/oskar_mem.h"
 
 #include <stdlib.h>
 

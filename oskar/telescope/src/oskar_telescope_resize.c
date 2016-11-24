@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_telescope.h>
-#include <oskar_telescope.h>
+#include "telescope/private_telescope.h"
+#include "telescope/oskar_telescope.h"
 
 #include <string.h>
 #include <stdio.h>

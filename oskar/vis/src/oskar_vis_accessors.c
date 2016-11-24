@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis.h>
-#include <oskar_vis.h>
+#include "vis/private_vis.h"
+#include "vis/oskar_vis.h"
 
 #ifdef __cplusplus
 extern "C" {

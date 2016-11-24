@@ -30,7 +30,7 @@
 #define OSKAR_CONVERT_ENU_DIRECTIONS_TO_THETA_PHI_INLINE_H_
 
 #include <oskar_global.h>
-#include <oskar_cmath.h>
+#include <math/oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {

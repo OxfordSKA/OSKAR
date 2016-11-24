@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_rotate.h>
+#include "math/oskar_rotate.h"
 #include <math.h>
 
 #ifdef __cplusplus

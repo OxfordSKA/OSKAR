@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_cellsize_to_fov.h>
+#include "convert/oskar_convert_cellsize_to_fov.h"
 
 #include <math.h>
 

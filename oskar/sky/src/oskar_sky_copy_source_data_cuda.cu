@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky_copy_source_data_cuda.h>
+#include "sky/oskar_sky_copy_source_data_cuda.h"
 #include <thrust/device_vector.h> // Must be included before thrust/copy.h
 #include <thrust/copy.h>
 

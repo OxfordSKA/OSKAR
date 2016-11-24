@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_dftw_o2c_2d_cuda.h>
+#include "math/oskar_dftw_o2c_2d_cuda.h"
 
 #ifdef __cplusplus
 extern "C" {

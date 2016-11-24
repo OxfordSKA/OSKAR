@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_apply_element_taper_gaussian_cuda.h>
+#include "telescope/station/element/oskar_apply_element_taper_gaussian_cuda.h"
 
 #define M_4LN2f 2.77258872223978123767f
 #define M_4LN2  2.77258872223978123767

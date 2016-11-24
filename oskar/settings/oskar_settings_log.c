@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_log.h>
+#include "oskar_settings_log.h"
 
-#include <private_log.h>
-#include <oskar_log.h>
-#include <oskar_telescope.h>
-#include <oskar_Settings_old.h>
+#include "log/private_log.h"
+#include "log/oskar_log.h"
+#include "telescope/oskar_telescope.h"
+#include "oskar_Settings_old.h"
 
 #include <stdio.h>
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <string.h>
 #include <float.h>
 

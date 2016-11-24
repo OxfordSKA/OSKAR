@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_station_from_telescope_dipole_azimuth.h>
-#include <oskar_cmath.h>
+#include "telescope/station/oskar_evaluate_station_from_telescope_dipole_azimuth.h"
+#include "math/oskar_cmath.h"
 #include <stdio.h>
 
 #ifdef __cplusplus

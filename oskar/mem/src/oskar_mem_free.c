@@ -30,9 +30,9 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include <private_mem.h>
-#include <oskar_mem.h>
-#include <oskar_device_utils.h>
+#include "mem/private_mem.h"
+#include "mem/oskar_mem.h"
+#include "utility/oskar_device_utils.h"
 
 #include <stdlib.h>
 

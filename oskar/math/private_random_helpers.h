@@ -30,7 +30,7 @@
 #define OSKAR_PRIVATE_RANDOM_HELPERS_H_
 
 #include <oskar_global.h>
-#include <oskar_cmath.h>
+#include <math/oskar_cmath.h>
 #include <Random123/philox.h>
 
 #ifdef __cplusplus

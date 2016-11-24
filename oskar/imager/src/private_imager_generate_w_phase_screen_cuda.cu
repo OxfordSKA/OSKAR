@@ -26,8 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager_generate_w_phase_screen_cuda.h>
-#include <oskar_cmath.h>
+#include "oskar_global.h"
+#include "imager/private_imager_generate_w_phase_screen_cuda.h"
+#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {

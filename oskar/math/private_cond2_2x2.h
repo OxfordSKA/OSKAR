@@ -30,7 +30,7 @@
 #define OSKAR_PRIVATE_COND2_2X2_H_
 
 #include <oskar_global.h>
-#include <oskar_multiply_inline.h>
+#include <math/oskar_multiply_inline.h>
 #include <math.h>
 
 #ifdef __cplusplus

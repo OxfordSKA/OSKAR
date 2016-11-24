@@ -54,6 +54,7 @@ extern "C" {
  * @param[in]     prefix Description of key (set blank or NULL if not required).
  * @param[in]     args   Variable argument list for printf().
  */
+OSKAR_EXPORT
 void oskar_log_write(oskar_Log* log, FILE* stream, char priority, char code,
         int depth, const char* prefix, const char* format, va_list args);
 
@@ -66,6 +67,7 @@ void oskar_log_write(oskar_Log* log, FILE* stream, char priority, char code,
  *
  * @return A code representing the priority.
  */
+OSKAR_EXPORT
 char oskar_log_get_entry_code(char priority);
 
 

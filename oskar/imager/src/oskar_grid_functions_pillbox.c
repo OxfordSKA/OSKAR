@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_grid_functions_pillbox.h>
+#include "imager/oskar_grid_functions_pillbox.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {

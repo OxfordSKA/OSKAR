@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_telescope.h>
-#include <oskar_telescope.h>
-#include <oskar_getline.h>
-#include <oskar_string_to_array.h>
-#include <oskar_cmath.h>
+#include "telescope/private_telescope.h"
+#include "telescope/oskar_telescope.h"
+#include "utility/oskar_getline.h"
+#include "utility/oskar_string_to_array.h"
+#include "math/oskar_cmath.h"
 
 #include <stdio.h>
 #include <stdlib.h>

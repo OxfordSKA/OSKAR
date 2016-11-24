@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
-#include <oskar_binary.h>
-#include <oskar_binary_write_mem.h>
-#include <oskar_binary_write_metadata.h>
+#include "sky/oskar_sky.h"
+#include "binary/oskar_binary.h"
+#include "mem/oskar_binary_write_mem.h"
+#include "utility/oskar_binary_write_metadata.h"
 
 #ifdef __cplusplus
 extern "C" {

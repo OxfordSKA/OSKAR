@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_scale_flux_with_frequency.h>
-#include <oskar_scale_flux_with_frequency_inline.h>
+#include "sky/oskar_scale_flux_with_frequency.h"
+#include "sky/oskar_scale_flux_with_frequency_inline.h"
 
 #ifdef __cplusplus
 extern "C" {

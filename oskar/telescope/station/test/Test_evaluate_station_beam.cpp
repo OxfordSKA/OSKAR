@@ -28,18 +28,18 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_station.h>
-#include <oskar_evaluate_station_beam_aperture_array.h>
-#include <oskar_evaluate_station_beam_gaussian.h>
-#include <oskar_evaluate_beam_horizon_direction.h>
-#include <oskar_get_error_string.h>
-#include <oskar_linspace.h>
-#include <oskar_meshgrid.h>
-#include <oskar_binary.h>
-#include <oskar_binary_write_mem.h>
-#include <oskar_device_utils.h>
+#include "telescope/station/oskar_station.h"
+#include "telescope/station/oskar_evaluate_station_beam_aperture_array.h"
+#include "telescope/station/oskar_evaluate_station_beam_gaussian.h"
+#include "telescope/station/oskar_evaluate_beam_horizon_direction.h"
+#include "utility/oskar_get_error_string.h"
+#include "math/oskar_linspace.h"
+#include "math/oskar_meshgrid.h"
+#include "binary/oskar_binary.h"
+#include "mem/oskar_binary_write_mem.h"
+#include "utility/oskar_device_utils.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <cstdio>
 #include <cstdlib>
 

@@ -26,17 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_station_beam_aperture_array.h>
+#include "telescope/station/oskar_evaluate_station_beam_aperture_array.h"
 
-#include <oskar_evaluate_beam_horizon_direction.h>
-#include <oskar_evaluate_array_pattern.h>
-#include <oskar_evaluate_array_pattern_hierarchical.h>
-#include <oskar_evaluate_element_weights.h>
-#include <oskar_element_evaluate.h>
-#include <oskar_blank_below_horizon.h>
-#include <private_station_work.h>
+#include "telescope/station/oskar_evaluate_beam_horizon_direction.h"
+#include "telescope/station/oskar_evaluate_array_pattern.h"
+#include "telescope/station/oskar_evaluate_array_pattern_hierarchical.h"
+#include "telescope/station/oskar_evaluate_element_weights.h"
+#include "telescope/station/element/oskar_element_evaluate.h"
+#include "telescope/station/oskar_blank_below_horizon.h"
+#include "telescope/station/private_station_work.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {

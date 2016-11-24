@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_TelescopeLoaderNoise.h>
-#include <oskar_dir.h>
+#include "telescope/private_TelescopeLoaderNoise.h"
+#include "utility/oskar_dir.h"
 
 #include <cfloat>
 #include <cassert>

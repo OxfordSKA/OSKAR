@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
+#include "imager/private_imager.h"
 
-#include <oskar_imager_select_coords.h>
+#include "imager/oskar_imager_select_coords.h"
 
 #ifdef __cplusplus
 extern "C" {

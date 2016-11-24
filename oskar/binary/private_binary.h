@@ -31,7 +31,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <oskar_crc.h>
+#include <binary/oskar_crc.h>
 
 #ifdef __cplusplus
 extern "C" {

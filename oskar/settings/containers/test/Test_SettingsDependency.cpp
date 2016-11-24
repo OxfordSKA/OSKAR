@@ -30,7 +30,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <oskar_SettingsDependency.hpp>
+#include "oskar_SettingsDependency.hpp"
 
 using namespace oskar;
 using namespace std;

@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_station.h>
-#include <oskar_station.h>
-#include <oskar_cmath.h>
+#include "telescope/station/private_station.h"
+#include "telescope/station/oskar_station.h"
+#include "math/oskar_cmath.h"
 #include <string.h>
 
 #ifdef __cplusplus

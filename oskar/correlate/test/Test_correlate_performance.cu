@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <oskar_global.h> // need this first to define __CUDACC__
-#include <oskar_vector_types.h>
-#include <oskar_cross_correlate_point_time_smearing_cuda.h>
-#include <private_correlate_functions_inline.h>
+#include "oskar_global.h" // need this first to define __CUDACC__
+#include "utility/oskar_vector_types.h"
+#include "correlate/oskar_cross_correlate_point_time_smearing_cuda.h"
+#include "correlate/private_correlate_functions_inline.h"
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>

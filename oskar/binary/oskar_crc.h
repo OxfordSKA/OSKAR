@@ -33,7 +33,7 @@
  * @file oskar_crc.h
  */
 
-#include <oskar_binary_macros.h>
+#include <binary/oskar_binary_macros.h>
 #include <stddef.h>
 
 #ifdef __cplusplus

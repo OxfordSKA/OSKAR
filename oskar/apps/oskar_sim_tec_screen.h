@@ -33,7 +33,7 @@
  * @file oskar_sim_tec_screen.h
  */
 
-#include <oskar_telescope.h>
+#include <telescope/oskar_telescope.h>
 #include <oskar_Settings_old.h>
 
 #ifdef __cplusplus

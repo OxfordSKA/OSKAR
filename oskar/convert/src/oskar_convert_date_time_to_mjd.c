@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_date_time_to_mjd.h>
+#include "convert/oskar_convert_date_time_to_mjd.h"
 
 #ifdef __cplusplus
 extern "C" {

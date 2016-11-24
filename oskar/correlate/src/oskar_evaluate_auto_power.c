@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_auto_power.h>
-#include <oskar_evaluate_auto_power_cuda.h>
-#include <oskar_evaluate_auto_power_c.h>
-#include <oskar_device_utils.h>
+#include "correlate/oskar_evaluate_auto_power.h"
+#include "correlate/oskar_evaluate_auto_power_cuda.h"
+#include "correlate/oskar_evaluate_auto_power_c.h"
+#include "utility/oskar_device_utils.h"
 
 #ifdef __cplusplus
 extern "C" {

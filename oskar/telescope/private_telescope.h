@@ -29,7 +29,7 @@
 #ifndef OSKAR_PRIVATE_TELESCOPE_H_
 #define OSKAR_PRIVATE_TELESCOPE_H_
 
-#include <oskar_station.h>
+#include <telescope/station/oskar_station.h>
 
 struct oskar_Telescope
 {

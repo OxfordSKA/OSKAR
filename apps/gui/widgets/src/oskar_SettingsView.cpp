@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_SettingsView.h>
-#include <oskar_SettingsModel_new.hpp>
+#include "oskar_SettingsView.h"
+#include "oskar_SettingsModel_new.hpp"
 #include <QtGui/QApplication>
 #include <QtGui/QScrollBar>
 #include <QtGui/QMessageBox>

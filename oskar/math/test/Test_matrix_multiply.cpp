@@ -28,8 +28,8 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_matrix_multiply.h>
-#include <oskar_get_error_string.h>
+#include "math/oskar_matrix_multiply.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <cstdlib>
 

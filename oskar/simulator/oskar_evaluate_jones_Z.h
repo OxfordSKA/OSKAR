@@ -34,10 +34,10 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_jones.h>
-#include <oskar_telescope.h>
-#include <oskar_sky.h>
-#include <oskar_WorkJonesZ.h>
+#include <simulator/oskar_jones.h>
+#include <telescope/oskar_telescope.h>
+#include <sky/oskar_sky.h>
+#include <simulator/oskar_WorkJonesZ.h>
 #include <oskar_SettingsIonosphere.h>
 
 #ifdef __cplusplus

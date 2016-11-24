@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
-#include <oskar_sky_filter_by_flux_cuda.h>
-#include <oskar_device_utils.h>
+#include "sky/oskar_sky.h"
+#include "sky/oskar_sky_filter_by_flux_cuda.h"
+#include "utility/oskar_device_utils.h"
 
 #include <float.h>
 

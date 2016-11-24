@@ -26,16 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
-#include <oskar_imager.h>
+#include "imager/private_imager.h"
+#include "imager/oskar_imager.h"
 
-#include <oskar_convert_cellsize_to_fov.h>
-#include <oskar_convert_fov_to_cellsize.h>
-#include <oskar_device_utils.h>
-#include <private_imager_free_gpu_data.h>
-#include <private_imager_set_num_planes.h>
+#include "convert/oskar_convert_cellsize_to_fov.h"
+#include "convert/oskar_convert_fov_to_cellsize.h"
+#include "utility/oskar_device_utils.h"
+#include "imager/private_imager_free_gpu_data.h"
+#include "imager/private_imager_set_num_planes.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <float.h>
 #include <stdio.h>
 #include <string.h>

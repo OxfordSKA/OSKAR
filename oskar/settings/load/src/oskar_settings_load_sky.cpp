@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_load_sky.h>
+#include "oskar_settings_load_sky.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

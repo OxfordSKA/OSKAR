@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_dierckx_bispev.h>
-#include <oskar_dierckx_bispev_bicubic_cuda.h>
-#include <oskar_splines.h>
-#include <oskar_device_utils.h>
+#include "splines/oskar_dierckx_bispev.h"
+#include "splines/oskar_dierckx_bispev_bicubic_cuda.h"
+#include "splines/oskar_splines.h"
+#include "utility/oskar_device_utils.h"
 
 #ifdef __cplusplus
 extern "C" {

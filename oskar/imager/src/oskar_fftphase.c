@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_fftphase.h>
+#include "imager/oskar_fftphase.h"
 
 #ifdef __cplusplus
 extern "C" {

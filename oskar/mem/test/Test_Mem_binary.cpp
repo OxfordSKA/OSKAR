@@ -28,14 +28,14 @@
 
 #include <gtest/gtest.h>
 
-#include <private_binary.h>
-#include <oskar_binary.h>
-#include <oskar_endian.h>
-#include <oskar_file_exists.h>
-#include <oskar_get_error_string.h>
-#include <oskar_mem.h>
-#include <oskar_binary_write_mem.h>
-#include <oskar_binary_read_mem.h>
+#include "binary/private_binary.h"
+#include "binary/oskar_binary.h"
+#include "binary/oskar_endian.h"
+#include "utility/oskar_file_exists.h"
+#include "utility/oskar_get_error_string.h"
+#include "mem/oskar_mem.h"
+#include "mem/oskar_binary_write_mem.h"
+#include "mem/oskar_binary_read_mem.h"
 
 #include <cstdio>
 #include <cstdlib>

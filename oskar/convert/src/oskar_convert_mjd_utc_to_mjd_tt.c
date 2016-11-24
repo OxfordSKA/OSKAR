@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_mjd_utc_to_mjd_tt.h>
+#include "convert/oskar_convert_mjd_utc_to_mjd_tt.h"
 
 #ifdef __cplusplus
 extern "C" {

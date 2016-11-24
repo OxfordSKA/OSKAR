@@ -34,7 +34,7 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_telescope.h>
+#include <telescope/oskar_telescope.h>
 
 #include <map>
 #include <string>

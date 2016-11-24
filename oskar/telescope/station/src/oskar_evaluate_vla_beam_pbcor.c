@@ -28,11 +28,11 @@
 
 #include <math.h>
 
-#include <oskar_evaluate_vla_beam_pbcor.h>
-#include <oskar_evaluate_vla_beam_pbcor_cuda.h>
-#include <oskar_device_utils.h>
-#include <oskar_find_closest_match.h>
-#include <oskar_vla_pbcor_inline.h>
+#include "telescope/station/oskar_evaluate_vla_beam_pbcor.h"
+#include "telescope/station/oskar_evaluate_vla_beam_pbcor_cuda.h"
+#include "telescope/station/oskar_vla_pbcor_inline.h"
+#include "utility/oskar_device_utils.h"
+#include "math/oskar_find_closest_match.h"
 
 #ifdef __cplusplus
 extern "C" {

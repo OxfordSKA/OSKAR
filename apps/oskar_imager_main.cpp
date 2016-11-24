@@ -26,17 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_OptionParser.h>
+#include "oskar_OptionParser.h"
 
-#include <oskar_get_error_string.h>
-#include <oskar_imager.h>
-#include <oskar_log.h>
-#include <oskar_timer.h>
-#include <oskar_version_string.h>
+#include "imager/oskar_imager.h"
+#include "log/oskar_log.h"
+#include "utility/oskar_timer.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_version_string.h"
 
-#include <oskar_SettingsTree.hpp>
-#include <oskar_SettingsDeclareXml.hpp>
-#include <oskar_SettingsFileHandlerQSettings.hpp>
+#include "oskar_SettingsTree.hpp"
+#include "oskar_SettingsDeclareXml.hpp"
+#include "oskar_SettingsFileHandlerQSettings.hpp"
 
 #include "apps/xml/oskar_imager_xml_all.h"
 

@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_element_weights.h>
-#include <oskar_evaluate_element_weights_dft.h>
-#include <oskar_evaluate_element_weights_errors.h>
+#include "telescope/station/oskar_evaluate_element_weights.h"
+#include "telescope/station/oskar_evaluate_element_weights_dft.h"
+#include "telescope/station/oskar_evaluate_element_weights_errors.h"
 
 #ifdef __cplusplus
 extern "C" {

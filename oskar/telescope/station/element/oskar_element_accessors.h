@@ -34,8 +34,8 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_mem.h>
-#include <oskar_splines.h>
+#include <mem/oskar_mem.h>
+#include <splines/oskar_splines.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_measurement_set.h>
-#include <private_ms.h>
+#include "ms/oskar_measurement_set.h"
+#include "ms/private_ms.h"
 
 #include <cstdlib>
 

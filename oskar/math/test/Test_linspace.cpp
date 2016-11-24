@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_linspace.h>
+#include "math/oskar_linspace.h"
 
 #include <cstdlib>
 

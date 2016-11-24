@@ -29,7 +29,7 @@
 #ifndef OSKAR_TELESCOPE_LOADER_APODISATION_H_
 #define OSKAR_TELESCOPE_LOADER_APODISATION_H_
 
-#include <oskar_TelescopeLoadAbstract.h>
+#include <telescope/oskar_TelescopeLoadAbstract.h>
 
 class TelescopeLoaderApodisation : public oskar_TelescopeLoadAbstract
 {

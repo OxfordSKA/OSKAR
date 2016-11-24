@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
+#include "imager/private_imager.h"
 
-#include <oskar_imager_free.h>
-#include <oskar_imager_reset_cache.h>
-#include <private_imager_free_gpu_data.h>
+#include "imager/oskar_imager_free.h"
+#include "imager/oskar_imager_reset_cache.h"
+#include "imager/private_imager_free_gpu_data.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus

@@ -28,14 +28,14 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_telescope.h>
-#include <oskar_sky.h>
-#include <oskar_convert_lon_lat_to_relative_directions.h>
-#include <oskar_get_error_string.h>
-#include <oskar_timer.h>
+#include "telescope/oskar_telescope.h"
+#include "sky/oskar_sky.h"
+#include "convert/oskar_convert_lon_lat_to_relative_directions.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_timer.h"
 
 #include <cstdlib>
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 
 TEST(oskar_Sky, copy)
 {

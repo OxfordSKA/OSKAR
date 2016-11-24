@@ -56,6 +56,7 @@ extern "C" {
  * @param[in]     priority Priority code of the message.
  * @param[in]     format   Format string (for printf()).
  */
+OSKAR_EXPORT
 void oskar_log_section(oskar_Log* log, char priority, const char* format, ...);
 
 #ifdef __cplusplus

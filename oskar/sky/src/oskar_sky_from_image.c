@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
-#include <oskar_convert_relative_directions_to_lon_lat.h>
-#include <oskar_cmath.h>
+#include "sky/oskar_sky.h"
+#include "convert/oskar_convert_relative_directions_to_lon_lat.h"
+#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -49,7 +49,7 @@ enable_testing()
 add_subdirectory(extern)
 add_subdirectory(oskar)
 add_subdirectory(apps)
-add_subdirectory(python)
+# add_subdirectory(python)
 
 # === Build documentation.
 add_subdirectory(doc)

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_log.h>
-#include <oskar_log.h>
+#include "log/private_log.h"
+#include "log/oskar_log.h"
 
 #include <string.h>
 #include <stdlib.h>

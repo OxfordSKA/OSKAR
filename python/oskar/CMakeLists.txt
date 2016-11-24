@@ -15,7 +15,7 @@ if (PYTHON_FOUND)
 
     oskar_py_module(_bda_utils src/oskar_bda_utils.c)
     oskar_py_module(_imager_lib src/oskar_imager_lib.c LIBS oskar)
-    oskar_py_module(_simulator_lib src/oskar_simulator_lib.c LIBS oskar oskar_apps)
+    oskar_py_module(_simulator_lib src/oskar_simulator_lib.c LIBS oskar)
     oskar_py_module(_sky_lib src/oskar_sky_lib.c LIBS oskar)
     oskar_py_module(_telescope_lib src/oskar_telescope_lib.c LIBS oskar)
     oskar_py_module(_vis_block_lib src/oskar_vis_block_lib.c LIBS oskar)

@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_timer.h>
+#include "utility/oskar_timer.h"
 #include <cstdlib>
 
 #if 0

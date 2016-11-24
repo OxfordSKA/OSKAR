@@ -29,7 +29,7 @@
 #ifndef OSKAR_PRIVATE_VIS_HEADER_H_
 #define OSKAR_PRIVATE_VIS_HEADER_H_
 
-#include <oskar_mem.h>
+#include <mem/oskar_mem.h>
 
 /*
  * Holds visibility header data, including station coordinates.

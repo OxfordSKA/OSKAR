@@ -28,9 +28,9 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_get_error_string.h>
-#include <oskar_mem.h>
-#include <oskar_vector_types.h>
+#include "utility/oskar_get_error_string.h"
+#include "mem/oskar_mem.h"
+#include "utility/oskar_vector_types.h"
 
 
 TEST(Mem, set_value_real_double)

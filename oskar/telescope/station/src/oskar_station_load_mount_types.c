@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_station.h>
+#include "telescope/station/oskar_station.h"
 
-#include <oskar_getline.h>
+#include "utility/oskar_getline.h"
 
 #include <stdio.h>
 #include <stdlib.h>

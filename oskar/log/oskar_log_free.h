@@ -48,6 +48,7 @@ extern "C" {
  *
  * @param[in,out] log  Pointer to a log structure.
  */
+OSKAR_EXPORT
 void oskar_log_free(oskar_Log* log);
 
 #ifdef __cplusplus

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_lon_lat_to_relative_directions_cuda.h>
-#include <private_convert_lon_lat_to_relative_directions_inline.h>
+#include "convert/oskar_convert_lon_lat_to_relative_directions_cuda.h"
+#include "convert/private_convert_lon_lat_to_relative_directions_inline.h"
 #include <math.h>
 
 #ifdef __cplusplus

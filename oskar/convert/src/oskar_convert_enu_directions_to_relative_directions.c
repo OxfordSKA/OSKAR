@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_enu_directions_to_relative_directions.h>
-#include <oskar_convert_enu_directions_to_relative_directions_cuda.h>
-#include <oskar_convert_enu_directions_to_relative_directions_inline.h>
+#include "convert/oskar_convert_enu_directions_to_relative_directions.h"
+#include "convert/oskar_convert_enu_directions_to_relative_directions_cuda.h"
+#include "convert/oskar_convert_enu_directions_to_relative_directions_inline.h"
 #include <math.h>
 
 #ifdef __cplusplus

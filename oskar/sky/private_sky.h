@@ -33,7 +33,7 @@
  * @file private_sky.h
  */
 
-#include <oskar_mem.h>
+#include <mem/oskar_mem.h>
 
 /**
  * @struct oskar_Sky

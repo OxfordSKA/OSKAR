@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mem.h>
-#include <oskar_mem_convert_precision.h>
+#include "mem/oskar_mem.h"
+#include "mem/oskar_mem_convert_precision.h"
 
 #ifdef __cplusplus
 extern "C" {

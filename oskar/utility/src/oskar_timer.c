@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_timer.h>
-#include <oskar_mutex.h>
+#include "utility/oskar_timer.h"
+#include "utility/oskar_mutex.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>

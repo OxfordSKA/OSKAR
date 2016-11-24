@@ -31,9 +31,9 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_SettingsTree.hpp>
-#include <oskar_SettingsDeclareXml.hpp>
-#include <oskar_settings_utility_string.hpp>
+#include "oskar_SettingsTree.hpp"
+#include "oskar_SettingsDeclareXml.hpp"
+#include "oskar_settings_utility_string.hpp"
 #include <string>
 
 using namespace oskar;

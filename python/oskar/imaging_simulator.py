@@ -32,7 +32,7 @@
 #
 
 from __future__ import absolute_import, division
-from .simulator import Simulator
+from oskar.simulator import Simulator
 
 
 class ImagingSimulator(Simulator):

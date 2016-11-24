@@ -29,14 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_utility_string.hpp>
+#include "oskar_settings_utility_string.hpp"
 
 #include <cfloat>
 #include <vector>
 #include <cmath>
 #include <cfloat>
 #include <iostream>
-#include <oskar_DoubleRange.hpp>
+#include "oskar_DoubleRange.hpp"
 
 namespace oskar {
 

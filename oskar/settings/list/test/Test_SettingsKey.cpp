@@ -31,7 +31,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_SettingsKey.hpp>
+#include "oskar_SettingsKey.hpp"
 #include <vector>
 #include <string>
 

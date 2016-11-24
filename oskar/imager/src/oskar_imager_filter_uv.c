@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
+#include "imager/private_imager.h"
 
-#include <oskar_imager_filter_uv.h>
+#include "imager/oskar_imager_filter_uv.h"
 #include <float.h>
 
 #ifdef __cplusplus

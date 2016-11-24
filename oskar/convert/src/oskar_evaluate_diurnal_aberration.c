@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_diurnal_aberration.h>
-#include <oskar_convert_geodetic_spherical_to_ecef.h>
-#include <oskar_cmath.h>
+#include "convert/oskar_evaluate_diurnal_aberration.h"
+#include "convert/oskar_convert_geodetic_spherical_to_ecef.h"
+#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {

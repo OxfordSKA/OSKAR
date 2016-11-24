@@ -29,7 +29,7 @@
 #ifndef OSKAR_IMAGER_UPDATE_PLANE_FFT_H_
 #define OSKAR_IMAGER_UPDATE_PLANE_FFT_H_
 
-#include <oskar_mem.h>
+#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

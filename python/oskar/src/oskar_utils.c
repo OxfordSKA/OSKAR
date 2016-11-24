@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,64 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <Python.h>
+#include <oskar.h>
 
-#ifndef OSKAR_EVALUATE_STATION_PIERCE_POINTS_H_
-#define OSKAR_EVALUATE_STATION_PIERCE_POINTS_H_
+static const char* module_doc =
+        "This module provides an interface to OSKAR utility functions.";
 
-/**
- * @file oskar_evaluate_station_pierce_points.h
- */
 
-#include <oskar_global.h>
-#include <oskar_log.h>
+static PyObject* version_string(PyObject* self, PyObject* args)
+{
+    (void) self;
+    (void) args;
+    return Py_BuildValue("s", oskar_version_string());
+}
 
-#ifdef __cplusplus
-extern "C" {
+
+/* Method table. */
+static PyMethodDef methods[] =
+{
+        {"version_string", (PyCFunction)version_string,
+                METH_VARARGS, "version_string()"},
+        {NULL, NULL, 0, NULL}
+};
+
+
+#if PY_MAJOR_VERSION >= 3
+static PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "_utils",           /* m_name */
+        module_doc,         /* m_doc */
+        -1,                 /* m_size */
+        methods             /* m_methods */
+};
 #endif
 
-/**
- * @brief
- * Function to evaluate pierce points for a specified station saving the
- * data as OSKAR binary time-frequency scatter data format.
- *
- * @details
- * This function acts as though it were a stand-alone executable.
- *
- * @param[in] settings_file Path to a settings file.
- * @param[in,out] log  Pointer to a log structure to use.
- */
-OSKAR_APPS_EXPORT
-int oskar_evaluate_station_pierce_points(const char* settings_file,
-        oskar_Log* log);
 
-#ifdef __cplusplus
+static PyObject* moduleinit(void)
+{
+    PyObject* m;
+#if PY_MAJOR_VERSION >= 3
+    m = PyModule_Create(&moduledef);
+#else
+    m = Py_InitModule3("_utils", methods, module_doc);
+#endif
+    return m;
+}
+
+#if PY_MAJOR_VERSION >= 3
+PyMODINIT_FUNC PyInit__utils(void)
+{
+    return moduleinit();
+}
+#else
+/* The init function name has to match that of the compiled module
+ * with the pattern 'init<module name>'. This module is called '_utils' */
+PyMODINIT_FUNC init_utils(void)
+{
+    moduleinit();
+    return;
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_STATION_PIERCE_POINTS_H_ */

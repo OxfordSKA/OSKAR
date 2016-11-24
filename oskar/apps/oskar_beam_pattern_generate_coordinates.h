@@ -34,9 +34,8 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_mem.h>
-#include <oskar_station.h>
-#include <oskar_station_work.h>
+#include <mem/oskar_mem.h>
+#include <telescope/station/oskar_station.h>
 #include <oskar_SettingsTree.hpp>
 
 #include <stddef.h>

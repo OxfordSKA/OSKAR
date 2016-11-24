@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mem.h>
-#include <oskar_mem_add_cuda.h>
-#include <oskar_device_utils.h>
+#include "mem/oskar_mem.h"
+#include "mem/oskar_mem_add_cuda.h"
+#include "utility/oskar_device_utils.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus

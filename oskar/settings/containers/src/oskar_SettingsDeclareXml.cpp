@@ -29,9 +29,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_SettingsTree.hpp>
-#include <oskar_SettingsDeclareXml.hpp>
-#include <oskar_settings_utility_string.hpp>
+#include "oskar_SettingsTree.hpp"
+#include "oskar_SettingsDeclareXml.hpp"
+#include "oskar_settings_utility_string.hpp"
 #include <iostream>
 #include <sstream>
 #include <map>

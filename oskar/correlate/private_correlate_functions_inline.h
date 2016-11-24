@@ -29,10 +29,10 @@
 #ifndef OSKAR_PRIVATE_CORRELATE_FUNCTIONS_INLINE_H_
 #define OSKAR_PRIVATE_CORRELATE_FUNCTIONS_INLINE_H_
 
-#include <oskar_cmath.h>
 #include <oskar_global.h>
-#include <oskar_multiply_inline.h>
-#include <oskar_kahan_sum.h>
+#include <math/oskar_cmath.h>
+#include <math/oskar_multiply_inline.h>
+#include <math/oskar_kahan_sum.h>
 
 #define OMEGA_EARTH  7.272205217e-5  /* radians/sec */
 #define OMEGA_EARTHf 7.272205217e-5f /* radians/sec */

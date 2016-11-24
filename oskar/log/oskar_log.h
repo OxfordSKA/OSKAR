@@ -73,18 +73,18 @@ enum OSKAR_LOG_PRIORITY {
     OSKAR_LOG_DEBUG   =  4   /* == 'D' */
 };
 
-#include <oskar_log_accessors.h>
-#include <oskar_log_create.h>
-#include <oskar_log_error.h>
-#include <oskar_log_file_data.h>
-#include <oskar_log_file_exists.h>
-#include <oskar_log_free.h>
-#include <oskar_log_line.h>
-#include <oskar_log_message.h>
-#include <oskar_log_section.h>
-#include <oskar_log_system_clock_data.h>
-#include <oskar_log_system_clock_string.h>
-#include <oskar_log_value.h>
-#include <oskar_log_warning.h>
+#include <log/oskar_log_accessors.h>
+#include <log/oskar_log_create.h>
+#include <log/oskar_log_error.h>
+#include <log/oskar_log_file_data.h>
+#include <log/oskar_log_file_exists.h>
+#include <log/oskar_log_free.h>
+#include <log/oskar_log_line.h>
+#include <log/oskar_log_message.h>
+#include <log/oskar_log_section.h>
+#include <log/oskar_log_system_clock_data.h>
+#include <log/oskar_log_system_clock_string.h>
+#include <log/oskar_log_value.h>
+#include <log/oskar_log_warning.h>
 
 #endif /* OSKAR_LOG_H_ */

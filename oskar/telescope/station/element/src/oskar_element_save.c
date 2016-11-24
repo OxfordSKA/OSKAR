@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_element.h>
-#include <oskar_element.h>
-#include <oskar_cmath.h>
+#include "telescope/station/element/private_element.h"
+#include "telescope/station/element/oskar_element.h"
+#include "math/oskar_cmath.h"
 
 #include <stdio.h>
 #include <stdlib.h>

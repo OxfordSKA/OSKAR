@@ -31,7 +31,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_SettingsDependency.hpp>
+#include "oskar_SettingsDependency.hpp"
 
 
 using oskar::Dependency;

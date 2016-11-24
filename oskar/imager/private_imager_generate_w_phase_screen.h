@@ -29,7 +29,7 @@
 #ifndef OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN_H_
 #define OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN_H_
 
-#include <oskar_mem.h>
+#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

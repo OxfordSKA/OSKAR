@@ -27,7 +27,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <oskar_dir.h>
+#include "utility/oskar_dir.h"
 #include <cstdio>
 
 

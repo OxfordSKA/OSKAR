@@ -32,7 +32,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include <climits>
-#include <oskar_settings_types.hpp>
+#include "oskar_settings_types.hpp"
 
 using namespace oskar;
 

@@ -29,7 +29,7 @@
 #ifndef OSKAR_TELESCOPE_LOADER_LAYOUT_H_
 #define OSKAR_TELESCOPE_LOADER_LAYOUT_H_
 
-#include <oskar_TelescopeLoadAbstract.h>
+#include <telescope/oskar_TelescopeLoadAbstract.h>
 
 class TelescopeLoaderLayout : public oskar_TelescopeLoadAbstract
 {

@@ -63,6 +63,7 @@ extern "C" {
  * @param[out] data  A 9-element array in which the system time and date
  *                   information is returned.
  */
+OSKAR_EXPORT
 void oskar_log_system_clock_data(int utc, int* data);
 
 #ifdef __cplusplus

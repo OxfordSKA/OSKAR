@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_version_string.h>
-#include <oskar_version.h>
+#include "utility/oskar_version_string.h"
+#include "oskar_version.h"
 
 #ifdef __cplusplus
 extern "C" {

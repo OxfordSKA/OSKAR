@@ -26,22 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_load.h>
-#include <oskar_settings_log.h>
+#include "oskar_settings_load.h"
+#include "oskar_settings_log.h"
 
-#include <oskar_set_up_telescope.h>
-#include <oskar_OptionParser.h>
+#include "oskar_set_up_telescope.h"
+#include "oskar_OptionParser.h"
 
-#include <oskar_log.h>
-#include <oskar_get_error_string.h>
-#include <oskar_version_string.h>
+#include "binary/oskar_binary.h"
+#include "log/oskar_log.h"
+#include "telescope/oskar_telescope.h"
+#include "utility/oskar_file_exists.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_version_string.h"
+#include "vis/oskar_vis_block.h"
+#include "vis/oskar_vis_header.h"
 
-#include <oskar_vis_block.h>
-#include <oskar_vis_header.h>
-#include <oskar_telescope.h>
-#include <oskar_file_exists.h>
-
-#include <oskar_binary.h>
 
 #include <iostream>
 #include <string>

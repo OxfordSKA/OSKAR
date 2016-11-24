@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager_weight_gridless.h>
+#include "imager/private_imager_weight_gridless.h"
 
 #ifdef __cplusplus
 extern "C" {

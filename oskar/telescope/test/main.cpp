@@ -27,7 +27,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <oskar_device_utils.h>
+#include "utility/oskar_device_utils.h"
 
 int main(int argc, char** argv)
 {

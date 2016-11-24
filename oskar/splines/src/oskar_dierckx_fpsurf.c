@@ -1,12 +1,12 @@
-#include <oskar_dierckx_fpsurf.h>
-#include <oskar_dierckx_fpback.h>
-#include <oskar_dierckx_fpdisc.h>
-#include <oskar_dierckx_fporde.h>
-#include <oskar_dierckx_fprank.h>
-#include <oskar_dierckx_fpbspl.h>
-#include <oskar_dierckx_fprota.h>
-#include <oskar_dierckx_fpgivs.h>
-#include <oskar_dierckx_fprati.h>
+#include "splines/oskar_dierckx_fpsurf.h"
+#include "splines/oskar_dierckx_fpback.h"
+#include "splines/oskar_dierckx_fpdisc.h"
+#include "splines/oskar_dierckx_fporde.h"
+#include "splines/oskar_dierckx_fprank.h"
+#include "splines/oskar_dierckx_fpbspl.h"
+#include "splines/oskar_dierckx_fprota.h"
+#include "splines/oskar_dierckx_fpgivs.h"
+#include "splines/oskar_dierckx_fprati.h"
 #include <math.h>
 
 #ifdef __cplusplus

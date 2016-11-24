@@ -30,7 +30,7 @@
  */
 
 
-#include <oskar_SettingsKey.hpp>
+#include "oskar_SettingsKey.hpp"
 
 namespace oskar {
 

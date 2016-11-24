@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_pierce_points.h>
-#include <oskar_cmath.h>
-#include <private_convert_ecef_to_geodetic_spherical_inline.h>
+#include "telescope/station/oskar_evaluate_pierce_points.h"
+#include "math/oskar_cmath.h"
+#include "convert/private_convert_ecef_to_geodetic_spherical_inline.h"
 
 #ifdef __cplusplus
 extern "C" {

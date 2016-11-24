@@ -26,17 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
+#include "sky/oskar_sky.h"
 
-#include <oskar_fit_ellipse.h>
-#include <oskar_rotate.h>
-#include <oskar_convert_lon_lat_to_relative_directions.h>
-#include <oskar_convert_lon_lat_to_xyz.h>
-#include <oskar_convert_relative_directions_to_lon_lat.h>
-#include <oskar_convert_xyz_to_lon_lat.h>
+#include "math/oskar_fit_ellipse.h"
+#include "math/oskar_rotate.h"
+#include "convert/oskar_convert_lon_lat_to_relative_directions.h"
+#include "convert/oskar_convert_lon_lat_to_xyz.h"
+#include "convert/oskar_convert_relative_directions_to_lon_lat.h"
+#include "convert/oskar_convert_xyz_to_lon_lat.h"
 
 #include <stdlib.h>
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 
 #define M_PI_2_2_LN_2 7.11941466249375271693034 /* pi^2 / (2 log_e(2)) */
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))

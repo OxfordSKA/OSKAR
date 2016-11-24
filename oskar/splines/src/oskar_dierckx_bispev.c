@@ -1,5 +1,5 @@
-#include <oskar_dierckx_bispev.h>
-#include <oskar_dierckx_fpbisp.h>
+#include "splines/oskar_dierckx_bispev.h"
+#include "splines/oskar_dierckx_fpbisp.h"
 
 #ifdef __cplusplus
 extern "C" {

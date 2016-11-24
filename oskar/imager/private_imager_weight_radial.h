@@ -29,8 +29,7 @@
 #ifndef OSKAR_IMAGER_WEIGHT_RADIAL_H_
 #define OSKAR_IMAGER_WEIGHT_RADIAL_H_
 
-#include <oskar_global.h>
-#include <oskar_mem.h>
+#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_get_error_string.h>
-#include <oskar_binary.h>
+#include "utility/oskar_get_error_string.h"
+#include "binary/oskar_binary.h"
 
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>

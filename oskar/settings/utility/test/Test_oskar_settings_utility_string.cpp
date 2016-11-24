@@ -34,7 +34,7 @@
 #include <iostream>
 #include <climits>
 #include <limits>
-#include <oskar_settings_utility_string.hpp>
+#include "oskar_settings_utility_string.hpp"
 #include <cmath>
 
 using namespace std;

@@ -29,8 +29,6 @@
 #ifndef OSKAR_BINARY_DATA_TYPES_H_
 #define OSKAR_BINARY_DATA_TYPES_H_
 
-#include <oskar_binary_macros.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -74,6 +72,12 @@ enum OSKAR_DATA_TYPE
     /* Matrix complex double (double4c). */
     OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX
 };
+
+#if __STDC_VERSION__ >= 199901L || defined(__cplusplus)
+    #define OSKAR_BINARY_INLINE static inline
+#else
+    #define OSKAR_BINARY_INLINE static
+#endif
 
 /**
  * @brief

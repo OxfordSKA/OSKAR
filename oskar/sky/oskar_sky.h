@@ -69,35 +69,35 @@ enum OSKAR_SKY_TAGS
 }
 #endif
 
-#include <oskar_sky_accessors.h>
-#include <oskar_sky_append_to_set.h>
-#include <oskar_sky_append.h>
-#include <oskar_sky_copy.h>
-#include <oskar_sky_copy_contents.h>
-#include <oskar_sky_create.h>
-#include <oskar_sky_create_copy.h>
-#include <oskar_sky_evaluate_gaussian_source_parameters.h>
-#include <oskar_sky_evaluate_relative_directions.h>
-#include <oskar_sky_filter_by_flux.h>
-#include <oskar_sky_filter_by_radius.h>
-#include <oskar_sky_free.h>
-#include <oskar_sky_from_fits_file.h>
-#include <oskar_sky_from_healpix_ring.h>
-#include <oskar_sky_from_image.h>
-#include <oskar_sky_generate_grid.h>
-#include <oskar_sky_generate_random_power_law.h>
-#include <oskar_sky_horizon_clip.h>
-#include <oskar_sky_load.h>
-#include <oskar_sky_override_polarisation.h>
-#include <oskar_sky_read.h>
-#include <oskar_sky_resize.h>
-#include <oskar_sky_rotate_to_position.h>
-#include <oskar_sky_save.h>
-#include <oskar_sky_scale_flux_with_frequency.h>
-#include <oskar_sky_set_gaussian_parameters.h>
-#include <oskar_sky_set_source.h>
-#include <oskar_sky_set_spectral_index.h>
-#include <oskar_sky_write.h>
+#include <sky/oskar_sky_accessors.h>
+#include <sky/oskar_sky_append_to_set.h>
+#include <sky/oskar_sky_append.h>
+#include <sky/oskar_sky_copy.h>
+#include <sky/oskar_sky_copy_contents.h>
+#include <sky/oskar_sky_create.h>
+#include <sky/oskar_sky_create_copy.h>
+#include <sky/oskar_sky_evaluate_gaussian_source_parameters.h>
+#include <sky/oskar_sky_evaluate_relative_directions.h>
+#include <sky/oskar_sky_filter_by_flux.h>
+#include <sky/oskar_sky_filter_by_radius.h>
+#include <sky/oskar_sky_free.h>
+#include <sky/oskar_sky_from_fits_file.h>
+#include <sky/oskar_sky_from_healpix_ring.h>
+#include <sky/oskar_sky_from_image.h>
+#include <sky/oskar_sky_generate_grid.h>
+#include <sky/oskar_sky_generate_random_power_law.h>
+#include <sky/oskar_sky_horizon_clip.h>
+#include <sky/oskar_sky_load.h>
+#include <sky/oskar_sky_override_polarisation.h>
+#include <sky/oskar_sky_read.h>
+#include <sky/oskar_sky_resize.h>
+#include <sky/oskar_sky_rotate_to_position.h>
+#include <sky/oskar_sky_save.h>
+#include <sky/oskar_sky_scale_flux_with_frequency.h>
+#include <sky/oskar_sky_set_gaussian_parameters.h>
+#include <sky/oskar_sky_set_source.h>
+#include <sky/oskar_sky_set_spectral_index.h>
+#include <sky/oskar_sky_write.h>
 
 
 #endif /* OSKAR_SKY_H_ */

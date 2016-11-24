@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_get_memory_usage.h>
+#include "utility/oskar_get_memory_usage.h"
 
 #include <stdio.h>
 #include <stddef.h>

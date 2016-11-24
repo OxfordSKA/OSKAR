@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_station.h>
-#include <oskar_station.h>
+#include "telescope/station/private_station.h"
+#include "telescope/station/oskar_station.h"
 
-#include <oskar_element_copy.h>
+#include "telescope/station/element/oskar_element_copy.h"
 
 #include <stdlib.h>
 #include <stddef.h>

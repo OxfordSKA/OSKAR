@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_sky.h>
-#include <oskar_sky.h>
+#include "sky/private_sky.h"
+#include "sky/oskar_sky.h"
 
 #include <math.h>
 

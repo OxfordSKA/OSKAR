@@ -26,16 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_element.h>
-#include <private_element.h>
+#include "telescope/station/element/oskar_element.h"
+#include "telescope/station/element/private_element.h"
 
-#include <oskar_getline.h>
-#include <oskar_string_to_array.h>
+#include "math/oskar_cmath.h"
+#include "utility/oskar_getline.h"
+#include "utility/oskar_string_to_array.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {

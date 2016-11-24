@@ -30,7 +30,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <oskar_settings_types.hpp>
+#include "oskar_settings_types.hpp"
 
 using namespace oskar;
 

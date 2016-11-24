@@ -26,8 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
-#include <private_imager_free_wproj.h>
+#ifdef OSKAR_HAVE_CUDA
+#include <cufft.h>
+#endif
+
+#include "imager/private_imager.h"
+#include "imager/private_imager_free_wproj.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,13 +44,15 @@ void oskar_imager_free_wproj(oskar_Imager* h, int* status)
     oskar_mem_free(h->corr_func, status);
     oskar_mem_free(h->fftpack_wsave, status);
     oskar_mem_free(h->fftpack_work, status);
+#ifdef OSKAR_HAVE_CUDA
     cufftDestroy(h->cufft_plan);
+    h->cufft_plan = 0;
+#endif
     h->w_kernels = 0;
     h->w_support = 0;
     h->corr_func = 0;
     h->fftpack_wsave = 0;
     h->fftpack_work = 0;
-    h->cufft_plan = 0;
 }
 
 #ifdef __cplusplus

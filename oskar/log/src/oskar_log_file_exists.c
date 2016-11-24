@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_log_file_exists.h>
+#include "log/oskar_log_file_exists.h"
 #include <stdio.h>
 
 #ifdef __cplusplus

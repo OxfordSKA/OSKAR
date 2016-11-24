@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
+#include "imager/private_imager.h"
 
-#include <private_imager_update_plane_fft.h>
-#include <oskar_grid_simple.h>
+#include "imager/private_imager_update_plane_fft.h"
+#include "imager/oskar_grid_simple.h"
 
 #include <stdlib.h>
 

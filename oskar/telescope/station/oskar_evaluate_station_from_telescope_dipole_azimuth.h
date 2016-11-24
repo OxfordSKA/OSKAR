@@ -33,7 +33,7 @@
  * @file oskar_evaluate_station_from_telescoe_dipole_azimuth.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

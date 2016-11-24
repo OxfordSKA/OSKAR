@@ -34,21 +34,15 @@
 """OSKAR is a package to simulate interferometric visibility data.
 """
 
-from __future__ import absolute_import, division
-from .version import __version__
+from __future__ import absolute_import
 
-from .sky import Sky
-from .telescope import Telescope
-from .simulator import Simulator
-from .imaging_simulator import ImagingSimulator
-from .imager import Imager
-from .vis_block import VisBlock
-from .vis_header import VisHeader
-from .measurement_set import MeasurementSet
-from .bda import BDA, apply_gains, vis_list_to_matrix
-
-#import sky
-#import telescope
-#import simulator
-#import imager
-#import bda
+from oskar._version import __version__
+from oskar.sky import Sky
+from oskar.telescope import Telescope
+from oskar.simulator import Simulator
+from oskar.imaging_simulator import ImagingSimulator
+from oskar.imager import Imager
+from oskar.vis_block import VisBlock
+from oskar.vis_header import VisHeader
+from oskar.measurement_set import MeasurementSet
+from oskar.bda import BDA, apply_gains, vis_list_to_matrix

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_tec_tid.h>
-#include <oskar_cmath.h>
+#include "sky/oskar_evaluate_tec_tid.h"
+#include "math/oskar_cmath.h"
 #include <stdio.h>
 
 #ifdef __cplusplus

@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_mjd_to_gast_fast.h>
-#include <oskar_convert_mjd_to_gmst.h>
-#include <oskar_equation_of_equinoxes_fast.h>
+#include "convert/oskar_convert_mjd_to_gast_fast.h"
+#include "convert/oskar_convert_mjd_to_gmst.h"
+#include "convert/oskar_equation_of_equinoxes_fast.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -30,11 +30,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <oskar_SettingsFileHandlerQSettings.hpp>
-#include <oskar_SettingsModel_new.hpp>
-#include <oskar_SettingsDeclareXml.hpp>
-#include <oskar_SettingsView.h>
-#include <oskar_SettingsDelegate_new.hpp>
+#include "oskar_SettingsFileHandlerQSettings.hpp"
+#include "oskar_SettingsModel_new.hpp"
+#include "oskar_SettingsDeclareXml.hpp"
+#include "oskar_SettingsView.h"
+#include "oskar_SettingsDelegate_new.hpp"
 #include <QtGui/QApplication>
 #include <QtGui/QWidget>
 #include <QtGui/QVBoxLayout>

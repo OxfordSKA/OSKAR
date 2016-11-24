@@ -1,5 +1,5 @@
-#include <oskar_dierckx_surfit.h>
-#include <oskar_dierckx_fpsurf.h>
+#include "splines/oskar_dierckx_surfit.h"
+#include "splines/oskar_dierckx_fpsurf.h"
 #include <math.h>
 
 #ifdef __cplusplus

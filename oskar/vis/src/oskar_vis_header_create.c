@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_header.h>
-#include <oskar_vis_header.h>
+#include "vis/private_vis_header.h"
+#include "vis/oskar_vis_header.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus

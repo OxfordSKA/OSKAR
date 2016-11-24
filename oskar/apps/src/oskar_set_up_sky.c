@@ -26,18 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_set_up_sky.h>
-#include <oskar_convert_brightness_to_jy.h>
-#include <oskar_convert_healpix_ring_to_theta_phi.h>
-#include <oskar_healpix_npix_to_nside.h>
-#include <oskar_random_gaussian.h>
-#include <oskar_random_broken_power_law.h>
-#include <oskar_generate_random_coordinate.h>
-#include <oskar_sky.h>
-#include <oskar_log.h>
-#include <oskar_get_error_string.h>
+#include "oskar_set_up_sky.h"
+#include "convert/oskar_convert_brightness_to_jy.h"
+#include "convert/oskar_convert_healpix_ring_to_theta_phi.h"
+#include "math/oskar_healpix_npix_to_nside.h"
+#include "math/oskar_random_gaussian.h"
+#include "math/oskar_random_broken_power_law.h"
+#include "sky/oskar_generate_random_coordinate.h"
+#include "sky/oskar_sky.h"
+#include "log/oskar_log.h"
+#include "utility/oskar_get_error_string.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <stdlib.h> /* For srand() */
 #include <string.h>
 

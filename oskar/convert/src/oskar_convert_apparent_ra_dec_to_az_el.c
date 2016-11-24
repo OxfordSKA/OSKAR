@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_apparent_ra_dec_to_az_el.h>
-#include <oskar_convert_apparent_ra_dec_to_enu_directions.h>
-#include <oskar_convert_enu_directions_to_az_el.h>
+#include "convert/oskar_convert_apparent_ra_dec_to_az_el.h"
+#include "convert/oskar_convert_apparent_ra_dec_to_enu_directions.h"
+#include "convert/oskar_convert_enu_directions_to_az_el.h"
 #include <math.h>
 
 #ifdef __cplusplus

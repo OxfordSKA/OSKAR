@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky_copy_source_data.h>
+#include "sky/oskar_sky_copy_source_data.h"
 
 #ifdef __cplusplus
 extern "C" {

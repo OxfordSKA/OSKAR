@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/gui/oskar_RunDialog.h>
-#include <apps/gui/oskar_RunThread.h>
+#include "apps/gui/oskar_RunDialog.h"
+#include "apps/gui/oskar_RunThread.h"
 
-#include <oskar_version.h>
-#include <oskar_get_error_string.h>
+#include "oskar_version.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <QtCore/QProcess>
 #include <QtCore/QSettings>

@@ -1,6 +1,6 @@
-#include <oskar_dierckx_fprank.h>
-#include <oskar_dierckx_fprota.h>
-#include <oskar_dierckx_fpgivs.h>
+#include "splines/oskar_dierckx_fprank.h"
+#include "splines/oskar_dierckx_fprota.h"
+#include "splines/oskar_dierckx_fpgivs.h"
 
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 

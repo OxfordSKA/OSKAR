@@ -1,4 +1,4 @@
-#include <oskar_dierckx_fpdisc.h>
+#include "splines/oskar_dierckx_fpdisc.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_sky.h>
-#include <oskar_sky.h>
+#include "sky/private_sky.h"
+#include "sky/oskar_sky.h"
 
-#include <oskar_mem.h>
+#include "mem/oskar_mem.h"
 
 #ifdef __cplusplus
 extern "C" {

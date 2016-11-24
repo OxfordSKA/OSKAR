@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_DoubleSpinBox.h>
+#include "oskar_DoubleSpinBox.h"
 #include <QtGui/QDoubleValidator>
 #include <QtGui/QLineEdit>
 #include <QtGui/QFocusEvent>
@@ -36,7 +36,7 @@
 #include <cstdio>
 #include <iostream>
 #include <iomanip>
-#include <oskar_settings_utility_string.hpp>
+#include "oskar_settings_utility_string.hpp"
 
 using namespace std;
 

@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_ludwig3_to_theta_phi_components.h>
-#include <oskar_convert_ludwig3_to_theta_phi_components_cuda.h>
-#include <oskar_device_utils.h>
-#include <private_convert_ludwig3_to_theta_phi_components_inline.h>
+#include "convert/oskar_convert_ludwig3_to_theta_phi_components.h"
+#include "convert/oskar_convert_ludwig3_to_theta_phi_components_cuda.h"
+#include "utility/oskar_device_utils.h"
+#include "convert/private_convert_ludwig3_to_theta_phi_components_inline.h"
 
 #ifdef __cplusplus
 extern "C" {

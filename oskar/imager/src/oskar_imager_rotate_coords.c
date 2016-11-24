@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_imager_rotate_coords.h>
+#include "imager/oskar_imager_rotate_coords.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -34,9 +34,9 @@
 from __future__ import absolute_import, division
 from . import _simulator_lib
 from threading import Thread
-from .vis_block import VisBlock
-from .vis_header import VisHeader
-from .barrier import Barrier
+from oskar.vis_block import VisBlock
+from oskar.vis_header import VisHeader
+from oskar.barrier import Barrier
 
 
 class Simulator(object):

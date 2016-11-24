@@ -81,7 +81,7 @@
 #include <string.h>
 #include <float.h>
 
-#include <oskar_lapack_subset.h>
+#include "math/oskar_lapack_subset.h"
 
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))

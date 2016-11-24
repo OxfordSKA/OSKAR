@@ -34,10 +34,10 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_sky.h>
-#include <oskar_telescope.h>
-#include <oskar_jones.h>
-#include <oskar_vector_types.h>
+#include <sky/oskar_sky.h>
+#include <telescope/oskar_telescope.h>
+#include <simulator/oskar_jones.h>
+#include <utility/oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {

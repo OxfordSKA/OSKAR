@@ -29,7 +29,7 @@
 #ifndef OSKAR_PRIVATE_SPLINES_H_
 #define OSKAR_PRIVATE_SPLINES_H_
 
-#include <oskar_mem.h>
+#include <mem/oskar_mem.h>
 
 /*
  * This structure holds the data required to construct a surface from

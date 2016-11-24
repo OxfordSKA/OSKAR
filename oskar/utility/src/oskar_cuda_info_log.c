@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_cuda_info.h>
-#include <oskar_cuda_info_log.h>
-#include <oskar_log.h>
+#include "utility/private_cuda_info.h"
+#include "utility/oskar_cuda_info_log.h"
+#include "log/oskar_log.h"
 
 #ifdef __cplusplus
 extern "C" {

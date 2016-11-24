@@ -34,8 +34,8 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_sky.h>
-#include <oskar_log.h>
+#include <sky/oskar_sky.h>
+#include <log/oskar_log.h>
 #include <oskar_Settings_old.h>
 
 #ifdef __cplusplus

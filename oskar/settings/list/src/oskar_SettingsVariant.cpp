@@ -41,7 +41,7 @@
 #include <cstdio> // for debugging
 #include <iostream> // for debugging
 
-#include <oskar_SettingsVariant.hpp>
+#include "oskar_SettingsVariant.hpp"
 
 using namespace std; // for debugging
 

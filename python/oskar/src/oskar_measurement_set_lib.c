@@ -28,7 +28,7 @@
 
 #include <Python.h>
 
-#include <oskar_measurement_set.h>
+#include <ms/oskar_measurement_set.h>
 #include <string.h>
 
 /* http://docs.scipy.org/doc/numpy-dev/reference/c-api.deprecations.html */
@@ -170,7 +170,7 @@ static PyObject* read_coords(PyObject* self, PyObject* args)
     if (status)
     {
         PyErr_Format(PyExc_RuntimeError,
-                "oskar_ms_read_coords() failed with code %d (%s).", status);
+                "oskar_ms_read_coords() failed with code %d.", status);
         Py_XDECREF(uu);
         Py_XDECREF(vv);
         Py_XDECREF(ww);

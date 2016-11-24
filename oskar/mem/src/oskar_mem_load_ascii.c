@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mem.h>
-#include <oskar_mem_load_ascii.h>
-#include <oskar_getline.h>
-#include <oskar_string_to_array.h>
+#include "mem/oskar_mem.h"
+#include "mem/oskar_mem_load_ascii.h"
+#include "utility/oskar_getline.h"
+#include "utility/oskar_string_to_array.h"
 
 #include <math.h>
 #include <stdarg.h>

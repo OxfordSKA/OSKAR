@@ -28,16 +28,16 @@
 
 #include "oskar_OptionParser.h"
 
-#include <oskar_angular_distance.h>
-#include <oskar_bearing_angle.h>
-#include <oskar_cmath.h>
-#include <oskar_convert_healpix_ring_to_theta_phi.h>
-#include <oskar_ellipse_radius.h>
-#include <oskar_get_error_string.h>
-#include <oskar_log.h>
-#include <oskar_sky.h>
-#include <oskar_timer.h>
-#include <oskar_version_string.h>
+#include "math/oskar_angular_distance.h"
+#include "math/oskar_bearing_angle.h"
+#include "math/oskar_cmath.h"
+#include "convert/oskar_convert_healpix_ring_to_theta_phi.h"
+#include "math/oskar_ellipse_radius.h"
+#include "utility/oskar_get_error_string.h"
+#include "log/oskar_log.h"
+#include "sky/oskar_sky.h"
+#include "utility/oskar_timer.h"
+#include "utility/oskar_version_string.h"
 
 #include <algorithm>
 #include <cfloat>

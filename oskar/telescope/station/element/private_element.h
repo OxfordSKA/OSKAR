@@ -29,8 +29,8 @@
 #ifndef OSKAR_PRIVATE_ELEMENT_H_
 #define OSKAR_PRIVATE_ELEMENT_H_
 
-#include <oskar_splines.h>
-#include <oskar_mem.h>
+#include <splines/oskar_splines.h>
+#include <mem/oskar_mem.h>
 
 struct oskar_Element
 {

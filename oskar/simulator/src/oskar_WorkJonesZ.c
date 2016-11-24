@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_WorkJonesZ.h>
-#include <oskar_mem.h>
+#include "simulator/oskar_WorkJonesZ.h"
+#include "mem/oskar_mem.h"
 
 #ifdef __cplusplus
 extern "C" {

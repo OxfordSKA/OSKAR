@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_element.h>
-#include <oskar_element.h>
-#include <oskar_binary.h>
-#include <oskar_binary_write_mem.h>
-#include <oskar_find_closest_match.h>
+#include "telescope/station/element/private_element.h"
+#include "telescope/station/element/oskar_element.h"
+#include "math/oskar_find_closest_match.h"
+#include "mem/oskar_binary_write_mem.h"
+#include "binary/oskar_binary.h"
 
 #ifdef __cplusplus
 extern "C" {

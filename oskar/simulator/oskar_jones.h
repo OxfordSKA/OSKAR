@@ -49,13 +49,13 @@ typedef struct oskar_Jones oskar_Jones;
 }
 #endif
 
-#include <oskar_jones_accessors.h>
-#include <oskar_jones_create.h>
-#include <oskar_jones_create_copy.h>
-#include <oskar_jones_free.h>
-#include <oskar_jones_get_station_pointer.h>
-#include <oskar_jones_join.h>
-#include <oskar_jones_set_real_scalar.h>
-#include <oskar_jones_set_size.h>
+#include <simulator/oskar_jones_accessors.h>
+#include <simulator/oskar_jones_create.h>
+#include <simulator/oskar_jones_create_copy.h>
+#include <simulator/oskar_jones_free.h>
+#include <simulator/oskar_jones_get_station_pointer.h>
+#include <simulator/oskar_jones_join.h>
+#include <simulator/oskar_jones_set_real_scalar.h>
+#include <simulator/oskar_jones_set_size.h>
 
 #endif /* OSKAR_JONES_H_ */

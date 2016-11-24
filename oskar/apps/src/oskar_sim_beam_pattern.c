@@ -26,31 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sim_beam_pattern.h>
+#include "oskar_sim_beam_pattern.h"
 
-#include <oskar_beam_pattern_generate_coordinates.h>
-#include <oskar_cmath.h>
-#include <oskar_convert_fov_to_cellsize.h>
-#include <oskar_convert_mjd_to_gast_fast.h>
-#include <oskar_cuda_mem_log.h>
-#include <oskar_device_utils.h>
-#include <oskar_evaluate_auto_power.h>
-#include <oskar_evaluate_cross_power.h>
-#include <oskar_evaluate_station_beam.h>
-#include <oskar_file_exists.h>
-#include <oskar_log.h>
-#include <oskar_set_up_telescope.h>
-#include <oskar_SettingsTree.hpp>
-#include <oskar_SettingsDeclareXml.hpp>
-#include <oskar_SettingsFileHandlerQSettings.hpp>
-#include <oskar_settings_old_free.h>
-#include <oskar_settings_load.h>
-#include <oskar_settings_log.h>
-#include <oskar_station_work.h>
-#include <oskar_telescope.h>
-#include <oskar_timer.h>
-#include <oskar_version.h>
-#include <private_cond2_2x2.h>
+#include "oskar_beam_pattern_generate_coordinates.h"
+#include "convert/oskar_convert_fov_to_cellsize.h"
+#include "convert/oskar_convert_mjd_to_gast_fast.h"
+#include "correlate/oskar_evaluate_auto_power.h"
+#include "correlate/oskar_evaluate_cross_power.h"
+#include "telescope/oskar_telescope.h"
+#include "telescope/station/oskar_evaluate_station_beam.h"
+#include "log/oskar_log.h"
+#include "math/oskar_cmath.h"
+#include "math/private_cond2_2x2.h"
+#include "oskar_set_up_telescope.h"
+#include "oskar_SettingsTree.hpp"
+#include "oskar_SettingsDeclareXml.hpp"
+#include "oskar_SettingsFileHandlerQSettings.hpp"
+#include "oskar_settings_old_free.h"
+#include "oskar_settings_load.h"
+#include "oskar_settings_log.h"
+#include "utility/oskar_cuda_mem_log.h"
+#include "utility/oskar_device_utils.h"
+#include "utility/oskar_file_exists.h"
+#include "utility/oskar_timer.h"
+#include "oskar_version.h"
 
 #include <fitsio.h>
 

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_brightness_to_jy.h>
+#include "convert/oskar_convert_brightness_to_jy.h"
 #include <string.h>
 
 #ifdef __cplusplus

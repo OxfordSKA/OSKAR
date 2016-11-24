@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_grid_correction.h>
+#include "imager/oskar_grid_correction.h"
 
 #ifdef __cplusplus
 extern "C" {

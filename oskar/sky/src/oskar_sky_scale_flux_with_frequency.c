@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
-#include <oskar_scale_flux_with_frequency_cuda.h>
-#include <oskar_scale_flux_with_frequency.h>
-#include <oskar_device_utils.h>
+#include "sky/oskar_sky.h"
+#include "sky/oskar_scale_flux_with_frequency_cuda.h"
+#include "sky/oskar_scale_flux_with_frequency.h"
+#include "utility/oskar_device_utils.h"
 
 #ifdef __cplusplus
 extern "C" {

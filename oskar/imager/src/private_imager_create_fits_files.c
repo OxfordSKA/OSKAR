@@ -26,12 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
+#include "imager/private_imager.h"
 
-#include <oskar_cmath.h>
-#include <oskar_convert_fov_to_cellsize.h>
-#include <oskar_imager.h>
-#include <private_imager_create_fits_files.h>
+#include "math/oskar_cmath.h"
+#include "convert/oskar_convert_fov_to_cellsize.h"
+#include "imager/oskar_imager.h"
+#include "imager/private_imager_create_fits_files.h"
 
 #include <string.h>
 #include <stdio.h>

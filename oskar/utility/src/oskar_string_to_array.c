@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_string_to_array.h>
+#include "utility/oskar_string_to_array.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

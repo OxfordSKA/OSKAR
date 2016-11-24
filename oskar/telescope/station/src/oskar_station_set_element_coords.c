@@ -28,8 +28,8 @@
 
 #include <stdlib.h>
 
-#include <private_station.h>
-#include <oskar_station.h>
+#include "telescope/station/private_station.h"
+#include "telescope/station/oskar_station.h"
 
 #ifdef __cplusplus
 extern "C" {

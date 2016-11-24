@@ -29,17 +29,17 @@
 #ifndef OSKAR_H_
 #define OSKAR_H_
 
-/* Note that 'binary' and 'ms' directories are treated as separate libraries,
- * so they are not included here. */
-
-#include "imager/oskar_imager.h"
-#include "mem/oskar_mem.h"
-#include "telescope/oskar_telescope.h"
-#include "sky/oskar_sky.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_timer.h"
-#include "utility/oskar_version_string.h"
-#include "vis/oskar_vis_block.h"
-#include "vis/oskar_vis_header.h"
+#include <binary/oskar_binary.h>
+#include <imager/oskar_imager.h>
+#include <mem/oskar_mem.h>
+#include <ms/oskar_measurement_set.h>
+#include <telescope/oskar_telescope.h>
+#include <simulator/oskar_simulator.h>
+#include <sky/oskar_sky.h>
+#include <utility/oskar_get_error_string.h>
+#include <utility/oskar_timer.h>
+#include <utility/oskar_version_string.h>
+#include <vis/oskar_vis_block.h>
+#include <vis/oskar_vis_header.h>
 
 #endif /* OSKAR_H_ */

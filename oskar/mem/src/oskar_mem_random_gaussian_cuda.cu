@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mem_random_gaussian_cuda.h>
-#include <private_random_helpers.h>
+#include "mem/oskar_mem_random_gaussian_cuda.h"
+#include "math/private_random_helpers.h"
 
 #ifdef __cplusplus
 extern "C" {

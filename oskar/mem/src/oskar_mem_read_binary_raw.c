@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mem.h>
+#include "mem/oskar_mem.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
+#include "sky/oskar_sky.h"
 
-#include <oskar_random_gaussian.h>
+#include "math/oskar_random_gaussian.h"
 #include <math.h>
 
 #ifdef __cplusplus

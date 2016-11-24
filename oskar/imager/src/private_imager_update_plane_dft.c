@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
+#include "imager/private_imager.h"
 
-#include <oskar_dft_c2r_2d_cuda.h>
-#include <oskar_dft_c2r_3d_cuda.h>
-#include <oskar_device_utils.h>
-#include <oskar_imager.h>
-#include <oskar_cmath.h>
-#include <private_imager_update_plane_dft.h>
+#include "math/oskar_dft_c2r_2d_cuda.h"
+#include "math/oskar_dft_c2r_3d_cuda.h"
+#include "utility/oskar_device_utils.h"
+#include "imager/oskar_imager.h"
+#include "imager/private_imager_update_plane_dft.h"
+#include "math/oskar_cmath.h"
 
 #include <stdlib.h>
 

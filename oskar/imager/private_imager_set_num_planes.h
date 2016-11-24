@@ -29,9 +29,6 @@
 #ifndef OSKAR_IMAGER_SET_NUM_PLANES_H_
 #define OSKAR_IMAGER_SET_NUM_PLANES_H_
 
-#include <oskar_global.h>
-#include <oskar_mem.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

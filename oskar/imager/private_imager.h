@@ -31,8 +31,8 @@
 #endif
 
 #include <fitsio.h>
-#include <oskar_mem.h>
-#include <oskar_log.h>
+#include <mem/oskar_mem.h>
+#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {

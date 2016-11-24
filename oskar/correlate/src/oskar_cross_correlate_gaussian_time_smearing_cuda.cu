@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_correlate_functions_inline.h>
-#include <oskar_cross_correlate_gaussian_time_smearing_cuda.h>
-#include <oskar_add_inline.h>
+#include "correlate/private_correlate_functions_inline.h"
+#include "correlate/oskar_cross_correlate_gaussian_time_smearing_cuda.h"
+#include "math/oskar_add_inline.h"
 
 /* Kernels. ================================================================ */
 

@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
-#include <oskar_convert_brightness_to_jy.h>
-#include <oskar_cmath.h>
+#include "sky/oskar_sky.h"
+#include "convert/oskar_convert_brightness_to_jy.h"
+#include "math/oskar_cmath.h"
 #include <fitsio.h>
 
 #ifdef __cplusplus
@@ -36,9 +36,9 @@ extern "C" {
 #endif
 
 oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
-		double min_peak_fraction, double min_abs_val,
-		const char* default_map_units, int override_units, double frequency_hz,
-		double spectral_index, int* status)
+        double min_peak_fraction, double min_abs_val,
+        const char* default_map_units, int override_units, double frequency_hz,
+        double spectral_index, int* status)
 {
     double image_ra_deg = 0.0, image_dec_deg = 0.0;
     double image_cellsize_deg = 0.0, image_freq_hz = 0.0;

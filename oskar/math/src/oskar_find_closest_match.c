@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_find_closest_match.h>
+#include "math/oskar_find_closest_match.h"
 #include <float.h>
 #include <math.h>
 

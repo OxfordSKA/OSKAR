@@ -26,18 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_element.h>
-#include <oskar_element.h>
+#include "telescope/station/element/private_element.h"
+#include "telescope/station/element/oskar_element.h"
 
-#include <oskar_apply_element_taper_cosine.h>
-#include <oskar_apply_element_taper_gaussian.h>
-#include <oskar_evaluate_dipole_pattern.h>
-#include <oskar_evaluate_geometric_dipole_pattern.h>
-#include <oskar_convert_enu_directions_to_theta_phi.h>
-#include <oskar_convert_ludwig3_to_theta_phi_components.h>
-#include <oskar_find_closest_match.h>
+#include "telescope/station/element/oskar_apply_element_taper_cosine.h"
+#include "telescope/station/element/oskar_apply_element_taper_gaussian.h"
+#include "telescope/station/element/oskar_evaluate_dipole_pattern.h"
+#include "telescope/station/element/oskar_evaluate_geometric_dipole_pattern.h"
+#include "convert/oskar_convert_enu_directions_to_theta_phi.h"
+#include "convert/oskar_convert_ludwig3_to_theta_phi_components.h"
+#include "math/oskar_find_closest_match.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 
 #define C_0 299792458.0
 

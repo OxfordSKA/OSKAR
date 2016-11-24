@@ -26,12 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_station_beam.h>
-#include <oskar_evaluate_station_beam_aperture_array.h>
-#include <oskar_evaluate_station_beam_gaussian.h>
-#include <oskar_evaluate_vla_beam_pbcor.h>
-#include <oskar_convert_relative_directions_to_enu_directions.h>
-#include <oskar_convert_enu_directions_to_relative_directions.h>
+#include "telescope/station/oskar_evaluate_station_beam.h"
+#include "telescope/station/oskar_evaluate_station_beam_aperture_array.h"
+#include "telescope/station/oskar_evaluate_station_beam_gaussian.h"
+#include "telescope/station/oskar_evaluate_vla_beam_pbcor.h"
+#include "convert/oskar_convert_relative_directions_to_enu_directions.h"
+#include "convert/oskar_convert_enu_directions_to_relative_directions.h"
 
 #include <math.h>
 

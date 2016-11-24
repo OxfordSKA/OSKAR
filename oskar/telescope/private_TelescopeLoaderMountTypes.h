@@ -29,7 +29,7 @@
 #ifndef OSKAR_TELESCOPE_LOADER_MOUNT_TYPES_H_
 #define OSKAR_TELESCOPE_LOADER_MOUNT_TYPES_H_
 
-#include <oskar_TelescopeLoadAbstract.h>
+#include <telescope/oskar_TelescopeLoadAbstract.h>
 
 class TelescopeLoaderMountTypes : public oskar_TelescopeLoadAbstract
 {

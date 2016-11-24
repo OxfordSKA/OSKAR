@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_load_observation.h>
-#include <oskar_settings_convert_date_time_to_mjd.h>
-#include <oskar_log.h>
+#include "oskar_settings_load_observation.h"
+#include "oskar_settings_convert_date_time_to_mjd.h"
+#include "log/oskar_log.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <cstdlib>
 #include <cstring>
 #include <cfloat>

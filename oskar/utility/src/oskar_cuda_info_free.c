@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_cuda_info.h>
-#include <oskar_cuda_info_free.h>
+#include "utility/private_cuda_info.h"
+#include "utility/oskar_cuda_info_free.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus

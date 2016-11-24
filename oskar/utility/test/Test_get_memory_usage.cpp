@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_get_memory_usage.h>
+#include "utility/oskar_get_memory_usage.h"
 
 #include <cstdio>
 #include <cstdlib>

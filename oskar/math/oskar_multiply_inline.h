@@ -38,7 +38,7 @@
 /* Must include this first to avoid type conflicts. */
 #include <vector_types.h>
 #endif
-#include <oskar_vector_types.h>
+#include <utility/oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {

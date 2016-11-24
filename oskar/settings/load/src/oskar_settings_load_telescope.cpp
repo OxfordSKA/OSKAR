@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_load_telescope.h>
-#include <oskar_telescope.h>
+#include "oskar_settings_load_telescope.h"
+#include "telescope/oskar_telescope.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_jones.h>
+#include "simulator/private_jones.h"
 
-#include <oskar_jones_set_real_scalar.h>
-#include <oskar_mem.h>
+#include "simulator/oskar_jones_set_real_scalar.h"
+#include "mem/oskar_mem.h"
 
 #ifdef __cplusplus
 extern "C" {

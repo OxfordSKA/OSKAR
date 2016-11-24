@@ -26,12 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
-#include <private_imager_free_dft.h>
-#include <private_imager_init_dft.h>
-#include <oskar_evaluate_image_lmn_grid.h>
-
-#include <oskar_cmath.h>
+#include "imager/private_imager.h"
+#include "imager/private_imager_free_dft.h"
+#include "imager/private_imager_init_dft.h"
+#include "math/oskar_evaluate_image_lmn_grid.h"
+#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -61,16 +61,16 @@ enum OSKAR_VIS_BLOCK_TAGS
 }
 #endif
 
-#include <oskar_vis_block_accessors.h>
-#include <oskar_vis_block_add_system_noise.h>
-#include <oskar_vis_block_clear.h>
-#include <oskar_vis_block_copy.h>
-#include <oskar_vis_block_create.h>
-#include <oskar_vis_block_create_from_header.h>
-#include <oskar_vis_block_free.h>
-#include <oskar_vis_block_read.h>
-#include <oskar_vis_block_resize.h>
-#include <oskar_vis_block_write.h>
-#include <oskar_vis_block_write_ms.h>
+#include <vis/oskar_vis_block_accessors.h>
+#include <vis/oskar_vis_block_add_system_noise.h>
+#include <vis/oskar_vis_block_clear.h>
+#include <vis/oskar_vis_block_copy.h>
+#include <vis/oskar_vis_block_create.h>
+#include <vis/oskar_vis_block_create_from_header.h>
+#include <vis/oskar_vis_block_free.h>
+#include <vis/oskar_vis_block_read.h>
+#include <vis/oskar_vis_block_resize.h>
+#include <vis/oskar_vis_block_write.h>
+#include <vis/oskar_vis_block_write_ms.h>
 
 #endif /* OSKAR_VIS_BLOCK_H_ */

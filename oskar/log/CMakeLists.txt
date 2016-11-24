@@ -1,10 +1,8 @@
 #
-# log/CMakeLists.txt
+# oskar/log/CMakeLists.txt
 #
 
-set(lib_type STATIC)
-set(name oskar_log)
-set(${name}_SRC
+set(log_SRC
     src/oskar_log_accessors.c
     src/oskar_log_create.c
     src/oskar_log_error.c
@@ -20,6 +18,7 @@ set(${name}_SRC
     src/oskar_log_warning.c
     src/oskar_log_write.c
 )
-add_library(${name} ${lib_type} ${${name}_SRC})
+
+set(log_SRC "${log_SRC}" PARENT_SCOPE)
 
 add_subdirectory(test)

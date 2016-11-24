@@ -28,15 +28,15 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_convert_healpix_ring_to_theta_phi.h>
-#include <oskar_convert_galactic_to_fk5.h>
-#include <oskar_evaluate_image_lon_lat_grid.h>
+#include "convert/oskar_convert_healpix_ring_to_theta_phi.h"
+#include "convert/oskar_convert_galactic_to_fk5.h"
+#include "math/oskar_evaluate_image_lon_lat_grid.h"
 
-#include <oskar_binary.h>
-#include <oskar_binary_write_mem.h>
-#include <oskar_timer.h>
+#include "binary/oskar_binary.h"
+#include "mem/oskar_binary_write_mem.h"
+#include "utility/oskar_timer.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <cstdio>
 #include <iostream>
 

@@ -26,13 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_vis_header_write_ms.h>
-
-#include <oskar_cmath.h>
-#include <oskar_dir.h>
-#include <oskar_measurement_set.h>
-#include <oskar_version.h>
-#include <oskar_vis_header.h>
+#include "vis/oskar_vis_header.h"
+#include "math/oskar_cmath.h"
+#include "utility/oskar_dir.h"
+#include "ms/oskar_measurement_set.h"
+#include "oskar_version.h"
 
 #ifdef __cplusplus
 extern "C" {

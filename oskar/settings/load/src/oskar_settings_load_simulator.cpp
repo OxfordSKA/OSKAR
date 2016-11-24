@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_load_simulator.h>
+#include "oskar_settings_load_simulator.h"
 
-#include <oskar_device_utils.h>
-#include <oskar_get_error_string.h>
+#include "utility/oskar_device_utils.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <cstdio>
 #include <cstdlib>

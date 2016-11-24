@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_equation_of_equinoxes_fast.h>
+#include "convert/oskar_equation_of_equinoxes_fast.h"
 #include <math.h>
 
 #ifdef __cplusplus

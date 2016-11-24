@@ -33,7 +33,7 @@
  * @file oskar_Jones.h
  */
 
-#include <oskar_mem.h>
+#include <mem/oskar_mem.h>
 
 /**
  * @brief Structure to hold Jones matrix and meta-data.

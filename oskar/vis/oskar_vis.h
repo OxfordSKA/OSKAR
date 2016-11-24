@@ -119,10 +119,10 @@ enum OSKAR_VIS_STATION_COORD_UNIT
 }
 #endif
 
-#include <oskar_vis_accessors.h>
-#include <oskar_vis_create.h>
-#include <oskar_vis_free.h>
-#include <oskar_vis_read.h>
-#include <oskar_vis_write.h>
+#include <vis/oskar_vis_accessors.h>
+#include <vis/oskar_vis_create.h>
+#include <vis/oskar_vis_free.h>
+#include <vis/oskar_vis_read.h>
+#include <vis/oskar_vis_write.h>
 
 #endif /* OSKAR_VIS_H_ */

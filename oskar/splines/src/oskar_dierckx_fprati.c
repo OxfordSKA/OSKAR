@@ -1,4 +1,4 @@
-#include <oskar_dierckx_fprati.h>
+#include "splines/oskar_dierckx_fprati.h"
 
 #ifdef __cplusplus
 extern "C" {

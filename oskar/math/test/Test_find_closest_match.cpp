@@ -28,9 +28,9 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_find_closest_match.h>
-#include <oskar_mem.h>
-#include <oskar_get_error_string.h>
+#include "math/oskar_find_closest_match.h"
+#include "mem/oskar_mem.h"
+#include "utility/oskar_get_error_string.h"
 
 TEST(find_closest_match, test)
 {

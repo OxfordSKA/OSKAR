@@ -26,20 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
+#include "imager/private_imager.h"
 
-#include <oskar_convert_ecef_to_baseline_uvw.h>
-#include <oskar_convert_lon_lat_to_relative_directions.h>
-#include <oskar_grid_weights.h>
-#include <oskar_imager.h>
-#include <oskar_cmath.h>
-#include <private_imager_create_fits_files.h>
-#include <private_imager_set_num_planes.h>
-#include <private_imager_update_plane_dft.h>
-#include <private_imager_update_plane_fft.h>
-#include <private_imager_update_plane_wproj.h>
-#include <private_imager_weight_radial.h>
-#include <private_imager_weight_uniform.h>
+#include "convert/oskar_convert_ecef_to_baseline_uvw.h"
+#include "convert/oskar_convert_lon_lat_to_relative_directions.h"
+#include "imager/oskar_grid_weights.h"
+#include "imager/oskar_imager.h"
+#include "math/oskar_cmath.h"
+#include "imager/private_imager_create_fits_files.h"
+#include "imager/private_imager_set_num_planes.h"
+#include "imager/private_imager_update_plane_dft.h"
+#include "imager/private_imager_update_plane_fft.h"
+#include "imager/private_imager_update_plane_wproj.h"
+#include "imager/private_imager_weight_radial.h"
+#include "imager/private_imager_weight_uniform.h"
 
 #include <stdlib.h>
 #include <stdio.h>

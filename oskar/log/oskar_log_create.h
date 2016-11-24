@@ -57,6 +57,7 @@ extern "C" {
  *
  * @return A handle to the new log.
  */
+OSKAR_EXPORT
 oskar_Log* oskar_log_create(int file_priority, int term_priority);
 
 #ifdef __cplusplus

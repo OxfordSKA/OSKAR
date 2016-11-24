@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_dftw_m2m_3d_indexed_input_cuda.h>
+#include "math/oskar_dftw_m2m_3d_indexed_input_cuda.h"
 
 #ifdef __cplusplus
 extern "C" {

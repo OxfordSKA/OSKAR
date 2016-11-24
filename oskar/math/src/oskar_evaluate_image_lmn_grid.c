@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_fov_to_cellsize.h>
-#include <oskar_evaluate_image_lmn_grid.h>
-#include <oskar_linspace.h>
+#include "convert/oskar_convert_fov_to_cellsize.h"
+#include "math/oskar_evaluate_image_lmn_grid.h"
+#include "math/oskar_linspace.h"
 
 #include <math.h>
 #include <stdlib.h>

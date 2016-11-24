@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mutex.h>
+#include "utility/oskar_mutex.h"
 #include <stdlib.h>
 
 #ifdef _OPENMP

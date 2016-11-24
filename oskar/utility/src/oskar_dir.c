@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_dir.h>
+#include "utility/oskar_dir.h"
 
 #ifndef OSKAR_OS_WIN
 #include <dirent.h>

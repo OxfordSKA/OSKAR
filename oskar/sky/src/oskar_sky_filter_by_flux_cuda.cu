@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky_filter_by_flux_cuda.h>
+#include "sky/oskar_sky_filter_by_flux_cuda.h"
 
 #include <thrust/device_vector.h>
 #include <thrust/remove.h>

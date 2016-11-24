@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_gaussian_cuda.h>
+#include "math/oskar_gaussian_cuda.h"
 
 #ifdef __cplusplus
 extern "C" {

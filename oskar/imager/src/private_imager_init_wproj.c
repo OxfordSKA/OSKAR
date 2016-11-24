@@ -30,16 +30,16 @@
 #include <cufft.h>
 #endif
 
-#include <private_imager.h>
-#include <private_imager_generate_w_phase_screen.h>
-#include <private_imager_free_wproj.h>
-#include <private_imager_init_wproj.h>
-#include <oskar_fftpack_cfft.h>
-#include <oskar_fftpack_cfft_f.h>
-#include <oskar_get_memory_usage.h>
-#include <oskar_grid_functions_spheroidal.h>
+#include "imager/private_imager.h"
+#include "imager/private_imager_generate_w_phase_screen.h"
+#include "imager/private_imager_free_wproj.h"
+#include "imager/private_imager_init_wproj.h"
+#include "imager/oskar_fftpack_cfft.h"
+#include "imager/oskar_fftpack_cfft_f.h"
+#include "utility/oskar_get_memory_usage.h"
+#include "imager/oskar_grid_functions_spheroidal.h"
+#include "math/oskar_cmath.h"
 
-#include <oskar_cmath.h>
 #include <stdlib.h>
 #include <string.h>
 

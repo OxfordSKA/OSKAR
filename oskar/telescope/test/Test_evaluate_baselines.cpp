@@ -28,9 +28,9 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_convert_station_uvw_to_baseline_uvw.h>
-#include <oskar_mem.h>
-#include <oskar_get_error_string.h>
+#include "convert/oskar_convert_station_uvw_to_baseline_uvw.h"
+#include "mem/oskar_mem.h"
+#include "utility/oskar_get_error_string.h"
 
 TEST(evaluate_baselines, cpu_gpu)
 {

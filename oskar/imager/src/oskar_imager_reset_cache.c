@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
-#include <private_imager_free_dft.h>
-#include <private_imager_free_fft.h>
-#include <private_imager_free_wproj.h>
-#include <oskar_imager_reset_cache.h>
+#include "imager/private_imager.h"
+#include "imager/private_imager_free_dft.h"
+#include "imager/private_imager_free_fft.h"
+#include "imager/private_imager_free_wproj.h"
+#include "imager/oskar_imager_reset_cache.h"
 #include <fitsio.h>
 
 #include <stdlib.h>

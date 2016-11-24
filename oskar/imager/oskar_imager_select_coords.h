@@ -34,7 +34,7 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_mem.h>
+#include <mem/oskar_mem.h>
 #include <stddef.h>
 
 #ifdef __cplusplus

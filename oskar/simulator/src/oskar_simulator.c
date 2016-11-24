@@ -26,33 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sim_interferometer.h>
+#include "math/oskar_cmath.h"
+#include "convert/oskar_convert_ecef_to_station_uvw.h"
+#include "convert/oskar_convert_ecef_to_baseline_uvw.h"
+#include "convert/oskar_convert_mjd_to_gast_fast.h"
+#include "correlate/oskar_auto_correlate.h"
+#include "correlate/oskar_cross_correlate.h"
+#include "utility/oskar_cuda_mem_log.h"
+#include "utility/oskar_device_utils.h"
+#include "simulator/oskar_evaluate_jones_R.h"
+#include "simulator/oskar_evaluate_jones_Z.h"
+#include "simulator/oskar_evaluate_jones_E.h"
+#include "simulator/oskar_evaluate_jones_K.h"
+#include "simulator/oskar_jones.h"
+#include "simulator/oskar_simulator.h"
+#include "log/oskar_log.h"
+#include "utility/oskar_mutex.h"
+#include "sky/oskar_sky.h"
+#include "telescope/oskar_telescope.h"
+#include "utility/oskar_timer.h"
+#include "vis/oskar_vis_block.h"
+#include "vis/oskar_vis_block_write_ms.h"
+#include "vis/oskar_vis_header.h"
+#include "vis/oskar_vis_header_write_ms.h"
 
-#include <oskar_cmath.h>
-#include <oskar_convert_ecef_to_station_uvw.h>
-#include <oskar_convert_ecef_to_baseline_uvw.h>
-#include <oskar_convert_mjd_to_gast_fast.h>
-#include <oskar_auto_correlate.h>
-#include <oskar_cross_correlate.h>
-#include <oskar_cuda_mem_log.h>
-#include <oskar_device_utils.h>
-#include <oskar_evaluate_jones_R.h>
-#include <oskar_evaluate_jones_Z.h>
-#include <oskar_evaluate_jones_E.h>
-#include <oskar_evaluate_jones_K.h>
-#include <oskar_jones.h>
-#include <oskar_log.h>
-#include <oskar_mutex.h>
-#include <oskar_sky.h>
-#include <oskar_station_work.h>
-#include <oskar_telescope.h>
-#include <oskar_timer.h>
-#include <oskar_vis_block.h>
-#include <oskar_vis_block_write_ms.h>
-#include <oskar_vis_header.h>
-#include <oskar_vis_header_write_ms.h>
-
-#include <oskar_get_memory_usage.h>
+#include "utility/oskar_get_memory_usage.h"
 
 #ifdef _OPENMP
 #include <omp.h>

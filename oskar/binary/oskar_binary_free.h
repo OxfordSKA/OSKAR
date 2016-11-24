@@ -33,7 +33,7 @@
  * @file oskar_binary_free.h
  */
 
-#include <oskar_binary_macros.h>
+#include <binary/oskar_binary_macros.h>
 
 #ifdef __cplusplus
 extern "C" {

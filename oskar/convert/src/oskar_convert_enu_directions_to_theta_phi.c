@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_enu_directions_to_theta_phi.h>
-#include <oskar_convert_enu_directions_to_theta_phi_cuda.h>
-#include <oskar_device_utils.h>
-#include <private_convert_enu_directions_to_theta_phi_inline.h>
+#include "convert/oskar_convert_enu_directions_to_theta_phi.h"
+#include "convert/oskar_convert_enu_directions_to_theta_phi_cuda.h"
+#include "utility/oskar_device_utils.h"
+#include "convert/private_convert_enu_directions_to_theta_phi_inline.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_file_exists.h>
+#include "oskar_settings_file_exists.h"
 #include <stdio.h>
 
 #ifdef __cplusplus

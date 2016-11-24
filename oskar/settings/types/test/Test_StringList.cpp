@@ -33,7 +33,7 @@
 #include <iostream>
 #include <climits>
 #include <cmath>
-#include <oskar_settings_types.hpp>
+#include "oskar_settings_types.hpp"
 #include <iostream>
 #include <iomanip>
 

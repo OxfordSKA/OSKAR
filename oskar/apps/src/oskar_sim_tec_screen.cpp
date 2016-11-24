@@ -26,21 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sim_tec_screen.h>
+#include "oskar_sim_tec_screen.h"
 
-#include <oskar_set_up_telescope.h>
+#include "oskar_set_up_telescope.h"
 
-#include <oskar_convert_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_enu_directions.h>
-#include <oskar_convert_offset_ecef_to_ecef.h>
-#include <oskar_evaluate_image_lm_grid.h>
-#include <oskar_evaluate_image_lon_lat_grid.h>
-#include <oskar_evaluate_pierce_points.h>
-#include <oskar_evaluate_tec_tid.h>
-#include <oskar_Settings_old.h>
-#include <oskar_telescope.h>
+#include "convert/oskar_convert_mjd_to_gast_fast.h"
+#include "convert/oskar_convert_apparent_ra_dec_to_enu_directions.h"
+#include "convert/oskar_convert_offset_ecef_to_ecef.h"
+#include "math/oskar_evaluate_image_lm_grid.h"
+#include "math/oskar_evaluate_image_lon_lat_grid.h"
+#include "sky/oskar_evaluate_tec_tid.h"
+#include "telescope/station/oskar_evaluate_pierce_points.h"
+#include "telescope/oskar_telescope.h"
+#include "oskar_Settings_old.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <cstdlib>
 #include <cstdio>
 

@@ -29,7 +29,7 @@
 #ifndef OSKAR_PRIVATE_STATION_WORK_H_
 #define OSKAR_PRIVATE_STATION_WORK_H_
 
-#include <oskar_mem.h>
+#include <mem/oskar_mem.h>
 
 struct oskar_StationWork
 {

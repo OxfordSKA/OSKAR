@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_global.h>
-#include <oskar_version.h>
+#include "oskar_global.h"
+#include "oskar_version.h"
 #include <QtCore/QSettings>
 #include <cstdio>
-#include <oskar_OptionParser.h>
+#include "oskar_OptionParser.h"
 #include <vector>
 #include <string>
 

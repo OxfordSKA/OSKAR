@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_dierckx_sphere.h>
-#include <oskar_dierckx_surfit.h>
-#include <private_splines.h>
-#include <oskar_splines.h>
+#include "splines/oskar_dierckx_sphere.h"
+#include "splines/oskar_dierckx_surfit.h"
+#include "splines/private_splines.h"
+#include "splines/oskar_splines.h"
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>

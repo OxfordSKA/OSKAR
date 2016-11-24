@@ -4,11 +4,9 @@
 
 set(apps_SRC
     src/oskar_beam_pattern_generate_coordinates.c
-    src/oskar_evaluate_station_pierce_points.cpp
     src/oskar_set_up_sky.c
     src/oskar_set_up_telescope.c
     src/oskar_sim_beam_pattern.c
-    src/oskar_sim_interferometer.c
     src/oskar_sim_tec_screen.cpp
     )
 add_library(oskar_apps ${apps_SRC})

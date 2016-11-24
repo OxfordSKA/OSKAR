@@ -28,13 +28,13 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_convert_enu_to_ecef.h>
-#include <oskar_evaluate_pierce_points.h>
-#include <oskar_convert_ecef_to_geodetic_spherical.h>
+#include "convert/oskar_convert_enu_to_ecef.h"
+#include "telescope/station/oskar_evaluate_pierce_points.h"
+#include "convert/oskar_convert_ecef_to_geodetic_spherical.h"
 
-#include <oskar_mem.h>
+#include "mem/oskar_mem.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <cstdio>
 
 static void create_rot_matrix(double* M, double lon_rad, double lat_rad);

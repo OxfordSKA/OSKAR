@@ -34,9 +34,8 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_telescope.h>
-#include <oskar_jones.h>
-#include <oskar_station_work.h>
+#include <telescope/oskar_telescope.h>
+#include <simulator/oskar_jones.h>
 
 #ifdef __cplusplus
 extern "C" {

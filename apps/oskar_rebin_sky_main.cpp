@@ -26,13 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_rebin_sky_cuda.h>
-#include <oskar_sky.h>
-#include <oskar_device_utils.h>
-#include <oskar_get_error_string.h>
-#include <oskar_log.h>
+#include "oskar_rebin_sky_cuda.h"
+#include "oskar_sky.h"
+#include "utility/oskar_device_utils.h"
+#include "utility/oskar_get_error_string.h"
+#include "oskar_log.h"
 
-#include <oskar_OptionParser.h>
+#include "oskar_OptionParser.h"
 
 #include <cstdio>
 #include <cstdlib>

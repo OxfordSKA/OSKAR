@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_relative_directions_to_lon_lat.h>
+#include "convert/oskar_convert_relative_directions_to_lon_lat.h"
 #include <math.h>
 
 #ifdef __cplusplus

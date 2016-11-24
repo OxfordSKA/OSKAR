@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_TelescopeLoadAbstract.h>
-#include <oskar_dir.h>
+#include "telescope/oskar_TelescopeLoadAbstract.h"
+#include "utility/oskar_dir.h"
 
 using std::map;
 using std::string;

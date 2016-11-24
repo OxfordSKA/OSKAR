@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_log.h>
+#include "log/oskar_log.h"
 #include <cstdio>
 
 TEST(Log, oskar_log_message)

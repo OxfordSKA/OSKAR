@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_SettingsValue.hpp>
-#include <oskar_settings_utility_string.hpp>
+#include "oskar_SettingsValue.hpp"
+#include "oskar_settings_utility_string.hpp"
 #include <cstdlib>
 #include <cstring>
 #include <iostream>

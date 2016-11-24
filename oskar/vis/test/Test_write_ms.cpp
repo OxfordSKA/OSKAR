@@ -28,14 +28,14 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_dir.h>
+#include "utility/oskar_dir.h"
 
-#include <oskar_convert_date_time_to_mjd.h>
-#include <oskar_vis_block.h>
-#include <oskar_vis_header.h>
-#include <oskar_telescope.h>
-#include <oskar_get_error_string.h>
-#include <oskar_cmath.h>
+#include "convert/oskar_convert_date_time_to_mjd.h"
+#include "vis/oskar_vis_block.h"
+#include "vis/oskar_vis_header.h"
+#include "telescope/oskar_telescope.h"
+#include "utility/oskar_get_error_string.h"
+#include "math/oskar_cmath.h"
 
 #include <cstdio>
 

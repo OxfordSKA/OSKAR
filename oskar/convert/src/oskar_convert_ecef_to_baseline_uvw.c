@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_ecef_to_baseline_uvw.h>
-#include <oskar_convert_station_uvw_to_baseline_uvw.h>
-#include <oskar_convert_ecef_to_station_uvw.h>
-#include <oskar_convert_mjd_to_gast_fast.h>
+#include "convert/oskar_convert_ecef_to_baseline_uvw.h"
+#include "convert/oskar_convert_station_uvw_to_baseline_uvw.h"
+#include "convert/oskar_convert_ecef_to_station_uvw.h"
+#include "convert/oskar_convert_mjd_to_gast_fast.h"
 
 #ifdef __cplusplus
 extern "C" {

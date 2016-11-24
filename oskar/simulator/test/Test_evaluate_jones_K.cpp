@@ -26,14 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_device_utils.h>
 #include <gtest/gtest.h>
 
-#include <oskar_timer.h>
-
-#include <oskar_evaluate_jones_K.h>
-#include <oskar_get_error_string.h>
-#include <oskar_vector_types.h>
+#include "simulator/oskar_evaluate_jones_K.h"
+#include "utility/oskar_device_utils.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_timer.h"
+#include "utility/oskar_vector_types.h"
 
 #include <cstdio>
 

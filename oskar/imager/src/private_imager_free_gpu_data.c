@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_device_utils.h>
-#include <private_imager.h>
-#include <private_imager_free_gpu_data.h>
+#include "utility/oskar_device_utils.h"
+#include "imager/private_imager.h"
+#include "imager/private_imager_free_gpu_data.h"
 
 #include <stdlib.h>
 

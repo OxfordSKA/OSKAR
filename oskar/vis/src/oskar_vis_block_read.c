@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_block.h>
-#include <oskar_binary.h>
-#include <oskar_binary_read_mem.h>
-#include <oskar_vis_block.h>
-#include <oskar_vis_header.h>
+#include "vis/private_vis_block.h"
+#include "binary/oskar_binary.h"
+#include "mem/oskar_binary_read_mem.h"
+#include "vis/oskar_vis_block.h"
+#include "vis/oskar_vis_header.h"
 
 #ifdef __cplusplus
 extern "C" {

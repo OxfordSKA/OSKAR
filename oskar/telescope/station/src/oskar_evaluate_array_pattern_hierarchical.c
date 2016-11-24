@@ -26,16 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_array_pattern_hierarchical.h>
-#include <oskar_dftw_c2c_2d_cuda.h>
-#include <oskar_dftw_c2c_3d_cuda.h>
-#include <oskar_dftw_m2m_2d_cuda.h>
-#include <oskar_dftw_m2m_3d_cuda.h>
-#include <oskar_dftw_c2c_2d_omp.h>
-#include <oskar_dftw_c2c_3d_omp.h>
-#include <oskar_dftw_m2m_2d_omp.h>
-#include <oskar_dftw_m2m_3d_omp.h>
-#include <oskar_device_utils.h>
+#include "telescope/station/oskar_evaluate_array_pattern_hierarchical.h"
+#include "math/oskar_dftw_c2c_2d_cuda.h"
+#include "math/oskar_dftw_c2c_3d_cuda.h"
+#include "math/oskar_dftw_m2m_2d_cuda.h"
+#include "math/oskar_dftw_m2m_3d_cuda.h"
+#include "math/oskar_dftw_c2c_2d_omp.h"
+#include "math/oskar_dftw_c2c_3d_omp.h"
+#include "math/oskar_dftw_m2m_2d_omp.h"
+#include "math/oskar_dftw_m2m_3d_omp.h"
+#include "utility/oskar_device_utils.h"
 
 #ifdef __cplusplus
 extern "C" {

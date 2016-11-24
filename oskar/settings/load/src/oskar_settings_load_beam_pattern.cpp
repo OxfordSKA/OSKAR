@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_load_beam_pattern.h>
+#include "oskar_settings_load_beam_pattern.h"
 
 #include <cstdio>
 #include <cstdlib>

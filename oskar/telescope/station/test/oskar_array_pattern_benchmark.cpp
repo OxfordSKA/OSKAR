@@ -26,18 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_OptionParser.h>
-#include <oskar_mem.h>
-#include <oskar_timer.h>
-#include <oskar_station.h>
-#include <private_station.h>
-#include <oskar_get_error_string.h>
-#include <oskar_evaluate_array_pattern.h>
-#include <oskar_evaluate_array_pattern_hierarchical.h>
+#include "oskar_OptionParser.h"
+#include "mem/oskar_mem.h"
+#include "utility/oskar_timer.h"
+#include "telescope/station/oskar_station.h"
+#include "telescope/station/private_station.h"
+#include "utility/oskar_get_error_string.h"
+#include "telescope/station/oskar_evaluate_array_pattern.h"
+#include "telescope/station/oskar_evaluate_array_pattern_hierarchical.h"
 
 #include <cstdlib>
 #include <cstdio>
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 
 enum OpType { O2C, C2C, M2M, UNDEF };
 

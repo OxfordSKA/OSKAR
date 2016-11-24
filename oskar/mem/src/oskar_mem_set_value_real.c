@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
-#include <oskar_mem.h>
+#include "mem/private_mem.h"
+#include "mem/oskar_mem.h"
 
-#include <oskar_mem_set_value_real_cuda.h>
+#include "mem/oskar_mem_set_value_real_cuda.h"
 
 #ifdef __cplusplus
 extern "C" {

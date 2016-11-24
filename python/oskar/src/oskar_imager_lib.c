@@ -28,9 +28,7 @@
 
 #include <Python.h>
 
-#include <oskar_imager.h>
-#include <oskar_vis_block.h>
-#include <oskar_get_error_string.h>
+#include <oskar.h>
 #include <string.h>
 
 /* http://docs.scipy.org/doc/numpy-dev/reference/c-api.deprecations.html */
@@ -1347,7 +1345,7 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     oskar_Imager* h;
     PyObject *obj[] = {0, 0, 0, 0, 0};
     PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0, *im = 0;
-    int i, num_cells, num_pixels, num_vis, size = 0, status = 0, type = 0;
+    int num_cells, num_pixels, num_vis, size = 0, status = 0, type = 0;
     int dft = 0, wproj = 0, uniform = 0, wprojplanes = -1;
     double fov_deg = 0.0, norm = 0.0;
     const char *weighting_type = 0, *algorithm_type = 0;

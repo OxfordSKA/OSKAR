@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_grid_simple.h>
+#include "imager/oskar_grid_simple.h"
 #include <math.h>
 #include <stdlib.h>
 

@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-#include <oskar_log_system_clock_data.h>
+#include "log/oskar_log_system_clock_data.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>

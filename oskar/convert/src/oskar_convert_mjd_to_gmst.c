@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_mjd_to_gmst.h>
+#include "convert/oskar_convert_mjd_to_gmst.h"
 #include <math.h>
 
 #ifdef __cplusplus

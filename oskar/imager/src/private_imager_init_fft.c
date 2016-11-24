@@ -30,15 +30,15 @@
 #include <cufft.h>
 #endif
 
-#include <private_imager.h>
-#include <private_imager_init_fft.h>
-#include <private_imager_free_fft.h>
+#include "imager/private_imager.h"
+#include "imager/private_imager_init_fft.h"
+#include "imager/private_imager_free_fft.h"
 
-#include <oskar_cmath.h>
-#include <oskar_fftpack_cfft.h>
-#include <oskar_fftpack_cfft_f.h>
-#include <oskar_grid_functions_spheroidal.h>
-#include <oskar_grid_functions_pillbox.h>
+#include "math/oskar_cmath.h"
+#include "imager/oskar_fftpack_cfft.h"
+#include "imager/oskar_fftpack_cfft_f.h"
+#include "imager/oskar_grid_functions_spheroidal.h"
+#include "imager/oskar_grid_functions_pillbox.h"
 
 #ifdef __cplusplus
 extern "C" {

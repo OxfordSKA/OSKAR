@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_old_init.h>
+#include "oskar_settings_old_init.h"
 #include <string.h>
 
 #ifdef __cplusplus

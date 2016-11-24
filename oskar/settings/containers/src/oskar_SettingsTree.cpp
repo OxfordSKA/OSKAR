@@ -29,14 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_SettingsTree.hpp>
-#include <oskar_SettingsFileHandler.hpp>
-#include <oskar_SettingsItem.hpp>
-#include <oskar_SettingsKey.hpp>
-#include <oskar_SettingsDependencyGroup.hpp>
-#include <oskar_SettingsDependency.hpp>
-#include <oskar_settings_utility_string.hpp>
-#include <oskar_version.h>
+#include "oskar_SettingsTree.hpp"
+#include "oskar_SettingsFileHandler.hpp"
+#include "oskar_SettingsItem.hpp"
+#include "oskar_SettingsKey.hpp"
+#include "oskar_SettingsDependencyGroup.hpp"
+#include "oskar_SettingsDependency.hpp"
+#include "oskar_settings_utility_string.hpp"
+#include "oskar_version.h"
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>

@@ -1,7 +1,7 @@
-# 
+#
 #  This file is part of OSKAR.
-# 
-# Copyright (c) 2014, The University of Oxford
+#
+# Copyright (c) 2016, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -17,7 +17,7 @@
 #  3. Neither the name of the University of Oxford nor the names of its
 #     contributors may be used to endorse or promote products derived from this
 #     software without specific prior written permission.
-# 
+#
 #  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,4 +31,11 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-__version__='@OSKAR_VERSION_STR@'
+from __future__ import absolute_import
+from . import _utils
+
+
+def oskar_version_string():
+    """Returns the version of the OSKAR library in use."""
+    return _utils.version_string()
+

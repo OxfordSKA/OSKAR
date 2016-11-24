@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_mjd_ut1_to_era.h>
+#include "convert/oskar_convert_mjd_ut1_to_era.h"
 #include <math.h>
 
 #ifdef __cplusplus

@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_sky.h>
-#include <oskar_sky.h>
+#include "sky/private_sky.h"
+#include "sky/oskar_sky.h"
 
-#include <oskar_convert_lon_lat_to_relative_directions.h>
+#include "convert/oskar_convert_lon_lat_to_relative_directions.h"
 
 #ifdef __cplusplus
 extern "C" {

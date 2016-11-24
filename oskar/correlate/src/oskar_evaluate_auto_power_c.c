@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_auto_power_c.h>
-#include <private_correlate_functions_inline.h>
+#include "correlate/oskar_evaluate_auto_power_c.h"
+#include "correlate/private_correlate_functions_inline.h"
 
 #ifdef __cplusplus
 extern "C" {

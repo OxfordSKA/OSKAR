@@ -29,9 +29,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_SettingsKey.hpp>
-#include <oskar_SettingsDependency.hpp>
-#include <oskar_SettingsDependencyGroup.hpp>
+#include "oskar_SettingsKey.hpp"
+#include "oskar_SettingsDependency.hpp"
+#include "oskar_SettingsDependencyGroup.hpp"
 
 namespace oskar {
 

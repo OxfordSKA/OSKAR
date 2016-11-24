@@ -34,8 +34,8 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_jones.h>
-#include <oskar_vector_types.h>
+#include <simulator/oskar_jones.h>
+#include <utility/oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {

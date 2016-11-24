@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_load_ionosphere.h>
-#include <oskar_settings_load_tid_parameter_file.h>
+#include "oskar_settings_load_ionosphere.h"
+#include "oskar_settings_load_tid_parameter_file.h"
 
 #include <cstring>
 #include <cstdlib>
@@ -37,7 +37,7 @@
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 
 extern "C"
 void oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,

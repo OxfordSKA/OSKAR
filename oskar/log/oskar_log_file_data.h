@@ -56,6 +56,7 @@ extern "C" {
  *
  * @return Pointer to memory buffer containing data currently in the log file.
  */
+OSKAR_EXPORT
 char* oskar_log_file_data(oskar_Log* log, size_t* size);
 
 #ifdef __cplusplus

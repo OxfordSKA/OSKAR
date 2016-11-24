@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_dftw_m2m_2d_omp.h>
+#include "math/oskar_dftw_m2m_2d_omp.h"
 #include <math.h>
 
 #ifdef __cplusplus

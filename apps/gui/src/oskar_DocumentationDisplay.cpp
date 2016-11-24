@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/gui/oskar_DocumentationDisplay.h>
+#include "apps/gui/oskar_DocumentationDisplay.h"
 
 #include <QtGui/QApplication>
 #include <QtGui/QDialogButtonBox>

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_image_lm_grid.h>
-#include <oskar_linspace.h>
+#include "math/oskar_evaluate_image_lm_grid.h"
+#include "math/oskar_linspace.h"
 
 #include <math.h>
 #include <stdlib.h>

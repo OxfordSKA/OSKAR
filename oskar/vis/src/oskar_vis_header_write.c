@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_header.h>
-#include <oskar_vis_header.h>
-#include <oskar_binary.h>
-#include <oskar_binary_write_mem.h>
-#include <oskar_binary_write_metadata.h>
+#include "vis/private_vis_header.h"
+#include "vis/oskar_vis_header.h"
+#include "binary/oskar_binary.h"
+#include "mem/oskar_binary_write_mem.h"
+#include "utility/oskar_binary_write_metadata.h"
 
 #include <string.h>
 

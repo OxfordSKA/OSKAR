@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_lon_lat_to_relative_directions.h>
-#include <oskar_convert_lon_lat_to_relative_directions_cuda.h>
-#include <private_convert_lon_lat_to_relative_directions_inline.h>
-#include <oskar_device_utils.h>
+#include "convert/oskar_convert_lon_lat_to_relative_directions.h"
+#include "convert/oskar_convert_lon_lat_to_relative_directions_cuda.h"
+#include "convert/private_convert_lon_lat_to_relative_directions_inline.h"
+#include "utility/oskar_device_utils.h"
 
 #include <math.h>
 

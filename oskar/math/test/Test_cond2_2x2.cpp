@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <private_cond2_2x2.h>
+#include "math/private_cond2_2x2.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>

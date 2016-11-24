@@ -26,16 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
+#include "imager/private_imager.h"
 
-#include <oskar_binary.h>
-#include <oskar_binary_read_mem.h>
-#include <oskar_imager.h>
-#include <oskar_vis_block.h>
-#include <oskar_vis_header.h>
-#include <oskar_cmath.h>
+#include "binary/oskar_binary.h"
+#include "mem/oskar_binary_read_mem.h"
+#include "imager/oskar_imager.h"
+#include "vis/oskar_vis_block.h"
+#include "vis/oskar_vis_header.h"
+#include "math/oskar_cmath.h"
 
-#include <ms/oskar_measurement_set.h>
+#include "ms/oskar_measurement_set.h"
 
 #include <stdlib.h>
 #include <string.h>

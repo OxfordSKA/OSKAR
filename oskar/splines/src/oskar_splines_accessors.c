@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_splines.h>
-#include <oskar_splines.h>
+#include "splines/private_splines.h"
+#include "splines/oskar_splines.h"
 
 #ifdef __cplusplus
 extern "C" {

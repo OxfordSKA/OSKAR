@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_angular_distance.h>
+#include "math/oskar_angular_distance.h"
 #include <math.h>
 
 #ifdef __cplusplus

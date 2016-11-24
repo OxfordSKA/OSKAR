@@ -34,9 +34,9 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_jones.h>
-#include <oskar_sky.h>
-#include <oskar_mem.h>
+#include <simulator/oskar_jones.h>
+#include <sky/oskar_sky.h>
+#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -27,15 +27,15 @@
  */
 
 /* FIXME Remove? */
-#include <private_binary.h>
+#include "binary/private_binary.h"
 
-#include <oskar_vis.h>
-#include <oskar_sky.h>
-#include <oskar_log.h>
-#include <oskar_binary.h>
-#include <oskar_binary_read_mem.h>
+#include "vis/oskar_vis.h"
+#include "sky/oskar_sky.h"
+#include "log/oskar_log.h"
+#include "binary/oskar_binary.h"
+#include "mem/oskar_binary_read_mem.h"
 
-#include <oskar_scan_binary_file.h>
+#include "utility/oskar_scan_binary_file.h"
 
 #include <string.h>
 #include <stdlib.h>

@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
-#include <oskar_generate_random_coordinate.h>
-#include <oskar_random_power_law.h>
+#include "sky/oskar_sky.h"
+#include "sky/oskar_generate_random_coordinate.h"
+#include "math/oskar_random_power_law.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus

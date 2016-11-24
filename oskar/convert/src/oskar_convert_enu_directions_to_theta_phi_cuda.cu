@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_enu_directions_to_theta_phi_cuda.h>
-#include <private_convert_enu_directions_to_theta_phi_inline.h>
+#include "convert/oskar_convert_enu_directions_to_theta_phi_cuda.h"
+#include "convert/private_convert_enu_directions_to_theta_phi_inline.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -29,8 +29,6 @@
 #ifndef OSKAR_IMAGER_FREE_GPU_DATA_H_
 #define OSKAR_IMAGER_FREE_GPU_DATA_H_
 
-#include <oskar_global.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

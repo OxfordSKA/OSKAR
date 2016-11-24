@@ -30,8 +30,8 @@
  */
 
 
-#include <oskar_SettingsDependency.hpp>
-#include <oskar_SettingsKey.hpp>
+#include "oskar_SettingsDependency.hpp"
+#include "oskar_SettingsKey.hpp"
 #include "../oskar_SettingsVariant.hpp"
 
 namespace oskar {

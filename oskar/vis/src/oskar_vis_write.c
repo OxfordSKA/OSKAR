@@ -26,12 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis.h>
-#include <oskar_vis.h>
-#include <oskar_binary.h>
-#include <oskar_log.h>
-#include <oskar_vis_header.h>
-#include <oskar_vis_block.h>
+#include "vis/private_vis.h"
+#include "vis/oskar_vis.h"
+#include "binary/oskar_binary.h"
+#include "log/oskar_log.h"
+#include "vis/oskar_vis_header.h"
+#include "vis/oskar_vis_block.h"
 
 #include <string.h>
 

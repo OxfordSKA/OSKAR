@@ -27,10 +27,10 @@
  */
 
 
-#include <oskar_settings_load_tid_parameter_file.h>
+#include "oskar_settings_load_tid_parameter_file.h"
 
-#include <oskar_settings_getline.h>
-#include <oskar_settings_string_to_array.h>
+#include "oskar_settings_getline.h"
+#include "oskar_settings_string_to_array.h"
 
 #include <stdio.h>
 #include <stdlib.h>

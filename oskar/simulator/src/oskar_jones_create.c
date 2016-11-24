@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_jones.h>
-#include <oskar_jones.h>
-#include <oskar_mem.h>
+#include "simulator/private_jones.h"
+#include "simulator/oskar_jones.h"
+#include "mem/oskar_mem.h"
 
 #include <stdlib.h>
 

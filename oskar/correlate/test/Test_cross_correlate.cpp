@@ -28,11 +28,11 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_timer.h>
+#include "utility/oskar_timer.h"
 
-#include <oskar_cross_correlate.h>
-#include <oskar_get_error_string.h>
-#include <oskar_kahan_sum.h>
+#include "correlate/oskar_cross_correlate.h"
+#include "utility/oskar_get_error_string.h"
+#include "math/oskar_kahan_sum.h"
 #include <cstdlib>
 
 // Comment out this line to disable benchmark timer printing.

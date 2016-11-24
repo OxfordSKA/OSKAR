@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_round_robin.h>
+#include "math/oskar_round_robin.h"
 
 #ifdef __cplusplus
 extern "C" {

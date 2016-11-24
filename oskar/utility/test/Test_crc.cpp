@@ -32,7 +32,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <oskar_crc.h>
+#include "binary/oskar_crc.h"
 
 TEST(crc, crc32_standard)
 {

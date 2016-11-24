@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_matrix_multiply.h>
+#include "math/oskar_matrix_multiply.h"
 
 #define SWAP_INT( a, b ) {int t; t = a; a = b; b = t;}
 

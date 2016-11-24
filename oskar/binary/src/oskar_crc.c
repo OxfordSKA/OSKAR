@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_crc.h>
+#include "binary/oskar_crc.h"
+#include "binary/oskar_endian.h"
 #include <stdlib.h>
 #include <string.h>
-#include <oskar_endian.h>
 
 #ifdef __cplusplus
 extern "C" {

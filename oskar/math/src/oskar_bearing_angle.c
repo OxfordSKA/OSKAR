@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_bearing_angle.h>
+#include "math/oskar_bearing_angle.h"
 #include <math.h>
 
 #ifdef __cplusplus

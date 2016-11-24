@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_ecef_to_station_uvw.h>
-#include <oskar_convert_ecef_to_station_uvw_cuda.h>
-#include <oskar_device_utils.h>
-#include <private_convert_ecef_to_station_uvw_inline.h>
+#include "convert/oskar_convert_ecef_to_station_uvw.h"
+#include "convert/oskar_convert_ecef_to_station_uvw_cuda.h"
+#include "utility/oskar_device_utils.h"
+#include "convert/private_convert_ecef_to_station_uvw_inline.h"
 
 #include <math.h>
 

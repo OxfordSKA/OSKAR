@@ -31,8 +31,11 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-from __future__ import absolute_import, division
-from . import _measurement_set_lib
+from __future__ import absolute_import, division, print_function
+try:
+    from . import _measurement_set_lib
+except ImportError:
+    _measurement_set_lib = None
 
 
 class MeasurementSet(object):
@@ -40,6 +43,9 @@ class MeasurementSet(object):
 
     def __init__(self):
         """The default constructor does nothing. Use create() or open()."""
+        if _measurement_set_lib is None:
+            raise RuntimeError(
+                "OSKAR was compiled without Measurement Set support.")
         self._capsule = 0
 
     @classmethod
@@ -62,6 +68,9 @@ class MeasurementSet(object):
             write_crosscorr (Optional[bool]):
                 If set, allow for write of cross-correlation data.
         """
+        if _measurement_set_lib is None:
+            raise RuntimeError(
+                "OSKAR was compiled without Measurement Set support.")
         t = MeasurementSet()
         t._capsule = _measurement_set_lib.create(
             file_name, num_stations, num_channels, num_pols,
@@ -91,6 +100,9 @@ class MeasurementSet(object):
         Args:
             file_name (str):      File name of the Measurement Set to open.
         """
+        if _measurement_set_lib is None:
+            raise RuntimeError(
+                "OSKAR was compiled without Measurement Set support.")
         t = MeasurementSet()
         t._capsule = _measurement_set_lib.open(file_name)
         return t

@@ -29,7 +29,7 @@
 #ifndef OSKAR_TELESCOPE_LOADER_GAIN_PHASE_H_
 #define OSKAR_TELESCOPE_LOADER_GAIN_PHASE_H_
 
-#include <oskar_TelescopeLoadAbstract.h>
+#include <telescope/oskar_TelescopeLoadAbstract.h>
 
 class TelescopeLoaderGainPhase : public oskar_TelescopeLoadAbstract
 {

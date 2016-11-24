@@ -29,10 +29,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_utility_string.hpp>
+#include "oskar_settings_utility_string.hpp"
 #include <climits>
 #include <vector>
-#include <oskar_RandomSeed.hpp>
+#include "oskar_RandomSeed.hpp"
 
 namespace oskar {
 

@@ -29,7 +29,7 @@
 #include "oskar_global.h"
 #include <QtCore/QtCore>
 #include <cstdio>
-#include <oskar_OptionParser.h>
+#include "oskar_OptionParser.h"
 
 int main(int argc, char** argv)
 {

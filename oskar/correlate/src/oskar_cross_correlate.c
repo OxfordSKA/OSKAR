@@ -26,24 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_cross_correlate.h>
-#include <oskar_cross_correlate_gaussian_cuda.h>
-#include <oskar_cross_correlate_gaussian_omp.h>
-#include <oskar_cross_correlate_gaussian_time_smearing_cuda.h>
-#include <oskar_cross_correlate_gaussian_time_smearing_omp.h>
-#include <oskar_cross_correlate_point_cuda.h>
-#include <oskar_cross_correlate_point_omp.h>
-#include <oskar_cross_correlate_point_time_smearing_cuda.h>
-#include <oskar_cross_correlate_point_time_smearing_omp.h>
-#include <oskar_cross_correlate_gaussian_scalar_cuda.h>
-#include <oskar_cross_correlate_gaussian_scalar_omp.h>
-#include <oskar_cross_correlate_gaussian_time_smearing_scalar_cuda.h>
-#include <oskar_cross_correlate_gaussian_time_smearing_scalar_omp.h>
-#include <oskar_cross_correlate_point_scalar_cuda.h>
-#include <oskar_cross_correlate_point_scalar_omp.h>
-#include <oskar_cross_correlate_point_time_smearing_scalar_cuda.h>
-#include <oskar_cross_correlate_point_time_smearing_scalar_omp.h>
-#include <oskar_device_utils.h>
+#include "correlate/oskar_cross_correlate.h"
+#include "correlate/oskar_cross_correlate_gaussian_cuda.h"
+#include "correlate/oskar_cross_correlate_gaussian_omp.h"
+#include "correlate/oskar_cross_correlate_gaussian_time_smearing_cuda.h"
+#include "correlate/oskar_cross_correlate_gaussian_time_smearing_omp.h"
+#include "correlate/oskar_cross_correlate_point_cuda.h"
+#include "correlate/oskar_cross_correlate_point_omp.h"
+#include "correlate/oskar_cross_correlate_point_time_smearing_cuda.h"
+#include "correlate/oskar_cross_correlate_point_time_smearing_omp.h"
+#include "correlate/oskar_cross_correlate_gaussian_scalar_cuda.h"
+#include "correlate/oskar_cross_correlate_gaussian_scalar_omp.h"
+#include "correlate/oskar_cross_correlate_gaussian_time_smearing_scalar_cuda.h"
+#include "correlate/oskar_cross_correlate_gaussian_time_smearing_scalar_omp.h"
+#include "correlate/oskar_cross_correlate_point_scalar_cuda.h"
+#include "correlate/oskar_cross_correlate_point_scalar_omp.h"
+#include "correlate/oskar_cross_correlate_point_time_smearing_scalar_cuda.h"
+#include "correlate/oskar_cross_correlate_point_time_smearing_scalar_omp.h"
+#include "utility/oskar_device_utils.h"
 
 #include <float.h>
 #include <math.h>

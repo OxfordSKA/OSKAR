@@ -27,9 +27,9 @@
  */
 
 #include <math.h>
-#include <private_correlate_functions_inline.h>
-#include <oskar_cross_correlate_point_time_smearing_omp.h>
-#include <oskar_add_inline.h>
+#include "correlate/private_correlate_functions_inline.h"
+#include "correlate/oskar_cross_correlate_point_time_smearing_omp.h"
+#include "math/oskar_add_inline.h"
 
 #ifdef __cplusplus
 extern "C" {

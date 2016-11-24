@@ -66,6 +66,6 @@ typedef struct oskar_Log oskar_Log;
 #endif /* OSKAR_LOG_TYPEDEF_ */
 
 /* Private function. */
-#include <oskar_log_write.h>
+#include <log/oskar_log_write.h>
 
 #endif /* OSKAR_PRIVATE_LOG_H_ */

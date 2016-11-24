@@ -27,7 +27,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <oskar_measurement_set.h>
+#include "ms/oskar_measurement_set.h"
 #include <vector>
 #include <complex>
 

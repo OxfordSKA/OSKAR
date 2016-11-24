@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_dierckx_bispev_cuda.h>
+#include "splines/oskar_dierckx_bispev_cuda.h"
 
 #ifdef __cplusplus
 extern "C" {

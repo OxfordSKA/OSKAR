@@ -29,11 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_DoubleSpinBox.h>
-#include <oskar_SettingsDelegate_new.hpp>
-#include <oskar_SettingsModel_new.hpp>
-#include <oskar_SettingsItem.hpp>
-#include <oskar_SettingsValue.hpp>
+#include "oskar_DoubleSpinBox.h"
+#include "oskar_SettingsDelegate_new.hpp"
+#include "oskar_SettingsModel_new.hpp"
+#include "oskar_SettingsItem.hpp"
+#include "oskar_SettingsValue.hpp"
 
 #include <QtCore/QEvent>
 #include <QtCore/QModelIndex>

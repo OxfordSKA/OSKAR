@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mem_random_uniform.h>
-#include <oskar_mem_random_uniform_cuda.h>
-#include <oskar_device_utils.h>
-#include <private_random_helpers.h>
+#include "mem/oskar_mem.h"
+#include "mem/oskar_mem_random_uniform_cuda.h"
+#include "utility/oskar_device_utils.h"
+#include "math/private_random_helpers.h"
 
 #ifdef __cplusplus
 extern "C" {

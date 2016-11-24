@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_grid_weights.h>
-#include <private_imager_weight_uniform.h>
+#include "imager/oskar_grid_weights.h"
+#include "imager/private_imager_weight_uniform.h"
 #include <math.h>
 
 #ifdef __cplusplus

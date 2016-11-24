@@ -28,12 +28,12 @@
 
 #include "oskar_OptionParser.h"
 
-#include <oskar_log.h>
-#include <oskar_mem.h>
-#include <oskar_convert_ecef_to_enu.h>
-#include <oskar_get_error_string.h>
-#include <oskar_version_string.h>
-#include <oskar_cmath.h>
+#include "convert/oskar_convert_ecef_to_enu.h"
+#include "log/oskar_log.h"
+#include "math/oskar_cmath.h"
+#include "mem/oskar_mem.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_version_string.h"
 
 #include <cstdio>
 #include <string>

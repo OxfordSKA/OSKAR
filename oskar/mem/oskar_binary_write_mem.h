@@ -35,8 +35,8 @@
 
 #include <oskar_global.h>
 #include <stddef.h>
-#include <oskar_mem.h>
-#include <oskar_binary.h>
+#include <mem/oskar_mem.h>
+#include <binary/oskar_binary.h>
 
 #ifdef __cplusplus
 extern "C" {

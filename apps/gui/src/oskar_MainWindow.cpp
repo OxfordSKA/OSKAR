@@ -26,20 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/gui/oskar_MainWindow.h>
+#include "apps/gui/oskar_MainWindow.h"
 
-#include <oskar_version.h>
-#include <apps/gui/oskar_About.h>
-#include <apps/gui/oskar_BinaryLocations.h>
-#include <apps/gui/oskar_CudaInfoDisplay.h>
-#include <apps/gui/oskar_DocumentationDisplay.h>
-#include <apps/gui/oskar_RunDialog.h>
-#include <oskar_SettingsDelegate_new.hpp>
-#include <oskar_SettingsDeclareXml.hpp>
-#include <oskar_SettingsModel_new.hpp>
-#include <oskar_SettingsFileHandlerQSettings.hpp>
-#include <oskar_SettingsView.h>
-#include <oskar_SettingsTree.hpp>
+#include "oskar_version.h"
+#include "apps/gui/oskar_About.h"
+#include "apps/gui/oskar_BinaryLocations.h"
+#include "apps/gui/oskar_CudaInfoDisplay.h"
+#include "apps/gui/oskar_DocumentationDisplay.h"
+#include "apps/gui/oskar_RunDialog.h"
+#include "oskar_SettingsDelegate_new.hpp"
+#include "oskar_SettingsDeclareXml.hpp"
+#include "oskar_SettingsModel_new.hpp"
+#include "oskar_SettingsFileHandlerQSettings.hpp"
+#include "oskar_SettingsView.h"
+#include "oskar_SettingsTree.hpp"
 
 // FIXME(FD) Replace these by querying the binary itself for its own XML.
 #include "apps/xml/oskar_sim_beam_pattern_xml_all.h"

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_jones_R_cuda.h>
-#include <oskar_parallactic_angle.h>
+#include "simulator/oskar_evaluate_jones_R_cuda.h"
+#include "sky/oskar_parallactic_angle.h"
 
 #ifdef __cplusplus
 extern "C" {

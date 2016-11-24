@@ -26,20 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_load.h>
-#include <oskar_settings_load_beam_pattern.h>
-#include <oskar_settings_load_interferometer.h>
-#include <oskar_settings_load_ionosphere.h>
-#include <oskar_settings_load_observation.h>
-#include <oskar_settings_load_simulator.h>
-#include <oskar_settings_load_sky.h>
-#include <oskar_settings_load_telescope.h>
-#include <oskar_settings_load_element_fit.h>
+#include "oskar_settings_load.h"
+#include "oskar_settings_load_beam_pattern.h"
+#include "oskar_settings_load_interferometer.h"
+#include "oskar_settings_load_ionosphere.h"
+#include "oskar_settings_load_observation.h"
+#include "oskar_settings_load_simulator.h"
+#include "oskar_settings_load_sky.h"
+#include "oskar_settings_load_telescope.h"
+#include "oskar_settings_load_element_fit.h"
 
-#include <oskar_settings_file_exists.h>
-#include <oskar_settings_old_init.h>
+#include "oskar_settings_file_exists.h"
+#include "oskar_settings_old_init.h"
 
-#include <oskar_log.h>
+#include "log/oskar_log.h"
 #include <string.h>
 #include <stdlib.h>
 

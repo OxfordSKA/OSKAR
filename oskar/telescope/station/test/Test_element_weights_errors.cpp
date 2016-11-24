@@ -28,13 +28,13 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_evaluate_element_weights_errors.h>
-#include <oskar_get_error_string.h>
-#include <oskar_mem.h>
+#include "telescope/station/oskar_evaluate_element_weights_errors.h"
+#include "utility/oskar_get_error_string.h"
+#include "mem/oskar_mem.h"
 
 #include <cstdio>
 #include <cstdlib>
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 
 TEST(element_weights_errors, test_evaluate)
 {

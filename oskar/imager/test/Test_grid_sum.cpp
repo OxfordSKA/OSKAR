@@ -27,7 +27,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <oskar_imager.h>
+#include "imager/oskar_imager.h"
 
 // #define WRITE_FITS 1
 #ifdef WRITE_FITS

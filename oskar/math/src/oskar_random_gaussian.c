@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_random_gaussian.h>
-#include <private_random_helpers.h>
+#include "math/oskar_random_gaussian.h"
+#include "math/private_random_helpers.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus

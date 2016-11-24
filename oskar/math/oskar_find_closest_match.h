@@ -30,7 +30,7 @@
 #define OSKAR_FIND_CLOSEST_MATCH_H_
 
 #include <oskar_global.h>
-#include <oskar_mem.h>
+#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

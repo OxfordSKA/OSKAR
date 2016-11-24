@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_apparent_ra_dec_to_enu_directions.h>
-#include <oskar_convert_apparent_ha_dec_to_enu_directions.h>
+#include "convert/oskar_convert_apparent_ra_dec_to_enu_directions.h"
+#include "convert/oskar_convert_apparent_ha_dec_to_enu_directions.h"
 
 #ifdef __cplusplus
 extern "C" {

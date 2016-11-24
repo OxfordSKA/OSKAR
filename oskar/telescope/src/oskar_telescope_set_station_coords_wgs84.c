@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_cmath.h>
-#include <oskar_convert_ecef_to_enu.h>
-#include <oskar_convert_geodetic_spherical_to_ecef.h>
-#include <oskar_telescope.h>
+#include "math/oskar_cmath.h"
+#include "convert/oskar_convert_ecef_to_enu.h"
+#include "convert/oskar_convert_geodetic_spherical_to_ecef.h"
+#include "telescope/oskar_telescope.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_blank_below_horizon_cuda.h"
+#include "telescope/station/oskar_blank_below_horizon_cuda.h"
 
 #ifdef __cplusplus
 extern "C" {

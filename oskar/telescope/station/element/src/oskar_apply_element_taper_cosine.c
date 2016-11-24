@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_apply_element_taper_cosine.h>
-#include <oskar_apply_element_taper_cosine_cuda.h>
-#include <oskar_device_utils.h>
+#include "telescope/station/element/oskar_apply_element_taper_cosine.h"
+#include "telescope/station/element/oskar_apply_element_taper_cosine_cuda.h"
+#include "utility/oskar_device_utils.h"
 #include <math.h>
 
 #ifdef __cplusplus

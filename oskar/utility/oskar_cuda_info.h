@@ -47,9 +47,9 @@ struct oskar_CudaInfo;
 typedef struct oskar_CudaInfo oskar_CudaInfo;
 #endif /* OSKAR_CUDA_INFO_TYPEDEF_ */
 
-#include <oskar_cuda_info_create.h>
-#include <oskar_cuda_info_free.h>
-#include <oskar_cuda_info_log.h>
+#include <utility/oskar_cuda_info_create.h>
+#include <utility/oskar_cuda_info_free.h>
+#include <utility/oskar_cuda_info_log.h>
 
 #ifdef __cplusplus
 }

@@ -51,6 +51,7 @@ extern "C" {
  *
  * @param[in] utc    If set, return UTC time; else return local time.
  */
+OSKAR_EXPORT
 const char* oskar_log_system_clock_string(int utc);
 
 #ifdef __cplusplus

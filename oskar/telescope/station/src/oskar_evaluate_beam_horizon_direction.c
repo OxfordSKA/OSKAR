@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_beam_horizon_direction.h>
-#include <oskar_convert_apparent_ra_dec_to_enu_directions.h>
-#include <oskar_angular_distance.h>
+#include "telescope/station/oskar_evaluate_beam_horizon_direction.h"
+#include "convert/oskar_convert_apparent_ra_dec_to_enu_directions.h"
+#include "math/oskar_angular_distance.h"
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mem.h>
-#include <oskar_file_exists.h>
+#include "mem/oskar_mem.h"
+#include "utility/oskar_file_exists.h"
 #include <string.h>
 #include <fitsio.h>
 

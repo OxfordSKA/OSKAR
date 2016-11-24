@@ -29,8 +29,8 @@
 #ifndef OSKAR_PRIVATE_STATION_H_
 #define OSKAR_PRIVATE_STATION_H_
 
-#include <oskar_mem.h>
-#include <oskar_element.h>
+#include <mem/oskar_mem.h>
+#include <telescope/station/element/oskar_element.h>
 
 /* Forward declaration. */
 struct oskar_Station;

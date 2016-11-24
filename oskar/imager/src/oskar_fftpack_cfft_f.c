@@ -80,7 +80,7 @@
  */
 
 #include <math.h>
-#include <oskar_fftpack_cfft_f.h>
+#include "imager/oskar_fftpack_cfft_f.h"
 
 #define min(a,b) ((a) < (b) ? (a) : (b))
 

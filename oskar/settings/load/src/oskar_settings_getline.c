@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_getline.h>
+#include "oskar_settings_getline.h"
 
 #include <stdio.h>
 #include <stdlib.h>

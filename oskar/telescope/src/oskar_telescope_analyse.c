@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_telescope.h>
-#include <oskar_telescope.h>
+#include "telescope/private_telescope.h"
+#include "telescope/oskar_telescope.h"
 
-#include <oskar_station_analyse.h>
-#include <oskar_station_different.h>
+#include "telescope/station/oskar_station_analyse.h"
+#include "telescope/station/oskar_station_different.h"
 
 #ifdef __cplusplus
 extern "C" {

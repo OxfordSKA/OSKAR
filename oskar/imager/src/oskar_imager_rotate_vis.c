@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_cmath.h>
-#include <oskar_imager_rotate_vis.h>
+#include "math/oskar_cmath.h"
+#include "imager/oskar_imager_rotate_vis.h"
 
 #include <stddef.h>
 

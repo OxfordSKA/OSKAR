@@ -54,6 +54,7 @@ extern "C" {
  * @return
  * If the file exists, this function returns 1; if not, it returns 0.
  */
+OSKAR_EXPORT
 int oskar_log_file_exists(const char* filename);
 
 #ifdef __cplusplus

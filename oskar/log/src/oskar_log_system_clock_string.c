@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_log_system_clock_string.h>
+#include "log/oskar_log_system_clock_string.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>

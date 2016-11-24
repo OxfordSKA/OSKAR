@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_angular_distance.h>
-#include <oskar_sky.h>
-#include <oskar_mem.h>
-#include <oskar_cmath.h>
+#include "math/oskar_angular_distance.h"
+#include "sky/oskar_sky.h"
+#include "mem/oskar_mem.h"
+#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,7 +91,7 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius_rad,
 
                 if (!(dist>=(float)inner_radius_rad &&
                         dist<(float)outer_radius_rad))
-                    continue;                        
+                    continue;
 
                 ra_[out]   = ra_[in];
                 dec_[out]  = dec_[in];

@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_jones.h>
+#include "simulator/private_jones.h"
 
-#include <oskar_jones_set_size.h>
+#include "simulator/oskar_jones_set_size.h"
 
 #ifdef __cplusplus
 extern "C" {

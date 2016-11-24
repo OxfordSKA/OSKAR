@@ -29,7 +29,7 @@
 #ifndef OSKAR_PRIVATE_VIS_BLOCK_H_
 #define OSKAR_PRIVATE_VIS_BLOCK_H_
 
-#include <oskar_mem.h>
+#include <mem/oskar_mem.h>
 
 /*
  * This structure holds visibility data for all baselines, and a set of times

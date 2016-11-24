@@ -28,10 +28,10 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_dir.h>
-#include <oskar_get_error_string.h>
-#include <oskar_mem.h>
-#include <oskar_telescope.h>
+#include "utility/oskar_dir.h"
+#include "utility/oskar_get_error_string.h"
+#include "mem/oskar_mem.h"
+#include "telescope/oskar_telescope.h"
 
 #include <cstdio>
 #include <cstdlib>

@@ -1,4 +1,4 @@
-#include <oskar_dierckx_fpgivs.h>
+#include "splines/oskar_dierckx_fpgivs.h"
 #include <math.h>
 
 #ifdef __cplusplus

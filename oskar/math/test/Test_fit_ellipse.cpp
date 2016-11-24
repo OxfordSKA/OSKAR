@@ -28,8 +28,8 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_fit_ellipse.h>
-#include <oskar_get_error_string.h>
+#include "math/oskar_fit_ellipse.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <cmath>
 #include <cstdlib>

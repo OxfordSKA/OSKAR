@@ -28,8 +28,7 @@
 
 #include <Python.h>
 
-#include <oskar_sky.h>
-#include <oskar_get_error_string.h>
+#include <oskar.h>
 #include <string.h>
 
 /* http://docs.scipy.org/doc/numpy-dev/reference/c-api.deprecations.html */

@@ -26,21 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sim_interferometer.h>
-#include <oskar_OptionParser.h>
+#include "simulator/oskar_simulator.h"
+#include "oskar_OptionParser.h"
 
-#include <oskar_get_error_string.h>
-#include <oskar_log.h>
-#include <oskar_set_up_sky.h>
-#include <oskar_set_up_telescope.h>
-#include <oskar_timer.h>
-#include <oskar_version_string.h>
+#include "log/oskar_log.h"
+#include "oskar_set_up_sky.h"
+#include "oskar_set_up_telescope.h"
+#include "utility/oskar_timer.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_version_string.h"
 
-#include <oskar_settings_load.h>
-#include <oskar_settings_log.h>
-#include <oskar_SettingsTree.hpp>
-#include <oskar_SettingsDeclareXml.hpp>
-#include <oskar_SettingsFileHandlerQSettings.hpp>
+#include "oskar_settings_load.h"
+#include "oskar_settings_log.h"
+#include "oskar_SettingsTree.hpp"
+#include "oskar_SettingsDeclareXml.hpp"
+#include "oskar_SettingsFileHandlerQSettings.hpp"
 
 #include "apps/xml/oskar_sim_interferometer_xml_all.h"
 

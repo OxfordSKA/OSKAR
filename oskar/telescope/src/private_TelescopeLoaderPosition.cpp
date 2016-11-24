@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_TelescopeLoaderPosition.h>
-#include <oskar_dir.h>
+#include "telescope/private_TelescopeLoaderPosition.h"
+#include "utility/oskar_dir.h"
 
 using std::map;
 using std::string;

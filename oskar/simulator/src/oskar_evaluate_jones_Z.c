@@ -26,16 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_jones_Z.h>
+#include "simulator/oskar_evaluate_jones_Z.h"
 
-#include <oskar_convert_relative_directions_to_enu_directions.h>
-#include <oskar_convert_offset_ecef_to_ecef.h>
-#include <oskar_evaluate_pierce_points.h>
-#include <oskar_evaluate_tec_tid.h>
-
-#include <oskar_telescope.h>
-#include <oskar_sky.h>
-#include <oskar_jones.h>
+#include "convert/oskar_convert_relative_directions_to_enu_directions.h"
+#include "convert/oskar_convert_offset_ecef_to_ecef.h"
+#include "telescope/station/oskar_evaluate_pierce_points.h"
+#include "sky/oskar_evaluate_tec_tid.h"
 
 #include <math.h>
 #include <stdio.h>

@@ -26,16 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_sky.h>
-#include <oskar_sky.h>
+#include "sky/private_sky.h"
+#include "sky/oskar_sky.h"
 
-#include <oskar_sky_copy_source_data.h>
-#include <oskar_sky_copy_source_data_cuda.h>
-#include <oskar_convert_relative_directions_to_enu_directions.h>
-#include <oskar_convert_relative_directions_to_enu_directions_cuda.h>
-#include <oskar_update_horizon_mask.h>
-#include <oskar_update_horizon_mask_cuda.h>
-#include <oskar_device_utils.h>
+#include "sky/oskar_sky_copy_source_data.h"
+#include "sky/oskar_sky_copy_source_data_cuda.h"
+#include "convert/oskar_convert_relative_directions_to_enu_directions.h"
+#include "convert/oskar_convert_relative_directions_to_enu_directions_cuda.h"
+#include "sky/oskar_update_horizon_mask.h"
+#include "sky/oskar_update_horizon_mask_cuda.h"
+#include "utility/oskar_device_utils.h"
 
 #define CF(m) oskar_mem_float(m, status)
 #define CFC(m) oskar_mem_float_const(m, status)

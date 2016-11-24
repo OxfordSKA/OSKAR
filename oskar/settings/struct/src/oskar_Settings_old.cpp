@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_Settings_old.h>
-#include <oskar_settings_old_free.h>
-#include <oskar_settings_old_init.h>
+#include "oskar_Settings_old.h"
+#include "oskar_settings_old_free.h"
+#include "oskar_settings_old_init.h"
 #include <cstdlib>
 
 oskar_Settings_old::oskar_Settings_old()

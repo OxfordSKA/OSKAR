@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_vis_block.h>
-#include <oskar_vis_header.h>
-
-#include <oskar_OptionParser.h>
-#include <oskar_get_error_string.h>
-#include <oskar_binary.h>
-#include <oskar_binary_read_mem.h>
-#include <oskar_version_string.h>
-#include <oskar_log.h>
+#include "binary/oskar_binary.h"
+#include "oskar_OptionParser.h"
+#include "log/oskar_log.h"
+#include "mem/oskar_binary_read_mem.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_version_string.h"
+#include "vis/oskar_vis_block.h"
+#include "vis/oskar_vis_header.h"
 
 #include <string>
 #include <vector>

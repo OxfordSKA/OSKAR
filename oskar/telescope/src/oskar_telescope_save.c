@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_telescope_save.h>
-#include <oskar_dir.h>
-#include <oskar_cmath.h>
+#include "telescope/oskar_telescope.h"
+#include "utility/oskar_dir.h"
+#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {

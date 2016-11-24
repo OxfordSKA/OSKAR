@@ -29,9 +29,9 @@
 #include <gtest/gtest.h>
 
 #include <fitsio.h>
-#include <oskar_convert_fov_to_cellsize.h>
-#include <oskar_mem.h>
-#include <oskar_cmath.h>
+#include "convert/oskar_convert_fov_to_cellsize.h"
+#include "mem/oskar_mem.h"
+#include "math/oskar_cmath.h"
 
 #include <cstdio>
 #include <cstdlib>

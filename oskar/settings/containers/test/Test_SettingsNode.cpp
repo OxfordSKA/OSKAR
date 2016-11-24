@@ -34,7 +34,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <oskar_SettingsNode.hpp>
+#include "oskar_SettingsNode.hpp"
 
 using namespace oskar;
 using namespace std;

@@ -34,8 +34,8 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_telescope.h>
-#include <oskar_vis_header.h>
+#include <telescope/oskar_telescope.h>
+#include <vis/oskar_vis_header.h>
 
 #ifdef __cplusplus
 extern "C" {

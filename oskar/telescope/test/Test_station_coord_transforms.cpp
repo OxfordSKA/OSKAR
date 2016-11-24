@@ -28,9 +28,9 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_convert_ecef_to_geodetic_spherical.h>
-#include <oskar_convert_geodetic_spherical_to_ecef.h>
-#include <oskar_cmath.h>
+#include "convert/oskar_convert_ecef_to_geodetic_spherical.h"
+#include "convert/oskar_convert_geodetic_spherical_to_ecef.h"
+#include "math/oskar_cmath.h"
 
 TEST(station_coord_transforms, geocentric_cartesian_to_geodetic_spherical)
 {

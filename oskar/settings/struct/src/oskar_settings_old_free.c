@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_settings_old_free.h>
+#include "oskar_settings_old_free.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

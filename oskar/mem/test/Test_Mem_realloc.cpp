@@ -28,8 +28,8 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_get_error_string.h>
-#include <oskar_mem.h>
+#include "utility/oskar_get_error_string.h"
+#include "mem/oskar_mem.h"
 
 TEST(Mem, realloc_gpu)
 {

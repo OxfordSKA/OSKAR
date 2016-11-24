@@ -28,10 +28,10 @@
 
 #include "oskar_OptionParser.h"
 
-#include <oskar_get_error_string.h>
-#include <oskar_log.h>
-#include <oskar_sky.h>
-#include <oskar_version_string.h>
+#include "log/oskar_log.h"
+#include "sky/oskar_sky.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_version_string.h"
 
 #include <cstdio>
 #include <cstring>

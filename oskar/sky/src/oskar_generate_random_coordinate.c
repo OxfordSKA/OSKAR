@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_generate_random_coordinate.h>
-#include <oskar_cmath.h>
+#include "sky/oskar_generate_random_coordinate.h"
+#include "math/oskar_cmath.h"
 #include <stdlib.h>
 
 void oskar_generate_random_coordinate(double* longitude, double* latitude)

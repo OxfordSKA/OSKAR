@@ -15,6 +15,7 @@ set(simulator_SRC
     src/oskar_jones_join.c
     src/oskar_jones_set_size.c
     src/oskar_jones_set_real_scalar.c
+    src/oskar_simulator.c
     src/oskar_WorkJonesZ.c
 )
 

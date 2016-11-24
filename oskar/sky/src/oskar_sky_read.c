@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
-#include <oskar_binary.h>
-#include <oskar_binary_read_mem.h>
+#include "sky/oskar_sky.h"
+#include "binary/oskar_binary.h"
+#include "mem/oskar_binary_read_mem.h"
 
 #ifdef __cplusplus
 extern "C" {

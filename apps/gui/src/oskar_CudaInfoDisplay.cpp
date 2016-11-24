@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/gui/oskar_CudaInfoDisplay.h>
+#include "apps/gui/oskar_CudaInfoDisplay.h"
 
 #include <QtCore/QProcess>
 #include <QtGui/QApplication>

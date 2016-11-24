@@ -26,19 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_telescope_load.h>
-#include <oskar_dir.h>
-#include <oskar_get_error_string.h>
-#include <private_TelescopeLoaderApodisation.h>
-#include <private_TelescopeLoaderElementPattern.h>
-#include <private_TelescopeLoaderElementTypes.h>
-#include <private_TelescopeLoaderFeedAngle.h>
-#include <private_TelescopeLoaderGainPhase.h>
-#include <private_TelescopeLoaderLayout.h>
-#include <private_TelescopeLoaderMountTypes.h>
-#include <private_TelescopeLoaderNoise.h>
-#include <private_TelescopeLoaderPermittedBeams.h>
-#include <private_TelescopeLoaderPosition.h>
+#include "telescope/oskar_telescope.h"
+#include "utility/oskar_dir.h"
+#include "utility/oskar_get_error_string.h"
+#include "telescope/private_TelescopeLoaderApodisation.h"
+#include "telescope/private_TelescopeLoaderElementPattern.h"
+#include "telescope/private_TelescopeLoaderElementTypes.h"
+#include "telescope/private_TelescopeLoaderFeedAngle.h"
+#include "telescope/private_TelescopeLoaderGainPhase.h"
+#include "telescope/private_TelescopeLoaderLayout.h"
+#include "telescope/private_TelescopeLoaderMountTypes.h"
+#include "telescope/private_TelescopeLoaderNoise.h"
+#include "telescope/private_TelescopeLoaderPermittedBeams.h"
+#include "telescope/private_TelescopeLoaderPosition.h"
 
 #include <cstdlib>
 #include <map>

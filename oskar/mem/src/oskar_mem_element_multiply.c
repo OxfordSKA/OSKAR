@@ -26,12 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
-#include <oskar_mem.h>
+#include "mem/private_mem.h"
+#include "mem/oskar_mem.h"
 
-#include <oskar_mem_element_multiply_cuda.h>
+#include "mem/oskar_mem_element_multiply_cuda.h"
 
-#include <oskar_multiply_inline.h>
+#include "math/oskar_multiply_inline.h"
 #include <stdio.h>
 #include <stdlib.h>
 

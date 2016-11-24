@@ -68,6 +68,7 @@ extern "C" {
  * @param[in]     depth    Level of nesting of log entry.
  * @param[in]     format   Format string (for printf()).
  */
+OSKAR_EXPORT
 void oskar_log_message(oskar_Log* log, char priority, int depth,
         const char* format, ...);
 

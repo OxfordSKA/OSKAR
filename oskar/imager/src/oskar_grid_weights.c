@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_grid_weights.h>
+#include "imager/oskar_grid_weights.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>

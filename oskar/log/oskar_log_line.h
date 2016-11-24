@@ -56,6 +56,7 @@ extern "C" {
  * @param[in]     priority Priority of log entry.
  * @param[in]     symbol   Symbol to use for the line.
  */
+OSKAR_EXPORT
 void oskar_log_line(oskar_Log* log, char priority, char symbol);
 
 #ifdef __cplusplus

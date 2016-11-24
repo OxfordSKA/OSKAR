@@ -26,12 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_auto_correlate.h>
-#include <oskar_auto_correlate_cuda.h>
-#include <oskar_auto_correlate_omp.h>
-#include <oskar_auto_correlate_scalar_cuda.h>
-#include <oskar_auto_correlate_scalar_omp.h>
-#include <oskar_device_utils.h>
+#include "correlate/oskar_auto_correlate.h"
+#include "correlate/oskar_auto_correlate_cuda.h"
+#include "correlate/oskar_auto_correlate_omp.h"
+#include "correlate/oskar_auto_correlate_scalar_cuda.h"
+#include "correlate/oskar_auto_correlate_scalar_omp.h"
+#include "utility/oskar_device_utils.h"
 
 #include <float.h>
 #include <math.h>

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_dft_c2r_2d_cuda.h>
+#include "math/oskar_dft_c2r_2d_cuda.h"
 
 
 /* Kernels. ================================================================ */

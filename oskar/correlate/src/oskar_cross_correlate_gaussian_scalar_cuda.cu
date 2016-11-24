@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_cross_correlate_gaussian_scalar_cuda.h>
-#include <private_correlate_functions_inline.h>
+#include "correlate/oskar_cross_correlate_gaussian_scalar_cuda.h"
+#include "correlate/private_correlate_functions_inline.h"
 
 /* Kernels. ================================================================ */
 

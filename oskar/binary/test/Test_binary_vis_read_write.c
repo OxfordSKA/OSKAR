@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <oskar_binary.h>
+#include "binary/oskar_binary.h"
 
 static void write_test_vis(const char* filename);
 static void read_test_vis(const char* filename);

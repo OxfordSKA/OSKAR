@@ -30,8 +30,8 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include <oskar_mem.h>
-#include <private_mem.h>
+#include "mem/oskar_mem.h"
+#include "mem/private_mem.h"
 
 #ifdef __cplusplus
 extern "C" {

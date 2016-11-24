@@ -120,12 +120,12 @@ enum OSKAR_BINARY_ERROR_CODES
 }
 #endif
 
-#include <oskar_binary_data_types.h>
-#include <oskar_binary_create.h>
-#include <oskar_binary_free.h>
-#include <oskar_binary_query.h>
-#include <oskar_binary_read.h>
-#include <oskar_binary_write.h>
-#include <oskar_endian.h>
+#include <binary/oskar_binary_data_types.h>
+#include <binary/oskar_binary_create.h>
+#include <binary/oskar_binary_free.h>
+#include <binary/oskar_binary_query.h>
+#include <binary/oskar_binary_read.h>
+#include <binary/oskar_binary_write.h>
+#include <binary/oskar_endian.h>
 
 #endif /* OSKAR_BINARY_H_ */

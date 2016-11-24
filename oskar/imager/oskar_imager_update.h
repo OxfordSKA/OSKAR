@@ -34,9 +34,9 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_mem.h>
-#include <oskar_vis_block.h>
-#include <oskar_vis_header.h>
+#include <mem/oskar_mem.h>
+#include <vis/oskar_vis_block.h>
+#include <vis/oskar_vis_header.h>
 
 #ifdef __cplusplus
 extern "C" {

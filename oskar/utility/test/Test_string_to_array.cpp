@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_string_to_array.h>
+#include "utility/oskar_string_to_array.h"
 
 #include <cstdio>
 #include <cstdlib>

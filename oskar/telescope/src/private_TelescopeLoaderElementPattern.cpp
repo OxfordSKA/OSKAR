@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_TelescopeLoaderElementPattern.h>
-#include <oskar_dir.h>
-#include <oskar_file_exists.h>
+#include "telescope/private_TelescopeLoaderElementPattern.h"
+#include "utility/oskar_dir.h"
+#include "utility/oskar_file_exists.h"
 
 #include <sstream>
 #include <cstring>

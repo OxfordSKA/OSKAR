@@ -29,8 +29,6 @@
 #ifndef OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN_CUDA_H_
 #define OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN_CUDA_H_
 
-#include <oskar_global.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

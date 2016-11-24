@@ -28,9 +28,9 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_mem.h>
-#include <oskar_timer.h>
-#include <oskar_random_gaussian.h>
+#include "mem/oskar_mem.h"
+#include "utility/oskar_timer.h"
+#include "math/oskar_random_gaussian.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>

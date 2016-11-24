@@ -96,12 +96,12 @@ enum OSKAR_VIS_HEADER_POL_TYPE
 }
 #endif
 
-#include <oskar_vis_header_accessors.h>
-#include <oskar_vis_header_create.h>
-#include <oskar_vis_header_create_copy.h>
-#include <oskar_vis_header_free.h>
-#include <oskar_vis_header_read.h>
-#include <oskar_vis_header_write.h>
-#include <oskar_vis_header_write_ms.h>
+#include <vis/oskar_vis_header_accessors.h>
+#include <vis/oskar_vis_header_create.h>
+#include <vis/oskar_vis_header_create_copy.h>
+#include <vis/oskar_vis_header_free.h>
+#include <vis/oskar_vis_header_read.h>
+#include <vis/oskar_vis_header_write.h>
+#include <vis/oskar_vis_header_write_ms.h>
 
 #endif /* OSKAR_VIS_HEADER_H_ */

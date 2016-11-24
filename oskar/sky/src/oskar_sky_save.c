@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
-#include <oskar_cmath.h>
+#include "sky/oskar_sky.h"
+#include "math/oskar_cmath.h"
 #include <stdio.h>
 
 #define RAD2DEG 180.0/M_PI

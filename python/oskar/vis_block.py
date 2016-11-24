@@ -31,7 +31,8 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-import _vis_block_lib
+from __future__ import absolute_import, division
+from . import _vis_block_lib
 
 
 class VisBlock(object):

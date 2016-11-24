@@ -1,5 +1,5 @@
-#include <oskar_dierckx_sphere.h>
-#include <oskar_dierckx_fpsphe.h>
+#include "splines/oskar_dierckx_sphere.h"
+#include "splines/oskar_dierckx_fpsphe.h"
 #include <math.h>
 
 #ifdef __cplusplus

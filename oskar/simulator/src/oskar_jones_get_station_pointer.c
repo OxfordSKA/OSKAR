@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_jones.h>
+#include "simulator/private_jones.h"
 
-#include <oskar_jones_get_station_pointer.h>
-#include <oskar_mem.h>
+#include "simulator/oskar_jones_get_station_pointer.h"
+#include "mem/oskar_mem.h"
 
 #ifdef __cplusplus
 extern "C" {

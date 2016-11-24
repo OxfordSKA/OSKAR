@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_element_weights_dft_cuda.h>
+#include "telescope/station/oskar_evaluate_element_weights_dft_cuda.h"
 
 #ifdef __cplusplus
 extern "C" {

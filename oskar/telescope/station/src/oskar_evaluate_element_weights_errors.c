@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_element_weights_errors.h>
-#include <oskar_evaluate_element_weights_errors_cuda.h>
+#include "telescope/station/oskar_evaluate_element_weights_errors.h"
+#include "telescope/station/oskar_evaluate_element_weights_errors_cuda.h"
 #include <math.h>
 
 #ifdef __cplusplus

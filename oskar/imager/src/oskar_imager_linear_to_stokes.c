@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_imager_linear_to_stokes.h>
+#include "imager/oskar_imager_linear_to_stokes.h"
 
 #include <stddef.h>
 

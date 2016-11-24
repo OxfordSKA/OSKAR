@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_geometric_dipole_pattern_cuda.h>
-#include <oskar_evaluate_geometric_dipole_pattern_inline.h>
-#include <oskar_cmath.h>
+#include "telescope/station/element/oskar_evaluate_geometric_dipole_pattern_cuda.h"
+#include "telescope/station/element/oskar_evaluate_geometric_dipole_pattern_inline.h"
+#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {

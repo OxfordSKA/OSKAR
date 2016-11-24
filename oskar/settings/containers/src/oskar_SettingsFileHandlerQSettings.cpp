@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_SettingsFileHandlerQSettings.hpp>
+#include "oskar_SettingsFileHandlerQSettings.hpp"
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
 #include <iostream>

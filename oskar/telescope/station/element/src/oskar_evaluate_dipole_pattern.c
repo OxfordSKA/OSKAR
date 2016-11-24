@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_dipole_pattern.h>
-#include <oskar_evaluate_dipole_pattern_cuda.h>
-#include <oskar_evaluate_dipole_pattern_inline.h>
-#include <oskar_device_utils.h>
-#include <oskar_cmath.h>
+#include "telescope/station/element/oskar_evaluate_dipole_pattern.h"
+#include "telescope/station/element/oskar_evaluate_dipole_pattern_cuda.h"
+#include "telescope/station/element/oskar_evaluate_dipole_pattern_inline.h"
+#include "utility/oskar_device_utils.h"
+#include "math/oskar_cmath.h"
 
 #define C_0 299792458.0
 

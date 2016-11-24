@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_telescope.h>
-#include <oskar_telescope.h>
+#include "telescope/private_telescope.h"
+#include "telescope/oskar_telescope.h"
 
-#include <oskar_mem.h>
+#include "mem/oskar_mem.h"
 
 #include <stdlib.h>
 #include <float.h>

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_vla_beam_pbcor_cuda.h>
-#include <oskar_vla_pbcor_inline.h>
+#include "telescope/station/oskar_evaluate_vla_beam_pbcor_cuda.h"
+#include "telescope/station/oskar_vla_pbcor_inline.h"
 
 #ifdef __cplusplus
 extern "C" {

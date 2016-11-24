@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_jones_K_cuda.h>
+#include "simulator/oskar_evaluate_jones_K_cuda.h"
 
 /* Kernels. ================================================================ */
 

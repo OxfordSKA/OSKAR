@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
-#include <private_imager_set_num_planes.h>
+#include "imager/private_imager.h"
+#include "imager/private_imager_set_num_planes.h"
 
 #ifdef __cplusplus
 extern "C" {

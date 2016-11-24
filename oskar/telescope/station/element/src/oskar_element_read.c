@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_splines.h>
-#include <private_element.h>
-#include <oskar_element.h>
-#include <oskar_binary.h>
-#include <oskar_binary_read_mem.h>
+#include "splines/private_splines.h"
+#include "telescope/station/element/private_element.h"
+#include "telescope/station/element/oskar_element.h"
+#include "mem/oskar_binary_read_mem.h"
+#include "binary/oskar_binary.h"
 
 #include <string.h>
 #include <float.h>

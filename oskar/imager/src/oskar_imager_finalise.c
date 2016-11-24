@@ -30,15 +30,15 @@
 #include <cufft.h>
 #endif
 
-#include <private_imager.h>
-#include <oskar_imager.h>
+#include "imager/private_imager.h"
+#include "imager/oskar_imager.h"
 
-#include <oskar_device_utils.h>
-#include <oskar_fftpack_cfft.h>
-#include <oskar_fftpack_cfft_f.h>
-#include <oskar_fftphase.h>
-#include <oskar_grid_correction.h>
-#include <oskar_mem.h>
+#include "utility/oskar_device_utils.h"
+#include "imager/oskar_fftpack_cfft.h"
+#include "imager/oskar_fftpack_cfft_f.h"
+#include "imager/oskar_fftphase.h"
+#include "imager/oskar_grid_correction.h"
+#include "mem/oskar_mem.h"
 #include <fitsio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_block.h>
-#include <oskar_vis_block.h>
-#include <oskar_random_gaussian.h>
-#include <oskar_find_closest_match.h>
+#include "vis/private_vis_block.h"
+#include "vis/oskar_vis_block.h"
+#include "math/oskar_random_gaussian.h"
+#include "math/oskar_find_closest_match.h"
 #include <math.h>
 
 #ifdef __cplusplus

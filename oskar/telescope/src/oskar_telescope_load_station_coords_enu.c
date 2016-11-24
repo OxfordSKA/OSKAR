@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_telescope.h>
+#include "telescope/oskar_telescope.h"
 
 #ifdef __cplusplus
 extern "C" {

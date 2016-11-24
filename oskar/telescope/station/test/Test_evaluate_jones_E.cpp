@@ -28,15 +28,15 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_telescope.h>
-#include <oskar_jones.h>
-#include <oskar_linspace.h>
-#include <oskar_meshgrid.h>
-#include <oskar_evaluate_image_lmn_grid.h>
-#include <oskar_evaluate_jones_E.h>
-#include <oskar_get_error_string.h>
+#include "telescope/oskar_telescope.h"
+#include "simulator/oskar_jones.h"
+#include "math/oskar_linspace.h"
+#include "math/oskar_meshgrid.h"
+#include "math/oskar_evaluate_image_lmn_grid.h"
+#include "simulator/oskar_evaluate_jones_E.h"
+#include "utility/oskar_get_error_string.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <cstdio>
 #include <cstdlib>
 #include <vector>

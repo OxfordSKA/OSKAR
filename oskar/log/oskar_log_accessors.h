@@ -40,14 +40,19 @@
 extern "C" {
 #endif
 
+OSKAR_EXPORT
 FILE* oskar_log_file_handle(oskar_Log* l);
 
+OSKAR_EXPORT
 void oskar_log_set_keep_file(oskar_Log* l, int value);
 
+OSKAR_EXPORT
 void oskar_log_set_file_priority(oskar_Log* l, int value);
 
+OSKAR_EXPORT
 void oskar_log_set_term_priority(oskar_Log* l, int value);
 
+OSKAR_EXPORT
 void oskar_log_set_value_width(oskar_Log* l, int value);
 
 #ifdef __cplusplus

@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_splines.h>
-#include <oskar_splines.h>
-#include <oskar_mem.h>
+#include "splines/private_splines.h"
+#include "splines/oskar_splines.h"
+#include "mem/oskar_mem.h"
 
 #ifdef __cplusplus
 extern "C" {

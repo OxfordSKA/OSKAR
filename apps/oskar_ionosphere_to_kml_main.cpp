@@ -26,29 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_OptionParser.h>
-#include <apps/lib/oskar_sim_tec_screen.h>
-#include <apps/lib/oskar_evaluate_station_pierce_points.h>
-#include <apps/lib/oskar_set_up_telescope.h>
-#include <apps/lib/oskar_set_up_sky.h>
+#include "oskar_OptionParser.h"
+#include "oskar_sim_tec_screen.h"
+#include "oskar_set_up_telescope.h"
+#include "oskar_set_up_sky.h"
 
-#include <oskar_settings_load.h>
-#include <oskar_settings_log.h>
+#include "oskar_settings_load.h"
+#include "oskar_settings_log.h"
 
-#include <oskar_telescope.h>
-#include <oskar_convert_offset_ecef_to_ecef.h>
+#include "telescope/oskar_telescope.h"
+#include "convert/oskar_convert_offset_ecef_to_ecef.h"
 
-#include <oskar_convert_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_enu_directions.h>
-#include <oskar_sky.h>
+#include "convert/oskar_convert_mjd_to_gast_fast.h"
+#include "convert/oskar_convert_apparent_ra_dec_to_enu_directions.h"
+#include "sky/oskar_sky.h"
 
-#include <oskar_get_error_string.h>
-#include <oskar_log.h>
+#include "utility/oskar_get_error_string.h"
+#include "log/oskar_log.h"
 
-#include <oskar_evaluate_image_lon_lat_grid.h>
+#include "math/oskar_evaluate_image_lon_lat_grid.h"
 
-#include <oskar_evaluate_pierce_points.h>
-#include <oskar_version_string.h>
+#include "telescope/station/oskar_evaluate_pierce_points.h"
+#include "utility/oskar_version_string.h"
 
 #include <cstdlib>
 #include <cstdio>

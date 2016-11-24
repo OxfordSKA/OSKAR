@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_galactic_to_fk5.h>
-#include <oskar_cmath.h>
+#include "convert/oskar_convert_galactic_to_fk5.h"
+#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {

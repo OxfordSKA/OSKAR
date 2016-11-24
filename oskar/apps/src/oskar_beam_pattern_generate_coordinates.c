@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_beam_pattern_generate_coordinates.h>
-#include <oskar_convert_healpix_ring_to_theta_phi.h>
-#include <oskar_convert_theta_phi_to_enu_directions.h>
-#include <oskar_convert_lon_lat_to_relative_directions.h>
-#include <oskar_evaluate_image_lmn_grid.h>
-#include <oskar_getline.h>
-#include <oskar_string_to_array.h>
-#include <oskar_cmath.h>
+#include "oskar_beam_pattern_generate_coordinates.h"
+#include "convert/oskar_convert_healpix_ring_to_theta_phi.h"
+#include "convert/oskar_convert_theta_phi_to_enu_directions.h"
+#include "convert/oskar_convert_lon_lat_to_relative_directions.h"
+#include "math/oskar_evaluate_image_lmn_grid.h"
+#include "utility/oskar_getline.h"
+#include "utility/oskar_string_to_array.h"
+#include "math/oskar_cmath.h"
 #include <stdio.h>
 
 static void load_coords(oskar_Mem* lon, oskar_Mem* lat,

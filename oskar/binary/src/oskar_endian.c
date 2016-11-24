@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_endian.h>
+#include "binary/oskar_endian.h"
 
 #ifdef __cplusplus
 extern "C" {

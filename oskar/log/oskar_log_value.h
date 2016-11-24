@@ -75,6 +75,7 @@ extern "C" {
  * @param[in]     prefix   String prefix (key).
  * @param[in]     format   Format string for printf().
  */
+OSKAR_EXPORT
 void oskar_log_value(oskar_Log* log, char priority, int depth,
         const char* prefix, const char* format, ...);
 

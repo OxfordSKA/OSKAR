@@ -28,11 +28,11 @@
 
 #include <math.h>
 
-#include <oskar_jones.h>
-#include <oskar_evaluate_jones_R.h>
-#include <oskar_evaluate_jones_R_cuda.h>
-#include <oskar_parallactic_angle.h>
-#include <oskar_device_utils.h>
+#include "simulator/oskar_jones.h"
+#include "simulator/oskar_evaluate_jones_R.h"
+#include "simulator/oskar_evaluate_jones_R_cuda.h"
+#include "sky/oskar_parallactic_angle.h"
+#include "utility/oskar_device_utils.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -4,7 +4,6 @@
 
 # Build OSKAR sub-libraries.
 add_subdirectory(binary)
-add_subdirectory(log)
 add_subdirectory(ms)
 add_subdirectory(settings)
 
@@ -14,6 +13,7 @@ set(${libname}_folders
     convert
     correlate
     imager
+    log
     math
     mem
     simulator
@@ -41,7 +41,6 @@ endif()
 target_link_libraries(${libname}
     cfitsio
     oskar_binary
-    oskar_log
     oskar_settings_struct)
 
 # Link with oskar_ms if we have casacore.

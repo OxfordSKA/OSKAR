@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
+#include "imager/private_imager.h"
 
-#include <oskar_imager_accessors.h>
-#include <oskar_imager_create.h>
+#include "imager/oskar_imager_accessors.h"
+#include "imager/oskar_imager_create.h"
 
 #include <stdlib.h>
 

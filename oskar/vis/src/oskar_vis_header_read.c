@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis_header.h>
-#include <oskar_vis_header.h>
-#include <oskar_binary_read_mem.h>
+#include "vis/private_vis_header.h"
+#include "vis/oskar_vis_header.h"
+#include "mem/oskar_binary_read_mem.h"
 
 #include <math.h>
 

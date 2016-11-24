@@ -1,4 +1,4 @@
-#include <oskar_dierckx_fprpsp.h>
+#include "splines/oskar_dierckx_fprpsp.h"
 
 #ifdef __cplusplus
 extern "C" {

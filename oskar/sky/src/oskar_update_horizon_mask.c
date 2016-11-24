@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_update_horizon_mask.h>
+#include "sky/oskar_update_horizon_mask.h"
 
 #ifdef __cplusplus
 extern "C" {

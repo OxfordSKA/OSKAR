@@ -29,9 +29,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_SettingsModel_new.hpp>
-#include <oskar_SettingsTree.hpp>
-#include <oskar_settings_types.hpp>
+#include "oskar_SettingsModel_new.hpp"
+#include "oskar_SettingsTree.hpp"
+#include "oskar_settings_types.hpp"
 
 #include <QtGui/QApplication>
 #include <QtGui/QFontMetrics>

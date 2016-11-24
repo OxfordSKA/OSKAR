@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_station_beam_gaussian.h>
-#include <oskar_blank_below_horizon.h>
-#include <oskar_gaussian.h>
-#include <oskar_gaussian_cuda.h>
-#include <oskar_mem.h>
-#include <oskar_device_utils.h>
+#include "telescope/station/oskar_evaluate_station_beam_gaussian.h"
+#include "telescope/station/oskar_blank_below_horizon.h"
+#include "math/oskar_gaussian.h"
+#include "math/oskar_gaussian_cuda.h"
+#include "mem/oskar_mem.h"
+#include "utility/oskar_device_utils.h"
 
-#include <oskar_cmath.h>
+#include "math/oskar_cmath.h"
 #include <stdio.h>
 
 #ifdef __cplusplus

@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_binary.h>
-#include <private_binary.h>
-#include <oskar_endian.h>
+#include "binary/oskar_binary.h"
+#include "binary/private_binary.h"
+#include "binary/oskar_endian.h"
 #include <string.h>
 #include <stdlib.h>
 

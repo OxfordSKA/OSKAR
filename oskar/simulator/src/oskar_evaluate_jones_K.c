@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_jones_K.h>
-#include <oskar_evaluate_jones_K_cuda.h>
-#include <oskar_device_utils.h>
-#include <oskar_cmath.h>
+#include "simulator/oskar_evaluate_jones_K.h"
+#include "simulator/oskar_evaluate_jones_K_cuda.h"
+#include "utility/oskar_device_utils.h"
+#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {

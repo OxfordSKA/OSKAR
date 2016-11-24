@@ -33,7 +33,7 @@
  * @file oskar_binary_query.h
  */
 
-#include <oskar_binary_macros.h>
+#include <binary/oskar_binary_macros.h>
 #include <stddef.h>
 
 #ifdef __cplusplus

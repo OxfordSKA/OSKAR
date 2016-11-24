@@ -49,6 +49,7 @@ extern "C" {
  * @param[in,out] log    Pointer to a log structure.
  * @param[in]     format Format string (for printf()).
  */
+OSKAR_EXPORT
 void oskar_log_error(oskar_Log* log, const char* format, ...);
 
 #ifdef __cplusplus

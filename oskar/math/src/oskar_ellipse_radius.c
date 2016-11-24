@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_ellipse_radius.h>
+#include "math/oskar_ellipse_radius.h"
 #include <math.h>
 
 #ifdef __cplusplus

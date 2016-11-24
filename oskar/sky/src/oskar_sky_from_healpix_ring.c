@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_galactic_to_fk5.h>
-#include <oskar_convert_healpix_ring_to_theta_phi.h>
-#include <oskar_sky.h>
-#include <oskar_cmath.h>
+#include "convert/oskar_convert_galactic_to_fk5.h"
+#include "convert/oskar_convert_healpix_ring_to_theta_phi.h"
+#include "sky/oskar_sky.h"
+#include "math/oskar_cmath.h"
 
 #include <string.h>
 

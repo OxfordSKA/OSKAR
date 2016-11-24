@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_getline.h>
+#include "utility/oskar_getline.h"
 
 #include <cstdio>
 #include <cstdlib>

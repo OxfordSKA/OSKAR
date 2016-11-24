@@ -67,11 +67,11 @@ enum OSKAR_SPLINES_TYPE
 }
 #endif
 
-#include <oskar_splines_accessors.h>
-#include <oskar_splines_copy.h>
-#include <oskar_splines_create.h>
-#include <oskar_splines_evaluate.h>
-#include <oskar_splines_free.h>
-#include <oskar_splines_fit.h>
+#include <splines/oskar_splines_accessors.h>
+#include <splines/oskar_splines_copy.h>
+#include <splines/oskar_splines_create.h>
+#include <splines/oskar_splines_evaluate.h>
+#include <splines/oskar_splines_free.h>
+#include <splines/oskar_splines_fit.h>
 
 #endif /* OSKAR_SPLINES_H_ */

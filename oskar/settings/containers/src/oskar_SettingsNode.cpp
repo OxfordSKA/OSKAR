@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_SettingsNode.hpp>
+#include "oskar_SettingsNode.hpp"
 
 using namespace std;
 
