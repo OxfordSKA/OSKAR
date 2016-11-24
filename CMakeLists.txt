@@ -34,9 +34,9 @@ endif()
 if (NOT OSKAR_BIN_INSTALL_DIR)
     set(OSKAR_BIN_INSTALL_DIR "bin")
 endif()
-if (NOT OSKAR_PYTHON_INSTALL_DIR)
-    set(OSKAR_PYTHON_INSTALL_DIR "share/oskar/python")
-endif()
+#if (NOT OSKAR_PYTHON_INSTALL_DIR)
+#    set(OSKAR_PYTHON_INSTALL_DIR "share/oskar/python")
+#endif()
 
 # === Set dependencies and compiler options.
 include(oskar_dependencies)
