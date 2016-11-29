@@ -87,8 +87,8 @@ class BuildExt(build_ext):
                 "Check that OSKAR has already been installed on this system, "
                 "and set the include path to build_ext "
                 "using -I or --include-dirs")
-        self.include_dirs.append(dirname(h))
-        self.include_dirs.append(get_include())
+        self.include_dirs.insert(0, dirname(h))
+        self.include_dirs.insert(0, get_include())
 
         # Check the version of OSKAR is compatible.
         version = self.get_oskar_version(h)

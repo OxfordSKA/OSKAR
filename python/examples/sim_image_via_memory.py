@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import numpy
 import oskar
 import time
@@ -19,7 +20,7 @@ if __name__ == '__main__':
 
     # Set up the sky model.
     sky = oskar.Sky.generate_grid(phase_centre_ra_deg, phase_centre_dec_deg,
-        16, 1.5, precision=precision)
+                                  16, 1.5, precision=precision)
     sky.append_sources(phase_centre_ra_deg, phase_centre_dec_deg, 1.0)
 
     # Set up the telescope model.
@@ -27,8 +28,8 @@ if __name__ == '__main__':
     tel.set_channel_bandwidth(1.0e3)
     tel.set_time_average(10.0)
     tel.set_pol_mode('Scalar')
-    tel.set_station_coords_enu(longitude_deg=0, latitude_deg=60, altitude_m=0, 
-        x=x, y=y)
+    tel.set_station_coords_enu(longitude_deg=0, latitude_deg=60, altitude_m=0,
+                               x=x, y=y)
     # Set station properties after stations have been defined.
     tel.set_phase_centre(phase_centre_ra_deg, phase_centre_dec_deg)
     tel.set_station_type('Gaussian beam')
@@ -47,8 +48,8 @@ if __name__ == '__main__':
     simulator.set_sky_model(sky)
     simulator.set_telescope_model(tel)
     simulator.set_observation_frequency(100e6)
-    simulator.set_observation_time(start_time_mjd_utc=51545.0,
-        length_sec=43200.0, num_time_steps=48)
+    simulator.set_observation_time(
+        start_time_mjd_utc=51545.0, length_sec=43200.0, num_time_steps=48)
 
     # Simulate and image visibilities.
     start = time.time()
@@ -72,9 +73,8 @@ if __name__ == '__main__':
         hdr.append(('CROTA2', 0.0))
         hdr.append(('BUNIT', 'Jy/beam'))
         fits.writeto(output_root+'_image_'+imagers[i].weighting+'.fits',
-            imager_data[i]['images'][0,:,:], hdr, clobber=True)
+                     imager_data[i]['images'][0, :, :], hdr, clobber=True)
 
         # Write the grid.
         fits.writeto(output_root+'_grid_'+imagers[i].weighting+'.fits',
-            numpy.abs(imager_data[i]['grids'][0,:,:]), clobber=True)
-
+                     numpy.abs(imager_data[i]['grids'][0, :, :]), clobber=True)

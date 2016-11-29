@@ -27,4 +27,4 @@ if (OSKAR_VERSION_SUFFIX AND NOT OSKAR_VERSION_SUFFIX STREQUAL "")
 endif()
 
 configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_version.h.in
-    ${PROJECT_BINARY_DIR}/oskar_version.h @ONLY)
+    ${PROJECT_BINARY_DIR}/oskar/oskar_version.h @ONLY)

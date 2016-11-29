@@ -1,6 +1,7 @@
 include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_BINARY_DIR}
+    ${PROJECT_BINARY_DIR}/oskar
 
     ${PROJECT_SOURCE_DIR}/extern
     ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
