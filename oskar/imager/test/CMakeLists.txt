@@ -3,7 +3,6 @@
 #
 
 set(name imager_test)
-include_directories(${CUDA_INCLUDE_DIRS})
 set(${name}_SRC
     main.cpp
     Test_fits_write.cpp

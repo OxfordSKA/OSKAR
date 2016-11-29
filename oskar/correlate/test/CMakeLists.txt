@@ -9,7 +9,6 @@ set(${name}_SRC
     Test_cross_correlate.cpp
     Test_evaluate_cross_power.cpp
 )
-include_directories(${CUDA_INCLUDE_DIRS})
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)
 set_target_properties(${name} PROPERTIES
@@ -18,12 +17,15 @@ set_target_properties(${name} PROPERTIES
 add_test(correlate_test ${name})
 
 
-# Correlate kernel performance test.
-#set(name correlate_performance_test)
-#cuda_add_executable(${name} Test_correlate_performance.cu)
-#target_link_libraries(${name} oskar gtest_main ${CUDA_LIBRARIES})
+if (CUDA_FOUND)
+    include_directories(${CUDA_INCLUDE_DIRS})
+    # Correlate kernel performance test.
+    #set(name correlate_performance_test)
+    #cuda_add_executable(${name} Test_correlate_performance.cu)
+    #target_link_libraries(${name} oskar gtest_main ${CUDA_LIBRARIES})
 
-# Correlator benchmark binary.
-set(name oskar_correlator_benchmark)
-add_executable(${name} ${name}.cpp)
-target_link_libraries(${name} oskar ${CUDA_LIBRARIES})
+    # Correlator benchmark binary.
+    set(name oskar_correlator_benchmark)
+    add_executable(${name} ${name}.cpp)
+    target_link_libraries(${name} oskar ${CUDA_LIBRARIES})
+endif()

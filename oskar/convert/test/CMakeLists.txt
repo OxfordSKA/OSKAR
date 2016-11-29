@@ -2,8 +2,6 @@
 # oskar/convert/test/CMakeLists.txt
 #
 
-include_directories(${CUDA_INCLUDE_DIRS})
-
 set(name convert_test)
 set(${name}_SRC
     main.cpp
@@ -13,7 +11,7 @@ set(${name}_SRC
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name}
     #sofa_c
-    oskar gtest ${CUDA_LIBRARIES}
+    oskar gtest
     #${CASACORE_LIBRARIES}
 )
 add_test(${name} ${name})
