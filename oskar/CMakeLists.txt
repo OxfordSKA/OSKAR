@@ -114,5 +114,5 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/oskar"
     PATTERN tests EXCLUDE
     PATTERN extern EXCLUDE
     PATTERN .git EXCLUDE)
-install(FILES ${PROJECT_BINARY_DIR}/oskar_version.h
+install(FILES ${PROJECT_BINARY_DIR}/oskar/oskar_version.h
     DESTINATION "${OSKAR_INCLUDE_INSTALL_DIR}/oskar")
