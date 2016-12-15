@@ -10,7 +10,7 @@
             data. See the accompanying documentation for a description
             of an OSKAR telescope model directory.</desc>
     </s>
-    <s k="station_type"><label>Station type</label>
+    <s k="station_type" priority="1"><label>Station type</label>
         <type name="OptionList" default="A">
             Aperture array,Isotropic beam,Gaussian beam,VLA (PBCOR)
         </type>
@@ -19,7 +19,7 @@
             aperture array beam if required for testing. All station beam
             effects can be disabled by selecting 'Isotropic beam'.</desc>
     </s>
-    <s k="normalise_beams_at_phase_centre">
+    <s k="normalise_beams_at_phase_centre" priority="1">
         <label>Normalise beams at phase centre</label>
         <type name="bool" default="true"/>
         <desc>If <b>true</b>, then scale the amplitude of every station beam
@@ -27,7 +27,7 @@
             snapshot. This effectively performs an amplitude calibration for
             a source at the phase centre.</desc>
     </s>
-    <s k="pol_mode">
+    <s k="pol_mode" priority="1">
         <label>Polarisation mode</label>
         <type name="OptionList" default="Full">Full, Scalar</type>
         <desc>The polarisation mode of simulations which use the telescope
@@ -38,7 +38,7 @@
             simulated. <b>Note that scalar mode can be significantly faster.</b>
         </desc>
     </s>
-    <s k="allow_station_beam_duplication">
+    <s k="allow_station_beam_duplication" priority="1">
         <label>Allow station beam duplication</label>
         <type name="bool" default="false" />
         <desc>If enabled, and if all stations are identical, all station beam

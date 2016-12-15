@@ -2,27 +2,27 @@
 
 <s k="simulator"><label>Simulator settings</label>
     <desc>These parameters affect the operation of the software.</desc>
-    <s k="double_precision"><label>Use double precision</label>
+    <s k="double_precision" priority="1"><label>Use double precision</label>
         <type name="bool" default="true"/>
         <desc>Determines whether double precision arithmetic is used.</desc>
     </s>
-    <s k="use_gpus"><label>Use GPUs</label>
+    <s k="use_gpus" priority="1"><label>Use GPUs</label>
         <type name="bool" default="true"/>
         <desc>Use GPU devices if available.</desc>
     </s>
-    <s k="cuda_device_ids"><label>CUDA device IDs to use</label>
+    <s k="cuda_device_ids" priority="1"><label>CUDA device IDs to use</label>
         <type name="IntListExt" default="all">all</type>
         <depends k="simulator/use_gpus" v="true"/>
         <desc>A comma-separated string containing device (GPU) IDs to use on
             a multi-GPU system, or 'all' to use all devices.</desc>
     </s>
-    <s k="num_devices"><label>Number of compute devices</label>
+    <s k="num_devices" priority="1"><label>Number of compute devices</label>
         <type name="IntRangeExt" default="auto">1,MAX,auto</type>
         <desc>Number of compute devices to use for the simulation.
         A compute device is either a local CPU core, or a GPU. Don't set
         this to more than the number of CPU cores in your system.</desc>
     </s>
-    <s k="max_sources_per_chunk">
+    <s k="max_sources_per_chunk" priority="1">
         <label>Max. number of sources per chunk</label>
         <type name="IntPositive" default="16384"/>
         <desc>Maximum number of sources or pixels processed concurrently on a

@@ -178,10 +178,12 @@ const oskar_Splines* oskar_element_scalar_im_const(const oskar_Element* data,
 /* Setters. */
 
 OSKAR_EXPORT
-void oskar_element_set_element_type(oskar_Element* data, int type);
+void oskar_element_set_element_type(oskar_Element* data, const char* type,
+        int* status);
 
 OSKAR_EXPORT
-void oskar_element_set_taper_type(oskar_Element* data, int type);
+void oskar_element_set_taper_type(oskar_Element* data, const char* type,
+        int* status);
 
 OSKAR_EXPORT
 void oskar_element_set_gaussian_fwhm_rad(oskar_Element* data, double value);
@@ -191,7 +193,7 @@ void oskar_element_set_cosine_power(oskar_Element* data, double value);
 
 OSKAR_EXPORT
 void oskar_element_set_dipole_length(oskar_Element* data, double value,
-        int units);
+        const char* units, int* status);
 
 #ifdef __cplusplus
 }

@@ -41,7 +41,7 @@ namespace oskar {
 
 SettingsItem::SettingsItem()
 : required_(false), num_dependency_groups_(0),
-  num_dependencies_(0), root_(0), current_group_(0)
+  num_dependencies_(0), root_(0), current_group_(0), priority_(0)
 {
 }
 
@@ -52,9 +52,10 @@ SettingsItem::SettingsItem(const std::string& key,
                            const std::string& type_default,
                            const std::string& type_parameters,
                            bool is_required,
-                           const std::string& priority)
+                           int priority)
 : key_(key), label_(label), description_(description), required_(is_required),
-  num_dependency_groups_(0), num_dependencies_(0), root_(0), current_group_(0)
+  priority_(priority), num_dependency_groups_(0), num_dependencies_(0),
+  root_(0), current_group_(0)
 {
     if (!type_name.empty()) {
         SettingsValue v;
@@ -77,17 +78,6 @@ SettingsItem::SettingsItem(const std::string& key,
         }
         if (ok) {
             value_ = v;
-        }
-    }
-    if (!priority.empty()) {
-        if (oskar_settings_utility_string_starts_with(priority, "N", false) ||
-                oskar_settings_utility_string_starts_with(priority, "D", false))
-            priority_ = DEFAULT;
-        else if (oskar_settings_utility_string_starts_with(priority, "I", false))
-            priority_ = IMPORTANT;
-        else {
-            cerr << "ERROR: Failed setting priority for (key='" << key;
-            cerr << ", priority='" << priority << "')" << endl;
         }
     }
 }

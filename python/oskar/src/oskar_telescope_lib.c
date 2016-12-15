@@ -259,15 +259,12 @@ static PyObject* set_pol_mode(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
+    int status = 0;
     const char* mode;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &mode)) return 0;
     if (!(h = get_handle(capsule))) return 0;
-
-    if (!strncmp(mode, "S", 1) || !strncmp(mode, "s", 1))
-        oskar_telescope_set_pol_mode(h, OSKAR_POL_MODE_SCALAR);
-    else if (!strncmp(mode, "F",  1) || !strncmp(mode, "f",  1))
-        oskar_telescope_set_pol_mode(h, OSKAR_POL_MODE_FULL);
-    else
+    oskar_telescope_set_pol_mode(h, mode, &status);
+    if (status)
     {
         PyErr_SetString(PyExc_RuntimeError, "Unknown polarisation mode.");
         return 0;
@@ -539,6 +536,7 @@ static PyObject* set_station_type(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
+    int status = 0;
     const char* type_string = 0;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &type_string)) return 0;
     if (!(h = get_handle(capsule))) return 0;
@@ -549,7 +547,12 @@ static PyObject* set_station_type(PyObject* self, PyObject* args)
         PyErr_Format(PyExc_RuntimeError, "No stations in telescope model!");
         return 0;
     }
-    oskar_telescope_set_station_type(h, type_string);
+    oskar_telescope_set_station_type(h, type_string, &status);
+    if (status)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Unknown station type.");
+        return 0;
+    }
     return Py_BuildValue("");
 }
 
@@ -570,24 +573,20 @@ static PyObject* set_uv_filter(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
+    int status = 0;
     double uv_filter_min = 0.0, uv_filter_max = 0.0;
-    int uv_filter_units = 0;
     const char* units = 0;
     if (!PyArg_ParseTuple(args, "Odds", &capsule,
             &uv_filter_min, &uv_filter_max, &units)) return 0;
     if (!(h = get_handle(capsule))) return 0;
 
-    if (!strncmp(units, "M", 1) || !strncmp(units, "m", 1))
-        uv_filter_units = OSKAR_METRES;
-    else if (!strncmp(units, "W",  1) || !strncmp(units, "w",  1))
-        uv_filter_units = OSKAR_WAVELENGTHS;
-    else
+    oskar_telescope_set_uv_filter(h,
+            uv_filter_min, uv_filter_max, units, &status);
+    if (status)
     {
         PyErr_SetString(PyExc_RuntimeError, "Unknown units.");
         return 0;
     }
-    oskar_telescope_set_uv_filter(h,
-            uv_filter_min, uv_filter_max, uv_filter_units);
     return Py_BuildValue("");
 }
 

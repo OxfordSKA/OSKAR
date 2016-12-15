@@ -58,7 +58,7 @@ SettingsNode::SettingsNode(const string& key,
              const string& type_default,
              const string& type_parameters,
              bool is_required,
-             const std::string& priority)
+             int priority)
 : SettingsItem(key, label, description, type_name, type_default,
         type_parameters, is_required, priority),
   parent_(0),
@@ -87,6 +87,7 @@ SettingsNode* SettingsNode::add_child(const SettingsNode& node)
 {
     if (node.item_type() != SettingsItem::INVALID) {
         children_.push_back(new SettingsNode(node, this));
+        update_priority(node.priority());
         return children_.back();
     }
     else {
@@ -158,86 +159,11 @@ void SettingsNode::update_value_set_counter_(bool increment_counter)
         parent_->update_value_set_counter_(increment_counter);
 }
 
+void SettingsNode::update_priority(int priority)
+{
+    this->priority_ += priority;
+    if (parent_)
+        parent_->update_priority(priority);
+}
+
 } // namespace oskar
-
-/* C interface. */
-struct oskar_SettingsNode : public oskar::SettingsNode
-{
-};
-
-int oskar_settings_node_num_children(const oskar_SettingsNode* node)
-{
-    return node->num_children();
-}
-
-int oskar_settings_node_begin_dependency_group(oskar_SettingsNode* node,
-        const char* logic)
-{
-    return (int) node->begin_dependency_group(string(logic));
-}
-
-void oskar_settings_node_end_dependency_group(oskar_SettingsNode* node)
-{
-    node->end_dependency_group();
-}
-
-int oskar_settings_node_add_dependency(oskar_SettingsNode* node,
-        const char* dependency_key, const char* value, const char* logic)
-{
-    return (int) node->add_dependency(string(dependency_key),
-            string(value), string(logic));
-}
-
-int oskar_settings_node_type(const oskar_SettingsNode* node)
-{
-    return (int) node->item_type();
-}
-
-const char* oskar_settings_node_key(const oskar_SettingsNode* node)
-{
-    return node->key().c_str();
-}
-
-const char* oskar_settings_node_label(const oskar_SettingsNode* node)
-{
-    return node->label().c_str();
-}
-
-const char* oskar_settings_node_description(const oskar_SettingsNode* node)
-{
-    return node->description().c_str();
-}
-
-int oskar_settings_node_is_required(const oskar_SettingsNode* node)
-{
-    return (int) node->is_required();
-}
-
-int oskar_settings_node_set_value(oskar_SettingsNode* node,
-        const char* value)
-{
-    return (int) node->set_value(string(value));
-}
-
-const oskar_SettingsValue* oskar_settings_node_value(
-        const oskar_SettingsNode* node)
-{
-    return (const oskar_SettingsValue*) &node->value();
-}
-
-int oskar_settings_node_num_dependencies(const oskar_SettingsNode* node)
-{
-    return node->num_dependencies();
-}
-
-int oskar_settings_node_num_dependency_groups(const oskar_SettingsNode* node)
-{
-    return node->num_dependency_groups();
-}
-
-const oskar_SettingsDependencyGroup* oskar_settings_node_dependency_tree(
-        const oskar_SettingsNode* node)
-{
-    return (const oskar_SettingsDependencyGroup*) node->dependency_tree();
-}
-

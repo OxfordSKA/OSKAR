@@ -10,6 +10,7 @@ add_subdirectory(settings)
 # Build OSKAR main library.
 set(libname oskar)
 set(${libname}_folders
+    beam_pattern
     convert
     correlate
     imager
@@ -40,8 +41,7 @@ endif()
 # Link libraries.
 target_link_libraries(${libname}
     cfitsio
-    oskar_binary
-    oskar_settings_struct)
+    oskar_binary)
 
 # Link with oskar_ms if we have casacore.
 if (CASACORE_FOUND)
@@ -72,9 +72,6 @@ install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 if (CUDA_FOUND)
     cuda_build_clean_target()
 endif()
-
-# === Build other oskar libraries.
-add_subdirectory(apps)
 
 # === Install header tree.
 if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")

@@ -9,7 +9,7 @@ add_executable(${name}
     Test_SettingsItem.cpp
     Test_SettingsKey.cpp
     Test_SettingsNode.cpp
-    Test_SettingsTree.cpp
+    Test_Settings.cpp
 )
 target_link_libraries(${name}
     gtest_main

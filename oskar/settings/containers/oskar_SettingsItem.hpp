@@ -59,7 +59,7 @@ namespace oskar {
  * - description: Detailed description of the setting.
  * - value: The value of the setting.
  * - required flag: Flag indicating that the setting is required.
- * - priority flag: Used to mark high priority settings.
+ * - priority level: Used to mark high priority settings.
  * - dependencies: Dependency tree used to determine if the setting is active.
  *
  * The settings value is a object of @class SettingsValue, this is a stack-
@@ -80,9 +80,6 @@ public:
     /*! Settings type enum. */
     enum ItemType { INVALID = -1, LABEL, SETTING };
 
-    /*! Settings priority enum. */
-    enum Priority { DEFAULT = 0, IMPORTANT = 1 };
-
     /*! Default constructor. */
     SettingsItem();
 
@@ -94,7 +91,7 @@ public:
                  const std::string& type_default = std::string(),
                  const std::string& type_parameters = std::string(),
                  bool is_required = false,
-                 const std::string& priority = "DEFAULT");
+                 int priority = 0);
 
     /*! Destructor. */
     virtual ~SettingsItem();
@@ -132,7 +129,7 @@ public:
     const SettingsValue& value() const { return value_; }
 
     /*! Return the priority of the setting. */
-    SettingsItem::Priority priority() const { return priority_; }
+    int priority() const { return priority_; }
 
     /*! Return the number of dependencies of the setting */
     int num_dependencies() const { return num_dependencies_; }
@@ -149,7 +146,7 @@ protected:
     std::string description_;
     SettingsValue value_;
     bool required_;
-    Priority priority_;
+    int priority_;
 
     int num_dependency_groups_;
     int num_dependencies_;

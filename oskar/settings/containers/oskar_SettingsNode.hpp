@@ -72,7 +72,7 @@ class SettingsNode : public SettingsItem
                  const std::string& type_default = std::string(),
                  const std::string& type_parameters = std::string(),
                  bool is_required = false,
-                 const std::string& priority = "DEFAULT");
+                 int priority = 0);
 
     /*! Destructor */
     virtual ~SettingsNode();
@@ -110,6 +110,7 @@ class SettingsNode : public SettingsItem
  private:
     /* Increment or decrementing the value set counter. */
     void update_value_set_counter_(bool increment_counter);
+    void update_priority(int priority);
     SettingsNode* parent_;
     std::vector<SettingsNode*> children_;
     /* Counter used to determine if the item or its children have been set.
@@ -120,42 +121,5 @@ class SettingsNode : public SettingsItem
 } /* namespace oskar */
 
 #endif /* __cplusplus */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* C interface. */
-struct oskar_SettingsNode;
-#ifndef OSKAR_SETTINGS_NODE_TYPEDEF_
-#define OSKAR_SETTINGS_NODE_TYPEDEF_
-typedef struct oskar_SettingsNode oskar_SettingsNode;
-#endif /* OSKAR_SETTINGS_NODE_TYPEDEF_ */
-
-int oskar_settings_node_num_children(const oskar_SettingsNode* node);
-int oskar_settings_node_begin_dependency_group(oskar_SettingsNode* node,
-        const char* logic);
-void oskar_settings_node_end_dependency_group(oskar_SettingsNode* node);
-int oskar_settings_node_add_dependency(oskar_SettingsNode* node,
-        const char* dependency_key, const char* value, const char* logic);
-
-int oskar_settings_node_type(const oskar_SettingsNode* node);
-const char* oskar_settings_node_key(const oskar_SettingsNode* node);
-const char* oskar_settings_node_label(const oskar_SettingsNode* node);
-const char* oskar_settings_node_description(const oskar_SettingsNode* node);
-int oskar_settings_node_is_required(const oskar_SettingsNode* node);
-int oskar_settings_node_set_value(oskar_SettingsNode* node,
-        const char* value);
-const oskar_SettingsValue* oskar_settings_node_value(
-        const oskar_SettingsNode* node);
-
-int oskar_settings_node_num_dependencies(const oskar_SettingsNode* node);
-int oskar_settings_node_num_dependency_groups(const oskar_SettingsNode* node);
-const oskar_SettingsDependencyGroup* oskar_settings_node_dependency_tree(
-        const oskar_SettingsNode* node);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* OSKAR_SETTINGS_NODE_HPP_ */

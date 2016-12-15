@@ -87,6 +87,11 @@ void SettingsTree::begin_group(const string& name)
     group_.push_back(name);
 }
 
+void SettingsTree::clear_group()
+{
+    group_.clear();
+}
+
 void SettingsTree::end_group()
 {
     group_.pop_back();
@@ -106,7 +111,8 @@ bool SettingsTree::add_setting(const string& key,
                                const string& type_name,
                                const string& type_default,
                                const string& type_parameters,
-                               bool required)
+                               bool required,
+                               int priority)
 {
     SettingsKey k(group_prefix()+ key, sep_);
     SettingsNode* parent = root_;
@@ -131,7 +137,7 @@ bool SettingsTree::add_setting(const string& key,
     }
     SettingsKey new_key(group_prefix()+ key, sep_);
     SettingsNode new_item(new_key, label, description, type_name,
-                          type_default, type_parameters, required);
+                          type_default, type_parameters, required, priority);
     if (!type_name.empty() && new_item.value().type() == SettingsValue::UNDEF)
         return false;
     current_node_ = parent->add_child(new_item);
@@ -579,197 +585,3 @@ void SettingsTree::set_defaults_(SettingsNode* node)
 }
 
 } // namespace oskar
-
-
-/* C interface. */
-struct oskar_Settings : public oskar::SettingsTree
-{
-    oskar_Settings() : oskar::SettingsTree() {}
-};
-
-
-oskar_Settings* oskar_settings_create()
-{
-    return new oskar_Settings();
-}
-
-void oskar_settings_free(oskar_Settings* s)
-{
-    delete s;
-}
-
-void oskar_settings_set_file_handler(oskar_Settings* s, void* handler)
-{
-    s->set_file_handler((oskar::SettingsFileHandler*) handler, string());
-}
-
-void oskar_settings_set_file_name(oskar_Settings* s, const char* name)
-{
-    s->set_file_name(string(name));
-}
-
-void oskar_settings_begin_group(oskar_Settings* s,
-        const char* name)
-{
-    s->begin_group(string(name));
-}
-
-void oskar_settings_end_group(oskar_Settings* s)
-{
-    s->end_group();
-}
-
-int oskar_settings_add_setting(oskar_Settings* s,
-        const char* key, const char* label, const char* description,
-        const char* type_name, const char* type_default,
-        const char* type_parameters, int required)
-{
-    return (int) s->add_setting(string(key), string(label),
-            string(description), string(type_name), string(type_default),
-            string(type_parameters), (bool) required);
-}
-
-int oskar_settings_begin_dependency_group(oskar_Settings* s,
-        const char* logic)
-{
-    return (int) s->begin_dependency_group(string(logic));
-}
-
-void oskar_settings_end_dependency_group(oskar_Settings* s)
-{
-    s->end_dependency_group();
-}
-
-int oskar_settings_add_dependency(oskar_Settings* s,
-        const char* dependency_key, const char* value, const char* condition)
-{
-    return (int) s->add_dependency(string(dependency_key),
-            string(value), string(condition));
-}
-
-int oskar_settings_set_value(oskar_Settings* s,
-        const char* key, const char* value)
-{
-    return (int) s->set_value(string(key), string(value));
-}
-
-const oskar_SettingsValue* oskar_settings_value(
-        const oskar_Settings* s, const char* key)
-{
-    return (const oskar_SettingsValue*) s->value(string(key));
-}
-
-int oskar_settings_starts_with(const oskar_Settings* s, const char* key,
-        const char* str, int* status)
-{
-    return oskar_settings_value_starts_with(
-            oskar_settings_value(s, key), str, status);
-}
-
-char oskar_settings_first_letter(const oskar_Settings* s, const char* key,
-        int* status)
-{
-    return oskar_settings_value_first_letter(oskar_settings_value(s, key),
-            status);
-}
-
-char* oskar_settings_to_string(const oskar_Settings* s,
-        const char* key, int* status)
-{
-    return oskar_settings_value_string(oskar_settings_value(s, key), status);
-}
-
-int oskar_settings_to_int(const oskar_Settings* s,
-        const char* key, int* status)
-{
-    return oskar_settings_value_to_int(oskar_settings_value(s, key), status);
-}
-
-double oskar_settings_to_double(const oskar_Settings* s,
-        const char* key, int* status)
-{
-    return oskar_settings_value_to_double(oskar_settings_value(s, key), status);
-}
-
-char** oskar_settings_to_string_list(const oskar_Settings* s,
-        const char* key, int* num, int* status)
-{
-    return oskar_settings_value_to_string_list(
-            oskar_settings_value(s, key), num, status);
-}
-
-int* oskar_settings_to_int_list(const oskar_Settings* s,
-        const char* key, int* num, int* status)
-{
-    return oskar_settings_value_to_int_list(
-            oskar_settings_value(s, key), num, status);
-}
-
-double* oskar_settings_to_double_list(const oskar_Settings* s,
-        const char* key, int* num, int* status)
-{
-    return oskar_settings_value_to_double_list(
-            oskar_settings_value(s, key), num, status);
-}
-
-int oskar_settings_num_items(const oskar_Settings* s)
-{
-    return s->num_items();
-}
-
-int oskar_settings_num_settings(const oskar_Settings* s)
-{
-    return s->num_settings();
-}
-
-void oskar_settings_print(const oskar_Settings* s)
-{
-    s->print();
-}
-
-void oskar_settings_clear(oskar_Settings* s)
-{
-    s->clear();
-}
-
-void oskar_settings_save(const oskar_Settings* s, const char* file_name,
-        int* status)
-{
-    if (!status || *status) return;
-    bool ok = s->save(string(file_name));
-    if (!ok)
-        *status = OSKAR_ERR_SETTINGS_SAVE;
-}
-
-void oskar_settings_load(oskar_Settings* s, const char* file_name,
-        int* num_failed, char*** failed_keys, int* status)
-{
-    if (!status || *status) return;
-    vector<pair<string, string> > failed;
-    bool ok = s->load(failed, string(file_name));
-    if (!ok)
-        *status = OSKAR_ERR_SETTINGS_LOAD;
-    *num_failed = failed.size();
-    if (*num_failed > 0)
-    {
-        *failed_keys = (char**) calloc(*num_failed, sizeof(char*));
-        for (int i = 0; i < *num_failed; ++i)
-        {
-            (*failed_keys)[i] = (char*) calloc(1, 1 + failed[i].first.size());
-            strcpy((*failed_keys)[i], failed[i].first.c_str());
-        }
-    }
-}
-
-int oskar_settings_contains(const oskar_Settings* s, const char* key)
-{
-    return (int) s->contains(string(key));
-}
-
-int oskar_settings_dependencies_satisfied(const oskar_Settings* s,
-        const char* key)
-{
-    return (int) s->dependencies_satisfied(string(key));
-}
-
-

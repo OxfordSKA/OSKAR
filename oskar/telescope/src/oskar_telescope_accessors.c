@@ -27,8 +27,8 @@
  */
 
 #include "telescope/private_telescope.h"
+#include "telescope/oskar_telescope.h"
 
-#include "telescope/oskar_telescope_accessors.h"
 #include "math/oskar_cmath.h"
 
 #include <string.h>
@@ -373,6 +373,7 @@ void oskar_telescope_set_noise_freq_file(oskar_Telescope* model,
         const char* filename, int* status)
 {
     int i;
+    if (*status) return;
     for (i = 0; i < model->num_stations; ++i)
     {
         oskar_mem_load_ascii(filename, 1, status,
@@ -414,6 +415,7 @@ void oskar_telescope_set_noise_rms_file(oskar_Telescope* model,
         const char* filename, int* status)
 {
     int i;
+    if (*status) return;
     for (i = 0; i < model->num_stations; ++i)
     {
         oskar_mem_load_ascii(filename, 1, status,
@@ -430,6 +432,7 @@ void oskar_telescope_set_noise_rms(oskar_Telescope* model,
     oskar_Mem *noise_rms_jy, *h;
 
     /* Set noise RMS for all top-level stations. */
+    if (*status) return;
     for (i = 0; i < model->num_stations; ++i)
     {
         s = model->station[i];
@@ -546,9 +549,11 @@ static void oskar_telescope_set_station_type_p(oskar_Station* station, int type)
     }
 }
 
-void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type)
+void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type,
+        int* status)
 {
     int i, t;
+    if (*status) return;
     if (!strncmp(type, "A", 1) || !strncmp(type, "a", 1))
         t = OSKAR_STATION_TYPE_AA;
     else if (!strncmp(type, "G", 1) || !strncmp(type, "g", 1))
@@ -557,21 +562,42 @@ void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type)
         t = OSKAR_STATION_TYPE_ISOTROPIC;
     else if (!strncmp(type, "V", 1) || !strncmp(type, "v", 1))
         t = OSKAR_STATION_TYPE_VLA_PBCOR;
+    else
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
     for (i = 0; i < model->num_stations; ++i)
         oskar_telescope_set_station_type_p(model->station[i], t);
 }
 
 void oskar_telescope_set_uv_filter(oskar_Telescope* model,
-        double uv_filter_min, double uv_filter_max, int uv_filter_units)
+        double uv_filter_min, double uv_filter_max, const char* units,
+        int* status)
 {
+    if (!strncmp(units, "M", 1) || !strncmp(units, "m", 1))
+        model->uv_filter_units = OSKAR_METRES;
+    else if (!strncmp(units, "W",  1) || !strncmp(units, "w",  1))
+        model->uv_filter_units = OSKAR_WAVELENGTHS;
+    else
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
     model->uv_filter_min = uv_filter_min;
     model->uv_filter_max = uv_filter_max;
-    model->uv_filter_units = uv_filter_units;
 }
 
-void oskar_telescope_set_pol_mode(oskar_Telescope* model, int value)
+void oskar_telescope_set_pol_mode(oskar_Telescope* model, const char* mode,
+        int* status)
 {
-    model->pol_mode = value;
+    if (*status) return;
+    if (!strncmp(mode, "S", 1) || !strncmp(mode, "s", 1))
+        model->pol_mode = OSKAR_POL_MODE_SCALAR;
+    else if (!strncmp(mode, "F",  1) || !strncmp(mode, "f",  1))
+        model->pol_mode = OSKAR_POL_MODE_FULL;
+    else
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
 }
 
 #ifdef __cplusplus

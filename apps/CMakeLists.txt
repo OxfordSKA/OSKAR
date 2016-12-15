@@ -53,39 +53,19 @@ declare_oskar_apps(
     oskar_cuda_system_info
     oskar_binary_file_query
     oskar_filter_sky_model_clusters
+    oskar_fit_element_data
+    oskar_fits_image_to_sky_model
+    oskar_imager
+    oskar_sim_beam_pattern
+    oskar_sim_interferometer
     oskar_vis_add
+    oskar_vis_add_noise
     oskar_vis_summary
+    oskar_vis_to_ms
     oskar_vis_upgrade_format
     oskar_vis_to_ascii_table)
 
-set(name oskar_fits_image_to_sky_model)
-oskar_app(${name} ${name}_main.cpp)
-
 if (QT4_FOUND)
-    # BINARY: oskar_sim_interferometer
-    set(name oskar_sim_interferometer)
-    oskar_qt_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar_sim_beam_pattern
-    set(name oskar_sim_beam_pattern)
-    oskar_qt_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar_imager
-    set(name oskar_imager)
-    oskar_qt_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar_fit_element_data
-    set(name oskar_fit_element_data)
-    oskar_qt_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar_vis_to_ms
-    set(name oskar_vis_to_ms)
-    oskar_qt_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar_vis_add_noise
-    set(name oskar_vis_add_noise)
-    oskar_qt_app(${name} ${name}_main.cpp)
-
     set(IONOSPHERE_TESTING OFF)
     if (IONOSPHERE_TESTING)
         # BINARY: oskar_sim_tec_screen
@@ -99,6 +79,15 @@ if (QT4_FOUND)
         oskar_app(${name} ${name}_main.cpp
             EXTRA_LIBS oskar_apps
             NO_INSTALL)
+
+        #if (PNG_FOUND)
+        #    include_directories(${PNG_INCLUDE_DIRS})
+        #    set(name oskar_ionosphere_to_kml)
+        #    oskar_app(${name} ${name}_main.cpp
+        #        EXTRA_LIBS ${PNG_LIBRARY} oskar_apps
+        #        NO_INSTALL
+        #    )
+        #endif ()
     endif()
 endif ()
 
@@ -117,12 +106,3 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
     PATTERN "test" EXCLUDE
     PATTERN "xml" EXCLUDE
 )
-
-#if (PNG_FOUND AND QT4_FOUND)
-#    include_directories(${PNG_INCLUDE_DIRS})
-#    set(name oskar_ionosphere_to_kml)
-#    oskar_app(${name} ${name}_main.cpp
-#        EXTRA_LIBS ${PNG_LIBRARY} oskar_apps
-#        NO_INSTALL
-#    )
-#endif ()

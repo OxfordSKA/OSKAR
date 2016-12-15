@@ -90,25 +90,4 @@ private:
 
 #endif /* __cplusplus */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* C interface. */
-struct oskar_SettingsFileHandlerQSettings;
-#ifndef OSKAR_SETTINGS_FILE_HANDLER_QSETTINGS_TYPEDEF_
-#define OSKAR_SETTINGS_FILE_HANDLER_QSETTINGS_TYPEDEF_
-typedef struct oskar_SettingsFileHandlerQSettings oskar_SettingsFileHandlerQSettings;
-#endif /* OSKAR_SETTINGS_FILE_HANDLER_QSETTINGS_TYPEDEF_ */
-
-oskar_SettingsFileHandlerQSettings*
-oskar_settings_file_handler_qsettings_create();
-
-void oskar_settings_file_handler_qsettings_free(
-        oskar_SettingsFileHandlerQSettings* handler);
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* OSKAR_SETTINGS_FILE_HANDLER_QSETTINGS_HPP_ */

@@ -29,10 +29,10 @@
 #include "oskar_OptionParser.h"
 #include "oskar_settings_load.h"
 #include "oskar_settings_log.h"
+#include "oskar_settings_to_sky.h"
+#include "oskar_settings_to_telescope.h"
 
 #include "binary/oskar_binary.h"
-#include "oskar_set_up_telescope.h"
-#include "oskar_set_up_sky.h"
 #include "convert/oskar_convert_offset_ecef_to_ecef.h"
 #include "convert/oskar_convert_mjd_to_gast_fast.h"
 #include "convert/oskar_convert_apparent_ra_dec_to_enu_directions.h"
@@ -85,13 +85,8 @@ int main(int argc, char** argv)
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);
     if (status) return status;
 
-    oskar_Telescope* tel = oskar_set_up_telescope(&settings, log, &status);
-
-    oskar_log_settings_telescope(log, &settings);
-    oskar_log_settings_observation(log, &settings);
-    oskar_log_settings_ionosphere(log, &settings);
-
-    oskar_Sky* sky = oskar_set_up_sky(&settings, log, &status);
+    oskar_Telescope* tel = oskar_settings_to_telescope(&settings, log, &status);
+    oskar_Sky* sky = oskar_settings_to_sky(&settings, log, &status);
 
     // FIXME remove this restriction ... (see evaluate Z)
     if (settings.ionosphere.num_TID_screens != 1)

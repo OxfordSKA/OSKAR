@@ -30,6 +30,7 @@
 #define OSKAR_H_
 
 #include <binary/oskar_binary.h>
+#include <beam_pattern/oskar_beam_pattern.h>
 #include <imager/oskar_imager.h>
 #include <mem/oskar_mem.h>
 #include <ms/oskar_measurement_set.h>

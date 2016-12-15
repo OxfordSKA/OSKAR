@@ -34,9 +34,10 @@
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
 
+#include "oskar_settings_log.h"
 #include "oskar_SettingsTree.hpp"
 #include "oskar_SettingsDeclareXml.hpp"
-#include "oskar_SettingsFileHandlerQSettings.hpp"
+#include "oskar_SettingsFileHandlerIni.hpp"
 
 #include "apps/xml/oskar_imager_xml_all.h"
 
@@ -72,15 +73,23 @@ int main(int argc, char** argv)
     oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
     SettingsTree s;
     settings_declare_xml(&s, oskar_imager_XML_STR);
-    SettingsFileHandlerQSettings handler;
+    SettingsFileHandlerIni handler;
     s.set_file_handler(&handler);
-    if (!s.load(failed_keys, settings_file)) return OSKAR_ERR_SETTINGS_LOAD;
+
+    // Warn about settings failures.
+    if (!s.load(failed_keys, settings_file))
+    {
+        oskar_log_error(log, "Failed to read settings file.");
+        oskar_log_free(log);
+        return OSKAR_ERR_FILE_IO;
+    }
     for (size_t i = 0; i < failed_keys.size(); ++i)
         oskar_log_warning(log, "Ignoring '%s'='%s'",
                 failed_keys[i].first.c_str(), failed_keys[i].second.c_str());
 
-    // TODO Log the relevant settings.
+    // Log the relevant settings.
     oskar_log_set_keep_file(log, 0);
+    oskar_settings_log(&s, log);
 
     // Create imager and set values from settings.
     s.begin_group("image");

@@ -165,13 +165,14 @@ bool add_setting_deps(node* s, oskar::SettingsTree* settings)
 
 
 bool declare_setting(node* s, const string& key_root,
-        const string& key_leaf, bool required, oskar::SettingsTree* settings)
+        const string& key_leaf, bool required, int priority,
+        oskar::SettingsTree* settings)
 {
     // Get a pointer to the type node.
     string type_name, default_value, options;
     vector<string> names;
-    names.push_back("type");
-    names.push_back("t");
+    names.push_back(string("type"));
+    names.push_back(string("t"));
     node* type_node = get_child_node(s, names);
     if (type_node)
     {
@@ -192,7 +193,8 @@ bool declare_setting(node* s, const string& key_root,
     // Add the setting.
     if (!settings->add_setting(key_root + key_leaf,
             get_label(s), get_description(s),
-            type_name, default_value, options, required)) return false;
+            type_name, default_value, options, required, priority))
+        return false;
 
     // Add any dependencies.
     if (!add_setting_deps(s, settings)) return false;
@@ -205,8 +207,9 @@ bool iterate_settings(node* n, const string key_root,
 {
     for (node* s = n->first_node(); s; s = s->next_sibling())
     {
-        string name, key, req;
-        bool required = false;
+        string name, key, req, pri;
+        bool required = false, ok = false;
+        int priority = 0;
 
         // Get the node name and check it's a settings node.
         name = s->name();
@@ -220,15 +223,19 @@ bool iterate_settings(node* n, const string key_root,
         if (req.empty()) req = a["required"];
         if (req.empty()) req = a["req"];
         if (req.empty()) req = a["r"];
+        if (pri.empty()) pri = a["priority"];
+        if (pri.empty()) pri = a["p"];
         if (!req.empty())
         {
             //std::transform(req.begin(), req.end(), req.begin(), std::toupper);
             for (size_t i = 0; i < req.length(); ++i) req[i] = toupper(req[i]);
             required = (req == "TRUE" || req == "YES");
         }
+        if (!pri.empty())
+            priority = oskar_settings_utility_string_to_int(pri, &ok);
 
         // Declare the setting.
-        if (!declare_setting(s, key_root, key, required, settings))
+        if (!declare_setting(s, key_root, key, required, priority, settings))
         {
             cerr << "ERROR: Problem reading setting: " << key << endl;
             return false;
@@ -259,12 +266,3 @@ bool settings_declare_xml(SettingsTree* settings, std::string xml)
 }
 
 } // namespace oskar
-
-/* C interface. */
-
-int oskar_settings_declare_xml(oskar_Settings* settings, const char* xml)
-{
-    return (int) settings_declare_xml(
-            (oskar::SettingsTree*)settings, string(xml));
-}
-

@@ -29,6 +29,8 @@
 #include "telescope/station/element/private_element.h"
 #include "telescope/station/element/oskar_element.h"
 
+#include <string.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -279,14 +281,32 @@ const oskar_Splines* oskar_element_scalar_im_const(const oskar_Element* data,
 
 /* Setters. */
 
-void oskar_element_set_element_type(oskar_Element* data, int type)
+void oskar_element_set_element_type(oskar_Element* data, const char* type,
+        int* status)
 {
-    data->element_type = type;
+    if (*status) return;
+    if (!strncmp(type, "D", 1) || !strncmp(type, "d", 1))
+        data->element_type = OSKAR_ELEMENT_TYPE_DIPOLE;
+    else if (!strncmp(type, "G",  1) || !strncmp(type, "g",  1))
+        data->element_type = OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE;
+    else if (!strncmp(type, "I",  1) || !strncmp(type, "i",  1))
+        data->element_type = OSKAR_ELEMENT_TYPE_ISOTROPIC;
+    else
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
 }
 
-void oskar_element_set_taper_type(oskar_Element* data, int type)
+void oskar_element_set_taper_type(oskar_Element* data, const char* type,
+        int* status)
 {
-    data->taper_type = type;
+    if (*status) return;
+    if (!strncmp(type, "N", 1) || !strncmp(type, "n", 1))
+        data->taper_type = OSKAR_ELEMENT_TAPER_NONE;
+    else if (!strncmp(type, "C",  1) || !strncmp(type, "c",  1))
+        data->taper_type = OSKAR_ELEMENT_TAPER_COSINE;
+    else if (!strncmp(type, "G",  1) || !strncmp(type, "g",  1))
+        data->taper_type = OSKAR_ELEMENT_TAPER_GAUSSIAN;
+    else
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
 }
 
 void oskar_element_set_gaussian_fwhm_rad(oskar_Element* data, double value)
@@ -300,10 +320,19 @@ void oskar_element_set_cosine_power(oskar_Element* data, double value)
 }
 
 void oskar_element_set_dipole_length(oskar_Element* data, double value,
-        int units)
+        const char* units, int* status)
 {
+    if (*status) return;
+    if (!strncmp(units, "W", 1) || !strncmp(units, "w", 1))
+        data->dipole_length_units = OSKAR_WAVELENGTHS;
+    else if (!strncmp(units, "M",  1) || !strncmp(units, "m",  1))
+        data->dipole_length_units = OSKAR_METRES;
+    else
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
     data->dipole_length = value;
-    data->dipole_length_units = units;
 }
 
 #ifdef __cplusplus

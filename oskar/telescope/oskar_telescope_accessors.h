@@ -1022,39 +1022,44 @@ void oskar_telescope_set_station_ids(oskar_Telescope* model);
  * @param[in] model            Pointer to telescope model.
  * @param[in] type             Station type, either "Array", "Gaussian"
  *                             or "Isotropic".
+ * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type);
+void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type,
+        int* status);
 
 /**
  * @brief
- * Sets the values of the smearing parameters.
+ * Sets the baseline UV range to evaluate.
  *
  * @details
- * Sets the values of the smearing parameters.
+ * Sets the baseline UV range to evaluate.
+ * Baselines with lengths outside this range will not be evaluated.
  *
  * @param[in] model            Pointer to telescope model.
  * @param[in] uv_filter_min    Minimum value for UV filter.
  * @param[in] uv_filter_max    Maximum value for UV filter.
- * @param[in] uv_filter_units  Units of UV filter (OSKAR_METRES or OSKAR_WAVELENGTHS).
+ * @param[in] units            Units of UV filter ("Metres" or "Wavelengths").
  */
 OSKAR_EXPORT
 void oskar_telescope_set_uv_filter(oskar_Telescope* model,
-        double uv_filter_min, double uv_filter_max, int uv_filter_units);
+        double uv_filter_min, double uv_filter_max, const char* units,
+        int* status);
 
 /**
  * @brief
- * Sets the polarisation mode of the telescope (full or scalar).
+ * Sets the polarisation mode of the telescope.
  *
  * @details
- * Sets the polarisation mode of the telescope
- * (OSKAR_POL_MODE_FULL or OSKAR_POL_MODE_SCALAR).
+ * Sets the polarisation mode of the telescope.
  *
- * @param[in] model   Pointer to telescope model.
- * @param[in] value   Enumerated mode.
+ * @param[in] model       Pointer to telescope model.
+ * @param[in] mode        Mode string ("Full" or "Scalar").
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_telescope_set_pol_mode(oskar_Telescope* model, int value);
+void oskar_telescope_set_pol_mode(oskar_Telescope* model, const char* mode,
+        int* status);
 
 #ifdef __cplusplus
 }

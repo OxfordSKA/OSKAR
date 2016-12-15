@@ -97,26 +97,4 @@ private:
 
 #endif /* __cplusplus */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* C interface. */
-struct oskar_SettingsDependency;
-#ifndef OSKAR_SETTINGS_DEPENDENCY_TYPEDEF_
-#define OSKAR_SETTINGS_DEPENDENCY_TYPEDEF_
-typedef struct oskar_SettingsDependency oskar_SettingsDependency;
-#endif /* OSKAR_SETTINGS_DEPENDENCY_TYPEDEF_ */
-
-const char* oskar_settings_dependency_key(
-        const oskar_SettingsDependency* dep);
-const char* oskar_settings_dependency_value(
-        const oskar_SettingsDependency* dep);
-const char* oskar_settings_dependency_logic_string(
-        const oskar_SettingsDependency* dep);
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* OSKAR_SETTINGS_DEPENDENCY_HPP_ */

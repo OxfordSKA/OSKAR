@@ -3,20 +3,15 @@
 #
 
 set(apps_SRC
-    src/oskar_beam_pattern_generate_coordinates.c
-    src/oskar_set_up_sky.c
-    src/oskar_set_up_telescope.c
-    src/oskar_sim_beam_pattern.c
-    src/oskar_sim_tec_screen.cpp
+    # src/oskar_sim_tec_screen.cpp
     )
 add_library(oskar_apps ${apps_SRC})
 
 target_link_libraries(oskar_apps
     oskar
     oskar_settings_containers
-    oskar_settings_load
-    oskar_settings_log
-    ${QT_QTCORE_LIBRARY})
+    # oskar_settings_load
+    oskar_settings_apps)
 
 if (MSVC)
     set_target_properties(oskar_apps PROPERTIES
@@ -37,6 +32,3 @@ endif()
 
 # Install target for the apps library.
 install(TARGETS oskar_apps DESTINATION ${OSKAR_LIB_INSTALL_DIR})
-
-# Tests
-add_subdirectory(test)

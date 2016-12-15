@@ -28,25 +28,20 @@
 
 #include "oskar_OptionParser.h"
 #include "oskar_sim_tec_screen.h"
-#include "oskar_set_up_telescope.h"
-#include "oskar_set_up_sky.h"
-
+#include "oskar_settings_to_telescope.h"
+#include "oskar_settings_to_sky.h"
 #include "oskar_settings_load.h"
 #include "oskar_settings_log.h"
 
-#include "telescope/oskar_telescope.h"
 #include "convert/oskar_convert_offset_ecef_to_ecef.h"
-
 #include "convert/oskar_convert_mjd_to_gast_fast.h"
 #include "convert/oskar_convert_apparent_ra_dec_to_enu_directions.h"
-#include "sky/oskar_sky.h"
-
-#include "utility/oskar_get_error_string.h"
 #include "log/oskar_log.h"
-
 #include "math/oskar_evaluate_image_lon_lat_grid.h"
-
+#include "sky/oskar_sky.h"
+#include "telescope/oskar_telescope.h"
 #include "telescope/station/oskar_evaluate_pierce_points.h"
+#include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
 
 #include <cstdlib>
@@ -110,12 +105,7 @@ int main(int argc, char** argv)
     oskar_Settings_old settings;
     oskar_settings_old_load(&settings, log, settings_file, &status);
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);
-
-    oskar_log_settings_telescope(log, &settings);
-    oskar_log_settings_observation(log, &settings);
-    oskar_log_settings_ionosphere(log, &settings);
-
-    oskar_Telescope* tel = oskar_set_up_telescope(&settings, log, &status);
+    oskar_Telescope* tel = oskar_settings_to_telescope(&settings, log, &status);
 
     // Generate or load TEC screen image
     // -------------------------------------------------------------------------
@@ -158,7 +148,7 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings_old& sett
         oskar_Log* log, const oskar_Telescope* tel)
 {
     int status = 0;
-    oskar_Sky* sky = oskar_set_up_sky(&settings, log, &status);
+    oskar_Sky* sky = oskar_settings_to_sky(&settings, log, &status);
 
     // FIXME remove this restriction ... (see evaluate Z)
     if (settings.ionosphere.num_TID_screens != 1)

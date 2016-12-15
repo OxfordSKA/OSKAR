@@ -66,7 +66,7 @@ TEST(evaluate_jones_E, evaluate_e)
         // Set the station meta-data.
         oskar_station_set_position(s, 0.0, M_PI / 2.0, 0.0);
         oskar_Element* element = oskar_station_element(s, 0);
-        oskar_element_set_element_type(element, OSKAR_ELEMENT_TYPE_ISOTROPIC);
+        oskar_element_set_element_type(element, "Isotropic", &error);
 
         // Generate the coordinates.
         std::vector<float> x_pos(station_dim);

@@ -129,21 +129,3 @@ void SettingsFileHandlerQSettings::write_version()
 }
 
 } // namespace oskar
-
-/* C interface. */
-struct oskar_SettingsFileHandlerQSettings :
-public oskar::SettingsFileHandlerQSettings
-{
-};
-
-oskar_SettingsFileHandlerQSettings*
-oskar_settings_file_handler_qsettings_create()
-{
-    return new oskar_SettingsFileHandlerQSettings;
-}
-
-void oskar_settings_file_handler_qsettings_free(
-        oskar_SettingsFileHandlerQSettings* handler)
-{
-    delete handler;
-}

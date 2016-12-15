@@ -87,7 +87,7 @@ public:
     bool operator==(const SettingsKey& other) const;
 
     /*! Implicit conversion operator. */
-    operator std::string() const;
+    operator const std::string&() const;
 
     /*! Operator to access sub-elements of the key. */
     std::string operator[](int i) const;

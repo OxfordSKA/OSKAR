@@ -29,20 +29,27 @@
 
 #include "oskar_settings_load_tid_parameter_file.h"
 
-#include "oskar_settings_getline.h"
-#include "oskar_settings_string_to_array.h"
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#ifdef _WIN32
+#define strtok_r(s,d,p) strtok_s(s,d,p)
+#else
+/* Ensure function is declared for strange string.h header. */
+char* strtok_r(char*, const char*, char**);
+#endif
+
+static size_t string_to_array(char* str, size_t n, double* data);
+static int oskar_settings_getline(char** lineptr, size_t* n, FILE* stream);
+
 void oskar_settings_load_tid_parameter_file(oskar_SettingsTIDscreen* TID,
         const char* filename, int* status)
 {
-    /* Declare the line buffer and counter. */
     char* line = NULL;
     size_t bufsize = 0;
     int n = 0;
@@ -77,7 +84,7 @@ void oskar_settings_load_tid_parameter_file(oskar_SettingsTIDscreen* TID,
         /* Read the screen height */
         if (n == 0)
         {
-            read = oskar_settings_string_to_array_d(line, 1, &TID->height_km);
+            read = string_to_array(line, 1, &TID->height_km);
             if (read != 1) continue;
             ++n;
         }
@@ -86,7 +93,7 @@ void oskar_settings_load_tid_parameter_file(oskar_SettingsTIDscreen* TID,
         {
             size_t newSize;
             double par[] = {0.0, 0.0, 0.0, 0.0};
-            read = oskar_settings_string_to_array_d(line, sizeof(par)/sizeof(double), par);
+            read = string_to_array(line, sizeof(par)/sizeof(double), par);
             if (read != 4) continue;
 
             /* Resize component arrays. */
@@ -107,8 +114,77 @@ void oskar_settings_load_tid_parameter_file(oskar_SettingsTIDscreen* TID,
     }
 
     /* Free the line buffer and close the file. */
-    if (line) free(line);
+    free(line);
     fclose(file);
+}
+
+
+size_t string_to_array(char* str, size_t n, double* data)
+{
+    size_t i = 0;
+    char *save_ptr, *token;
+    do
+    {
+        token = strtok_r(str, ", ", &save_ptr);
+        str = NULL;
+        if (!token) break;
+        if (token[0] == '#') break;
+        if (sscanf(token, "%lf", &data[i]) > 0) i++;
+    }
+    while (i < n);
+    return i;
+}
+
+
+int oskar_settings_getline(char** lineptr, size_t* n, FILE* stream)
+{
+    /* Initialise the byte counter. */
+    size_t size = 0;
+    int c;
+
+    /* Check if buffer is empty. */
+    if (*n == 0 || *lineptr == 0)
+    {
+        *n = 80;
+        *lineptr = (char*)malloc(*n);
+        if (*lineptr == 0)
+            return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    }
+
+    /* Read in the line. */
+    for (;;)
+    {
+        /* Get the character. */
+        c = getc(stream);
+
+        /* Check if end-of-file or end-of-line has been reached. */
+        if (c == EOF || c == '\n')
+            break;
+
+        /* Allocate space for size+1 bytes (including NULL terminator). */
+        if (size + 1 >= *n)
+        {
+            void *t;
+
+            /* Double the length of the buffer. */
+            *n = 2 * *n + 1;
+            t = realloc(*lineptr, *n);
+            if (!t)
+                return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            *lineptr = (char*)t;
+        }
+
+        /* Store the character. */
+        (*lineptr)[size++] = c;
+    }
+
+    /* Add a NULL terminator. */
+    (*lineptr)[size] = '\0';
+
+    /* Return the number of characters read, or EOF as appropriate. */
+    if (c == EOF && size == 0)
+        return OSKAR_ERR_EOF;
+    return size;
 }
 
 

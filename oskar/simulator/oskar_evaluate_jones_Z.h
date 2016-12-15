@@ -38,7 +38,7 @@
 #include <telescope/oskar_telescope.h>
 #include <sky/oskar_sky.h>
 #include <simulator/oskar_WorkJonesZ.h>
-#include <oskar_SettingsIonosphere.h>
+#include <oskar_Settings_old.h>
 
 #ifdef __cplusplus
 extern "C" {

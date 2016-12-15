@@ -84,27 +84,3 @@ SettingsDependency::Logic SettingsDependency::string_to_logic(const std::string&
 }
 
 } // namespace oskar
-
-/* C interface. */
-struct oskar_SettingsDependency : public oskar::SettingsDependency
-{
-};
-
-const char* oskar_settings_dependency_key(
-        const oskar_SettingsDependency* dep)
-{
-    return dep->key().c_str();
-}
-
-const char* oskar_settings_dependency_value(
-        const oskar_SettingsDependency* dep)
-{
-    return dep->value().c_str();
-}
-
-const char* oskar_settings_dependency_logic_string(
-        const oskar_SettingsDependency* dep)
-{
-    return dep->logic_string();
-}
-

@@ -47,15 +47,4 @@ bool settings_declare_xml(SettingsTree* settings, std::string xml);
 
 #endif /* __cplusplus */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/*! Populates a settings tree from the specified @p xml string */
-int oskar_settings_declare_xml(oskar_Settings* settings, const char* xml);
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* OSKAR_SETTINGS_DECLARE_XML_HPP_ */

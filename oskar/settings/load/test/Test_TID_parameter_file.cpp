@@ -29,7 +29,7 @@
 #include <gtest/gtest.h>
 
 #include "oskar_settings_load_tid_parameter_file.h"
-#include "oskar_SettingsIonosphere.h"
+#include "oskar_Settings_old.h"
 
 #include "utility/oskar_get_error_string.h"
 

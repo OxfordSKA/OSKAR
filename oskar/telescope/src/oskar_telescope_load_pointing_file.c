@@ -34,6 +34,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define DEG2RAD (M_PI / 180.0)
 
@@ -57,7 +58,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
     int* id = 0;
 
     /* Check if safe to proceed. */
-    if (*status || !filename) return;
+    if (*status || !filename || strlen(filename) == 0) return;
 
     /* Check type. */
     type = oskar_telescope_precision(telescope);

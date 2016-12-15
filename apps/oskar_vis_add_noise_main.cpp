@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_settings_load.h"
 #include "oskar_settings_log.h"
-
-#include "oskar_set_up_telescope.h"
+#include "oskar_settings_to_telescope.h"
+#include "oskar_SettingsTree.hpp"
+#include "oskar_SettingsDeclareXml.hpp"
+#include "oskar_SettingsFileHandlerIni.hpp"
 #include "oskar_OptionParser.h"
 
 #include "binary/oskar_binary.h"
@@ -41,10 +42,16 @@
 #include "vis/oskar_vis_block.h"
 #include "vis/oskar_vis_header.h"
 
+#include "apps/xml/oskar_sim_interferometer_xml_all.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
+
+using namespace oskar;
+using std::vector;
+using std::string;
+using std::pair;
 
 using namespace std;
 
@@ -55,6 +62,7 @@ using namespace std;
 int main(int argc, char** argv)
 {
     int status = 0;
+    vector<pair<string, string> > failed_keys;
 
     // Obtain command line options & arguments.
     oskar_OptionParser opt("oskar_vis_add_noise", oskar_version_string());
@@ -83,18 +91,27 @@ int main(int argc, char** argv)
     oskar_log_set_keep_file(log, false);
     oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
-    // Load the settings file and telescope model.
-    oskar_log_section(log, 'M', "Loading settings file '%s'",
-            settings_file.c_str());
-    oskar_Settings_old settings;
-    oskar_settings_old_load(&settings, 0, settings_file.c_str(), &status);
-    if (status != OSKAR_SUCCESS) {
-        oskar_log_error(log, "Failed to load settings from '%s'",
-                settings_file.c_str());
+    // Load the settings file.
+    oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
+    SettingsTree s;
+    settings_declare_xml(&s, oskar_sim_interferometer_XML_STR);
+    SettingsFileHandlerIni handler;
+    s.set_file_handler(&handler);
+
+    // Warn about settings failures.
+    if (!s.load(failed_keys, settings_file))
+    {
+        oskar_log_error(log, "Failed to read settings file.");
         oskar_log_free(log);
-        return EXIT_FAILURE;
+        return OSKAR_ERR_FILE_IO;
     }
-    if (!settings.interferometer.noise.enable)
+    for (size_t i = 0; i < failed_keys.size(); ++i)
+        oskar_log_warning(log, "Ignoring '%s'='%s'",
+                failed_keys[i].first.c_str(), failed_keys[i].second.c_str());
+
+    // Log the relevant settings.
+    oskar_settings_log(&s, log);
+    if (!s.to_int("interferometer/noise/enable", &status))
     {
         oskar_log_error(log, "Noise addition disabled in the settings.");
         oskar_log_free(log);
@@ -102,7 +119,7 @@ int main(int argc, char** argv)
     }
 
     // Set up the telescope model.
-    oskar_Telescope* tel = oskar_set_up_telescope(&settings, log, &status);
+    oskar_Telescope* tel = oskar_settings_to_telescope(&s, log, &status);
     oskar_telescope_analyse(tel, &status);
     if (status)
     {

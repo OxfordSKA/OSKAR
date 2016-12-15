@@ -176,17 +176,6 @@ std::string SettingsValue::value() const
 
 #endif /* __cplusplus */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* C interface. */
-struct oskar_SettingsValue;
-#ifndef OSKAR_SETTINGS_VALUE_TYPEDEF_
-#define OSKAR_SETTINGS_VALUE_TYPEDEF_
-typedef struct oskar_SettingsValue oskar_SettingsValue;
-#endif /* OSKAR_SETTINGS_VALUE_TYPEDEF_ */
-
 enum OSKAR_SETTINGS_ERRORS
 {
     OSKAR_ERR_SETTINGS_NO_VALUE = -200,
@@ -199,33 +188,5 @@ enum OSKAR_SETTINGS_ERRORS
     OSKAR_ERR_SETTINGS_LOAD = -207,
     OSKAR_ERR_SETTINGS_SAVE = -208
 };
-
-/* Basic string methods for interfacing with the type. */
-int oskar_settings_value_init(oskar_SettingsValue* v, const char* type,
-        const char* param);
-int oskar_settings_value_set_default(oskar_SettingsValue* v, const char* value);
-int oskar_settings_value_set(oskar_SettingsValue* v, const char* value);
-char* oskar_settings_value_string(const oskar_SettingsValue* v, int* status);
-int oskar_settings_value_is_default(const oskar_SettingsValue* v);
-int oskar_settings_value_starts_with(const oskar_SettingsValue* v,
-        const char* str, int* status);
-char oskar_settings_value_first_letter(const oskar_SettingsValue* v,
-        int* status);
-
-/* Conversions to intrinsic types. */
-double oskar_settings_value_to_double(const oskar_SettingsValue* v, int* status);
-int oskar_settings_value_to_int(const oskar_SettingsValue* v, int* status);
-unsigned int oskar_settings_value_to_unsigned(const oskar_SettingsValue* v,
-        int* status);
-char** oskar_settings_value_to_string_list(const oskar_SettingsValue* v,
-        int* num, int* status);
-int* oskar_settings_value_to_int_list(const oskar_SettingsValue* v,
-        int* num, int* status);
-double* oskar_settings_value_to_double_list(const oskar_SettingsValue* v,
-        int* num, int* status);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* OSKAR_SETTINGS_VALUE_HPP_ */

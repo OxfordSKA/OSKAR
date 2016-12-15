@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TREE_HPP_
-#define OSKAR_SETTINGS_TREE_HPP_
+#ifndef OSKAR_SETTINGS_HPP_
+#define OSKAR_SETTINGS_HPP_
 
 #include <oskar_SettingsValue.hpp>
 #include <oskar_SettingsNode.hpp>
@@ -99,6 +99,13 @@ class SettingsTree
      */
     void begin_group(const std::string& name);
 
+    /*! Clears the current settings key group prefix. */
+    /*!
+     * Convenience method to clear the current settings group, if set using
+     * @fn begin_group.
+     */
+    void clear_group();
+
     /*! Removes the last level from the current settings key group prefix. */
     /*!
      * Convenience method for working with settings keys to be used in
@@ -129,6 +136,7 @@ class SettingsTree
      * @param type_parameters String containing any initialisation parameters
      *                        for the type.
      * @param required     If true, mark the setting as required.
+     * @param priority     Priority level (importance) of the setting.
      *
      * @return True if successfully added, otherwise false.
      */
@@ -138,7 +146,8 @@ class SettingsTree
                      const std::string& type_name = std::string(),
                      const std::string& type_default = std::string(),
                      const std::string& type_parameters = std::string(),
-                     bool required = false);
+                     bool required = false,
+                     int priority = 0);
 
     /*! Begin a logical group of dependencies for the current setting. */
     /*!
@@ -327,78 +336,4 @@ class SettingsTree
 
 #endif /* __cplusplus */
 
-
-
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* C interface. */
-struct oskar_Settings;
-#ifndef OSKAR_SETTINGS_TYPEDEF_
-#define OSKAR_SETTINGS_TYPEDEF_
-typedef struct oskar_Settings oskar_Settings;
-#endif /* OSKAR_SETTINGS_TYPEDEF_ */
-
-oskar_Settings* oskar_settings_create();
-void oskar_settings_free(oskar_Settings* s);
-
-void oskar_settings_set_file_handler(oskar_Settings* s, void* handler);
-void oskar_settings_set_file_name(oskar_Settings* s, const char* name);
-void oskar_settings_begin_group(oskar_Settings* s, const char* name);
-void oskar_settings_end_group(oskar_Settings* s);
-
-int oskar_settings_add_setting(oskar_Settings* s,
-        const char* key, const char* label, const char* description,
-        const char* type_name, const char* type_default,
-        const char* type_parameters, int required);
-
-int oskar_settings_begin_dependency_group(oskar_Settings* s,
-        const char* logic);
-void oskar_settings_end_dependency_group(oskar_Settings* s);
-
-int oskar_settings_add_dependency(oskar_Settings* s,
-        const char* dependency_key, const char* value, const char* condition);
-
-int oskar_settings_set_value(oskar_Settings* s,
-        const char* key, const char* value);
-const oskar_SettingsValue* oskar_settings_value(
-        const oskar_Settings* s, const char* key);
-int oskar_settings_starts_with(const oskar_Settings* s, const char* key,
-        const char* str, int* status);
-char oskar_settings_first_letter(const oskar_Settings* s, const char* key,
-        int* status);
-char* oskar_settings_to_string(const oskar_Settings* s,
-        const char* key, int* status);
-int oskar_settings_to_int(const oskar_Settings* s,
-        const char* key, int* status);
-double oskar_settings_to_double(const oskar_Settings* s,
-        const char* key, int* status);
-char** oskar_settings_to_string_list(const oskar_Settings* s,
-        const char* key, int* num, int* status);
-int* oskar_settings_to_int_list(const oskar_Settings* s,
-        const char* key, int* num, int* status);
-double* oskar_settings_to_double_list(const oskar_Settings* s,
-        const char* key, int* num, int* status);
-
-int oskar_settings_num_items(const oskar_Settings* s);
-int oskar_settings_num_settings(const oskar_Settings* s);
-void oskar_settings_print(const oskar_Settings* s);
-void oskar_settings_clear(oskar_Settings* s);
-void oskar_settings_save(const oskar_Settings* s, const char* file_name,
-        int* status);
-void oskar_settings_load(oskar_Settings* s, const char* file_name,
-        int* num_failed, char*** failed_keys, int* status);
-
-int oskar_settings_contains(const oskar_Settings* s, const char* key);
-int oskar_settings_dependencies_satisfied(const oskar_Settings* s,
-        const char* key);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* OSKAR_SETTINGS_TREE_HPP_ */
+#endif /* OSKAR_SETTINGS_HPP_ */

@@ -28,20 +28,27 @@
 
 #include "oskar_settings_load.h"
 #include "oskar_settings_log.h"
+#include "oskar_settings_to_telescope.h"
 #include "oskar_sim_tec_screen.h"
 #include "oskar_OptionParser.h"
 
-#include "oskar_set_up_telescope.h"
 #include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
 #include "utility/oskar_version_string.h"
 #include "utility/oskar_get_error_string.h"
+
+#include "apps/xml/oskar_sim_tec_screen_xml_all.h"
 
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 
 #include <fitsio.h>
+
+using namespace oskar;
+using std::vector;
+using std::string;
+using std::pair;
 
 static fitsfile* create_fits_file(const char* filename, int precision,
         int width, int height, int num_times, double centre_deg[2],
@@ -68,9 +75,6 @@ int main(int argc, char** argv)
     oskar_Settings_old settings;
     oskar_settings_old_load(&settings, log, settings_file, &error);
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);
-    oskar_log_settings_telescope(log, &settings);
-    oskar_log_settings_observation(log, &settings);
-    oskar_log_settings_ionosphere(log, &settings);
 
     // Get settings.
     const oskar_SettingsIonosphere* MIM = &settings.ionosphere;
@@ -90,7 +94,7 @@ int main(int argc, char** argv)
 
     // Run simulation.
     double pp_coord[2];
-    oskar_Telescope* tel = oskar_set_up_telescope(&settings, log, &error);
+    oskar_Telescope* tel = oskar_settings_to_telescope(&settings, log, &error);
     oskar_Mem* TEC_screen = oskar_sim_tec_screen(&settings, tel,
             &pp_coord[0], &pp_coord[1], &error);
     pp_coord[0] *= 180. / M_PI;

@@ -37,6 +37,7 @@ void oskar_telescope_log_summary(const oskar_Telescope* telescope,
         oskar_Log* log, int* status)
 {
     if (*status) return;
+    oskar_log_section(log, 'M', "Telescope model");
     oskar_log_message(log, 'M', 0, "Telescope model summary");
     oskar_log_value(log, 'M', 1, "Longitude [deg]", "%.3f",
             oskar_telescope_lon_rad(telescope) * 180.0 / M_PI);

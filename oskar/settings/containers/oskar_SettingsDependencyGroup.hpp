@@ -119,12 +119,4 @@ class SettingsDependencyGroup
 
 #endif /* __cplusplus */
 
-/* C interface. */
-struct oskar_SettingsDependencyGroup;
-#ifndef OSKAR_SETTINGS_DEPENDENCY_GROUP_TYPEDEF_
-#define OSKAR_SETTINGS_DEPENDENCY_GROUP_TYPEDEF_
-typedef struct oskar_SettingsDependencyGroup oskar_SettingsDependencyGroup;
-#endif /* OSKAR_SETTINGS_DEPENDENCY_GROUP_TYPEDEF_ */
-
-
 #endif /* OSKAR_SETTINGS_DEPENDENCY_GROUP_HPP_ */

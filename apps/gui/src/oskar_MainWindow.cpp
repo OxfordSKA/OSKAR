@@ -37,7 +37,7 @@
 #include "oskar_SettingsDelegate_new.hpp"
 #include "oskar_SettingsDeclareXml.hpp"
 #include "oskar_SettingsModel_new.hpp"
-#include "oskar_SettingsFileHandlerQSettings.hpp"
+#include "oskar_SettingsFileHandlerIni.hpp"
 #include "oskar_SettingsView.h"
 #include "oskar_SettingsTree.hpp"
 
@@ -86,7 +86,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     // Create the settings model.
     settings_ = new oskar::SettingsTree;
-    handler_ = new oskar::SettingsFileHandlerQSettings(OSKAR_VERSION_STR);
+    handler_ = new oskar::SettingsFileHandlerIni(OSKAR_VERSION_STR);
     settings_->set_file_handler(handler_);
     model_ = new oskar::SettingsModel(settings_, this);
     QSortFilterProxyModel* modelProxy_ = new oskar::SettingsModelFilter(this);

@@ -35,7 +35,7 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_SettingsIonosphere.h>
+#include <oskar_Settings_old.h>
 
 #ifdef __cplusplus
 extern "C" {

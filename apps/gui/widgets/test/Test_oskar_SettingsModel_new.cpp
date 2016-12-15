@@ -30,7 +30,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "oskar_SettingsFileHandlerQSettings.hpp"
+#include "oskar_SettingsFileHandlerIni.hpp"
 #include "oskar_SettingsModel_new.hpp"
 #include "oskar_SettingsDeclareXml.hpp"
 #include "oskar_SettingsView.h"
@@ -39,7 +39,7 @@
 #include <QtGui/QWidget>
 #include <QtGui/QVBoxLayout>
 
-#include "apps/xml/oskar_xml_all.h"
+#include "apps/xml/oskar_sim_interferometer_xml_all.h"
 
 using namespace std;
 using namespace oskar;
@@ -127,10 +127,10 @@ TEST(test_SettingsModel_new, test2)
 
     // Create the settings tree.
     SettingsTree s;
-    settings_declare_xml(&s, oskar_XML_STR);
+    settings_declare_xml(&s, oskar_sim_interferometer_XML_STR);
 
     // Create a file handler.
-    SettingsFileHandlerQSettings file_handler;
+    SettingsFileHandlerIni file_handler;
     file_handler.set_write_defaults(false);
     s.set_file_handler(&file_handler, "test2.ini");
 

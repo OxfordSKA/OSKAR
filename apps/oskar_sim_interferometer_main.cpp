@@ -30,17 +30,16 @@
 #include "oskar_OptionParser.h"
 
 #include "log/oskar_log.h"
-#include "oskar_set_up_sky.h"
-#include "oskar_set_up_telescope.h"
 #include "utility/oskar_timer.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
 
-#include "oskar_settings_load.h"
+#include "oskar_settings_to_sky.h"
+#include "oskar_settings_to_telescope.h"
 #include "oskar_settings_log.h"
 #include "oskar_SettingsTree.hpp"
 #include "oskar_SettingsDeclareXml.hpp"
-#include "oskar_SettingsFileHandlerQSettings.hpp"
+#include "oskar_SettingsFileHandlerIni.hpp"
 
 #include "apps/xml/oskar_sim_interferometer_xml_all.h"
 
@@ -75,21 +74,22 @@ int main(int argc, char** argv)
     oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
     SettingsTree s;
     settings_declare_xml(&s, oskar_sim_interferometer_XML_STR);
-    SettingsFileHandlerQSettings handler;
+    SettingsFileHandlerIni handler;
     s.set_file_handler(&handler);
-    if (!s.load(failed_keys, settings_file)) return OSKAR_ERR_SETTINGS_LOAD;
+
+    // Warn about settings failures.
+    if (!s.load(failed_keys, settings_file))
+    {
+        oskar_log_error(log, "Failed to read settings file.");
+        oskar_log_free(log);
+        return OSKAR_ERR_FILE_IO;
+    }
     for (size_t i = 0; i < failed_keys.size(); ++i)
         oskar_log_warning(log, "Ignoring '%s'='%s'",
                 failed_keys[i].first.c_str(), failed_keys[i].second.c_str());
 
-    // Log the relevant settings. (TODO fix/automate these functions)
-    oskar_Settings_old s_old;
-    oskar_settings_old_load(&s_old, log, settings_file, &e);
-    oskar_log_settings_simulator(log, &s_old);
-    oskar_log_settings_sky(log, &s_old);
-    oskar_log_settings_observation(log, &s_old);
-    oskar_log_settings_telescope(log, &s_old);
-    oskar_log_settings_interferometer(log, &s_old);
+    // Log the relevant settings.
+    oskar_settings_log(&s, log);
 
     // Create simulator and set values from settings.
     s.begin_group("simulator");
@@ -160,12 +160,12 @@ int main(int argc, char** argv)
     s.end_group();
 
     // Set the sky model. A copy is made, so the original can be freed.
-    oskar_Sky* sky = oskar_set_up_sky(&s_old, log, &e);
+    oskar_Sky* sky = oskar_settings_to_sky(&s, log, &e);
     oskar_simulator_set_sky_model(h, sky, max_sources_per_chunk, &e);
     oskar_sky_free(sky, &e);
 
     // Set the telescope model. A copy is made, so the original can be freed.
-    oskar_Telescope* tel = oskar_set_up_telescope(&s_old, log, &e);
+    oskar_Telescope* tel = oskar_settings_to_telescope(&s, log, &e);
     oskar_simulator_set_telescope_model(h, tel, &e);
     oskar_telescope_free(tel, &e);
 

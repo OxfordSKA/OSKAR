@@ -92,7 +92,7 @@ bool SettingsKey::operator==(const SettingsKey& other) const
                     oskar_settings_utility_string_to_upper(other.key_));
 }
 
-SettingsKey::operator std::string() const
+SettingsKey::operator const std::string&() const
 {
     return key_;
 }

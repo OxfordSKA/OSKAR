@@ -27,7 +27,6 @@
  */
 
 #include "oskar_settings_load_observation.h"
-#include "oskar_settings_convert_date_time_to_mjd.h"
 #include "log/oskar_log.h"
 
 #include "math/oskar_cmath.h"
@@ -43,71 +42,35 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 
-static QStringList get_list(QVariant v)
+static double convert_date_time_to_mjd(int year, int month, int day,
+        double day_fraction)
 {
-    QStringList list;
-    if (v.type() == QVariant::StringList)
-        list = v.toStringList();
-    else if (v.type() == QVariant::String)
-        list = v.toString().split(",");
-    return list;
+    int a, y, m, jdn;
+
+    /* Compute Julian Day Number (Note: all integer division). */
+    a = (14 - month) / 12;
+    y = year + 4800 - a;
+    m = month + 12 * a - 3;
+    jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
+            + (y / 400) - 32045;
+
+    /* Compute day fraction. */
+    day_fraction -= 0.5;
+    return (jdn - 2400000.5) + day_fraction;
 }
+
 
 extern "C"
 void oskar_settings_load_observation(oskar_SettingsObservation* obs,
         oskar_Log* log, const char* filename, int* status)
 {
     QByteArray t;
-    QVariant v;
     QSettings s(QString(filename), QSettings::IniFormat);
 
     if (*status) return;
 
     s.beginGroup("observation");
     {
-        // Get pointing direction(s) as string lists.
-        QStringList ra_list, dec_list;
-        ra_list = get_list(s.value("phase_centre_ra_deg", "0.0"));
-        dec_list = get_list(s.value("phase_centre_dec_deg", "0.0"));
-
-        // Check lists are the same length.
-        if (ra_list.size() != dec_list.size())
-        {
-            oskar_log_error(log, "RA and Dec coordinate arrays "
-                    "must be the same length.");
-            *status = OSKAR_ERR_SETTINGS_OBSERVATION;
-            return;
-        }
-
-        // Allocate memory for pointing data and copy to settings arrays.
-        obs->num_pointing_levels = ra_list.size();
-        obs->phase_centre_lon_rad = (double*)malloc(ra_list.size() * sizeof(double));
-        obs->phase_centre_lat_rad = (double*)malloc(dec_list.size() * sizeof(double));
-        for (int i = 0; i < obs->num_pointing_levels; ++i)
-        {
-            obs->phase_centre_lon_rad[i] = ra_list[i].toDouble() * M_PI / 180.0;
-            obs->phase_centre_lat_rad[i] = dec_list[i].toDouble() * M_PI / 180.0;
-        }
-
-        // Get station pointing file.
-        t = s.value("pointing_file", "").toByteArray();
-        if (t.size() > 0)
-        {
-            obs->pointing_file = (char*)malloc(t.size() + 1);
-            strcpy(obs->pointing_file, t.constData());
-        }
-
-        // Get frequency / channel data.
-        obs->start_frequency_hz = s.value("start_frequency_hz").toDouble();
-        if (obs->start_frequency_hz < DBL_MIN)
-        {
-            *status = OSKAR_ERR_SETTINGS_OBSERVATION;
-            return;
-        }
-
-        obs->num_channels     = s.value("num_channels", 1).toInt();
-        obs->frequency_inc_hz = s.value("frequency_inc_hz").toDouble();
-
         // Get observation start time as MJD(UTC).
         QString str_st = s.value("start_time_utc").toString();
         if (str_st.size() > 0 && !str_st.contains(":"))
@@ -157,7 +120,7 @@ void oskar_settings_load_observation(oskar_SettingsObservation* obs,
             // Compute start time as MJD(UTC).
             double day_fraction = (hour + (minute / 60.0) +
                     (second / 3600.0)) / 24.0;
-            obs->start_mjd_utc = oskar_settings_convert_date_time_to_mjd(year,
+            obs->start_mjd_utc = convert_date_time_to_mjd(year,
                     month, day, day_fraction);
         }
 
@@ -195,19 +158,10 @@ void oskar_settings_load_observation(oskar_SettingsObservation* obs,
                     len.minute() * 60.0 + len.second() + len.msec() / 1000.0;
         }
         obs->length_days = obs->length_sec / 86400.0;
-
-        // Get advanced observation parameters.
-        s.beginGroup("advanced");
-        obs->delta_tai_utc_sec = s.value("delta_tai_utc_sec", 35.0).toDouble();
-        obs->delta_ut1_utc_sec = s.value("delta_ut1_utc_sec", 0.0).toDouble();
-        obs->pm_x_arcsec = s.value("pm_x_arcsec", 0.0).toDouble();
-        obs->pm_y_arcsec = s.value("pm_y_arcsec", 0.0).toDouble();
-        s.endGroup();
     }
     s.endGroup();
 
     // Range checks.
-    if (obs->num_channels <= 0) obs->num_channels = 1;
     if (obs->num_time_steps <= 0) obs->num_time_steps = 1;
 
     // Compute interval
