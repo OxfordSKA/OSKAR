@@ -41,6 +41,10 @@ if (QT4_FOUND)
             ${QT_QTNETWORK_LIBRARY})
 endif ()
 
+if (CUDA_FOUND)
+    oskar_app(oskar_cuda_system_info oskar_cuda_system_info_main.cpp)
+endif()
+
 macro(declare_oskar_apps)
     foreach (name ${ARGN})
         oskar_app(${name} ${name}_main.cpp)
@@ -50,7 +54,6 @@ endmacro()
 declare_oskar_apps(
     oskar_convert_ecef_to_enu
     oskar_convert_geodetic_to_ecef
-    oskar_cuda_system_info
     oskar_binary_file_query
     oskar_filter_sky_model_clusters
     oskar_fit_element_data
