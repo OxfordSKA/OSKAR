@@ -114,6 +114,7 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
         oskar_mem_copy_contents(d->l, h->l, 0, block_start, block_size, status);
         oskar_mem_copy_contents(d->m, h->m, 0, block_start, block_size, status);
 
+#ifdef OSKAR_HAVE_CUDA
         if (h->algorithm == OSKAR_ALGORITHM_DFT_2D)
         {
             if (prec == OSKAR_DOUBLE)
@@ -165,6 +166,9 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
                         oskar_mem_float(d->block_gpu, status));
         }
         oskar_device_check_error(status);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
 
         /* Copy the data back and add to existing data. */
         oskar_mem_copy(d->block_cpu, d->block_gpu, status);

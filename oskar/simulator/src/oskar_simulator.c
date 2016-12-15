@@ -503,8 +503,10 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
     if (h->log && !*status)
     {
         oskar_log_section(h->log, 'M', "Initial memory usage");
+#ifdef OSKAR_HAVE_CUDA
         for (i = 0; i < h->num_gpus; ++i)
             oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
+#endif
         system_mem_log(h->log);
         oskar_log_section(h->log, 'M', "Starting simulation...");
     }
@@ -582,8 +584,10 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
     if (h->log && !*status)
     {
         oskar_log_section(h->log, 'M', "Final memory usage");
+#ifdef OSKAR_HAVE_CUDA
         for (i = 0; i < h->num_gpus; ++i)
             oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
+#endif
         system_mem_log(h->log);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -123,6 +123,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         }
         else
         {
+#ifdef OSKAR_HAVE_CUDA
             if (oskar_mem_is_scalar(beam))
             {
                 oskar_gaussian_cuda_d(oskar_mem_double2(beam, status),
@@ -134,6 +135,9 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
                         num_points, l_, m_, std);
             }
             oskar_device_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
         }
     }
     else /* type == OSKAR_SINGLE */
@@ -157,6 +161,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         }
         else
         {
+#ifdef OSKAR_HAVE_CUDA
             if (oskar_mem_is_scalar(beam))
             {
                 oskar_gaussian_cuda_f(oskar_mem_float2(beam, status),
@@ -168,6 +173,9 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
                         num_points, l_, m_, (float)std);
             }
             oskar_device_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
         }
     }
 

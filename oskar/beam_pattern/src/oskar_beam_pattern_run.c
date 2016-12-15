@@ -98,9 +98,11 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
     /* Record memory usage. */
     if (h->log && !*status)
     {
+#ifdef OSKAR_HAVE_CUDA
         oskar_log_section(h->log, 'M', "Initial memory usage");
         for (i = 0; i < h->num_gpus; ++i)
             oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
+#endif
         oskar_log_section(h->log, 'M', "Starting simulation...");
     }
 
@@ -198,10 +200,11 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
     /* Record memory usage. */
     if (h->log && !*status)
     {
+#ifdef OSKAR_HAVE_CUDA
         oskar_log_section(h->log, 'M', "Final memory usage");
         for (i = 0; i < h->num_gpus; ++i)
             oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
-
+#endif
         /* Record time taken. */
         oskar_log_set_value_width(h->log, 25);
         record_timing(h);
