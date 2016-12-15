@@ -32,10 +32,15 @@
 #
 
 from __future__ import absolute_import
-from . import _utils
+try:
+    from . import _utils
+except ImportError:
+    _utils = None
 
 
 def oskar_version_string():
     """Returns the version of the OSKAR library in use."""
+    if _utils is None:
+        raise RuntimeError("OSKAR library not found.")
     return _utils.version_string()
 

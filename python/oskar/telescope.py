@@ -34,7 +34,10 @@
 from __future__ import absolute_import, division
 import math
 import numpy
-from . import _telescope_lib
+try:
+    from . import _telescope_lib
+except ImportError:
+    _telescope_lib = None
 
 
 class Telescope(object):
@@ -48,6 +51,8 @@ class Telescope(object):
             precision (str): Either 'double' or 'single' to specify
                 the numerical precision of the data.
         """
+        if _telescope_lib is None:
+            raise RuntimeError("OSKAR library not found.")
         self._capsule = _telescope_lib.create(precision)
 
     def load(self, dir_name):

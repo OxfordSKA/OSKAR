@@ -32,7 +32,10 @@
 #
 
 from __future__ import absolute_import, division
-from . import _simulator_lib
+try:
+    from . import _simulator_lib
+except ImportError:
+    _simulator_lib = None
 from threading import Thread
 from oskar.vis_block import VisBlock
 from oskar.vis_header import VisHeader
@@ -49,6 +52,8 @@ class Simulator(object):
             precision (str): Either 'double' or 'single' to specify
                 the numerical precision of the simulation.
         """
+        if _simulator_lib is None:
+            raise RuntimeError("OSKAR library not found.")
         self._capsule = _simulator_lib.create(precision)
         self._barrier = None
 

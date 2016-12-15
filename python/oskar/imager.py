@@ -38,7 +38,10 @@ This module provides a Python interface to OSKAR imaging functions.
 from __future__ import absolute_import, division
 import math
 import numpy
-from . import _imager_lib
+try:
+    from . import _imager_lib
+except ImportError:
+    _imager_lib = None
 
 
 class Imager(object):
@@ -51,6 +54,8 @@ class Imager(object):
             precision (str): Either 'double' or 'single' to specify
                 the numerical precision of the images.
         """
+        if _imager_lib is None:
+            raise RuntimeError("OSKAR library not found.")
         self._capsule = _imager_lib.create(precision)
 
     def check_init(self):
@@ -936,5 +941,7 @@ class Imager(object):
         Returns:
             array: Image as a 2D numpy array. Data are ordered as in FITS image.
         """
+        if _imager_lib is None:
+            raise RuntimeError("OSKAR library not found.")
         return _imager_lib.make_image(uu, vv, ww, amps, fov_deg, size,
                                       weighting, algorithm, weight, wprojplanes)

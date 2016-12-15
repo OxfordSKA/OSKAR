@@ -2,6 +2,7 @@
 from numpy import get_include
 from os.path import join, isfile, dirname
 import os
+import platform
 try:
     from setuptools import setup, Extension
     from setuptools.command.build_ext import build_ext
@@ -44,7 +45,7 @@ class BuildExt(build_ext):
 
     @staticmethod
     def dir_contains(name, dir_paths):
-        """Returns true if name fragment exists as part of a directory listing.
+        """Returns directory if name fragment is part of a directory listing.
 
         Args:
             name (str):                   The name fragment to search for.
@@ -54,8 +55,8 @@ class BuildExt(build_ext):
             dir_contents = os.listdir(d)
             for item in dir_contents:
                 if name in item:
-                    return True
-        return False
+                    return d
+        return None
 
     @staticmethod
     def get_oskar_version(version_file):
@@ -71,12 +72,14 @@ class BuildExt(build_ext):
         Library directories and include directories are checked here, first.
         """
         # Check we can find the OSKAR library.
-        if not self.dir_contains('oskar.', self.library_dirs):
+        d = self.dir_contains('oskar.', self.library_dirs)
+        if not d:
             raise RuntimeError(
                 "Could not find OSKAR library. "
                 "Check that OSKAR has already been installed on this system, "
                 "and set the library path to build_ext "
                 "using -L or --library-dirs")
+        self.rpath.append(d)
         self.libraries.append('oskar')
 
         # Check we can find the OSKAR headers.
@@ -101,9 +104,16 @@ class BuildExt(build_ext):
         build_ext.run(self)
 
     def build_extension(self, ext):
-        """Overridden method. Builds each extension."""
+        """Overridden method. Builds each Extension."""
+        ext.runtime_library_dirs = self.rpath
+
+        # Unfortunately things don't work as they should on the Mac...
+        if platform.system() == 'Darwin':
+            for t in self.rpath:
+                ext.extra_link_args.append('-Wl,-rpath,'+t)
+
+        # Don't try to build MS extension if liboskar_ms is not found.
         if 'measurement_set' in ext.name:
-            # Don't try to build MS extension if liboskar_ms is not found.
             if not self.dir_contains('oskar_ms.', self.library_dirs):
                 return
         build_ext.build_extension(self, ext)

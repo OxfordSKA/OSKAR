@@ -33,7 +33,10 @@ BDA functions
 =============
 """
 from __future__ import division, absolute_import, print_function
-from . import _bda_utils
+try:
+    from . import _bda_utils
+except ImportError:
+    _bda_utils = None
 
 
 class BDA(object):

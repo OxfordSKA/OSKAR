@@ -34,19 +34,24 @@
 from __future__ import absolute_import, division
 import math
 import numpy
-from . import _sky_lib
+try:
+    from . import _sky_lib
+except ImportError:
+    _sky_lib = None
 
 
 class Sky(object):
     """This class provides a Python interface to an OSKAR sky model."""
 
     def __init__(self, precision='double'):
-        """Creates a handle to an OSKAR sky model.
+        """Creates an OSKAR sky model.
 
         Args:
             precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the data.
         """
+        if _sky_lib is None:
+            raise RuntimeError("OSKAR library not found.")
         self._capsule = _sky_lib.create(precision)
 
     def append(self, other):
@@ -180,6 +185,8 @@ class Sky(object):
             precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the data.
         """
+        if _sky_lib is None:
+            raise RuntimeError("OSKAR library not found.")
         t = Sky()
         t._capsule = _sky_lib.from_fits_file(
             filename, min_peak_fraction, min_abs_val, default_map_units,
@@ -203,6 +210,8 @@ class Sky(object):
             precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the data.
         """
+        if _sky_lib is None:
+            raise RuntimeError("OSKAR library not found.")
         t = Sky()
         t._capsule = _sky_lib.generate_grid(
             ra0_deg, dec0_deg, side_length, fov_deg, mean_flux_jy,
@@ -223,6 +232,8 @@ class Sky(object):
             precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the data.
         """
+        if _sky_lib is None:
+            raise RuntimeError("OSKAR library not found.")
         t = Sky()
         t._capsule = _sky_lib.generate_random_power_law(
             num_sources, min_flux_jy, max_flux_jy, power_law_index, seed,
@@ -246,6 +257,8 @@ class Sky(object):
             precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the data.
         """
+        if _sky_lib is None:
+            raise RuntimeError("OSKAR library not found.")
         t = Sky()
         t._capsule = _sky_lib.load(filename, precision)
         return t

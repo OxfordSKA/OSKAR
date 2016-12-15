@@ -32,7 +32,10 @@
 #
 
 from __future__ import absolute_import, division
-from . import _vis_block_lib
+try:
+    from . import _vis_block_lib
+except ImportError:
+    _vis_block_lib = None
 
 
 class VisBlock(object):
@@ -40,6 +43,8 @@ class VisBlock(object):
 
     def __init__(self):
         """Constructs a handle to a visibility block."""
+        if _vis_block_lib is None:
+            raise RuntimeError("OSKAR library not found.")
         self._capsule = 0
 
     def auto_correlations(self):

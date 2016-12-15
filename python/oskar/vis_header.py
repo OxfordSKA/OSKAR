@@ -32,7 +32,10 @@
 #
 
 from __future__ import absolute_import, division
-from . import _vis_header_lib
+try:
+    from . import _vis_header_lib
+except ImportError:
+    _vis_header_lib = None
 
 
 class VisHeader(object):
@@ -40,6 +43,8 @@ class VisHeader(object):
 
     def __init__(self):
         """Constructs a handle to a visibility header."""
+        if _vis_header_lib is None:
+            raise RuntimeError("OSKAR library not found.")
         self._capsule = None
 
     def channel_bandwidth_hz(self):
