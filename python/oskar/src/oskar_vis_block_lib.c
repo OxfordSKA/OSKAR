@@ -35,9 +35,9 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
-static const char* module_doc =
+static const char module_doc[] =
         "This module provides an interface to an OSKAR visibility block.";
-static const char* name = "oskar_VisBlock";
+static const char name[] = "oskar_VisBlock";
 
 static void vis_block_free(PyObject* capsule)
 {

@@ -35,9 +35,9 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
-static const char* module_doc =
+static const char module_doc[] =
         "This module provides an interface to the OSKAR Measurement Set wrapper.";
-static const char* name = "oskar_MeasurementSet";
+static const char name[] = "oskar_MeasurementSet";
 
 static void ms_free(PyObject* capsule)
 {

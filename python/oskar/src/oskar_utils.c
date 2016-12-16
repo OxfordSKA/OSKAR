@@ -29,7 +29,7 @@
 #include <Python.h>
 #include <oskar.h>
 
-static const char* module_doc =
+static const char module_doc[] =
         "This module provides an interface to OSKAR utility functions.";
 
 
