@@ -39,7 +39,7 @@
 
 TEST(oskar_Sky, copy)
 {
-    int status = OSKAR_SUCCESS;
+    int status = 0;
 
     // Create and fill sky model 1.
     int sky1_num_sources = 50e3;

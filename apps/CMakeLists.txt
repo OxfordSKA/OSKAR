@@ -5,41 +5,8 @@
 add_subdirectory(test)
 add_subdirectory(xml)
 
-# === Include build macros used for apps and mex functions.
+# === Include build macros used for apps.
 include(${OSKAR_SOURCE_DIR}/cmake/oskar_build_macros.cmake)
-
-if (QT4_FOUND)
-    include_directories(${QT_INCLUDE_DIR})
-
-    # BINARY: oskar_settings_set
-    set(name oskar_settings_set)
-    qt_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar_settings_get
-    set(name oskar_settings_get)
-    qt_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar (GUI)
-    add_subdirectory(gui)
-    foreach (file ${gui_SRC})
-        list(REMOVE_ITEM gui_SRC ${file})
-        list(APPEND gui_SRC gui/${file})
-    endforeach()
-    foreach (file ${gui_MOC_SRC})
-        list(REMOVE_ITEM gui_MOC_SRC ${file})
-        list(APPEND gui_MOC_SRC gui/${file})
-    endforeach()
-    qt4_wrap_cpp(gui_SRC ${gui_MOC_SRC})
-    qt4_add_resources(gui_SRC gui/icons/icons.qrc)
-    qt_app(oskar oskar_main.cpp ${gui_SRC} ${gui_MOC_SRC}
-        EXTRA_LIBS
-            oskar_settings_widgets
-            oskar_settings_types
-            oskar_settings_containers
-            ${QT_QTCORE_LIBRARY}
-            ${QT_QTGUI_LIBRARY}
-            ${QT_QTNETWORK_LIBRARY})
-endif ()
 
 if (CUDA_FOUND)
     oskar_app(oskar_cuda_system_info oskar_cuda_system_info_main.cpp)
@@ -68,31 +35,29 @@ declare_oskar_apps(
     oskar_vis_upgrade_format
     oskar_vis_to_ascii_table)
 
-if (QT4_FOUND)
-    set(IONOSPHERE_TESTING OFF)
-    if (IONOSPHERE_TESTING)
-        # BINARY: oskar_sim_tec_screen
-        set(name oskar_sim_tec_screen)
-        oskar_app(${name} ${name}_main.cpp
-            EXTRA_LIBS oskar_apps
-            NO_INSTALL)
+set(IONOSPHERE_TESTING OFF)
+if (IONOSPHERE_TESTING)
+    # BINARY: oskar_sim_tec_screen
+    set(name oskar_sim_tec_screen)
+    oskar_app(${name} ${name}_main.cpp
+        EXTRA_LIBS oskar_apps
+        NO_INSTALL)
 
-        # BINARY: oskar_evaluate_pierce_points
-        set(name oskar_evaluate_pierce_points)
-        oskar_app(${name} ${name}_main.cpp
-            EXTRA_LIBS oskar_apps
-            NO_INSTALL)
+    # BINARY: oskar_evaluate_pierce_points
+    set(name oskar_evaluate_pierce_points)
+    oskar_app(${name} ${name}_main.cpp
+        EXTRA_LIBS oskar_apps
+        NO_INSTALL)
 
-        #if (PNG_FOUND)
-        #    include_directories(${PNG_INCLUDE_DIRS})
-        #    set(name oskar_ionosphere_to_kml)
-        #    oskar_app(${name} ${name}_main.cpp
-        #        EXTRA_LIBS ${PNG_LIBRARY} oskar_apps
-        #        NO_INSTALL
-        #    )
-        #endif ()
-    endif()
-endif ()
+    #if (PNG_FOUND)
+    #    include_directories(${PNG_INCLUDE_DIRS})
+    #    set(name oskar_ionosphere_to_kml)
+    #    oskar_app(${name} ${name}_main.cpp
+    #        EXTRA_LIBS ${PNG_LIBRARY} oskar_apps
+    #        NO_INSTALL
+    #    )
+    #endif ()
+endif()
 
 # Install python scripts to the installation binary directory
 include(oskar_copy_files)

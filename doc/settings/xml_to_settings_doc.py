@@ -233,6 +233,7 @@ def set_allowed_values_latex(node, latex_file):
         allowed_values_ += r'\vspace{4pt}'
         for p in params_:
             p = p.strip()
+            p = p.replace(r'_', r'\_')
             allowed_values_ += r'\item {' + p+'}\n'
         allowed_values_ += r'\end{itemize}'+'\n'
         #allowed_values_ += r'\vspace{-\baselineskip}\mbox{}'+'\n'
@@ -584,7 +585,7 @@ def recurse_tree(node, key=None, depth=0, count=0, latex_file=None):
 
 if __name__ == "__main__":
 
-    #filename = '@PROJECT_BINARY_DIR@/settings/xml/oskar.xml'
+    #filename = '@PROJECT_BINARY_DIR@/apps/xml/oskar.xml'
     dox_filename = '@PROJECT_SOURCE_DIR@/doc/settings/settings_tables.txt'
     if os.path.isfile(dox_filename):
         os.remove(dox_filename)
@@ -595,7 +596,7 @@ if __name__ == "__main__":
 #     #print '---------------------------------'
 #     #print '<%s>' % xml.tag
 
-    filename = '@PROJECT_BINARY_DIR@/settings/xml/oskar_all.xml'
+    filename = '@PROJECT_BINARY_DIR@/apps/xml/oskar_all.xml'
     fh_ = open(filename, 'r')
     xmlStr = fh_.read()
     fh_.close()

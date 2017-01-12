@@ -3,7 +3,7 @@
 \page settings Settings
 
 \latexonly
-\def \docversion{11}
+\def \docversion{12}
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
 \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
@@ -39,8 +39,8 @@ length=06:00:00.000
 \endverbatim
 
 Settings files can be written or modified using any text editor, or by using the
-<tt>oskar_settings_set</tt> binary, or (the recommended method) by using the
-OSKAR GUI.
+<tt>--set</tt> command line flag when running the application,
+or (the recommended method) by using the OSKAR GUI.
 
 The following section describes the currently available settings.
 
@@ -84,37 +84,42 @@ SETTINGS_TABLES
 <tr><td>6</td><td>2012-11-20</td>
     <td>Updated for version 2.1.1-beta.</td></tr>
 <tr><td>7</td><td>2013-03-01</td>
-    <td>Updated settings for version 2.2.0. This includes changes to most 
-    settings in the sky model group, and changes to the settings that define 
+    <td>Updated settings for version 2.2.0. This includes changes to most
+    settings in the sky model group, and changes to the settings that define
     the files saved from beam pattern simulations.</td></tr>
 <tr><td>8</td><td>2013-11-13</td>
-    <td>Updated settings for version 2.3.0. This consists of an update to 
+    <td>Updated settings for version 2.3.0. This consists of an update to
     the specification of beam pattern simulation settings.</td></tr>
 <tr><td>9</td><td>2014-07-17</td>
-    <td>Updated settings for version 2.5.0. Moved element pattern fitting 
-    parameters out of the telescope model group to the 
-    top-level 'element_fit' group. Added global beam normalization option. 
-    Added isotropic beam station type. Added Gaussian station beam reference 
-    frequency. Added dipole length options. Added UV range filtering 
-    parameters. Added scalar mode option. Removed option to make image 
+    <td>Updated settings for version 2.5.0. Moved element pattern fitting
+    parameters out of the telescope model group to the
+    top-level 'element_fit' group. Added global beam normalization option.
+    Added isotropic beam station type. Added Gaussian station beam reference
+    frequency. Added dipole length options. Added UV range filtering
+    parameters. Added scalar mode option. Removed option to make image
     after interferometer simulation.</td></tr>
 <tr><td>10</td><td>2014-09-08</td>
-    <td>Updated descriptions in system noise settings to clarify that the 
-    noise is specified for a single polarisation.  Changed all random 
-    number seed integer ranges to start at 1 (rather than 0). Changed beam 
+    <td>Updated descriptions in system noise settings to clarify that the
+    noise is specified for a single polarisation.  Changed all random
+    number seed integer ranges to start at 1 (rather than 0). Changed beam
     normalization to be enabled by default.</td></tr>
 <tr><td>11</td><td>2015-04-28</td>
     <td>Moved option to select polarisation mode into telescope model settings
-    group, so that scalar mode can also be used for beam pattern 
+    group, so that scalar mode can also be used for beam pattern
     simulations. Moved and renamed option to allow station beam duplication
-    into telescope model group. Added option to disable horizon clip in 
-    advanced sky model settings. Re-wrote most of the beam pattern options to 
+    into telescope model group. Added option to disable horizon clip in
+    advanced sky model settings. Re-wrote most of the beam pattern options to
     support the new output modes.
-    Added the ability to use seconds (as well as hours, minutes and seconds) 
-    to specify observation length. Removed options to write OSKAR image 
+    Added the ability to use seconds (as well as hours, minutes and seconds)
+    to specify observation length. Removed options to write OSKAR image
     files. Removed ability to load a GSM file directly or use HEALPix
-    temperature maps, as the frequency scaling was not treated 
+    temperature maps, as the frequency scaling was not treated
     correctly.</td></tr>
+<tr><td>12</td><td>2017-01-05</td>
+    <td>Added new imager settings. Removed telescope position settings
+    (these are now specified in the telescope model folder).
+    Updated beam pattern output settings.
+    Reinstated GSM and HEALPix sky model settings.</td></tr>
 </table>
 
 */

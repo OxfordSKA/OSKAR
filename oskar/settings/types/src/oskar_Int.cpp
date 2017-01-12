@@ -29,10 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_Int.hpp"
-#include "oskar_settings_utility_string.hpp"
+#include "settings/types/oskar_Int.h"
+#include "settings/oskar_settings_utility_string.h"
 #include <sstream>
 #include <iostream>
+
 using namespace std;
 
 namespace oskar {

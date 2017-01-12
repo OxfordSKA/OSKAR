@@ -4,8 +4,7 @@ OSKAR has been designed to produce simulated visibility data from radio
 telescopes containing aperture arrays, such as those envisaged for the
 Square Kilometre Array.
 
-In order to run OSKAR, you will need a CUDA-capable NVIDIA graphics
-processing unit (GPU). Please see INSTALL.md for a quick installation guide.
+Please see INSTALL.md for a quick installation guide.
 
 Full documentation and software can be found at http://oskar.oerc.ox.ac.uk
 

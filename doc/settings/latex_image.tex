@@ -25,6 +25,36 @@
 \endfoot
  
 \endlastfoot
+double\_precision
+&
+{Determines whether double precision arithmetic is used.}
+&
+Bool
+&
+true
+\\
+\hline
+
+cuda\_device\_ids
+&
+{A comma-separated string containing device (GPU) IDs to use on a multi-GPU system, or `all' to use all devices.}
+&
+CSV integer list or `all'
+&
+all
+\\
+\hline
+
+specify\_cellsize
+&
+{If set, specify cellsize; otherwise, specify field of view.}
+&
+Bool
+&
+false
+\\
+\hline
+
 fov\_deg
 &
 {Total field of view in degrees.}
@@ -35,9 +65,19 @@ Unsigned double
 \\
 \hline
 
+cellsize\_arcsec
+&
+{The cell (pixel) size in arcseconds.}
+&
+Unsigned double
+&
+1.0
+\\
+\hline
+
 size
 &
-{Image width in one dimension (e.g. a value of 256 would give a 256 by 256 image).}
+{Image width in one dimension (e.g. a value of 256 would give a 256 by 256 image). This must be even.}
 &
 Integer > 0
 &
@@ -114,7 +154,7 @@ time\_snapshots
 &
 Bool
 &
-true
+false
 \\
 \hline
 
@@ -135,6 +175,124 @@ time\_end
 {Integer $\geq$ 0, or `max'}
 &
 max
+\\
+\hline
+
+uv\_filter\_min
+&
+{The minimum UV baseline length to image, in wavelengths.}
+&
+Unsigned double
+&
+0.0
+\\
+\hline
+
+uv\_filter\_max
+&
+{The maximum UV baseline length to image, in wavelengths.}
+&
+{Double $\geq$ 0, or `max'}
+&
+max
+\\
+\hline
+
+algorithm
+&
+{The type of transform used to generate the image.}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {FFT}
+\item {DFT 2D}
+\item {DFT 3D}
+\item {W-projection}
+\end{itemize}
+}
+&
+FFT
+\\
+\hline
+
+weighting
+&
+{The type of visibility weighting scheme to use.}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Natural}
+\item {Radial}
+\item {Uniform}
+\end{itemize}
+}
+&
+Natural
+\\
+\hline
+
+fft/use\_gpu
+&
+{If true, use the GPU to perform the FFT.}
+&
+Bool
+&
+false
+\\
+\hline
+
+fft/kernel\_type
+&
+{The type of gridding kernel to use.}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Spheroidal}
+\item {Pillbox}
+\end{itemize}
+}
+&
+Spheroidal
+\\
+\hline
+
+fft/support
+&
+{The support size used for the gridding kernel.}
+&
+Int
+&
+3
+\\
+\hline
+
+fft/oversample
+&
+{The oversample factor used for the gridding kernel.}
+&
+Int
+&
+100
+\\
+\hline
+
+wproj/generate\_w\_kernels\_on\_gpu
+&
+{If true, use the GPU to generate the W-kernels.}
+&
+Bool
+&
+true
+\\
+\hline
+
+wproj/num\_w\_planes
+&
+{The number of W-planes to use. Values less than 1 mean "auto".}
+&
+Int
+&
+0
 \\
 \hline
 
@@ -182,43 +340,37 @@ Double
 
 input\_vis\_data
 &
-{Path to the input OSKAR visibility data file.}
+{Path to the input OSKAR visibility data file or Measurement Set.}
 &
 Path name
 &
 None
+\\
+\hline
+
+ms\_column
+&
+{The name of the column in the Measurement Set to use, if applicable.}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {DATA}
+\item {MODEL\_DATA}
+\item {CORRECTED\_DATA}
+\end{itemize}
+}
+&
+DATA
 \\
 \hline
 
 root\_path
 &
-{Path consisting of the root of the image filename used to save the output image. The full filename will be constructed as {\texttt{\textbf{ $<$root$>$\_$<$image\_type$>$.$<$extension$>$ }}}}
+{The root filename used to save the output image. The full filename will be constructed as {\texttt{\textbf{$<$root$>$\_$<$image\_type$>$.fits }}}}
 &
 Path name
 &
 None
-\\
-\hline
-
-fits\_image
-&
-{If true, save the image in FITS format.}
-&
-Bool
-&
-true
-\\
-\hline
-
-overwrite
-&
-{If \textbf{true}, existing image files will be overwritten. If \textbf{false}, new image files of the same name will be created by appending an number to the existing filename with the pattern: 
-\vspace{8pt}\par\noindent  {\texttt{\textbf{$<$filename$>$-$<$N$>$.$<$extension$>$}}}, 
-\vspace{8pt}\par\noindent where N starts at 1 and is incremented for each new image created.}
-&
-Bool
-&
-true
 \\
 \hline
 

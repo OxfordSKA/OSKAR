@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_settings_utility_string.hpp"
-#include "oskar_OptionList.hpp"
+#include "settings/oskar_settings_utility_string.h"
+#include "settings/types/oskar_OptionList.h"
 
 namespace oskar {
 

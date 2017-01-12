@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_OptionParser.h"
-
+#include "apps/oskar_OptionParser.h"
 #include "convert/oskar_convert_geodetic_spherical_to_ecef.h"
 #include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
@@ -41,15 +40,15 @@
 int main(int argc, char** argv)
 {
     int status = 0;
-    oskar_OptionParser opt("oskar_convert_geodetic_to_ecef",
+    oskar::OptionParser opt("oskar_convert_geodetic_to_ecef",
             oskar_version_string());
-    opt.setDescription("Converts geodetic longitude/latitude/altitude to "
+    opt.set_description("Converts geodetic longitude/latitude/altitude to "
             "Cartesian ECEF coordinates. Assumes WGS84 ellipsoid.");
-    opt.addRequired("input file", "Path to file containing input coordinates. "
+    opt.add_required("input file", "Path to file containing input coordinates. "
             "Angles must be in degrees.");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
-    const char* filename = opt.getArg();
+    const char* filename = opt.get_arg();
 
     // Load the input file.
     oskar_Mem *lon = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);

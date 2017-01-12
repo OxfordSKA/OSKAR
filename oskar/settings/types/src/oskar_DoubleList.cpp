@@ -29,9 +29,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_settings_utility_string.hpp"
+#include "settings/oskar_settings_utility_string.h"
+#include "settings/types/oskar_DoubleList.h"
 #include <sstream>
-#include "oskar_DoubleList.hpp"
 #include <cmath>
 #include <iostream>
 

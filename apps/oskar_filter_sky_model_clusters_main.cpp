@@ -26,16 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_OptionParser.h"
-
+#include "apps/oskar_OptionParser.h"
+#include "convert/oskar_convert_healpix_ring_to_theta_phi.h"
+#include "log/oskar_log.h"
 #include "math/oskar_angular_distance.h"
 #include "math/oskar_bearing_angle.h"
 #include "math/oskar_cmath.h"
-#include "convert/oskar_convert_healpix_ring_to_theta_phi.h"
 #include "math/oskar_ellipse_radius.h"
-#include "utility/oskar_get_error_string.h"
-#include "log/oskar_log.h"
 #include "sky/oskar_sky.h"
+#include "utility/oskar_get_error_string.h"
 #include "utility/oskar_timer.h"
 #include "utility/oskar_version_string.h"
 
@@ -140,20 +139,20 @@ int main(int argc, char** argv)
 {
     int status = 0;
     oskar_Log* log = 0;
-    oskar_OptionParser opt("oskar_filter_sky_model_clusters",
+    oskar::OptionParser opt("oskar_filter_sky_model_clusters",
             oskar_version_string());
-    opt.setDescription("Removes overlapping sources in a sky model by "
+    opt.set_description("Removes overlapping sources in a sky model by "
             "finding those which overlap, calculating the peak flux from "
             "each cluster, and filtering on the result.");
-    opt.addRequired("sky model to filter (in Jy; deconvolved size)",
+    opt.add_required("sky model to filter (in Jy; deconvolved size)",
             "Path to an OSKAR sky model.");
-    opt.addOptional("sky model to use as filter (in Jy/beam; fitted size)",
+    opt.add_optional("sky model to use as filter (in Jy/beam; fitted size)",
             "Path to an OSKAR sky model.");
-    opt.addFlag("-s", "Multiple of Gaussian sigma to check for overlap", 1,
+    opt.add_flag("-s", "Multiple of Gaussian sigma to check for overlap", 1,
             "5", false, "--sigma");
-    opt.addFlag("-t", "Threshold flux, in Jy or Jy/beam", 1,
+    opt.add_flag("-t", "Threshold flux, in Jy or Jy/beam", 1,
             "15", false, "--threshold");
-    opt.addFlag("-i", "Use integrated flux", 0, "", false,
+    opt.add_flag("-i", "Use integrated flux", 0, "", false,
             "--use-integrated-flux");
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
@@ -161,9 +160,9 @@ int main(int argc, char** argv)
     double sigma = 0.0, threshold = 0.0;
     opt.get("-s")->getDouble(sigma);
     opt.get("-t")->getDouble(threshold);
-    bool use_integrated_flux = opt.isSet("-i") ? true : false;
-    const char* sky_file_to_filter = opt.getArg(0);
-    const char* sky_file_as_filter = opt.getArg(1);
+    bool use_integrated_flux = opt.is_set("-i") ? true : false;
+    const char* sky_file_to_filter = opt.get_arg(0);
+    const char* sky_file_as_filter = opt.get_arg(1);
     if (!sky_file_as_filter)
     {
         use_integrated_flux = true;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_OPTION_PARSER_H_
 #define OSKAR_OPTION_PARSER_H_
 
@@ -34,52 +33,56 @@
  * @file oskar_OptionParser.h
  */
 
-#include <oskar_global.h>
-#include <oskar_version.h>
 #include "extern/ezOptionParser-0.2.0/ezOptionParser.hpp"
 #include <vector>
 #include <string>
 #include <cstdio>
-#include <stdarg.h>
+#include <cstdarg>
+
+namespace oskar {
 
 /**
  * @brief
- * Class to provide a command line passing for OSKAR applications.
+ * Provides a command line parser for OSKAR applications.
  *
  * @details
- * Class providing a wrapper to the ezOptionParser for use with OSKAR
- * applications.
+ * Provides a command line parser for OSKAR applications.
  *
  * Note on the use symbols in option syntax: (the following are advised
  * in order to maintain consistency)
  *
  *  []   = optional (e.g. $ foo [settings file] )
  *  <>   = required (e.g. $ foo <file name> )
- *  ...  = repeating elements, "and so on" (e.g.
- *  |    = mutually exclusive (e.g.
+ *  ...  = repeating elements, "and so on"
+ *  |    = mutually exclusive
  *
  * TODO better handling of unexpected options. It would be useful if a warning
  * could be printed.
  */
-class oskar_OptionParser : public ez::ezOptionParser
+class OptionParser : public ez::ezOptionParser
 {
 public:
-    oskar_OptionParser(const char* title, const char* ver = OSKAR_VERSION_STR)
+    OptionParser(const char* title, const char* ver,
+            const char* settings = "")
     {
         this->footer =
                 "\n"
                 "" + std::string(80, '-') + "\n"
                 "OSKAR (version " + ver + ")\n"
-                "Copyright (c) 2014, The University of Oxford.\n"
+                "Copyright (c) 2017, The University of Oxford.\n"
                 "This program is free and without warranty.\n"
                 "" + std::string(80, '-') + "\n";
-        setVersion(ver, false);
-        setTitle(title);
+        set_version(ver, false);
+        set_title(title);
+        set_settings(settings);
     }
-    virtual ~oskar_OptionParser() {}
-
+    virtual ~OptionParser() {}
+    void add_example(const char* text)
+    {
+        this->example += "  " + std::string(text) + "\n";
+    }
     // Wrapper to define flags with no arguments
-    void addFlag(const char* flag1, const char* help, bool required = false,
+    void add_flag(const char* flag1, const char* help, bool required = false,
             const char* flag2 = 0)
     {
         const char* defaults = "";
@@ -90,9 +93,8 @@ public:
         else
             add(defaults, required, expectedArgs, delim, help, flag1);
     }
-
     // Wrapper to define flags with arguments with default values.
-    void addFlag(const char* flag1, const char* help, int expectedArgs,
+    void add_flag(const char* flag1, const char* help, int expectedArgs,
             const char* defaults = "", bool required = false, const char* flag2 = 0)
     {
         char delim = 0;
@@ -105,118 +107,43 @@ public:
         else
             add(defaults, required, expectedArgs, delim, strHelp.c_str(), flag1);
     }
-
-    void addRequired(const char* name, const char* help = "")
+    void add_optional(const char* name, const char* help = "")
     {
         // TODO Do something with the help field
-        required_.push_back(name);
-        requiredHelp_.push_back(help);
+        optional_.push_back(std::string(name));
+        optionalHelp_.push_back(std::string(help));
     }
-
-    void addOptional(const char* name, const char* help = "")
+    void add_required(const char* name, const char* help = "")
     {
         // TODO Do something with the help field
-        optional_.push_back(name);
-        optionalHelp_.push_back(help);
+        required_.push_back(std::string(name));
+        requiredHelp_.push_back(std::string(help));
     }
-    void setTitle(const char* text)
+    void add_settings_options()
     {
-        this->title = text;
-    }
-    void setVersion(const char* version, bool show = true)
-    {
-        if (show)
-            this->version = version;
-        version_ = version;
-    }
-    void setDescription(const char* description)
-    {
-        this->description = description;
-    }
-    //    void setSyntax(const char* text)
-    //    {
-    //        this->syntax = "\n  " + std::string(text);
-    //    }
-    void addExample(const char* text)
-    {
-        this->example += "  " + std::string(text) + "\n";
-    }
-    void printUsage()
-    {
-        std::string usage;
-        this->getUsage(usage);
-        std::cout << usage;
-    }
-    void getUsage(std::string& usage)
-    {
-        this->syntax = this->title + " [OPTIONS]";
-        for (int i = 0; i < (int)required_.size(); ++i)
-            this->syntax += " <" + required_[i] + ">";
-        for (int i = 0; i < (int)optional_.size(); ++i)
-            this->syntax += " [" + optional_[i] + "]";
-        // TODO overload here rather than editing the library header...!
-        ez::ezOptionParser::getUsage(usage);
-    }
-
-    int numArgs() const
-    {
-        return (((int)firstArgs.size()-1) + (int)lastArgs.size());
-    }
-    std::vector<std::string> getArgs() const
-    {
-        std::vector<std::string> args;
-        for (int i = 1; i < (int)firstArgs.size(); ++i)
-            args.push_back(*this->firstArgs[i]);
-        for (int i = 0; i < (int)lastArgs.size(); ++i)
-            args.push_back(*this->lastArgs[i]);
-        return args;
-    }
-    const char* getArg(int i = 0) const
-    {
-        if ((int)firstArgs.size()-1 > i)
-            return (*this->firstArgs[i+1]).c_str();
-        // Requested index is in the last argument set.
-        else if (((int)firstArgs.size()-1 + (int)lastArgs.size()) > i)
-            return (*this->lastArgs[i-((int)firstArgs.size()-1)]).c_str();
-        return 0;
-    }
-    std::vector<std::string> getInputFiles(int minRequired = 2) const
-    {
-        std::vector<std::string> files;
-        // Note: minRequired+1 because firstArg[0] == binary name
-        bool filesFirst = ((int)this->firstArgs.size() >= minRequired+1) &&
-                ((int)this->lastArgs.size() == 0);
-        using namespace std;
-
-        if (filesFirst)
-        {
-            // Note: starts at 1 as index 0 == the binary name.
-            for (int i = 1; i < (int)this->firstArgs.size(); ++i)
-            {
-                files.push_back(*this->firstArgs[i]);
-            }
-        }
-        else
-        {
-            for (int i = 0; i < (int)this->lastArgs.size(); ++i)
-            {
-                files.push_back(*this->lastArgs[i]);
-            }
-        }
-        return files;
+        add_required("settings file");
+        add_optional("key");
+        add_optional("value");
+        add_flag("--get", "Print key value in settings file.");
+        add_flag("--set", "Set key value in settings file.");
     }
     bool check_options(int argc, char** argv)
     {
-        addFlag("--help", "Display usage instructions and exit.", false);
-        addFlag("--version", "Display the program name/version banner and exit.",
+        add_flag("--help", "Display usage instructions and exit.", false);
+        add_flag("--version", "Display the program name/version banner and exit.",
                 false);
+        add_flag("--settings", "Display settings and exit.", false);
         this->parse(argc, argv);
-        if (isSet("--help")) {
-            printUsage();
+        if (is_set("--help")) {
+            print_usage();
             return false;
         }
-        if (isSet("--version")) {
+        if (is_set("--version")) {
             std::cout << version_ << std::endl;
+            return false;
+        }
+        if (is_set("--settings")) {
+            std::cout << std::string(settings_) << std::endl;
             return false;
         }
         std::vector<std::string> badOpts;
@@ -235,44 +162,103 @@ public:
             }
         }
         int minReqArgs = (int)required_.size();
-//        int minOptArgs = (int)optional_.size();
-
-//        using namespace std;
-
-//        cout << "numArgs    = " << numArgs() << endl;
-//        cout << "minReqArgs = " << minReqArgs << endl;
-//        cout << "minOptArgs = " << minOptArgs << endl;
-
-        if (numArgs() < minReqArgs)
+        if (num_args() < minReqArgs)
         {
             error("Expected >= %i input argument(s), %i given", minReqArgs,
-                    numArgs());
+                    num_args());
             return false;
         }
-//        if (numArgs() < minReqArgs || numArgs() > (minReqArgs +  minOptArgs))
-//        {
-//            if (minOptArgs > 0)
-//                error("Expected %i to %i input argument(s), %i given.",
-//                        minReqArgs, minReqArgs + minOptArgs, numArgs());
-//            else
-//                error("Expected >= %i input argument(s), %i given", minReqArgs,
-//                        numArgs());
-//
-//            return false;
-//        }
         return true;
     }
-
     void error(const char* format, ...)
     {
         std::cerr << "ERROR:\n";
         std::cerr << "  ";
-        va_list args;
+        std::va_list args;
         va_start(args, format);
-        vprintf(format, args);
+        std::vprintf(format, args);
         va_end(args);
         std::cerr << "\n\n";
-        this->printUsage();
+        this->print_usage();
+    }
+    std::vector<std::string> get_args() const
+    {
+        std::vector<std::string> args;
+        for (int i = 1; i < (int)firstArgs.size(); ++i)
+            args.push_back(*this->firstArgs[i]);
+        for (int i = 0; i < (int)lastArgs.size(); ++i)
+            args.push_back(*this->lastArgs[i]);
+        return args;
+    }
+    const char* get_arg(int i = 0) const
+    {
+        if ((int)firstArgs.size()-1 > i)
+            return (*this->firstArgs[i+1]).c_str();
+        // Requested index is in the last argument set.
+        else if (((int)firstArgs.size()-1 + (int)lastArgs.size()) > i)
+            return (*this->lastArgs[i-((int)firstArgs.size()-1)]).c_str();
+        return 0;
+    }
+    std::vector<std::string> get_input_files(int minRequired = 2) const
+    {
+        std::vector<std::string> files;
+        // Note: minRequired+1 because firstArg[0] == binary name
+        bool filesFirst = ((int)this->firstArgs.size() >= minRequired+1) &&
+                ((int)this->lastArgs.size() == 0);
+        if (filesFirst)
+        {
+            // Note: starts at 1 as index 0 == the binary name.
+            for (int i = 1; i < (int)this->firstArgs.size(); ++i)
+                files.push_back(*this->firstArgs[i]);
+        }
+        else
+        {
+            for (int i = 0; i < (int)this->lastArgs.size(); ++i)
+                files.push_back(*this->lastArgs[i]);
+        }
+        return files;
+    }
+    void get_usage(std::string& usage)
+    {
+        this->syntax = this->title + " [OPTIONS]";
+        for (int i = 0; i < (int)required_.size(); ++i)
+            this->syntax += " <" + required_[i] + ">";
+        for (int i = 0; i < (int)optional_.size(); ++i)
+            this->syntax += " [" + optional_[i] + "]";
+        // TODO overload here rather than editing the library header...!
+        ez::ezOptionParser::getUsage(usage);
+    }
+    int is_set(const char* option)
+    {
+        return isSet(option);
+    }
+    void print_usage()
+    {
+        std::string usage;
+        this->get_usage(usage);
+        std::cout << usage;
+    }
+    int num_args() const
+    {
+        return (((int)firstArgs.size()-1) + (int)lastArgs.size());
+    }
+    void set_description(const char* description)
+    {
+        this->description = description;
+    }
+    void set_settings(const char* text)
+    {
+        this->settings_ = text;
+    }
+    void set_title(const char* text)
+    {
+        this->title = text;
+    }
+    void set_version(const char* version, bool show = true)
+    {
+        if (show)
+            this->version = version;
+        version_ = version;
     }
 
 private:
@@ -280,7 +266,10 @@ private:
     std::vector<std::string> optionalHelp_;
     std::vector<std::string> required_;
     std::vector<std::string> requiredHelp_;
+    const char* settings_;
     const char* version_;
 };
+
+} /* namespace oskar */
 
 #endif /* OSKAR_OPTION_PARSER_H_ */

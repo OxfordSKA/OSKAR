@@ -197,77 +197,81 @@ function download_example_data() {
 
 # Description:
 #   Sets the specified setting into the specified *.ini file using the
-#   'oskar_set_setting' binary.
+#   application binary.
 #
 # Usage:
-#   set_setting [ini_file] [key] [value]
+#   set_setting [app] [ini_file] [key] [value]
 #
 # Example
-#   set_setting test.ini sky/oskar_sky_model/file sky.osm
+#   set_setting oskar_sim_interferometer test.ini sky/oskar_sky_model/file sky.osm
 #
 function set_setting() {
-    local bin=${oskar_app_path}/oskar_settings_set
-    if [ ! -x ${bin} ]; then
-        echo "ERROR: Unable to find required binary: $bin."
+    if [ ! $# -eq 4 ]; then
+        echo "ERROR: set_setting requires 4 input arguments got $#."
+        echo "usage: set_setting [app] [ini_file] [key] [value]"
         exit_ 1
+        return
     fi
-    if [ ! $# -eq 3 ]; then
-        echo "ERROR: set_setting requires 3 input arguments got $#."
-        echo "usage: set_setting [ini_file] [key] [value]"
+    if [ ! -x $1 ]; then
+        echo "ERROR: Unable to find required app: $1."
         exit_ 1
+        return
     fi
-    eval "$bin -q $1 $2 \"$3\""
+    if [ ! -x $2 ]; then
+        touch $2
+    fi
+    eval "$1 --set $2 $3 \"$4\""
 }
 
 # Description:
 #   Gets the specified setting into the specified *.ini file using the
-#   'oskar_get_setting' binary.
+#   application binary.
 #
 # Usage:
-#   get_setting [ini_file] [key]
+#   get_setting [app] [ini_file] [key]
 #
 # Example
-#   value=$(get_setting test.ini observation/num_time_steps)
+#   value=$(get_setting oskar_sim_interferometer test.ini observation/num_time_steps)
 #
 function get_setting() {
-    local bin=${oskar_app_path}/oskar_settings_get
-    if [ ! -x ${bin} ]; then
-        echo "ERROR: Unable to find required binary: $bin."
+    if [ ! $# -eq 3 ]; then
+        echo "ERROR: get_setting requires 3 input arguments got $#."
+        echo "usage: get_setting [app] [ini_file] [key]"
         exit_ 1
         return
     fi
-    if [ ! $# -eq 2 ]; then
-        echo "ERROR: get_setting requires 2 input arguments got $#."
-        echo "usage: get_setting [ini_file] [key]"
+    if [ ! -x $1 ]; then
+        echo "ERROR: Unable to find required app: $1."
         exit_ 1
         return
     fi
-    var=$($bin "$1" "$2")
+    var=$($1 --get "$2" "$3")
     echo "$var"
 }
 
 # Description:
-#   Removes / deletes the specified setting in the specified *.ini file using the
-#   'oskar_set_setting' binary.
+#   Removes the specified setting in the specified *.ini file using the
+#   application binary.
 #
 # Usage:
-#   del_setting [ini_file] [key]
+#   del_setting [app] [ini_file] [key]
 #
 # Example
-#   del_setting test.ini sky/oskar_sky_model/file
+#   del_setting oskar_sim_interferometer test.ini sky/oskar_sky_model/file
 #
 function del_setting() {
-    local bin=${oskar_app_path}/oskar_settings_set
-    if [ ! -x ${bin} ]; then
-        echo "ERROR: Unable to find required binary: $bin."
+    if [ ! $# -eq 3 ]; then
+        echo "ERROR: del_setting requires 3 input arguments got $#."
+        echo "usage: del_setting [app] [ini_file] [key]"
         exit_ 1
+        return
     fi
-    if [ ! $# -eq 2 ]; then
-        echo "ERROR: del_setting requires 2 input arguments got $#."
-        echo "usage: del_setting [ini_file] [key]"
+    if [ ! -x $1 ]; then
+        echo "ERROR: Unable to find required app: $1."
         exit_ 1
+        return
     fi
-    cmd="$bin -q $1 $2"
+    cmd="$1 --set $2 $3"
     ($cmd)
 }
 

@@ -4,6 +4,10 @@
 
 # === Set the project name and specify the required CMAKE version.
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+if (APPLE)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8" CACHE STRING "Minimum macOS version")
+endif()
+
 # Set various policies to get old behviour with cmake 3.x
 if (POLICY CMP0042)
     cmake_policy(SET CMP0042 OLD)
@@ -34,9 +38,6 @@ endif()
 if (NOT OSKAR_BIN_INSTALL_DIR)
     set(OSKAR_BIN_INSTALL_DIR "bin")
 endif()
-#if (NOT OSKAR_PYTHON_INSTALL_DIR)
-#    set(OSKAR_PYTHON_INSTALL_DIR "share/oskar/python")
-#endif()
 
 # === Set dependencies and compiler options.
 include(oskar_dependencies)
@@ -49,7 +50,7 @@ enable_testing()
 add_subdirectory(extern)
 add_subdirectory(oskar)
 add_subdirectory(apps)
-# add_subdirectory(python)
+add_subdirectory(gui)
 
 # === Build documentation.
 add_subdirectory(doc)

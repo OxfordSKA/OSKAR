@@ -26,13 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/oskar_OptionParser.h"
 #include "oskar_rebin_sky_cuda.h"
-#include "oskar_sky.h"
+#include "log/oskar_log.h"
+#include "sky/oskar_sky.h"
 #include "utility/oskar_device_utils.h"
 #include "utility/oskar_get_error_string.h"
-#include "oskar_log.h"
-
-#include "oskar_OptionParser.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -42,9 +41,9 @@ int main(int argc, char** argv)
     oskar_Sky *input, *output, *input_gpu, *output_gpu;
     int error = 0;
 
-    oskar_OptionParser opt("oskar_rebin_sky");
-    opt.addRequired("input sky file");
-    opt.addRequired("output sky file");
+    oskar::OptionParser opt("oskar_rebin_sky");
+    opt.add_required("input sky file");
+    opt.add_required("output sky file");
     if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
 

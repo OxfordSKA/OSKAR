@@ -143,7 +143,7 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
     if (num_pols == 1 && h->im_type != OSKAR_IMAGE_TYPE_I &&
             h->im_type != OSKAR_IMAGE_TYPE_PSF)
     {
-        *status = OSKAR_ERR_SETTINGS_IMAGE;
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
     }
 

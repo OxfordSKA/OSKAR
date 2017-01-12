@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@
  */
 enum OSKAR_ERROR_CODES
 {
-    OSKAR_SUCCESS                                      =  0,
+    /* Code zero means no error. */
     OSKAR_ERR_EOF                                      = -1,
     OSKAR_ERR_FILE_IO                                  = -2,
     OSKAR_ERR_INVALID_ARGUMENT                         = -3,
@@ -65,23 +65,16 @@ enum OSKAR_ERROR_CODES
     OSKAR_ERR_SPLINE_COEFF_FAIL                        = -18,
     OSKAR_ERR_SPLINE_EVAL_FAIL                         = -19,
     OSKAR_ERR_ELLIPSE_FIT_FAILED                       = -20,
-    OSKAR_ERR_SETTINGS                                 = -21,
-    OSKAR_ERR_SETTINGS_OBSERVATION                     = -22,
-    OSKAR_ERR_SETTINGS_TELESCOPE                       = -23,
-    OSKAR_ERR_SETTINGS_INTERFEROMETER                  = -24,
-    OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE            = -25,
-    OSKAR_ERR_SETTINGS_BEAM_PATTERN                    = -26,
-    OSKAR_ERR_SETTINGS_IMAGE                           = -27,
-    OSKAR_ERR_SETTINGS_IONOSPHERE                      = -28,
-    OSKAR_ERR_SETUP_FAIL                               = -30,
-    OSKAR_ERR_SETUP_FAIL_SKY                           = -31,
-    OSKAR_ERR_SETUP_FAIL_TELESCOPE                     = -32,
-    OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH    = -33,
-    OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING = -34,
-    OSKAR_ERR_BAD_SKY_FILE                             = -35,
-    OSKAR_ERR_BAD_POINTING_FILE                        = -36,
-    OSKAR_ERR_BAD_COORD_FILE                           = -37,
-    OSKAR_ERR_BAD_GSM_FILE                             = -38,
+    OSKAR_ERR_SETTINGS_TELESCOPE                       = -21,
+    OSKAR_ERR_SETUP_FAIL                               = -22,
+    OSKAR_ERR_SETUP_FAIL_SKY                           = -23,
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE                     = -24,
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH    = -25,
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING = -26,
+    OSKAR_ERR_BAD_SKY_FILE                             = -27,
+    OSKAR_ERR_BAD_POINTING_FILE                        = -28,
+    OSKAR_ERR_BAD_COORD_FILE                           = -29,
+    OSKAR_ERR_BAD_GSM_FILE                             = -30,
 
     /*
      * Codes -75 to -99 are reserved for settings errors.

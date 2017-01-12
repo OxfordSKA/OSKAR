@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_OptionParser.h"
-
+#include "apps/oskar_OptionParser.h"
 #include "log/oskar_log.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_scan_binary_file.h"
@@ -38,21 +37,18 @@
 
 int main(int argc, char** argv)
 {
-    oskar_OptionParser opt("oskar_binary_file_query", oskar_version_string());
-    opt.setDescription("List a summary of the contents of an OSKAR binary file.");
-    opt.addRequired("binary file", "Path of an OSKAR binary file.");
+    oskar::OptionParser opt("oskar_binary_file_query", oskar_version_string());
+    opt.set_description("List a summary of the contents of an OSKAR binary file.");
+    opt.add_required("binary file", "Path of an OSKAR binary file.");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
-    const char* filename = opt.getArg();
+    const char* filename = opt.get_arg();
 
     // Scan the file.
-    int error = OSKAR_SUCCESS;
+    int error = 0;
     oskar_scan_binary_file(0, filename, &error);
     if (error)
-    {
         oskar_log_error(0, oskar_get_error_string(error));
-        return error;
-    }
 
-    return OSKAR_SUCCESS;
+    return error;
 }

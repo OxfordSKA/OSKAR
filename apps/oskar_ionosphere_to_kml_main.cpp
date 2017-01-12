@@ -26,12 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_OptionParser.h"
-#include "oskar_sim_tec_screen.h"
-#include "oskar_settings_to_telescope.h"
-#include "oskar_settings_to_sky.h"
+#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_settings_to_telescope.h"
+#include "apps/oskar_settings_log.h"
+#include "apps/oskar_settings_to_sky.h"
 #include "oskar_settings_load.h"
-#include "oskar_settings_log.h"
+#include "oskar_sim_tec_screen.h"
 
 #include "convert/oskar_convert_offset_ecef_to_ecef.h"
 #include "convert/oskar_convert_mjd_to_gast_fast.h"
@@ -92,8 +92,8 @@ int main(int argc, char** argv)
 {
     int status = 0;
 
-    oskar_OptionParser opt("oskar_sim_tec_screen", oskar_version_string());
-    opt.addRequired("settings file");
+    oskar::OptionParser opt("oskar_sim_tec_screen", oskar_version_string());
+    opt.add_required("settings file");
     if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
 
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
     oskar_Log* log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_STATUS);
     oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
-    const char* settings_file = opt.getArg(0);
+    const char* settings_file = opt.get_arg(0);
     oskar_Settings_old settings;
     oskar_settings_old_load(&settings, log, settings_file, &status);
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
     // Generate or load pierce points
     // -------------------------------------------------------------------------
     status = evaluate_pp(&pp_lon, &pp_lat, settings, log, tel);
-    if (status != OSKAR_SUCCESS)
+    if (status)
         oskar_log_error(log, "XXX: %s.", oskar_get_error_string(status));
 
     // Write out KML

@@ -108,7 +108,7 @@ else()
     endif()
 endif ()
 
-# Rpath settings for OS X
+# Rpath settings for macOS
 # ------------------------------------------------------------------------------
 if (APPLE)
     set(CMAKE_INSTALL_NAME_DIR "@rpath")
@@ -129,15 +129,18 @@ if (CUDA_FOUND)
         set(CUDA_NVCC_FLAGS_RELWIDTHDEBINFO "-02 -g --generate-line-info")
         set(CUDA_NVCC_FLAGS_MINSIZEREL -01)
         if (DEFINED NVCC_COMPILER_BINDIR)
-            append_flags(CUDA_NVCC_FLAGS_RELEASE -ccbin=${NVCC_COMPILER_BINDIR})
-            append_flags(CUDA_NVCC_FLAGS_DEBUG -ccbin=${NVCC_COMPILER_BINDIR})
-            append_flags(CUDA_NVCC_FLAGS_RELWIDTHDEBINFO -ccbin=${NVCC_COMPILER_BINDIR})
-            append_flags(CUDA_NVCC_FLAGS_MINSIZEREL -ccbin=${NVCC_COMPILER_BINDIR})
+            append_flags(CUDA_NVCC_FLAGS_RELEASE -ccbin ${NVCC_COMPILER_BINDIR})
+            append_flags(CUDA_NVCC_FLAGS_DEBUG -ccbin ${NVCC_COMPILER_BINDIR})
+            append_flags(CUDA_NVCC_FLAGS_RELWIDTHDEBINFO -ccbin ${NVCC_COMPILER_BINDIR})
+            append_flags(CUDA_NVCC_FLAGS_MINSIZEREL -ccbin ${NVCC_COMPILER_BINDIR})
         endif()
 
         # Options passed to the compiler NVCC encapsulates.
         if (FORCE_LIBSTDC++)
             list(APPEND CUDA_NVCC_FLAGS -Xcompiler;-stdlib=libstdc++;)
+        endif()
+        if (APPLE AND (DEFINED CMAKE_OSX_DEPLOYMENT_TARGET))
+            list(APPEND CUDA_NVCC_FLAGS -Xcompiler;-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET};)
         endif()
         list(APPEND CUDA_NVCC_FLAGS_RELEASE -Xcompiler;-O2)
         list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-O0)

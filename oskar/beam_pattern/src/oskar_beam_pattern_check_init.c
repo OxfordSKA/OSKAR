@@ -197,7 +197,7 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
     /* Check that at least one output file will be generated. */
     if (h->num_data_products == 0 && !*status)
     {
-        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        *status = OSKAR_ERR_FILE_IO;
         oskar_log_error(h->log, "No output file(s) selected.");
     }
 }
@@ -650,7 +650,7 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
                 {
                     oskar_log_error(h->log, "Cannot create cross-power beam "
                             "using less than two active stations.");
-                    *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+                    *status = OSKAR_ERR_INVALID_ARGUMENT;
                     break;
                 }
 

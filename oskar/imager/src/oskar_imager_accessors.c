@@ -204,7 +204,7 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
         h->algorithm = OSKAR_ALGORITHM_DFT_2D;
     else if (!strncmp(type, "DFT 3", 5) || !strncmp(type, "dft 3", 5))
         h->algorithm = OSKAR_ALGORITHM_DFT_3D;
-    else *status = OSKAR_ERR_SETTINGS_IMAGE;
+    else *status = OSKAR_ERR_INVALID_ARGUMENT;
 }
 
 
@@ -358,7 +358,7 @@ void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
         h->kernel_type = 'G';
     else if (!strncmp(type, "P", 1) || !strncmp(type, "p", 1))
         h->kernel_type = 'P';
-    else *status = OSKAR_ERR_SETTINGS_IMAGE;
+    else *status = OSKAR_ERR_INVALID_ARGUMENT;
 }
 
 
@@ -394,7 +394,7 @@ void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
         h->im_type = OSKAR_IMAGE_TYPE_YX;
     else if (!strncmp(type, "YY", 2) || !strncmp(type, "yy", 2))
         h->im_type = OSKAR_IMAGE_TYPE_YY;
-    else *status = OSKAR_ERR_SETTINGS_IMAGE;
+    else *status = OSKAR_ERR_INVALID_ARGUMENT;
     h->use_stokes = (h->im_type == OSKAR_IMAGE_TYPE_STOKES ||
             h->im_type == OSKAR_IMAGE_TYPE_I ||
             h->im_type == OSKAR_IMAGE_TYPE_Q ||
@@ -560,7 +560,7 @@ void oskar_imager_set_weighting(oskar_Imager* h, const char* type, int* status)
         h->weighting = OSKAR_WEIGHTING_RADIAL;
     else if (!strncmp(type, "U", 1) || !strncmp(type, "u", 1))
         h->weighting = OSKAR_WEIGHTING_UNIFORM;
-    else *status = OSKAR_ERR_SETTINGS_IMAGE;
+    else *status = OSKAR_ERR_INVALID_ARGUMENT;
 }
 
 

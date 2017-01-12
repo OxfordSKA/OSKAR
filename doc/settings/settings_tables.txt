@@ -64,7 +64,7 @@ All settings keys in this group are prefixed with <tt>beam_pattern/</tt>.
 
 <!-- ************************************* -->
 \subsection settings_image Image settings
-These settings are used when running the OSKAR imager. Note that the OSKAR imager in its current form is not recommended for general use: visibilities should normally be written to a Measurement Set for imaging in CASA or other software.
+These settings are used when running the OSKAR imager.
 
 All settings keys in this group are prefixed with <tt>image/</tt>.
 

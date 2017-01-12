@@ -71,7 +71,7 @@ void oskar_evaluate_beam_horizon_direction(double* x, double* y, double* z,
     }
     else
     {
-        *status = OSKAR_ERR_SETTINGS;
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
     }
 
     /* Check if the beam direction needs to be one of a set of

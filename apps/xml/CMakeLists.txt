@@ -14,6 +14,8 @@ foreach (file_ ${SettingsXML})
 endforeach()
 
 # Process import nodes in application XML files.
+# Note that oskar.xml is needed to generate the settings documentation.
+process_import_nodes(${CMAKE_CURRENT_BINARY_DIR}/oskar.xml)
 process_import_nodes(${CMAKE_CURRENT_BINARY_DIR}/oskar_sim_interferometer.xml)
 process_import_nodes(${CMAKE_CURRENT_BINARY_DIR}/oskar_sim_beam_pattern.xml)
 process_import_nodes(${CMAKE_CURRENT_BINARY_DIR}/oskar_sim_tec_screen.xml)

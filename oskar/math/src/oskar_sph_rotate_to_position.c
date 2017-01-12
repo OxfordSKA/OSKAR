@@ -117,7 +117,7 @@ int oskar_sph_rotate_to_position(int n, oskar_Mem* lon, oskar_Mem* lat,
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
-    return OSKAR_SUCCESS;
+    return 0;
 }
 
 

@@ -42,13 +42,7 @@ void oskar_evaluate_image_lm_grid(oskar_Mem* l, oskar_Mem* m, int nl, int nm,
 {
     int type, loc;
 
-    if (!status || *status != OSKAR_SUCCESS)
-        return;
-
-    if (!l || !m) {
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
-        return;
-    }
+    if (*status) return;
 
     type = oskar_mem_type(l);
     if (oskar_mem_type(m) != type) {

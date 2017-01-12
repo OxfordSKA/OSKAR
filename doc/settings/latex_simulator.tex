@@ -35,9 +35,49 @@ true
 \\
 \hline
 
+use\_gpus
+&
+{Use GPU devices if available.}
+&
+Bool
+&
+true
+\\
+\hline
+
+cuda\_device\_ids
+&
+{A comma-separated string containing device (GPU) IDs to use on a multi-GPU system, or `all' to use all devices.}
+&
+CSV integer list or `all'
+&
+all
+\\
+\hline
+
+num\_devices
+&
+{Number of compute devices to use for the simulation. A compute device is either a local CPU core, or a GPU. Don't set this to more than the number of CPU cores in your system.}
+&
+{Integer $\geq$ 1, or `auto'}
+&
+auto
+\\
+\hline
+
+max\_sources\_per\_chunk
+&
+{Maximum number of sources or pixels processed concurrently on a single compute device. Reduce if simulations run out of GPU memory.}
+&
+Integer > 0
+&
+16384
+\\
+\hline
+
 keep\_log\_file
 &
-{Determines whether a log file of the run will be kept on disk. Note that even if this option is set to false, log files will be stored in any OSKAR binary data files produced by the simulator.}
+{Determines whether a log file of the run will remain on disk. Note that even if this option is set to false, logs will be stored in any visibility data files produced by the simulator.}
 &
 Bool
 &
@@ -52,26 +92,6 @@ write\_status\_to\_log\_file
 Bool
 &
 false
-\\
-\hline
-
-max\_sources\_per\_chunk
-&
-{Maximum number of sources or pixels processed concurrently on a single GPU. Reduce this if simulations are running out of GPU memory.}
-&
-Integer > 0
-&
-16384
-\\
-\hline
-
-cuda\_device\_ids
-&
-{A comma-separated string containing device (GPU) IDs to use on a multi-GPU system, or `all' to use all devices.}
-&
-CSV integer list or `all'
-&
-all
 \\
 \hline
 

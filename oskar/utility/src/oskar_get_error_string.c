@@ -49,7 +49,6 @@ const char* oskar_get_error_string(int error)
     /* Return a string describing the OSKAR error code. */
     switch (error)
     {
-    case OSKAR_SUCCESS:                    return "no error reported";
     case OSKAR_ERR_EOF:                    return "end of file";
     case OSKAR_ERR_FILE_IO:                return "file I/O error";
     case OSKAR_ERR_INVALID_ARGUMENT:       return "invalid function argument";
@@ -72,17 +71,7 @@ const char* oskar_get_error_string(int error)
     case OSKAR_ERR_SPLINE_COEFF_FAIL:      return "spline fitting failed";
     case OSKAR_ERR_SPLINE_EVAL_FAIL:       return "spline evaluation failed";
     case OSKAR_ERR_ELLIPSE_FIT_FAILED:     return "ellipse fitting failed";
-    case OSKAR_ERR_SETTINGS:               return "settings error";
-    case OSKAR_ERR_SETTINGS_OBSERVATION:   return "observation settings error";
     case OSKAR_ERR_SETTINGS_TELESCOPE:     return "telescope settings error";
-    case OSKAR_ERR_SETTINGS_INTERFEROMETER:
-        return "interferometer settings error";
-    case OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE:
-        return "interferometer noise settings error";
-    case OSKAR_ERR_SETTINGS_BEAM_PATTERN:
-        return "beam pattern settings error";
-    case OSKAR_ERR_SETTINGS_IMAGE:         return "image settings error";
-    case OSKAR_ERR_SETTINGS_IONOSPHERE:    return "ionosphere settings error";
     case OSKAR_ERR_SETUP_FAIL:             return "set up failed";
     case OSKAR_ERR_SETUP_FAIL_SKY:         return "sky model set up failed";
     case OSKAR_ERR_SETUP_FAIL_TELESCOPE:

@@ -486,10 +486,19 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
     if (*status) return;
 
     /* Check the visibilities are going somewhere. */
-    if (!(h->vis_name || h->ms_name))
+    if (!h->vis_name
+#ifndef OSKAR_NO_MS
+            && !h->ms_name
+#endif
+    )
     {
         oskar_log_error(h->log, "No output file specified.");
-        *status = OSKAR_ERR_SETTINGS_INTERFEROMETER;
+#ifdef OSKAR_NO_MS
+        if (h->ms_name)
+            oskar_log_error(h->log,
+                    "OSKAR was compiled without Measurement Set support.");
+#endif
+        *status = OSKAR_ERR_FILE_IO;
         return;
     }
 
@@ -668,7 +677,7 @@ void oskar_simulator_set_correlation_type(oskar_Simulator* h,
         h->correlation_type = 'B';
     else if (!strncmp(type, "C",  1) || !strncmp(type, "c",  1))
         h->correlation_type = 'C';
-    else *status = OSKAR_ERR_SETTINGS_INTERFEROMETER;
+    else *status = OSKAR_ERR_INVALID_ARGUMENT;
 }
 
 

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/oskar_OptionParser.h"
 #include "binary/oskar_binary.h"
-#include "oskar_OptionParser.h"
 #include "log/oskar_log.h"
 #include "mem/oskar_binary_read_mem.h"
 #include "utility/oskar_get_error_string.h"
@@ -54,20 +54,20 @@ int main(int argc, char **argv)
 {
     int status = 0;
 
-    oskar_OptionParser opt("oskar_vis_summary", oskar_version_string());
-    opt.addRequired("OSKAR visibility file");
-    opt.addFlag("-l", "Display the simulation log.", false, "--log");
-    opt.addFlag("-s", "Display the simulation settings file.", false, "--settings");
-    opt.addFlag("-t", "Display visibility statistics.", false, "--stats");
-    opt.addFlag("-a", "Display header.", false, "--header");
+    oskar::OptionParser opt("oskar_vis_summary", oskar_version_string());
+    opt.add_required("OSKAR visibility file");
+    opt.add_flag("-l", "Display the simulation log.", false, "--log");
+    opt.add_flag("-s", "Display the simulation settings file.", false, "--settings");
+    opt.add_flag("-t", "Display visibility statistics.", false, "--stats");
+    opt.add_flag("-a", "Display header.", false, "--header");
     if (!opt.check_options(argc, argv)) return OSKAR_ERR_INVALID_ARGUMENT;
 
-    vector<string> vis_filename = opt.getInputFiles(1);
+    vector<string> vis_filename = opt.get_input_files(1);
     int num_files = (int)vis_filename.size();
-    bool display_log = opt.isSet("-l") ? true : false;
-    bool display_settings = opt.isSet("-s") ? true : false;
-    bool display_stats = opt.isSet("-t") ? true : false;
-    bool display_header = opt.isSet("-a") ? true : false;
+    bool display_log = opt.is_set("-l") ? true : false;
+    bool display_settings = opt.is_set("-s") ? true : false;
+    bool display_stats = opt.is_set("-t") ? true : false;
+    bool display_header = opt.is_set("-a") ? true : false;
     if (!display_log && !display_settings && !display_stats && !display_header)
         display_header = true;
 

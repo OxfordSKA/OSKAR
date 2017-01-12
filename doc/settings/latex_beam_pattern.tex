@@ -85,7 +85,7 @@ Beam
 beam\_image/size
 &
 {Image dimensions. If a single value is specified, the image is assumed to have the same number of pixels along each dimension.
-\vspace{8pt}\par\noindent  Example: 
+\vspace{8pt}\par\noindent Example: 
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
 \vspace{8pt}
  \item {A value of `256' results in a square image of size 256 by 256 pixels.}
@@ -103,7 +103,7 @@ CSV integer list
 beam\_image/fov\_deg
 &
 {Field-of-view (FOV) in degrees (max 180.0). If a single value is specified, the image is assumed to have the same FOV along each dimension.
-\vspace{8pt}\par\noindent  Example: 
+\vspace{8pt}\par\noindent Example: 
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
 \vspace{8pt}
  \item {A value of `2.0' results in an image with a FOV of 2.0 degrees in each dimension.}
@@ -170,7 +170,7 @@ output/average\_single\_axis
 \end{itemize}
 }
 &
-false
+None
 \\
 \hline
 
@@ -204,9 +204,9 @@ false
 \\
 \hline
 
-station\_outputs/text\_file/auto\_power\_stokes\_i
+station\_outputs/text\_file/auto\_power
 &
-{If true, save each total intensity beam in text files. This is evaluated as the Stokes I response of the auto-correlation.}
+{If true, save each total intensity (auto-correlation) beam in text files.}
 &
 Bool
 &
@@ -234,19 +234,9 @@ false
 \\
 \hline
 
-station\_outputs/fits\_image/auto\_power\_stokes\_i
+station\_outputs/fits\_image/auto\_power
 &
-{If true, save each total intensity beam in FITS image files. This is evaluated as the Stokes I response of the auto-correlation.}
-&
-Bool
-&
-false
-\\
-\hline
-
-telescope\_outputs/text\_file/cross\_power\_stokes\_i\_raw\_complex
-&
-{If true, save the average cross-power beam raw response to Stokes I from all specified stations as a text file.}
+{If true, save each total intensity (auto-correlation) beam in FITS image files.}
 &
 Bool
 &
@@ -254,19 +244,9 @@ false
 \\
 \hline
 
-telescope\_outputs/text\_file/cross\_power\_stokes\_i\_amp
+telescope\_outputs/text\_file/cross\_power\_raw\_complex
 &
-{If true, save the average cross-power beam amplitude response to Stokes I from all specified stations as text files.}
-&
-Bool
-&
-false
-\\
-\hline
-
-telescope\_outputs/text\_file/cross\_power\_stokes\_i\_phase
-&
-{If true, save the average cross-power beam phase response to Stokes I from all specified stations as text files.}
+{If true, save the average cross-power beam raw response from all specified stations as a text file.}
 &
 Bool
 &
@@ -274,9 +254,9 @@ false
 \\
 \hline
 
-telescope\_outputs/fits\_image/cross\_power\_stokes\_i\_amp
+telescope\_outputs/text\_file/cross\_power\_amp
 &
-{If true, save the average cross-power beam amplitude response to Stokes I from all specified stations in FITS image files.}
+{If true, save the average cross-power beam amplitude response from all specified stations as text files.}
 &
 Bool
 &
@@ -284,9 +264,29 @@ false
 \\
 \hline
 
-telescope\_outputs/fits\_image/cross\_power\_stokes\_i\_phase
+telescope\_outputs/text\_file/cross\_power\_phase
 &
-{If true, save the average cross-power beam phase response to Stokes I from all specified stations in FITS image files.}
+{If true, save the average cross-power beam phase response from all specified stations as text files.}
+&
+Bool
+&
+false
+\\
+\hline
+
+telescope\_outputs/fits\_image/cross\_power\_amp
+&
+{If true, save the average cross-power beam amplitude response from all specified stations in FITS image files.}
+&
+Bool
+&
+false
+\\
+\hline
+
+telescope\_outputs/fits\_image/cross\_power\_phase
+&
+{If true, save the average cross-power beam phase response from all specified stations in FITS image files.}
 &
 Bool
 &

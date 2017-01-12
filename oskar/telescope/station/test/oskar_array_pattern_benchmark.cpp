@@ -26,18 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_OptionParser.h"
+#include "apps/oskar_OptionParser.h"
+#include "math/oskar_cmath.h"
 #include "mem/oskar_mem.h"
-#include "utility/oskar_timer.h"
 #include "telescope/station/oskar_station.h"
 #include "telescope/station/private_station.h"
-#include "utility/oskar_get_error_string.h"
 #include "telescope/station/oskar_evaluate_array_pattern.h"
 #include "telescope/station/oskar_evaluate_array_pattern_hierarchical.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_timer.h"
+#include "oskar_version.h"
 
 #include <cstdlib>
 #include <cstdio>
-#include "math/oskar_cmath.h"
 
 enum OpType { O2C, C2C, M2M, UNDEF };
 
@@ -47,55 +48,55 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
 
 int main(int argc, char** argv)
 {
-    oskar_OptionParser opt("oskar_array_pattern_benchmark");
-    opt.addRequired("No. array elements");
-    opt.addRequired("No. directions");
-    opt.addFlag("-sp", "Use single precision (default: double precision)");
-    opt.addFlag("-g", "Run on the GPU");
-    opt.addFlag("-c", "Run on the CPU");
-    opt.addFlag("-o2c", "Single level beam pattern, phase only (real to complex DFT)");
-    opt.addFlag("-c2c", "Beam pattern using complex inputs (complex to complex DFT)");
-    opt.addFlag("-m2m", "Beam pattern using complex, polarised inputs (complex matrix to matrix DFT)");
-    opt.addFlag("-2d", "Use a 2-dimensional phase term (default: 3D)");
-    opt.addFlag("-n", "Number of iterations", 1, "1");
-    opt.addFlag("-v", "Display verbose output.");
+    oskar::OptionParser opt("oskar_array_pattern_benchmark", OSKAR_VERSION_STR);
+    opt.add_required("No. array elements");
+    opt.add_required("No. directions");
+    opt.add_flag("-sp", "Use single precision (default: double precision)");
+    opt.add_flag("-g", "Run on the GPU");
+    opt.add_flag("-c", "Run on the CPU");
+    opt.add_flag("-o2c", "Single level beam pattern, phase only (real to complex DFT)");
+    opt.add_flag("-c2c", "Beam pattern using complex inputs (complex to complex DFT)");
+    opt.add_flag("-m2m", "Beam pattern using complex, polarised inputs (complex matrix to matrix DFT)");
+    opt.add_flag("-2d", "Use a 2-dimensional phase term (default: 3D)");
+    opt.add_flag("-n", "Number of iterations", 1, "1");
+    opt.add_flag("-v", "Display verbose output.");
 
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
 
-    int num_elements = atoi(opt.getArg(0));
-    int num_directions = atoi(opt.getArg(1));
+    int num_elements = atoi(opt.get_arg(0));
+    int num_directions = atoi(opt.get_arg(1));
     OpType op_type = UNDEF;
     int op_type_count = 0;
-    if (opt.isSet("-o2c"))
+    if (opt.is_set("-o2c"))
     {
         op_type = O2C;
         op_type_count++;
     }
-    if (opt.isSet("-c2c"))
+    if (opt.is_set("-c2c"))
     {
         op_type = C2C;
         op_type_count++;
     }
-    if (opt.isSet("-m2m"))
+    if (opt.is_set("-m2m"))
     {
         op_type = M2M;
         op_type_count++;
     }
 
     int loc;
-    if (opt.isSet("-g"))
+    if (opt.is_set("-g"))
         loc = OSKAR_GPU;
-    if (opt.isSet("-c"))
+    if (opt.is_set("-c"))
         loc = OSKAR_CPU;
-    if (!(opt.isSet("-c") ^ opt.isSet("-g")))
+    if (!(opt.is_set("-c") ^ opt.is_set("-g")))
     {
         opt.error("Please select one of -g or -c");
         return EXIT_FAILURE;
     }
 
-    int precision = opt.isSet("-sp") ? OSKAR_SINGLE : OSKAR_DOUBLE;
-    bool evaluate_2d = opt.isSet("-2d") ? true : false;
+    int precision = opt.is_set("-sp") ? OSKAR_SINGLE : OSKAR_DOUBLE;
+    bool evaluate_2d = opt.is_set("-2d") ? true : false;
     int niter;
     opt.get("-n")->getInt(niter);
 
@@ -104,7 +105,7 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    if (opt.isSet("-v"))
+    if (opt.is_set("-v"))
     {
         printf("\n");
         printf("- Number of elements: %i\n", num_elements);
@@ -130,7 +131,7 @@ int main(int argc, char** argv)
                 "%s\n", status, oskar_get_error_string(status));
         return EXIT_FAILURE;
     }
-    if (opt.isSet("-v"))
+    if (opt.is_set("-v"))
     {
         printf("==> Total time taken: %f seconds.\n", time_taken);
         printf("==> Time taken per iteration: %f seconds.\n", time_taken/niter);

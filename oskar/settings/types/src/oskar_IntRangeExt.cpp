@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_IntRangeExt.hpp"
-#include "oskar_settings_utility_string.hpp"
+#include "settings/types/oskar_IntRangeExt.h"
+#include "settings/oskar_settings_utility_string.h"
 #include <climits>
 #include <vector>
 #include <iostream>

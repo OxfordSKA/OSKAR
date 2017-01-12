@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/oskar_OptionParser.h"
 #include "binary/oskar_binary.h"
-#include "oskar_OptionParser.h"
 #include "log/oskar_log.h"
 #include "mem/oskar_binary_read_mem.h"
 #include "utility/oskar_version_string.h"
@@ -46,18 +46,18 @@ int main(int argc, char** argv)
 {
     int error = 0;
 
-    oskar_OptionParser opt("oskar_vis_upgrade_format", oskar_version_string());
-    opt.setDescription("Upgrades one or more old OSKAR visibility binary "
+    oskar::OptionParser opt("oskar_vis_upgrade_format", oskar_version_string());
+    opt.set_description("Upgrades one or more old OSKAR visibility binary "
             "files to the current format version.");
-    opt.addRequired("OSKAR visibility file(s)");
-    opt.addExample("oskar_vis_upgrade_format file1.vis");
+    opt.add_required("OSKAR visibility file(s)");
+    opt.add_example("oskar_vis_upgrade_format file1.vis");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
 
     // Get the options.
     string out_path;
-    vector<string> in_files = opt.getInputFiles(1);
-    bool verbose = opt.isSet("-q") ? false : true;
+    vector<string> in_files = opt.get_input_files(1);
+    bool verbose = opt.is_set("-q") ? false : true;
     int num_in_files = in_files.size();
 
     // Print if verbose.

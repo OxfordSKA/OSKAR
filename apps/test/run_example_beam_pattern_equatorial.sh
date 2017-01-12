@@ -18,9 +18,10 @@ echo ""
 cd "${example_data_dir}"
 
 # Set or overwrite a number of settings in the example data settings file.
-ini=setup.ini
+app=${oskar_app_path}/oskar_sim_beam_pattern
+ini=oskar_sim_beam_pattern.ini
 # Telescope model
-set_setting $ini telescope/input_directory telescope.tm
+set_setting $app $ini telescope/input_directory telescope.tm
 
 # Run the beam pattern simulation
 echo "Running beam pattern simulation"

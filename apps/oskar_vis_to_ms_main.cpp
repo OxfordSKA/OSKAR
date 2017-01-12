@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/oskar_OptionParser.h"
 #include "binary/oskar_binary.h"
-#include "oskar_OptionParser.h"
 #include "log/oskar_log.h"
 #include "mem/oskar_binary_read_mem.h"
 #include "ms/oskar_measurement_set.h"
@@ -48,27 +48,27 @@ int main(int argc, char** argv)
 {
     int error = 0;
 
-    oskar_OptionParser opt("oskar_vis_to_ms", oskar_version_string());
-    opt.setDescription("Converts one or more OSKAR visibility binary files to "
+    oskar::OptionParser opt("oskar_vis_to_ms", oskar_version_string());
+    opt.set_description("Converts one or more OSKAR visibility binary files to "
             "Measurement Set format (http://casa.nrao.edu/Memos/229.html).\n"
             "If not specified, the name of the Measurement Set will "
             "be 'out.ms'.");
-    opt.addRequired("OSKAR visibility files...");
-    opt.addFlag("-o", "Output Measurement Set name", 1, "out.ms",
+    opt.add_required("OSKAR visibility files...");
+    opt.add_flag("-o", "Output Measurement Set name", 1, "out.ms",
             false, "--output");
-    opt.addFlag("-p", "Force polarised MS format", false, "--force_polarised");
-    opt.addExample("oskar_vis_to_ms file1.vis file2.vis");
-    opt.addExample("oskar_vis_to_ms file1.vis file2.vis -o stitched.ms");
-    opt.addExample("oskar_vis_to_ms *.vis");
+    opt.add_flag("-p", "Force polarised MS format", false, "--force_polarised");
+    opt.add_example("oskar_vis_to_ms file1.vis file2.vis");
+    opt.add_example("oskar_vis_to_ms file1.vis file2.vis -o stitched.ms");
+    opt.add_example("oskar_vis_to_ms *.vis");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
 
     // Get the options.
     string out_path;
     opt.get("-o")->getString(out_path);
-    vector<string> in_files = opt.getInputFiles(1);
-    bool verbose = opt.isSet("-q") ? false : true;
-    bool force_polarised = opt.isSet("-p") ? true : false;
+    vector<string> in_files = opt.get_input_files(1);
+    bool verbose = opt.is_set("-q") ? false : true;
+    bool force_polarised = opt.is_set("-p") ? true : false;
     int num_in_files = in_files.size();
 
     // Print if verbose.

@@ -1,12 +1,24 @@
-2016-XX-YY  OSKAR-2.7.0
+2017-XX-YY  OSKAR-2.7.0
 
     * Removed telescope longitude, latitude and altitude from settings file.
       These are now specified using "position.txt" in the telescope model.
 
-    * Added option to specify whether to use GPUs for simulations.
+    * Made CUDA an optional dependency, and added option to specify whether
+      or not to use GPUs for simulations. This makes it possible to run
+      inside a virtual machine if necessary.
 
-    * Added option to specify the number of compute devices for simulations
-      (CPU cores and/or GPU cards).
+    * Removed Qt dependency from all command line applications, and updated
+      the GUI to use Qt 5.
+
+    * Changed GUI to only display settings for the selected application and to
+      remember the last settings file used for each application.
+
+    * Removed oskar_settings_set, as it was unable to check whether settings
+      were being set correctly. Settings files can now be updated using
+      the --set command line option of the required application.
+
+    * Added option to specify the number of compute devices used for
+      simulations (CPU cores and/or GPU cards).
 
     * Added Python interface.
 

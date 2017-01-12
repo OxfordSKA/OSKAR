@@ -82,7 +82,7 @@ void oskar_splines_fit(oskar_Splines* spline, int num_points, double* x_theta,
     /* Check that parameters are within allowed ranges. */
     if (inc_factor <= 1.0)
     {
-        *status = OSKAR_ERR_SETTINGS;
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
     }
 

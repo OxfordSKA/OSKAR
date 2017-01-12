@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,70 +26,83 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_OptionParser.h"
-
+#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_settings_log.h"
 #include "imager/oskar_imager.h"
 #include "log/oskar_log.h"
+#include "settings/oskar_SettingsTree.h"
+#include "settings/oskar_SettingsDeclareXml.h"
+#include "settings/oskar_SettingsFileHandlerIni.h"
 #include "utility/oskar_timer.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
-
-#include "oskar_settings_log.h"
-#include "oskar_SettingsTree.hpp"
-#include "oskar_SettingsDeclareXml.hpp"
-#include "oskar_SettingsFileHandlerIni.hpp"
 
 #include "apps/xml/oskar_imager_xml_all.h"
 
 #include <cstdio>
 #include <cstdlib>
-#include <string>
-#include <vector>
 
 using namespace oskar;
 using std::vector;
 using std::string;
 using std::pair;
 
+static const char settings_def[] = oskar_imager_XML_STR;
+
 int main(int argc, char** argv)
 {
     int e = 0, end, prec;
     double uv_max;
     vector<pair<string, string> > failed_keys;
+    oskar_Log* log = 0;
 
-    oskar_OptionParser opt("oskar_imager", oskar_version_string());
-    opt.addRequired("settings file");
-    opt.addFlag("-q", "Suppress printing.", false, "--quiet");
-    if (!opt.check_options(argc, argv)) return OSKAR_ERR_INVALID_ARGUMENT;
-    const char* settings_file = opt.getArg(0);
+    OptionParser opt("oskar_imager", oskar_version_string(), settings_def);
+    opt.add_settings_options();
+    opt.add_flag("-q", "Suppress printing.", false, "--quiet");
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
+    const char* settings_file = opt.get_arg(0);
 
-    // Create the log.
-    int file_priority = OSKAR_LOG_MESSAGE;
-    int term_priority = opt.isSet("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
-    oskar_Log* log = oskar_log_create(file_priority, term_priority);
-    oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
-
-    // Load the settings file.
-    oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
+    // Declare settings.
     SettingsTree s;
-    settings_declare_xml(&s, oskar_imager_XML_STR);
-    SettingsFileHandlerIni handler;
+    settings_declare_xml(&s, settings_def);
+    SettingsFileHandlerIni handler("oskar_imager", oskar_version_string());
     s.set_file_handler(&handler);
 
-    // Warn about settings failures.
-    if (!s.load(failed_keys, settings_file))
+    // Create the log if necessary.
+    if (!opt.is_set("--get") && !opt.is_set("--set"))
+    {
+        int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
+        log = oskar_log_create(OSKAR_LOG_MESSAGE, priority);
+        oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
+        oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
+    }
+
+    // Load the settings file.
+    if (!s.load(settings_file, failed_keys))
     {
         oskar_log_error(log, "Failed to read settings file.");
-        oskar_log_free(log);
-        return OSKAR_ERR_FILE_IO;
+        if (log) oskar_log_free(log);
+        return EXIT_FAILURE;
     }
-    for (size_t i = 0; i < failed_keys.size(); ++i)
-        oskar_log_warning(log, "Ignoring '%s'='%s'",
-                failed_keys[i].first.c_str(), failed_keys[i].second.c_str());
 
-    // Log the relevant settings.
+    // Get/set setting if necessary.
+    if (opt.is_set("--get"))
+    {
+        printf("%s\n", s.to_string(opt.get_arg(1), &e).c_str());
+        return !e ? 0 : EXIT_FAILURE;
+    }
+    else if (opt.is_set("--set"))
+    {
+        const char* key = opt.get_arg(1);
+        const char* val = opt.get_arg(2);
+        bool ok = val ? s.set_value(key, val) : s.set_default(key);
+        if (!ok) oskar_log_error(log, "Failed to set '%s'='%s'", key, val);
+        return ok ? 0 : EXIT_FAILURE;
+    }
+
+    // Write settings to log.
     oskar_log_set_keep_file(log, 0);
-    oskar_settings_log(&s, log);
+    oskar_settings_log(&s, log, failed_keys);
 
     // Create imager and set values from settings.
     s.begin_group("image");

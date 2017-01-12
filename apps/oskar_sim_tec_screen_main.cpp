@@ -26,17 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_settings_load.h"
-#include "oskar_settings_log.h"
-#include "oskar_settings_to_telescope.h"
-#include "oskar_sim_tec_screen.h"
-#include "oskar_OptionParser.h"
-
+#include "apps/oskar_settings_log.h"
+#include "apps/oskar_settings_to_telescope.h"
+#include "apps/oskar_sim_tec_screen.h"
+#include "apps/oskar_OptionParser.h"
 #include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
 #include "utility/oskar_version_string.h"
 #include "utility/oskar_get_error_string.h"
 
+#include "oskar_settings_load.h"
 #include "apps/xml/oskar_sim_tec_screen_xml_all.h"
 
 #include <cstdlib>
@@ -63,15 +62,15 @@ int main(int argc, char** argv)
 {
     int error = 0;
 
-    oskar_OptionParser opt("oskar_sim_tec_screen", oskar_version_string());
-    opt.addRequired("settings file");
+    OptionParser opt("oskar_sim_tec_screen", oskar_version_string());
+    opt.add_required("settings file");
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
 
     oskar_Log* log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_STATUS);
     oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
-    const char* settings_file = opt.getArg(0);
+    const char* settings_file = opt.get_arg(0);
     oskar_Settings_old settings;
     oskar_settings_old_load(&settings, log, settings_file, &error);
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);

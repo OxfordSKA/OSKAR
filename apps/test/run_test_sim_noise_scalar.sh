@@ -30,41 +30,42 @@ echo ""
 # Move into the example data directory
 cd "${example_data_dir}"
 
-ini=setup.ini
-del_setting $ini sky/oskar_sky_model/file
-set_setting $ini simulator/keep_log_file false
-set_setting $ini simulator/write_status_to_log_file true
-set_setting $ini simulator/double_precision false
-set_setting $ini telescope/input_directory telescope.tm
-set_setting $ini telescope/normalise_beams_at_phase_centre false
-set_setting $ini telescope/pol_mode "Scalar"
-#set_setting $ini telescope/pol_mode "Full"
-set_setting $ini interferometer/max_time_samples_per_block 5
-#set_setting $ini interferometer/ms_filename example.ms
-set_setting $ini interferometer/correlation_type Both
-set_setting $ini observation/num_channels 1
-set_setting $ini observation/start_frequency_hz 200e6
-set_setting $ini observation/num_time_steps 20
-set_setting $ini observation/length "$(bc -l <<< 12.*3600.)"
+app_sim=${oskar_app_path}/oskar_sim_interferometer
+ini_sim=oskar_sim_interferometer.ini
+del_setting $app_sim $ini_sim sky/oskar_sky_model/file
+set_setting $app_sim $ini_sim simulator/keep_log_file false
+set_setting $app_sim $ini_sim simulator/write_status_to_log_file true
+set_setting $app_sim $ini_sim simulator/double_precision false
+set_setting $app_sim $ini_sim telescope/input_directory telescope.tm
+set_setting $app_sim $ini_sim telescope/normalise_beams_at_phase_centre false
+set_setting $app_sim $ini_sim telescope/pol_mode "Scalar"
+#set_setting $app_sim $ini_sim telescope/pol_mode "Full"
+set_setting $app_sim $ini_sim interferometer/max_time_samples_per_block 5
+#set_setting $app_sim $ini_sim interferometer/ms_filename example.ms
+set_setting $app_sim $ini_sim interferometer/correlation_type Both
+set_setting $app_sim $ini_sim observation/num_channels 1
+set_setting $app_sim $ini_sim observation/start_frequency_hz 200e6
+set_setting $app_sim $ini_sim observation/num_time_steps 20
+set_setting $app_sim $ini_sim observation/length "$(bc -l <<< 12.*3600.)"
 
 # Set settings which add noise.
 noise_seed=$((1 + RANDOM % 1000000))
 rms=5
 Tacc=10.0
 bw=10.0
-set_setting $ini interferometer/channel_bandwidth_hz $bw
-set_setting $ini interferometer/time_average_sec $Tacc
-set_setting $ini interferometer/noise/enable true
-set_setting $ini interferometer/noise/seed $noise_seed
-set_setting $ini interferometer/noise/freq "Observation settings"
-set_setting $ini interferometer/noise/rms "Range"
-set_setting $ini interferometer/noise/rms/start $rms
-set_setting $ini interferometer/noise/rms/end $rms
+set_setting $app_sim $ini_sim interferometer/channel_bandwidth_hz $bw
+set_setting $app_sim $ini_sim interferometer/time_average_sec $Tacc
+set_setting $app_sim $ini_sim interferometer/noise/enable true
+set_setting $app_sim $ini_sim interferometer/noise/seed $noise_seed
+set_setting $app_sim $ini_sim interferometer/noise/freq "Observation settings"
+set_setting $app_sim $ini_sim interferometer/noise/rms "Range"
+set_setting $app_sim $ini_sim interferometer/noise/rms/start $rms
+set_setting $app_sim $ini_sim interferometer/noise/rms/end $rms
 
 # Run the interferometry simulation
 echo "Starting interferometry simulation (with no sources)"
 T0="$(date +%s)"
-run_sim_interferometer -q $ini # &> /dev/null
+run_sim_interferometer -q $ini_sim # &> /dev/null
 echo "  Finished in $(($(date +%s)-T0)) s"
 echo ""
 
@@ -102,21 +103,23 @@ echo ""
 ###############################################################################
 
 # Image noisy visibilities
-set_setting $ini image/image_type "I"
-set_setting $ini image/fov_deg 5
-set_setting $ini image/size 1024
-set_setting $ini image/time_snapshots false
-set_setting $ini image/input_vis_data $noise_vis
-set_setting $ini image/root_path "with_noise"
+app_img=${oskar_app_path}/oskar_imager
+ini_img=oskar_imager.ini
+set_setting $app_img $ini_img image/image_type "I"
+set_setting $app_img $ini_img image/fov_deg 5
+set_setting $app_img $ini_img image/size 1024
+set_setting $app_img $ini_img image/time_snapshots false
+set_setting $app_img $ini_img image/input_vis_data $noise_vis
+set_setting $app_img $ini_img image/root_path "with_noise"
 echo "Imaging"
 T0="$(date +%s)"
-run_imager -q $ini
+run_imager -q $ini_img
 echo "  Finished in $(($(date +%s)-T0)) s"
 echo ""
 
 num_stations=30
-noise_rms=$(get_setting $ini interferometer/noise/rms/start)
-num_times=$(get_setting $ini observation/num_time_steps)
+noise_rms=$(get_setting $app_sim $ini_sim interferometer/noise/rms/start)
+num_times=$(get_setting $app_sim $ini_sim observation/num_time_steps)
 num_baselines=$((num_stations*(num_stations-1)/2))
 num_samples=$((num_baselines*num_times))
 #

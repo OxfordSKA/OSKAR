@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_OptionParser.h"
-
+#include "apps/oskar_OptionParser.h"
 #include "log/oskar_log.h"
 #include "sky/oskar_sky.h"
 #include "utility/oskar_get_error_string.h"
@@ -40,18 +39,18 @@ int main(int argc, char** argv)
 {
     int error = 0;
 
-    oskar_OptionParser opt("oskar_fits_image_to_sky_model",
+    oskar::OptionParser opt("oskar_fits_image_to_sky_model",
             oskar_version_string());
-    opt.setDescription("Converts a FITS image to an OSKAR sky model. A number "
+    opt.set_description("Converts a FITS image to an OSKAR sky model. A number "
             "of options are provided to control how much of the image is used "
             "to make the sky model.");
-    opt.addRequired("FITS file", "The input FITS image to convert.");
-    opt.addRequired("sky model file", "The output OSKAR sky model file name to save.");
-    opt.addFlag("-s", "Spectral index. This is the spectral index that will "
+    opt.add_required("FITS file", "The input FITS image to convert.");
+    opt.add_required("sky model file", "The output OSKAR sky model file name to save.");
+    opt.add_flag("-s", "Spectral index. This is the spectral index that will "
             "be given to each pixel in the output sky model.", 1, "0.0");
-    opt.addFlag("-f", "Minimum allowed fraction of image peak. Pixel values "
+    opt.add_flag("-f", "Minimum allowed fraction of image peak. Pixel values "
             "below this fraction will be ignored.", 1, "0.0");
-    opt.addFlag("-n", "Noise floor in units of original image. "
+    opt.add_flag("-n", "Noise floor in units of original image. "
             "Pixels below this value will be ignored.", 1, "0.0");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
@@ -65,12 +64,12 @@ int main(int argc, char** argv)
     opt.get("-s")->getDouble(spectral_index);
 
     // Load the FITS image data.
-    oskar_Sky* sky = oskar_sky_from_fits_file(OSKAR_DOUBLE, opt.getArg(0),
+    oskar_Sky* sky = oskar_sky_from_fits_file(OSKAR_DOUBLE, opt.get_arg(0),
             min_peak_fraction, min_abs_val, "Jy/beam", 0, 0.0, spectral_index,
             &error);
 
     // Write out the sky model.
-    oskar_sky_save(opt.getArg(1), sky, &error);
+    oskar_sky_save(opt.get_arg(1), sky, &error);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));

@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_Double.hpp"
-#include "oskar_settings_utility_string.hpp"
+#include "settings/types/oskar_Double.h"
+#include "settings/oskar_settings_utility_string.h"
 #include <sstream>
 #include <cmath>
 #include <cfloat>

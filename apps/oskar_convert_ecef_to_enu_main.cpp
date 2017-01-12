@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_OptionParser.h"
-
+#include "apps/oskar_OptionParser.h"
 #include "convert/oskar_convert_ecef_to_enu.h"
 #include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
@@ -41,20 +40,20 @@
 int main(int argc, char** argv)
 {
     int status = 0;
-    oskar_OptionParser opt("oskar_convert_ecef_to_enu",
+    oskar::OptionParser opt("oskar_convert_ecef_to_enu",
             oskar_version_string());
-    opt.setDescription("Converts Cartesian ECEF to ENU coordinates at "
+    opt.set_description("Converts Cartesian ECEF to ENU coordinates at "
             "reference location. Assumes WGS84 ellipsoid.");
-    opt.addRequired("input file", "Path to file containing input coordinates.");
-    opt.addRequired("ref. longitude [deg]", "Reference longitude in degrees.");
-    opt.addRequired("ref. latitude [deg]", "Reference latitude in degrees.");
-    opt.addRequired("ref. altitude [m]", "Reference altitude in metres.");
+    opt.add_required("input file", "Path to file containing input coordinates.");
+    opt.add_required("ref. longitude [deg]", "Reference longitude in degrees.");
+    opt.add_required("ref. latitude [deg]", "Reference latitude in degrees.");
+    opt.add_required("ref. altitude [m]", "Reference altitude in metres.");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
-    const char* filename = opt.getArg(0);
-    double lon = strtod(opt.getArg(1), 0) * M_PI / 180.0;
-    double lat = strtod(opt.getArg(2), 0) * M_PI / 180.0;
-    double alt = strtod(opt.getArg(3), 0);
+    const char* filename = opt.get_arg(0);
+    double lon = strtod(opt.get_arg(1), 0) * M_PI / 180.0;
+    double lat = strtod(opt.get_arg(2), 0) * M_PI / 180.0;
+    double alt = strtod(opt.get_arg(3), 0);
 
     // Load the input file.
     oskar_Mem *ecef_x = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);

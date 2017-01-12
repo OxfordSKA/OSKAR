@@ -176,7 +176,7 @@ TEST(evaluate_pierce_points, test2)
     oskar_Mem *hor_x, *hor_y, *hor_z;
     int type = OSKAR_DOUBLE;
     int location = OSKAR_CPU;
-    int status = OSKAR_SUCCESS;
+    int status = 0;
     hor_x = oskar_mem_create(type, location, n, &status);
     hor_y = oskar_mem_create(type, location, n, &status);
     hor_z = oskar_mem_create(type, location, n, &status);

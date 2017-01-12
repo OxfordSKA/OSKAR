@@ -1,28 +1,30 @@
 
 # 1. Introduction
 
-The OSKAR simulation package can be built and installed by following the steps
-described below. The current version is available as a source code distribution,
-targeted at Linux and Mac OS X operating systems. Partial installation under
+OSKAR can be built and installed by following the steps described below.
+The current version is available as a source code distribution,
+targeted at Linux and macOS operating systems. Partial installation under
 Microsoft Windows may be possible, but is not currently supported.
 
 
 # 2. Dependencies
 
-OSKAR depends on a number of other libraries. The main components of OSKAR
-require CUDA 5.5 or later and Qt 4.6 or later to be installed on the target
-system. Additionally, the casacore libraries must be present if
-Measurement Sets are to be exported.
+Some parts of OSKAR depend on a number of other libraries.
+If GPU acceleration is required, an NVIDIA GPU with CUDA 5.5 or later
+(and associated NVIDIA driver) must be installed on the target system.
+If the graphical user interface (GUI) is required, Qt must also be installed.
+Additionally, the casacore libraries must be present if Measurement Sets
+are to be exported.
 
 Please ensure that the required dependencies are installed before proceeding
 further.
 
 The list below summarises the main dependencies:
 
-* CMake (http://www.cmake.org), version >= 3.0.0
-* NVIDIA CUDA (http://developer.nvidia.com/cuda-downloads), version >= 5.5
-* Qt4 (http://www.qt.io), version >= 4.6
-* casacore (https://github.com/casacore/casacore), version >= 1.5.0
+* CMake (https://cmake.org), version >= 3.0.0
+* [Optional] NVIDIA CUDA (https://developer.nvidia.com/cuda-downloads), version >= 5.5
+* [Optional] Qt 5 (https://www.qt.io)
+* [Optional] casacore (https://github.com/casacore/casacore), version >= 1.5.0
 
 
 # 3. Building OSKAR
@@ -55,28 +57,31 @@ These are listed below.
 
 Advanced Build Options:
 
-    * -DCMAKE_BUILD_TYPE=<release or debug> (default: release)
-        Build OSKAR in release or debug mode.
-
     * -DCASACORE_LIB_DIR=<path> (default: searches the system library paths)
         Specifies a custom path in which to look for the CasaCore libraries
         (libcasa_ms.so and others).
-        Note: This should only be used in special cases, where the version of
-        CasaCore installed in the system library path can't be used to build
-        OSKAR.
+        Note: This should only be used if the CasaCore library in the system
+        library path can't be used to build OSKAR..
 
     * -DCASACORE_INC_DIR=<path> (default: searches the system include paths)
         Specifies a custom path in which to look for the CasaCore library
         headers. This is the path to the top level casacore include folder.
-        Note: This should only be used in special cases, where the version of
-        CasaCore headers installed in the system include path can't be used to
-        build OSKAR.
+        Note: This should only be used if the CasaCore headers in the system
+        include path can't be used to build OSKAR.
+
+    * -DCMAKE_PREFIX_PATH=<path> (default: None)
+        Specifies a location in which to search for Qt 5. For example, if
+        using Homebrew on macOS, this may need to be set to /usr/local/opt/qt5/
+
+    * -DCMAKE_BUILD_TYPE=<release or debug> (default: release)
+        Build OSKAR in release or debug mode.
 
     * -DNVCC_COMPILER_BINDIR=<path> (default: None)
         Specifies a nvcc compiler binary directory override. See nvcc help.
-        Note: This is likely to be needed only on OS X when the version of the
+        Note: This is likely to be needed only on macOS when the version of the
         compiler picked up by nvcc (which is related to the version of XCode
         being used) is incompatible with the current version of CUDA.
+        Set this to 'clang' on macOS if using GCC to build the rest of OSKAR.
 
     * -DFORCE_LIBSTDC++=ON|OFF (default: OFF)
         If ON forces the use of libstdc++ with the Clang compiler.
@@ -88,21 +93,10 @@ Advanced Build Options:
         If ON enables the display of diagnostic build information when
         running CMake.
 
-    * -DPYTHON_LIBRARY=<path to library> (default: None)
-        Path to the Python library which can be used to specify a specific
-        installation of Python to use.
+## 3.2. Custom (Non-System) Qt Installations
 
-    * -DPYTHON_INCLUDE_DIR=<path to Python.h> (default: None)
-        Path to Python.h which can be used to specify a specific installation
-        of Python to use.
-
-## 3.2. Custom (Non-System) Qt4 Installations
-
-When searching for a valid Qt4 installation, the OSKAR CMake build system
-queries the qmake binary in order to determine the location of the relevant
-libraries and headers. Therefore, all that is required to use a specific
-version of Qt4 is to add the location of the desired qmake binary to the
-beginning of the system search path.
+If Qt 5 cannot be found from the default system paths, make sure to set
+CMAKE_PREFIX_PATH as described above.
 
 
 # 4. Testing the Installation

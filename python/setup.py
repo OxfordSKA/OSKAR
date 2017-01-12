@@ -143,12 +143,12 @@ setup(
             'Development Status :: 3 - Alpha',
             'Environment :: Console',
             'Intended Audience :: Science/Research',
-            'Topic :: Scientific/Engineering :: Astronomy'
+            'Topic :: Scientific/Engineering :: Astronomy',
             'License :: OSI Approved :: BSD License',
             'Operating System :: POSIX',
             'Programming Language :: C',
             'Programming Language :: Python :: 2.7',
-            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3'
     ],
     author='OSKAR Developers',
     author_email='oskar@oerc.ox.ac.uk',

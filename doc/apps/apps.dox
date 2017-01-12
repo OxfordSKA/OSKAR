@@ -3,7 +3,7 @@
 \page apps Applications
 
 \latexonly
-\def \docversion{10}
+\def \docversion{11}
 \endlatexonly
 
 \section apps_intro Introduction
@@ -13,7 +13,7 @@ OSKAR package. It assumes that OSKAR has already been built and installed.
 
 \section apps_binaries Application Binaries
 
-Currently, there are 14 OSKAR application binaries available, listed below
+Currently, there are 12 OSKAR application binaries available, listed below
 in alphabetical order. Applications that can be used to perform simulations
 with OSKAR are marked with *.
 
@@ -23,8 +23,6 @@ with OSKAR are marked with *.
 -# \ref apps_oskar_fit_element_data "oskar_fit_element_data"
 -# \ref apps_oskar_fits_image_to_sky_model "oskar_fits_image_to_sky_model"
 -# \ref apps_oskar_imager "oskar_imager"
--# \ref apps_oskar_settings_get "oskar_settings_get"
--# \ref apps_oskar_settings_set "oskar_settings_set"
 -# \ref apps_oskar_sim_beam_pattern "oskar_sim_beam_pattern *"
 -# \ref apps_oskar_sim_interferometer "oskar_sim_interferometer *"
 -# \ref apps_oskar_vis_add "oskar_vis_add"
@@ -74,11 +72,13 @@ options are configured using the element fit group of the specified settings
 file. The application is run using the following syntax:
 
 \code
-    $ oskar_fit_element_data <settings file path>
+    $ oskar_fit_element_data [--set] <settings file path> [key] [value]
 \endcode
 
 Note that this application can be configured and run via the oskar GUI
-application, described above.
+application, described above. If required, settings files can be modified
+via the command line using the --set option, with the key and new value given
+after the path to the settings file.
 
 \subsection apps_oskar_fits_image_to_sky_model oskar_fits_image_to_sky_model
 
@@ -97,44 +97,20 @@ all be set here.
 
 \subsection apps_oskar_imager oskar_imager
 
-An application that can be used to make raw (dirty) images, in FITS or OSKAR
-binary image format, from visibility data stored in OSKAR binary visibility
-data files. Images or image cubes are made using a GPU-based DFT algorithm.
+An application that can be used to make raw (dirty) FITS images or image cubes
+from visibility data stored in OSKAR binary visibility data files or
+CASA Measurement Sets.
 All options are configured in the image group of a specified OSKAR settings
 file, and the imager is run with the following syntax:
 
 \code
-    $ oskar_imager <settings file path>
+    $ oskar_imager [--set] <settings file path> [key] [value]
 \endcode
 
 Note that this application can be configured and run via the oskar GUI
-application, described above.
-
-\subsection apps_oskar_settings_get oskar_settings_get
-
-Intended for use when scripting OSKAR, this utility reads the value of a
-specified settings key in an OSKAR settings file. The settings value is
-written to the terminal standard output. This application is run using the
-following syntax:
-
-\code
-    $ oskar_settings_get <settings file path> <key>
-\endcode
-
-\subsection apps_oskar_settings_set    oskar_settings_set
-
-Intended for use when scripting OSKAR, this utility can be used to write
-settings to an OSKAR settings file. The value of the setting, the settings
-key and settings file are specified on the command line according to the
-following syntax:
-
-\code
-    $ oskar_settings_set <settings file path> <key> <value>
-\endcode
-
-An example shell script that makes use of oskar_settings_set is shown later
-in this document. Please see the accompanying documentation for details of
-the options that can be set in OSKAR settings files.
+application, described above. If required, settings files can be modified
+via the command line using the --set option, with the key and new value given
+after the path to the settings file.
 
 \subsection apps_oskar_sim_beam_pattern    oskar_sim_beam_pattern
 
@@ -145,11 +121,13 @@ same algorithms used in the interferometry simulation. The application is run
 with the following syntax:
 
 \code
-    $ oskar_sim_beam_pattern <settings file path>
+    $ oskar_sim_beam_pattern [--set] <settings file path> [key] [value]
 \endcode
 
 Note that this application can be configured and run via the oskar GUI
-application, described above.
+application, described above. If required, settings files can be modified
+via the command line using the --set option, with the key and new value given
+after the path to the settings file.
 
 \subsection apps_oskar_sim_interferometer    oskar_sim_interferometer
 
@@ -160,37 +138,39 @@ variety of options, which are specified in an OSKAR settings file provided as
 the first command line argument:
 
 \code
-    $ oskar_sim_interferometer <settings file path>
+    $ oskar_sim_interferometer [--set] <settings file path> [key] [value]
 \endcode
 
 Note that this application can be configured and run via the oskar GUI
-application, described above.
+application, described above. If required, settings files can be modified
+via the command line using the --set option, with the key and new value given
+after the path to the settings file.
 
 \subsubsection apps_oskar_sim_interferometer_parallel Parallelisation and multi-GPU usage
 
 Interferometer simulations operate on units of computation known as a
 visibility block. This is a unit of the final output visibility data set
 containing all baselines and all channels, but a limited number of times.
-Computation and writing of these visibility blocks is overlapped by using 
-multiple CPU threads. In addition, if multiple GPUs are available and assigned 
-in the simulation settings, they will cooperate on filling each visibility 
-block. The division of work which results by using this scheme to simulate a 
+Computation and writing of these visibility blocks is overlapped by using
+multiple CPU threads. In addition, if multiple GPUs are available and assigned
+in the simulation settings, they will cooperate on filling each visibility
+block. The division of work which results by using this scheme to simulate a
 data set on a system with two GPUs is illustrated in the
 \ref sim_interferometer_timing_fig "Figure" below. In this illustration, after
 a short period of loading the simulator settings and input model data (marked
 'Setup & load'), three threads are launched to perform overlapping
-compute and write of blocks of visibility data. Note that the number of 
+compute and write of blocks of visibility data. Note that the number of
 threads used by the simulator will be one larger than the number of GPUs used
 for the computation. Computation within each visibility block is split between
-each of the available GPUs, and proceeds by sharing out independent units of 
-the visibility block which correspond to the visibilities for one chunk of 
-sources for one time. The size of the chunk of sources, which has an impact 
-on the number of compute units shared between the GPUs, is configurable in 
-the simulation settings. In order to achieve good performance, it is 
-advisable to ensure that the number of source chunks multiplied by the number 
-of times in a visibility block is large enough to hide any variation in 
-compute times between the different compute units, while at the same time 
-having enough sources in a chunk to fully occupy the GPU (i.e. several 
+each of the available GPUs, and proceeds by sharing out independent units of
+the visibility block which correspond to the visibilities for one chunk of
+sources for one time. The size of the chunk of sources, which has an impact
+on the number of compute units shared between the GPUs, is configurable in
+the simulation settings. In order to achieve good performance, it is
+advisable to ensure that the number of source chunks multiplied by the number
+of times in a visibility block is large enough to hide any variation in
+compute times between the different compute units, while at the same time
+having enough sources in a chunk to fully occupy the GPU (i.e. several
 thousand sources in each chunk).
 
 \anchor sim_interferometer_timing_fig
@@ -206,9 +186,9 @@ results of a number of timers. These are the following:
 - <b>Total wall time</b> is the total execution time for the simulation. This
 is a combination of the time taken in loading input data, all computation,
 and writing the output files. Where possible, compute and write operations are
-overlapped, so the total compute time will equal the largest of either write 
-or compute, and the balance between these will give an indication of whether 
-the simulation is limited by available computing power or filesystem 
+overlapped, so the total compute time will equal the largest of either write
+or compute, and the balance between these will give an indication of whether
+the simulation is limited by available computing power or filesystem
 performance.
 - <b>Load</b> is the time taken in loading the simulation input data. This time
 is always a contribution to the total wall time.
@@ -217,12 +197,12 @@ visibility blocks. This is usually the dominant part of the total simulation
 wall time, in which case the simulation performance is limited by available
 computing power.
 - <b>Write</b> time indicates the total time taken in writing visibility
-data files (CASA Measurement Set and/or OSKAR binary format). If the compute 
-time is larger than this value, write operations will have very little impact 
+data files (CASA Measurement Set and/or OSKAR binary format). If the compute
+time is larger than this value, write operations will have very little impact
 on the overall simulation wall time. The only exception to this is writing the
 last visibility block, which cannot overlap with any compute operations.
 
-Notable components of the simulation compute time are also listed, with 
+Notable components of the simulation compute time are also listed, with
 their average percentage contribution to the total computation cost.
 - <b>Copy</b> represents the cost of setting up and moving data to the GPU.
 - <b>Horizon clip</b> is the process of removing sources below the horizon as
@@ -315,10 +295,11 @@ section only exists to show an example of the scripting capability of OSKAR.
 INI=temp.ini
 SKY=temp.sky
 
-# Name of binary.
-OSKAR_SET=oskar_settings_set
+# Command used to set parameters.
+OSKAR_SET=oskar_sim_interferometer --set
 
 # General settings.
+touch $INI
 $OSKAR_SET $INI sky/oskar_sky_model/file $SKY
 $OSKAR_SET $INI observation/start_frequency_hz 100000000
 $OSKAR_SET $INI observation/start_time_utc "21-09-2000 00:00:00.000"
@@ -326,7 +307,6 @@ $OSKAR_SET $INI observation/length 12:00:00.000
 $OSKAR_SET $INI observation/num_time_steps 24
 $OSKAR_SET $INI telescope/input_directory \
         ../../data/telescope/hexagonal_regular_small_25x2587
-$OSKAR_SET $INI telescope/longitude_deg 0
 $OSKAR_SET $INI telescope/aperture_array/array_pattern/enable false
 $OSKAR_SET $INI telescope/aperture_array/element_pattern/enable_numerical false
 $OSKAR_SET $INI telescope/aperture_array/element_pattern/functional_type \
@@ -453,8 +433,12 @@ ds9 Equator_RA_1*.fits &
     <td>[2.5.1] Updated description for oskar_vis_to_ms application, which
     now supports concatenation of visibility files.</td></tr>
 <tr><td>10</td><td>2015-04-27</td>
-    <td>[2.6.0] Updated description of the oskar_sim_interferometer 
+    <td>[2.6.0] Updated description of the oskar_sim_interferometer
     application. Removed deprecated oskar_image_* applications.
+    </td></tr>
+<tr><td>11</td><td>2017-01-05</td>
+    <td>[2.7.0] Removed oskar_settings_set and replaced with --set option
+    on applications that use settings files.
     </td></tr>
 </table>
 

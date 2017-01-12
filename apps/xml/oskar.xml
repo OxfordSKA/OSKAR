@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root version="@OSKAR_VERSION_STR@">
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_simulator.xml" />
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_sky_model.xml" />
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_observation.xml" />
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_telescope_model.xml" />
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_element_fit.xml" />
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_interferometer.xml" />
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_beam_pattern.xml" />
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_image.xml" />
+</root>

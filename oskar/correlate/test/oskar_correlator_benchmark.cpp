@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/oskar_OptionParser.h"
 #include "correlate/oskar_cross_correlate.h"
-#include "telescope/oskar_telescope.h"
 #include "sky/oskar_sky.h"
 #include "simulator/oskar_jones.h"
 #include "mem/oskar_mem.h"
+#include "telescope/oskar_telescope.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_timer.h"
-
-#include "oskar_OptionParser.h"
+#include "oskar_version.h"
 
 #ifndef _WIN32
 #   include <sys/time.h>
@@ -50,21 +50,21 @@ int benchmark(int num_stations, int num_sources, int type,
 
 int main(int argc, char** argv)
 {
-    oskar_OptionParser opt("oskar_correlator_benchmark");
-    opt.addFlag("-nst", "Number of stations.", 1, "", true);
-    opt.addFlag("-nsrc", "Number of sources.", 1, "", true);
-    opt.addFlag("-sp", "Use single precision (default: double precision)");
-    opt.addFlag("-s", "Use scalar Jones terms (default: matrix/polarised).");
-    opt.addFlag("-g", "Run on the GPU");
-    opt.addFlag("-c", "Run on the CPU");
-    opt.addFlag("-e", "Use Gaussian sources (default: point sources).");
-    opt.addFlag("-t", "Use analytical time averaging (default: no time "
+    oskar::OptionParser opt("oskar_correlator_benchmark", OSKAR_VERSION_STR);
+    opt.add_flag("-nst", "Number of stations.", 1, "", true);
+    opt.add_flag("-nsrc", "Number of sources.", 1, "", true);
+    opt.add_flag("-sp", "Use single precision (default: double precision)");
+    opt.add_flag("-s", "Use scalar Jones terms (default: matrix/polarised).");
+    opt.add_flag("-g", "Run on the GPU");
+    opt.add_flag("-c", "Run on the CPU");
+    opt.add_flag("-e", "Use Gaussian sources (default: point sources).");
+    opt.add_flag("-t", "Use analytical time averaging (default: no time "
             "averaging).");
-    opt.addFlag("-r", "Dump raw iteration data to this file.", 1);
-    opt.addFlag("-std", "Discard values greater than this number of standard "
+    opt.add_flag("-r", "Dump raw iteration data to this file.", 1);
+    opt.add_flag("-std", "Discard values greater than this number of standard "
             "deviations from the mean.", 1);
-    opt.addFlag("-n", "Number of iterations", 1, "1", false);
-    opt.addFlag("-v", "Display verbose output.", false);
+    opt.add_flag("-n", "Number of iterations", 1, "1", false);
+    opt.add_flag("-v", "Display verbose output.", false);
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
 
@@ -72,37 +72,37 @@ int main(int argc, char** argv)
     double max_std_dev = 0.0;
     opt.get("-nst")->getInt(num_stations);
     opt.get("-nsrc")->getInt(num_sources);
-    int type = opt.isSet("-sp") ? OSKAR_SINGLE : OSKAR_DOUBLE;
+    int type = opt.is_set("-sp") ? OSKAR_SINGLE : OSKAR_DOUBLE;
     int jones_type = type | OSKAR_COMPLEX;
-    if (!opt.isSet("-s"))
+    if (!opt.is_set("-s"))
         jones_type |= OSKAR_MATRIX;
     opt.get("-n")->getInt(niter);
-    int use_extended = opt.isSet("-e") ? OSKAR_TRUE : OSKAR_FALSE;
-    int use_time_ave = opt.isSet("-t") ? OSKAR_TRUE : OSKAR_FALSE;
+    int use_extended = opt.is_set("-e") ? OSKAR_TRUE : OSKAR_FALSE;
+    int use_time_ave = opt.is_set("-t") ? OSKAR_TRUE : OSKAR_FALSE;
     std::string raw_file;
-    if (opt.isSet("-r"))
+    if (opt.is_set("-r"))
         opt.get("-r")->getString(raw_file);
-    if (opt.isSet("-std"))
+    if (opt.is_set("-std"))
         opt.get("-std")->getDouble(max_std_dev);
 
     int loc;
-    if (opt.isSet("-g"))
+    if (opt.is_set("-g"))
         loc = OSKAR_GPU;
-    if (opt.isSet("-c"))
+    if (opt.is_set("-c"))
         loc = OSKAR_CPU;
-    if (!(opt.isSet("-c") ^ opt.isSet("-g")))
+    if (!(opt.is_set("-c") ^ opt.is_set("-g")))
     {
         opt.error("Please select one of -g or -c");
         return EXIT_FAILURE;
     }
 
-    if (opt.isSet("-v"))
+    if (opt.is_set("-v"))
     {
         printf("\n");
         printf("- Number of stations: %i\n", num_stations);
         printf("- Number of sources: %i\n", num_sources);
         printf("- Precision: %s\n", (type == OSKAR_SINGLE) ? "single" : "double");
-        printf("- Jones type: %s\n", (opt.isSet("-s")) ? "scalar" : "matrix");
+        printf("- Jones type: %s\n", (opt.is_set("-s")) ? "scalar" : "matrix");
         printf("- Extended sources: %s\n", (use_extended) ? "true" : "false");
         printf("- Analytical time smearing: %s\n", (use_time_ave) ? "true" : "false");
         printf("- Number of iterations: %i\n", niter);
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
     }
 
     // Print average.
-    if (opt.isSet("-v"))
+    if (opt.is_set("-v"))
     {
         printf("==> Total time taken: %f seconds.\n", time_taken_sec);
         printf("==> Time taken per iteration: %f seconds.\n", average_time_sec);

@@ -153,7 +153,7 @@ static void oskar_evaluate_TEC(oskar_WorkJonesZ* work, int num_pp,
      * if a TEC model which is valid for multiple screens is implemented
      */
     if (settings->num_TID_screens > 1)
-        *status = OSKAR_ERR_SETTINGS_IONOSPHERE;
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
 
     oskar_mem_set_value_real(work->total_TEC, 0.0, 0, 0, status);
 

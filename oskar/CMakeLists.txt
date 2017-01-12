@@ -3,6 +3,7 @@
 #
 
 # Build OSKAR sub-libraries.
+add_subdirectory(apps)
 add_subdirectory(binary)
 add_subdirectory(ms)
 add_subdirectory(settings)
@@ -94,22 +95,10 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/oskar"
     DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
     FILES_MATCHING PATTERN "oskar*.h"
     PATTERN ${install_include_dir} EXCLUDE
-    PATTERN build EXCLUDE
-    PATTERN release EXCLUDE
-    PATTERN release* EXCLUDE
-    PATTERN debug EXCLUDE
-    PATTERN debug* EXCLUDE
-    PATTERN .settings EXCLUDE
-    PATTERN cmake EXCLUDE
-    PATTERN doc EXCLUDE
-    PATTERN gui EXCLUDE
-    PATTERN xml EXCLUDE
-    PATTERN python EXCLUDE
     PATTERN *dierckx* EXCLUDE
     PATTERN src  EXCLUDE
     PATTERN test EXCLUDE
     PATTERN tests EXCLUDE
-    PATTERN extern EXCLUDE
     PATTERN .git EXCLUDE)
 install(FILES ${PROJECT_BINARY_DIR}/oskar/oskar_version.h
     DESTINATION "${OSKAR_INCLUDE_INSTALL_DIR}/oskar")

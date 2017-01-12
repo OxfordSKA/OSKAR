@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_settings_log.h"
-#include "oskar_settings_to_telescope.h"
-#include "oskar_SettingsTree.hpp"
-#include "oskar_SettingsDeclareXml.hpp"
-#include "oskar_SettingsFileHandlerIni.hpp"
-#include "oskar_OptionParser.h"
-
+#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_settings_log.h"
+#include "apps/oskar_settings_to_telescope.h"
 #include "binary/oskar_binary.h"
 #include "log/oskar_log.h"
+#include "settings/oskar_SettingsTree.h"
+#include "settings/oskar_SettingsDeclareXml.h"
+#include "settings/oskar_SettingsFileHandlerIni.h"
 #include "telescope/oskar_telescope.h"
 #include "utility/oskar_file_exists.h"
 #include "utility/oskar_get_error_string.h"
@@ -55,6 +54,8 @@ using std::pair;
 
 using namespace std;
 
+static const char settings_def[] = oskar_sim_interferometer_XML_STR;
+
 //-----------------------------------------------------------------------------
 //void log_noise_settings(oskar_Log* log, oskar_Settings* settings);
 //-----------------------------------------------------------------------------
@@ -65,22 +66,30 @@ int main(int argc, char** argv)
     vector<pair<string, string> > failed_keys;
 
     // Obtain command line options & arguments.
-    oskar_OptionParser opt("oskar_vis_add_noise", oskar_version_string());
-    opt.setDescription("Application to add noise to OSKAR binary visibility "
+    OptionParser opt("oskar_vis_add_noise", oskar_version_string(),
+            settings_def);
+    opt.set_description("Application to add noise to OSKAR binary visibility "
             "files.");
-    opt.addRequired("OSKAR visibility file(s)...");
-    opt.addFlag("-s", "OSKAR settings file (noise settings).", 1, "", true);
-    opt.addFlag("-v", "Verbose logging.");
-    opt.addFlag("-q", "Suppress all logging output.");
+    opt.add_required("OSKAR visibility file(s)...");
+    opt.add_flag("-s", "OSKAR settings file (noise settings).", 1, "", true);
+    opt.add_flag("-v", "Verbose logging.");
+    opt.add_flag("-q", "Suppress all logging output.");
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
 
     string settings_file;
     opt.get("-s")->getString(settings_file);
-    vector<string> vis_filename_in = opt.getInputFiles();
+    vector<string> vis_filename_in = opt.get_input_files();
     int num_files = vis_filename_in.size();
-    bool verbose = opt.isSet("-v") ? true : false;
-    bool quiet   = opt.isSet("-q") ? true : false;
+    bool verbose = opt.is_set("-v") ? true : false;
+    bool quiet   = opt.is_set("-q") ? true : false;
+
+    // Declare settings.
+    SettingsTree s;
+    settings_declare_xml(&s, settings_def);
+    SettingsFileHandlerIni handler("oskar_vis_add_noise",
+            oskar_version_string());
+    s.set_file_handler(&handler);
 
     // Create the log.
     int file_priority = OSKAR_LOG_MESSAGE;
@@ -93,24 +102,15 @@ int main(int argc, char** argv)
 
     // Load the settings file.
     oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
-    SettingsTree s;
-    settings_declare_xml(&s, oskar_sim_interferometer_XML_STR);
-    SettingsFileHandlerIni handler;
-    s.set_file_handler(&handler);
-
-    // Warn about settings failures.
-    if (!s.load(failed_keys, settings_file))
+    if (!s.load(settings_file, failed_keys))
     {
         oskar_log_error(log, "Failed to read settings file.");
         oskar_log_free(log);
         return OSKAR_ERR_FILE_IO;
     }
-    for (size_t i = 0; i < failed_keys.size(); ++i)
-        oskar_log_warning(log, "Ignoring '%s'='%s'",
-                failed_keys[i].first.c_str(), failed_keys[i].second.c_str());
 
-    // Log the relevant settings.
-    oskar_settings_log(&s, log);
+    // Write settings to log.
+    oskar_settings_log(&s, log, failed_keys);
     if (!s.to_int("interferometer/noise/enable", &status))
     {
         oskar_log_error(log, "Noise addition disabled in the settings.");

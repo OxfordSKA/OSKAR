@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_OptionParser.h"
+#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_settings_log.h"
+#include "apps/oskar_settings_to_sky.h"
+#include "apps/oskar_settings_to_telescope.h"
 #include "oskar_settings_load.h"
-#include "oskar_settings_log.h"
-#include "oskar_settings_to_sky.h"
-#include "oskar_settings_to_telescope.h"
 
 #include "binary/oskar_binary.h"
 #include "convert/oskar_convert_offset_ecef_to_ecef.h"
@@ -51,13 +51,13 @@
 int main(int argc, char** argv)
 {
     int status = 0;
-    oskar_OptionParser opt("oskar_evaulate_pierce_points",
+    oskar::OptionParser opt("oskar_evaulate_pierce_points",
             oskar_version_string());
-    opt.addRequired("settings file");
+    opt.add_required("settings file");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
 
-    const char* settings_file = opt.getArg();
+    const char* settings_file = opt.get_arg();
 
     // Create the log.
     oskar_Log* log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_STATUS);
@@ -206,7 +206,7 @@ int main(int argc, char** argv)
                     num_sources, hor_x, hor_y, hor_z, &status);
         } // Loop over stations.
 
-        if (status != OSKAR_SUCCESS)
+        if (status != 0)
             continue;
 
         int index = t; // could be = (num_times * f) + t if we have frequency data

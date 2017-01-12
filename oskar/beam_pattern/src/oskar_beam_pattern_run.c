@@ -88,7 +88,7 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
     if (!h->root_path)
     {
         oskar_log_error(h->log, "No output file name specified.");
-        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        *status = OSKAR_ERR_FILE_IO;
         return;
     }
 

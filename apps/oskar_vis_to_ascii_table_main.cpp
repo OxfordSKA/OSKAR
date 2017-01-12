@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_OptionParser.h"
+#include "apps/oskar_OptionParser.h"
 #include "binary/oskar_binary.h"
 #include "vis/oskar_vis.h"
 #include "utility/oskar_vector_types.h"
@@ -49,54 +49,54 @@ template <typename T1, typename T2> static void writeData_(int idx, T1 uu,
 int main(int argc, char** argv)
 {
     // ===== Declare options ==================================================
-    oskar_OptionParser opt("oskar_vis_to_ascii_table", oskar_version_string());
-    opt.setDescription("Converts an OSKAR visibility binary file to an ASCII "
+    oskar::OptionParser opt("oskar_vis_to_ascii_table", oskar_version_string());
+    opt.set_description("Converts an OSKAR visibility binary file to an ASCII "
             "table format with the following columns:\n "
             "[1] index, [2] baseline-uu, [3] baseline-vv, [4] baseline-ww "
             "[5] Real, [6] Imag. "
             "The table is written out in baseline-time order where baseline "
             "is the fastest varying dimension");
-    opt.addRequired("OSKAR vis file");
-    opt.addOptional("output file name");
-    opt.addFlag("-c", "Channel index to write to file. (default = 0)", 1, "0",
+    opt.add_required("OSKAR vis file");
+    opt.add_optional("output file name");
+    opt.add_flag("-c", "Channel index to write to file. (default = 0)", 1, "0",
             false, "--channel");
-    opt.addFlag("-p", "Polarisation ID to write to file. (default = 0) "
+    opt.add_flag("-p", "Polarisation ID to write to file. (default = 0) "
             "(0=I, 1=Q, 2=U, 3=V, 4=XX, 5=XY, 6=YX, 7=YY)",
             1, "0", false, "--polarisation");
-    opt.addFlag("-t", "Time index to write to file. (default = all)", 1, "",
+    opt.add_flag("-t", "Time index to write to file. (default = all)", 1, "",
             false, "--time");
-    opt.addFlag("-w", "Output baseline coordinates in wavelengths. "
+    opt.add_flag("-w", "Output baseline coordinates in wavelengths. "
             "(default = metres)", false, "--baseline_wavelengths");
-    opt.addFlag("-h", "Write a summary header in the ASCII table. ");
-    opt.addFlag("-v", "Verbose mode.");
-    opt.addFlag("--csv", "Write in CSV format");
-    opt.addFlag("-s", "Write output table to standard output instead of to file.",
+    opt.add_flag("-h", "Write a summary header in the ASCII table. ");
+    opt.add_flag("-v", "Verbose mode.");
+    opt.add_flag("--csv", "Write in CSV format");
+    opt.add_flag("-s", "Write output table to standard output instead of to file.",
             false, "--stdout");
 
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
 
     // ===== Read options ====================================================
-    const char* vis_file = opt.getArg(0);
+    const char* vis_file = opt.get_arg(0);
     std::string txt_file;
-    if (opt.numArgs() == 2)
-        txt_file = std::string(opt.getArg(1));
+    if (opt.num_args() == 2)
+        txt_file = std::string(opt.get_arg(1));
     else {
         txt_file = std::string(vis_file) + ".txt";
     }
     int c = 0;
-    if (opt.isSet("-c"))
+    if (opt.is_set("-c"))
         opt.get("-c")->getInt(c);
     int p = 0;
-    if (opt.isSet("-p"))
+    if (opt.is_set("-p"))
         opt.get("-p")->getInt(p);
     int t = -1;
-    if (opt.isSet("-t"))
+    if (opt.is_set("-t"))
         opt.get("-t")->getInt(t);
-    bool metres = !opt.isSet("-w");
-    bool write_header = opt.isSet("-h");
-    bool csv = opt.isSet("--csv");
-    bool verbose = opt.isSet("-v");
+    bool metres = !opt.is_set("-w");
+    bool write_header = opt.is_set("-h");
+    bool csv = opt.is_set("--csv");
+    bool verbose = opt.is_set("-v");
 
     // ===== Write table ======================================================
     int status = 0;
@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 
 
     FILE* out;
-    if (!opt.isSet("-s")) {
+    if (!opt.is_set("-s")) {
         out = fopen(txt_file.c_str(), "w");
         if (out == NULL) return OSKAR_FAIL;
     }

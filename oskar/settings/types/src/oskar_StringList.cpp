@@ -29,10 +29,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_settings_utility_string.hpp"
+#include "settings/oskar_settings_utility_string.h"
+#include "settings/types/oskar_StringList.h"
 
 #include <sstream>
-#include "oskar_StringList.hpp"
 
 namespace oskar {
 

@@ -29,9 +29,9 @@ channel\_bandwidth\_hz
 &
 {The channel width, in Hz, used to simulate bandwidth smearing. (Note that this can be different to the frequency increment if channels do not cover a contiguous frequency range.)}
 &
-Double
+Unsigned double
 &
-0.0
+0
 \\
 \hline
 
@@ -39,17 +39,17 @@ time\_average\_sec
 &
 {The correlator time-average duration, in seconds, used to simulate time averaging smearing.}
 &
-Double
+Unsigned double
 &
-0.0
+0
 \\
 \hline
 
 max\_time\_samples\_per\_block
 &
-{The maximum number of time samples held in memory before being flushed to disk.}
+{The maximum number of time samples held in memory before being written to disk.}
 &
-Int
+Unsigned integer
 &
 10
 \\
@@ -128,7 +128,7 @@ Integer $\geq$ 1, or `time'
 
 noise/freq
 &
-{Selection of the the list of frequencies for which noise values are defined: 
+{Selection of the list of frequencies for which noise values are defined: 
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
 \vspace{8pt}
  \item {\textbf{Telescope model}: frequencies are loaded from a data file in the telescope model directory.}

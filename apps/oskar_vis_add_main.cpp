@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/oskar_OptionParser.h"
 #include "vis/oskar_vis.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
-#include "oskar_OptionParser.h"
 
 #include <string>
 #include <cmath>
@@ -39,10 +39,11 @@
 #include <iomanip>
 
 using namespace std;
+using namespace oskar;
 
 // -----------------------------------------------------------------------------
-static void set_options(oskar_OptionParser& opt);
-static bool check_options(oskar_OptionParser& opt, int argc, char** argv);
+static void set_options(OptionParser& opt);
+static bool check_options(OptionParser& opt, int argc, char** argv);
 static bool isCompatible(const oskar_Vis* vis1, const oskar_Vis* vis2);
 static void print_error(int status, const char* message);
 // -----------------------------------------------------------------------------
@@ -50,7 +51,7 @@ static void print_error(int status, const char* message);
 int main(int argc, char** argv)
 {
     // Register options =======================================================
-    oskar_OptionParser opt("oskar_vis_add", oskar_version_string());
+    OptionParser opt("oskar_vis_add", oskar_version_string());
     set_options(opt);
     if (!check_options(opt, argc, argv))
         return OSKAR_FAIL;
@@ -58,8 +59,8 @@ int main(int argc, char** argv)
     // Retrieve options ========================================================
     string out_path;
     opt.get("-o")->getString(out_path);
-    vector<string> in_files = opt.getInputFiles(2);
-    bool verbose = opt.isSet("-q") ? false : true;
+    vector<string> in_files = opt.get_input_files(2);
+    bool verbose = opt.is_set("-q") ? false : true;
     int num_in_files = in_files.size();
 
     // Print if verbose.
@@ -174,19 +175,19 @@ static bool isCompatible(const oskar_Vis* v1, const oskar_Vis* v2)
     return true;
 }
 
-static void set_options(oskar_OptionParser& opt)
+static void set_options(OptionParser& opt)
 {
-    opt.setDescription("Application to combine OSKAR binary visibility files.");
-    opt.addRequired("OSKAR visibility files...");
-    opt.addFlag("-o", "Output visibility file name", 1, "out.vis", false, "--output");
-    opt.addFlag("-q", "Disable log messages", false, "--quiet");
-    opt.addExample("oskar_vis_add file1.vis file2.vis");
-    opt.addExample("oskar_vis_add file1.vis file2.vis -o combined.vis");
-    opt.addExample("oskar_vis_add -q file1.vis file2.vis file3.vis");
-    opt.addExample("oskar_vis_add *.vis");
+    opt.set_description("Application to combine OSKAR binary visibility files.");
+    opt.add_required("OSKAR visibility files...");
+    opt.add_flag("-o", "Output visibility file name", 1, "out.vis", false, "--output");
+    opt.add_flag("-q", "Disable log messages", false, "--quiet");
+    opt.add_example("oskar_vis_add file1.vis file2.vis");
+    opt.add_example("oskar_vis_add file1.vis file2.vis -o combined.vis");
+    opt.add_example("oskar_vis_add -q file1.vis file2.vis file3.vis");
+    opt.add_example("oskar_vis_add *.vis");
 }
 
-static bool check_options(oskar_OptionParser& opt, int argc, char** argv)
+static bool check_options(OptionParser& opt, int argc, char** argv)
 {
     if (!opt.check_options(argc, argv))
         return false;

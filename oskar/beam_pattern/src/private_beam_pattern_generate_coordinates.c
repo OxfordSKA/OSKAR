@@ -71,7 +71,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         num_pixels = 0;
     else
     {
-        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
     }
 
@@ -174,7 +174,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
             break;
         }
         default:
-            *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
             break;
         };
 
@@ -213,7 +213,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
             break;
         }
         default:
-            *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
             break;
         };
 
@@ -224,7 +224,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
     }
     else
     {
-        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
     }
 
     /* Set the number of pixels. */

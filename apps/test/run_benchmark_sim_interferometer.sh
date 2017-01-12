@@ -23,19 +23,20 @@ echo ""
 cd "${example_data_dir}"
 
 # Set settings
-ini=setup.ini
-del_setting $ini sky/oskar_sky_model/file
-set_setting $ini telescope/input_directory telescope.tm
-set_setting $ini simulator/keep_log_file true
-set_setting $ini simulator/write_status_to_log_file true
-set_setting $ini observation/num_channels 1
-set_setting $ini observation/num_time_steps 30
-set_setting $ini sky/generator/grid/side_length 64
-set_setting $ini sky/generator/grid/fov_deg 5
-set_setting $ini sky/generator/grid/mean_flux_jy 1
+app=${oskar_app_path}/oskar_sim_interferometer
+ini=oskar_sim_interferometer.ini
+del_setting $app $ini sky/oskar_sky_model/file
+set_setting $app $ini telescope/input_directory telescope.tm
+set_setting $app $ini simulator/keep_log_file true
+set_setting $app $ini simulator/write_status_to_log_file true
+set_setting $app $ini observation/num_channels 1
+set_setting $app $ini observation/num_time_steps 30
+set_setting $app $ini sky/generator/grid/side_length 64
+set_setting $app $ini sky/generator/grid/fov_deg 5
+set_setting $app $ini sky/generator/grid/mean_flux_jy 1
 
 # Run the interferometry simulation in single precision
-set_setting $ini simulator/double_precision false
+set_setting $app $ini simulator/double_precision false
 echo "Starting interferometry simulation [Single precision]"
 T0="$(date +%s)"
 run_sim_interferometer $verbose $ini
@@ -48,7 +49,7 @@ echo "........................................................................."
 echo ""
 
 # Run the interferometry simulation in double precision
-set_setting $ini simulator/double_precision true
+set_setting $app $ini simulator/double_precision true
 echo "Starting interferometry simulation [Double precision]"
 T0="$(date +%s)"
 run_sim_interferometer $verbose $ini

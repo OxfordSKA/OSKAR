@@ -29,13 +29,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_settings_utility_string.hpp"
+#include "settings/oskar_settings_utility_string.h"
+#include "settings/types/oskar_IntRange.h"
 
 #include <climits>
 #include <vector>
 
 #include <iostream>
-#include "oskar_IntRange.hpp"
 
 namespace oskar {
 

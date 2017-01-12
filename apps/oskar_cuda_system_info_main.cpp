@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_OptionParser.h"
-
+#include "apps/oskar_OptionParser.h"
 #include "log/oskar_log.h"
 #include "utility/oskar_cuda_info.h"
 #include "utility/oskar_get_error_string.h"
@@ -35,8 +34,8 @@
 
 int main(int argc, char** argv)
 {
-    oskar_OptionParser opt("oskar_cuda_system_info", oskar_version_string());
-    opt.setDescription("Display a summary of the available CUDA capability");
+    oskar::OptionParser opt("oskar_cuda_system_info", oskar_version_string());
+    opt.set_description("Display a summary of the available CUDA capability");
     if (!opt.check_options(argc, argv)) return OSKAR_FAIL;
 
     // Create the CUDA info structure.

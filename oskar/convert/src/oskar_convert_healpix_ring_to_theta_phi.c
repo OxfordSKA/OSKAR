@@ -74,7 +74,7 @@ void oskar_convert_healpix_ring_to_theta_phi(int nside,
         unsigned int i;
         theta_ = oskar_mem_double(theta, status);
         phi_ = oskar_mem_double(phi, status);
-        if (*status != OSKAR_SUCCESS) return;
+        if (*status) return;
         for (i = 0; i < num_pixels; ++i)
         {
             oskar_convert_healpix_ring_to_theta_phi_d(nside, i, &theta_[i], &phi_[i]);
@@ -86,7 +86,7 @@ void oskar_convert_healpix_ring_to_theta_phi(int nside,
         unsigned int i;
         theta_ = oskar_mem_float(theta, status);
         phi_ = oskar_mem_float(phi, status);
-        if (*status != OSKAR_SUCCESS) return;
+        if (*status) return;
         for (i = 0; i < num_pixels; ++i)
         {
             oskar_convert_healpix_ring_to_theta_phi_f(nside, i, &theta_[i], &phi_[i]);
