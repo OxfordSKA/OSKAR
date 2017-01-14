@@ -30,8 +30,9 @@ rm -rf _CPack_Packages
 rm -rf apps
 rm -rf doc
 rm -rf extern
-rm -rf python
+rm -rf gui
 rm -rf oskar
+rm -rf python
 
 # Remove any example data (zip files or directories)
 rm -rf OSKAR-*-Example-Data

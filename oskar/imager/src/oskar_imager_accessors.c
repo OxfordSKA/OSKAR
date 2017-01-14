@@ -135,9 +135,9 @@ const char* oskar_imager_image_type(const oskar_Imager* h)
 }
 
 
-const char* oskar_imager_input_file(const oskar_Imager* h)
+char* const* oskar_imager_input_files(const oskar_Imager* h)
 {
-    return h->input_file;
+    return h->input_files;
 }
 
 
@@ -150,6 +150,12 @@ const char* oskar_imager_ms_column(const oskar_Imager* h)
 int oskar_imager_num_image_planes(const oskar_Imager* h)
 {
     return h->num_planes;
+}
+
+
+int oskar_imager_num_input_files(const oskar_Imager* h)
+{
+    return h->num_files;
 }
 
 
@@ -181,6 +187,12 @@ int oskar_imager_plane_type(const oskar_Imager* h)
 int oskar_imager_precision(const oskar_Imager* h)
 {
     return h->imager_prec;
+}
+
+
+int oskar_imager_scale_norm_with_num_input_files(const oskar_Imager* h)
+{
+    return h->scale_norm_with_num_input_files;
 }
 
 
@@ -413,18 +425,27 @@ void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
 }
 
 
-void oskar_imager_set_input_file(oskar_Imager* h, const char* filename,
-        int* status)
+void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
+        char* const* filenames, int* status)
 {
-    int len = 0;
+    int i;
     if (*status) return;
-    free(h->input_file);
-    h->input_file = 0;
-    if (filename) len = strlen(filename);
-    if (len > 0)
+    for (i = 0; i < h->num_files; ++i)
+        free(h->input_files[i]);
+    free(h->input_files);
+    h->input_files = 0;
+    h->num_files = num_files;
+    if (num_files == 0) return;
+    h->input_files = (char**) calloc(num_files, sizeof(char*));
+    for (i = 0; i < num_files; ++i)
     {
-        h->input_file = calloc(1 + len, 1);
-        strcpy(h->input_file, filename);
+        int len = 0;
+        if (filenames[i]) len = strlen(filenames[i]);
+        if (len > 0)
+        {
+            h->input_files[i] = (char*) calloc(1 + len, sizeof(char));
+            strcpy(h->input_files[i], filenames[i]);
+        }
     }
 }
 
@@ -467,6 +488,13 @@ void oskar_imager_set_output_root(oskar_Imager* h, const char* filename,
 void oskar_imager_set_oversample(oskar_Imager* h, int value)
 {
     h->oversample = value;
+}
+
+
+void oskar_imager_set_scale_norm_with_num_input_files(oskar_Imager* h,
+        int value)
+{
+    h->scale_norm_with_num_input_files = value;
 }
 
 

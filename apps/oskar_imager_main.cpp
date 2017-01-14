@@ -51,8 +51,7 @@ static const char settings_def[] = oskar_imager_XML_STR;
 
 int main(int argc, char** argv)
 {
-    int e = 0, end, prec;
-    double uv_max;
+    int i, e = 0, end;
     vector<pair<string, string> > failed_keys;
     oskar_Log* log = 0;
 
@@ -106,7 +105,7 @@ int main(int argc, char** argv)
 
     // Create imager and set values from settings.
     s.begin_group("image");
-    prec = s.to_int("double_precision", &e) ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    int prec = s.to_int("double_precision", &e) ? OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_Imager* h = oskar_imager_create(prec, &e);
     oskar_imager_set_log(h, log);
     if (!s.starts_with("cuda_device_ids", "all", &e))
@@ -114,8 +113,20 @@ int main(int argc, char** argv)
         vector<int> ids = s.to_int_list("cuda_device_ids", &e);
         if (ids.size() > 0) oskar_imager_set_gpus(h, ids.size(), &ids[0], &e);
     }
-    oskar_imager_set_input_file(h,
-            s.to_string("input_vis_data", &e).c_str(), &e);
+    vector<string> files = s.to_string_list("input_vis_data", &e);
+    int num_files = files.size();
+    char** input_files = (char**) calloc(num_files, sizeof(char*));
+    for (i = 0; i < num_files; ++i)
+    {
+        input_files[i] = (char*) calloc(1 + files[i].length(), sizeof(char));
+        strcpy(input_files[i], files[i].c_str());
+    }
+    oskar_imager_set_input_files(h, num_files, input_files, &e);
+    for (i = 0; i < num_files; ++i)
+        free(input_files[i]);
+    free(input_files);
+    oskar_imager_set_scale_norm_with_num_input_files(h,
+            s.to_int("scale_norm_with_num_input_files", &e));
     oskar_imager_set_ms_column(h, s.to_string("ms_column", &e).c_str(), &e);
     oskar_imager_set_output_root(h, s.to_string("root_path", &e).c_str(), &e);
     oskar_imager_set_image_type(h, s.to_string("image_type", &e).c_str(), &e);
@@ -134,7 +145,7 @@ int main(int argc, char** argv)
     end = s.starts_with("time_end", "max", &e) ? -1 : s.to_int("time_end", &e);
     oskar_imager_set_time_end(h, end);
     oskar_imager_set_uv_filter_min(h, s.to_double("uv_filter_min", &e));
-    uv_max = s.starts_with("uv_filter_max", "max", &e) ? -1.0 :
+    double uv_max = s.starts_with("uv_filter_max", "max", &e) ? -1.0 :
             s.to_double("uv_filter_max", &e);
     oskar_imager_set_uv_filter_max(h, uv_max);
     oskar_imager_set_algorithm(h, s.to_string("algorithm", &e).c_str(), &e);

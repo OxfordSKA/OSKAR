@@ -440,10 +440,23 @@ static PyObject* image_type(PyObject* self, PyObject* args)
 static PyObject* input_file(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
-    PyObject* capsule = 0;
+    PyObject *capsule = 0, *list = 0;
+    int i, num_files = 0;
+    char* const* files;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
-    return Py_BuildValue("s", oskar_imager_input_file(h));
+
+    /* Return the input file name or list of input file names. */
+    num_files = oskar_imager_num_input_files(h);
+    files = oskar_imager_input_files(h);
+    if (num_files == 0) return Py_BuildValue("");
+    if (num_files == 1) return Py_BuildValue("s", files[0]);
+    list = PyList_New(num_files);
+    for (i = 0; i < num_files; ++i)
+    {
+        PyList_SetItem(list, i, Py_BuildValue("s", files[i]));
+    }
+    return Py_BuildValue("N", list);
 }
 
 
@@ -582,6 +595,18 @@ fail:
         images_c = 0;
     }
     return 0;
+}
+
+
+static PyObject* scale_norm_with_num_input_files(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    return Py_BuildValue("O",
+            oskar_imager_scale_norm_with_num_input_files(h) ?
+                    Py_True : Py_False);
 }
 
 
@@ -795,13 +820,39 @@ static PyObject* set_image_type(PyObject* self, PyObject* args)
 static PyObject* set_input_file(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
-    PyObject* capsule = 0;
+    PyObject *capsule = 0, *list = 0;
     int status = 0;
-    const char* filename = 0;
-    if (!PyArg_ParseTuple(args, "Os", &capsule, &filename)) return 0;
+    if (!PyArg_ParseTuple(args, "OO", &capsule, &list)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_input_file(h, filename, &status);
-    return Py_BuildValue("i", status);
+
+    /* Check to see if the list is really a list, or a string. */
+    if (PyString_Check(list))
+    {
+        char* file;
+        file = PyString_AsString(list);
+        oskar_imager_set_input_files(h, 1, &file, &status);
+        return Py_BuildValue("i", status);
+    }
+    else if (PyList_Check(list))
+    {
+        int i, num_files;
+        char** files = 0;
+        num_files = (int) PyList_Size(list);
+        files = (char**) calloc(num_files, sizeof(char*));
+        for (i = 0; i < num_files; ++i)
+        {
+            files[i] = PyString_AsString(PyList_GetItem(list, i));
+        }
+        oskar_imager_set_input_files(h, num_files, files, &status);
+        free(files);
+        return Py_BuildValue("i", status);
+    }
+    else
+    {
+        PyErr_SetString(PyExc_RuntimeError,
+                "Argument must be a string or list of strings.");
+        return 0;
+    }
 }
 
 
@@ -840,6 +891,19 @@ static PyObject* set_output_root(PyObject* self, PyObject* args)
     if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_output_root(h, filename, &status);
     return Py_BuildValue("i", status);
+}
+
+
+static PyObject* set_scale_norm_with_num_input_files(PyObject* self,
+        PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    int value = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_scale_norm_with_num_input_files(h, value);
+    return Py_BuildValue("");
 }
 
 
@@ -1557,6 +1621,9 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "reset_cache()"},
         {"run", (PyCFunction)run,
                 METH_VARARGS, "run(return_images, return_grids)"},
+        {"scale_norm_with_num_input_files",
+                (PyCFunction)scale_norm_with_num_input_files,
+                METH_VARARGS, "scale_norm_with_num_input_files()"},
         {"set_algorithm", (PyCFunction)set_algorithm,
                 METH_VARARGS, "set_algorithm(type)"},
         {"set_cellsize", (PyCFunction)set_cellsize,
@@ -1593,6 +1660,9 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "set_num_w_planes(value)"},
         {"set_output_root", (PyCFunction)set_output_root,
                 METH_VARARGS, "set_output_root(filename)"},
+        {"set_scale_norm_with_num_input_files",
+                (PyCFunction)set_scale_norm_with_num_input_files,
+                METH_VARARGS, "set_scale_norm_with_num_input_files(value)"},
         {"set_size", (PyCFunction)set_size, METH_VARARGS, "set_size(value)"},
         {"set_time_end", (PyCFunction)set_time_end,
                 METH_VARARGS, "set_time_end(value)"},

@@ -58,6 +58,13 @@ void oskar_imager_finalise(oskar_Imager* h,
     int t, c, p, i;
     if (*status || !h->planes) return;
 
+    /* Adjust normalisation if required. */
+    if (h->scale_norm_with_num_input_files)
+    {
+        for (i = 0; i < h->num_planes; ++i)
+            h->plane_norm[i] /= h->num_files;
+    }
+
     /* Copy grids to output grid planes if given. */
     for (i = 0; (i < h->num_planes) && (i < num_output_grids); ++i)
     {

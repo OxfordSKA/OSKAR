@@ -39,6 +39,7 @@ extern "C" {
 
 void oskar_imager_free(oskar_Imager* h, int* status)
 {
+    int i;
     if (!h) return;
     oskar_imager_reset_cache(h, status);
     oskar_mem_free(h->uu_im, status);
@@ -52,7 +53,9 @@ void oskar_imager_free(oskar_Imager* h, int* status)
     oskar_mem_free(h->weight_tmp, status);
 
     oskar_imager_free_gpu_data(h, status);
-    free(h->input_file);
+    for (i = 0; i < h->num_files; ++i)
+        free(h->input_files[i]);
+    free(h->input_files);
     free(h->image_root);
     free(h->ms_column);
     free(h);

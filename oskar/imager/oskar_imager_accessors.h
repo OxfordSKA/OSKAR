@@ -174,16 +174,16 @@ const char* oskar_imager_image_type(const oskar_Imager* h);
 
 /**
  * @brief
- * Returns the input file or Measurement Set.
+ * Returns the list of input files or Measurement Sets.
  *
  * @details
- * Returns the input file or Measurement Set.
- * This is used when calling oskar_imager_run().
+ * Returns the list of input files or Measurement Sets.
+ * These are used when calling oskar_imager_run().
  *
  * @param[in] h  Handle to imager.
  */
 OSKAR_EXPORT
-const char* oskar_imager_input_file(const oskar_Imager* h);
+char* const* oskar_imager_input_files(const oskar_Imager* h);
 
 /**
  * @brief
@@ -206,6 +206,19 @@ const char* oskar_imager_ms_column(const oskar_Imager* h);
  */
 OSKAR_EXPORT
 int oskar_imager_num_image_planes(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the number of input files or Measurement Sets.
+ *
+ * @details
+ * Returns the number of input files or Measurement Sets.
+ * These are used when calling oskar_imager_run().
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_num_input_files(const oskar_Imager* h);
 
 /**
  * @brief
@@ -259,6 +272,16 @@ int oskar_imager_plane_type(const oskar_Imager* h);
  */
 OSKAR_EXPORT
 int oskar_imager_precision(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the option to scale image normalisation by the number of input files.
+ *
+ * @details
+ * Returns the option to scale image normalisation by the number of input files.
+ */
+OSKAR_EXPORT
+int oskar_imager_scale_norm_with_num_input_files(const oskar_Imager* h);
 
 /**
  * @brief
@@ -514,19 +537,20 @@ void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
 
 /**
  * @brief
- * Sets the input file or Measurement Set.
+ * Sets the input files or Measurement Sets.
  *
  * @details
- * Sets the input file or Measurement Set.
+ * Sets the input files or Measurement Sets
  * This is used when calling oskar_imager_run().
  *
  * @param[in,out] h          Handle to imager.
- * @param[in]     filename   Input path.
+ * @param[in]     num_files  Number of input files in list.
+ * @param[in]     filenames  Input paths.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_set_input_file(oskar_Imager* h, const char* filename,
-        int* status);
+void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
+        char* const* filenames, int* status);
 
 /**
  * @brief
@@ -585,6 +609,26 @@ void oskar_imager_set_output_root(oskar_Imager* h, const char* filename,
  */
 OSKAR_EXPORT
 void oskar_imager_set_oversample(oskar_Imager* h, int value);
+
+/**
+ * @brief
+ * Sets the option to scale image normalisation with number of input files.
+ *
+ * @details
+ * Sets the option to scale image normalisation with number of input files.
+ * Set this to true if the different files represent multiple
+ * sky model components observed with the same telescope configuration
+ * and observation parameters.
+ * Set this to false if the different files represent multiple
+ * observations of the same sky with different telescope configurations
+ * or observation parameters.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      Option value (true or false).
+ */
+OSKAR_EXPORT
+void oskar_imager_set_scale_norm_with_num_input_files(oskar_Imager* h,
+        int value);
 
 /**
  * @brief

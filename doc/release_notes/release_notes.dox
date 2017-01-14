@@ -52,6 +52,8 @@ please refer to older revisions of this document or the
 - Added options to specify grid kernel parameters.
 - Added option to perform imaging in single or double precision,
       regardless of the precision of the input data.
+- Added capability to use multiple visibility files as input to the imager,
+      with option to scale image normalisation accordingly.
 - Allowed visibility data to be read from a specified column of a
       Measurement Set.
 

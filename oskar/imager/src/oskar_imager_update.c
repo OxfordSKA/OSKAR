@@ -78,11 +78,6 @@ void oskar_imager_update_from_block(oskar_Imager* h,
     if (!oskar_vis_block_has_cross_correlations(block))
         return;
 
-    /* Check that at least part of the block is in range. */
-    if (end_time < h->time_range[0] ||
-            (start_time > h->time_range[1] && h->time_range[1] >= 0))
-        return;
-
     /* Deal with the lack of weights. */
     if (!weight)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,14 +41,14 @@ extern "C" {
 
 /**
  * @brief
- * High-level function to make images from visibility data in a file.
+ * High-level function to make images from visibility data in files.
  *
  * @details
  * After creating and setting up the imager, this function is used to make
- * one or more images from visibility data in an OSKAR visibility file or
- * (if compiled with casacore) a Measurement Set.
+ * one or more images from visibility data in OSKAR visibility files or
+ * (if compiled with casacore) CASA Measurement Sets.
  *
- * Call oskar_imager_set_input_file() to set the filename.
+ * Call oskar_imager_set_input_files() to set the filenames.
  * When using Measurement Sets, the filename must end with ".ms" or ".MS".
  *
  * Copies of the image and/or grid planes can be returned if required

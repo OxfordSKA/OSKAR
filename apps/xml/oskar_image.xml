@@ -154,10 +154,25 @@
             <depends k="image/direction" v="RA, Dec"/>
         </s>
     </s>
-    <s k="input_vis_data"><label>Input visibility data file</label>
-        <type name="InputFile"/>
-        <desc>Path to the input OSKAR visibility data file or
-            Measurement Set.</desc>
+    <s k="input_vis_data"><label>Input visibility data file(s)</label>
+        <type name="InputFileList"/>
+        <desc>Path to the input OSKAR visibility data file(s) or
+            Measurement Set(s).</desc>
+    </s>
+    <s k="scale_norm_with_num_input_files">
+        <label>Scale normalisation with number of input files</label>
+        <type name="bool" default="false"/>
+        <desc>Sets the option to scale image normalisation with number of
+            input files.
+            <ul>
+                <li>Set this to <b>true</b> if the different files represent
+                multiple sky model components observed with the same
+                telescope configuration and observation parameters.</li>
+                <li>Set this to <b>false</b> if the different files represent
+                multiple observations of the same sky observed with different
+                telescope configurations or observation parameters.</li>
+            </ul>
+        </desc>
     </s>
     <s k="ms_column"><label>Measurement Set column</label>
         <type name="OptionList" default="DATA">DATA,MODEL_DATA,CORRECTED_DATA</type>

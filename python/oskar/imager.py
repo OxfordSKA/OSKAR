@@ -228,6 +228,15 @@ class Imager(object):
         """
         return _imager_lib.plane_size(self._capsule)
 
+    def get_scale_norm_with_num_input_files(self):
+        """Returns the option to scale image normalisation by the number of
+        input files.
+
+        Returns:
+            boolean: The option value (true or false).
+        """
+        return _imager_lib.scale_norm_with_num_input_files(self._capsule)
+
     def get_size(self):
         """Returns the image side length, in pixels.
 
@@ -534,6 +543,21 @@ class Imager(object):
         """
         _imager_lib.set_output_root(self._capsule, filename)
 
+    def set_scale_norm_with_num_input_files(self, value):
+        """Sets the option to scale image normalisation with number of files.
+
+        Set this to true if the different files represent multiple
+        sky model components observed with the same telescope configuration
+        and observation parameters.
+        Set this to false if the different files represent multiple
+        observations of the same sky with different telescope configurations
+        or observation parameters.
+
+        Args:
+            value (boolean): Option value.
+        """
+        _imager_lib.set_scale_norm_with_num_input_files(self._capsule, value)
+
     def set_size(self, size):
         """Sets image side length.
 
@@ -743,12 +767,16 @@ class Imager(object):
     image_size = property(get_image_size, set_image_size)
     image_type = property(get_image_type, set_image_type)
     input_file = property(get_input_file, set_input_file)
+    input_files = property(get_input_file, set_input_file)
     input_vis_data = property(get_input_file, set_input_file)
     ms_column = property(get_ms_column, set_ms_column)
     num_w_planes = property(get_num_w_planes, set_num_w_planes)
     output_root = property(get_output_root, set_output_root)
     plane_size = property(get_plane_size)
     root_path = property(get_output_root, set_output_root)
+    scale_norm_with_num_input_files = \
+        property(get_scale_norm_with_num_input_files,
+                 set_scale_norm_with_num_input_files)
     size = property(get_size, set_size)
     time_end = property(get_time_end, set_time_end)
     time_snapshots = property(get_time_snapshots, set_time_snapshots)
