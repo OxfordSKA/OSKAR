@@ -48,8 +48,7 @@ int main(int argc, char** argv)
     opt.add_required("ref. longitude [deg]", "Reference longitude in degrees.");
     opt.add_required("ref. latitude [deg]", "Reference latitude in degrees.");
     opt.add_required("ref. altitude [m]", "Reference altitude in metres.");
-    if (!opt.check_options(argc, argv))
-        return OSKAR_FAIL;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
     const char* filename = opt.get_arg(0);
     double lon = strtod(opt.get_arg(1), 0) * M_PI / 180.0;
     double lat = strtod(opt.get_arg(2), 0) * M_PI / 180.0;

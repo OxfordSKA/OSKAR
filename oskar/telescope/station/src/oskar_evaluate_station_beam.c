@@ -323,7 +323,7 @@ static void compute_enu_directions(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
         /* TODO convert from az0, el0 to ha0, dec0 */
         ha0 = 0.0;
         dec0 = 0.0;
-        *status = OSKAR_FAIL;
+        *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
         return;
     }
     else
@@ -368,7 +368,7 @@ static void compute_relative_directions(oskar_Mem* l, oskar_Mem* m,
         /* TODO convert from az0, el0 to ha0, dec0 */
         ha0 = 0.0;
         dec0 = 0.0;
-        *status = OSKAR_FAIL;
+        *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
         return;
     }
     else

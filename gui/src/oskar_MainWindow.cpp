@@ -224,14 +224,14 @@ void MainWindow::clear()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setText("This action will discard unsaved modifications.");
         msgBox.setInformativeText("Do you want to proceed?");
-        msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
         if (msgBox.exec() == QMessageBox::Cancel)
             return;
     }
     files_[current_app_] = QString();
     if (handler_) handler_->set_file_name(std::string());
     settings_->set_defaults();
-    view_->update();
+    model_->refresh();
     setWindowTitle(title_);
 }
 

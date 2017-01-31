@@ -43,8 +43,10 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
 
     // Create the QApplication and initialise settings fields.
+#if QT_VERSION >= 0x050600
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
     QApplication app(argc, argv);
     app.setApplicationName("OSKAR2");
     app.setOrganizationName("OeRC");

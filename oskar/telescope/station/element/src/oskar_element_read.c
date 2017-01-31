@@ -119,7 +119,7 @@ void oskar_element_read(oskar_Element* data, const char* filename,
     {
         /* Check the surface type (scalar). */
         if (surface_type != OSKAR_ELEMENT_SURFACE_TYPE_SCALAR)
-            *status = OSKAR_ERR_UNKNOWN;
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
 
         /* Read data for [real], [imag] surfaces. */
         read_splines(h, scalar_re, 0, status);
@@ -129,7 +129,7 @@ void oskar_element_read(oskar_Element* data, const char* filename,
     {
         /* Check the surface type (Ludwig-3). */
         if (surface_type != OSKAR_ELEMENT_SURFACE_TYPE_LUDWIG_3)
-            *status = OSKAR_ERR_UNKNOWN;
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
 
         /* Read data for [h_re], [h_im], [v_re], [v_im] surfaces. */
         read_splines(h, h_re, 0, status);

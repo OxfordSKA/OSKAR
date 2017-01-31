@@ -36,8 +36,8 @@
     </s>
     <s k="start_time_utc" required="true"><label>Start time (UTC)</label>
         <type name="DateTime"/>
-        <desc>The start time and date for the observation. This can either
-            be a MJD value or a string with one of the following formats:
+        <desc>The start time and date for the observation. This can be either
+            a MJD value or a string with one of the following formats:
             <ul>
               <li><b><code>d-M-yyyy h:m:s.z</code></b></li>
               <li><b><code>yyyy/M/d/h:m:s.z</code></b></li>
@@ -54,8 +54,7 @@
               <li><b>s</b> is seconds (0 to 59)</li>
               <li><b>z</b> is milliseconds (0 to 999)</li>
             </ul>
-            Note that date and time values support optional leading zeros in
-            the format string.</desc>
+        </desc>
     </s>
     <s k="length" required="true">
         <label>Observation length [sec, or hh:mm:ss]</label>

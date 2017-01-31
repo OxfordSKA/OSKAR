@@ -53,8 +53,7 @@ int main(int argc, char** argv)
     // Register options =======================================================
     OptionParser opt("oskar_vis_add", oskar_version_string());
     set_options(opt);
-    if (!check_options(opt, argc, argv))
-        return OSKAR_FAIL;
+    if (!check_options(opt, argc, argv)) return EXIT_FAILURE;
 
     // Retrieve options ========================================================
     string out_path;

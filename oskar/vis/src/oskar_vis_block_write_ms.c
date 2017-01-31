@@ -77,8 +77,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     t_start_mjd      = oskar_vis_header_time_start_mjd_utc(header);
     ref_freq_hz      = oskar_vis_header_freq_start_hz(header);
     prec             = oskar_mem_precision(in_xcorr);
-    t_start_sec      = t_start_mjd * 86400.0 +
-            interval_sec * (start_time_index + 0.5);
+    t_start_sec      = t_start_mjd * 86400.0;
 
     /* Check that there is something to write. */
     if (!have_autocorr && !have_crosscorr) return;
@@ -141,7 +140,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
         for (t = 0; t < num_times; ++t)
         {
             /* Construct the baseline coordinates for the given time. */
-            int start_row = (start_time_index + t) * num_baseln_out;
+            unsigned int start_row = (start_time_index + t) * num_baseln_out;
             for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
             {
                 if (have_autocorr)
@@ -246,7 +245,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
             }
             oskar_ms_write_coords_d(ms, start_row, num_baseln_out,
                     uu_out, vv_out, ww_out, exposure_sec, interval_sec,
-                    t_start_sec + (t * interval_sec));
+                    (start_time_index + t + 0.5) * interval_sec + t_start_sec);
             oskar_ms_write_vis_d(ms, start_row, start_chan_index,
                     num_channels, num_baseln_out, (const double*)out);
         }
@@ -264,7 +263,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
         for (t = 0; t < num_times; ++t)
         {
             /* Construct the baseline coordinates for the given time. */
-            int start_row = (start_time_index + t) * num_baseln_out;
+            unsigned int start_row = (start_time_index + t) * num_baseln_out;
             for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
             {
                 if (have_autocorr)
@@ -369,7 +368,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
             }
             oskar_ms_write_coords_f(ms, start_row, num_baseln_out,
                     uu_out, vv_out, ww_out, exposure_sec, interval_sec,
-                    t_start_sec + (t * interval_sec));
+                    (start_time_index + t + 0.5) * interval_sec + t_start_sec);
             oskar_ms_write_vis_f(ms, start_row, start_chan_index,
                     num_channels, num_baseln_out, (const float*)out);
         }

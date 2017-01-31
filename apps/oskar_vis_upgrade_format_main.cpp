@@ -51,8 +51,7 @@ int main(int argc, char** argv)
             "files to the current format version.");
     opt.add_required("OSKAR visibility file(s)");
     opt.add_example("oskar_vis_upgrade_format file1.vis");
-    if (!opt.check_options(argc, argv))
-        return OSKAR_FAIL;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     // Get the options.
     string out_path;

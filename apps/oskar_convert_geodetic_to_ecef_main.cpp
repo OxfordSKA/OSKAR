@@ -46,8 +46,7 @@ int main(int argc, char** argv)
             "Cartesian ECEF coordinates. Assumes WGS84 ellipsoid.");
     opt.add_required("input file", "Path to file containing input coordinates. "
             "Angles must be in degrees.");
-    if (!opt.check_options(argc, argv))
-        return OSKAR_FAIL;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
     const char* filename = opt.get_arg();
 
     // Load the input file.

@@ -72,9 +72,7 @@ int main(int argc, char** argv)
     opt.add_flag("--csv", "Write in CSV format");
     opt.add_flag("-s", "Write output table to standard output instead of to file.",
             false, "--stdout");
-
-    if (!opt.check_options(argc, argv))
-        return OSKAR_FAIL;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     // ===== Read options ====================================================
     const char* vis_file = opt.get_arg(0);
@@ -125,18 +123,18 @@ int main(int argc, char** argv)
 
     if (t != -1 && t > num_times-1) {
         fprintf(stderr, "ERROR: Time index out of range.\n");
-        return OSKAR_FAIL;
+        return EXIT_FAILURE;
     }
     if (c > num_chan-1) {
         fprintf(stderr, "ERROR: Channel index out of range.\n");
-        return OSKAR_FAIL;
+        return EXIT_FAILURE;
     }
 
 
     FILE* out;
     if (!opt.is_set("-s")) {
         out = fopen(txt_file.c_str(), "w");
-        if (out == NULL) return OSKAR_FAIL;
+        if (out == NULL) return EXIT_FAILURE;
     }
     else {
         out = stdout;
