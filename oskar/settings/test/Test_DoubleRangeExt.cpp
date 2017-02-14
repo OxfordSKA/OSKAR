@@ -79,5 +79,17 @@ TEST(settings_types, DoubleRangeExt)
     {
         ASSERT_TRUE(r.init("MIN,MAX,MAX"));
     }
+    {
+        ASSERT_TRUE(r.init("-MAX,MAX,min,max"));
+        ASSERT_TRUE(r.set_default("min"));
+        ASSERT_STREQ("min", r.get_value().c_str());
+    }
+    {
+        ASSERT_TRUE(r.init("-MAX,MAX,min,max"));
+        ASSERT_TRUE(r.set_default("max"));
+        ASSERT_STREQ("max", r.get_value().c_str());
+        r.set_value("10.0");
+        ASSERT_STREQ("10.0", r.get_value().c_str());
+    }
 }
 

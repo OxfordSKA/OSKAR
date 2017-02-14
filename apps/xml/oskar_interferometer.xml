@@ -46,13 +46,13 @@
             auto-correlations, or both.</desc>
     </s>
     <s k="uv_filter_min"><label>UV range filter min</label>
-        <type name="DoubleRangeExt" default="min">0,MAX,min</type>
+        <type name="DoubleRangeExt" default="min">0,MAX,min,max</type>
         <desc>The minimum value of the baseline UV length allowed by the
             filter. <b>Note that visibilities on baseline UV lengths outside
             this range will not be evaluated!</b></desc>
     </s>
     <s k="uv_filter_max"><label>UV range filter max</label>
-        <type name="DoubleRangeExt" default="max">0,MAX,max</type>
+        <type name="DoubleRangeExt" default="max">0,MAX,min,max</type>
         <desc>The maximum value of the baseline UV length allowed by the
             filter. <b>Note that visibilities on baseline UV lengths outside
             this range will not be evaluated!</b></desc>

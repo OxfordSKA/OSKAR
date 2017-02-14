@@ -163,9 +163,9 @@ int main(int argc, char** argv)
             s.to_int("advanced/apply_horizon_clip", &e));
     oskar_simulator_set_zero_failed_gaussians(h,
             s.to_int("advanced/zero_failed_gaussians", &e));
-    /* FIXME oskar_simulator_set_source_flux_range(h,
-            s.to_double("common_flux_filter_min_jy", &e),
-            s.to_double("common_flux_filter_max_jy", &e));*/
+    oskar_simulator_set_source_flux_range(h,
+            s.to_double("common_flux_filter/flux_min", &e),
+            s.to_double("common_flux_filter/flux_max", &e));
     s.end_group();
 
     // Set observation settings.

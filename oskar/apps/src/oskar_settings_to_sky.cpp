@@ -501,11 +501,8 @@ static void set_up_filter(oskar_Sky* sky, SettingsTree* s,
         double ra0_rad, double dec0_rad, int* status)
 {
     s->begin_group("filter");
-    double flux_min = 0.0, flux_max = 0.0;
-    if (!s->starts_with("flux_min", "min", status))
-        flux_min = s->to_double("flux_min", status);
-    if (!s->starts_with("flux_max", "max", status))
-        flux_max = s->to_double("flux_max", status);
+    double flux_min = s->to_double("flux_min", status);
+    double flux_max = s->to_double("flux_max", status);
     double radius_inner_rad = s->to_double("radius_inner_deg", status) * D2R;
     double radius_outer_rad = s->to_double("radius_outer_deg", status) * D2R;
     oskar_sky_filter_by_flux(sky, flux_min, flux_max, status);

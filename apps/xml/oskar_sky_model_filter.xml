@@ -2,15 +2,15 @@
 
 <s k="filter"><label>Filter settings</label>
     <s k="flux_min"><label>Flux density min [Jy]</label>
-        <type name="DoubleRangeExt" default="min">0,MAX,min</type>
-        <desc>Minimum flux density allowed by the filter, in Jy. This is an 
-            exclusive interval bound; 
+        <type name="DoubleRangeExt" default="min">-MAX,MAX,min,max</type>
+        <desc>Minimum flux density allowed by the filter, in Jy. This is an
+            exclusive interval bound;
             i.e. min &amp;lt; flux &amp;le; max.</desc>
     </s>
     <s k="flux_max"><label>Flux density max [Jy]</label>
-        <type name="DoubleRangeExt" default="max" >0,MAX,max</type>
-        <desc>Maximum flux density allowed by the filter, in Jy. This is an 
-            inclusive interval bound; 
+        <type name="DoubleRangeExt" default="max">-MAX,MAX,min,max</type>
+        <desc>Maximum flux density allowed by the filter, in Jy. This is an
+            inclusive interval bound;
             i.e. min &amp;lt; flux &amp;le; max.</desc>
     </s>
     <s k="radius_inner_deg"><label>Inner radius from phase centre [deg]</label>

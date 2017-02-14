@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,16 +45,8 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
     if (*status) return;
 
     /* Return immediately if no filtering should be done. */
-    if (min_I <= 0.0 && max_I <= 0.0)
+    if (min_I <= -DBL_MAX && max_I >= DBL_MAX)
         return;
-
-    /* If only the lower limit is set */
-    if (max_I <= 0.0 && min_I > 0.0)
-        max_I = DBL_MAX;
-
-    /* If only the upper limit is set */
-    if (min_I <= 0.0 && max_I > 0.0)
-        min_I = 0.0;
 
     if (max_I < min_I)
     {
