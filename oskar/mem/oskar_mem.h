@@ -101,6 +101,7 @@ enum OSKAR_MEM_LOCATION
 #include <mem/oskar_mem_set_element.h>
 #include <mem/oskar_mem_set_value_real.h>
 #include <mem/oskar_mem_stats.h>
+#include <mem/oskar_mem_write_fits_cube.h>
 #include <mem/oskar_mem_write_healpix_fits.h>
 
 #endif /* OSKAR_MEM_H_ */

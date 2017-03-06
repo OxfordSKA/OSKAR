@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,8 @@ extern "C" {
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
+
+/*#define SAVE_KERNELS 1*/
 
 static int oskar_composite_nearest_even(int value, int* smaller, int *larger);
 
@@ -384,6 +386,11 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
                         conv_size_half * (abs(iy) * oversample))];
     }
     oskar_mem_scale_real(h->w_kernels, 1.0 / sum, status);
+
+#ifdef SAVE_KERNELS
+    oskar_mem_write_fits_cube(h->w_kernels, "kernels_norm",
+            conv_size_half, conv_size_half, h->num_w_planes, -1, status);
+#endif
 
     /* Generate grid correction function. */
     h->corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
