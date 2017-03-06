@@ -54,6 +54,8 @@
     * Allowed visibility data to be read from a specified column of a
       Measurement Set.
 
+    * Allowed negative source fluxes.
+
 2015-06-24  OSKAR-2.6.1
 
     * Changed Measurement Set WEIGHT and SIGMA columns to use a tiled storage

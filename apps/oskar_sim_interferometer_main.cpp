@@ -53,25 +53,23 @@ static const char settings_def[] = oskar_sim_interferometer_XML_STR;
 
 int main(int argc, char** argv)
 {
-    int e = 0;
-    vector<pair<string, string> > failed_keys;
-    oskar_Log* log = 0;
-
     OptionParser opt("oskar_sim_interferometer", oskar_version_string(),
             settings_def);
     opt.add_settings_options();
     opt.add_flag("-q", "Suppress printing.", false, "--quiet");
     if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
     const char* settings_file = opt.get_arg(0);
+    int e = 0;
 
     // Declare settings.
     SettingsTree s;
-    settings_declare_xml(&s, settings_def);
     SettingsFileHandlerIni handler("oskar_sim_interferometer",
             oskar_version_string());
+    settings_declare_xml(&s, settings_def);
     s.set_file_handler(&handler);
 
     // Create the log if necessary.
+    oskar_Log* log = 0;
     if (!opt.is_set("--get") && !opt.is_set("--set"))
     {
         int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
@@ -81,6 +79,7 @@ int main(int argc, char** argv)
     }
 
     // Load the settings file.
+    vector<pair<string, string> > failed_keys;
     if (!s.load(settings_file, failed_keys))
     {
         oskar_log_error(log, "Failed to read settings file.");
@@ -164,9 +163,9 @@ int main(int argc, char** argv)
             s.to_int("advanced/apply_horizon_clip", &e));
     oskar_simulator_set_zero_failed_gaussians(h,
             s.to_int("advanced/zero_failed_gaussians", &e));
-    /* FIXME oskar_simulator_set_source_flux_range(h,
-            s.to_double("common_flux_filter_min_jy", &e),
-            s.to_double("common_flux_filter_max_jy", &e));*/
+    oskar_simulator_set_source_flux_range(h,
+            s.to_double("common_flux_filter/flux_min", &e),
+            s.to_double("common_flux_filter/flux_max", &e));
     s.end_group();
 
     // Set observation settings.

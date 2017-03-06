@@ -56,26 +56,23 @@ static string construct_element_pathname(string output_dir,
 
 int main(int argc, char** argv)
 {
-    int status = 0;
-    string output;
-    vector<pair<string, string> > failed_keys;
-    oskar_Log* log = 0;
-
     OptionParser opt("oskar_fit_element_data", oskar_version_string(),
             settings_def);
     opt.add_settings_options();
     opt.add_flag("-q", "Suppress printing.", false, "--quiet");
     if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
     const char* settings_file = opt.get_arg(0);
+    int e = 0;
 
     // Declare settings.
     SettingsTree s;
-    settings_declare_xml(&s, settings_def);
     SettingsFileHandlerIni handler("oskar_fit_element_data",
             oskar_version_string());
+    settings_declare_xml(&s, settings_def);
     s.set_file_handler(&handler);
 
     // Create the log if necessary.
+    oskar_Log* log = 0;
     if (!opt.is_set("--get") && !opt.is_set("--set"))
     {
         int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
@@ -85,6 +82,7 @@ int main(int argc, char** argv)
     }
 
     // Load the settings file.
+    vector<pair<string, string> > failed_keys;
     if (!s.load(settings_file, failed_keys))
     {
         oskar_log_error(log, "Failed to read settings file.");
@@ -95,8 +93,8 @@ int main(int argc, char** argv)
     // Get/set setting if necessary.
     if (opt.is_set("--get"))
     {
-        printf("%s\n", s.to_string(opt.get_arg(1), &status).c_str());
-        return !status ? 0 : EXIT_FAILURE;
+        printf("%s\n", s.to_string(opt.get_arg(1), &e).c_str());
+        return !e ? 0 : EXIT_FAILURE;
     }
     else if (opt.is_set("--set"))
     {
@@ -113,19 +111,19 @@ int main(int argc, char** argv)
 
     // Get the main settings.
     s.begin_group("element_fit");
-    string input_cst_file = s.to_string("input_cst_file", &status);
-    string input_scalar_file = s.to_string("input_scalar_file", &status);
-    string output_dir = s.to_string("output_directory", &status);
-    string pol_type = s.to_string("pol_type", &status);
-    // string coordinate_system = s.to_string("coordinate_system", &status);
-    int element_type_index = s.to_int("element_type_index", &status);
-    double frequency_hz = s.to_double("frequency_hz", &status);
+    string input_cst_file = s.to_string("input_cst_file", &e);
+    string input_scalar_file = s.to_string("input_scalar_file", &e);
+    string output_dir = s.to_string("output_directory", &e);
+    string pol_type = s.to_string("pol_type", &e);
+    // string coordinate_system = s.to_string("coordinate_system", &e);
+    int element_type_index = s.to_int("element_type_index", &e);
+    double frequency_hz = s.to_double("frequency_hz", &e);
     double average_fractional_error =
-            s.to_double("average_fractional_error", &status);
+            s.to_double("average_fractional_error", &e);
     double average_fractional_error_factor_increase =
-            s.to_double("average_fractional_error_factor_increase", &status);
-    int ignore_below_horizon = s.to_int("ignore_data_below_horizon", &status);
-    int ignore_at_pole = s.to_int("ignore_data_at_pole", &status);
+            s.to_double("average_fractional_error_factor_increase", &e);
+    int ignore_below_horizon = s.to_int("ignore_data_below_horizon", &e);
+    int ignore_at_pole = s.to_int("ignore_data_at_pole", &e);
     int port = pol_type == "X" ? 1 : pol_type == "Y" ? 2 : 0;
 
     // Check that the input and output files have been set.
@@ -137,8 +135,7 @@ int main(int argc, char** argv)
     }
 
     // Create an element model.
-    oskar_Element* element = oskar_element_create(OSKAR_DOUBLE,
-            OSKAR_CPU, &status);
+    oskar_Element* element = oskar_element_create(OSKAR_DOUBLE, OSKAR_CPU, &e);
 
     // Load the CST text file for the correct port, if specified (X=1, Y=2).
     if (!input_cst_file.empty())
@@ -149,26 +146,26 @@ int main(int argc, char** argv)
         oskar_element_load_cst(element, log, port, frequency_hz,
                 input_cst_file.c_str(), average_fractional_error,
                 average_fractional_error_factor_increase,
-                ignore_at_pole, ignore_below_horizon, &status);
+                ignore_at_pole, ignore_below_horizon, &e);
 
         // Construct the output file name based on the settings.
         if (port == 0)
         {
-            output = construct_element_pathname(output_dir, 1,
+            string output = construct_element_pathname(output_dir, 1,
                     element_type_index, frequency_hz);
             oskar_element_write(element, log, output.c_str(), 1,
-                    frequency_hz, &status);
+                    frequency_hz, &e);
             output = construct_element_pathname(output_dir, 2,
                     element_type_index, frequency_hz);
             oskar_element_write(element, log, output.c_str(), 2,
-                    frequency_hz, &status);
+                    frequency_hz, &e);
         }
         else
         {
-            output = construct_element_pathname(output_dir, port,
+            string output = construct_element_pathname(output_dir, port,
                     element_type_index, frequency_hz);
             oskar_element_write(element, log, output.c_str(), port,
-                    frequency_hz, &status);
+                    frequency_hz, &e);
         }
     }
 
@@ -180,27 +177,27 @@ int main(int argc, char** argv)
         oskar_element_load_scalar(element, log, frequency_hz,
                 input_scalar_file.c_str(), average_fractional_error,
                 average_fractional_error_factor_increase,
-                ignore_at_pole, ignore_below_horizon, &status);
+                ignore_at_pole, ignore_below_horizon, &e);
 
         // Construct the output file name based on the settings.
-        output = construct_element_pathname(output_dir, 0,
+        string output = construct_element_pathname(output_dir, 0,
                 element_type_index, frequency_hz);
         oskar_element_write(element, log, output.c_str(), 0,
-                frequency_hz, &status);
+                frequency_hz, &e);
     }
 
     // Check for errors.
-    if (status)
+    if (e)
     {
-        oskar_log_error(log, "Run failed with code %i: %s.", status,
-                oskar_get_error_string(status));
+        oskar_log_error(log, "Run failed with code %i: %s.", e,
+                oskar_get_error_string(e));
     }
 
     // Free memory.
-    oskar_element_free(element, &status);
+    oskar_element_free(element, &e);
     oskar_log_free(log);
 
-    return status;
+    return e;
 }
 
 

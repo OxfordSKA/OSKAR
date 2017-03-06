@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 {
     oskar::OptionParser opt("oskar_cuda_system_info", oskar_version_string());
     opt.set_description("Display a summary of the available CUDA capability");
-    if (!opt.check_options(argc, argv)) return OSKAR_FAIL;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     // Create the CUDA info structure.
     int error = 0;

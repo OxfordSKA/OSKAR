@@ -76,5 +76,20 @@ TEST(SettingsValue, test1)
     ASSERT_TRUE(v.set_default("2.0"));
     ASSERT_EQ(SettingsValue::DOUBLE, v.type());
     ASSERT_STREQ("Double", v.type_name().c_str());
+
+    bool ok = false;
+    ASSERT_TRUE(v.init("DoubleRangeExt", "-MAX,MAX,min,max"));
+    ASSERT_TRUE(v.get<DoubleRangeExt>().set_default("min"));
+    ASSERT_TRUE(v.set_value("10.0"));
+    ASSERT_DOUBLE_EQ(10.0, v.to_double(ok));
+    ASSERT_TRUE(ok);
+    ASSERT_TRUE(v.set_value("min"));
+    ASSERT_DOUBLE_EQ(-DBL_MAX, v.to_double(ok));
+    ASSERT_STREQ("min", v.to_string().c_str());
+    ASSERT_TRUE(ok);
+    ASSERT_TRUE(v.set_value("max"));
+    ASSERT_DOUBLE_EQ(DBL_MAX, v.to_double(ok));
+    ASSERT_STREQ("max", v.to_string().c_str());
+    ASSERT_TRUE(ok);
 }
 

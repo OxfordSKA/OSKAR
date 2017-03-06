@@ -221,7 +221,7 @@ oskar_Simulator* oskar_simulator_create(int precision, int* status)
     oskar_simulator_set_num_devices(h, -1);
     oskar_simulator_set_correlation_type(h, "Cross-correlations", status);
     oskar_simulator_set_horizon_clip(h, 1);
-    oskar_simulator_set_source_flux_range(h, 0.0, DBL_MAX);
+    oskar_simulator_set_source_flux_range(h, -DBL_MAX, DBL_MAX);
     oskar_simulator_set_max_times_per_block(h, 10);
     return h;
 }

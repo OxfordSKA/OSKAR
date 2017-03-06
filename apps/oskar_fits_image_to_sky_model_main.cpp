@@ -52,8 +52,7 @@ int main(int argc, char** argv)
             "below this fraction will be ignored.", 1, "0.0");
     opt.add_flag("-n", "Noise floor in units of original image. "
             "Pixels below this value will be ignored.", 1, "0.0");
-    if (!opt.check_options(argc, argv))
-        return OSKAR_FAIL;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     // Parse command line.
     double spectral_index = 0.0;

@@ -3,9 +3,9 @@
 #
 
 # Build OSKAR GUI.
-find_package(Qt5Core)
-find_package(Qt5Widgets)
-find_package(Qt5Network)
+find_package(Qt5Core QUIET)
+find_package(Qt5Widgets QUIET)
+find_package(Qt5Network QUIET)
 
 if (Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Network_FOUND)
     set(gui_SRC

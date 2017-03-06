@@ -152,7 +152,11 @@ static int get_items(const char* dir_path, const char* wildcard,
     char* buffer = 0;
     buffer = (char*) malloc(3 + strlen(dir_path));
     (void) sprintf(buffer, "%s\\*", dir_path);
-    if ((h = FindFirstFile(buffer, &f)) == INVALID_HANDLE_VALUE) return 0;
+    if ((h = FindFirstFile(buffer, &f)) == INVALID_HANDLE_VALUE)
+    {
+        free(buffer);
+        return 0;
+    }
     do
         item(dir_path, f.cFileName, wildcard, match_files, match_dirs,
                 &i, num_items, items);

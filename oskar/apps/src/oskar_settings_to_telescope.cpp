@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,15 +113,10 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
                 s->to_double("channel_bandwidth_hz", status));
         oskar_telescope_set_time_average(t,
                 s->to_double("time_average_sec", status));
-        {
-            double uv_min = 0.0, uv_max = -1.0;
-            if (!s->starts_with("uv_filter_min", "min", status))
-                uv_min = s->to_double("uv_filter_min", status);
-            if (!s->starts_with("uv_filter_max", "max", status))
-                uv_max = s->to_double("uv_filter_max", status);
-            oskar_telescope_set_uv_filter(t, uv_min, uv_max,
-                    s->to_string("uv_filter_units", status).c_str(), status);
-        }
+        oskar_telescope_set_uv_filter(t,
+                s->to_double("uv_filter_min", status),
+                s->to_double("uv_filter_max", status),
+                s->to_string("uv_filter_units", status).c_str(), status);
         switch (s->first_letter("noise/freq", status))
         {
         case 'R': /* Range. */

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Script clean up an OSKAR build directory.
+# Script to clean up an OSKAR build directory.
 #
 # WARNING: Must only be run from inside the top level of the build directory
 #
@@ -32,7 +32,6 @@ rm -rf doc
 rm -rf extern
 rm -rf gui
 rm -rf oskar
-rm -rf python
 
 # Remove any example data (zip files or directories)
 rm -rf OSKAR-*-Example-Data
@@ -47,8 +46,7 @@ rm -f  *.log
 # Note can only remove the contents of the directories not the directories
 # themselves as they may contain non-OSKAR files.
 if [ "$1" == "-uninstall" ]; then
-    rm -f  @CMAKE_INSTALL_PREFIX@/@OSKAR_BIN_INSTALL_DIR@/oskar*
+    rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_BIN_INSTALL_DIR@/oskar*
     rm -f  @CMAKE_INSTALL_PREFIX@/@OSKAR_LIB_INSTALL_DIR@/liboskar*
     rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_INCLUDE_INSTALL_DIR@/oskar
-    # rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_PYTHON_INSTALL_DIR@
 fi

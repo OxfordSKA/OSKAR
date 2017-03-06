@@ -135,7 +135,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
             else if (beam_coord_type == OSKAR_SPHERICAL_TYPE_AZEL)
             {
                 /* TODO convert from az0, el0 to ra0, dec0 */
-                *status = OSKAR_FAIL;
+                *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
             }
             else
             {

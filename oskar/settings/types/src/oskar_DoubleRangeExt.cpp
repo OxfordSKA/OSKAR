@@ -120,6 +120,25 @@ std::string DoubleRangeExt::get_value() const
     return to_string_(value_);
 }
 
+double DoubleRangeExt::value() const
+{
+    if (is_max()) return max_;
+    if (is_min()) return min_;
+    return ttl::var::get<double>(value_);
+}
+
+double DoubleRangeExt::default_value() const
+{
+    if (default_.which() == STRING &&
+            ttl::var::get<std::string>(default_) == ext_max_)
+        return max_;
+    if (default_.which() == STRING &&
+            ttl::var::get<std::string>(default_) == ext_min_)
+        return min_;
+    return ttl::var::get<double>(default_);
+}
+
+
 bool DoubleRangeExt::is_default() const
 {
     if (value_.is_singular() || default_.is_singular()) return false;

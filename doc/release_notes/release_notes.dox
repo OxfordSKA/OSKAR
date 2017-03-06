@@ -56,6 +56,7 @@ please refer to older revisions of this document or the
       with option to scale image normalisation accordingly.
 - Allowed visibility data to be read from a specified column of a
       Measurement Set.
+- Allowed negative source fluxes.
 
 
 \section release_notes_roadmap Roadmap

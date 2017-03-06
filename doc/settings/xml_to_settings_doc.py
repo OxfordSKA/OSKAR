@@ -191,11 +191,13 @@ def set_allowed_values_latex(node, latex_file):
         a = params_[0]
         b = params_[1]
         c = params_[2]
+        d = params_[3]
         if b == 'MAX':
-            allowed_values_ = r"{Double $\geq$ %s, or `%s'}" % (a,c)
+            allowed_values_ = r"{Double $\geq$ %s, `%s' or `%s'}" % (a, c, d)
         else:
-            allowed_values_ = "Double in range %s $\leq$ $x$ $\leq$ %s, or `%s'" \
-                % (a, b, c)
+            allowed_values_ = \
+                    "Double in range %s $\leq$ $x$ $\leq$ %s, `%s' or `%s'" \
+                    % (a, b, c, d)
 
     elif type_name_ == 'INPUTFILELIST':
         #allowed_values_ = 'Comma separated list of path names'

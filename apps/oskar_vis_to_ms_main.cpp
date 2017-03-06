@@ -60,8 +60,7 @@ int main(int argc, char** argv)
     opt.add_example("oskar_vis_to_ms file1.vis file2.vis");
     opt.add_example("oskar_vis_to_ms file1.vis file2.vis -o stitched.ms");
     opt.add_example("oskar_vis_to_ms *.vis");
-    if (!opt.check_options(argc, argv))
-        return OSKAR_FAIL;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     // Get the options.
     string out_path;

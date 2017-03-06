@@ -40,8 +40,7 @@ int main(int argc, char** argv)
     oskar::OptionParser opt("oskar_binary_file_query", oskar_version_string());
     opt.set_description("List a summary of the contents of an OSKAR binary file.");
     opt.add_required("binary file", "Path of an OSKAR binary file.");
-    if (!opt.check_options(argc, argv))
-        return OSKAR_FAIL;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
     const char* filename = opt.get_arg();
 
     // Scan the file.

@@ -85,10 +85,8 @@ public:
     bool set_value(double d);
     bool set_default(double d);
 
-    // FIXME(BM) handle string types.
-    double value() const { return ttl::var::get<double>(value_); }
-    // FIXME(BM) handle string types.
-    double default_value() const { return ttl::var::get<double>(default_); }
+    double value() const;
+    double default_value() const;
     double min() const { return min_; }
     double max() const { return max_; }
     std::string ext_min() const { return ext_min_; }

@@ -74,6 +74,7 @@ void SettingsTree::set_file_name(const std::string& name)
 void SettingsTree::set_defaults()
 {
     set_defaults_(root_);
+    modified_ = false;
 }
 
 bool SettingsTree::is_modified() const

@@ -263,13 +263,13 @@
     <s k="common_flux_filter">
         <label>Common source flux filtering settings</label>
         <s k="flux_min"><label>Flux density min [Jy]</label>
-            <type name="DoubleRangeExt" default="min">0,MAX,min</type>
+            <type name="DoubleRangeExt" default="min">-MAX,MAX,min,max</type>
             <desc>Minimum flux density allowed by the filter, in Jy. <b>Note
                 that this filter is applied on a per-channel basis after
                 scaling all source fluxes by the spectral index.</b></desc>
         </s>
         <s k="flux_max"><label>Flux density max [Jy]</label>
-            <type name="DoubleRangeExt" default="max">0,MAX,max</type>
+            <type name="DoubleRangeExt" default="max">-MAX,MAX,min,max</type>
             <desc>Maximum flux density allowed by the filter, in Jy. <b>Note
                 that this filter is applied on a per-channel basis after
                 scaling all source fluxes by the spectral index.</b></desc>

@@ -74,7 +74,7 @@ void oskar_element_save(const oskar_Element* element, const char* filename,
     }
     else
     {
-        *status = OSKAR_ERR_UNKNOWN;
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
         fclose(file);
         return;
     }

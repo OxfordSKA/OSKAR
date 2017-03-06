@@ -63,7 +63,6 @@ static const char settings_def[] = oskar_sim_interferometer_XML_STR;
 int main(int argc, char** argv)
 {
     int status = 0;
-    vector<pair<string, string> > failed_keys;
 
     // Obtain command line options & arguments.
     OptionParser opt("oskar_vis_add_noise", oskar_version_string(),
@@ -74,8 +73,7 @@ int main(int argc, char** argv)
     opt.add_flag("-s", "OSKAR settings file (noise settings).", 1, "", true);
     opt.add_flag("-v", "Verbose logging.");
     opt.add_flag("-q", "Suppress all logging output.");
-    if (!opt.check_options(argc, argv))
-        return EXIT_FAILURE;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     string settings_file;
     opt.get("-s")->getString(settings_file);
@@ -86,9 +84,9 @@ int main(int argc, char** argv)
 
     // Declare settings.
     SettingsTree s;
-    settings_declare_xml(&s, settings_def);
     SettingsFileHandlerIni handler("oskar_vis_add_noise",
             oskar_version_string());
+    settings_declare_xml(&s, settings_def);
     s.set_file_handler(&handler);
 
     // Create the log.
@@ -102,6 +100,7 @@ int main(int argc, char** argv)
 
     // Load the settings file.
     oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
+    vector<pair<string, string> > failed_keys;
     if (!s.load(settings_file, failed_keys))
     {
         oskar_log_error(log, "Failed to read settings file.");

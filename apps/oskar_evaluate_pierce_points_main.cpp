@@ -54,8 +54,7 @@ int main(int argc, char** argv)
     oskar::OptionParser opt("oskar_evaulate_pierce_points",
             oskar_version_string());
     opt.add_required("settings file");
-    if (!opt.check_options(argc, argv))
-        return OSKAR_FAIL;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     const char* settings_file = opt.get_arg();
 
