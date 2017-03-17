@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,34 +27,48 @@
  */
 
 #include "imager/private_imager.h"
-
-#include "imager/oskar_imager_select_coords.h"
+#include "imager/private_imager_select_coords.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define C0 299792458.0
+
 void oskar_imager_select_coords(const oskar_Imager* h,
         int start_time, int end_time, int start_chan, int end_chan,
         int num_baselines, const oskar_Mem* vis_uu, const oskar_Mem* vis_vv,
-        const oskar_Mem* vis_ww, int im_time_idx, int im_chan_idx,
+        const oskar_Mem* vis_ww, double im_time_utc, double im_freq_hz,
         oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, size_t* num, int* status)
 {
-    int c, t;
-    double freq, scaling, c0 = 299792458.0;
-    oskar_Mem *uu_ = 0, *vv_ = 0, *ww_ = 0;
     size_t src;
+    int i, j, t, c;
+    oskar_Mem *uu_ = 0, *vv_ = 0, *ww_ = 0;
+    double inv_wavelength;
+    const double s = 0.05;
+    const double df = h->freq_inc_hz;
+    const double dt = h->time_inc_sec / 86400.0;
+    const double f0 = h->vis_freq_start_hz;
+    const double t0 = h->vis_time_start_mjd_utc + 0.5 * dt;
+
+    /* Initialise. */
     if (*status) return;
     *num = 0;
+    uu_ = oskar_mem_create_alias(0, 0, 0, status);
+    vv_ = oskar_mem_create_alias(0, 0, 0, status);
+    ww_ = oskar_mem_create_alias(0, 0, 0, status);
 
     /* Check whether using time and/or frequency synthesis. */
     if (h->time_snaps && h->chan_snaps)
     {
         /* Get the time and channel for the image and check if out of range. */
-        t = im_time_idx + h->vis_time_range[0];
+        t = (int) round((im_time_utc - t0) / dt);
         if (t < start_time || t > end_time) return;
-        c = im_chan_idx + h->vis_chan_range[0];
+        if (fabs((im_time_utc - t0) - t * dt) > s * dt) return;
+        c = (int) round((im_freq_hz - f0) / df);
         if (c < start_chan || c > end_chan) return;
+        if (fabs((im_freq_hz - f0) - c * df) > s * df) return;
 
         /* Copy the baseline coordinates for the selected time. */
         src = num_baselines * (t - start_time);
@@ -63,26 +77,25 @@ void oskar_imager_select_coords(const oskar_Imager* h,
         oskar_mem_copy_contents(ww, vis_ww, 0, src, num_baselines, status);
 
         /* Divide coordinates by the wavelength. */
-        freq = h->vis_freq_start_hz + c * h->freq_inc_hz;
-        scaling = freq / c0;
-        oskar_mem_scale_real(uu, scaling, status);
-        oskar_mem_scale_real(vv, scaling, status);
-        oskar_mem_scale_real(ww, scaling, status);
+        inv_wavelength = (f0 + c * df) / C0;
+        oskar_mem_scale_real(uu, inv_wavelength, status);
+        oskar_mem_scale_real(vv, inv_wavelength, status);
+        oskar_mem_scale_real(ww, inv_wavelength, status);
         *num += num_baselines;
     }
     else if (h->time_snaps && !h->chan_snaps) /* Frequency synthesis */
     {
         /* Get the time for the image and check if out of range. */
-        t = im_time_idx + h->vis_time_range[0];
+        t = (int) round((im_time_utc - t0) / dt);
         if (t < start_time || t > end_time) return;
+        if (fabs((im_time_utc - t0) - t * dt) > s * dt) return;
 
         /* Copy the baseline coordinates for the selected time. */
-        uu_ = oskar_mem_create_alias(0, 0, 0, status);
-        vv_ = oskar_mem_create_alias(0, 0, 0, status);
-        ww_ = oskar_mem_create_alias(0, 0, 0, status);
-        for (c = h->vis_chan_range[0]; c <= h->vis_chan_range[1]; ++c)
+        for (i = 0; i < h->num_sel_freqs; ++i)
         {
+            c = (int) round((h->sel_freqs[i] - f0) / df);
             if (c < start_chan || c > end_chan) continue;
+            if (fabs((h->sel_freqs[i] - f0) - c * df) > s * df) continue;
 
             src = num_baselines * (t - start_time);
             oskar_mem_set_alias(uu_, uu, *num, num_baselines, status);
@@ -96,27 +109,26 @@ void oskar_imager_select_coords(const oskar_Imager* h,
                     num_baselines, status);
 
             /* Divide coordinates by the wavelength. */
-            freq = h->vis_freq_start_hz + c * h->freq_inc_hz;
-            scaling = freq / c0;
-            oskar_mem_scale_real(uu_, scaling, status);
-            oskar_mem_scale_real(vv_, scaling, status);
-            oskar_mem_scale_real(ww_, scaling, status);
+            inv_wavelength = (f0 + c * df) / C0;
+            oskar_mem_scale_real(uu_, inv_wavelength, status);
+            oskar_mem_scale_real(vv_, inv_wavelength, status);
+            oskar_mem_scale_real(ww_, inv_wavelength, status);
             *num += num_baselines;
         }
     }
     else if (!h->time_snaps && h->chan_snaps) /* Time synthesis */
     {
         /* Get the channel for the image and check if out of range. */
-        c = im_chan_idx + h->vis_chan_range[0];
+        c = (int) round((im_freq_hz - f0) / df);
         if (c < start_chan || c > end_chan) return;
+        if (fabs((im_freq_hz - f0) - c * df) > s * df) return;
 
         /* Copy the baseline coordinates for all times. */
-        uu_ = oskar_mem_create_alias(0, 0, 0, status);
-        vv_ = oskar_mem_create_alias(0, 0, 0, status);
-        ww_ = oskar_mem_create_alias(0, 0, 0, status);
-        for (t = h->vis_time_range[0]; t <= h->vis_time_range[1]; ++t)
+        for (i = 0; i < h->num_sel_times; ++i)
         {
+            t = (int) round((h->sel_times[i] - t0) / dt);
             if (t < start_time || t > end_time) continue;
+            if (fabs((h->sel_times[i] - t0) - t * dt) > s * dt) continue;
 
             src = num_baselines * (t - start_time);
             oskar_mem_set_alias(uu_, uu, *num, num_baselines, status);
@@ -130,26 +142,26 @@ void oskar_imager_select_coords(const oskar_Imager* h,
                     num_baselines, status);
 
             /* Divide coordinates by the wavelength. */
-            freq = h->vis_freq_start_hz + c * h->freq_inc_hz;
-            scaling = freq / c0;
-            oskar_mem_scale_real(uu_, scaling, status);
-            oskar_mem_scale_real(vv_, scaling, status);
-            oskar_mem_scale_real(ww_, scaling, status);
+            inv_wavelength = (f0 + c * df) / C0;
+            oskar_mem_scale_real(uu_, inv_wavelength, status);
+            oskar_mem_scale_real(vv_, inv_wavelength, status);
+            oskar_mem_scale_real(ww_, inv_wavelength, status);
             *num += num_baselines;
         }
     }
     else /* Time and frequency synthesis */
     {
-        uu_ = oskar_mem_create_alias(0, 0, 0, status);
-        vv_ = oskar_mem_create_alias(0, 0, 0, status);
-        ww_ = oskar_mem_create_alias(0, 0, 0, status);
-        for (t = h->vis_time_range[0]; t <= h->vis_time_range[1]; ++t)
+        for (i = 0; i < h->num_sel_times; ++i)
         {
+            t = (int) round((h->sel_times[i] - t0) / dt);
             if (t < start_time || t > end_time) continue;
+            if (fabs((h->sel_times[i] - t0) - t * dt) > s * dt) continue;
 
-            for (c = h->vis_chan_range[0]; c <= h->vis_chan_range[1]; ++c)
+            for (j = 0; j < h->num_sel_freqs; ++j)
             {
+                c = (int) round((h->sel_freqs[j] - f0) / df);
                 if (c < start_chan || c > end_chan) continue;
+                if (fabs((h->sel_freqs[j] - f0) - c * df) > s * df) continue;
 
                 /* Copy the baseline coordinates for the current time. */
                 src = num_baselines * (t - start_time);
@@ -164,11 +176,10 @@ void oskar_imager_select_coords(const oskar_Imager* h,
                         num_baselines, status);
 
                 /* Divide coordinates by the wavelength. */
-                freq = h->vis_freq_start_hz + c * h->freq_inc_hz;
-                scaling = freq / c0;
-                oskar_mem_scale_real(uu_, scaling, status);
-                oskar_mem_scale_real(vv_, scaling, status);
-                oskar_mem_scale_real(ww_, scaling, status);
+                inv_wavelength = (f0 + c * df) / C0;
+                oskar_mem_scale_real(uu_, inv_wavelength, status);
+                oskar_mem_scale_real(vv_, inv_wavelength, status);
+                oskar_mem_scale_real(ww_, inv_wavelength, status);
                 *num += num_baselines;
             }
         }

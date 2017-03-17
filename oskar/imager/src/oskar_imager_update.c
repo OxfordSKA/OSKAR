@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,22 +29,22 @@
 #include "imager/private_imager.h"
 
 #include "convert/oskar_convert_ecef_to_baseline_uvw.h"
-#include "convert/oskar_convert_lon_lat_to_relative_directions.h"
 #include "imager/oskar_grid_weights.h"
 #include "imager/oskar_imager.h"
-#include "math/oskar_cmath.h"
 #include "imager/private_imager_create_fits_files.h"
+#include "imager/private_imager_filter_uv.h"
 #include "imager/private_imager_set_num_planes.h"
+#include "imager/private_imager_select_coords.h"
+#include "imager/private_imager_select_vis.h"
 #include "imager/private_imager_update_plane_dft.h"
 #include "imager/private_imager_update_plane_fft.h"
 #include "imager/private_imager_update_plane_wproj.h"
 #include "imager/private_imager_weight_radial.h"
 #include "imager/private_imager_weight_uniform.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-#define DEG2RAD M_PI/180.0
 
 #ifdef __cplusplus
 extern "C" {
@@ -96,11 +96,11 @@ void oskar_imager_update_from_block(oskar_Imager* h,
         oskar_imager_set_vis_frequency(h,
                 oskar_vis_header_freq_start_hz(header),
                 oskar_vis_header_freq_inc_hz(header),
-                oskar_vis_header_num_channels_total(header), status);
+                oskar_vis_header_num_channels_total(header));
         oskar_imager_set_vis_time(h,
                 oskar_vis_header_time_start_mjd_utc(header),
                 oskar_vis_header_time_inc_sec(header),
-                oskar_vis_header_num_times_total(header), status);
+                oskar_vis_header_num_times_total(header));
         oskar_imager_set_vis_phase_centre(h,
                 oskar_vis_header_phase_centre_ra_deg(header),
                 oskar_vis_header_phase_centre_dec_deg(header));
@@ -143,7 +143,7 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
     }
 
     /* Ensure image/grid planes exist and algorithm has been initialised. */
-    oskar_imager_set_num_planes(h);
+    oskar_imager_set_num_planes(h, status);
     oskar_imager_check_init(h, status);
     oskar_imager_allocate_planes(h, status);
     if (*status) return;
@@ -208,10 +208,10 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
     }
 
     /* Loop over each image plane being made. */
-    for (t = 0; t < h->im_num_times; ++t)
+    for (t = 0; t < h->num_im_times; ++t)
     {
         if (*status) break;
-        for (c = 0; c < h->im_num_channels; ++c)
+        for (c = 0; c < h->num_im_channels; ++c)
         {
             oskar_Mem *pu, *pv, *pw;
             size_t num_coords = 0, num_vis = 0;
@@ -225,7 +225,8 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
             }
             oskar_imager_select_coords(h, start_time, end_time,
                     start_chan, end_chan, num_baselines, u_in, v_in, w_in,
-                    t, c, pu, pv, pw, &num_coords, status);
+                    h->im_times[t], h->im_freqs[c], pu, pv, pw,
+                    &num_coords, status);
 
             /* Check if any baselines were selected. */
             if (num_coords == 0) continue;
@@ -236,7 +237,7 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
                         h->uu_tmp, h->vv_tmp, h->ww_tmp, h->M,
                         h->uu_im, h->vv_im, h->ww_im);
 
-            for (p = 0; p < h->im_num_pols; ++p)
+            for (p = 0; p < h->num_im_pols; ++p)
             {
                 if (*status) break;
 
@@ -244,7 +245,8 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
                 /* Always need to select weights. */
                 oskar_imager_select_vis(h,
                         start_time, end_time, start_chan, end_chan,
-                        num_baselines, num_pols, amp_in, weight_in, t, c, p,
+                        num_baselines, num_pols, amp_in, weight_in,
+                        h->im_times[t], h->im_freqs[c], p,
                         h->vis_im, h->weight_im, &num_vis, status);
 
                 /* Overwrite visibilities if making PSF, or phase rotate. */
@@ -269,7 +271,7 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
                         h->ww_im, h->vis_im, h->weight_im, status);
 
                 /* Update this image plane with the visibilities. */
-                plane = h->im_num_pols * (t * h->im_num_channels + c) + p;
+                plane = h->num_im_pols * (t * h->num_im_channels + c) + p;
                 if (h->coords_only)
                     oskar_imager_update_plane(h, num_vis, h->uu_im, h->vv_im,
                             h->ww_im, 0, h->weight_im, 0, 0,
@@ -467,7 +469,8 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
     /* Allocate the weights grids if required. */
     if (!h->weights_grids)
     {
-        h->weights_grids = calloc(h->num_planes, sizeof(oskar_Mem*));
+        h->weights_grids = (oskar_Mem**)
+                calloc(h->num_planes, sizeof(oskar_Mem*));
         if (h->weighting == OSKAR_WEIGHTING_UNIFORM)
         {
             for (i = 0; i < h->num_planes; ++i)
@@ -483,7 +486,8 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
     if (h->coords_only || h->planes) return;
 
     /* Allocate the image or visibility planes. */
-    h->planes = calloc(h->num_planes, sizeof(oskar_Mem*));
+    h->planes = (oskar_Mem**) calloc(h->num_planes, sizeof(oskar_Mem*));
+    h->plane_norm = (double*) calloc(h->num_planes, sizeof(double));
     switch (h->algorithm)
     {
     case OSKAR_ALGORITHM_DFT_2D:
@@ -506,40 +510,6 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
         *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     }
     if (*status) return;
-    h->plane_norm = (double*) calloc(h->num_planes, sizeof(double));
-
-    /* If imaging away from the beam direction, evaluate l0-l, m0-m, n0-n
-     * for the new pointing centre, and a rotation matrix to generate the
-     * rotated baseline coordinates. */
-    if (h->direction_type == 'R')
-    {
-        double l1, m1, n1, ra_rad, dec_rad, ra0_rad, dec0_rad;
-        double d_a, d_d, *M;
-
-        ra_rad = h->im_centre_deg[0] * DEG2RAD;
-        dec_rad = h->im_centre_deg[1] * DEG2RAD;
-        ra0_rad = h->vis_centre_deg[0] * DEG2RAD;
-        dec0_rad = h->vis_centre_deg[1] * DEG2RAD;
-        d_a = ra0_rad - ra_rad; /* It's OK, these are meant to be swapped. */
-        d_d = dec_rad - dec0_rad;
-
-        /* Rotate by -delta_ra around v, then delta_dec around u. */
-        M = h->M;
-        M[0] = cos(d_a);           M[1] = 0.0;      M[2] = sin(d_a);
-        M[3] = sin(d_a)*sin(d_d);  M[4] = cos(d_d); M[5] = -cos(d_a)*sin(d_d);
-        M[6] = -sin(d_a)*cos(d_d); M[7] = sin(d_a); M[8] = cos(d_a)*cos(d_d);
-
-        oskar_convert_lon_lat_to_relative_directions_d(1,
-                &ra_rad, &dec_rad, ra0_rad, dec0_rad, &l1, &m1, &n1);
-        h->delta_l = 0 - l1;
-        h->delta_m = 0 - m1;
-        h->delta_n = 1 - n1;
-    }
-    else
-    {
-        h->im_centre_deg[0] = h->vis_centre_deg[0];
-        h->im_centre_deg[1] = h->vis_centre_deg[1];
-    }
 
     /* Create FITS files for the planes if required. */
     oskar_imager_create_fits_files(h, status);

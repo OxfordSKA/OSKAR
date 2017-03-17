@@ -74,7 +74,7 @@ enum OSKAR_ERROR_CODES
     OSKAR_ERR_BAD_SKY_FILE                             = -27,
     OSKAR_ERR_BAD_POINTING_FILE                        = -28,
     OSKAR_ERR_BAD_COORD_FILE                           = -29,
-    OSKAR_ERR_BAD_GSM_FILE                             = -30,
+    OSKAR_ERR_BAD_GSM_FILE                             = -30
 
     /*
      * Codes -75 to -99 are reserved for settings errors.
@@ -82,9 +82,6 @@ enum OSKAR_ERROR_CODES
      * Codes -100 to -125 are reserved for binary format errors.
      * See oskar_binary.h
      */
-
-    OSKAR_FAIL                                         = -126,
-    OSKAR_ERR_UNKNOWN                                  = -127
 };
 
 /**

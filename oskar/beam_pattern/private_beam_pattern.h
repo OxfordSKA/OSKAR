@@ -29,6 +29,7 @@
 #include <mem/oskar_mem.h>
 #include <telescope/oskar_telescope.h>
 #include <utility/oskar_timer.h>
+#include <utility/oskar_mutex.h>
 
 #include <fitsio.h>
 #include <stdio.h>
@@ -100,6 +101,9 @@ struct oskar_BeamPattern
     double freq_start_hz, freq_inc_hz;
     char average_single_axis, coord_frame_type, coord_grid_type;
     char *root_path, *sky_model_file;
+
+    /* State. */
+    oskar_Mutex* mutex;
 
     /* Input data. */
     oskar_Mem *x, *y, *z;

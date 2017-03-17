@@ -84,7 +84,6 @@ enum OSKAR_IMAGE_WEIGHTING
 #include <imager/oskar_imager_accessors.h>
 #include <imager/oskar_imager_check_init.h>
 #include <imager/oskar_imager_create.h>
-#include <imager/oskar_imager_filter_uv.h>
 #include <imager/oskar_imager_finalise.h>
 #include <imager/oskar_imager_free.h>
 #include <imager/oskar_imager_linear_to_stokes.h>
@@ -92,8 +91,6 @@ enum OSKAR_IMAGE_WEIGHTING
 #include <imager/oskar_imager_rotate_coords.h>
 #include <imager/oskar_imager_rotate_vis.h>
 #include <imager/oskar_imager_run.h>
-#include <imager/oskar_imager_select_coords.h>
-#include <imager/oskar_imager_select_vis.h>
 #include <imager/oskar_imager_update.h>
 
 #endif /* OSKAR_IMAGER_H_ */

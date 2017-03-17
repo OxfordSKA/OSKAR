@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,20 +54,21 @@ struct oskar_Imager
 
     /* Settings parameters. */
     int imager_prec, num_gpus, *cuda_device_ids, fft_on_gpu;
-    int chan_snaps, time_snaps, chan_range[2], time_range[2];
-    int im_type, im_num_times, im_num_channels, im_num_pols, pol_offset;
-    int algorithm, image_size, use_ms, use_stokes, support, oversample;
+    int chan_snaps, time_snaps;
+    int im_type, num_im_times, num_im_channels, num_im_pols, pol_offset;
+    int algorithm, image_size, use_stokes, support, oversample;
     int generate_w_kernels_on_gpu, set_cellsize, set_fov, weighting;
     int num_files, scale_norm_with_num_input_files;
     char direction_type, kernel_type, **input_files, *image_root, *ms_column;
     double cellsize_rad, fov_deg, im_centre_deg[2];
     double uv_filter_min, uv_filter_max;
+    double time_min_utc, time_max_utc, freq_min_hz, freq_max_hz;
 
     /* Visibility meta-data. */
-    int vis_time_range[2], vis_chan_range[2];
-    double vis_centre_deg[2];
-    double vis_freq_start_hz, im_freq_start_hz, freq_inc_hz;
-    double vis_time_start_mjd_utc, im_time_start_mjd_utc, time_inc_sec;
+    int num_sel_freqs, num_sel_times;
+    double *im_freqs, *im_times, *sel_freqs, *sel_times;
+    double vis_freq_start_hz, freq_inc_hz;
+    double vis_time_start_mjd_utc, time_inc_sec;
 
     /* Scratch data. */
     oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im, *weight_im;

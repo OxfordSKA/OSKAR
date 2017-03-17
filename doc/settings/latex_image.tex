@@ -124,25 +124,25 @@ channel\_snapshots
 &
 Bool
 &
-true
+false
 \\
 \hline
 
-channel\_start
+freq\_min\_hz
 &
-{The start channel index to include in the image or image cube.}
+{The minimum visibility channel centre frequency to include in the image or image cube, in Hz.}
 &
-Unsigned integer
+Unsigned double
 &
-0
+0.0
 \\
 \hline
 
-channel\_end
+freq\_max\_hz
 &
-{The end channel index to include in the image or image cube.}
+{The maximum visibility channel centre frequency to include in the image or image cube, in Hz.}
 &
-{Integer $\geq$ 0, or `max'}
+{Double $\geq$ 0, `min' or `max'}
 &
 max
 \\
@@ -158,23 +158,65 @@ false
 \\
 \hline
 
-time\_start
+time\_min\_utc
 &
-{The start time index to include in the image or image cube.}
+{The minimum visibility time centroid to include in the image. This can be either a MJD value or a string with one of the following formats: 
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
+\vspace{8pt}
+ \item {\textbf{{\texttt{d-M-yyyy h:m:s.z}}}}
+ \item {\textbf{{\texttt{yyyy/M/d/h:m:s.z}}}}
+ \item {\textbf{{\texttt{yyyy-M-d h:m:s.z}}}}
+ \item {\textbf{{\texttt{yyyy-M-dTh:m:s.z}}}}
+ \vspace{8pt}
+\end{itemize}}
+ where: 
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
+\vspace{8pt}
+ \item {\textbf{d} is the day number (1 to 31)}
+ \item {\textbf{M} is the month (1 to 12)}
+ \item {\textbf{yyyy} is the year (4 digits)}
+ \item {\textbf{h} is the hour (0 to 23)}
+ \item {\textbf{m} is minutes (0 to 59)}
+ \item {\textbf{s} is seconds (0 to 59)}
+ \item {\textbf{z} is milliseconds (0 to 999)}
+ \vspace{8pt}
+\end{itemize}}
+}
 &
-Unsigned integer
+Double (if MJD), or formatted date-time string.
 &
-0
+0.0
 \\
 \hline
 
-time\_end
+time\_max\_utc
 &
-{The end time index to include in the image or image cube.}
+{The minimum visibility time centroid to include in the image. This can be either a MJD value or a string with one of the following formats: 
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
+\vspace{8pt}
+ \item {\textbf{{\texttt{d-M-yyyy h:m:s.z}}}}
+ \item {\textbf{{\texttt{yyyy/M/d/h:m:s.z}}}}
+ \item {\textbf{{\texttt{yyyy-M-d h:m:s.z}}}}
+ \item {\textbf{{\texttt{yyyy-M-dTh:m:s.z}}}}
+ \vspace{8pt}
+\end{itemize}}
+ where: 
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
+\vspace{8pt}
+ \item {\textbf{d} is the day number (1 to 31)}
+ \item {\textbf{M} is the month (1 to 12)}
+ \item {\textbf{yyyy} is the year (4 digits)}
+ \item {\textbf{h} is the hour (0 to 23)}
+ \item {\textbf{m} is minutes (0 to 59)}
+ \item {\textbf{s} is seconds (0 to 59)}
+ \item {\textbf{z} is milliseconds (0 to 999)}
+ \vspace{8pt}
+\end{itemize}}
+}
 &
-{Integer $\geq$ 0, or `max'}
+Double (if MJD), or formatted date-time string.
 &
-max
+0.0
 \\
 \hline
 
@@ -192,7 +234,7 @@ uv\_filter\_max
 &
 {The maximum UV baseline length to image, in wavelengths.}
 &
-{Double $\geq$ 0, or `max'}
+{Double $\geq$ 0, `min' or `max'}
 &
 max
 \\
@@ -340,11 +382,28 @@ Double
 
 input\_vis\_data
 &
-{Path to the input OSKAR visibility data file or Measurement Set.}
+{Path to the input OSKAR visibility data file(s) or Measurement Set(s).}
 &
-Path name
+CSV list of path names
 &
 None
+\\
+\hline
+
+scale\_norm\_with\_num\_input\_files
+&
+{Sets the option to scale image normalisation with number of input files. 
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
+\vspace{8pt}
+ \item {Set this to \textbf{true} if the different files represent multiple sky model components observed with the same telescope configuration and observation parameters.}
+ \item {Set this to \textbf{false} if the different files represent multiple observations of the same sky observed with different telescope configurations or observation parameters.}
+ \vspace{8pt}
+\end{itemize}}
+}
+&
+Bool
+&
+false
 \\
 \hline
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,26 +27,26 @@
  */
 
 #include "imager/private_imager.h"
-#include "imager/oskar_imager.h"
 
 #include "convert/oskar_convert_cellsize_to_fov.h"
 #include "convert/oskar_convert_fov_to_cellsize.h"
-#include "utility/oskar_device_utils.h"
+#include "convert/oskar_convert_lon_lat_to_relative_directions.h"
+#include "imager/oskar_imager.h"
 #include "imager/private_imager_free_gpu_data.h"
 #include "imager/private_imager_set_num_planes.h"
-
 #include "math/oskar_cmath.h"
+#include "utility/oskar_device_utils.h"
+
 #include <float.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#define DEG2RAD M_PI/180.0
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-static void oskar_imager_data_range(const int settings_range[2],
-        int num_data_values, int range[2], int* status);
-
 
 const char* oskar_imager_algorithm(const oskar_Imager* h)
 {
@@ -67,21 +67,9 @@ double oskar_imager_cellsize(const oskar_Imager* h)
 }
 
 
-int oskar_imager_channel_end(const oskar_Imager* h)
-{
-    return h->chan_range[1];
-}
-
-
 int oskar_imager_channel_snapshots(const oskar_Imager* h)
 {
     return h->chan_snaps;
-}
-
-
-int oskar_imager_channel_start(const oskar_Imager* h)
-{
-    return h->chan_range[0];
 }
 
 
@@ -100,6 +88,18 @@ int oskar_imager_fft_on_gpu(const oskar_Imager* h)
 double oskar_imager_fov(const oskar_Imager* h)
 {
     return h->fov_deg;
+}
+
+
+double oskar_imager_freq_max_hz(const oskar_Imager* h)
+{
+    return h->freq_max_hz == 0.0 ? 0.0 : h->freq_max_hz - 0.01;
+}
+
+
+double oskar_imager_freq_min_hz(const oskar_Imager* h)
+{
+    return h->freq_min_hz == 0.0 ? 0.0 : h->freq_min_hz + 0.01;
 }
 
 
@@ -230,21 +230,9 @@ void oskar_imager_set_cellsize(oskar_Imager* h, double cellsize_arcsec)
 }
 
 
-void oskar_imager_set_channel_end(oskar_Imager* h, int value)
-{
-    h->chan_range[1] = value;
-}
-
-
 void oskar_imager_set_channel_snapshots(oskar_Imager* h, int value)
 {
     h->chan_snaps = value;
-}
-
-
-void oskar_imager_set_channel_start(oskar_Imager* h, int value)
-{
-    h->chan_range[0] = value;
 }
 
 
@@ -297,6 +285,22 @@ void oskar_imager_set_fov(oskar_Imager* h, double fov_deg)
 void oskar_imager_set_fft_on_gpu(oskar_Imager* h, int value)
 {
     h->fft_on_gpu = value;
+}
+
+
+void oskar_imager_set_freq_max_hz(oskar_Imager* h, double max_freq_hz)
+{
+    if (max_freq_hz != 0.0 && max_freq_hz != DBL_MAX)
+        max_freq_hz += 0.01;
+    h->freq_max_hz = max_freq_hz;
+}
+
+
+void oskar_imager_set_freq_min_hz(oskar_Imager* h, double min_freq_hz)
+{
+    if (min_freq_hz != 0.0)
+        min_freq_hz -= 0.01;
+    h->freq_min_hz = min_freq_hz;
 }
 
 
@@ -412,7 +416,7 @@ void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
             h->im_type == OSKAR_IMAGE_TYPE_Q ||
             h->im_type == OSKAR_IMAGE_TYPE_U ||
             h->im_type == OSKAR_IMAGE_TYPE_V);
-    h->im_num_pols = (h->im_type == OSKAR_IMAGE_TYPE_STOKES ||
+    h->num_im_pols = (h->im_type == OSKAR_IMAGE_TYPE_STOKES ||
             h->im_type == OSKAR_IMAGE_TYPE_LINEAR) ? 4 : 1;
     if (h->im_type == OSKAR_IMAGE_TYPE_I || h->im_type == OSKAR_IMAGE_TYPE_XX)
         h->pol_offset = 0;
@@ -462,18 +466,16 @@ void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
     int len = 0;
     if (*status) return;
     len = strlen(column);
-    if (len == 0) { *status = OSKAR_ERR_FILE_IO; return; }
+    if (len == 0) { *status = OSKAR_ERR_INVALID_ARGUMENT; return; }
     free(h->ms_column);
     h->ms_column = calloc(1 + len, 1);
     strcpy(h->ms_column, column);
 }
 
 
-void oskar_imager_set_output_root(oskar_Imager* h, const char* filename,
-        int* status)
+void oskar_imager_set_output_root(oskar_Imager* h, const char* filename)
 {
     int len = 0;
-    if (*status) return;
     free(h->image_root);
     h->image_root = 0;
     if (filename) len = strlen(filename);
@@ -516,21 +518,25 @@ void oskar_imager_set_size(oskar_Imager* h, int size, int* status)
 }
 
 
-void oskar_imager_set_time_end(oskar_Imager* h, int value)
+void oskar_imager_set_time_max_utc(oskar_Imager* h, double time_max_mjd_utc)
 {
-    h->time_range[1] = value;
+    if (time_max_mjd_utc != 0.0 && time_max_mjd_utc != DBL_MAX)
+        time_max_mjd_utc += 0.01 / 86400.0;
+    h->time_max_utc = time_max_mjd_utc;
+}
+
+
+void oskar_imager_set_time_min_utc(oskar_Imager* h, double time_min_mjd_utc)
+{
+    if (time_min_mjd_utc != 0.0)
+        time_min_mjd_utc -= 0.01 / 86400.0;
+    h->time_min_utc = time_min_mjd_utc;
 }
 
 
 void oskar_imager_set_time_snapshots(oskar_Imager* h, int value)
 {
     h->time_snaps = value;
-}
-
-
-void oskar_imager_set_time_start(oskar_Imager* h, int value)
-{
-    h->time_range[0] = value;
 }
 
 
@@ -546,31 +552,99 @@ void oskar_imager_set_uv_filter_min(oskar_Imager* h, double min_wavelength)
 }
 
 
+static int qsort_compare_doubles(const void* a, const void* b)
+{
+    double aa, bb;
+    aa = *(const double*)a;
+    bb = *(const double*)b;
+    if (aa < bb) return -1;
+    if (aa > bb) return  1;
+    return 0;
+}
+
+
+static void update_set(double ref, double inc, int num_to_check,
+        int* num_recorded, double** values, double tol,
+        double min_val, double max_val)
+{
+    int i, j;
+    for (i = 0; i < num_to_check; ++i)
+    {
+        double value = ref + i * inc;
+        for (j = 0; j < *num_recorded; ++j)
+            if (fabs(value - (*values)[j]) < tol) break;
+        if (j == *num_recorded &&
+                value >= min_val && (value <= max_val || max_val <= 0.0))
+        {
+            (*num_recorded)++;
+            *values = (double*) realloc(*values,
+                    *num_recorded * sizeof(double));
+            (*values)[j] = value;
+        }
+    }
+    qsort(*values, *num_recorded, sizeof(double), qsort_compare_doubles);
+}
+
+
 void oskar_imager_set_vis_frequency(oskar_Imager* h,
-        double ref_hz, double inc_hz, int num, int* status)
+        double ref_hz, double inc_hz, int num)
 {
     h->vis_freq_start_hz = ref_hz;
     h->freq_inc_hz = inc_hz;
-    oskar_imager_data_range(h->chan_range, num,
-            h->vis_chan_range, status);
+    if (!h->planes)
+        update_set(ref_hz, inc_hz,
+                num, &(h->num_sel_freqs), &(h->sel_freqs), 0.01,
+                h->freq_min_hz, h->freq_max_hz);
 }
 
 
 void oskar_imager_set_vis_phase_centre(oskar_Imager* h,
         double ra_deg, double dec_deg)
 {
-    h->vis_centre_deg[0] = ra_deg;
-    h->vis_centre_deg[1] = dec_deg;
+    /* If imaging away from the beam direction, evaluate l0-l, m0-m, n0-n
+     * for the new pointing centre, and a rotation matrix to generate the
+     * rotated baseline coordinates. */
+    if (h->direction_type == 'R')
+    {
+        double l1, m1, n1, ra_rad, dec_rad, ra0_rad, dec0_rad;
+        double d_a, d_d, *M;
+
+        ra_rad = h->im_centre_deg[0] * DEG2RAD;
+        dec_rad = h->im_centre_deg[1] * DEG2RAD;
+        ra0_rad = ra_deg * DEG2RAD;
+        dec0_rad = dec_deg * DEG2RAD;
+        d_a = ra0_rad - ra_rad; /* These are meant to be swapped: -delta_ra. */
+        d_d = dec_rad - dec0_rad;
+
+        /* Rotate by -delta_ra around v, then delta_dec around u. */
+        M = h->M;
+        M[0] = cos(d_a);           M[1] = 0.0;      M[2] = sin(d_a);
+        M[3] = sin(d_a)*sin(d_d);  M[4] = cos(d_d); M[5] = -cos(d_a)*sin(d_d);
+        M[6] = -sin(d_a)*cos(d_d); M[7] = sin(d_a); M[8] = cos(d_a)*cos(d_d);
+
+        oskar_convert_lon_lat_to_relative_directions_d(1,
+                &ra_rad, &dec_rad, ra0_rad, dec0_rad, &l1, &m1, &n1);
+        h->delta_l = 0 - l1;
+        h->delta_m = 0 - m1;
+        h->delta_n = 1 - n1;
+    }
+    else
+    {
+        h->im_centre_deg[0] = ra_deg;
+        h->im_centre_deg[1] = dec_deg;
+    }
 }
 
 
 void oskar_imager_set_vis_time(oskar_Imager* h,
-        double ref_mjd_utc, double inc_sec, int num, int* status)
+        double ref_mjd_utc, double inc_sec, int num)
 {
     h->vis_time_start_mjd_utc = ref_mjd_utc;
     h->time_inc_sec = inc_sec;
-    oskar_imager_data_range(h->time_range, num,
-            h->vis_time_range, status);
+    if (!h->planes)
+        update_set(ref_mjd_utc + 0.5 * inc_sec / 86400.0, inc_sec / 86400.0,
+                num, &(h->num_sel_times), &(h->sel_times), 0.01 / 86400.0,
+                h->time_min_utc, h->time_max_utc);
 }
 
 
@@ -594,25 +668,25 @@ void oskar_imager_set_weighting(oskar_Imager* h, const char* type, int* status)
 
 int oskar_imager_size(const oskar_Imager* h)
 {
-    return h->image_size;;
+    return h->image_size;
 }
 
 
-int oskar_imager_time_end(const oskar_Imager* h)
+double oskar_imager_time_max_utc(const oskar_Imager* h)
 {
-    return h->time_range[1];
+    return h->time_max_utc == 0.0 ? 0.0 : h->time_max_utc - 0.01 / 86400.0;
+}
+
+
+double oskar_imager_time_min_utc(const oskar_Imager* h)
+{
+    return h->time_min_utc == 0.0 ? 0.0 : h->time_min_utc + 0.01 / 86400.0;
 }
 
 
 int oskar_imager_time_snapshots(const oskar_Imager* h)
 {
     return h->time_snaps;
-}
-
-
-int oskar_imager_time_start(const oskar_Imager* h)
-{
-    return h->time_range[0];
 }
 
 
@@ -636,28 +710,6 @@ const char* oskar_imager_weighting(const oskar_Imager* h)
     case OSKAR_WEIGHTING_RADIAL:  return "Radial";
     case OSKAR_WEIGHTING_UNIFORM: return "Uniform";
     default:                      return "";
-    }
-}
-
-
-void oskar_imager_data_range(const int settings_range[2],
-        int num_data_values, int range[2], int* status)
-{
-    if (*status) return;
-    if (settings_range[0] >= num_data_values ||
-            settings_range[1] >= num_data_values)
-    {
-        *status = OSKAR_ERR_OUT_OF_RANGE;
-        return;
-    }
-    range[0] = settings_range[0] < 0 ? 0 : settings_range[0];
-    range[1] = settings_range[1] < 0 ? num_data_values - 1 : settings_range[1];
-    if (range[0] > range[1])
-    {
-        int t;
-        t = range[0];
-        range[0] = range[1];
-        range[1] = t;
     }
 }
 

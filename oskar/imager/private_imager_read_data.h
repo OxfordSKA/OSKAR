@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_SELECT_COORDS_H_
-#define OSKAR_IMAGER_SELECT_COORDS_H_
-
-/**
- * @file oskar_imager_select_coords.h
- */
-
-#include <oskar_global.h>
-#include <mem/oskar_mem.h>
-#include <stddef.h>
+#ifndef OSKAR_IMAGER_READ_DATA_H_
+#define OSKAR_IMAGER_READ_DATA_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- *
- * @details
- *
- */
-OSKAR_EXPORT
-void oskar_imager_select_coords(const oskar_Imager* h,
-        int start_time, int end_time, int start_chan, int end_chan,
-        int num_baselines, const oskar_Mem* vis_uu, const oskar_Mem* vis_vv,
-        const oskar_Mem* vis_ww, int im_time_idx, int im_chan_idx,
-        oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, size_t* num, int* status);
+void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
+        int i_file, int num_files, int* percent_done, int* percent_next,
+        int* status);
+
+void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
+        int i_file, int num_files, int* percent_done, int* percent_next,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_IMAGER_SELECT_COORDS_H_ */
+#endif /* OSKAR_IMAGER_READ_DATA_H_ */

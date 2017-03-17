@@ -26,29 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "beam_pattern/oskar_beam_pattern.h"
-#include "beam_pattern/private_beam_pattern.h"
+#ifndef OSKAR_IMAGER_SELECT_VIS_H_
+#define OSKAR_IMAGER_SELECT_VIS_H_
 
-#include <stdlib.h>
+#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_beam_pattern_free(oskar_BeamPattern* h, int* status)
-{
-    oskar_beam_pattern_reset_cache(h, status);
-    oskar_telescope_free(h->tel, status);
-    oskar_timer_free(h->tmr_sim);
-    oskar_timer_free(h->tmr_write);
-    oskar_mutex_free(h->mutex);
-    free(h->root_path);
-    free(h->sky_model_file);
-    free(h->settings_log);
-    free(h->station_ids);
-    free(h);
-}
+void oskar_imager_select_vis(const oskar_Imager* h,
+        int start_time, int end_time, int start_chan, int end_chan,
+        int num_baselines, int num_pols, const oskar_Mem* data,
+        const oskar_Mem* weight_in, double im_time_utc, double im_freq_hz,
+        int im_pol, oskar_Mem* data_out, oskar_Mem* weight_out,
+        size_t* num, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_IMAGER_SELECT_VIS_H_ */

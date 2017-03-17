@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "beam_pattern/oskar_beam_pattern.h"
-#include "beam_pattern/private_beam_pattern.h"
-
-#include <stdlib.h>
+#ifndef OSKAR_IMAGER_READ_COORDS_H_
+#define OSKAR_IMAGER_READ_COORDS_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_beam_pattern_free(oskar_BeamPattern* h, int* status)
-{
-    oskar_beam_pattern_reset_cache(h, status);
-    oskar_telescope_free(h->tel, status);
-    oskar_timer_free(h->tmr_sim);
-    oskar_timer_free(h->tmr_write);
-    oskar_mutex_free(h->mutex);
-    free(h->root_path);
-    free(h->sky_model_file);
-    free(h->settings_log);
-    free(h->station_ids);
-    free(h);
-}
+void oskar_imager_read_coords_ms(oskar_Imager* h, const char* filename,
+        int i_file, int num_files, int* percent_done, int* percent_next,
+        int* status);
+
+void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
+        int i_file, int num_files, int* percent_done, int* percent_next,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_IMAGER_READ_COORDS_H_ */

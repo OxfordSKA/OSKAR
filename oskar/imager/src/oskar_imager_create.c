@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 #include "imager/oskar_imager_create.h"
 
 #include <stdlib.h>
+#include <float.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,17 +65,10 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
 
     /* Set sensible defaults. */
     oskar_imager_set_gpus(h, -1, 0, status);
-    oskar_imager_set_fft_on_gpu(h, 0);
     oskar_imager_set_generate_w_kernels_on_gpu(h, 1);
     oskar_imager_set_fov(h, 1.0);
     oskar_imager_set_size(h, 256, status);
-    oskar_imager_set_channel_start(h, 0);
-    oskar_imager_set_channel_end(h, -1);
-    oskar_imager_set_channel_snapshots(h, 1);
-    oskar_imager_set_time_start(h, 0);
-    oskar_imager_set_time_end(h, -1);
-    oskar_imager_set_time_snapshots(h, 0);
-    oskar_imager_set_uv_filter_max(h, -1.0);
+    oskar_imager_set_uv_filter_max(h, DBL_MAX);
     oskar_imager_set_image_type(h, "I", status);
     oskar_imager_set_algorithm(h, "FFT", status);
     oskar_imager_set_weighting(h, "Natural", status);

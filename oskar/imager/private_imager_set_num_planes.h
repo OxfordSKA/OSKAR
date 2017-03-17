@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-void oskar_imager_set_num_planes(oskar_Imager* h);
+void oskar_imager_set_num_planes(oskar_Imager* h, int* status);
 
 #ifdef __cplusplus
 }

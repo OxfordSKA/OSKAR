@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -320,12 +320,14 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
 
     if (h->log)
     {
+        oskar_mutex_lock(h->mutex);
         oskar_log_message(h->log, 'S', 1, "Chunk %*i/%i, "
-                "Time %*i/%i, Channel %*i/%i [GPU %i]",
+                "Time %*i/%i, Channel %*i/%i [Device %i]",
                 disp_width(h->num_chunks), i_chunk+1, h->num_chunks,
                 disp_width(h->num_time_steps), i_time+1, h->num_time_steps,
                 disp_width(h->num_channels), i_channel+1, h->num_channels,
                 device_id);
+        oskar_mutex_unlock(h->mutex);
     }
     oskar_timer_pause(d->tmr_compute);
 }
@@ -881,7 +883,7 @@ static void record_timing(oskar_BeamPattern* h)
             oskar_timer_elapsed(h->tmr_sim));
     for (i = 0; i < h->num_devices; ++i)
     {
-        oskar_log_value(h->log, 'M', 0, "Compute", "%.3f s [GPU %i]",
+        oskar_log_value(h->log, 'M', 0, "Compute", "%.3f s [Device %i]",
                 oskar_timer_elapsed(h->d[i].tmr_compute), i);
     }
     oskar_log_value(h->log, 'M', 0, "Write", "%.3f s",

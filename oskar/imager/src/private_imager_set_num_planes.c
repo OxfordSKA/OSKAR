@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,30 +33,48 @@
 extern "C" {
 #endif
 
-#define SEC2DAYS 1.15740740740740740740741e-5
-
-void oskar_imager_set_num_planes(oskar_Imager* h)
+void oskar_imager_set_num_planes(oskar_Imager* h, int* status)
 {
-    if (h->num_planes > 0) return;
+    int i;
+    if (*status || h->num_planes > 0) return;
 
     /* Set image meta-data. */
-    h->im_num_channels = (h->chan_snaps ?
-            1 + h->vis_chan_range[1] - h->vis_chan_range[0] : 1);
-    h->im_num_times = (h->time_snaps ?
-            1 + h->vis_time_range[1] - h->vis_time_range[0] : 1);
-    h->im_time_start_mjd_utc = h->vis_time_start_mjd_utc +
-            (h->vis_time_range[0] * h->time_inc_sec * SEC2DAYS);
+    h->num_im_channels = h->chan_snaps ? h->num_sel_freqs : 1;
+    h->num_im_times = h->time_snaps ? h->num_sel_times : 1;
+    if (h->num_sel_freqs == 0 || h->num_sel_times == 0)
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
+    h->im_freqs = (double*) realloc(h->im_freqs,
+            h->num_im_channels * sizeof(double));
+    h->im_times = (double*) realloc(h->im_times,
+            h->num_im_times * sizeof(double));
     if (h->chan_snaps)
     {
-        h->im_freq_start_hz = h->vis_freq_start_hz +
-                h->vis_chan_range[0] * h->freq_inc_hz;
+        for (i = 0; i < h->num_im_channels; ++i)
+            h->im_freqs[i] = h->sel_freqs[i];
     }
     else
     {
-        double chan0 = 0.5 * (h->vis_chan_range[1] - h->vis_chan_range[0]);
-        h->im_freq_start_hz = h->vis_freq_start_hz + chan0 * h->freq_inc_hz;
+        h->im_freqs[0] = 0.0;
+        for (i = 0; i < h->num_im_channels; ++i)
+            h->im_freqs[0] += h->sel_freqs[i];
+        h->im_freqs[0] /= h->num_im_channels;
     }
-    h->num_planes = h->im_num_times * h->im_num_channels * h->im_num_pols;
+    if (h->time_snaps)
+    {
+        for (i = 0; i < h->num_im_times; ++i)
+            h->im_times[i] = h->sel_times[i];
+    }
+    else
+    {
+        h->im_times[0] = 0.0;
+        for (i = 0; i < h->num_im_times; ++i)
+            h->im_times[0] += h->sel_times[i];
+        h->im_times[0] /= h->num_im_times;
+    }
+    h->num_planes = h->num_im_times * h->num_im_channels * h->num_im_pols;
 }
 
 

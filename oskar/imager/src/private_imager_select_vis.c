@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,10 +27,9 @@
  */
 
 #include "imager/private_imager.h"
-
 #include "imager/oskar_imager.h"
-#include "imager/oskar_imager_select_vis.h"
-
+#include "imager/private_imager_select_vis.h"
+#include <math.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -46,13 +45,18 @@ static void copy_vis_pol(oskar_Mem* amps, oskar_Mem* wt, int amps_offset,
 void oskar_imager_select_vis(const oskar_Imager* h,
         int start_time, int end_time, int start_chan, int end_chan,
         int num_baselines, int num_pols, const oskar_Mem* data,
-        const oskar_Mem* weight_in, int im_time_idx, int im_chan_idx,
+        const oskar_Mem* weight_in, double im_time_utc, double im_freq_hz,
         int im_pol, oskar_Mem* data_out, oskar_Mem* weight_out,
         size_t* num, int* status)
 {
-    int t, c, nb, num_chan, pol_offset;
-    num_chan = 1 + end_chan - start_chan;
-    nb = num_baselines;
+    int i, j, t, c, pol_offset;
+    const int num_chan = 1 + end_chan - start_chan;
+    const int nb = num_baselines;
+    const double s = 0.05;
+    const double df = h->freq_inc_hz;
+    const double dt = h->time_inc_sec / 86400.0;
+    const double f0 = h->vis_freq_start_hz;
+    const double t0 = h->vis_time_start_mjd_utc + 0.5 * dt;
     *num = 0;
 
     /* Override pol_offset if required. */
@@ -65,10 +69,12 @@ void oskar_imager_select_vis(const oskar_Imager* h,
     if (h->time_snaps && h->chan_snaps)
     {
         /* Snapshots. */
-        t = im_time_idx + h->vis_time_range[0];
+        t = (int) round((im_time_utc - t0) / dt);
         if (t < start_time || t > end_time) return;
-        c = im_chan_idx + h->vis_chan_range[0];
+        if (fabs((im_time_utc - t0) - t * dt) > s * dt) return;
+        c = (int) round((im_freq_hz - f0) / df);
         if (c < start_chan || c > end_chan) return;
+        if (fabs((im_freq_hz - f0) - c * df) > s * df) return;
         copy_vis_pol(data_out, weight_out, *num, data, weight_in,
                 ((t - start_time) * num_chan + (c - start_chan)) * nb,
                 (t - start_time) * nb,
@@ -78,11 +84,14 @@ void oskar_imager_select_vis(const oskar_Imager* h,
     else if (h->time_snaps && !h->chan_snaps)
     {
         /* Frequency synthesis. */
-        t = im_time_idx + h->vis_time_range[0];
+        t = (int) round((im_time_utc - t0) / dt);
         if (t < start_time || t > end_time) return;
-        for (c = h->vis_chan_range[0]; c <= h->vis_chan_range[1]; ++c)
+        if (fabs((im_time_utc - t0) - t * dt) > s * dt) return;
+        for (i = 0; i < h->num_sel_freqs; ++i)
         {
+            c = (int) round((h->sel_freqs[i] - f0) / df);
             if (c < start_chan || c > end_chan) continue;
+            if (fabs((h->sel_freqs[i] - f0) - c * df) > s * df) continue;
             copy_vis_pol(data_out, weight_out, *num, data, weight_in,
                     ((t - start_time) * num_chan + (c - start_chan)) * nb,
                     (t - start_time) * nb,
@@ -93,11 +102,14 @@ void oskar_imager_select_vis(const oskar_Imager* h,
     else if (!h->time_snaps && h->chan_snaps)
     {
         /* Time synthesis. */
-        c = im_chan_idx + h->vis_chan_range[0];
+        c = (int) round((im_freq_hz - f0) / df);
         if (c < start_chan || c > end_chan) return;
-        for (t = h->vis_time_range[0]; t <= h->vis_time_range[1]; ++t)
+        if (fabs((im_freq_hz - f0) - c * df) > s * df) return;
+        for (i = 0; i < h->num_sel_times; ++i)
         {
+            t = (int) round((h->sel_times[i] - t0) / dt);
             if (t < start_time || t > end_time) continue;
+            if (fabs((h->sel_times[i] - t0) - t * dt) > s * dt) continue;
             copy_vis_pol(data_out, weight_out, *num, data, weight_in,
                     ((t - start_time) * num_chan + (c - start_chan)) * nb,
                     (t - start_time) * nb,
@@ -108,12 +120,16 @@ void oskar_imager_select_vis(const oskar_Imager* h,
     else
     {
         /* Time and frequency synthesis. */
-        for (t = h->vis_time_range[0]; t <= h->vis_time_range[1]; ++t)
+        for (i = 0; i < h->num_sel_times; ++i)
         {
+            t = (int) round((h->sel_times[i] - t0) / dt);
             if (t < start_time || t > end_time) continue;
-            for (c = h->vis_chan_range[0]; c <= h->vis_chan_range[1]; ++c)
+            if (fabs((h->sel_times[i] - t0) - t * dt) > s * dt) continue;
+            for (j = 0; j < h->num_sel_freqs; ++j)
             {
+                c = (int) round((h->sel_freqs[j] - f0) / df);
                 if (c < start_chan || c > end_chan) continue;
+                if (fabs((h->sel_freqs[j] - f0) - c * df) > s * df) continue;
                 copy_vis_pol(data_out, weight_out, *num, data, weight_in,
                         ((t - start_time) * num_chan + (c - start_chan)) * nb,
                         (t - start_time) * nb,

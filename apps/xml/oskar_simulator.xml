@@ -17,7 +17,7 @@
             a multi-GPU system, or 'all' to use all devices.</desc>
     </s>
     <s k="num_devices" priority="1"><label>Number of compute devices</label>
-        <type name="IntRangeExt" default="auto">1,MAX,auto</type>
+        <type name="IntRangeExt" default="auto">0,MAX,auto</type>
         <desc>Number of compute devices to use for the simulation.
         A compute device is either a local CPU core, or a GPU. Don't set
         this to more than the number of CPU cores in your system.</desc>

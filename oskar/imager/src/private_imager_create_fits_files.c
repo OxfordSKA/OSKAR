@@ -61,7 +61,7 @@ void oskar_imager_create_fits_files(oskar_Imager* h, int* status)
     int i;
     if (*status) return;
     if (!h->image_root) return;
-    for (i = 0; i < h->im_num_pols; ++i)
+    for (i = 0; i < h->num_im_pols; ++i)
     {
         double fov_deg[2];
         char f[512];
@@ -93,16 +93,16 @@ void oskar_imager_create_fits_files(oskar_Imager* h, int* status)
         case OSKAR_IMAGE_TYPE_PSF:
             SNPRINTF(f, sizeof(f), "%s_PSF.fits", h->image_root); break;
         default:
-            *status = OSKAR_ERR_UNKNOWN;
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
             break;
         }
 
         fov_deg[0] = fov_deg[1] = h->fov_deg;
         h->fits_file[i] = create_fits_file(f, h->imager_prec,
-                h->image_size, h->image_size, h->im_num_times,
-                h->im_num_channels, h->im_centre_deg, fov_deg,
-                h->im_time_start_mjd_utc, h->time_inc_sec, h->im_freq_start_hz,
-                h->freq_inc_hz, status);
+                h->image_size, h->image_size, h->num_im_times,
+                h->num_im_channels, h->im_centre_deg, fov_deg,
+                h->im_times[0], h->time_inc_sec,
+                h->im_freqs[0], h->freq_inc_hz, status);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@ oskar_BeamPattern* oskar_beam_pattern_create(int precision, int* status)
     h->prec      = precision;
     h->tmr_sim   = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    h->mutex     = oskar_mutex_create();
 
     /* Set sensible defaults. */
     oskar_beam_pattern_set_gpus(h, -1, 0, status);

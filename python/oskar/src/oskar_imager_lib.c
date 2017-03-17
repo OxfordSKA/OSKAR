@@ -152,16 +152,6 @@ static PyObject* cellsize(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* channel_end(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_imager(capsule))) return 0;
-    return Py_BuildValue("i", oskar_imager_channel_end(h));
-}
-
-
 static PyObject* channel_snapshots(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -171,16 +161,6 @@ static PyObject* channel_snapshots(PyObject* self, PyObject* args)
     if (!(h = get_handle_imager(capsule))) return 0;
     flag = oskar_imager_channel_snapshots(h);
     return Py_BuildValue("O", flag ? Py_True : Py_False);
-}
-
-
-static PyObject* channel_start(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_imager(capsule))) return 0;
-    return Py_BuildValue("i", oskar_imager_channel_start(h));
 }
 
 
@@ -194,7 +174,16 @@ static PyObject* check_init(PyObject* self, PyObject* args)
     Py_BEGIN_ALLOW_THREADS
     oskar_imager_check_init(h, &status);
     Py_END_ALLOW_THREADS
-    return Py_BuildValue("i", status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_imager_check_init() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
 }
 
 
@@ -406,6 +395,26 @@ static PyObject* fov(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* freq_max_hz(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    return Py_BuildValue("d", oskar_imager_freq_max_hz(h));
+}
+
+
+static PyObject* freq_min_hz(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    return Py_BuildValue("d", oskar_imager_freq_min_hz(h));
+}
+
+
 static PyObject* generate_w_kernels_on_gpu(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -508,7 +517,16 @@ static PyObject* reset_cache(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_reset_cache(h, &status);
-    return Py_BuildValue("i", status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_imager_reset_cache() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
 }
 
 
@@ -644,18 +662,6 @@ static PyObject* set_cellsize(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* set_channel_end(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    int value = 0;
-    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
-    if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_channel_end(h, value);
-    return Py_BuildValue("");
-}
-
-
 static PyObject* set_channel_snapshots(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -664,18 +670,6 @@ static PyObject* set_channel_snapshots(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_channel_snapshots(h, value);
-    return Py_BuildValue("");
-}
-
-
-static PyObject* set_channel_start(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    int value = 0;
-    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
-    if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_channel_start(h, value);
     return Py_BuildValue("");
 }
 
@@ -739,6 +733,30 @@ static PyObject* set_fov(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* set_freq_max_hz(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    double value = 0.0;
+    if (!PyArg_ParseTuple(args, "Od", &capsule, &value)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_freq_max_hz(h, value);
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_freq_min_hz(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    double value = 0.0;
+    if (!PyArg_ParseTuple(args, "Od", &capsule, &value)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_freq_min_hz(h, value);
+    return Py_BuildValue("");
+}
+
+
 static PyObject* set_generate_w_kernels_on_gpu(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -770,7 +788,7 @@ static PyObject* set_grid_kernel(PyObject* self, PyObject* args)
                 status, oskar_get_error_string(status));
         return 0;
     }
-    return Py_BuildValue("i", status);
+    return Py_BuildValue("");
 }
 
 
@@ -813,7 +831,7 @@ static PyObject* set_image_type(PyObject* self, PyObject* args)
                 status, oskar_get_error_string(status));
         return 0;
     }
-    return Py_BuildValue("i", status);
+    return Py_BuildValue("");
 }
 
 
@@ -885,12 +903,11 @@ static PyObject* set_output_root(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
-    int status = 0;
     const char* filename = 0;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &filename)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_output_root(h, filename, &status);
-    return Py_BuildValue("i", status);
+    oskar_imager_set_output_root(h, filename);
+    return Py_BuildValue("");
 }
 
 
@@ -928,14 +945,26 @@ static PyObject* set_size(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* set_time_end(PyObject* self, PyObject* args)
+static PyObject* set_time_max_utc(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
-    int value = 0;
-    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
+    double value = 0.0;
+    if (!PyArg_ParseTuple(args, "Od", &capsule, &value)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_time_end(h, value);
+    oskar_imager_set_time_max_utc(h, value);
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_time_min_utc(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    double value = 0.0;
+    if (!PyArg_ParseTuple(args, "Od", &capsule, &value)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_time_min_utc(h, value);
     return Py_BuildValue("");
 }
 
@@ -948,18 +977,6 @@ static PyObject* set_time_snapshots(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_time_snapshots(h, value);
-    return Py_BuildValue("");
-}
-
-
-static PyObject* set_time_start(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    int value = 0;
-    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
-    if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_time_start(h, value);
     return Py_BuildValue("");
 }
 
@@ -992,12 +1009,12 @@ static PyObject* set_vis_frequency(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
-    int status = 0, num = 0;
+    int num = 0;
     double ref = 0.0, inc = 0.0;
     if (!PyArg_ParseTuple(args, "Oddi", &capsule, &ref, &inc, &num)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_vis_frequency(h, ref, inc, num, &status);
-    return Py_BuildValue("i", status);
+    oskar_imager_set_vis_frequency(h, ref, inc, num);
+    return Py_BuildValue("");
 }
 
 
@@ -1017,12 +1034,12 @@ static PyObject* set_vis_time(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
-    int status = 0, num = 0;
+    int num = 0;
     double ref = 0.0, inc = 0.0;
     if (!PyArg_ParseTuple(args, "Oddi", &capsule, &ref, &inc, &num)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_vis_time(h, ref, inc, num, &status);
-    return Py_BuildValue("i", status);
+    oskar_imager_set_vis_time(h, ref, inc, num);
+    return Py_BuildValue("");
 }
 
 
@@ -1058,13 +1075,23 @@ static PyObject* size(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* time_end(PyObject* self, PyObject* args)
+static PyObject* time_max_utc(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
-    return Py_BuildValue("i", oskar_imager_time_end(h));
+    return Py_BuildValue("d", oskar_imager_time_max_utc(h));
+}
+
+
+static PyObject* time_min_utc(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    return Py_BuildValue("d", oskar_imager_time_min_utc(h));
 }
 
 
@@ -1077,16 +1104,6 @@ static PyObject* time_snapshots(PyObject* self, PyObject* args)
     if (!(h = get_handle_imager(capsule))) return 0;
     flag = oskar_imager_time_snapshots(h);
     return Py_BuildValue("O", flag ? Py_True : Py_False);
-}
-
-
-static PyObject* time_start(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_imager(capsule))) return 0;
-    return Py_BuildValue("i", oskar_imager_time_start(h));
 }
 
 
@@ -1490,6 +1507,9 @@ static PyObject* make_image(PyObject* self, PyObject* args)
         oskar_mem_set_value_real(weight_c, 1.0, 0, num_vis, &status);
     }
 
+    /* Allow threads. */
+    Py_BEGIN_ALLOW_THREADS
+
     /* Create and set up the imager. */
     h = oskar_imager_create(type, &status);
     oskar_imager_set_fov(h, fov_deg);
@@ -1508,9 +1528,6 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     if (!strncmp(weighting_type, "U", 1) ||
             !strncmp(weighting_type, "u", 1))
         uniform = 1;
-
-    /* Allow threads. */
-    Py_BEGIN_ALLOW_THREADS
 
     /* Supply the coordinates first, if required. */
     if (wproj || uniform)
@@ -1535,9 +1552,6 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     oskar_imager_finalise_plane(h, plane, norm, &status);
     oskar_imager_trim_image(plane, oskar_imager_plane_size(h), size, &status);
 
-    /* Disallow threads. */
-    Py_END_ALLOW_THREADS
-
     /* Free temporaries. */
     oskar_mem_free(uu_c, &status);
     oskar_mem_free(vv_c, &status);
@@ -1546,6 +1560,9 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     oskar_mem_free(weight_c, &status);
     oskar_mem_free(weights_grid, &status);
     oskar_imager_free(h, &status);
+
+    /* Disallow threads. */
+    Py_END_ALLOW_THREADS
 
     /* Copy the data out. */
     dims[0] = size;
@@ -1579,6 +1596,7 @@ fail:
     Py_XDECREF(ww);
     Py_XDECREF(amps);
     Py_XDECREF(weight);
+    Py_XDECREF(im);
     return 0;
 }
 
@@ -1588,12 +1606,8 @@ static PyMethodDef methods[] =
 {
         {"algorithm", (PyCFunction)algorithm, METH_VARARGS, "algorithm()"},
         {"cellsize", (PyCFunction)cellsize, METH_VARARGS, "cellsize()"},
-        {"channel_end", (PyCFunction)channel_end,
-                METH_VARARGS, "channel_end()"},
         {"channel_snapshots", (PyCFunction)channel_snapshots,
                 METH_VARARGS, "channel_snapshots()"},
-        {"channel_start", (PyCFunction)channel_start,
-                METH_VARARGS, "channel_start()"},
         {"check_init", (PyCFunction)check_init, METH_VARARGS, "check_init()"},
         {"coords_only", (PyCFunction)coords_only,
                 METH_VARARGS, "coords_only()"},
@@ -1604,6 +1618,10 @@ static PyMethodDef methods[] =
         {"finalise_plane", (PyCFunction)finalise_plane,
                 METH_VARARGS, "finalise_plane(plane, plane_norm)"},
         {"fov", (PyCFunction)fov, METH_VARARGS, "fov()"},
+        {"freq_max_hz", (PyCFunction)freq_max_hz,
+                METH_VARARGS, "freq_max_hz()"},
+        {"freq_min_hz", (PyCFunction)freq_min_hz,
+                METH_VARARGS, "freq_min_hz()"},
         {"generate_w_kernels_on_gpu", (PyCFunction)generate_w_kernels_on_gpu,
                 METH_VARARGS, "generate_w_kernels_on_gpu()"},
         {"image_size", (PyCFunction)image_size, METH_VARARGS, "image_size()"},
@@ -1628,12 +1646,8 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "set_algorithm(type)"},
         {"set_cellsize", (PyCFunction)set_cellsize,
                 METH_VARARGS, "set_cellsize(value)"},
-        {"set_channel_end", (PyCFunction)set_channel_end,
-                METH_VARARGS, "set_channel_end(value)"},
         {"set_channel_snapshots", (PyCFunction)set_channel_snapshots,
                 METH_VARARGS, "set_channel_snapshots(value)"},
-        {"set_channel_start", (PyCFunction)set_channel_start,
-                METH_VARARGS, "set_channel_start(value)"},
         {"set_coords_only", (PyCFunction)set_coords_only,
                 METH_VARARGS, "set_coords_only(flag)"},
         {"set_default_direction", (PyCFunction)set_default_direction,
@@ -1643,6 +1657,10 @@ static PyMethodDef methods[] =
         {"set_fft_on_gpu", (PyCFunction)set_fft_on_gpu,
                 METH_VARARGS, "set_fft_on_gpu(value)"},
         {"set_fov", (PyCFunction)set_fov, METH_VARARGS, "set_fov(value)"},
+        {"set_freq_max_hz", (PyCFunction)set_freq_max_hz,
+                METH_VARARGS, "set_freq_max_hz(value)"},
+        {"set_freq_min_hz", (PyCFunction)set_freq_min_hz,
+                METH_VARARGS, "set_freq_min_hz(value)"},
         {"set_generate_w_kernels_on_gpu",
                 (PyCFunction)set_generate_w_kernels_on_gpu,
                 METH_VARARGS, "set_generate_w_kernels_on_gpu(value)"},
@@ -1664,12 +1682,12 @@ static PyMethodDef methods[] =
                 (PyCFunction)set_scale_norm_with_num_input_files,
                 METH_VARARGS, "set_scale_norm_with_num_input_files(value)"},
         {"set_size", (PyCFunction)set_size, METH_VARARGS, "set_size(value)"},
-        {"set_time_end", (PyCFunction)set_time_end,
-                METH_VARARGS, "set_time_end(value)"},
+        {"set_time_max_utc", (PyCFunction)set_time_max_utc,
+                METH_VARARGS, "set_time_max_utc(value)"},
+        {"set_time_min_utc", (PyCFunction)set_time_min_utc,
+                METH_VARARGS, "set_time_min_utc(value)"},
         {"set_time_snapshots", (PyCFunction)set_time_snapshots,
                 METH_VARARGS, "set_time_snapshots(value)"},
-        {"set_time_start", (PyCFunction)set_time_start,
-                METH_VARARGS, "set_time_start(value)"},
         {"set_uv_filter_max", (PyCFunction)set_uv_filter_max,
                 METH_VARARGS, "set_uv_filter_max(max_wavelengths)"},
         {"set_uv_filter_min", (PyCFunction)set_uv_filter_min,
@@ -1683,10 +1701,12 @@ static PyMethodDef methods[] =
         {"set_weighting", (PyCFunction)set_weighting,
                 METH_VARARGS, "set_weighting(type)"},
         {"size", (PyCFunction)size, METH_VARARGS, "size()"},
-        {"time_end", (PyCFunction)time_end, METH_VARARGS, "time_end()"},
+        {"time_max_utc", (PyCFunction)time_max_utc,
+                METH_VARARGS, "time_max_utc()"},
+        {"time_min_utc", (PyCFunction)time_min_utc,
+                METH_VARARGS, "time_min_utc()"},
         {"time_snapshots", (PyCFunction)time_snapshots,
                 METH_VARARGS, "time_snapshots()"},
-        {"time_start", (PyCFunction)time_start, METH_VARARGS, "time_start()"},
         {"update", (PyCFunction)update, METH_VARARGS,
                 "update(uu, vv, ww, amps, weight, start_time, end_time, "
                 "start_chan, end_chan, num_baselines, num_pols)"},

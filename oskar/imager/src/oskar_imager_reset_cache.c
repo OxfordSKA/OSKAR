@@ -43,6 +43,20 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
 {
     int i;
 
+    /* Clear selected axes. */
+    free(h->sel_freqs);
+    free(h->sel_times);
+    free(h->im_freqs);
+    free(h->im_times);
+    h->sel_freqs = 0;
+    h->sel_times = 0;
+    h->im_freqs = 0;
+    h->im_times = 0;
+    h->num_sel_freqs = 0;
+    h->num_sel_times = 0;
+    h->num_im_channels = 0;
+    h->num_im_times = 0;
+
     /* Clear algorithm caches. */
     oskar_imager_free_dft(h, status);
     oskar_imager_free_fft(h, status);
@@ -78,7 +92,7 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     h->stokes = 0;
 
     /* Close any open FITS files. */
-    for (i = 0; i < h->im_num_pols; ++i)
+    for (i = 0; i < h->num_im_pols; ++i)
     {
         if (h->fits_file[i])
             ffclos(h->fits_file[i], status);

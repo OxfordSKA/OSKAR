@@ -47,20 +47,20 @@
             generated using the PSF option.</desc>
     </s>
     <s k="channel_snapshots" priority="1"><label>Channel snapshots</label>
-        <type name="bool" default="true"/>
+        <type name="bool" default="false"/>
         <desc>If true, then produce an image cube containing snapshots for each
             frequency channel. If false, then use frequency-synthesis to stack
             the channels in the final image.</desc>
     </s>
-    <s k="channel_start"><label>Channel start</label>
-        <type name="uint" default="0"/>
-        <desc>The start channel index to include in the image or image
-            cube.</desc>
+    <s k="freq_min_hz"><label>Minimum frequency [Hz]</label>
+        <type name="UnsignedDouble" default="0.0"/>
+        <desc>The minimum visibility channel centre frequency to include in
+            the image or image cube, in Hz.</desc>
     </s>
-    <s k="channel_end"><label>Channel end</label>
-        <type name="IntRangeExt" default="max">0,MAX,max</type>
-        <desc>The end channel index to include in the image or image
-            cube.</desc>
+    <s k="freq_max_hz"><label>Maximum frequency [Hz]</label>
+        <type name="DoubleRangeExt" default="max">0,MAX,min,max</type>
+        <desc>The maximum visibility channel centre frequency to include in
+            the image or image cube, in Hz.</desc>
     </s>
     <s k="time_snapshots" priority="1"><label>Time snapshots</label>
         <type name="bool" default="false"/>
@@ -68,20 +68,56 @@
             for each time step. If false, then use time-synthesis to stack
             the times in the final image.</desc>
     </s>
-    <s k="time_start"><label>Time start</label>
-        <type name="uint" default="0"/>
-        <desc>The start time index to include in the image or image cube.</desc>
+    <s k="time_min_utc"><label>Minimum time (UTC)</label>
+        <type name="DateTime" default="0.0"/>
+        <desc>The minimum visibility time centroid to include in the image.
+            This can be either a MJD value or a string with one of the
+            following formats:
+            <ul>
+              <li><b><code>d-M-yyyy h:m:s.z</code></b></li>
+              <li><b><code>yyyy/M/d/h:m:s.z</code></b></li>
+              <li><b><code>yyyy-M-d h:m:s.z</code></b></li>
+              <li><b><code>yyyy-M-dTh:m:s.z</code></b></li>
+            </ul>
+            where:
+            <ul>
+              <li><b>d</b> is the day number (1 to 31)</li>
+              <li><b>M</b> is the month (1 to 12)</li>
+              <li><b>yyyy</b> is the year (4 digits)</li>
+              <li><b>h</b> is the hour (0 to 23)</li>
+              <li><b>m</b> is minutes (0 to 59)</li>
+              <li><b>s</b> is seconds (0 to 59)</li>
+              <li><b>z</b> is milliseconds (0 to 999)</li>
+            </ul></desc>
     </s>
-    <s k="time_end"><label>Time end</label>
-        <type name="IntRangeExt" default="max">0,MAX,max</type>
-        <desc>The end time index to include in the image or image cube.</desc>
+    <s k="time_max_utc"><label>Maximum time (UTC)</label>
+        <type name="DateTime" default="0.0"/>
+        <desc>The minimum visibility time centroid to include in the image.
+            This can be either a MJD value or a string with one of the
+            following formats:
+            <ul>
+              <li><b><code>d-M-yyyy h:m:s.z</code></b></li>
+              <li><b><code>yyyy/M/d/h:m:s.z</code></b></li>
+              <li><b><code>yyyy-M-d h:m:s.z</code></b></li>
+              <li><b><code>yyyy-M-dTh:m:s.z</code></b></li>
+            </ul>
+            where:
+            <ul>
+              <li><b>d</b> is the day number (1 to 31)</li>
+              <li><b>M</b> is the month (1 to 12)</li>
+              <li><b>yyyy</b> is the year (4 digits)</li>
+              <li><b>h</b> is the hour (0 to 23)</li>
+              <li><b>m</b> is minutes (0 to 59)</li>
+              <li><b>s</b> is seconds (0 to 59)</li>
+              <li><b>z</b> is milliseconds (0 to 999)</li>
+            </ul></desc>
     </s>
     <s k="uv_filter_min"><label>UV filter min [wavelengths]</label>
         <type name="UnsignedDouble" default="0.0"/>
         <desc>The minimum UV baseline length to image, in wavelengths.</desc>
     </s>
     <s k="uv_filter_max"><label>UV filter max [wavelengths]</label>
-        <type name="DoubleRangeExt" default="max">0,MAX,max</type>
+        <type name="DoubleRangeExt" default="max">0,MAX,min,max</type>
         <desc>The maximum UV baseline length to image, in wavelengths.</desc>
     </s>
     <s k="algorithm" priority="1"><label>Algorithm</label>
@@ -154,12 +190,13 @@
             <depends k="image/direction" v="RA, Dec"/>
         </s>
     </s>
-    <s k="input_vis_data"><label>Input visibility data file(s)</label>
+    <s k="input_vis_data" priority="1">
+        <label>Input visibility data file(s)</label>
         <type name="InputFileList"/>
         <desc>Path to the input OSKAR visibility data file(s) or
             Measurement Set(s).</desc>
     </s>
-    <s k="scale_norm_with_num_input_files">
+    <s k="scale_norm_with_num_input_files" priority="1">
         <label>Scale normalisation with number of input files</label>
         <type name="bool" default="false"/>
         <desc>Sets the option to scale image normalisation with number of
@@ -179,7 +216,7 @@
         <desc>The name of the column in the Measurement Set to use,
             if applicable.</desc>
     </s>
-    <s k="root_path"><label>Output image root path</label>
+    <s k="root_path" priority="1"><label>Output image root path</label>
         <type name="OutputFile"/>
         <desc>The root filename used to save the output image. The full
             filename will be constructed as

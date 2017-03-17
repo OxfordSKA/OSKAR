@@ -43,31 +43,26 @@
 #include <cstdlib>
 
 using namespace oskar;
-using std::vector;
-using std::string;
-using std::pair;
 
 static const char settings_def[] = oskar_imager_XML_STR;
 
 int main(int argc, char** argv)
 {
-    int i, e = 0, end;
-    vector<pair<string, string> > failed_keys;
-    oskar_Log* log = 0;
-
     OptionParser opt("oskar_imager", oskar_version_string(), settings_def);
     opt.add_settings_options();
     opt.add_flag("-q", "Suppress printing.", false, "--quiet");
     if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
     const char* settings_file = opt.get_arg(0);
+    int e = 0;
 
     // Declare settings.
     SettingsTree s;
-    settings_declare_xml(&s, settings_def);
     SettingsFileHandlerIni handler("oskar_imager", oskar_version_string());
+    settings_declare_xml(&s, settings_def);
     s.set_file_handler(&handler);
 
     // Create the log if necessary.
+    oskar_Log* log = 0;
     if (!opt.is_set("--get") && !opt.is_set("--set"))
     {
         int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
@@ -77,6 +72,7 @@ int main(int argc, char** argv)
     }
 
     // Load the settings file.
+    std::vector<std::pair<std::string, std::string> > failed_keys;
     if (!s.load(settings_file, failed_keys))
     {
         oskar_log_error(log, "Failed to read settings file.");
@@ -105,30 +101,34 @@ int main(int argc, char** argv)
 
     // Create imager and set values from settings.
     s.begin_group("image");
-    int prec = s.to_int("double_precision", &e) ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    oskar_Imager* h = oskar_imager_create(prec, &e);
+    if (s.to_string("root_path", &e).empty())
+    {
+        oskar_log_error(log, "No output file has been set.");
+        return EXIT_FAILURE;
+    }
+    oskar_Imager* h = oskar_imager_create(s.to_int("double_precision", &e) ?
+            OSKAR_DOUBLE : OSKAR_SINGLE, &e);
     oskar_imager_set_log(h, log);
     if (!s.starts_with("cuda_device_ids", "all", &e))
     {
-        vector<int> ids = s.to_int_list("cuda_device_ids", &e);
+        std::vector<int> ids = s.to_int_list("cuda_device_ids", &e);
         if (ids.size() > 0) oskar_imager_set_gpus(h, ids.size(), &ids[0], &e);
     }
-    vector<string> files = s.to_string_list("input_vis_data", &e);
+    std::vector<std::string> files = s.to_string_list("input_vis_data", &e);
     int num_files = files.size();
     char** input_files = (char**) calloc(num_files, sizeof(char*));
-    for (i = 0; i < num_files; ++i)
+    for (int i = 0; i < num_files; ++i)
     {
         input_files[i] = (char*) calloc(1 + files[i].length(), sizeof(char));
         strcpy(input_files[i], files[i].c_str());
     }
     oskar_imager_set_input_files(h, num_files, input_files, &e);
-    for (i = 0; i < num_files; ++i)
-        free(input_files[i]);
+    for (int i = 0; i < num_files; ++i) free(input_files[i]);
     free(input_files);
     oskar_imager_set_scale_norm_with_num_input_files(h,
             s.to_int("scale_norm_with_num_input_files", &e));
     oskar_imager_set_ms_column(h, s.to_string("ms_column", &e).c_str(), &e);
-    oskar_imager_set_output_root(h, s.to_string("root_path", &e).c_str(), &e);
+    oskar_imager_set_output_root(h, s.to_string("root_path", &e).c_str());
     oskar_imager_set_image_type(h, s.to_string("image_type", &e).c_str(), &e);
     if (s.to_int("specify_cellsize", &e))
         oskar_imager_set_cellsize(h, s.to_double("cellsize_arcsec", &e));
@@ -136,18 +136,13 @@ int main(int argc, char** argv)
         oskar_imager_set_fov(h, s.to_double("fov_deg", &e));
     oskar_imager_set_size(h, s.to_int("size", &e), &e);
     oskar_imager_set_channel_snapshots(h, s.to_int("channel_snapshots", &e));
-    oskar_imager_set_channel_start(h, s.to_int("channel_start", &e));
-    end = s.starts_with("channel_end", "max", &e) ? -1 :
-            s.to_int("channel_end", &e);
-    oskar_imager_set_channel_end(h, end);
+    oskar_imager_set_freq_min_hz(h, s.to_double("freq_min_hz", &e));
+    oskar_imager_set_freq_max_hz(h, s.to_double("freq_max_hz", &e));
     oskar_imager_set_time_snapshots(h, s.to_int("time_snapshots", &e));
-    oskar_imager_set_time_start(h, s.to_int("time_start", &e));
-    end = s.starts_with("time_end", "max", &e) ? -1 : s.to_int("time_end", &e);
-    oskar_imager_set_time_end(h, end);
+    oskar_imager_set_time_min_utc(h, s.to_double("time_min_utc", &e));
+    oskar_imager_set_time_max_utc(h, s.to_double("time_max_utc", &e));
     oskar_imager_set_uv_filter_min(h, s.to_double("uv_filter_min", &e));
-    double uv_max = s.starts_with("uv_filter_max", "max", &e) ? -1.0 :
-            s.to_double("uv_filter_max", &e);
-    oskar_imager_set_uv_filter_max(h, uv_max);
+    oskar_imager_set_uv_filter_max(h, s.to_double("uv_filter_max", &e));
     oskar_imager_set_algorithm(h, s.to_string("algorithm", &e).c_str(), &e);
     oskar_imager_set_weighting(h, s.to_string("weighting", &e).c_str(), &e);
     if (s.starts_with("algorithm", "FFT", &e) ||
@@ -164,11 +159,9 @@ int main(int argc, char** argv)
     oskar_imager_set_generate_w_kernels_on_gpu(h,
             s.to_int("wproj/generate_w_kernels_on_gpu", &e));
     if (s.first_letter("direction", &e) == 'R')
-    {
         oskar_imager_set_direction(h,
                 s.to_double("direction/ra_deg", &e),
                 s.to_double("direction/dec_deg", &e));
-    }
 
     // Make the images.
     oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);

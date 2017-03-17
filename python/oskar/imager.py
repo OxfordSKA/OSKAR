@@ -112,14 +112,6 @@ class Imager(object):
         """
         return _imager_lib.cellsize(self._capsule)
 
-    def get_channel_end(self):
-        """Returns the end channel to image.
-
-        Returns:
-            int: End channel index (-1 for all channels).
-        """
-        return _imager_lib.channel_end(self._capsule)
-
     def get_channel_snapshots(self):
         """Returns the flag specifying whether to image each channel separately.
 
@@ -128,14 +120,6 @@ class Imager(object):
                 if false, use frequency synthesis.
         """
         return _imager_lib.channel_snapshots(self._capsule)
-
-    def get_channel_start(self):
-        """Returns the start channel to image.
-
-        Returns:
-            int: Start channel index.
-        """
-        return _imager_lib.channel_start(self._capsule)
 
     def get_coords_only(self):
         """Returns flag specifying whether imager is in coordinate-only mode.
@@ -160,6 +144,22 @@ class Imager(object):
             float: The image field-of-view, in degrees.
         """
         return _imager_lib.fov(self._capsule)
+
+    def get_freq_max_hz(self):
+        """Returns the maximum frequency of visibility data to image.
+
+        Returns:
+            float: The maximum frequency of visibility data to image, in Hz.
+        """
+        return _imager_lib.freq_max_hz(self._capsule)
+
+    def get_freq_min_hz(self):
+        """Returns the minimum frequency of visibility data to image.
+
+        Returns:
+            float: The minimum frequency of visibility data to image, in Hz.
+        """
+        return _imager_lib.freq_min_hz(self._capsule)
 
     def get_generate_w_kernels_on_gpu(self):
         """Returns flag specifying whether to use the GPU to generate W-kernels.
@@ -245,13 +245,21 @@ class Imager(object):
         """
         return _imager_lib.size(self._capsule)
 
-    def get_time_end(self):
-        """Returns the end time index to image.
+    def get_time_max_utc(self):
+        """Returns the maximum time of visibility data to include in the image.
 
         Returns:
-            int: End time index (-1 for all channels).
+            float: The maximum time of visibility data, as MJD(UTC).
         """
-        return _imager_lib.time_end(self._capsule)
+        return _imager_lib.time_max_utc(self._capsule)
+
+    def get_time_min_utc(self):
+        """Returns the minimum time of visibility data to include in the image.
+
+        Returns:
+            float: The minimum time of visibility data, as MJD(UTC).
+        """
+        return _imager_lib.time_min_utc(self._capsule)
 
     def get_time_snapshots(self):
         """Returns the flag specifying whether to image each time separately.
@@ -261,14 +269,6 @@ class Imager(object):
                 if false, use time synthesis.
         """
         return _imager_lib.time_snapshots(self._capsule)
-
-    def get_time_start(self):
-        """Returns the start time index to image.
-
-        Returns:
-            int: Start time index.
-        """
-        return _imager_lib.time_start(self._capsule)
 
     def get_uv_filter_max(self):
         """Returns the maximum UV baseline length to image, in wavelengths.
@@ -394,14 +394,6 @@ class Imager(object):
         """
         _imager_lib.set_cellsize(self._capsule, cellsize_arcsec)
 
-    def set_channel_end(self, value):
-        """Sets the end channel to image.
-
-        Args:
-            value (int): End channel index (-1 for all channels).
-        """
-        _imager_lib.set_channel_end(self._capsule, value)
-
     def set_channel_snapshots(self, value):
         """Sets the flag specifying whether to image each channel separately.
 
@@ -410,14 +402,6 @@ class Imager(object):
                 if false, use frequency synthesis.
         """
         _imager_lib.set_channel_snapshots(self._capsule, value)
-
-    def set_channel_start(self, value):
-        """Sets the start channel to image.
-
-        Args:
-            value (int): Start channel index.
-        """
-        _imager_lib.set_channel_start(self._capsule, value)
 
     def set_coords_only(self, flag):
         """Sets the imager to ignore visibility data and use coordinates only.
@@ -469,6 +453,24 @@ class Imager(object):
             fov_deg (float): Field of view, in degrees.
         """
         _imager_lib.set_fov(self._capsule, fov_deg)
+
+    def set_freq_max_hz(self, value):
+        """Sets the maximum frequency of visibility data to image.
+
+        A value less than or equal to zero means no maximum.
+
+        Args:
+            value (float): Maximum frequency of visibility data to image, in Hz.
+        """
+        _imager_lib.set_freq_max_hz(self._capsule, value)
+
+    def set_freq_min_hz(self, value):
+        """Sets the minimum frequency of visibility data to image.
+
+        Args:
+            value (float): Minimum frequency of visibility data to image, in Hz.
+        """
+        _imager_lib.set_freq_min_hz(self._capsule, value)
 
     def set_generate_w_kernels_on_gpu(self, value):
         """Sets whether to use the GPU to generate W-kernels.
@@ -566,13 +568,23 @@ class Imager(object):
         """
         _imager_lib.set_size(self._capsule, size)
 
-    def set_time_end(self, value):
-        """Sets the end time index to image.
+    def set_time_max_utc(self, value):
+        """Sets the maximum time of visibility data to include in the image.
+
+        A value less than or equal to zero means no maximum.
 
         Args:
-            value (int): End channel index (-1 for all channels).
+            value (float): The maximum time of visibility data, as MJD(UTC).
         """
-        _imager_lib.set_time_end(self._capsule, value)
+        _imager_lib.set_time_max_utc(self._capsule, value)
+
+    def set_time_min_utc(self, value):
+        """Sets the minimum time of visibility data to include in the image.
+
+        Args:
+            value (float): The minimum time of visibility data, as MJD(UTC).
+        """
+        _imager_lib.set_time_min_utc(self._capsule, value)
 
     def set_time_snapshots(self, value):
         """Sets the flag specifying whether to image each time separately.
@@ -582,14 +594,6 @@ class Imager(object):
                 if false, use time synthesis.
         """
         _imager_lib.set_time_snapshots(self._capsule, value)
-
-    def set_time_start(self, value):
-        """Sets the start time index to image.
-
-        Args:
-            value (int): Start time index.
-        """
-        _imager_lib.set_time_start(self._capsule, value)
 
     def set_uv_filter_max(self, max_wavelength):
         """Sets the maximum UV baseline length to image, in wavelengths.
@@ -754,14 +758,14 @@ class Imager(object):
     cellsize_arcsec = property(get_cellsize, set_cellsize)
     cell_size = property(get_cellsize, set_cellsize)
     cell_size_arcsec = property(get_cellsize, set_cellsize)
-    channel_end = property(get_channel_end, set_channel_end)
     channel_snapshots = property(get_channel_snapshots,
                                  set_channel_snapshots)
-    channel_start = property(get_channel_start, set_channel_start)
     coords_only = property(get_coords_only, set_coords_only)
     fft_on_gpu = property(get_fft_on_gpu, set_fft_on_gpu)
     fov = property(get_fov, set_fov)
     fov_deg = property(get_fov, set_fov)
+    freq_max_hz = property(get_freq_max_hz, set_freq_max_hz)
+    freq_min_hz = property(get_freq_min_hz, set_freq_min_hz)
     generate_w_kernels_on_gpu = property(get_generate_w_kernels_on_gpu,
                                          set_generate_w_kernels_on_gpu)
     image_size = property(get_image_size, set_image_size)
@@ -778,9 +782,9 @@ class Imager(object):
         property(get_scale_norm_with_num_input_files,
                  set_scale_norm_with_num_input_files)
     size = property(get_size, set_size)
-    time_end = property(get_time_end, set_time_end)
+    time_max_utc = property(get_time_max_utc, set_time_max_utc)
+    time_min_utc = property(get_time_min_utc, set_time_min_utc)
     time_snapshots = property(get_time_snapshots, set_time_snapshots)
-    time_start = property(get_time_start, set_time_start)
     uv_filter_max = property(get_uv_filter_max, set_uv_filter_max)
     uv_filter_min = property(get_uv_filter_min, set_uv_filter_min)
     weighting = property(get_weighting, set_weighting)

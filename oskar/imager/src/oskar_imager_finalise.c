@@ -93,9 +93,9 @@ void oskar_imager_finalise(oskar_Imager* h,
         }
 
         /* Write to files if required. */
-        for (t = 0, i = 0; t < h->im_num_times; ++t)
-            for (c = 0; c < h->im_num_channels; ++c)
-                for (p = 0; p < h->im_num_pols; ++p, ++i)
+        for (t = 0, i = 0; t < h->num_im_times; ++t)
+            for (c = 0; c < h->num_im_channels; ++c)
+                for (p = 0; p < h->num_im_pols; ++p, ++i)
                     write_plane(h, h->planes[i], t, c, p, status);
     }
 

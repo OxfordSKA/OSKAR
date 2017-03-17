@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,18 +66,6 @@ double oskar_imager_cellsize(const oskar_Imager* h);
 
 /**
  * @brief
- * Returns the end channel to image.
- *
- * @details
- * Returns the end channel to image. A value less than 0 means 'all'.
- *
- * @param[in] h  Handle to imager.
- */
-OSKAR_EXPORT
-int oskar_imager_channel_end(const oskar_Imager* h);
-
-/**
- * @brief
  * Returns the flag specifying whether to image each channel separately.
  *
  * @details
@@ -87,18 +75,6 @@ int oskar_imager_channel_end(const oskar_Imager* h);
  */
 OSKAR_EXPORT
 int oskar_imager_channel_snapshots(const oskar_Imager* h);
-
-/**
- * @brief
- * Returns the start channel to image.
- *
- * @details
- * Returns the start channel to image.
- *
- * @param[in] h  Handle to imager.
- */
-OSKAR_EXPORT
-int oskar_imager_channel_start(const oskar_Imager* h);
 
 /**
  * @brief
@@ -135,6 +111,32 @@ int oskar_imager_fft_on_gpu(const oskar_Imager* h);
  */
 OSKAR_EXPORT
 double oskar_imager_fov(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the maximum frequency of visibility data to include in the image.
+ *
+ * @details
+ * Returns the maximum frequency of visibility data to include in the image
+ * or image cube. A value less than or equal to zero means no maximum.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+double oskar_imager_freq_max_hz(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the minimum frequency of visibility data to include in the image.
+ *
+ * @details
+ * Returns the minimum frequency of visibility data to include in the image
+ * or image cube.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+double oskar_imager_freq_min_hz(const oskar_Imager* h);
 
 /**
  * @brief
@@ -323,19 +325,6 @@ void oskar_imager_set_cellsize(oskar_Imager* h, double cellsize_arcsec);
 
 /**
  * @brief
- * Sets the end channel to image.
- *
- * @details
- * Sets the end channel to image. A value less than 0 means 'all'.
- *
- * @param[in,out] h          Handle to imager.
- * @param[in]     value      End channel index (-1 for all times).
- */
-OSKAR_EXPORT
-void oskar_imager_set_channel_end(oskar_Imager* h, int value);
-
-/**
- * @brief
  * Sets the flag specifying whether to image each channel separately.
  *
  * @details
@@ -347,19 +336,6 @@ void oskar_imager_set_channel_end(oskar_Imager* h, int value);
  */
 OSKAR_EXPORT
 void oskar_imager_set_channel_snapshots(oskar_Imager* h, int value);
-
-/**
- * @brief
- * Sets the start channel to image.
- *
- * @details
- * Sets the start channel to image.
- *
- * @param[in,out] h          Handle to imager.
- * @param[in]     value      Start channel index.
- */
-OSKAR_EXPORT
-void oskar_imager_set_channel_start(oskar_Imager* h, int value);
 
 /**
  * @brief
@@ -420,6 +396,19 @@ void oskar_imager_set_direction(oskar_Imager* h, double ra_deg, double dec_deg);
 
 /**
  * @brief
+ * Sets whether to use the GPU for FFTs.
+ *
+ * @details
+ * Sets whether to use the GPU for FFTs.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      If true, use the GPU; if false, use the CPU.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_fft_on_gpu(oskar_Imager* h, int value);
+
+/**
+ * @brief
  * Sets the image field of view.
  *
  * @details
@@ -433,16 +422,31 @@ void oskar_imager_set_fov(oskar_Imager* h, double fov_deg);
 
 /**
  * @brief
- * Sets whether to use the GPU for FFTs.
+ * Sets the maximum frequency of visibility data to include in the image.
  *
  * @details
- * Sets whether to use the GPU for FFTs.
+ * Sets the maximum frequency of visibility data to include in the image
+ * or image cube. A value less than or equal to zero means no maximum.
  *
- * @param[in,out] h          Handle to imager.
- * @param[in]     value      If true, use the GPU; if false, use the CPU.
+ * @param[in] h           Handle to imager.
+ * @param[in] freq_max_hz The maximum frequency of visibility data, in Hz.
  */
 OSKAR_EXPORT
-void oskar_imager_set_fft_on_gpu(oskar_Imager* h, int value);
+void oskar_imager_set_freq_max_hz(oskar_Imager* h, double freq_max_hz);
+
+/**
+ * @brief
+ * Sets the minimum frequency of visibility data to include in the image.
+ *
+ * @details
+ * Sets the minimum frequency of visibility data to include in the image
+ * or image cube.
+ *
+ * @param[in] h           Handle to imager.
+ * @param[in] freq_min_hz The minimum frequency of visibility data, in Hz.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_freq_min_hz(oskar_Imager* h, double freq_min_hz);
 
 /**
  * @brief
@@ -591,11 +595,9 @@ void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
  *
  * @param[in,out] h          Handle to imager.
  * @param[in]     filename   Root path.
- * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_set_output_root(oskar_Imager* h, const char* filename,
-        int* status);
+void oskar_imager_set_output_root(oskar_Imager* h, const char* filename);
 
 /**
  * @brief
@@ -646,16 +648,33 @@ void oskar_imager_set_size(oskar_Imager* h, int size, int* status);
 
 /**
  * @brief
- * Sets the end time index to image.
+ * Sets the maximum timestamp of visibility data to include in the image.
  *
  * @details
- * Sets the end time index to image. A value less than 0 means 'all'.
+ * Sets the maximum timestamp of visibility data to include in the image
+ * or image cube. A value less than or equal to zero means no maximum.
  *
- * @param[in,out] h          Handle to imager.
- * @param[in]     value      End time index (-1 for all times).
+ * @param[in] h                Handle to imager.
+ * @param[in] time_max_mjd_utc The maximum timestamp of visibility data,
+ *                             as MJD(UTC).
  */
 OSKAR_EXPORT
-void oskar_imager_set_time_end(oskar_Imager* h, int value);
+void oskar_imager_set_time_max_utc(oskar_Imager* h, double time_max_mjd_utc);
+
+/**
+ * @brief
+ * Sets the minimum timestamp of visibility data to include in the image.
+ *
+ * @details
+ * Sets the minimum timestamp of visibility data to include in the image
+ * or image cube.
+ *
+ * @param[in] h                Handle to imager.
+ * @param[in] time_min_mjd_utc The minimum timestamp of visibility data,
+ *                             as MJD(UTC).
+ */
+OSKAR_EXPORT
+void oskar_imager_set_time_min_utc(oskar_Imager* h, double time_min_mjd_utc);
 
 /**
  * @brief
@@ -670,19 +689,6 @@ void oskar_imager_set_time_end(oskar_Imager* h, int value);
  */
 OSKAR_EXPORT
 void oskar_imager_set_time_snapshots(oskar_Imager* h, int value);
-
-/**
- * @brief
- * Sets the start time index to image.
- *
- * @details
- * Sets the start time index to image.
- *
- * @param[in,out] h          Handle to imager.
- * @param[in]     value      Start time index.
- */
-OSKAR_EXPORT
-void oskar_imager_set_time_start(oskar_Imager* h, int value);
 
 /**
  * @brief
@@ -724,11 +730,10 @@ void oskar_imager_set_uv_filter_min(oskar_Imager* h, double min_wavelength);
  * @param[in]     ref_hz  Frequency of index 0, in Hz.
  * @param[in]     inc_hz  Frequency increment, in Hz.
  * @param[in]     num     Number of channels in visibility data.
- * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
 void oskar_imager_set_vis_frequency(oskar_Imager* h,
-        double ref_hz, double inc_hz, int num, int* status);
+        double ref_hz, double inc_hz, int num);
 
 /**
  * @brief
@@ -760,11 +765,10 @@ void oskar_imager_set_vis_phase_centre(oskar_Imager* h,
  * @param[in]     ref_mjd_utc  Time of index 0, as MJD(UTC).
  * @param[in]     inc_sec      Time increment, in seconds.
  * @param[in]     num          Number of time steps in visibility data.
- * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
 void oskar_imager_set_vis_time(oskar_Imager* h,
-        double ref_mjd_utc, double inc_sec, int num, int* status);
+        double ref_mjd_utc, double inc_sec, int num);
 
 /**
  * @brief
@@ -809,15 +813,29 @@ int oskar_imager_size(const oskar_Imager* h);
 
 /**
  * @brief
- * Returns the end time index to image.
+ * Returns the maximum timestamp of visibility data to include in the image.
  *
  * @details
- * Returns the end time index to image. A value less than 0 means 'all'.
+ * Returns the maximum timestamp of visibility data to include in the image
+ * or image cube. A value less than or equal to zero means no maximum.
  *
  * @param[in] h  Handle to imager.
  */
 OSKAR_EXPORT
-int oskar_imager_time_end(const oskar_Imager* h);
+double oskar_imager_time_max_utc(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the minimum timestamp of visibility data to include in the image.
+ *
+ * @details
+ * Returns the minimum timestamp of visibility data to include in the image
+ * or image cube.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+double oskar_imager_time_min_utc(const oskar_Imager* h);
 
 /**
  * @brief
@@ -830,18 +848,6 @@ int oskar_imager_time_end(const oskar_Imager* h);
  */
 OSKAR_EXPORT
 int oskar_imager_time_snapshots(const oskar_Imager* h);
-
-/**
- * @brief
- * Returns the start time index to image.
- *
- * @details
- * Returns the start time index to image.
- *
- * @param[in] h  Handle to imager.
- */
-OSKAR_EXPORT
-int oskar_imager_time_start(const oskar_Imager* h);
 
 /**
  * @brief
