@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@
 #include "vis/oskar_vis_block.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <vector>
 
@@ -148,7 +149,7 @@ int main(int argc, char** argv)
 int main(void)
 {
     oskar_log_error(0, "OSKAR was not compiled with Measurement Set support.");
-    return OSKAR_FAIL;
+    return EXIT_FAILURE;
 }
 #endif
 
