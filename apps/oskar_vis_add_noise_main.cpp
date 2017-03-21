@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,8 @@ int main(int argc, char** argv)
     oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
     // Load the settings file.
-    oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
+    oskar_log_section(log, 'M', "Loading settings file '%s'",
+            settings_file.c_str());
     vector<pair<string, string> > failed_keys;
     if (!s.load(settings_file, failed_keys))
     {
