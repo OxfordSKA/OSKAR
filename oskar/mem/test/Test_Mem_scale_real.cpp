@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,17 @@
 #include "mem/oskar_mem.h"
 #include "utility/oskar_get_error_string.h"
 
+#ifdef OSKAR_HAVE_CUDA
+static const int location = OSKAR_GPU;
+#else
+static const int location = OSKAR_CPU;
+#endif
 
 TEST(Mem, scale_real_single)
 {
     // Single precision real.
     int n = 100, status = 0;
-    oskar_Mem *mem_cpu, *mem_cpu2, *mem_gpu;
+    oskar_Mem *mem_cpu, *mem_cpu2, *temp;
 
     // Initialise.
     mem_cpu = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, n, &status);
@@ -55,14 +60,14 @@ TEST(Mem, scale_real_single)
         EXPECT_FLOAT_EQ(2.0f * i, data[i]);
     }
 
-    // Copy to GPU and scale again.
-    mem_gpu = oskar_mem_create_copy(mem_cpu, OSKAR_GPU, &status);
+    // Copy to device and scale again.
+    temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(mem_gpu, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
-    mem_cpu2 = oskar_mem_create_copy(mem_gpu, OSKAR_CPU, &status);
+    mem_cpu2 = oskar_mem_create_copy(temp, OSKAR_CPU, &status);
     data = oskar_mem_float(mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
@@ -73,7 +78,7 @@ TEST(Mem, scale_real_single)
     // Free memory.
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
-    oskar_mem_free(mem_gpu, &status);
+    oskar_mem_free(temp, &status);
 }
 
 
@@ -81,7 +86,7 @@ TEST(Mem, scale_real_single_complex)
 {
     // Single precision complex.
     int n = 100, status = 0;
-    oskar_Mem *mem_cpu, *mem_cpu2, *mem_gpu;
+    oskar_Mem *mem_cpu, *mem_cpu2, *temp;
 
     // Initialise.
     mem_cpu = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU, n,
@@ -104,14 +109,14 @@ TEST(Mem, scale_real_single_complex)
         EXPECT_FLOAT_EQ(2.0f * ((float)i + 0.2f), t.y);
     }
 
-    // Copy to GPU and scale again.
-    mem_gpu = oskar_mem_create_copy(mem_cpu, OSKAR_GPU, &status);
+    // Copy to device and scale again.
+    temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(mem_gpu, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
-    mem_cpu2 = oskar_mem_create_copy(mem_gpu, OSKAR_CPU, &status);
+    mem_cpu2 = oskar_mem_create_copy(temp, OSKAR_CPU, &status);
     data = oskar_mem_float2(mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
@@ -124,7 +129,7 @@ TEST(Mem, scale_real_single_complex)
     // Free memory.
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
-    oskar_mem_free(mem_gpu, &status);
+    oskar_mem_free(temp, &status);
 }
 
 
@@ -132,7 +137,7 @@ TEST(Mem, scale_real_single_complex_matrix)
 {
     // Single precision complex matrix.
     int n = 100, status = 0;
-    oskar_Mem *mem_cpu, *mem_cpu2, *mem_gpu;
+    oskar_Mem *mem_cpu, *mem_cpu2, *temp;
 
     // Initialise.
     mem_cpu = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
@@ -167,14 +172,14 @@ TEST(Mem, scale_real_single_complex_matrix)
         EXPECT_FLOAT_EQ(2.0f * ((float)i + 1.4f), t.d.y);
     }
 
-    // Copy to GPU and scale again.
-    mem_gpu = oskar_mem_create_copy(mem_cpu, OSKAR_GPU, &status);
+    // Copy to device and scale again.
+    temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(mem_gpu, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
-    mem_cpu2 = oskar_mem_create_copy(mem_gpu, OSKAR_CPU, &status);
+    mem_cpu2 = oskar_mem_create_copy(temp, OSKAR_CPU, &status);
     data = oskar_mem_float4c(mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
@@ -193,7 +198,7 @@ TEST(Mem, scale_real_single_complex_matrix)
     // Free memory.
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
-    oskar_mem_free(mem_gpu, &status);
+    oskar_mem_free(temp, &status);
 }
 
 
@@ -201,7 +206,7 @@ TEST(Mem, scale_real_double)
 {
     // Double precision real.
     int n = 100, status = 0;
-    oskar_Mem *mem_cpu, *mem_cpu2, *mem_gpu;
+    oskar_Mem *mem_cpu, *mem_cpu2, *temp;
 
     // Initialise.
     mem_cpu = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, n, &status);
@@ -220,14 +225,14 @@ TEST(Mem, scale_real_double)
         EXPECT_DOUBLE_EQ(2.0 * i, data[i]);
     }
 
-    // Copy to GPU and scale again.
-    mem_gpu = oskar_mem_create_copy(mem_cpu, OSKAR_GPU, &status);
+    // Copy to device and scale again.
+    temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(mem_gpu, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
-    mem_cpu2 = oskar_mem_create_copy(mem_gpu, OSKAR_CPU, &status);
+    mem_cpu2 = oskar_mem_create_copy(temp, OSKAR_CPU, &status);
     data = oskar_mem_double(mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
@@ -238,7 +243,7 @@ TEST(Mem, scale_real_double)
     // Free memory.
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
-    oskar_mem_free(mem_gpu, &status);
+    oskar_mem_free(temp, &status);
 }
 
 
@@ -246,7 +251,7 @@ TEST(Mem, scale_real_double_complex)
 {
     // Double precision complex.
     int n = 100, status = 0;
-    oskar_Mem *mem_cpu, *mem_cpu2, *mem_gpu;
+    oskar_Mem *mem_cpu, *mem_cpu2, *temp;
 
     // Initialise.
     mem_cpu = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, n,
@@ -269,14 +274,14 @@ TEST(Mem, scale_real_double_complex)
         EXPECT_DOUBLE_EQ(2.0 * ((double)i + 0.2), t.y);
     }
 
-    // Copy to GPU and scale again.
-    mem_gpu = oskar_mem_create_copy(mem_cpu, OSKAR_GPU, &status);
+    // Copy to device and scale again.
+    temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(mem_gpu, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
-    mem_cpu2 = oskar_mem_create_copy(mem_gpu, OSKAR_CPU, &status);
+    mem_cpu2 = oskar_mem_create_copy(temp, OSKAR_CPU, &status);
     data = oskar_mem_double2(mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
@@ -289,7 +294,7 @@ TEST(Mem, scale_real_double_complex)
     // Free memory.
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
-    oskar_mem_free(mem_gpu, &status);
+    oskar_mem_free(temp, &status);
 }
 
 
@@ -297,7 +302,7 @@ TEST(Mem, scale_real_double_complex_matrix)
 {
     // Double precision complex matrix.
     int n = 100, status = 0;
-    oskar_Mem *mem_cpu, *mem_cpu2, *mem_gpu;
+    oskar_Mem *mem_cpu, *mem_cpu2, *temp;
 
     // Initialise.
     mem_cpu = oskar_mem_create(OSKAR_DOUBLE_COMPLEX_MATRIX,
@@ -332,14 +337,14 @@ TEST(Mem, scale_real_double_complex_matrix)
         EXPECT_DOUBLE_EQ(2.0 * ((double)i + 1.4), t.d.y);
     }
 
-    // Copy to GPU and scale again.
-    mem_gpu = oskar_mem_create_copy(mem_cpu, OSKAR_GPU, &status);
+    // Copy to device and scale again.
+    temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(mem_gpu, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
-    mem_cpu2 = oskar_mem_create_copy(mem_gpu, OSKAR_CPU, &status);
+    mem_cpu2 = oskar_mem_create_copy(temp, OSKAR_CPU, &status);
     data = oskar_mem_double4c(mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
@@ -358,5 +363,5 @@ TEST(Mem, scale_real_double_complex_matrix)
     // Free memory.
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
-    oskar_mem_free(mem_gpu, &status);
+    oskar_mem_free(temp, &status);
 }

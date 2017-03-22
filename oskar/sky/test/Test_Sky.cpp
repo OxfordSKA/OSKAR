@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,12 @@
 #include <cstdlib>
 #include "math/oskar_cmath.h"
 
+#ifdef OSKAR_HAVE_CUDA
+static int device_loc = OSKAR_GPU;
+#else
+static int device_loc = OSKAR_CPU;
+#endif
+
 TEST(oskar_Sky, copy)
 {
     int status = 0;
@@ -58,7 +64,7 @@ TEST(oskar_Sky, copy)
     // Create sky model 2
     int sky2_num_sorces = 50e3;
     oskar_Sky* sky2 = oskar_sky_create(OSKAR_SINGLE,
-            OSKAR_GPU, sky2_num_sorces, &status);
+            device_loc, sky2_num_sorces, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy sky model 1 into 2
@@ -105,7 +111,7 @@ TEST(SkyModel, append)
     // Create and fill sky model 1.
     int sky1_num_sources = 2;
     oskar_Sky* sky1 = oskar_sky_create(OSKAR_SINGLE,
-            OSKAR_GPU, sky1_num_sources, &status);
+            device_loc, sky1_num_sources, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < sky1_num_sources; ++i)
     {
@@ -133,7 +139,7 @@ TEST(SkyModel, append)
     // Append sky2 to sky1.
     oskar_sky_append(sky1, sky2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ((int)OSKAR_GPU, oskar_sky_mem_location(sky1));
+    ASSERT_EQ(device_loc, oskar_sky_mem_location(sky1));
 
     // Copy back and check contents.
     oskar_Sky* sky_temp = oskar_sky_create_copy(sky1,
@@ -182,8 +188,7 @@ TEST(SkyModel, compute_relative_lmn)
     float dec0 = 55.0 * deg2rad;
 
     // Construct a sky model on the GPU.
-    oskar_Sky* sky1 = oskar_sky_create(OSKAR_SINGLE,
-            OSKAR_GPU, n, &status);
+    oskar_Sky* sky1 = oskar_sky_create(OSKAR_SINGLE, device_loc, n, &status);
     ASSERT_EQ(n, oskar_sky_num_sources(sky1));
 
     // Set values of these sources.
@@ -399,7 +404,7 @@ TEST(SkyModel, filter_by_flux)
 
         // Filter on GPU.
         oskar_Sky* sky_gpu = oskar_sky_create_copy(sky_input,
-                OSKAR_GPU, &status);
+                device_loc, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_sky_filter_by_flux(sky_gpu, flux_min, flux_max, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -488,7 +493,7 @@ TEST(SkyModel, filter_by_flux)
 
         // Filter on GPU.
         oskar_Sky* sky_gpu = oskar_sky_create_copy(sky_input,
-                OSKAR_GPU, &status);
+                device_loc, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_sky_filter_by_flux(sky_gpu, flux_min, flux_max, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -605,7 +610,7 @@ TEST(SkyModel, horizon_clip)
     }
 
     // Horizon clip on GPU.
-    int loc = OSKAR_GPU;
+    int loc = device_loc;
     {
         // Create a work buffer and output sky model.
         oskar_StationWork* work = oskar_station_work_create(type, loc, &status);
@@ -676,10 +681,10 @@ TEST(SkyModel, resize)
     // Resizing on the GPU in single precision
     {
         oskar_Sky* sky = oskar_sky_create(OSKAR_SINGLE,
-                OSKAR_GPU, 10, &status);
+                device_loc, 10, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky));
-        ASSERT_EQ((int)OSKAR_GPU, oskar_sky_mem_location(sky));
+        ASSERT_EQ(device_loc, oskar_sky_mem_location(sky));
         ASSERT_EQ(10, oskar_sky_num_sources(sky));
         oskar_sky_resize(sky, 1, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -730,8 +735,7 @@ TEST(SkyModel, scale_by_spectral_index)
     oskar_mem_set_value_real(oskar_sky_spectral_index(sky), spix, 0, 0, &status);
 
     // Copy to GPU.
-    oskar_Sky* sky_gpu = oskar_sky_create_copy(sky, OSKAR_GPU,
-            &status);
+    oskar_Sky* sky_gpu = oskar_sky_create_copy(sky, device_loc, &status);
 
     // Scale on CPU.
     timer = oskar_timer_create(OSKAR_TIMER_NATIVE);
@@ -810,12 +814,10 @@ TEST(SkyModel, rotation_measure)
     oskar_mem_set_value_real(oskar_sky_rotation_measure_rad(sky_ref), rm, 0, 0, &status);
 
     // Copy to CPU.
-    oskar_Sky* sky_cpu = oskar_sky_create_copy(sky_ref, OSKAR_CPU,
-            &status);
+    oskar_Sky* sky_cpu = oskar_sky_create_copy(sky_ref, OSKAR_CPU, &status);
 
     // Copy to GPU.
-    oskar_Sky* sky_gpu = oskar_sky_create_copy(sky_ref, OSKAR_GPU,
-            &status);
+    oskar_Sky* sky_gpu = oskar_sky_create_copy(sky_ref, device_loc, &status);
 
     // Scale on CPU.
     timer = oskar_timer_create(OSKAR_TIMER_NATIVE);
@@ -937,8 +939,7 @@ TEST(SkyModel, set_source)
     int status = 0;
 
     // Construct a sky model on the GPU of zero size.
-    oskar_Sky* sky = oskar_sky_create(OSKAR_SINGLE,
-            OSKAR_GPU, 0, &status);
+    oskar_Sky* sky = oskar_sky_create(OSKAR_SINGLE, device_loc, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ(0, oskar_sky_num_sources(sky));
 
@@ -961,7 +962,7 @@ TEST(SkyModel, set_source)
             250.0e6, -0.8, 2.5, 0.0, 0.0, 0.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky));
-    ASSERT_EQ((int)OSKAR_GPU, oskar_sky_mem_location(sky));
+    ASSERT_EQ(device_loc, oskar_sky_mem_location(sky));
 
     // Copy back into temp. structure on the CPU to check the values were set
     // correctly.

@@ -43,6 +43,12 @@
 
 #define D2R (M_PI / 180.0)
 
+#ifdef OSKAR_HAVE_CUDA
+static int device_loc = OSKAR_GPU;
+#else
+static int device_loc = OSKAR_CPU;
+#endif
+
 TEST(evaluate_jones_E, evaluate_e)
 {
     int error = 0;
@@ -88,7 +94,7 @@ TEST(evaluate_jones_E, evaluate_e)
 
     // Copy telescope structure to the GPU, and free the CPU version.
     oskar_Telescope* tel_gpu = oskar_telescope_create_copy(tel_cpu,
-            OSKAR_GPU, &error);
+            device_loc, &error);
     oskar_telescope_free(tel_cpu, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
@@ -102,13 +108,13 @@ TEST(evaluate_jones_E, evaluate_e)
             1, l, m, n, &error);
 
     // Set up GPU memory.
-    oskar_Mem* l_gpu = oskar_mem_create_copy(l, OSKAR_GPU, &error);
-    oskar_Mem* m_gpu = oskar_mem_create_copy(m, OSKAR_GPU, &error);
-    oskar_Mem* n_gpu = oskar_mem_create_copy(n, OSKAR_GPU, &error);
+    oskar_Mem* l_gpu = oskar_mem_create_copy(l, device_loc, &error);
+    oskar_Mem* m_gpu = oskar_mem_create_copy(m, device_loc, &error);
+    oskar_Mem* n_gpu = oskar_mem_create_copy(n, device_loc, &error);
     oskar_Jones* E = oskar_jones_create(OSKAR_SINGLE_COMPLEX,
-            OSKAR_GPU, num_stations, num_pts, &error);
+            device_loc, num_stations, num_pts, &error);
     oskar_StationWork* work = oskar_station_work_create(OSKAR_SINGLE,
-            OSKAR_GPU, &error);
+            device_loc, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Evaluate Jones E.

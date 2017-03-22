@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,13 @@
 #include <cstdlib>
 #include "math/oskar_cmath.h"
 
+#ifdef OSKAR_HAVE_CUDA
+static int device_loc = OSKAR_GPU;
+#else
+static int device_loc = OSKAR_CPU;
+#endif
+
+
 TEST(element_weights_errors, test_evaluate)
 {
     int num_elements           = 10000;
@@ -47,15 +54,15 @@ TEST(element_weights_errors, test_evaluate)
     unsigned int seed = 1;
 
     oskar_Mem *d_gain, *d_gain_error, *d_phase, *d_phase_error, *d_errors;
-    d_gain = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_gain = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &error);
-    d_gain_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_gain_error = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &error);
-    d_phase = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_phase = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &error);
-    d_phase_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_phase_error = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &error);
-    d_errors = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_GPU,
+    d_errors = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, device_loc,
             num_elements, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
@@ -109,15 +116,15 @@ TEST(element_weights_errors, test_apply)
 
     oskar_Mem *d_gain, *d_gain_error, *d_phase, *d_phase_error, *d_errors;
     oskar_Mem *h_weights, *d_weights;
-    d_errors = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_GPU,
+    d_errors = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, device_loc,
             num_elements, &status);
-    d_gain = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_gain = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &status);
-    d_gain_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_gain_error = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &status);
-    d_phase = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_phase = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &status);
-    d_phase_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_phase_error = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &status);
     h_weights = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU,
             num_elements, &status);
@@ -135,7 +142,7 @@ TEST(element_weights_errors, test_apply)
         h_weights_[i].x = weight.x;
         h_weights_[i].y = weight.y;
     }
-    d_weights = oskar_mem_create_copy(h_weights, OSKAR_GPU, &status);
+    d_weights = oskar_mem_create_copy(h_weights, device_loc, &status);
 
     oskar_evaluate_element_weights_errors(num_elements,
             d_gain, d_gain_error, d_phase, d_phase_error,
@@ -176,15 +183,15 @@ TEST(element_weights_errors, test_reinit)
     double phase_error = (5 / 180.0) * M_PI;
 
     oskar_Mem *d_errors, *d_gain, *d_gain_error, *d_phase, *d_phase_error;
-    d_errors = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_GPU,
+    d_errors = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, device_loc,
             num_elements, &status);
-    d_gain = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_gain = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &status);
-    d_gain_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_gain_error = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &status);
-    d_phase = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_phase = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &status);
-    d_phase_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
+    d_phase_error = oskar_mem_create(OSKAR_DOUBLE, device_loc,
             num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 

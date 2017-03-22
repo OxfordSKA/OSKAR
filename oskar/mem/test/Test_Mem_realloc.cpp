@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 #include "utility/oskar_get_error_string.h"
 #include "mem/oskar_mem.h"
 
+#ifdef OSKAR_HAVE_CUDA
 TEST(Mem, realloc_gpu)
 {
     int status = 0;
@@ -43,6 +44,8 @@ TEST(Mem, realloc_gpu)
     oskar_mem_free(mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
+#endif
+
 
 TEST(Mem, realloc_cpu)
 {

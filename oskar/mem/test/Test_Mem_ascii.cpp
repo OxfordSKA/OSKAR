@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,6 +117,8 @@ TEST(Mem, load_ascii_real_cpu)
     remove(filename);
 }
 
+
+#ifdef OSKAR_HAVE_CUDA
 TEST(Mem, load_ascii_real_gpu)
 {
     int status = 0;
@@ -135,10 +137,10 @@ TEST(Mem, load_ascii_real_gpu)
 
     // Load columns back into GPU memory.
     oskar_Mem *a, *b, *c, *d;
-    a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
-    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
-    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
-    d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, 0, &status);
+    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, 0, &status);
+    d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Expect pass.
@@ -175,6 +177,8 @@ TEST(Mem, load_ascii_real_gpu)
 
     remove(filename);
 }
+#endif
+
 
 TEST(Mem, load_ascii_complex_real_cpu)
 {
@@ -222,6 +226,8 @@ TEST(Mem, load_ascii_complex_real_cpu)
     remove(filename);
 }
 
+
+#ifdef OSKAR_HAVE_CUDA
 TEST(Mem, load_ascii_complex_real_gpu_cpu)
 {
     int status = 0;
@@ -269,6 +275,8 @@ TEST(Mem, load_ascii_complex_real_gpu_cpu)
 
     remove(filename);
 }
+#endif
+
 
 TEST(Mem, load_ascii_complex_real_default_cpu)
 {
@@ -445,17 +453,20 @@ TEST(Mem, load_ascii_required_data)
 
 TEST(Mem, save_ascii)
 {
-    int status = 0;
+    int status = 0, location = OSKAR_CPU;
     oskar_Mem *mem1, *mem2, *mem3, *mem4, *mem5, *mem6, *mem7, *mem8;
     size_t length = 100;
+#ifdef OSKAR_HAVE_CUDA
+    location = OSKAR_GPU;
+#endif
     mem1 = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, length, &status);
     mem2 = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, length, &status);
     mem3 = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU, length, &status);
     mem4 = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, length, &status);
-    mem5 = oskar_mem_create(OSKAR_SINGLE, OSKAR_GPU, length, &status);
-    mem6 = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, length, &status);
-    mem7 = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_GPU, length, &status);
-    mem8 = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_GPU, length, &status);
+    mem5 = oskar_mem_create(OSKAR_SINGLE, location, length, &status);
+    mem6 = oskar_mem_create(OSKAR_DOUBLE, location, length, &status);
+    mem7 = oskar_mem_create(OSKAR_SINGLE_COMPLEX, location, length, &status);
+    mem8 = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, location, length, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_set_value_real(mem1, 1.0, 0, 0, &status);

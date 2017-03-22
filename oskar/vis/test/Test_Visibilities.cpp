@@ -63,39 +63,21 @@ TEST(Visibilities, create)
 
     // Don't expect an error for complex types.
     {
-        int location, status = 0;
+        int status = 0;
         oskar_Vis* vis;
-        location = OSKAR_CPU;
-        vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX, location,
+        vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU,
                 num_channels, num_times, num_stations, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_vis_free(vis, &status);
-        vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX, location,
+        vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU,
                 num_channels, num_times, num_stations, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_vis_free(vis, &status);
-        vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX_MATRIX, location,
+        vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_CPU,
                 num_channels, num_times, num_stations, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_vis_free(vis, &status);
-        vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX_MATRIX, location,
-                num_channels, num_times, num_stations, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_vis_free(vis, &status);
-        location = OSKAR_GPU;
-        vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX, location,
-                num_channels, num_times, num_stations, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_vis_free(vis, &status);
-        vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX, location,
-                num_channels, num_times, num_stations, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_vis_free(vis, &status);
-        vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX_MATRIX, location,
-                num_channels, num_times, num_stations, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_vis_free(vis, &status);
-        vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX_MATRIX, location,
+        vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
                 num_channels, num_times, num_stations, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_vis_free(vis, &status);

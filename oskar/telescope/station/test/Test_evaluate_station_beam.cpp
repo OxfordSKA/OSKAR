@@ -45,6 +45,12 @@
 
 using namespace std;
 
+#ifdef OSKAR_HAVE_CUDA
+static int device_loc = OSKAR_GPU;
+#else
+static int device_loc = OSKAR_CPU;
+#endif
+
 TEST(evaluate_station_beam, test_array_pattern)
 {
     int error = 0;
@@ -82,7 +88,7 @@ TEST(evaluate_station_beam, test_array_pattern)
 
     // Copy the station structure to the GPU and free the original structure.
     oskar_Station* station_gpu = oskar_station_create_copy(station,
-            OSKAR_GPU, &error);
+            device_loc, &error);
     oskar_station_free(station, &error);
 
     // Evaluate horizontal l,m positions at which to generate the beam pattern.
@@ -103,16 +109,16 @@ TEST(evaluate_station_beam, test_array_pattern)
     free(lm);
 
     // Copy horizontal lm coordinates to GPU.
-    d_l = oskar_mem_create_copy(h_l, OSKAR_GPU, &error);
-    d_m = oskar_mem_create_copy(h_m, OSKAR_GPU, &error);
-    d_n = oskar_mem_create_copy(h_n, OSKAR_GPU, &error);
+    d_l = oskar_mem_create_copy(h_l, device_loc, &error);
+    d_m = oskar_mem_create_copy(h_m, device_loc, &error);
+    d_n = oskar_mem_create_copy(h_n, device_loc, &error);
 
     // Allocate work buffers.
     oskar_StationWork* work = oskar_station_work_create(OSKAR_SINGLE,
-            OSKAR_GPU, &error);
+            device_loc, &error);
 
     // Create memory for the beam pattern.
-    beam_pattern = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_GPU,
+    beam_pattern = oskar_mem_create(OSKAR_SINGLE_COMPLEX, device_loc,
             num_pixels, &error);
 
     ASSERT_EQ(0, oskar_station_array_is_3d(station_gpu));
@@ -234,7 +240,7 @@ TEST(evaluate_station_beam, gaussian)
     // Double GPU
     {
         int type = OSKAR_DOUBLE;
-        int location = OSKAR_GPU;
+        int location = device_loc;
         double* x = (double*)malloc(size * sizeof(double));
         oskar_linspace_d(x, -lm_minmax, lm_minmax, size);
         oskar_Mem *h_l, *h_m, *l, *m, *beam, *horizon_mask;
@@ -273,7 +279,7 @@ TEST(evaluate_station_beam, gaussian)
     // Single GPU
     {
         int type = OSKAR_SINGLE;
-        int location = OSKAR_GPU;
+        int location = device_loc;
         float* x = (float*)malloc(size * sizeof(float));
         oskar_linspace_f(x, -lm_minmax, lm_minmax, size);
         oskar_Mem *h_l, *h_m, *l, *m, *beam, *horizon_mask;

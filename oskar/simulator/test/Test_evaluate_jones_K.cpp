@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,11 @@
 
 static void run_test(int type, double tol)
 {
+#ifdef OSKAR_HAVE_CUDA
+    int location = OSKAR_GPU;
+#else
+    int location = OSKAR_CPU;
+#endif
     int num_sources = 1000;
     int num_stations = 100;
     int n_tries = 30;
@@ -46,7 +51,7 @@ static void run_test(int type, double tol)
     double freq_hz = 100e6;
     oskar_Jones* K = oskar_jones_create(type | OSKAR_COMPLEX, OSKAR_CPU,
             num_stations, num_sources, &status);
-    oskar_Jones* K_g = oskar_jones_create(type | OSKAR_COMPLEX, OSKAR_GPU,
+    oskar_Jones* K_g = oskar_jones_create(type | OSKAR_COMPLEX, location,
             num_stations, num_sources, &status);
     oskar_Mem* l = oskar_mem_create(type, OSKAR_CPU, num_sources, &status);
     oskar_Mem* m = oskar_mem_create(type, OSKAR_CPU, num_sources, &status);
@@ -65,13 +70,13 @@ static void run_test(int type, double tol)
     oskar_mem_random_range(v, -10.0, 10.0, &status);
     oskar_mem_random_range(w, -10.0, 10.0, &status);
 
-    oskar_Mem* l_g = oskar_mem_create_copy(l, OSKAR_GPU, &status);
-    oskar_Mem* m_g = oskar_mem_create_copy(m, OSKAR_GPU, &status);
-    oskar_Mem* n_g = oskar_mem_create_copy(n, OSKAR_GPU, &status);
-    oskar_Mem* I_g = oskar_mem_create_copy(I, OSKAR_GPU, &status);
-    oskar_Mem* u_g = oskar_mem_create_copy(u, OSKAR_GPU, &status);
-    oskar_Mem* v_g = oskar_mem_create_copy(v, OSKAR_GPU, &status);
-    oskar_Mem* w_g = oskar_mem_create_copy(w, OSKAR_GPU, &status);
+    oskar_Mem* l_g = oskar_mem_create_copy(l, location, &status);
+    oskar_Mem* m_g = oskar_mem_create_copy(m, location, &status);
+    oskar_Mem* n_g = oskar_mem_create_copy(n, location, &status);
+    oskar_Mem* I_g = oskar_mem_create_copy(I, location, &status);
+    oskar_Mem* u_g = oskar_mem_create_copy(u, location, &status);
+    oskar_Mem* v_g = oskar_mem_create_copy(v, location, &status);
+    oskar_Mem* w_g = oskar_mem_create_copy(w, location, &status);
     oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
     oskar_timer_start(tmr);
     oskar_evaluate_jones_K(K, num_sources, l, m, n, u, v, w,
@@ -84,7 +89,7 @@ static void run_test(int type, double tol)
     for (int i = 0; i < n_tries; ++i)
         oskar_evaluate_jones_K(K_g, num_sources, l_g, m_g, n_g, u_g, v_g, w_g,
                 freq_hz, I_g, I_min, I_max, &status);
-    printf("Jones K (GPU): %.3f sec\n", oskar_timer_elapsed(tmr) / n_tries);
+    printf("Jones K (device): %.3f sec\n", oskar_timer_elapsed(tmr) / n_tries);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     double max_err, avg_err;

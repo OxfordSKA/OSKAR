@@ -184,8 +184,10 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         oskar_mem_free(m, &status);
         oskar_mem_free(n, &status);
 
-        // GPU version.
+        // Device/GPU version.
+#ifdef OSKAR_HAVE_CUDA
         loc = OSKAR_GPU;
+#endif
 
         ra = oskar_mem_create(type, loc, num, &status);
         dec = oskar_mem_create(type, loc, num, &status);
@@ -291,8 +293,10 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         oskar_mem_free(m, &status);
         oskar_mem_free(n, &status);
 
-        // GPU version.
+        // Device/GPU version.
+#ifdef OSKAR_HAVE_CUDA
         loc = OSKAR_GPU;
+#endif
 
         ra = oskar_mem_create(type, loc, num, &status);
         dec = oskar_mem_create(type, loc, num, &status);

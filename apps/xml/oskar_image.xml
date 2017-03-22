@@ -92,7 +92,7 @@
     </s>
     <s k="time_max_utc"><label>Maximum time (UTC)</label>
         <type name="DateTime" default="0.0"/>
-        <desc>The minimum visibility time centroid to include in the image.
+        <desc>The maximum visibility time centroid to include in the image.
             This can be either a MJD value or a string with one of the
             following formats:
             <ul>

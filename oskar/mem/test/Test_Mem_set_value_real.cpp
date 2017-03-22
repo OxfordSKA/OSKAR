@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,12 @@
 #include "mem/oskar_mem.h"
 #include "utility/oskar_vector_types.h"
 
+#ifdef OSKAR_HAVE_CUDA
+static const int location = location;
+#else
+static const int location = OSKAR_CPU;
+#endif
+
 
 TEST(Mem, set_value_real_double)
 {
@@ -55,7 +61,7 @@ TEST(Mem, set_value_real_double_complex)
     // Double precision complex.
     int n = 100, status = 0;
     oskar_Mem *mem, *mem2;
-    mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_GPU, n,
+    mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, location, n,
             &status);
     oskar_mem_set_value_real(mem, 6.5, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -77,7 +83,7 @@ TEST(Mem, set_value_real_double_complex_matrix)
     // Double precision complex matrix.
     int n = 100, status = 0;
     oskar_Mem *mem, *mem2;
-    mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_GPU, n,
+    mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX_MATRIX, location, n,
             &status);
     oskar_mem_set_value_real(mem, 6.5, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -122,7 +128,7 @@ TEST(Mem, set_value_real_single_complex)
     // Single precision complex.
     int n = 100, status = 0;
     oskar_Mem *mem, *mem2;
-    mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_GPU, n,
+    mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX, location, n,
             &status);
     oskar_mem_set_value_real(mem, 6.5, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -144,7 +150,7 @@ TEST(Mem, set_value_real_single_complex_matrix)
     // Single precision complex matrix.
     int n = 100, status = 0;
     oskar_Mem *mem, *mem2;
-    mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_GPU, n,
+    mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, location, n,
             &status);
     oskar_mem_set_value_real(mem, 6.5, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);

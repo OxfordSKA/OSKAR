@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -668,19 +668,9 @@ static void test_ones(int precision, int location)
     ASSERT_EQ(0, status);
 }
 
-TEST(Jones, set_ones_singleCPU)
-{
-    test_ones(OSKAR_SINGLE, OSKAR_CPU);
-}
-
 TEST(Jones, set_ones_singleGPU)
 {
     test_ones(OSKAR_SINGLE, OSKAR_GPU);
-}
-
-TEST(Jones, set_ones_doubleCPU)
-{
-    test_ones(OSKAR_DOUBLE, OSKAR_CPU);
 }
 
 TEST(Jones, set_ones_doubleGPU)
@@ -688,4 +678,15 @@ TEST(Jones, set_ones_doubleGPU)
     test_ones(OSKAR_DOUBLE, OSKAR_GPU);
 }
 
-#endif
+#endif /* OSKAR_HAVE_CUDA */
+
+TEST(Jones, set_ones_singleCPU)
+{
+    test_ones(OSKAR_SINGLE, OSKAR_CPU);
+}
+
+TEST(Jones, set_ones_doubleCPU)
+{
+    test_ones(OSKAR_DOUBLE, OSKAR_CPU);
+}
+

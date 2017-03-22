@@ -83,7 +83,9 @@ TEST(evaluate_baselines, cpu_gpu)
     }
 
     // Allocate device memory and copy input data.
+#ifdef OSKAR_HAVE_CUDA
     location = OSKAR_GPU;
+#endif
     u_gpu = oskar_mem_create_copy(u, location, &status);
     v_gpu = oskar_mem_create_copy(v, location, &status);
     w_gpu = oskar_mem_create_copy(w, location, &status);
@@ -92,7 +94,7 @@ TEST(evaluate_baselines, cpu_gpu)
     ww_gpu = oskar_mem_create(type, location, num_baselines, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    // Evaluate baseline coordinates on GPU.
+    // Evaluate baseline coordinates on device.
     oskar_convert_station_uvw_to_baseline_uvw(u_gpu, v_gpu, w_gpu,
             uu_gpu, vv_gpu, ww_gpu, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);

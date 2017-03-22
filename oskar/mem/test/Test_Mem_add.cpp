@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -138,6 +138,7 @@ TEST(Mem, add_in_place)
 }
 
 
+#ifdef OSKAR_HAVE_CUDA
 TEST(Mem, add_gpu)
 {
     // Use Case: memory on the GPU.
@@ -153,6 +154,7 @@ TEST(Mem, add_gpu)
     oskar_mem_free(in2, &status);
     oskar_mem_free(out, &status);
 }
+#endif
 
 
 TEST(Mem, not_enough_output_elements)

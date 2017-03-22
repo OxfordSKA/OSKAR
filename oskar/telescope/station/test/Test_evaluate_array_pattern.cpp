@@ -45,6 +45,12 @@
 
 using namespace std;
 
+#ifdef OSKAR_HAVE_CUDA
+static int device_loc = OSKAR_GPU;
+#else
+static int device_loc = OSKAR_CPU;
+#endif
+
 static void check_images(const oskar_Mem* image1, const oskar_Mem* image2)
 {
     int status = 0;
@@ -312,9 +318,9 @@ TEST(evaluate_array_pattern, test)
             ra_deg, dec_deg, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     station_gpu_f = oskar_station_create_copy(station_cpu_f,
-            OSKAR_GPU, &status);
+            device_loc, &status);
     station_gpu_d = oskar_station_create_copy(station_cpu_d,
-            OSKAR_GPU, &status);
+            device_loc, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Set up longitude/latitude grids. */
@@ -330,10 +336,10 @@ TEST(evaluate_array_pattern, test)
     oskar_evaluate_image_lon_lat_grid(lon_cpu_d, lat_cpu_d, image_side,
             image_side, fov_rad, fov_rad, ra_rad, dec_rad, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    lon_gpu_f = oskar_mem_create_copy(lon_cpu_f, OSKAR_GPU, &status);
-    lon_gpu_d = oskar_mem_create_copy(lon_cpu_d, OSKAR_GPU, &status);
-    lat_gpu_f = oskar_mem_create_copy(lat_cpu_f, OSKAR_GPU, &status);
-    lat_gpu_d = oskar_mem_create_copy(lat_cpu_d, OSKAR_GPU, &status);
+    lon_gpu_f = oskar_mem_create_copy(lon_cpu_f, device_loc, &status);
+    lon_gpu_d = oskar_mem_create_copy(lon_cpu_d, device_loc, &status);
+    lat_gpu_f = oskar_mem_create_copy(lat_cpu_f, device_loc, &status);
+    lat_gpu_d = oskar_mem_create_copy(lat_cpu_d, device_loc, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Set up beam patterns. */

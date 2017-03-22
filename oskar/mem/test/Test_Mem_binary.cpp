@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,9 @@ TEST(binary_file, binary_read_write_mem)
 {
     const char filename[] = "temp_test_mem_binary.dat";
     int num_cpu = 1000;
+#ifdef OSKAR_HAVE_CUDA
     int num_gpu = 2048;
+#endif
     int status = 0;
 
     // Create the handle.
@@ -71,6 +73,7 @@ TEST(binary_file, binary_read_write_mem)
         oskar_mem_free(mem, &status);
     }
 
+#ifdef OSKAR_HAVE_CUDA
     // Save data from GPU.
     {
         oskar_Mem *mem_cpu, *mem_gpu;
@@ -96,6 +99,7 @@ TEST(binary_file, binary_read_write_mem)
         oskar_mem_free(mem_cpu, &status);
         oskar_mem_free(mem_gpu, &status);
     }
+#endif
 
     // Save a single integer with a large index.
     int val = 0xFFFFFF;
@@ -164,6 +168,7 @@ TEST(binary_file, binary_read_write_mem)
     oskar_binary_free(h);
     h = oskar_binary_create(filename, 'r', &status);
 
+#ifdef OSKAR_HAVE_CUDA
     // Load data directly to GPU.
     {
         oskar_Mem *mem_gpu, *mem_cpu;
@@ -186,6 +191,7 @@ TEST(binary_file, binary_read_write_mem)
         oskar_mem_free(mem_cpu, &status);
         oskar_mem_free(mem_gpu, &status);
     }
+#endif
 
     // Load integer with a large index.
     int new_val = 0;

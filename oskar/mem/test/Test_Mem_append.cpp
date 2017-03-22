@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,6 +89,7 @@ TEST(Mem, append_cpu)
 }
 
 
+#ifdef OSKAR_HAVE_CUDA
 TEST(Mem, append_gpu)
 {
     int status = 0;
@@ -145,4 +146,5 @@ TEST(Mem, append_gpu)
     oskar_mem_free(mem_temp, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
+#endif
 
