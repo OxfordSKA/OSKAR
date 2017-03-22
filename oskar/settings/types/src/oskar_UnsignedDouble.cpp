@@ -102,12 +102,12 @@ std::string UnsignedDouble::get_value() const
 
 bool UnsignedDouble::is_default() const
 {
-    return (fabs(value_ - default_) < DBL_MIN);
+    return (fabs(value_ - default_) < DBL_EPSILON * value_);
 }
 
 bool UnsignedDouble::operator==(const UnsignedDouble& other) const
 {
-    return (fabs(value_ - other.value_) < DBL_MIN);
+    return (fabs(value_ - other.value_) < DBL_EPSILON * value_);
 }
 
 bool UnsignedDouble::operator>(const UnsignedDouble& other) const

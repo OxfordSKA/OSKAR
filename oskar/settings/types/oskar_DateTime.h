@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -83,8 +83,8 @@ public:
     };
 
  public:
-    DateTime();
-    virtual ~DateTime();
+    DateTime() {}
+    virtual ~DateTime() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
@@ -108,15 +108,17 @@ public:
     bool operator==(const DateTime& other) const;
     bool operator>(const DateTime& other) const;
 
+    static Value from_string(const std::string& s, bool& ok);
+    static std::string to_string(const Value& val);
+    static double to_mjd(const Value& val);
+    static void from_mjd(double mjd, Value& val);
+
  private:
-    void from_mjd_(double mjd, Value& dateTime) const;
-    Value string_to_date_time_(const std::string& s, bool& ok) const;
-    std::string date_time_to_string(const Value& dateTime) const;
-    bool parse_date_style_1_(const std::string& s, Value& dateTime) const;
-    bool parse_date_style_2_(const std::string& s, Value& dateTime) const;
-    bool parse_date_style_3_(const std::string& s, Value& dateTime) const;
-    bool parse_date_style_4_(const std::string& s, Value& dateTime) const;
-    bool parse_time_(const std::string& s, Value& dateTime) const;
+    static bool parse_date_style_1(const std::string& s, Value& val);
+    static bool parse_date_style_2(const std::string& s, Value& val);
+    static bool parse_date_style_3(const std::string& s, Value& val);
+    static bool parse_date_style_4(const std::string& s, Value& val);
+    static bool parse_time(const std::string& s, Value& val);
 
  private:
     Value value_;

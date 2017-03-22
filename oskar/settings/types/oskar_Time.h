@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -66,8 +66,8 @@ public:
         Time::Format format;
     };
 
-    Time();
-    virtual ~Time();
+    Time() {}
+    virtual ~Time() {}
 
     bool init(const std::string& param);
     bool set_default(const std::string& value);
@@ -83,9 +83,10 @@ public:
     bool operator==(const Time& other) const;
     bool operator>(const Time& other) const;
 
+    static bool from_string(const std::string& s, Value& value);
+    static std::string to_string(const Value& value);
+
 private:
-    bool from_string_(const std::string& s, Value& value) const;
-    std::string to_string_(const Value& value) const;
     Value default_, value_;
 };
 

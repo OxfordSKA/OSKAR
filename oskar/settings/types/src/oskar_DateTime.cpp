@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -39,50 +39,41 @@
 #include <cstdio>
 
 using namespace std;
+
 namespace oskar {
 
-DateTime::DateTime()
-{
-}
-
-DateTime::~DateTime()
-{
-}
-
-bool DateTime::init(const std::string& /*s*/)
+bool DateTime::init(const string& /*s*/)
 {
     value_.clear();
     default_.clear();
     return true;
 }
 
-
-bool DateTime::set_default(const std::string& s)
+bool DateTime::set_default(const string& s)
 {
     bool ok = true;
-    default_ = string_to_date_time_(s, ok);
-    if (ok) {
+    default_ = from_string(s, ok);
+    if (ok)
         value_ = default_;
-    }
     return ok;
 }
 
-std::string DateTime::get_default() const
+string DateTime::get_default() const
 {
-    return date_time_to_string(default_);
+    return to_string(default_);
 }
 
-bool DateTime::set_value(const std::string& s)
+bool DateTime::set_value(const string& s)
 {
 //    cout << "DateTime::set_value() " << s << endl;
     bool ok = true;
-    value_ = string_to_date_time_(s, ok);
+    value_ = from_string(s, ok);
     return ok;
 }
 
-std::string DateTime::get_value() const
+string DateTime::get_value() const
 {
-    return date_time_to_string(value_);
+    return to_string(value_);
 }
 
 bool DateTime::is_default() const
@@ -93,27 +84,30 @@ bool DateTime::is_default() const
     answer &= (value_.day == default_.day);
     answer &= (value_.hours == default_.hours);
     answer &= (value_.minutes == default_.minutes);
-    answer &= (fabs(value_.seconds - default_.seconds) < DBL_MIN);
+    answer &= (fabs(value_.seconds - default_.seconds) < 1e-6);
     return answer;
 }
 
 double DateTime::to_mjd() const
 {
+    return to_mjd(value_);
+}
+
+double DateTime::to_mjd(const Value& val)
+{
     // Compute Julian Day Number (Note: all integer division).
-    int a = (14 - value_.month) / 12;
-    int y = value_.year + 4800 - a;
-    int m = value_.month + 12 * a - 3;
-    int jdn = value_.day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
+    int a = (14 - val.month) / 12;
+    int y = val.year + 4800 - a;
+    int m = val.month + 12 * a - 3;
+    int jdn = val.day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
                             + (y / 400) - 32045;
 
     // Compute day fraction.
-    double hours = value_.hours + value_.minutes / 60.0 +
-                    value_.seconds / 3600.0;
+    double hours = val.hours + val.minutes / 60.0 + val.seconds / 3600.0;
     double day_fraction = hours / 24.0;
     day_fraction -= 0.5;
     return (jdn - 2400000.5) + day_fraction;
 }
-
 
 /**
  *  Convert a date to Julian Day.
@@ -162,11 +156,9 @@ double DateTime::to_mjd_2() const
     return mjd;
 }
 
-
-
 void DateTime::from_mjd(double mjd)
 {
-    from_mjd_(mjd, value_);
+    from_mjd(mjd, value_);
 }
 
 bool DateTime::operator==(const DateTime& other) const
@@ -177,7 +169,7 @@ bool DateTime::operator==(const DateTime& other) const
     answer &= (value_.day == other.value_.day);
     answer &= (value_.hours == other.value_.hours);
     answer &= (value_.minutes == other.value_.minutes);
-    answer &= (fabs(value_.seconds - other.value_.seconds) < DBL_MIN);
+    answer &= (fabs(value_.seconds - other.value_.seconds) < 1e-6);
     return answer;
 }
 
@@ -194,7 +186,7 @@ bool DateTime::operator>(const DateTime& other) const
  *  Algorithm from 'Practical Astronomy with your Calculator or Spreadsheet',
  *       4th ed., Duffet-Smith and Zwart, 2011.
  */
-void DateTime::from_mjd_(double mjd, Value& value) const
+void DateTime::from_mjd(double mjd, Value& val)
 {
     double iMJD;
     double F = modf(mjd, &iMJD);
@@ -228,19 +220,18 @@ void DateTime::from_mjd_(double mjd, Value& value) const
     double hours = trunc(fday * 24.);
     double minutes = trunc(((fday * 24.) - hours) * 60.);
     double seconds = ((fday * 24.0) - hours - (minutes / 60.)) * 3600.0;
-    value.year = static_cast<int>(year);
-    value.month = static_cast<int>(month);
-    value.day = iday;
-    value.hours = static_cast<int>(hours);
-    value.minutes = static_cast<int>(minutes);
-    value.seconds = seconds;
-    value.style = MJD;
+    val.year = static_cast<int>(year);
+    val.month = static_cast<int>(month);
+    val.day = iday;
+    val.hours = static_cast<int>(hours);
+    val.minutes = static_cast<int>(minutes);
+    val.seconds = seconds;
+    val.style = MJD;
 }
 
-DateTime::Value DateTime::string_to_date_time_(const std::string& s,
-                                               bool& ok) const
+DateTime::Value DateTime::from_string(const string& s, bool& ok)
 {
-    Value dateTime;
+    Value val;
     /*
      *  1. d-M-yyyy h:m:s[.z] - British style
      *  2. yyyy/M/d/h:m:s[.z] - CASA style
@@ -250,37 +241,37 @@ DateTime::Value DateTime::string_to_date_time_(const std::string& s,
      */
     double mjd = oskar_settings_utility_string_to_double(s, &ok);
     if (ok) {
-        from_mjd_(mjd, dateTime);
-        return dateTime;
+        from_mjd(mjd, val);
+        return val;
     }
     else {
         size_t p = s.find("-");
-        if (p != std::string::npos)
+        if (p != string::npos)
         {
             if (p <= 2) {
-                dateTime.style = BRITISH;
-                ok = parse_date_style_1_(s, dateTime);
+                val.style = BRITISH;
+                ok = parse_date_style_1(s, val);
             }
-            else if (s.find("T") != std::string::npos) {
-                dateTime.style = ISO;
-                ok = parse_date_style_4_(s, dateTime);
+            else if (s.find("T") != string::npos) {
+                val.style = ISO;
+                ok = parse_date_style_4(s, val);
             }
             else {
-                dateTime.style = INTERNATIONAL;
-                ok = parse_date_style_3_(s, dateTime);
+                val.style = INTERNATIONAL;
+                ok = parse_date_style_3(s, val);
             }
         }
-        else if (s.find("/") != std::string::npos) {
-            dateTime.style = CASA;
-            ok = parse_date_style_2_(s, dateTime);
+        else if (s.find("/") != string::npos) {
+            val.style = CASA;
+            ok = parse_date_style_2(s, val);
         }
-        return dateTime;
+        return val;
     }
 }
 
-std::string DateTime::date_time_to_string(const Value& dateTime) const
+string DateTime::to_string(const Value& val)
 {
-    std::ostringstream ss;
+    ostringstream ss;
     /*
      *  1. d-M-yyyy h:m:s[.z] - British style
      *  2. yyyy/M/d/h:m:s[.z] - CASA style
@@ -288,184 +279,182 @@ std::string DateTime::date_time_to_string(const Value& dateTime) const
      *  4. yyyy-M-dTh:m:s[.z] - ISO date style
      *  5. MJD
      */
-    switch (dateTime.style)
+    switch (val.style)
     {
         case BRITISH:
         {
-            ss << std::setfill('0') << std::setw(2) << dateTime.day << '-';
-            ss << std::setfill('0') << std::setw(2) << dateTime.month << '-';
-            ss << std::setfill('0') << std::setw(4) << dateTime.year << ' ';
-            ss << std::setfill('0') << std::setw(2) << dateTime.hours << ':';
-            ss << std::setfill('0') << std::setw(2) << dateTime.minutes << ':';
-            if (dateTime.seconds < 10.) ss << 0;
-            ss << oskar_settings_utility_double_to_string_2(dateTime.seconds, 'f', 12);
+            ss << setfill('0') << setw(2) << val.day << '-';
+            ss << setfill('0') << setw(2) << val.month << '-';
+            ss << setfill('0') << setw(4) << val.year << ' ';
+            ss << setfill('0') << setw(2) << val.hours << ':';
+            ss << setfill('0') << setw(2) << val.minutes << ':';
+            if (val.seconds < 10.) ss << 0;
+            ss << oskar_settings_utility_double_to_string_2(val.seconds, 'f', 12);
             break;
         }
         case CASA:
         {
-            ss << std::setfill('0') << std::setw(4) << dateTime.year << '/';
-            ss << std::setfill('0') << std::setw(2) << dateTime.month << '/';
-            ss << std::setfill('0') << std::setw(2) << dateTime.day << '/';
-            ss << std::setfill('0') << std::setw(2) << dateTime.hours << ':';
-            ss << std::setfill('0') << std::setw(2) << dateTime.minutes << ':';
-            if (dateTime.seconds < 10.) ss << 0;
-            ss << oskar_settings_utility_double_to_string_2(dateTime.seconds, 'f', 12);
+            ss << setfill('0') << setw(4) << val.year << '/';
+            ss << setfill('0') << setw(2) << val.month << '/';
+            ss << setfill('0') << setw(2) << val.day << '/';
+            ss << setfill('0') << setw(2) << val.hours << ':';
+            ss << setfill('0') << setw(2) << val.minutes << ':';
+            if (val.seconds < 10.) ss << 0;
+            ss << oskar_settings_utility_double_to_string_2(val.seconds, 'f', 12);
             break;
         }
         case INTERNATIONAL:
         {
-            ss << std::setfill('0') << std::setw(4) << dateTime.year << '-';
-            ss << std::setfill('0') << std::setw(2) << dateTime.month << '-';
-            ss << std::setfill('0') << std::setw(2) << dateTime.day << ' ';
-            ss << std::setfill('0') << std::setw(2) << dateTime.hours << ':';
-            ss << std::setfill('0') << std::setw(2) << dateTime.minutes << ':';
-            if (dateTime.seconds < 10.) ss << 0;
-            ss << oskar_settings_utility_double_to_string_2(dateTime.seconds, 'f', 12);
+            ss << setfill('0') << setw(4) << val.year << '-';
+            ss << setfill('0') << setw(2) << val.month << '-';
+            ss << setfill('0') << setw(2) << val.day << ' ';
+            ss << setfill('0') << setw(2) << val.hours << ':';
+            ss << setfill('0') << setw(2) << val.minutes << ':';
+            if (val.seconds < 10.) ss << 0;
+            ss << oskar_settings_utility_double_to_string_2(val.seconds, 'f', 12);
             break;
         }
         case ISO:
         {
-            ss << std::setfill('0') << std::setw(4) << dateTime.year << '-';
-            ss << std::setfill('0') << std::setw(2) << dateTime.month << '-';
-            ss << std::setfill('0') << std::setw(2) << dateTime.day << 'T';
-            ss << std::setfill('0') << std::setw(2) << dateTime.hours << ':';
-            ss << std::setfill('0') << std::setw(2) << dateTime.minutes << ':';
-            if (dateTime.seconds < 10.) ss << 0;
-            ss << oskar_settings_utility_double_to_string_2(dateTime.seconds, 'f', 12);
+            ss << setfill('0') << setw(4) << val.year << '-';
+            ss << setfill('0') << setw(2) << val.month << '-';
+            ss << setfill('0') << setw(2) << val.day << 'T';
+            ss << setfill('0') << setw(2) << val.hours << ':';
+            ss << setfill('0') << setw(2) << val.minutes << ':';
+            if (val.seconds < 10.) ss << 0;
+            ss << oskar_settings_utility_double_to_string_2(val.seconds, 'f', 12);
             break;
         }
         case MJD:
         {
-            double mjd = to_mjd();
+            double mjd = to_mjd(val);
             ss << oskar_settings_utility_double_to_string_2(mjd, 'g', 14);
             break;
         }
         default:
-            return std::string();
+            return string();
             break;
     }
     return ss.str();
 }
 
-bool DateTime::parse_date_style_1_(const std::string& s, Value& dateTime) const
+bool DateTime::parse_date_style_1(const string& s, Value& val)
 {
-//    std::cout << "FORMAT 1 = d-M-yyyy h:m:s[.z] : " << s << std::endl;
-    std::istringstream ss(s);
-    std::string token;
-    std::getline(ss, token, '-');
-    dateTime.day = oskar_settings_utility_string_to_int(token);
-    if (dateTime.day < 0 || dateTime.day >= 31) {
-        dateTime.day = 0;
+//    cout << "FORMAT 1 = d-M-yyyy h:m:s[.z] : " << s << endl;
+    istringstream ss(s);
+    string token;
+    getline(ss, token, '-');
+    val.day = oskar_settings_utility_string_to_int(token);
+    if (val.day < 1 || val.day > 31) {
+        val.day = 0;
         return false;
     }
-    std::getline(ss, token, '-');
-    dateTime.month = oskar_settings_utility_string_to_int(token);
-    if (dateTime.month < 0 || dateTime.month >= 12) {
-        dateTime.month = 0;
+    getline(ss, token, '-');
+    val.month = oskar_settings_utility_string_to_int(token);
+    if (val.month < 1 || val.month > 12) {
+        val.month = 0;
         return false;
     }
-    std::getline(ss, token, ' ');
-    dateTime.year = oskar_settings_utility_string_to_int(token);
-    std::getline(ss, token);
-    return parse_time_(token, dateTime);
+    getline(ss, token, ' ');
+    val.year = oskar_settings_utility_string_to_int(token);
+    getline(ss, token);
+    return parse_time(token, val);
 }
 
-bool DateTime::parse_date_style_2_(const std::string& s, Value& dateTime) const
+bool DateTime::parse_date_style_2(const string& s, Value& val)
 {
-    //std::cout << "FORMAT 2 = yyyy/M/d/h:m:s[.z] : " << s << std::endl;
-    std::istringstream ss(s);
-    std::string token;
-    std::getline(ss, token, '/');
-    dateTime.year = oskar_settings_utility_string_to_int(token);
-    std::getline(ss, token, '/');
-    dateTime.month = oskar_settings_utility_string_to_int(token);
-    if (dateTime.month < 0 || dateTime.month >= 12) {
-        dateTime.month = 0;
+    //cout << "FORMAT 2 = yyyy/M/d/h:m:s[.z] : " << s << endl;
+    istringstream ss(s);
+    string token;
+    getline(ss, token, '/');
+    val.year = oskar_settings_utility_string_to_int(token);
+    getline(ss, token, '/');
+    val.month = oskar_settings_utility_string_to_int(token);
+    if (val.month < 1 || val.month > 12) {
+        val.month = 0;
         return false;
     }
-    std::getline(ss, token, '/');
-    dateTime.day = oskar_settings_utility_string_to_int(token);
-    if (dateTime.day < 0 || dateTime.day >= 31) {
-        dateTime.day = 0;
+    getline(ss, token, '/');
+    val.day = oskar_settings_utility_string_to_int(token);
+    if (val.day < 1 || val.day > 31) {
+        val.day = 0;
         return false;
     }
-    std::getline(ss, token);
-    return parse_time_(token, dateTime);
+    getline(ss, token);
+    return parse_time(token, val);
 }
 
-bool DateTime::parse_date_style_3_(const std::string& s, Value& dateTime) const
+bool DateTime::parse_date_style_3(const string& s, Value& val)
 {
-//    std::cout << "FORMAT 3 = yyyy-M-d h:m:s[.z] : " << s << std::endl;
-    std::istringstream ss(s);
-    std::string token;
-    std::getline(ss, token, '-');
-    dateTime.year = oskar_settings_utility_string_to_int(token);
-    std::getline(ss, token, '-');
-    dateTime.month = oskar_settings_utility_string_to_int(token);
-    if (dateTime.month < 0 || dateTime.month >= 12) {
-        dateTime.month = 0;
+//    cout << "FORMAT 3 = yyyy-M-d h:m:s[.z] : " << s << endl;
+    istringstream ss(s);
+    string token;
+    getline(ss, token, '-');
+    val.year = oskar_settings_utility_string_to_int(token);
+    getline(ss, token, '-');
+    val.month = oskar_settings_utility_string_to_int(token);
+    if (val.month < 1 || val.month > 12) {
+        val.month = 0;
         return false;
     }
-    std::getline(ss, token, ' ');
-    dateTime.day = oskar_settings_utility_string_to_int(token);
-    if (dateTime.day < 0 || dateTime.day >= 31) {
-        dateTime.day = 0;
+    getline(ss, token, ' ');
+    val.day = oskar_settings_utility_string_to_int(token);
+    if (val.day < 1 || val.day > 31) {
+        val.day = 0;
         return false;
     }
-    std::getline(ss, token);
-    return parse_time_(token, dateTime);
+    getline(ss, token);
+    return parse_time(token, val);
 }
 
-bool DateTime::parse_date_style_4_(const std::string& s, Value& dateTime) const
+bool DateTime::parse_date_style_4(const string& s, Value& val)
 {
-//    std::cout << "FORMAT 4 = yyyy-M-dTh:m:s[.z] : " << s << std::endl;
-    std::istringstream ss(s);
-    std::string token;
-    std::getline(ss, token, '-');
-    dateTime.year = oskar_settings_utility_string_to_int(token);
-    std::getline(ss, token, '-');
-    dateTime.month = oskar_settings_utility_string_to_int(token);
-    if (dateTime.month < 0 || dateTime.month >= 12) {
-        dateTime.month = 0;
+//    cout << "FORMAT 4 = yyyy-M-dTh:m:s[.z] : " << s << endl;
+    istringstream ss(s);
+    string token;
+    getline(ss, token, '-');
+    val.year = oskar_settings_utility_string_to_int(token);
+    getline(ss, token, '-');
+    val.month = oskar_settings_utility_string_to_int(token);
+    if (val.month < 1 || val.month > 12) {
+        val.month = 0;
         return false;
     }
-    std::getline(ss, token, 'T');
-    dateTime.day = oskar_settings_utility_string_to_int(token);
-    if (dateTime.day < 0 || dateTime.day >= 31) {
-        dateTime.day = 0;
+    getline(ss, token, 'T');
+    val.day = oskar_settings_utility_string_to_int(token);
+    if (val.day < 1 || val.day > 31) {
+        val.day = 0;
         return false;
     }
-    std::getline(ss, token);
-    return parse_time_(token, dateTime);
+    getline(ss, token);
+    return parse_time(token, val);
 }
 
-bool DateTime::parse_time_(const std::string& s, Value& dateTime) const
+bool DateTime::parse_time(const string& s, Value& val)
 {
-    std::istringstream ss(s);
-    std::string token;
-    std::getline(ss, token, ':');
-    dateTime.hours = oskar_settings_utility_string_to_int(token);
-    if (dateTime.hours < 0 || dateTime.hours >= 23) {
-        dateTime.hours = 0;
+    istringstream ss(s);
+    string token;
+    getline(ss, token, ':');
+    val.hours = oskar_settings_utility_string_to_int(token);
+    if (val.hours < 0 || val.hours > 23) {
+        val.hours = 0;
         return false;
     }
-    std::getline(ss, token, ':');
-    dateTime.minutes = oskar_settings_utility_string_to_int(token);
-    if (dateTime.minutes < 0 || dateTime.minutes >= 59) {
-        dateTime.minutes = 0;
+    getline(ss, token, ':');
+    val.minutes = oskar_settings_utility_string_to_int(token);
+    if (val.minutes < 0 || val.minutes > 59) {
+        val.minutes = 0;
         return false;
     }
-    std::getline(ss, token);
+    getline(ss, token);
     bool ok = true;
-    dateTime.seconds = oskar_settings_utility_string_to_double(token, &ok);
+    val.seconds = oskar_settings_utility_string_to_double(token, &ok);
     if (!ok) return false;
-    if (dateTime.minutes < 0.0 || dateTime.minutes >= 60.0) {
-        dateTime.seconds = 0.0;
+    if (val.seconds < 0.0 || val.seconds >= 60.0) {
+        val.seconds = 0.0;
         return false;
     }
     return true;
 }
 
-
 } // namespace oskar
-
