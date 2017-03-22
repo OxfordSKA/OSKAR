@@ -121,7 +121,7 @@ std::string DoubleRange::get_value() const
 
 bool DoubleRange::is_default() const
 {
-    if (fabs(default_ - value_) < DBL_EPSILON * value_) return true;
+    if (fabs(default_ - value_) < DBL_EPSILON) return true;
     else return false;
 }
 
@@ -147,7 +147,7 @@ bool DoubleRange::from_string_(double& value, const std::string& s) const
 
 bool DoubleRange::operator==(const DoubleRange& other) const
 {
-    return (fabs(value_ - other.value_) < DBL_EPSILON * value_);
+    return (fabs(value_ - other.value_) < DBL_EPSILON);
 }
 
 bool DoubleRange::operator>(const DoubleRange& other) const

@@ -91,12 +91,12 @@ std::string Double::get_value() const
 
 bool Double::is_default() const
 {
-    return (fabs(value_ - default_) < DBL_EPSILON * value_);
+    return (fabs(value_ - default_) < DBL_EPSILON);
 }
 
 bool Double::operator==(const Double& other) const
 {
-    return (fabs(value_ - other.value_) < DBL_EPSILON * value_);
+    return (fabs(value_ - other.value_) < DBL_EPSILON);
 }
 
 bool Double::operator>(const Double& other) const
