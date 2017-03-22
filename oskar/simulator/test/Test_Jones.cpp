@@ -194,6 +194,123 @@ void t_join_in_place(int in_type1A, int in_type2A, int in_loc1A, int in_loc2A,
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
+static void test_ones(int precision, int location)
+{
+    oskar_Jones *jones, *temp = 0, *j_ptr;
+    int status = 0, num_stations, num_sources;
+
+    // Test scalar complex type.
+    jones = oskar_jones_create(precision | OSKAR_COMPLEX, location,
+            stations, sources, &status);
+    ASSERT_EQ(0, status);
+    oskar_jones_set_real_scalar(jones, 1.0, &status);
+    EXPECT_EQ(0, status);
+    j_ptr = jones;
+
+    // Copy back to CPU memory if required.
+    if (location != OSKAR_CPU)
+    {
+        temp = oskar_jones_create_copy(jones, OSKAR_CPU, &status);
+        ASSERT_EQ(0, status);
+        j_ptr = temp;
+    }
+
+    // Check data.
+    num_stations = oskar_jones_num_stations(j_ptr);
+    num_sources  = oskar_jones_num_sources(j_ptr);
+    if (precision == OSKAR_SINGLE)
+    {
+        float2* p = oskar_jones_float2(j_ptr, &status);
+        for (int st = 0; st < num_stations; ++st)
+        {
+            for (int src = 0, i = 0; src < num_sources; ++src, ++i)
+            {
+                EXPECT_FLOAT_EQ(p[i].x, 1.0f);
+                EXPECT_FLOAT_EQ(p[i].y, 0.0f);
+            }
+        }
+    }
+    else
+    {
+        double2* p = oskar_jones_double2(j_ptr, &status);
+        for (int st = 0; st < num_stations; ++st)
+        {
+            for (int src = 0, i = 0; src < num_sources; ++src, ++i)
+            {
+                EXPECT_DOUBLE_EQ(p[i].x, 1.0);
+                EXPECT_DOUBLE_EQ(p[i].y, 0.0);
+            }
+        }
+    }
+
+    // Free memory.
+    if (location != OSKAR_CPU)
+        oskar_jones_free(temp, &status);
+    oskar_jones_free(jones, &status);
+    ASSERT_EQ(0, status);
+
+    // Test matrix complex type.
+    jones = oskar_jones_create(precision | OSKAR_COMPLEX | OSKAR_MATRIX,
+            location, stations, sources, &status);
+    ASSERT_EQ(0, status);
+    oskar_jones_set_real_scalar(jones, 1.0, &status);
+    EXPECT_EQ(0, status);
+    j_ptr = jones;
+
+    // Copy back to CPU memory if required.
+    if (location != OSKAR_CPU)
+    {
+        temp = oskar_jones_create_copy(jones, OSKAR_CPU, &status);
+        ASSERT_EQ(0, status);
+        j_ptr = temp;
+    }
+
+    // Check data.
+    num_stations = oskar_jones_num_stations(j_ptr);
+    num_sources  = oskar_jones_num_sources(j_ptr);
+    if (precision == OSKAR_SINGLE)
+    {
+        float4c* p = oskar_jones_float4c(j_ptr, &status);
+        for (int st = 0; st < num_stations; ++st)
+        {
+            for (int src = 0, i = 0; src < num_sources; ++src, ++i)
+            {
+                EXPECT_FLOAT_EQ(p[i].a.x, 1.0f);
+                EXPECT_FLOAT_EQ(p[i].a.y, 0.0f);
+                EXPECT_FLOAT_EQ(p[i].b.x, 0.0f);
+                EXPECT_FLOAT_EQ(p[i].b.y, 0.0f);
+                EXPECT_FLOAT_EQ(p[i].c.x, 0.0f);
+                EXPECT_FLOAT_EQ(p[i].c.y, 0.0f);
+                EXPECT_FLOAT_EQ(p[i].d.x, 1.0f);
+                EXPECT_FLOAT_EQ(p[i].d.y, 0.0f);
+            }
+        }
+    }
+    else
+    {
+        double4c* p = oskar_jones_double4c(j_ptr, &status);
+        for (int st = 0; st < num_stations; ++st)
+        {
+            for (int src = 0, i = 0; src < num_sources; ++src, ++i)
+            {
+                EXPECT_DOUBLE_EQ(p[i].a.x, 1.0);
+                EXPECT_DOUBLE_EQ(p[i].a.y, 0.0);
+                EXPECT_DOUBLE_EQ(p[i].b.x, 0.0);
+                EXPECT_DOUBLE_EQ(p[i].b.y, 0.0);
+                EXPECT_DOUBLE_EQ(p[i].c.x, 0.0);
+                EXPECT_DOUBLE_EQ(p[i].c.y, 0.0);
+                EXPECT_DOUBLE_EQ(p[i].d.x, 1.0);
+                EXPECT_DOUBLE_EQ(p[i].d.y, 0.0);
+            }
+        }
+    }
+
+    // Free memory.
+    if (location != OSKAR_CPU)
+        oskar_jones_free(temp, &status);
+    oskar_jones_free(jones, &status);
+    ASSERT_EQ(0, status);
+}
 
 // CPU only. //////////////////////////////////////////////////////////////////
 
@@ -548,124 +665,6 @@ TEST(Jones, join_in_place_matx_matx_matx_doubleMix_doubleCPU)
 {
     t_join_in_place(TDCM, TDCM, LG, LC,
             TDCM, TDCM, LC, LC, 0, 0);
-}
-
-static void test_ones(int precision, int location)
-{
-    oskar_Jones *jones, *temp = 0, *j_ptr;
-    int status = 0, num_stations, num_sources;
-
-    // Test scalar complex type.
-    jones = oskar_jones_create(precision | OSKAR_COMPLEX, location,
-            stations, sources, &status);
-    ASSERT_EQ(0, status);
-    oskar_jones_set_real_scalar(jones, 1.0, &status);
-    EXPECT_EQ(0, status);
-    j_ptr = jones;
-
-    // Copy back to CPU memory if required.
-    if (location != OSKAR_CPU)
-    {
-        temp = oskar_jones_create_copy(jones, OSKAR_CPU, &status);
-        ASSERT_EQ(0, status);
-        j_ptr = temp;
-    }
-
-    // Check data.
-    num_stations = oskar_jones_num_stations(j_ptr);
-    num_sources  = oskar_jones_num_sources(j_ptr);
-    if (precision == OSKAR_SINGLE)
-    {
-        float2* p = oskar_jones_float2(j_ptr, &status);
-        for (int st = 0; st < num_stations; ++st)
-        {
-            for (int src = 0, i = 0; src < num_sources; ++src, ++i)
-            {
-                EXPECT_FLOAT_EQ(p[i].x, 1.0f);
-                EXPECT_FLOAT_EQ(p[i].y, 0.0f);
-            }
-        }
-    }
-    else
-    {
-        double2* p = oskar_jones_double2(j_ptr, &status);
-        for (int st = 0; st < num_stations; ++st)
-        {
-            for (int src = 0, i = 0; src < num_sources; ++src, ++i)
-            {
-                EXPECT_DOUBLE_EQ(p[i].x, 1.0);
-                EXPECT_DOUBLE_EQ(p[i].y, 0.0);
-            }
-        }
-    }
-
-    // Free memory.
-    if (location != OSKAR_CPU)
-        oskar_jones_free(temp, &status);
-    oskar_jones_free(jones, &status);
-    ASSERT_EQ(0, status);
-
-    // Test matrix complex type.
-    jones = oskar_jones_create(precision | OSKAR_COMPLEX | OSKAR_MATRIX,
-            location, stations, sources, &status);
-    ASSERT_EQ(0, status);
-    oskar_jones_set_real_scalar(jones, 1.0, &status);
-    EXPECT_EQ(0, status);
-    j_ptr = jones;
-
-    // Copy back to CPU memory if required.
-    if (location != OSKAR_CPU)
-    {
-        temp = oskar_jones_create_copy(jones, OSKAR_CPU, &status);
-        ASSERT_EQ(0, status);
-        j_ptr = temp;
-    }
-
-    // Check data.
-    num_stations = oskar_jones_num_stations(j_ptr);
-    num_sources  = oskar_jones_num_sources(j_ptr);
-    if (precision == OSKAR_SINGLE)
-    {
-        float4c* p = oskar_jones_float4c(j_ptr, &status);
-        for (int st = 0; st < num_stations; ++st)
-        {
-            for (int src = 0, i = 0; src < num_sources; ++src, ++i)
-            {
-                EXPECT_FLOAT_EQ(p[i].a.x, 1.0f);
-                EXPECT_FLOAT_EQ(p[i].a.y, 0.0f);
-                EXPECT_FLOAT_EQ(p[i].b.x, 0.0f);
-                EXPECT_FLOAT_EQ(p[i].b.y, 0.0f);
-                EXPECT_FLOAT_EQ(p[i].c.x, 0.0f);
-                EXPECT_FLOAT_EQ(p[i].c.y, 0.0f);
-                EXPECT_FLOAT_EQ(p[i].d.x, 1.0f);
-                EXPECT_FLOAT_EQ(p[i].d.y, 0.0f);
-            }
-        }
-    }
-    else
-    {
-        double4c* p = oskar_jones_double4c(j_ptr, &status);
-        for (int st = 0; st < num_stations; ++st)
-        {
-            for (int src = 0, i = 0; src < num_sources; ++src, ++i)
-            {
-                EXPECT_DOUBLE_EQ(p[i].a.x, 1.0);
-                EXPECT_DOUBLE_EQ(p[i].a.y, 0.0);
-                EXPECT_DOUBLE_EQ(p[i].b.x, 0.0);
-                EXPECT_DOUBLE_EQ(p[i].b.y, 0.0);
-                EXPECT_DOUBLE_EQ(p[i].c.x, 0.0);
-                EXPECT_DOUBLE_EQ(p[i].c.y, 0.0);
-                EXPECT_DOUBLE_EQ(p[i].d.x, 1.0);
-                EXPECT_DOUBLE_EQ(p[i].d.y, 0.0);
-            }
-        }
-    }
-
-    // Free memory.
-    if (location != OSKAR_CPU)
-        oskar_jones_free(temp, &status);
-    oskar_jones_free(jones, &status);
-    ASSERT_EQ(0, status);
 }
 
 TEST(Jones, set_ones_singleGPU)
