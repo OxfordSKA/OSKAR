@@ -32,6 +32,7 @@
 #include "convert/oskar_convert_fov_to_cellsize.h"
 #include "convert/oskar_convert_lon_lat_to_relative_directions.h"
 #include "imager/oskar_imager.h"
+#include "imager/private_imager_composite_nearest_even.h"
 #include "imager/private_imager_free_gpu_data.h"
 #include "imager/private_imager_set_num_planes.h"
 #include "math/oskar_cmath.h"
@@ -171,16 +172,34 @@ const char* oskar_imager_output_root(const oskar_Imager* h)
 }
 
 
-int oskar_imager_plane_size(const oskar_Imager* h)
+int oskar_imager_plane_size(oskar_Imager* h)
 {
+    if (h->grid_size == 0)
+    {
+        if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
+        {
+            (void) oskar_imager_composite_nearest_even(h->image_padding *
+                    ((double)(h->image_size)) - 0.5, 0, &h->grid_size);
+        }
+        else
+        {
+            h->grid_size = h->image_size;
+        }
+    }
     return h->grid_size;
 }
 
 
 int oskar_imager_plane_type(const oskar_Imager* h)
 {
-    if (h->num_planes <= 0 || !h->planes) return 0;
-    return oskar_mem_type(h->planes[0]);
+    switch (h->algorithm)
+    {
+    case OSKAR_ALGORITHM_DFT_2D:
+    case OSKAR_ALGORITHM_DFT_3D:
+        return h->imager_prec;
+    default:
+        return h->imager_prec | OSKAR_COMPLEX;
+    }
 }
 
 
@@ -200,6 +219,7 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
         int* status)
 {
     if (*status) return;
+    h->image_padding = 1.0;
     if (!strncmp(type, "FFT", 3) || !strncmp(type, "fft", 3))
     {
         h->algorithm = OSKAR_ALGORITHM_FFT;
@@ -211,12 +231,17 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
     {
         h->algorithm = OSKAR_ALGORITHM_WPROJ;
         h->oversample = 4;
+        h->image_padding = 1.2;
     }
     else if (!strncmp(type, "DFT 2", 5) || !strncmp(type, "dft 2", 5))
         h->algorithm = OSKAR_ALGORITHM_DFT_2D;
     else if (!strncmp(type, "DFT 3", 5) || !strncmp(type, "dft 3", 5))
         h->algorithm = OSKAR_ALGORITHM_DFT_3D;
     else *status = OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Recalculate grid plane size. */
+    h->grid_size = 0;
+    (void) oskar_imager_plane_size(h);
 }
 
 
@@ -508,7 +533,8 @@ void oskar_imager_set_size(oskar_Imager* h, int size, int* status)
         return;
     }
     h->image_size = size;
-    h->grid_size = size;
+    h->grid_size = 0;
+    (void) oskar_imager_plane_size(h);
     if (h->set_fov)
         h->cellsize_rad = oskar_convert_fov_to_cellsize(
                 h->fov_deg * (M_PI / 180.0), h->image_size);

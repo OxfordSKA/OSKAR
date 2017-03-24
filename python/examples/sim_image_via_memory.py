@@ -54,7 +54,7 @@ if __name__ == '__main__':
     # Simulate and image visibilities.
     start = time.time()
     print('Simulating and imaging...')
-    imager_data = simulator.run(return_images=True, return_grids=True)
+    imager_data = simulator.run(return_images=1, return_grids=1)
     print('Completed after %.3f seconds.' % (time.time() - start))
 
     # Save FITS files (via Python using astropy, not directly from the imager).

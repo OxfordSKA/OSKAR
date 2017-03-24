@@ -31,6 +31,9 @@
 #endif
 
 #include "imager/private_imager.h"
+#include "imager/oskar_imager.h"
+
+#include "imager/private_imager_composite_nearest_even.h"
 #include "imager/private_imager_generate_w_phase_screen.h"
 #include "imager/private_imager_free_wproj.h"
 #include "imager/private_imager_init_wproj.h"
@@ -52,8 +55,6 @@ extern "C" {
 
 /*#define SAVE_KERNELS 1*/
 
-static int oskar_composite_nearest_even(int value, int* smaller, int *larger);
-
 /*
  * W-kernel generation is based on CASA implementation
  * in code/synthesis/TransformMachines/WPConvFunc.cc
@@ -61,11 +62,10 @@ static int oskar_composite_nearest_even(int value, int* smaller, int *larger);
 void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 {
     size_t max_mem_bytes, max_bytes_per_plane, element_size, copy_len;
-    int i, iw, ix, iy, *supp, new_conv_size, oversample;
+    int i, iw, ix, iy, *supp, grid_size, new_conv_size, oversample;
     int conv_size, conv_size_half, inner, nearest;
     double l_max, max_conv_size, max_uvw, max_val, sampling, sum, ww_mid;
     double *maxes;
-    double image_padding = 1.2;
 #ifdef OSKAR_HAVE_CUDA
     cufftHandle cufft_plan = 0;
 #endif
@@ -107,8 +107,9 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     max_bytes_per_plane = 64 * 1024 * 1024; /* 64 MB per plane */
     max_mem_bytes = MIN(max_mem_bytes, max_bytes_per_plane * h->num_w_planes);
     max_conv_size = sqrt(max_mem_bytes / (16.0 * h->num_w_planes));
-    nearest = oskar_composite_nearest_even(2 * (int)(max_conv_size / 2.0), 0, 0);
-    conv_size = MIN((int)(h->image_size * image_padding), nearest);
+    nearest = oskar_imager_composite_nearest_even(
+            2 * (int)(max_conv_size / 2.0), 0, 0);
+    conv_size = MIN((int)(h->image_size * h->image_padding), nearest);
     conv_size_half = conv_size / 2 - 1;
     h->conv_size_half = conv_size_half;
 
@@ -125,11 +126,9 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     /* Get size of inner region of kernel and padded grid size. */
     inner = conv_size / oversample;
     l_max = sin(0.5 * h->fov_deg * M_PI/180.0);
-    sampling = (2.0 * l_max) / h->image_size;
-    sampling *= oversample;
-    (void) oskar_composite_nearest_even(image_padding *
-            ((double)(h->image_size)) - 0.5, 0, &h->grid_size);
-    sampling *= ((double) h->grid_size) / ((double) conv_size);
+    sampling = (2.0 * l_max * oversample) / h->image_size;
+    grid_size = oskar_imager_plane_size(h);
+    sampling *= ((double) grid_size) / ((double) conv_size);
 
     /* Create scratch arrays and FFT plan for the phase screens. */
     screen = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
@@ -394,8 +393,8 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 
     /* Generate grid correction function. */
     h->corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
-            h->grid_size, status);
-    oskar_grid_correction_function_spheroidal(h->grid_size, oversample,
+            grid_size, status);
+    oskar_grid_correction_function_spheroidal(grid_size, oversample,
             oskar_mem_double(h->corr_func, status));
 
     /* Set up the FFT. */
@@ -404,9 +403,9 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 #ifdef OSKAR_HAVE_CUDA
         /* Generate FFT plan. */
         if (h->imager_prec == OSKAR_DOUBLE)
-            cufftPlan2d(&h->cufft_plan, h->grid_size, h->grid_size, CUFFT_Z2Z);
+            cufftPlan2d(&h->cufft_plan, grid_size, grid_size, CUFFT_Z2Z);
         else
-            cufftPlan2d(&h->cufft_plan, h->grid_size, h->grid_size, CUFFT_C2C);
+            cufftPlan2d(&h->cufft_plan, grid_size, grid_size, CUFFT_C2C);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -414,73 +413,20 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     else
     {
         /* Initialise workspaces for CPU FFT algorithm. */
-        int len_save = 4 * h->grid_size +
-                2 * (int)(log((double)h->grid_size) / log(2.0)) + 8;
+        int len_save = 4 * grid_size +
+                2 * (int)(log((double)grid_size) / log(2.0)) + 8;
         h->fftpack_wsave = oskar_mem_create(h->imager_prec, OSKAR_CPU,
                 len_save, status);
         h->fftpack_work = oskar_mem_create(h->imager_prec, OSKAR_CPU,
-                2 * h->grid_size * h->grid_size, status);
+                2 * grid_size * grid_size, status);
         if (h->imager_prec == OSKAR_DOUBLE)
-            oskar_fftpack_cfft2i(h->grid_size, h->grid_size,
+            oskar_fftpack_cfft2i(grid_size, grid_size,
                     oskar_mem_double(h->fftpack_wsave, status));
         else
-            oskar_fftpack_cfft2i_f(h->grid_size, h->grid_size,
+            oskar_fftpack_cfft2i_f(grid_size, grid_size,
                     oskar_mem_float(h->fftpack_wsave, status));
     }
 }
-
-
-static int cmpfunc(const void* a, const void* b)
-{
-    return (*(const int*)a - *(const int*)b);
-}
-
-
-static int oskar_composite_nearest_even(int value, int* smaller, int *larger)
-{
-    double x;
-    int i = 0, i2, i3, i5, n2, n3, n5, nt, *values, up, down;
-    x = (double) value;
-    n2 = 1 + (int) (log(x) / log(2.0) + 1.0);
-    n3 = 1 + (int) (log(x) / log(3.0) + 1.0);
-    n5 = 1 + (int) (log(x) / log(5.0) + 1.0);
-    nt = n2 * n3 * n5;
-    values = (int*) malloc(nt * sizeof(int));
-    for (i2 = 0; i2 < n2; ++i2)
-    {
-        for (i3 = 0; i3 < n3; ++i3)
-        {
-            for (i5 = 0; i5 < n5; ++i5, ++i)
-            {
-                values[i] = (int) round(
-                        pow(2.0, (double) i2) *
-                        pow(3.0, (double) i3) *
-                        pow(5.0, (double) i5));
-            }
-        }
-    }
-    qsort(values, nt, sizeof(int), cmpfunc);
-
-    /* Get next larger even. */
-    for (i = 0; i < nt; ++i)
-    {
-        up = values[i];
-        if ((up > value) && (up % 2 == 0)) break;
-    }
-
-    /* Get next smaller even. */
-    for (i = nt - 1; i >= 0; --i)
-    {
-        down = values[i];
-        if ((down < value) && (down % 2 == 0)) break;
-    }
-
-    free(values);
-    if (smaller) *smaller = down;
-    if (larger) *larger = up;
-    return (abs(up - value) < abs(down - value) ? up : down);
-}
-
 
 #ifdef __cplusplus
 }

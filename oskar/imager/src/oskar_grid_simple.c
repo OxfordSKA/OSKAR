@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,8 @@ void oskar_grid_simple_d(const int support, const int oversample,
         int* restrict num_skipped, double* restrict norm,
         double* restrict grid)
 {
-    int i, j, k, p, grid_x, grid_y, off_x, off_y;
+    size_t p;
+    int i, j, k, grid_x, grid_y, off_x, off_y;
     const int g_centre = grid_size / 2;
     const double scale = grid_size * cell_size_rad;
 
@@ -93,8 +94,8 @@ void oskar_grid_simple_d(const int support, const int oversample,
 
         /* Convolve this point. */
         w = weight[i];
-        val[0] = vis[2 * i + 0] * w;
-        val[1] = vis[2 * i + 1] * w;
+        val[0] = w * vis[2 * i];
+        val[1] = w * vis[2 * i + 1];
         sum = 0.0;
         for (j = -support; j <= support; ++j)
         {
@@ -105,7 +106,7 @@ void oskar_grid_simple_d(const int support, const int oversample,
                 cxy = cx * cy;
                 sum += cxy;
                 p = 2 * (((grid_y + j) * grid_size) + grid_x + k);
-                grid[p + 0] += val[0] * cxy;
+                grid[p]     += val[0] * cxy;
                 grid[p + 1] += val[1] * cxy;
             }
         }
@@ -122,7 +123,8 @@ void oskar_grid_simple_f(const int support, const int oversample,
         int* restrict num_skipped, double* restrict norm,
         float* restrict grid)
 {
-    int i, j, k, p, grid_x, grid_y, off_x, off_y;
+    size_t p;
+    int i, j, k, grid_x, grid_y, off_x, off_y;
     const int g_centre = grid_size / 2;
     const double scale = grid_size * cell_size_rad;
 
@@ -160,8 +162,8 @@ void oskar_grid_simple_f(const int support, const int oversample,
 
         /* Convolve this point. */
         w = weight[i];
-        val[0] = vis[2 * i + 0] * w;
-        val[1] = vis[2 * i + 1] * w;
+        val[0] = w * vis[2 * i];
+        val[1] = w * vis[2 * i + 1];
         sum = 0.0;
         for (j = -support; j <= support; ++j)
         {
@@ -172,7 +174,7 @@ void oskar_grid_simple_f(const int support, const int oversample,
                 cxy = cx * cy;
                 sum += cxy;
                 p = 2 * (((grid_y + j) * grid_size) + grid_x + k);
-                grid[p + 0] += val[0] * cxy;
+                grid[p]     += val[0] * cxy;
                 grid[p + 1] += val[1] * cxy;
             }
         }
@@ -188,7 +190,8 @@ void oskar_grid_simple_3_100_d(const double* restrict conv_func,
         int* restrict num_skipped, double* restrict norm,
         double* restrict grid)
 {
-    int i, j, k, p, grid_x, grid_y, off_x, off_y;
+    size_t p;
+    int i, j, k, grid_x, grid_y, off_x, off_y;
     const int g_centre = grid_size / 2;
     const double scale = grid_size * cell_size_rad;
 
@@ -218,8 +221,8 @@ void oskar_grid_simple_3_100_d(const double* restrict conv_func,
 
         /* Convolve this point. */
         w = weight[i];
-        val[0] = vis[2 * i + 0] * w;
-        val[1] = vis[2 * i + 1] * w;
+        val[0] = w * vis[2 * i];
+        val[1] = w * vis[2 * i + 1];
         sum = 0.0;
         for (j = -3; j <= 3; ++j)
         {
@@ -230,7 +233,7 @@ void oskar_grid_simple_3_100_d(const double* restrict conv_func,
                 cxy = cx * cy;
                 sum += cxy;
                 p = 2 * (((grid_y + j) * grid_size) + grid_x + k);
-                grid[p + 0] += val[0] * cxy;
+                grid[p]     += val[0] * cxy;
                 grid[p + 1] += val[1] * cxy;
             }
         }
@@ -246,7 +249,8 @@ void oskar_grid_simple_3_100_f(const double* restrict conv_func,
         int* restrict num_skipped, double* restrict norm,
         float* restrict grid)
 {
-    int i, j, k, p, grid_x, grid_y, off_x, off_y;
+    size_t p;
+    int i, j, k, grid_x, grid_y, off_x, off_y;
     const int g_centre = grid_size / 2;
     const double scale = grid_size * cell_size_rad;
 
@@ -276,8 +280,8 @@ void oskar_grid_simple_3_100_f(const double* restrict conv_func,
 
         /* Convolve this point. */
         w = weight[i];
-        val[0] = vis[2 * i + 0] * w;
-        val[1] = vis[2 * i + 1] * w;
+        val[0] = w * vis[2 * i];
+        val[1] = w * vis[2 * i + 1];
         sum = 0.0;
         for (j = -3; j <= 3; ++j)
         {
@@ -288,7 +292,7 @@ void oskar_grid_simple_3_100_f(const double* restrict conv_func,
                 cxy = cx * cy;
                 sum += cxy;
                 p = 2 * (((grid_y + j) * grid_size) + grid_x + k);
-                grid[p + 0] += val[0] * cxy;
+                grid[p]     += val[0] * cxy;
                 grid[p + 1] += val[1] * cxy;
             }
         }

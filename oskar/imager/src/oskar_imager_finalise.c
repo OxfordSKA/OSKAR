@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,8 @@ void oskar_imager_finalise(oskar_Imager* h,
         int num_output_images, oskar_Mem** output_images,
         int num_output_grids, oskar_Mem** output_grids, int* status)
 {
-    int t, c, p, i;
+    size_t n;
+    int t, c, p, i, plane_size;
     if (*status || !h->planes) return;
 
     /* Adjust normalisation if required. */
@@ -68,6 +69,9 @@ void oskar_imager_finalise(oskar_Imager* h,
     /* Copy grids to output grid planes if given. */
     for (i = 0; (i < h->num_planes) && (i < num_output_grids); ++i)
     {
+        if (!(output_grids[i]))
+            output_grids[i] = oskar_mem_create(oskar_mem_type(h->planes[i]),
+                    OSKAR_CPU, 0, status);
         oskar_mem_copy(output_grids[i], h->planes[i], status);
         oskar_mem_scale_real(output_grids[i], 1.0 / h->plane_norm[i], status);
     }
@@ -75,21 +79,29 @@ void oskar_imager_finalise(oskar_Imager* h,
     /* Check if images are required. */
     if (h->fits_file[0] || output_images)
     {
+        n = h->image_size * h->image_size;
+        plane_size = oskar_imager_plane_size(h);
+
         /* Finalise all the planes. */
         for (i = 0; i < h->num_planes; ++i)
         {
             oskar_imager_finalise_plane(h,
                     h->planes[i], h->plane_norm[i], status);
             oskar_imager_trim_image(h->planes[i],
-                    h->grid_size, h->image_size, status);
+                    plane_size, h->image_size, status);
         }
 
         /* Copy images to output image planes if given. */
         for (i = 0; (i < h->num_planes) && (i < num_output_images); ++i)
         {
+            if (!(output_images[i]))
+                output_images[i] = oskar_mem_create(h->imager_prec,
+                        OSKAR_CPU, n, status);
+            if (oskar_mem_length(output_images[i]) < n)
+                oskar_mem_realloc(output_images[i], n, status);
             memcpy(oskar_mem_void(output_images[i]),
-                    oskar_mem_void_const(h->planes[i]), h->image_size *
-                    h->image_size * oskar_mem_element_size(h->imager_prec));
+                    oskar_mem_void_const(h->planes[i]),
+                    n * oskar_mem_element_size(h->imager_prec));
         }
 
         /* Write to files if required. */
@@ -107,8 +119,8 @@ void oskar_imager_finalise(oskar_Imager* h,
 void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
         double plane_norm, int* status)
 {
-    int size, num_cells;
-    DeviceData* d;
+    int size;
+    size_t num_cells;
     if (*status) return;
 
     /* Apply normalisation. */
@@ -126,15 +138,16 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
     }
 
     /* Make image using FFT and apply grid correction. */
-    size = h->grid_size;
+    size = oskar_imager_plane_size(h);
     num_cells = size * size;
-    d = &h->d[0];
     if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
     {
         oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
         if (h->fft_on_gpu)
         {
 #ifdef OSKAR_HAVE_CUDA
+            DeviceData* d;
+            d = &h->d[0];
             oskar_device_set(h->cuda_device_ids[0], status);
             oskar_mem_copy(d->plane_gpu, plane, status);
             cufftExecZ2Z(h->cufft_plan, oskar_mem_void(d->plane_gpu),
@@ -162,6 +175,8 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
         if (h->fft_on_gpu)
         {
 #ifdef OSKAR_HAVE_CUDA
+            DeviceData* d;
+            d = &h->d[0];
             oskar_device_set(h->cuda_device_ids[0], status);
             oskar_mem_copy(d->plane_gpu, plane, status);
             cufftExecC2C(h->cufft_plan, oskar_mem_void(d->plane_gpu),
@@ -189,7 +204,8 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
 void oskar_imager_trim_image(oskar_Mem* plane,
         int plane_size, int image_size, int* status)
 {
-    int i, num_cells, size_diff;
+    size_t i, num_cells;
+    int size_diff;
     if (*status) return;
 
     /* Get the real part only, if the plane is complex. */

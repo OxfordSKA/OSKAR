@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,8 @@
 #endif
 
 #include "imager/private_imager.h"
+#include "imager/oskar_imager.h"
+
 #include "imager/private_imager_init_fft.h"
 #include "imager/private_imager_free_fft.h"
 
@@ -46,26 +48,27 @@ extern "C" {
 
 void oskar_imager_init_fft(oskar_Imager* h, int* status)
 {
+    int grid_size;
     oskar_imager_free_fft(h, status);
     if (*status) return;
 
     /* Generate the convolution function. */
+    grid_size = oskar_imager_plane_size(h);
     h->conv_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             h->oversample * (h->support + 1), status);
-    h->corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
-            h->grid_size, status);
+    h->corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, grid_size, status);
     if (h->kernel_type == 'S')
     {
         oskar_grid_convolution_function_spheroidal(h->support, h->oversample,
                 oskar_mem_double(h->conv_func, status));
-        oskar_grid_correction_function_spheroidal(h->grid_size, 0,
+        oskar_grid_correction_function_spheroidal(grid_size, 0,
                 oskar_mem_double(h->corr_func, status));
     }
     else if (h->kernel_type == 'P')
     {
         oskar_grid_convolution_function_pillbox(h->support, h->oversample,
                 oskar_mem_double(h->conv_func, status));
-        oskar_grid_correction_function_pillbox(h->grid_size,
+        oskar_grid_correction_function_pillbox(grid_size,
                 oskar_mem_double(h->corr_func, status));
     }
 
@@ -75,9 +78,9 @@ void oskar_imager_init_fft(oskar_Imager* h, int* status)
 #ifdef OSKAR_HAVE_CUDA
         /* Generate FFT plan. */
         if (h->imager_prec == OSKAR_DOUBLE)
-            cufftPlan2d(&h->cufft_plan, h->grid_size, h->grid_size, CUFFT_Z2Z);
+            cufftPlan2d(&h->cufft_plan, grid_size, grid_size, CUFFT_Z2Z);
         else
-            cufftPlan2d(&h->cufft_plan, h->grid_size, h->grid_size, CUFFT_C2C);
+            cufftPlan2d(&h->cufft_plan, grid_size, grid_size, CUFFT_C2C);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -85,17 +88,17 @@ void oskar_imager_init_fft(oskar_Imager* h, int* status)
     else
     {
         /* Initialise workspaces for CPU FFT algorithm. */
-        int len_save = 4 * h->grid_size +
-                2 * (int)(log((double)h->grid_size) / log(2.0)) + 8;
+        int len_save = 4 * grid_size +
+                2 * (int)(log((double)grid_size) / log(2.0)) + 8;
         h->fftpack_wsave = oskar_mem_create(h->imager_prec, OSKAR_CPU,
                 len_save, status);
         h->fftpack_work = oskar_mem_create(h->imager_prec, OSKAR_CPU,
-                2 * h->grid_size * h->grid_size, status);
+                2 * grid_size * grid_size, status);
         if (h->imager_prec == OSKAR_DOUBLE)
-            oskar_fftpack_cfft2i(h->grid_size, h->grid_size,
+            oskar_fftpack_cfft2i(grid_size, grid_size,
                     oskar_mem_double(h->fftpack_wsave, status));
         else
-            oskar_fftpack_cfft2i_f(h->grid_size, h->grid_size,
+            oskar_fftpack_cfft2i_f(grid_size, grid_size,
                     oskar_mem_float(h->fftpack_wsave, status));
     }
 }

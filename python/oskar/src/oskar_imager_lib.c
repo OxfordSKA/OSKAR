@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, The University of Oxford
+ * Copyright (c) 2014-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -214,15 +214,14 @@ static PyObject* create(PyObject* self, PyObject* args)
 
 
 static oskar_Mem** create_cube(oskar_Imager* h, int plane_size, int plane_type,
-        PyObject* dict, const char* key, int* num_images, int* status)
+        PyObject* dict, const char* key, int num_planes, int* status)
 {
     oskar_Mem *alias_tmp, **cube_c;
     PyArrayObject *cube;
-    int i, num_planes, plane_elem;
+    int i, plane_elem;
     npy_intp dims[3];
 
     /* Create a Python array to hold the images. */
-    num_planes = oskar_imager_num_image_planes(h);
     plane_elem = plane_size * plane_size;
     dims[0]    = num_planes;
     dims[1]    = plane_size;
@@ -235,7 +234,6 @@ static oskar_Mem** create_cube(oskar_Imager* h, int plane_size, int plane_type,
     PyDict_SetItemString(dict, key, (PyObject*)cube);
 
     /* Create the array of pointers to each plane for the imager. */
-    *num_images = num_planes;
     alias_tmp = oskar_mem_create_alias_from_raw(PyArray_DATA(cube),
             plane_type, OSKAR_CPU, PyArray_SIZE(cube), status);
     cube_c = calloc(num_planes, sizeof(oskar_Mem*));
@@ -262,8 +260,7 @@ static PyObject* finalise(PyObject* self, PyObject* args)
     oskar_Imager* h = 0;
     PyObject *capsule = 0, *dict = 0;
     oskar_Mem **grids_c = 0, **images_c = 0;
-    int i = 0, num_output_images = 0, num_output_grids = 0, num_planes = 0;
-    int return_images = 0, return_grids = 0, status = 0;
+    int i = 0, return_images = 0, return_grids = 0, status = 0;
     if (!PyArg_ParseTuple(args, "Oii",
             &capsule, &return_images, &return_grids))
         return 0;
@@ -271,43 +268,42 @@ static PyObject* finalise(PyObject* self, PyObject* args)
 
     /* Create a dictionary to return any outputs. */
     dict = PyDict_New();
-    num_planes = oskar_imager_num_image_planes(h);
 
     /* Check if we need to return images. */
-    if (return_images && num_planes > 0)
+    if (return_images > 0)
     {
         images_c = create_cube(h, oskar_imager_image_size(h),
-                oskar_imager_precision(h), dict, "images", &num_output_images,
+                oskar_imager_precision(h), dict, "images", return_images,
                 &status);
         if (!images_c) goto fail;
     }
 
     /* Check if we need to return grids. */
-    if (return_grids && num_planes > 0)
+    if (return_grids > 0)
     {
         grids_c = create_cube(h, oskar_imager_plane_size(h),
-                oskar_imager_plane_type(h), dict, "grids", &num_output_grids,
+                oskar_imager_plane_type(h), dict, "grids", return_grids,
                 &status);
         if (!grids_c) goto fail;
     }
 
     /* Finalise. */
     Py_BEGIN_ALLOW_THREADS
-    oskar_imager_finalise(h, num_output_images, images_c,
-            num_output_grids, grids_c, &status);
+    oskar_imager_finalise(h, return_images, images_c,
+            return_grids, grids_c, &status);
     Py_END_ALLOW_THREADS
 
     /* Free handles. */
     if (grids_c)
     {
-        for (i = 0; i < num_planes; ++i)
+        for (i = 0; i < return_grids; ++i)
             oskar_mem_free(grids_c[i], &status);
         free(grids_c);
         grids_c = 0;
     }
     if (images_c)
     {
-        for (i = 0; i < num_planes; ++i)
+        for (i = 0; i < return_images; ++i)
             oskar_mem_free(images_c[i], &status);
         free(images_c);
         images_c = 0;
@@ -327,14 +323,14 @@ fail:
     Py_XDECREF(dict);
     if (grids_c)
     {
-        for (i = 0; i < num_planes; ++i)
+        for (i = 0; i < return_grids; ++i)
             oskar_mem_free(grids_c[i], &status);
         free(grids_c);
         grids_c = 0;
     }
     if (images_c)
     {
-        for (i = 0; i < num_planes; ++i)
+        for (i = 0; i < return_images; ++i)
             oskar_mem_free(images_c[i], &status);
         free(images_c);
         images_c = 0;
@@ -535,8 +531,7 @@ static PyObject* run(PyObject* self, PyObject* args)
     oskar_Imager* h = 0;
     PyObject *capsule = 0, *dict = 0;
     oskar_Mem **grids_c = 0, **images_c = 0;
-    int i = 0, num_output_images = 0, num_output_grids = 0, num_planes = 0;
-    int return_images = 0, return_grids = 0, status = 0;
+    int i = 0, return_images = 0, return_grids = 0, status = 0;
     if (!PyArg_ParseTuple(args, "Oii",
             &capsule, &return_images, &return_grids))
         return 0;
@@ -544,43 +539,42 @@ static PyObject* run(PyObject* self, PyObject* args)
 
     /* Create a dictionary to return any outputs. */
     dict = PyDict_New();
-    num_planes = oskar_imager_num_image_planes(h);
 
     /* Check if we need to return images. */
-    if (return_images && num_planes > 0)
+    if (return_images > 0)
     {
         images_c = create_cube(h, oskar_imager_image_size(h),
-                oskar_imager_precision(h), dict, "images", &num_output_images,
+                oskar_imager_precision(h), dict, "images", return_images,
                 &status);
         if (!images_c) goto fail;
     }
 
     /* Check if we need to return grids. */
-    if (return_grids && num_planes > 0)
+    if (return_grids > 0)
     {
         grids_c = create_cube(h, oskar_imager_plane_size(h),
-                oskar_imager_plane_type(h), dict, "grids", &num_output_grids,
+                oskar_imager_plane_type(h), dict, "grids", return_grids,
                 &status);
         if (!grids_c) goto fail;
     }
 
     /* Run the imager. */
     Py_BEGIN_ALLOW_THREADS
-    oskar_imager_run(h, num_output_images, images_c,
-            num_output_grids, grids_c, &status);
+    oskar_imager_run(h, return_images, images_c,
+            return_grids, grids_c, &status);
     Py_END_ALLOW_THREADS
 
     /* Free handles. */
     if (grids_c)
     {
-        for (i = 0; i < num_planes; ++i)
+        for (i = 0; i < return_grids; ++i)
             oskar_mem_free(grids_c[i], &status);
         free(grids_c);
         grids_c = 0;
     }
     if (images_c)
     {
-        for (i = 0; i < num_planes; ++i)
+        for (i = 0; i < return_images; ++i)
             oskar_mem_free(images_c[i], &status);
         free(images_c);
         images_c = 0;
@@ -600,14 +594,14 @@ fail:
     Py_XDECREF(dict);
     if (grids_c)
     {
-        for (i = 0; i < num_planes; ++i)
+        for (i = 0; i < return_grids; ++i)
             oskar_mem_free(grids_c[i], &status);
         free(grids_c);
         grids_c = 0;
     }
     if (images_c)
     {
-        for (i = 0; i < num_planes; ++i)
+        for (i = 0; i < return_images; ++i)
             oskar_mem_free(images_c[i], &status);
         free(images_c);
         images_c = 0;

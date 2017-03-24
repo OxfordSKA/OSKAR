@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,9 @@ void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
     *num_skipped = 0;
     for (i = 0; i < num_vis; ++i)
     {
+        size_t p;
         double cwt[2], pos_u, pos_v, val[2], sum, w, ww_i;
-        int ix, iy, j, k, p, grid_u, grid_v, grid_w, off_u, off_v, wsupport;
+        int ix, iy, j, k, grid_u, grid_v, grid_w, off_u, off_v, wsupport;
         int kernel_start;
 
         /* Convert UV coordinates to grid coordinates. */
@@ -143,8 +144,9 @@ void oskar_grid_wproj_f(const int num_w_planes, const int* restrict support,
     *num_skipped = 0;
     for (i = 0; i < num_vis; ++i)
     {
+        size_t p;
         double cwt[2], pos_u, pos_v, val[2], sum, w, ww_i;
-        int ix, iy, j, k, p, grid_u, grid_v, grid_w, off_u, off_v, wsupport;
+        int ix, iy, j, k, grid_u, grid_v, grid_w, off_u, off_v, wsupport;
         int kernel_start;
 
         /* Convert UV coordinates to grid coordinates. */

@@ -66,7 +66,7 @@ class Imager(object):
         """
         _imager_lib.check_init(self._capsule)
 
-    def finalise(self, return_images=False, return_grids=False):
+    def finalise(self, return_images=0, return_grids=0):
         """Finalises the image or images.
 
         Images or grids can be returned in a Python dictionary
@@ -75,8 +75,8 @@ class Imager(object):
         the grid cube can be accessed using the 'grids' key.
 
         Args:
-            return_images (Optional[boolean]): If true, return images.
-            return_grids (Optional[boolean]): If true, return grids.
+            return_images (Optional[int]): Number of image planes to return.
+            return_grids (Optional[int]): Number of grid planes to return.
         """
         return _imager_lib.finalise(self._capsule, return_images, return_grids)
 
@@ -303,8 +303,7 @@ class Imager(object):
 
     def run(self, uu=None, vv=None, ww=None, amps=None, weight=None,
             start_time=0, end_time=0, start_channel=0, end_channel=0,
-            num_baselines=0, num_pols=1, return_images=False,
-            return_grids=False):
+            num_baselines=0, num_pols=1, return_images=0, return_grids=0):
         """Runs the imager.
 
         Visibilities will be used either from the input file or Measurement Set,
@@ -349,8 +348,8 @@ class Imager(object):
                 Number of baselines in the visibility block. Default n.
             num_pols (Optional[int]):
                 Number of polarisations in the visibility block. Default 1.
-            return_images (Optional[boolean]): If true, return images.
-            return_grids (Optional[boolean]): If true, return grids.
+            return_images (Optional[int]): Number of image planes to return.
+            return_grids (Optional[int]): Number of grid planes to return.
         """
         if amps is None:
             return _imager_lib.run(self._capsule, return_images, return_grids)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include "imager/private_imager.h"
+#include "imager/oskar_imager.h"
 
 #include "imager/private_imager_update_plane_fft.h"
 #include "imager/oskar_grid_simple.h"
@@ -42,12 +43,14 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
         const oskar_Mem* weight, oskar_Mem* plane, double* plane_norm,
         int* status)
 {
-    int num_cells, num_skipped = 0;
+    int grid_size, num_skipped = 0;
+    size_t num_cells;
     if (*status) return;
-    num_cells = h->grid_size * h->grid_size;
+    grid_size = oskar_imager_plane_size(h);
+    num_cells = grid_size * grid_size;
     if (oskar_mem_precision(plane) != h->imager_prec)
         *status = OSKAR_ERR_TYPE_MISMATCH;
-    if ((int)oskar_mem_length(plane) < num_cells)
+    if (oskar_mem_length(plane) < num_cells)
         oskar_mem_realloc(plane, num_cells, status);
     if (*status) return;
     if (h->imager_prec == OSKAR_DOUBLE)
@@ -57,7 +60,7 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
                 oskar_mem_double_const(vv, status),
                 oskar_mem_double_const(amps, status),
                 oskar_mem_double_const(weight, status), h->cellsize_rad,
-                h->grid_size, &num_skipped, plane_norm,
+                grid_size, &num_skipped, plane_norm,
                 oskar_mem_double(plane, status));
     else
         oskar_grid_simple_f(h->support, h->oversample,
@@ -66,7 +69,7 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
                 oskar_mem_float_const(vv, status),
                 oskar_mem_float_const(amps, status),
                 oskar_mem_float_const(weight, status), h->cellsize_rad,
-                h->grid_size, &num_skipped, plane_norm,
+                grid_size, &num_skipped, plane_norm,
                 oskar_mem_float(plane, status));
     if (num_skipped > 0)
         printf("WARNING: Skipped %d visibility points.\n", num_skipped);

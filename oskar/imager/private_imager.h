@@ -60,7 +60,7 @@ struct oskar_Imager
     int generate_w_kernels_on_gpu, set_cellsize, set_fov, weighting;
     int num_files, scale_norm_with_num_input_files;
     char direction_type, kernel_type, **input_files, *image_root, *ms_column;
-    double cellsize_rad, fov_deg, im_centre_deg[2];
+    double cellsize_rad, fov_deg, image_padding, im_centre_deg[2];
     double uv_filter_min, uv_filter_max;
     double time_min_utc, time_max_utc, freq_min_hz, freq_max_hz;
 

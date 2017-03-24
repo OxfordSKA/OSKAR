@@ -65,15 +65,15 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
 
     /* Set sensible defaults. */
     oskar_imager_set_gpus(h, -1, 0, status);
+    oskar_imager_set_algorithm(h, "FFT", status);
+    oskar_imager_set_image_type(h, "I", status);
+    oskar_imager_set_weighting(h, "Natural", status);
+    oskar_imager_set_ms_column(h, "DATA", status);
+    oskar_imager_set_default_direction(h);
     oskar_imager_set_generate_w_kernels_on_gpu(h, 1);
     oskar_imager_set_fov(h, 1.0);
     oskar_imager_set_size(h, 256, status);
     oskar_imager_set_uv_filter_max(h, DBL_MAX);
-    oskar_imager_set_image_type(h, "I", status);
-    oskar_imager_set_algorithm(h, "FFT", status);
-    oskar_imager_set_weighting(h, "Natural", status);
-    oskar_imager_set_ms_column(h, "DATA", status);
-    oskar_imager_set_default_direction(h);
     return h;
 }
 

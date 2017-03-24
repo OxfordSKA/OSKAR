@@ -253,7 +253,7 @@ const char* oskar_imager_output_root(const oskar_Imager* h);
  * This will be different to the image size when using W-projection.
  */
 OSKAR_EXPORT
-int oskar_imager_plane_size(const oskar_Imager* h);
+int oskar_imager_plane_size(oskar_Imager* h);
 
 /**
  * @brief

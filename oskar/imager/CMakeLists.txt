@@ -23,6 +23,7 @@ set(imager_SRC
     src/oskar_imager_rotate_vis.c
     src/oskar_imager_run.c
     src/oskar_imager_update.c
+    src/private_imager_composite_nearest_even.c
     src/private_imager_create_fits_files.c
     src/private_imager_filter_uv.c
     src/private_imager_free_dft.c

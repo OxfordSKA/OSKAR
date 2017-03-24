@@ -463,7 +463,7 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, int num_points,
 
 void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
 {
-    int i;
+    int i, plane_size;
     if (*status) return;
 
     /* Allocate the weights grids if required. */
@@ -488,28 +488,12 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
     /* Allocate the image or visibility planes. */
     h->planes = (oskar_Mem**) calloc(h->num_planes, sizeof(oskar_Mem*));
     h->plane_norm = (double*) calloc(h->num_planes, sizeof(double));
-    switch (h->algorithm)
+    plane_size = oskar_imager_plane_size(h);
+    for (i = 0; i < h->num_planes; ++i)
     {
-    case OSKAR_ALGORITHM_DFT_2D:
-    case OSKAR_ALGORITHM_DFT_3D:
-        for (i = 0; i < h->num_planes; ++i)
-        {
-            h->planes[i] = oskar_mem_create(h->imager_prec,
-                    OSKAR_CPU, h->image_size * h->image_size, status);
-        }
-        break;
-    case OSKAR_ALGORITHM_FFT:
-    case OSKAR_ALGORITHM_WPROJ:
-        for (i = 0; i < h->num_planes; ++i)
-        {
-            h->planes[i] = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
-                    OSKAR_CPU, h->grid_size * h->grid_size, status);
-        }
-        break;
-    default:
-        *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+        h->planes[i] = oskar_mem_create(oskar_imager_plane_type(h), OSKAR_CPU,
+                plane_size * plane_size, status);
     }
-    if (*status) return;
 
     /* Create FITS files for the planes if required. */
     oskar_imager_create_fits_files(h, status);
