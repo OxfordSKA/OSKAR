@@ -204,13 +204,13 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
 void oskar_imager_trim_image(oskar_Mem* plane,
         int plane_size, int image_size, int* status)
 {
-    size_t i, num_cells;
     int size_diff;
     if (*status) return;
 
     /* Get the real part only, if the plane is complex. */
     if (oskar_mem_is_complex(plane))
     {
+        size_t i, num_cells;
         num_cells = plane_size * plane_size;
         if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
         {
@@ -230,6 +230,7 @@ void oskar_imager_trim_image(oskar_Mem* plane,
     {
         char *ptr;
         size_t in = 0, out = 0, copy_len = 0, element_size = 0;
+        int i;
         ptr = oskar_mem_char(plane);
         element_size = oskar_mem_element_size(oskar_mem_precision(plane));
         copy_len = element_size * image_size;
