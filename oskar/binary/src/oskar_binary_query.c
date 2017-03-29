@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,24 @@
 extern "C" {
 #endif
 
+int oskar_binary_num_tags(const oskar_Binary* handle)
+{
+    return handle->num_chunks;
+}
+
+int oskar_binary_tag_data_type(const oskar_Binary* handle, int tag_index)
+{
+    return tag_index < handle->num_chunks ?
+            handle->data_type[tag_index] : 0;
+}
+
+size_t oskar_binary_tag_payload_size(const oskar_Binary* handle,
+        int tag_index)
+{
+    return tag_index < handle->num_chunks ?
+            handle->payload_size_bytes[tag_index] : 0;
+}
+
 int oskar_binary_query(const oskar_Binary* handle,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
         int user_index, size_t* payload_size, int* status)
@@ -48,7 +66,7 @@ int oskar_binary_query(const oskar_Binary* handle,
     for (i = handle->query_search_start; i < handle->num_chunks; ++i)
     {
         if (!(handle->extended[i]) &&
-                handle->data_type[i] == (int) data_type &&
+                ((handle->data_type[i] == (int) data_type) || (!data_type)) &&
                 handle->id_group[i] == (int) id_group &&
                 handle->id_tag[i] == (int) id_tag &&
                 handle->user_index[i] == user_index)
@@ -65,7 +83,7 @@ int oskar_binary_query(const oskar_Binary* handle,
         return -1;
     }
 
-    *payload_size = handle->payload_size_bytes[i];
+    if (payload_size) *payload_size = handle->payload_size_bytes[i];
     return i;
 }
 
@@ -91,7 +109,7 @@ int oskar_binary_query_ext(const oskar_Binary* handle,
     for (i = handle->query_search_start; i < handle->num_chunks; ++i)
     {
         if (handle->extended[i] &&
-                handle->data_type[i] == (int) data_type &&
+                ((handle->data_type[i] == (int) data_type) || (!data_type)) &&
                 handle->id_group[i] == (int) lgroup &&
                 handle->id_tag[i] == (int) ltag &&
                 handle->user_index[i] == user_index)
@@ -114,7 +132,7 @@ int oskar_binary_query_ext(const oskar_Binary* handle,
         return -1;
     }
 
-    *payload_size = handle->payload_size_bytes[i];
+    if (payload_size) *payload_size = handle->payload_size_bytes[i];
     return i;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,12 +45,29 @@ struct oskar_MeasurementSet;
 typedef struct oskar_MeasurementSet oskar_MeasurementSet;
 #endif /* OSKAR_MEASUREMENT_SET_TYPEDEF_ */
 
-/* Binary file error codes are in the range -200 to -219. */
+/* Measurement Set error codes are in the range -200 to -219. */
 enum OSKAR_MS_ERROR_CODES
 {
     OSKAR_ERR_MS_COLUMN_NOT_FOUND        = -200,
     OSKAR_ERR_MS_OUT_OF_RANGE            = -201,
-    OSKAR_ERR_MS_UNKNOWN_DATA_TYPE       = -202
+    OSKAR_ERR_MS_UNKNOWN_DATA_TYPE       = -202,
+    OSKAR_ERR_MS_NO_DATA                 = -203
+};
+
+enum OSKAR_MS_TYPES
+{
+    OSKAR_MS_UNKNOWN_TYPE = -1,
+    OSKAR_MS_BOOL,
+    OSKAR_MS_CHAR,
+    OSKAR_MS_UCHAR,
+    OSKAR_MS_SHORT,
+    OSKAR_MS_USHORT,
+    OSKAR_MS_INT,
+    OSKAR_MS_UINT,
+    OSKAR_MS_FLOAT,
+    OSKAR_MS_DOUBLE,
+    OSKAR_MS_COMPLEX,
+    OSKAR_MS_DCOMPLEX
 };
 
 #ifdef __cplusplus

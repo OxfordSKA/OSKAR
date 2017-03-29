@@ -76,6 +76,9 @@ Advanced Build Options:
     * -DCMAKE_BUILD_TYPE=<release or debug> (default: release)
         Build OSKAR in release or debug mode.
 
+    * -DFIND_CUDA=ON|OFF (default: ON)
+        Can be used to tell the build system not to find or link against CUDA.
+
     * -DNVCC_COMPILER_BINDIR=<path> (default: None)
         Specifies a nvcc compiler binary directory override. See nvcc help.
         Note: This is likely to be needed only on macOS when the version of the

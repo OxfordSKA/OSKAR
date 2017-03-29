@@ -83,10 +83,10 @@ void oskar_imager_read_coords_ms(oskar_Imager* h, const char* filename,
 
     /* Set visibility meta-data. */
     oskar_imager_set_vis_frequency(h,
-            oskar_ms_ref_freq_hz(ms),
-            oskar_ms_channel_width_hz(ms), num_channels);
+            oskar_ms_freq_start_hz(ms),
+            oskar_ms_freq_inc_hz(ms), num_channels);
     oskar_imager_set_vis_time(h,
-            oskar_ms_start_time_mjd(ms),
+            oskar_ms_time_start_mjd_utc(ms),
             oskar_ms_time_inc_sec(ms), num_times);
     oskar_imager_set_vis_phase_centre(h,
             oskar_ms_phase_centre_ra_rad(ms) * 180/M_PI,

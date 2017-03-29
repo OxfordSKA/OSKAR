@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,13 +42,70 @@ extern "C" {
 
 /**
  * @brief
- * Returns the channel width in the Measurement Set.
+ * Returns the size in bytes of an element in a column of the Measurement Set.
  *
  * @details
- * Returns the channel width in the Measurement Set.
+ * Returns the size in bytes of an element in a column of the Measurement Set.
+ *
+ * @param[in] column     Column name.
  */
 OSKAR_MS_EXPORT
-double oskar_ms_channel_width_hz(const oskar_MeasurementSet* p);
+size_t oskar_ms_column_element_size(const oskar_MeasurementSet* p,
+        const char* column);
+
+/**
+ * @brief
+ * Returns the data type of an element in a column of the Measurement Set.
+ *
+ * @details
+ * Returns the data type of an element in a column of the Measurement Set.
+ *
+ * This is one of the values from the OSKAR_MS_TYPE enumerator.
+ *
+ * @param[in] column     Column name.
+ */
+OSKAR_MS_EXPORT
+int oskar_ms_column_element_type(const oskar_MeasurementSet* p,
+        const char* column);
+
+/**
+ * @brief
+ * Returns the shape of an element in a column of the Measurement Set.
+ *
+ * @details
+ * Returns the shape of an element in a column of the Measurement Set.
+ *
+ * Note that the returned array must be freed by the caller using free().
+ *
+ * @param[in] column     Column name.
+ * @param[out] ndim      Number of dimensions.
+ *
+ * @return Array containing the size of each dimension.
+ * Must be freed by the caller using free().
+ */
+OSKAR_MS_EXPORT
+size_t* oskar_ms_column_shape(const oskar_MeasurementSet* p, const char* column,
+        size_t* ndim);
+
+/**
+ * @brief
+ * Returns the channel separation in the Measurement Set.
+ *
+ * @details
+ * Returns the channel separation in the Measurement Set.
+ */
+OSKAR_MS_EXPORT
+double oskar_ms_freq_inc_hz(const oskar_MeasurementSet* p);
+
+/**
+ * @brief
+ * Returns the reference frequency in the Measurement Set.
+ *
+ * @details
+ * Returns the reference frequency in the Measurement Set.
+ */
+OSKAR_MS_EXPORT
+double oskar_ms_freq_start_hz(const oskar_MeasurementSet* p);
 
 /**
  * @brief
@@ -112,16 +169,6 @@ double oskar_ms_phase_centre_dec_rad(const oskar_MeasurementSet* p);
 
 /**
  * @brief
- * Returns the reference frequency in the Measurement Set.
- *
- * @details
- * Returns the reference frequency in the Measurement Set.
- */
-OSKAR_MS_EXPORT
-double oskar_ms_ref_freq_hz(const oskar_MeasurementSet* p);
-
-/**
- * @brief
  * Sets the observation phase centre.
  *
  * @details
@@ -172,16 +219,6 @@ void oskar_ms_set_time_range(oskar_MeasurementSet* p);
 
 /**
  * @brief
- * Returns the start time in the Measurement Set.
- *
- * @details
- * Returns the start time in the Measurement Set.
- */
-OSKAR_MS_EXPORT
-double oskar_ms_start_time_mjd(const oskar_MeasurementSet* p);
-
-/**
- * @brief
  * Returns the time increment in the Measurement Set.
  *
  * @details
@@ -189,6 +226,16 @@ double oskar_ms_start_time_mjd(const oskar_MeasurementSet* p);
  */
 OSKAR_MS_EXPORT
 double oskar_ms_time_inc_sec(const oskar_MeasurementSet* p);
+
+/**
+ * @brief
+ * Returns the start time in the Measurement Set.
+ *
+ * @details
+ * Returns the start time in the Measurement Set.
+ */
+OSKAR_MS_EXPORT
+double oskar_ms_time_start_mjd_utc(const oskar_MeasurementSet* p);
 
 #ifdef __cplusplus
 }

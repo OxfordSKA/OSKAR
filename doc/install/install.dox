@@ -85,6 +85,9 @@ These are as listed below.
   - Build OSKAR with release flags, debug flags, or release flags with
     debugging symbols.
 
+- <tt><b>-DFIND_CUDA=ON|OFF</b></tt> (default: ON)
+  - Can be used to tell the build system not to find or link against CUDA.
+
 - <tt><b>-DNVCC_COMPILER_BINDIR=\<path\></b></tt> (default: None)
   - Specifies a nvcc compiler binary directory override. See nvcc help.
   - Note: This is likely to be needed only on macOS when the version of the compiler picked up by nvcc (which is related to the version of XCode being used) is incompatible with the current version of CUDA.
@@ -152,10 +155,11 @@ behaves as expected.
 <tr><td>7</td><td>2015-02-28</td>
     <td>Removed explicit CFITSIO and CBLAS dependencies.
     Clarified dependency requirements. Removed MATLAB references.</td></tr>
-<tr><td>8</td><td>2017-01-11</td>
+<tr><td>8</td><td>2017-03-29</td>
     <td>Removed LAPACK dependencies.
     Marked CUDA and Qt dependencies as optional.
     Added note describing how to set a non-standard path for Qt 5.
+    Added option to not find (or link against) CUDA.
     </td></tr>
 </table>
 

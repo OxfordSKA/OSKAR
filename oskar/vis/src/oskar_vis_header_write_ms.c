@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         const char* ms_path, int overwrite, int force_polarised, int* status)
 {
     const oskar_Mem *x_metres, *y_metres, *z_metres;
-    double ref_freq_hz, chan_width_hz, ra_rad, dec_rad;
+    double freq_start_hz, freq_inc_hz, ra_rad, dec_rad;
     int amp_type, autocorr, crosscorr, dir_exists;
     unsigned int num_stations, num_pols, num_channels;
     oskar_MeasurementSet* ms = 0;
@@ -54,10 +54,8 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     num_channels  = oskar_vis_header_num_channels_total(hdr);
     ra_rad        = oskar_vis_header_phase_centre_ra_deg(hdr) * M_PI / 180.0;
     dec_rad       = oskar_vis_header_phase_centre_dec_deg(hdr) * M_PI / 180.0;
-    ref_freq_hz   = oskar_vis_header_freq_start_hz(hdr);
-    /* NOTE Should the chan_width be freq_inc or channel bandwidth?
-     * (These are different numbers in general.) */
-    chan_width_hz = oskar_vis_header_freq_inc_hz(hdr);
+    freq_start_hz = oskar_vis_header_freq_start_hz(hdr);
+    freq_inc_hz   = oskar_vis_header_freq_inc_hz(hdr);
     x_metres      = oskar_vis_header_station_x_offset_ecef_metres_const(hdr);
     y_metres      = oskar_vis_header_station_y_offset_ecef_metres_const(hdr);
     z_metres      = oskar_vis_header_station_z_offset_ecef_metres_const(hdr);
@@ -70,8 +68,8 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
 
     /* Set channel width to be greater than 0, if it isn't already.
      * This is required for the Measurement Set to be valid. */
-    if (! (chan_width_hz > 0.0))
-        chan_width_hz = 1.0;
+    if (! (freq_inc_hz > 0.0))
+        freq_inc_hz = 1.0;
 
     /* If directory doesn't exist, or if overwrite flag is set,
      * create a new one. */
@@ -85,7 +83,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         /* Create the Measurement Set. */
         ms = oskar_ms_create(ms_path, "OSKAR " OSKAR_VERSION_STR,
                 num_stations, num_channels, num_pols,
-                ref_freq_hz, chan_width_hz, autocorr, crosscorr);
+                freq_start_hz, freq_inc_hz, autocorr, crosscorr);
         if (!ms)
         {
             *status = OSKAR_ERR_FILE_IO;
@@ -139,7 +137,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         }
 
         /* Check the reference frequencies match. */
-        if (fabs(oskar_ms_ref_freq_hz(ms) - ref_freq_hz) > 1e-10)
+        if (fabs(oskar_ms_freq_start_hz(ms) - freq_start_hz) > 1e-10)
         {
             *status = OSKAR_ERR_VALUE_MISMATCH;
             oskar_ms_close(ms);

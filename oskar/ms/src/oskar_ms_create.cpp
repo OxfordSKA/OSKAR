@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,8 +46,8 @@ static void oskar_ms_add_pol(oskar_MeasurementSet* p, unsigned int num_pols);
 
 oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         const char* app_name, unsigned int num_stations,
-        unsigned int num_channels, unsigned int num_pols, double ref_freq_hz,
-        double chan_width_hz, int write_autocorr, int write_crosscorr)
+        unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
+        double freq_inc_hz, int write_autocorr, int write_crosscorr)
 {
     oskar_MeasurementSet* p = (oskar_MeasurementSet*)
             calloc(1, sizeof(oskar_MeasurementSet));
@@ -172,14 +172,14 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
     oskar_ms_set_phase_centre(p, 0, 0.0, 0.0);
 
     // Set up the band.
-    Vector<double> chan_widths(num_channels, chan_width_hz);
+    Vector<double> chan_widths(num_channels, freq_inc_hz);
     Vector<double> chan_freqs(num_channels);
     //double start = ref_freq - (num_channels - 1) * chan_width / 2.0;
     for (unsigned int c = 0; c < num_channels; ++c)
     {
-        chan_freqs(c) = ref_freq_hz + c * chan_width_hz;
+        chan_freqs(c) = freq_start_hz + c * freq_inc_hz;
     }
-    oskar_ms_add_band(p, 0, num_channels, ref_freq_hz, chan_freqs, chan_widths);
+    oskar_ms_add_band(p, 0, num_channels, freq_start_hz, chan_freqs, chan_widths);
 
     // Get a string containing the current system time.
     char time_str[80];
@@ -197,8 +197,8 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
     p->num_channels = num_channels;
     p->num_stations = num_stations;
     p->num_receptors = 2; // By default.
-    p->ref_freq = ref_freq_hz;
-    p->chan_width = chan_width_hz;
+    p->freq_start_hz = freq_start_hz;
+    p->freq_inc_hz = freq_inc_hz;
 
     // Fill the ANTENNA table.
     p->ms->antenna().addRow(num_stations);

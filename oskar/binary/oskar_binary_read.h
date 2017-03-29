@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,26 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief Reads a block of binary data for a single tag from an input stream.
+ *
+ * @details
+ * This low-level function reads a block of binary data for a single tag from
+ * an input stream.
+ *
+ * The tag is specified by its sequence number in the stream, as returned by
+ * oskar_binary_query() or oskar_binary_query_ext().
+ *
+ * @param[in,out] handle   Binary file handle.
+ * @param[in] chunk_index  Sequence index of the chunk's tag in the file.
+ * @param[in] data_size    Size of memory available at \p data, in bytes.
+ * @param[out] data        Pointer to memory block to write into.
+ * @param[in,out] status   Status return code.
+ */
+OSKAR_BINARY_EXPORT
+void oskar_binary_read_block(oskar_Binary* handle,
+        int chunk_index, size_t data_size, void* data, int* status);
 
 /**
  * @brief Reads a block of binary data for a single tag from an input stream.

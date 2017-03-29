@@ -37,17 +37,20 @@ if (NOT WIN32)
     set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g -Wall")
     set(CMAKE_C_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     set(CMAKE_CXX_FLAGS "-fPIC")
+    if ("${CMAKE_CXX_COMPILER_ID}" MATCHES ".*Clang.*")
+        # Tell Clang to use c++-11, required for casacore headers.
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -std=c++11")
+    endif()
     set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -Wall")
     set(CMAKE_CXX_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
 
-    if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    if ("${CMAKE_C_COMPILER_ID}" MATCHES ".*Clang.*"
+            OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
         # Treat external code as system headers.
         # This avoids a number of warning supression flags.
-        append_flags(CMAKE_C_FLAGS -isystem ${CUDA_INCLUDE_DIRS})
         append_flags(CMAKE_CXX_FLAGS
-            -isystem ${CUDA_INCLUDE_DIRS}
             -isystem ${GTEST_INCLUDE_DIR}
             -isystem ${GTEST_INCLUDE_DIR}/internal
             -isystem ${CASACORE_INCLUDE_DIR}/casacore
@@ -80,7 +83,7 @@ if (NOT WIN32)
         )
         append_flags(CMAKE_CXX_FLAGS_RELWITHDEBINFO -Wno-unused-function)
 
-        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND FORCE_LIBSTDC++)
+        if ("${CMAKE_CXX_COMPILER_ID}" MATCHES ".*Clang.*" AND FORCE_LIBSTDC++)
             # Tell Clang to use libstdc++ rather than libc++
             # This is required if any of the OSKAR dependencies are built
             # against libstdc++ due to ABI incompatibility with libc++.
@@ -120,6 +123,11 @@ endif (APPLE)
 # ------------------------------------------------------------------------------
 if (CUDA_FOUND)
     if (NOT WIN32)
+        if ("${CMAKE_C_COMPILER_ID}" MATCHES ".*Clang.*"
+                OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+            append_flags(CMAKE_C_FLAGS -isystem ${CUDA_INCLUDE_DIRS})
+            append_flags(CMAKE_CXX_FLAGS -isystem ${CUDA_INCLUDE_DIRS})
+        endif()
         set(CUDA_PROPAGATE_HOST_FLAGS OFF)
         set(CUDA_VERBOSE_BUILD OFF)
 
@@ -161,7 +169,7 @@ if (CUDA_FOUND)
         list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-missing-field-initializers;)
         # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
         list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-function;)
-        if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        if (NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES ".*Clang.*")
             list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-local-typedef;)
         endif()
         # PTX compiler options

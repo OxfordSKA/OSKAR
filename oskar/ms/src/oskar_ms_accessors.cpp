@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,74 @@
 
 using namespace casa;
 
-double oskar_ms_channel_width_hz(const oskar_MeasurementSet* p)
+size_t oskar_ms_column_element_size(const oskar_MeasurementSet* p,
+        const char* column)
 {
-    return p->chan_width;
+    if (!p->ms || !p->ms->tableDesc().isColumn(column)) return 0;
+
+    switch (p->ms->tableDesc().columnDesc(column).dataType())
+    {
+    case TpBool:     return sizeof(Bool);
+    case TpChar:     return sizeof(Char);
+    case TpUChar:    return sizeof(uChar);
+    case TpShort:    return sizeof(Short);
+    case TpUShort:   return sizeof(uShort);
+    case TpInt:      return sizeof(Int);
+    case TpUInt:     return sizeof(uInt);
+    case TpFloat:    return sizeof(Float);
+    case TpDouble:   return sizeof(Double);
+    case TpComplex:  return sizeof(Complex);
+    case TpDComplex: return sizeof(DComplex);
+    }
+    return 0;
+}
+
+int oskar_ms_column_element_type(const oskar_MeasurementSet* p,
+        const char* column)
+{
+    if (!p->ms || !p->ms->tableDesc().isColumn(column))
+        return OSKAR_MS_UNKNOWN_TYPE;
+
+    switch (p->ms->tableDesc().columnDesc(column).dataType())
+    {
+    case TpBool:     return OSKAR_MS_BOOL;
+    case TpChar:     return OSKAR_MS_CHAR;
+    case TpUChar:    return OSKAR_MS_UCHAR;
+    case TpShort:    return OSKAR_MS_SHORT;
+    case TpUShort:   return OSKAR_MS_USHORT;
+    case TpInt:      return OSKAR_MS_INT;
+    case TpUInt:     return OSKAR_MS_UINT;
+    case TpFloat:    return OSKAR_MS_FLOAT;
+    case TpDouble:   return OSKAR_MS_DOUBLE;
+    case TpComplex:  return OSKAR_MS_COMPLEX;
+    case TpDComplex: return OSKAR_MS_DCOMPLEX;
+    }
+    return OSKAR_MS_UNKNOWN_TYPE;
+}
+
+size_t* oskar_ms_column_shape(const oskar_MeasurementSet* p, const char* column,
+        size_t* ndim)
+{
+    size_t i = 0, *t = 0;
+    if (!p->ms || !p->ms->tableDesc().isColumn(column)) return 0;
+
+    const IPosition& shape = p->ms->tableDesc().columnDesc(column).shape();
+    if ((*ndim = (int) shape.size()))
+    {
+        t = (size_t*) calloc(*ndim, sizeof(size_t));
+        for (i = 0; i < *ndim; ++i) t[i] = shape(i);
+    }
+    return t;
+}
+
+double oskar_ms_freq_inc_hz(const oskar_MeasurementSet* p)
+{
+    return p->freq_inc_hz;
+}
+
+double oskar_ms_freq_start_hz(const oskar_MeasurementSet* p)
+{
+    return p->freq_start_hz;
 }
 
 unsigned int oskar_ms_num_channels(const oskar_MeasurementSet* p)
@@ -68,11 +133,6 @@ double oskar_ms_phase_centre_ra_rad(const oskar_MeasurementSet* p)
 double oskar_ms_phase_centre_dec_rad(const oskar_MeasurementSet* p)
 {
     return p->phase_centre_dec;
-}
-
-double oskar_ms_ref_freq_hz(const oskar_MeasurementSet* p)
-{
-    return p->ref_freq;
 }
 
 void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
@@ -150,13 +210,13 @@ void oskar_ms_set_time_range(oskar_MeasurementSet* p)
     p->msc->observation().releaseDate().put(0, release_date);
 }
 
-double oskar_ms_start_time_mjd(const oskar_MeasurementSet* p)
-{
-    return p->start_time / 86400.0;
-}
-
 double oskar_ms_time_inc_sec(const oskar_MeasurementSet* p)
 {
     return p->time_inc_sec;
+}
+
+double oskar_ms_time_start_mjd_utc(const oskar_MeasurementSet* p)
+{
+    return p->start_time / 86400.0;
 }
 

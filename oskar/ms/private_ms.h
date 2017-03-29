@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ struct oskar_MeasurementSet
     char* app_name;
     unsigned int *a1, *a2;
     unsigned int num_pols, num_channels, num_stations, num_receptors;
-    double ref_freq, chan_width;
+    double freq_start_hz, freq_inc_hz;
     double phase_centre_ra, phase_centre_dec;
     double start_time, end_time, time_inc_sec;
 };

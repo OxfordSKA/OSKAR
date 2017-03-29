@@ -1,7 +1,7 @@
 #
 #  This file is part of OSKAR.
 #
-# Copyright (c) 2014-2016, The University of Oxford
+# Copyright (c) 2014-2017, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -37,6 +37,7 @@
 from __future__ import absolute_import
 
 from oskar._version import __version__
+from oskar.binary import Binary
 from oskar.sky import Sky
 from oskar.telescope import Telescope
 from oskar.simulator import Simulator

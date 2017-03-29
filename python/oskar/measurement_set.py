@@ -1,7 +1,7 @@
 #
 #  This file is part of OSKAR.
 #
-# Copyright (c) 2016, The University of Oxford
+# Copyright (c) 2016-2017, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -31,7 +31,7 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-from __future__ import absolute_import, division, print_function
+from __future__ import absolute_import, division
 try:
     from . import _measurement_set_lib
 except ImportError:
@@ -77,21 +77,37 @@ class MeasurementSet(object):
             ref_freq_hz, chan_width_hz, write_autocorr, write_crosscorr)
         return t
 
-    def num_channels(self):
+    def get_freq_inc_hz(self):
+        """Returns the frequency increment between channels."""
+        return _measurement_set_lib.freq_inc_hz(self._capsule)
+
+    def get_freq_start_hz(self):
+        """Returns the frequency at the centre of the first channel."""
+        return _measurement_set_lib.freq_start_hz(self._capsule)
+
+    def get_num_channels(self):
         """Returns the number of frequency channels in the Measurement Set."""
         return _measurement_set_lib.num_channels(self._capsule)
 
-    def num_pols(self):
+    def get_num_pols(self):
         """Returns the number of polarisations in the Measurement Set."""
         return _measurement_set_lib.num_pols(self._capsule)
 
-    def num_rows(self):
+    def get_num_rows(self):
         """Returns the number of rows in the Measurement Set main table."""
         return _measurement_set_lib.num_rows(self._capsule)
 
-    def num_stations(self):
+    def get_num_stations(self):
         """Returns the number of stations in the Measurement Set."""
         return _measurement_set_lib.num_stations(self._capsule)
+
+    def get_phase_centre_ra_rad(self):
+        """Returns the Right Ascension of the phase centre in radians."""
+        return _measurement_set_lib.phase_centre_ra_rad(self._capsule)
+
+    def get_phase_centre_dec_rad(self):
+        """Returns the Declination of the phase centre in radians."""
+        return _measurement_set_lib.phase_centre_dec_rad(self._capsule)
 
     @classmethod
     def open(cls, file_name):
@@ -106,6 +122,20 @@ class MeasurementSet(object):
         t = MeasurementSet()
         t._capsule = _measurement_set_lib.open(file_name)
         return t
+
+    def read_column(self, column, start_row, num_rows):
+        """Reads a column of data from the main table.
+
+        Args:
+            column (str):           Name of the column to read.
+            start_row (int):        The start row index to read (zero-based).
+            num_rows (int):         Number of rows to read.
+
+        Returns:
+            numpy.array: A numpy array containing the contents of the column.
+        """
+        return _measurement_set_lib.read_column(
+            self._capsule, column, start_row, num_rows)
 
     def read_coords(self, start_row, num_baselines):
         """Reads baseline coordinate data from the main table.
@@ -214,3 +244,13 @@ class MeasurementSet(object):
         _measurement_set_lib.write_vis(
             self._capsule, start_row, start_channel, num_channels,
             num_baselines, vis)
+
+    # Properties
+    freq_inc_hz = property(get_freq_inc_hz)
+    freq_start_hz = property(get_freq_start_hz)
+    num_channels = property(get_num_channels)
+    num_pols = property(get_num_pols)
+    num_rows = property(get_num_rows)
+    num_stations = property(get_num_stations)
+    phase_centre_ra_rad = property(get_phase_centre_ra_rad)
+    phase_centre_dec_rad = property(get_phase_centre_dec_rad)

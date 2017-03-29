@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,8 @@ oskar_MeasurementSet* oskar_ms_open(const char* filename)
     if (p->ms->spectralWindow().nrow() > 0)
     {
         p->num_channels = p->msc->spectralWindow().numChan().get(0);
-        p->ref_freq = p->msc->spectralWindow().refFrequency().get(0);
-        p->chan_width = (p->msc->spectralWindow().chanWidth().get(0))(
+        p->freq_start_hz = p->msc->spectralWindow().refFrequency().get(0);
+        p->freq_inc_hz = (p->msc->spectralWindow().chanWidth().get(0))(
                 IPosition(1, 0));
     }
     p->num_stations = p->ms->antenna().nrow();

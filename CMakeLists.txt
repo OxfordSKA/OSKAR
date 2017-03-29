@@ -39,9 +39,23 @@ if (NOT OSKAR_BIN_INSTALL_DIR)
     set(OSKAR_BIN_INSTALL_DIR "bin")
 endif()
 
+# === Set compiler include directories.
+include_directories(
+    ${PROJECT_BINARY_DIR}
+    ${PROJECT_BINARY_DIR}/oskar
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/oskar
+    ${PROJECT_SOURCE_DIR}/extern
+    ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
+    ${PROJECT_SOURCE_DIR}/extern/rapidxml-1.13
+    ${PROJECT_SOURCE_DIR}/extern/cfitsio-3.41
+    ${PROJECT_SOURCE_DIR}/extern/Random123
+    ${PROJECT_SOURCE_DIR}/extern/Random123/features
+)
+set(GTEST_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include/gtest)
+
 # === Set dependencies and compiler options.
 include(oskar_dependencies)
-include(oskar_includes)
 include(oskar_set_version)
 include(oskar_compiler_options)
 enable_testing()

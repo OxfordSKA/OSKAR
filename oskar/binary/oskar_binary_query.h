@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,50 @@ extern "C" {
 #endif
 
 /**
+ * @brief Return the number of tagged data blocks in the file.
+ *
+ * @details
+ * This function returns the number of tagged data blocks in the file.
+ *
+ * @param[in] handle        Binary data handle.
+ *
+ * @return Number of tags in the file.
+ */
+OSKAR_BINARY_EXPORT
+int oskar_binary_num_tags(const oskar_Binary* handle);
+
+/**
+ * @brief Return the enumerated data type of a data block in the file.
+ *
+ * @details
+ * This function returns the enumerated data type of a data block in the file.
+ *
+ * @param[in] handle        Binary data handle.
+ * @param[in] tag_index     The sequence index of the tag,
+ *                          as returned by oskar_binary_query().
+ *
+ * @return The enumerated data type of the data block.
+ */
+OSKAR_BINARY_EXPORT
+int oskar_binary_tag_data_type(const oskar_Binary* handle, int tag_index);
+
+/**
+ * @brief Return the payload size in bytes of a chunk in the file.
+ *
+ * @details
+ * This function returns the payload size in bytes of a chunk in the file.
+ *
+ * @param[in] handle        Binary data handle.
+ * @param[in] tag_index     The sequence index of the tag,
+ *                          as returned by oskar_binary_query().
+ *
+ * @return The payload size of the chunk in bytes.
+ */
+OSKAR_BINARY_EXPORT
+size_t oskar_binary_tag_payload_size(const oskar_Binary* handle,
+        int tag_index);
+
+/**
  * @brief Return the payload size associated with a standard tag.
  *
  * @details
@@ -50,7 +94,7 @@ extern "C" {
  * that are both given as bytes.
  *
  * @param[in] handle        Binary data handle.
- * @param[in] data_type     Type of the memory.
+ * @param[in] data_type     Type of the memory. If 0, the type is not checked.
  * @param[in] id_group      Tag group identifier.
  * @param[in] id_tag        Tag identifier.
  * @param[in] user_index    User-defined index.
@@ -65,7 +109,7 @@ int oskar_binary_query(const oskar_Binary* handle,
         int user_index, size_t* payload_size, int* status);
 
 /**
- * @brief Return the payload size associated with a tag.
+ * @brief Return the payload size associated with an extended tag.
  *
  * @details
  * This function returns the payload size associated with a given tag.
@@ -74,7 +118,7 @@ int oskar_binary_query(const oskar_Binary* handle,
  * that are both given as strings.
  *
  * @param[in] handle        Binary data handle.
- * @param[in] data_type     Type of the memory.
+ * @param[in] data_type     Type of the memory. If 0, the type is not checked.
  * @param[in] name_group    Tag group name.
  * @param[in] name_tag      Tag name.
  * @param[in] user_index    User-defined index.

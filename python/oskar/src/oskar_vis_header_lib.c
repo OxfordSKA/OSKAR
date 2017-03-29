@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,22 +39,38 @@ static const char module_doc[] =
         "This module provides an interface to an OSKAR visibility header.";
 static const char name[] = "oskar_VisHeader";
 
-static oskar_VisHeader* get_handle(PyObject* capsule)
+static void vis_header_free(PyObject* capsule)
 {
-    oskar_VisHeader* h = 0;
+    int status = 0;
+    oskar_VisHeader* h = (oskar_VisHeader*) PyCapsule_GetPointer(capsule, name);
+    oskar_vis_header_free(h, &status);
+}
+
+static void* get_handle(PyObject* capsule, const char* name)
+{
+    void* h = 0;
     if (!PyCapsule_CheckExact(capsule))
     {
         PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
         return 0;
     }
-    h = (oskar_VisHeader*) PyCapsule_GetPointer(capsule, name);
-    if (!h)
+    if (!(h = PyCapsule_GetPointer(capsule, name)))
     {
-        PyErr_SetString(PyExc_RuntimeError,
-                "Unable to convert PyCapsule object to oskar_VisHeader.");
+        PyErr_Format(PyExc_RuntimeError,
+                "Unable to convert PyCapsule object to %s.", name);
         return 0;
     }
     return h;
+}
+
+
+static PyObject* amp_type(PyObject* self, PyObject* args)
+{
+    oskar_VisHeader* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
+    return Py_BuildValue("i", oskar_vis_header_amp_type(h));
 }
 
 
@@ -63,8 +79,18 @@ static PyObject* channel_bandwidth_hz(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_vis_header_channel_bandwidth_hz(h));
+}
+
+
+static PyObject* coord_precision(PyObject* self, PyObject* args)
+{
+    oskar_VisHeader* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
+    return Py_BuildValue("i", oskar_vis_header_coord_precision(h));
 }
 
 
@@ -73,7 +99,7 @@ static PyObject* freq_start_hz(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_vis_header_freq_start_hz(h));
 }
 
@@ -83,7 +109,7 @@ static PyObject* freq_inc_hz(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_vis_header_freq_inc_hz(h));
 }
 
@@ -93,7 +119,7 @@ static PyObject* max_channels_per_block(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_header_max_channels_per_block(h));
 }
 
@@ -103,7 +129,7 @@ static PyObject* max_times_per_block(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_header_max_times_per_block(h));
 }
 
@@ -113,7 +139,7 @@ static PyObject* num_channels_total(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_header_num_channels_total(h));
 }
 
@@ -123,8 +149,18 @@ static PyObject* num_stations(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_header_num_stations(h));
+}
+
+
+static PyObject* num_tags_per_block(PyObject* self, PyObject* args)
+{
+    oskar_VisHeader* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
+    return Py_BuildValue("i", oskar_vis_header_num_tags_per_block(h));
 }
 
 
@@ -133,7 +169,7 @@ static PyObject* num_times_total(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_header_num_times_total(h));
 }
 
@@ -143,7 +179,7 @@ static PyObject* phase_centre_ra_deg(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_vis_header_phase_centre_ra_deg(h));
 }
 
@@ -153,8 +189,39 @@ static PyObject* phase_centre_dec_deg(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_vis_header_phase_centre_dec_deg(h));
+}
+
+
+static PyObject* read_header(PyObject* self, PyObject* args)
+{
+    oskar_VisHeader* h = 0;
+    oskar_Binary* b = 0;
+    PyObject *binary = 0, *capsule = 0;
+    int status = 0;
+    if (!PyArg_ParseTuple(args, "O", &binary)) return 0;
+
+    /* Get a handle to the binary file from the supplied capsule. */
+    if (!(b = (oskar_Binary*) get_handle(binary, "oskar_Binary"))) return 0;
+
+    /* Read the header. */
+    h = oskar_vis_header_read(b, &status);
+
+    /* Check for errors. */
+    if (!h || status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_vis_header_read() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        oskar_vis_header_free(h, &status);
+        return 0;
+    }
+
+    /* Store the header in a new capsule and return it. */
+    capsule = PyCapsule_New((void*)h, name,
+            (PyCapsule_Destructor)vis_header_free);
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
 
@@ -163,7 +230,7 @@ static PyObject* time_start_mjd_utc(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_vis_header_time_start_mjd_utc(h));
 }
 
@@ -173,7 +240,7 @@ static PyObject* time_inc_sec(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_vis_header_time_inc_sec(h));
 }
 
@@ -183,7 +250,7 @@ static PyObject* time_average_sec(PyObject* self, PyObject* args)
     oskar_VisHeader* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_vis_header_time_average_sec(h));
 }
 
@@ -191,8 +258,11 @@ static PyObject* time_average_sec(PyObject* self, PyObject* args)
 /* Method table. */
 static PyMethodDef methods[] =
 {
+        {"amp_type", (PyCFunction)amp_type, METH_VARARGS, "amp_type()"},
         {"channel_bandwidth_hz", (PyCFunction)channel_bandwidth_hz,
                 METH_VARARGS, "channel_bandwidth_hz()"},
+        {"coord_precision", (PyCFunction)coord_precision,
+                METH_VARARGS, "coord_precision()"},
         {"freq_start_hz", (PyCFunction)freq_start_hz,
                 METH_VARARGS, "freq_start_hz()"},
         {"freq_inc_hz", (PyCFunction)freq_inc_hz,
@@ -205,12 +275,16 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "num_channels_total()"},
         {"num_stations", (PyCFunction)num_stations,
                 METH_VARARGS, "num_stations()"},
+        {"num_tags_per_block", (PyCFunction)num_tags_per_block,
+                METH_VARARGS, "num_tags_per_block()"},
         {"num_times_total", (PyCFunction)num_times_total,
                 METH_VARARGS, "num_times_total()"},
         {"phase_centre_ra_deg", (PyCFunction)phase_centre_ra_deg,
                 METH_VARARGS, "phase_centre_ra_deg()"},
         {"phase_centre_dec_deg", (PyCFunction)phase_centre_dec_deg,
                 METH_VARARGS, "phase_centre_dec_deg()"},
+        {"read_header", (PyCFunction)read_header,
+                METH_VARARGS, "read_header(binary_file_handle)"},
         {"time_start_mjd_utc", (PyCFunction)time_start_mjd_utc,
                 METH_VARARGS, "time_start_mjd_utc()"},
         {"time_inc_sec", (PyCFunction)time_inc_sec,

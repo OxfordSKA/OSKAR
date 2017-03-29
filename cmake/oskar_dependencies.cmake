@@ -2,27 +2,20 @@
 # cmake/oskar_dependencies.cmake:
 #
 
-# ==== Find dependencies.
-find_package(OpenCL)
-find_package(CUDA 5.5)
-find_package(OpenMP)
+if (FIND_CUDA OR NOT DEFINED FIND_CUDA)
+    find_package(CUDA 5.5)
+endif()
 find_package(CasaCore)
-#find_package(PNG QUIET)
+find_package(OpenCL QUIET)
+find_package(OpenMP)
 
-# ==== Work out what we can build.
 if (NOT CUDA_FOUND)
     message("===============================================================================")
     message("-- WARNING: CUDA toolkit not found: Unable to use any GPUs.")
     message("===============================================================================")
-elseif (NOT CUDA_CUDA_LIBRARY)
-    # Leave this as a note only, as drivers may not be installed
-    # on cluster head nodes.
-    message("-- NOTE: CUDA driver library not found.")
-endif ()
-
-if (CUDA_FOUND)
+else()
     add_definitions(-DOSKAR_HAVE_CUDA)
-endif ()
+endif()
 
 if (NOT CASACORE_FOUND)
     message("===============================================================================")
@@ -33,9 +26,9 @@ endif()
 
 if (NOT OPENMP_FOUND)
     message("===============================================================================")
-    message("-- WARNING: OpenMP not found: Unable to use multiple GPUs.")
+    message("-- WARNING: OpenMP not found: Unable to use multiple devices.")
     message("===============================================================================")
-endif ()
+endif()
 
 message("===============================================================================")
 message("-- INFO: 'make install' will install OSKAR to:")

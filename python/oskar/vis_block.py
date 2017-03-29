@@ -1,7 +1,7 @@
 #
 #  This file is part of OSKAR.
 #
-# Copyright (c) 2016, The University of Oxford
+# Copyright (c) 2016-2017, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -67,30 +67,39 @@ class VisBlock(object):
         """Returns an array reference to the cross correlations in the block."""
         return _vis_block_lib.cross_correlations(self._capsule)
 
-    def num_baselines(self):
+    def get_num_baselines(self):
         """Returns the number of baselines in the block."""
         return _vis_block_lib.num_baselines(self._capsule)
 
-    def num_channels(self):
+    def get_num_channels(self):
         """Returns the number of frequency channels in the block."""
         return _vis_block_lib.num_channels(self._capsule)
 
-    def num_pols(self):
+    def get_num_pols(self):
         """Returns the number of polarisations in the block."""
         return _vis_block_lib.num_pols(self._capsule)
 
-    def num_stations(self):
+    def get_num_stations(self):
         """Returns the number of stations in the block."""
         return _vis_block_lib.num_stations(self._capsule)
 
-    def num_times(self):
+    def get_num_times(self):
         """Returns the number of time samples in the block."""
         return _vis_block_lib.num_times(self._capsule)
 
-    def start_channel_index(self):
+    def get_start_channel_index(self):
         """Returns the start channel index of the block."""
         return _vis_block_lib.start_channel_index(self._capsule)
 
-    def start_time_index(self):
+    def get_start_time_index(self):
         """Returns the start time index of the block."""
         return _vis_block_lib.start_time_index(self._capsule)
+
+    # Properties
+    num_baselines = property(get_num_baselines)
+    num_channels = property(get_num_channels)
+    num_pols = property(get_num_pols)
+    num_stations = property(get_num_stations)
+    num_times = property(get_num_times)
+    start_channel_index = property(get_start_channel_index)
+    start_time_index = property(get_start_time_index)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,14 +41,21 @@ void copy_array(const oskar_MeasurementSet* p, const char* column,
         size_t data_size_bytes, void* data, size_t* required_size,
         int* status)
 {
-    Slice slice(start_row, num_rows, 1);
-    ArrayColumn<T> ac(*(p->ms), column);
-    Array<T> a = ac.getColumnRange(slice);
-    *required_size = a.size() * sizeof(T);
-    if (data_size_bytes >= *required_size)
-        memcpy(data, a.data(), *required_size);
-    else
-        *status = OSKAR_ERR_MS_OUT_OF_RANGE;
+    try
+    {
+        Slice slice(start_row, num_rows, 1);
+        ArrayColumn<T> ac(*(p->ms), column);
+        Array<T> a = ac.getColumnRange(slice);
+        *required_size = a.size() * sizeof(T);
+        if (data_size_bytes >= *required_size)
+            memcpy(data, a.data(), *required_size);
+        else
+            *status = OSKAR_ERR_MS_OUT_OF_RANGE;
+    }
+    catch (...)
+    {
+        *status = OSKAR_ERR_MS_NO_DATA;
+    }
 }
 
 template<typename T>
@@ -57,14 +64,21 @@ void copy_scalar(const oskar_MeasurementSet* p, const char* column,
         size_t data_size_bytes, void* data, size_t* required_size,
         int* status)
 {
-    Slice slice(start_row, num_rows, 1);
-    ScalarColumn<T> ac(*(p->ms), column);
-    Array<T> a = ac.getColumnRange(slice);
-    *required_size = a.size() * sizeof(T);
-    if (data_size_bytes >= *required_size)
-        memcpy(data, a.data(), *required_size);
-    else
-        *status = OSKAR_ERR_MS_OUT_OF_RANGE;
+    try
+    {
+        Slice slice(start_row, num_rows, 1);
+        ScalarColumn<T> ac(*(p->ms), column);
+        Array<T> a = ac.getColumnRange(slice);
+        *required_size = a.size() * sizeof(T);
+        if (data_size_bytes >= *required_size)
+            memcpy(data, a.data(), *required_size);
+        else
+            *status = OSKAR_ERR_MS_OUT_OF_RANGE;
+    }
+    catch (...)
+    {
+        *status = OSKAR_ERR_MS_NO_DATA;
+    }
 }
 
 void oskar_ms_read_column(const oskar_MeasurementSet* p, const char* column,
@@ -105,6 +119,9 @@ void oskar_ms_read_column(const oskar_MeasurementSet* p, const char* column,
         case TpBool:
             copy_scalar<Bool>(p, column, start_row, num_rows,
                     data_size_bytes, data, required_size_bytes, status); break;
+        case TpChar:
+            copy_scalar<Char>(p, column, start_row, num_rows,
+                    data_size_bytes, data, required_size_bytes, status); break;
         case TpUChar:
             copy_scalar<uChar>(p, column, start_row, num_rows,
                     data_size_bytes, data, required_size_bytes, status); break;
@@ -142,6 +159,9 @@ void oskar_ms_read_column(const oskar_MeasurementSet* p, const char* column,
         {
         case TpBool:
             copy_array<Bool>(p, column, start_row, num_rows,
+                    data_size_bytes, data, required_size_bytes, status); break;
+        case TpChar:
+            copy_array<Char>(p, column, start_row, num_rows,
                     data_size_bytes, data, required_size_bytes, status); break;
         case TpUChar:
             copy_array<uChar>(p, column, start_row, num_rows,

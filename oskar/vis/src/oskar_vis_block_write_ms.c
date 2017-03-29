@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     const oskar_Mem *in_acorr, *in_xcorr, *in_uu, *in_vv, *in_ww;
     oskar_Mem *temp_vis = 0, *temp_uu = 0, *temp_vv = 0, *temp_ww = 0;
     double exposure_sec, interval_sec, t_start_mjd, t_start_sec;
-    double ra_rad, dec_rad, ref_freq_hz;
+    double ra_rad, dec_rad, freq_start_hz;
     unsigned int a1, a2, num_baseln_in, num_baseln_out, num_channels;
     unsigned int num_pols_in, num_pols_out, num_stations, num_times, b, c, t;
     unsigned int i, i_out, prec, start_time_index, start_chan_index;
@@ -75,7 +75,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     exposure_sec     = oskar_vis_header_time_average_sec(header);
     interval_sec     = oskar_vis_header_time_inc_sec(header);
     t_start_mjd      = oskar_vis_header_time_start_mjd_utc(header);
-    ref_freq_hz      = oskar_vis_header_freq_start_hz(header);
+    freq_start_hz    = oskar_vis_header_freq_start_hz(header);
     prec             = oskar_mem_precision(in_xcorr);
     t_start_sec      = t_start_mjd * 86400.0;
 
@@ -104,7 +104,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     }
 
     /* Check the reference frequencies match. */
-    if (fabs(oskar_ms_ref_freq_hz(ms) - ref_freq_hz) > 1e-10)
+    if (fabs(oskar_ms_freq_start_hz(ms) - freq_start_hz) > 1e-10)
     {
         *status = OSKAR_ERR_VALUE_MISMATCH;
         return;

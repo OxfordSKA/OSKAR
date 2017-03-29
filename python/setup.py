@@ -15,6 +15,7 @@ oskar_compatibility_version = '2.7'
 
 # Define the extension modules to build.
 modules = [
+    ('_binary_lib', 'oskar_binary_lib.c'),
     ('_imager_lib', 'oskar_imager_lib.c'),
     ('_measurement_set_lib', 'oskar_measurement_set_lib.c'),
     ('_simulator_lib', 'oskar_simulator_lib.c'),
