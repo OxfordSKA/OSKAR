@@ -237,8 +237,8 @@ Each line contains up to six values, which correspond to positions
 represented as horizontal (x, y, z) coordinates in metres relative to a
 local tangent (horizon) plane, where x is towards geographic east, y is towards
 geographic north, and z is towards the local zenith. (The telescope centre
-position on Earth is specified using longitude and latitude values in the
-main OSKAR settings file, which is described in a separate document.)
+position on Earth is specified using the top-level "position.txt" file,
+which is described in the above section.)
 
 Coordinate errors can also be specified using optional columns.
 The first three columns are the "measured" positions, while
