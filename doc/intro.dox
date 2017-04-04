@@ -167,8 +167,6 @@ that we can implement all of them.
 Features are expected to be implemented in future versions of OSKAR as
 listed below.
 
-\subsection roadmap_version_2_8_0 Planned for OSKAR 2.8.0
-
 - Use of analytical and numerical dish patterns.
 - Swap of X and Y dipoles to match IAU polarisation axes on the sky.
 - Full 3D specification of individual element feed angles.
