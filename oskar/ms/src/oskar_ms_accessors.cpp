@@ -52,6 +52,7 @@ size_t oskar_ms_column_element_size(const oskar_MeasurementSet* p,
     case TpDouble:   return sizeof(Double);
     case TpComplex:  return sizeof(Complex);
     case TpDComplex: return sizeof(DComplex);
+    default:         return 0;
     }
     return 0;
 }
@@ -75,6 +76,7 @@ int oskar_ms_column_element_type(const oskar_MeasurementSet* p,
     case TpDouble:   return OSKAR_MS_DOUBLE;
     case TpComplex:  return OSKAR_MS_COMPLEX;
     case TpDComplex: return OSKAR_MS_DCOMPLEX;
+    default:         return OSKAR_MS_UNKNOWN_TYPE;
     }
     return OSKAR_MS_UNKNOWN_TYPE;
 }
