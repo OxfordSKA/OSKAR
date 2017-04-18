@@ -38,8 +38,11 @@
 #include "imager/oskar_fftpack_cfft_f.h"
 #include "imager/oskar_fftphase.h"
 #include "imager/oskar_grid_correction.h"
+#include "imager/oskar_grid_functions_pillbox.h"
+#include "imager/oskar_grid_functions_spheroidal.h"
 #include "mem/oskar_mem.h"
 #include <fitsio.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -85,8 +88,8 @@ void oskar_imager_finalise(oskar_Imager* h,
         /* Finalise all the planes. */
         for (i = 0; i < h->num_planes; ++i)
         {
-            oskar_imager_finalise_plane(h,
-                    h->planes[i], h->plane_norm[i], status);
+            oskar_imager_finalise_plane(h, h->planes[i],
+                    h->plane_norm[i], status);
             oskar_imager_trim_image(h->planes[i],
                     plane_size, h->image_size, status);
         }
@@ -116,8 +119,8 @@ void oskar_imager_finalise(oskar_Imager* h,
 }
 
 
-void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
-        double plane_norm, int* status)
+void oskar_imager_finalise_plane(oskar_Imager* h,
+        oskar_Mem* plane, double plane_norm, int* status)
 {
     int size;
     size_t num_cells;
@@ -126,6 +129,8 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
     /* Apply normalisation. */
     if (plane_norm > 0.0 || plane_norm < 0.0)
         oskar_mem_scale_real(plane, 1.0 / plane_norm, status);
+
+    /* If algorithm if DFT, we've finished here. */
     if (h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
             h->algorithm == OSKAR_ALGORITHM_DFT_3D)
         return;
@@ -133,67 +138,102 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
     /* Check plane is complex type, as plane must be gridded visibilities. */
     if (!oskar_mem_is_complex(plane))
     {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
 
-    /* Make image using FFT and apply grid correction. */
+    /* Check plane size is as expected. */
     size = oskar_imager_plane_size(h);
     num_cells = size * size;
-    if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
+    if (oskar_mem_length(plane) != num_cells)
     {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
+
+    /* Perform FFT shift of the input grid. */
+    if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
         oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
-        if (h->fft_on_gpu)
-        {
+    else
+        oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
+
+    /* Call FFT. */
 #ifdef OSKAR_HAVE_CUDA
-            DeviceData* d;
-            d = &h->d[0];
-            oskar_device_set(h->cuda_device_ids[0], status);
-            oskar_mem_copy(d->plane_gpu, plane, status);
+    if (h->fft_on_gpu)
+    {
+        size_t work_size = 0;
+        DeviceData* d = &h->d[0];
+        oskar_device_set(h->cuda_device_ids[0], status);
+        if (cufftGetSize(h->cufft_plan, &work_size) != CUFFT_SUCCESS)
+            cufftPlan2d(&h->cufft_plan, size, size,
+                    (h->imager_prec == OSKAR_DOUBLE) ? CUFFT_Z2Z : CUFFT_C2C);
+        oskar_mem_copy(d->plane_gpu, plane, status);
+        if (h->imager_prec == OSKAR_DOUBLE)
             cufftExecZ2Z(h->cufft_plan, oskar_mem_void(d->plane_gpu),
                     oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
-            oskar_mem_copy(plane, d->plane_gpu, status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
         else
+            cufftExecC2C(h->cufft_plan, oskar_mem_void(d->plane_gpu),
+                    oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
+        oskar_mem_copy(plane, d->plane_gpu, status);
+    }
+    else
+#endif
+    {
+        if (!h->fftpack_work)
+            h->fftpack_work = oskar_mem_create(h->imager_prec, OSKAR_CPU,
+                    2 * num_cells, status);
+        if (!h->fftpack_wsave)
         {
+            int len = 4 * size + 2 * (int)(log((double)size) / log(2.0)) + 8;
+            h->fftpack_wsave = oskar_mem_create(h->imager_prec, OSKAR_CPU,
+                    len, status);
+            if (h->imager_prec == OSKAR_DOUBLE)
+                oskar_fftpack_cfft2i(size, size,
+                        oskar_mem_double(h->fftpack_wsave, status));
+            else
+                oskar_fftpack_cfft2i_f(size, size,
+                        oskar_mem_float(h->fftpack_wsave, status));
+        }
+        if (h->imager_prec == OSKAR_DOUBLE)
             oskar_fftpack_cfft2f(size, size, size,
                     oskar_mem_double(plane, status),
                     oskar_mem_double(h->fftpack_wsave, status),
                     oskar_mem_double(h->fftpack_work, status));
-            oskar_mem_scale_real(plane, (double)num_cells, status);
+        else
+            oskar_fftpack_cfft2f_f(size, size, size,
+                    oskar_mem_float(plane, status),
+                    oskar_mem_float(h->fftpack_wsave, status),
+                    oskar_mem_float(h->fftpack_work, status));
+        oskar_mem_scale_real(plane, (double)num_cells, status);
+    }
+
+    /* Generate grid correction function if required. */
+    if (!h->corr_func)
+    {
+        h->corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, size, status);
+        if (h->algorithm != OSKAR_ALGORITHM_FFT)
+            oskar_grid_correction_function_spheroidal(size, h->oversample,
+                    oskar_mem_double(h->corr_func, status));
+        else
+        {
+            if (h->kernel_type == 'S')
+                oskar_grid_correction_function_spheroidal(size, 0,
+                        oskar_mem_double(h->corr_func, status));
+            else if (h->kernel_type == 'P')
+                oskar_grid_correction_function_pillbox(size,
+                        oskar_mem_double(h->corr_func, status));
         }
+    }
+
+    /* FFT shift again, and apply grid correction. */
+    if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
+    {
         oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
         oskar_grid_correction_d(size, oskar_mem_double(h->corr_func, status),
                 oskar_mem_double(plane, status));
     }
     else
     {
-        oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
-        if (h->fft_on_gpu)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            DeviceData* d;
-            d = &h->d[0];
-            oskar_device_set(h->cuda_device_ids[0], status);
-            oskar_mem_copy(d->plane_gpu, plane, status);
-            cufftExecC2C(h->cufft_plan, oskar_mem_void(d->plane_gpu),
-                    oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
-            oskar_mem_copy(plane, d->plane_gpu, status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else
-        {
-            oskar_fftpack_cfft2f_f(size, size, size,
-                    oskar_mem_float(plane, status),
-                    oskar_mem_float(h->fftpack_wsave, status),
-                    oskar_mem_float(h->fftpack_work, status));
-            oskar_mem_scale_real(plane, (double)num_cells, status);
-        }
         oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
         oskar_grid_correction_f(size, oskar_mem_double(h->corr_func, status),
                 oskar_mem_float(plane, status));

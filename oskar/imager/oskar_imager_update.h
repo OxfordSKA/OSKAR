@@ -96,9 +96,9 @@ void oskar_imager_update_from_block(oskar_Imager* h,
  */
 OSKAR_EXPORT
 void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
-		const oskar_Mem* vv, const oskar_Mem* ww, const oskar_Mem* amps,
-		const oskar_Mem* weight, int start_time, int end_time, int start_chan,
-		int end_chan, int num_baselines, int num_pols, int* status);
+        const oskar_Mem* vv, const oskar_Mem* ww, const oskar_Mem* amps,
+        const oskar_Mem* weight, int start_time, int end_time, int start_chan,
+        int end_chan, int num_baselines, int num_pols, int* status);
 
 /**
  * @brief
@@ -112,7 +112,7 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
  * not available at this level.
  *
  * When using a DFT, \p plane refers to the image plane;
- * when using a FFT, \p plane refers to the visibility grid.
+ * otherwise, \p plane refers to the visibility grid.
  *
  * The supplied baseline coordinates must be in wavelengths.
  *

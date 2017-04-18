@@ -35,7 +35,6 @@
 
 #include "imager/private_imager_composite_nearest_even.h"
 #include "imager/private_imager_generate_w_phase_screen.h"
-#include "imager/private_imager_free_wproj.h"
 #include "imager/private_imager_init_wproj.h"
 #include "imager/oskar_fftpack_cfft.h"
 #include "imager/oskar_fftpack_cfft_f.h"
@@ -62,9 +61,9 @@ extern "C" {
 void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 {
     size_t max_mem_bytes, max_bytes_per_plane, element_size, copy_len;
-    int i, iw, ix, iy, *supp, grid_size, new_conv_size, oversample;
+    int i, iw, ix, iy, *supp, new_conv_size, oversample;
     int conv_size, conv_size_half, inner, nearest;
-    double l_max, max_conv_size, max_uvw, max_val, sampling, sum, ww_mid;
+    double l_max, max_conv_size, max_uvw, max_val, sampling, sum;
     double *maxes;
 #ifdef OSKAR_HAVE_CUDA
     cufftHandle cufft_plan = 0;
@@ -73,31 +72,27 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     oskar_Mem *taper = 0, *taper_gpu = 0, *taper_ptr = 0;
     oskar_Mem *wsave = 0, *work = 0;
     char *ptr_out, *ptr_in;
-
-    /* Clear old kernels. */
-    oskar_imager_free_wproj(h, status);
     if (*status) return;
 
     /* Get GCF padding oversample factor. */
     oversample = h->oversample;
 
-    /* Calculate number of w-planes if not set. */
-    if ((h->num_w_planes < 1) && (h->ww_max > 0.0))
+    /* Calculate required number of w-planes if not set. */
+    if (h->ww_max > 0.0)
     {
+        double ww_mid;
         max_uvw = 1.05 * h->ww_max;
         ww_mid = 0.5 * (h->ww_min + h->ww_max);
         if (h->ww_rms > ww_mid)
             max_uvw *= h->ww_rms / ww_mid;
-        h->num_w_planes = (int)(max_uvw *
-                fabs(sin(h->cellsize_rad * h->image_size / 2.0)));
     }
     else
     {
-        if (h->ww_max > 0.0)
-            max_uvw = 1.05 * h->ww_max;
-        else
-            max_uvw = 0.25 / fabs(h->cellsize_rad);
+        max_uvw = 0.25 / fabs(h->cellsize_rad);
     }
+    if (h->num_w_planes < 1)
+        h->num_w_planes = (int)(max_uvw *
+                fabs(sin(h->cellsize_rad * h->image_size / 2.0)));
     if (h->num_w_planes < 16)
         h->num_w_planes = 16;
 
@@ -114,6 +109,8 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     h->conv_size_half = conv_size_half;
 
     /* Allocate kernels and support array. */
+    oskar_mem_free(h->w_kernels, status);
+    oskar_mem_free(h->w_support, status);
     h->w_support = oskar_mem_create(OSKAR_INT, OSKAR_CPU,
             h->num_w_planes, status);
     h->w_kernels = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX, OSKAR_CPU,
@@ -127,8 +124,7 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     inner = conv_size / oversample;
     l_max = sin(0.5 * h->fov_deg * M_PI/180.0);
     sampling = (2.0 * l_max * oversample) / h->image_size;
-    grid_size = oskar_imager_plane_size(h);
-    sampling *= ((double) grid_size) / ((double) conv_size);
+    sampling *= ((double) oskar_imager_plane_size(h)) / ((double) conv_size);
 
     /* Create scratch arrays and FFT plan for the phase screens. */
     screen = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
@@ -283,14 +279,14 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         plane_offset = conv_size_half * conv_size_half * iw;
         if (oskar_mem_precision(h->w_kernels) == OSKAR_DOUBLE)
         {
-            const double *restrict ptr = oskar_mem_double_const(
+            const double *restrict p = oskar_mem_double_const(
                     h->w_kernels, status);
             for (trial = conv_size_half - 1; trial > 0; trial--)
             {
                 ind1 = 2 * (trial * conv_size_half + plane_offset);
                 ind2 = 2 * (trial + plane_offset);
-                v1 = sqrt(ptr[ind1]*ptr[ind1] + ptr[ind1+1]*ptr[ind1+1]);
-                v2 = sqrt(ptr[ind2]*ptr[ind2] + ptr[ind2+1]*ptr[ind2+1]);
+                v1 = sqrt(p[ind1]*p[ind1] + p[ind1+1]*p[ind1+1]);
+                v2 = sqrt(p[ind2]*p[ind2] + p[ind2+1]*p[ind2+1]);
                 if ((v1 > 1e-3) || (v2 > 1e-3))
                 {
                     found = 1;
@@ -300,14 +296,14 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         }
         else
         {
-            const float *restrict ptr = oskar_mem_float_const(
+            const float *restrict p = oskar_mem_float_const(
                     h->w_kernels, status);
             for (trial = conv_size_half - 1; trial > 0; trial--)
             {
                 ind1 = 2 * (trial * conv_size_half + plane_offset);
                 ind2 = 2 * (trial + plane_offset);
-                v1 = sqrt(ptr[ind1]*ptr[ind1] + ptr[ind1+1]*ptr[ind1+1]);
-                v2 = sqrt(ptr[ind2]*ptr[ind2] + ptr[ind2+1]*ptr[ind2+1]);
+                v1 = sqrt(p[ind1]*p[ind1] + p[ind1+1]*p[ind1+1]);
+                v2 = sqrt(p[ind2]*p[ind2] + p[ind2+1]*p[ind2+1]);
                 if ((v1 > 1e-3) || (v2 > 1e-3))
                 {
                     found = 1;
@@ -370,18 +366,18 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     sum = 0.0; /* Real part only. */
     if (oskar_mem_precision(h->w_kernels) == OSKAR_DOUBLE)
     {
-        double *ptr = oskar_mem_double(h->w_kernels, status);
+        const double *restrict p = oskar_mem_double_const(h->w_kernels, status);
         for (iy = -supp[0]; iy <= supp[0]; ++iy)
             for (ix = -supp[0]; ix <= supp[0]; ++ix)
-                sum += ptr[2 * (abs(ix) * oversample +
+                sum += p[2 * (abs(ix) * oversample +
                         conv_size_half * (abs(iy) * oversample))];
     }
     else
     {
-        float *ptr = oskar_mem_float(h->w_kernels, status);
+        const float *restrict p = oskar_mem_float_const(h->w_kernels, status);
         for (iy = -supp[0]; iy <= supp[0]; ++iy)
             for (ix = -supp[0]; ix <= supp[0]; ++ix)
-                sum += ptr[2 * (abs(ix) * oversample +
+                sum += p[2 * (abs(ix) * oversample +
                         conv_size_half * (abs(iy) * oversample))];
     }
     oskar_mem_scale_real(h->w_kernels, 1.0 / sum, status);
@@ -390,42 +386,6 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     oskar_mem_write_fits_cube(h->w_kernels, "kernels_norm",
             conv_size_half, conv_size_half, h->num_w_planes, -1, status);
 #endif
-
-    /* Generate grid correction function. */
-    h->corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
-            grid_size, status);
-    oskar_grid_correction_function_spheroidal(grid_size, oversample,
-            oskar_mem_double(h->corr_func, status));
-
-    /* Set up the FFT. */
-    if (h->fft_on_gpu)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        /* Generate FFT plan. */
-        if (h->imager_prec == OSKAR_DOUBLE)
-            cufftPlan2d(&h->cufft_plan, grid_size, grid_size, CUFFT_Z2Z);
-        else
-            cufftPlan2d(&h->cufft_plan, grid_size, grid_size, CUFFT_C2C);
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-    }
-    else
-    {
-        /* Initialise workspaces for CPU FFT algorithm. */
-        int len_save = 4 * grid_size +
-                2 * (int)(log((double)grid_size) / log(2.0)) + 8;
-        h->fftpack_wsave = oskar_mem_create(h->imager_prec, OSKAR_CPU,
-                len_save, status);
-        h->fftpack_work = oskar_mem_create(h->imager_prec, OSKAR_CPU,
-                2 * grid_size * grid_size, status);
-        if (h->imager_prec == OSKAR_DOUBLE)
-            oskar_fftpack_cfft2i(grid_size, grid_size,
-                    oskar_mem_double(h->fftpack_wsave, status));
-        else
-            oskar_fftpack_cfft2i_f(grid_size, grid_size,
-                    oskar_mem_float(h->fftpack_wsave, status));
-    }
 }
 
 #ifdef __cplusplus

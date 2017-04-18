@@ -1270,15 +1270,27 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
         return 0;
     if (!(h = get_handle_imager(obj[0]))) return 0;
 
-    /* Make sure input objects are arrays. Convert if required. */
+    /* Make sure required input objects are arrays. Convert if required. */
     uu     = (PyArrayObject*) PyArray_FROM_OF(obj[1], NPY_ARRAY_IN_ARRAY);
     vv     = (PyArrayObject*) PyArray_FROM_OF(obj[2], NPY_ARRAY_IN_ARRAY);
     ww     = (PyArrayObject*) PyArray_FROM_OF(obj[3], NPY_ARRAY_IN_ARRAY);
-    amps   = (PyArrayObject*) PyArray_FROM_OF(obj[4], NPY_ARRAY_IN_ARRAY);
     weight = (PyArrayObject*) PyArray_FROM_OF(obj[5], NPY_ARRAY_IN_ARRAY);
-    plane  = (PyArrayObject*) PyArray_FROM_OF(obj[6], NPY_ARRAY_OUT_ARRAY);
-    if (!uu || !vv || !ww || !amps || !weight || !plane)
+    if (!uu || !vv || !ww || !weight)
         goto fail;
+
+    /* Check if visibility amplitudes are present. */
+    if (obj[4] != Py_None)
+    {
+        amps = (PyArrayObject*) PyArray_FROM_OF(obj[4], NPY_ARRAY_IN_ARRAY);
+        if (!amps) goto fail;
+    }
+
+    /* Check if visibility grid is present. */
+    if (obj[6] != Py_None)
+    {
+        plane = (PyArrayObject*) PyArray_FROM_OF(obj[6], NPY_ARRAY_IN_ARRAY);
+        if (!plane) goto fail;
+    }
 
     /* Check if weights grid is present. */
     if (obj[7] != Py_None)
@@ -1288,31 +1300,26 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
         if (!weights_grid) goto fail;
     }
 
+    /* Check if visibilities are required but not present. */
+    if (!oskar_imager_coords_only(h) && (!amps || !plane))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Visibility data not present and "
+                "imager not in coordinate-only mode.");
+        goto fail;
+    }
+
     /* Check dimensions. */
-    if (PyArray_NDIM(uu) != 1 || PyArray_NDIM(vv) != 1 ||
-            PyArray_NDIM(ww) != 1 || PyArray_NDIM(amps) != 1 ||
-            PyArray_NDIM(weight) != 1)
-    {
-        PyErr_SetString(PyExc_RuntimeError, "Input data arrays must be 1D.");
-        goto fail;
-    }
-    if (PyArray_NDIM(plane) != 2)
-    {
-        PyErr_SetString(PyExc_RuntimeError, "Plane must be 2D.");
-        goto fail;
-    }
-    num_vis = (int) PyArray_SIZE(amps);
+    num_vis = (int) PyArray_SIZE(weight);
     if (num_vis != (int) PyArray_SIZE(uu) ||
             num_vis != (int) PyArray_SIZE(vv) ||
-            num_vis != (int) PyArray_SIZE(ww) ||
-            num_vis != (int) PyArray_SIZE(weight))
+            num_vis != (int) PyArray_SIZE(ww))
     {
         PyErr_SetString(PyExc_RuntimeError, "Input data dimension mismatch.");
         goto fail;
     }
 
     /* Check visibility data are complex. */
-    if (!PyArray_ISCOMPLEX(amps))
+    if (amps && !PyArray_ISCOMPLEX(amps))
     {
         PyErr_SetString(PyExc_RuntimeError,
                 "Input visibility data must be complex.");
@@ -1326,13 +1333,19 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
             oskar_type_from_numpy(vv), OSKAR_CPU, num_vis, &status);
     ww_c = oskar_mem_create_alias_from_raw(PyArray_DATA(ww),
             oskar_type_from_numpy(ww), OSKAR_CPU, num_vis, &status);
-    amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amps),
-            oskar_type_from_numpy(amps), OSKAR_CPU, num_vis, &status);
     weight_c = oskar_mem_create_alias_from_raw(PyArray_DATA(weight),
             oskar_type_from_numpy(weight), OSKAR_CPU, num_vis, &status);
-    plane_c = oskar_mem_create_alias_from_raw(PyArray_DATA(plane),
-            oskar_type_from_numpy(plane), OSKAR_CPU,
-            (size_t) PyArray_SIZE(plane), &status);
+    if (amps)
+    {
+        amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amps),
+                oskar_type_from_numpy(amps), OSKAR_CPU, num_vis, &status);
+    }
+    if (plane)
+    {
+        plane_c = oskar_mem_create_alias_from_raw(PyArray_DATA(plane),
+                oskar_type_from_numpy(plane), OSKAR_CPU,
+                (size_t) PyArray_SIZE(plane), &status);
+    }
     if (weights_grid)
     {
         weights_grid_c = oskar_mem_create_alias_from_raw(
@@ -1420,8 +1433,8 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     oskar_Imager* h;
     PyObject *obj[] = {0, 0, 0, 0, 0};
     PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0, *im = 0;
-    int num_cells, num_pixels, num_vis, size = 0, status = 0, type = 0;
-    int dft = 0, wproj = 0, uniform = 0, wprojplanes = -1;
+    int num_cells, num_pixels, num_vis, plane_size = 0, size = 0;
+    int dft = 0, status = 0, type = 0, wproj = 0, uniform = 0, wprojplanes = -1;
     double fov_deg = 0.0, norm = 0.0;
     const char *weighting_type = 0, *algorithm_type = 0;
     oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *weight_c, *plane;
@@ -1523,20 +1536,22 @@ static PyObject* make_image(PyObject* self, PyObject* args)
             !strncmp(weighting_type, "u", 1))
         uniform = 1;
 
+    /* Get the plane size. */
+    plane_size = oskar_imager_plane_size(h);
+    num_cells = plane_size * plane_size;
+
     /* Supply the coordinates first, if required. */
     if (wproj || uniform)
     {
-        weights_grid = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
+        weights_grid = oskar_mem_create(type, OSKAR_CPU, num_cells, &status);
         oskar_imager_set_coords_only(h, 1);
         oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, 0, weight_c,
                 0, 0, weights_grid, &status);
         oskar_imager_set_coords_only(h, 0);
     }
 
-    /* Initialise the algorithm to get the plane size. */
+    /* Initialise the algorithm. */
     oskar_imager_check_init(h, &status);
-    num_cells = oskar_imager_plane_size(h);
-    num_cells *= num_cells;
 
     /* Make the image. */
     plane = oskar_mem_create((dft ? type : (type | OSKAR_COMPLEX)), OSKAR_CPU,
@@ -1544,7 +1559,7 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c, weight_c,
             plane, &norm, weights_grid, &status);
     oskar_imager_finalise_plane(h, plane, norm, &status);
-    oskar_imager_trim_image(plane, oskar_imager_plane_size(h), size, &status);
+    oskar_imager_trim_image(plane, plane_size, size, &status);
 
     /* Free temporaries. */
     oskar_mem_free(uu_c, &status);

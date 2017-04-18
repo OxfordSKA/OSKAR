@@ -73,12 +73,12 @@ void oskar_imager_finalise(oskar_Imager* h,
  *
  * @param[in,out] h          Handle to imager.
  * @param[in,out] plane      Plane to finalise.
- * @param[in,out] plane_norm Normalisation required for plane.
+ * @param[in]     plane_norm Normalisation required for plane.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
-        double plane_norm, int* status);
+void oskar_imager_finalise_plane(oskar_Imager* h,
+        oskar_Mem* plane, double plane_norm, int* status);
 
 /**
  * @brief

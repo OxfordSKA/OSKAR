@@ -241,6 +241,7 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
 
     /* Recalculate grid plane size. */
     h->grid_size = 0;
+    oskar_imager_reset_cache(h, status);
     (void) oskar_imager_plane_size(h);
 }
 
@@ -279,6 +280,18 @@ void oskar_imager_set_coords_only(oskar_Imager* h, int flag)
         /* Finishing. */
         if (h->ww_points > 0)
             h->ww_rms = sqrt(h->ww_rms / h->ww_points);
+
+        /* Calculate required number of w-planes if not set. */
+        if ((h->ww_max > 0.0) && (h->num_w_planes < 1))
+        {
+            double max_uvw, ww_mid;
+            max_uvw = 1.05 * h->ww_max;
+            ww_mid = 0.5 * (h->ww_min + h->ww_max);
+            if (h->ww_rms > ww_mid)
+                max_uvw *= h->ww_rms / ww_mid;
+            h->num_w_planes = (int)(max_uvw *
+                    fabs(sin(h->cellsize_rad * h->image_size / 2.0)));
+        }
     }
 }
 
@@ -534,6 +547,7 @@ void oskar_imager_set_size(oskar_Imager* h, int size, int* status)
     }
     h->image_size = size;
     h->grid_size = 0;
+    oskar_imager_reset_cache(h, status);
     (void) oskar_imager_plane_size(h);
     if (h->set_fov)
         h->cellsize_rad = oskar_convert_fov_to_cellsize(

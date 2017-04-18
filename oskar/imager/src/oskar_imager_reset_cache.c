@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef OSKAR_HAVE_CUDA
+#include <cufft.h>
+#endif
+
 #include "imager/private_imager.h"
-#include "imager/private_imager_free_dft.h"
-#include "imager/private_imager_free_fft.h"
-#include "imager/private_imager_free_wproj.h"
 #include "imager/oskar_imager_reset_cache.h"
 #include <fitsio.h>
 
@@ -57,10 +58,25 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     h->num_im_channels = 0;
     h->num_im_times = 0;
 
-    /* Clear algorithm caches. */
-    oskar_imager_free_dft(h, status);
-    oskar_imager_free_fft(h, status);
-    oskar_imager_free_wproj(h, status);
+    /* Clear FFT caches. */
+    oskar_mem_free(h->corr_func, status);
+    oskar_mem_free(h->fftpack_wsave, status);
+    oskar_mem_free(h->fftpack_work, status);
+#ifdef OSKAR_HAVE_CUDA
+    cufftDestroy(h->cufft_plan);
+    h->cufft_plan = 0;
+#endif
+    h->corr_func = 0;
+    h->fftpack_wsave = 0;
+    h->fftpack_work = 0;
+
+    /* Clear algorithm-specific caches. */
+    oskar_mem_free(h->l, status); h->l = 0;
+    oskar_mem_free(h->m, status); h->m = 0;
+    oskar_mem_free(h->n, status); h->n = 0;
+    oskar_mem_free(h->conv_func, status); h->conv_func = 0;
+    oskar_mem_free(h->w_kernels, status); h->w_kernels = 0;
+    oskar_mem_free(h->w_support, status); h->w_support = 0;
 
     /* Free the image planes. */
     if (h->planes)

@@ -2,7 +2,7 @@
 #
 #  This file is part of OSKAR.
 #
-# Copyright (c) 2014-2016, The University of Oxford
+# Copyright (c) 2014-2017, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -306,8 +306,8 @@ class Imager(object):
             num_baselines=0, num_pols=1, return_images=0, return_grids=0):
         """Runs the imager.
 
-        Visibilities will be used either from the input file or Measurement Set,
-        if one is set, or from the supplied arrays.
+        Visibilities will be used either from the input file or
+        Measurement Set, if one is set, or from the supplied arrays.
         If using a file, the input filename must be set using set_input_file().
         If using arrays, the visibility meta-data must be set prior to calling
         this method using set_vis_* methods.
@@ -358,7 +358,8 @@ class Imager(object):
             if self.weighting == 'Uniform' or self.algorithm == 'W-projection':
                 self.set_coords_only(True)
                 self.update(uu, vv, ww, amps, weight, start_time, end_time,
-                            start_channel, end_channel, num_baselines, num_pols)
+                            start_channel, end_channel, num_baselines,
+                            num_pols)
                 self.set_coords_only(False)
             self.update(uu, vv, ww, amps, weight, start_time, end_time,
                         start_channel, end_channel, num_baselines, num_pols)
@@ -459,7 +460,8 @@ class Imager(object):
         A value less than or equal to zero means no maximum.
 
         Args:
-            value (float): Maximum frequency of visibility data to image, in Hz.
+            value (float):
+                Maximum frequency of visibility data to image, in Hz.
         """
         _imager_lib.set_freq_max_hz(self._capsule, value)
 
@@ -467,7 +469,8 @@ class Imager(object):
         """Sets the minimum frequency of visibility data to image.
 
         Args:
-            value (float): Minimum frequency of visibility data to image, in Hz.
+            value (float):
+                Minimum frequency of visibility data to image, in Hz.
         """
         _imager_lib.set_freq_min_hz(self._capsule, value)
 
@@ -647,7 +650,8 @@ class Imager(object):
             num_times (Optional[int]):
                 Number of time steps in visibility data.
         """
-        _imager_lib.set_vis_time(self._capsule, ref_mjd_utc, inc_sec, num_times)
+        _imager_lib.set_vis_time(self._capsule, ref_mjd_utc, inc_sec,
+                                 num_times)
 
     def set_weighting(self, weighting):
         """Sets the type of visibility weighting to use.
@@ -723,7 +727,20 @@ class Imager(object):
         This is a low-level function that can be used to generate
         gridded visibilities if required.
 
-        Call finalise_plane() to finalise the image after calling this function.
+        Visibility selection/filtering and phase rotation are
+        not available at this level.
+
+        When using a DFT, plane refers to the image plane;
+        otherwise, plane refers to the visibility grid.
+
+        The supplied baseline coordinates must be in wavelengths.
+
+        If this is called in "coordinate only" mode, then the visibility
+        amplitudes are ignored, the plane is untouched and the weights grid
+        is updated instead.
+
+        Call finalise_plane() to finalise the image after calling this
+        function.
 
         Args:
             uu (float, array-like, shape (n,)):
@@ -732,23 +749,24 @@ class Imager(object):
                 Baseline vv coordinates, in wavelengths.
             ww (float, array-like, shape (n,)):
                 Baseline ww coordinates, in wavelengths.
-            amps (complex float, array-like, shape (n,)):
+            amps (complex float, array-like, shape (n,) or None):
                 Baseline visibility amplitudes.
             weight (float, array-like, shape (n,)):
                 Visibility weights.
-            plane (float, array-like):
+            plane (float, array-like or None):
                 Plane to update.
             plane_norm (float):
                 Current plane normalisation.
             weights_grid (Optional[float, array-like]):
-                Gridded weights, size and shape of the image plane.
+                Gridded weights, size and shape of the grid plane.
                 Used for uniform weighting.
 
         Returns:
             float: Updated plane normalisation.
         """
         return _imager_lib.update_plane(self._capsule, uu, vv, ww, amps,
-                                        weight, plane, plane_norm, weights_grid)
+                                        weight, plane, plane_norm,
+                                        weights_grid)
 
     # Properties.
     algorithm = property(get_algorithm, set_algorithm)
@@ -906,10 +924,10 @@ class Imager(object):
     def grid_pixels(grid_cellsize, size):
         """Return grid pixel coordinates the same units as grid_cellsize.
 
-        Returns the x and y coordinates of the uv grid pixels for a grid / image
-        of size x size pixels where the grid pixel separation is given by
-        grid_cellsize. The output pixel coordinates will be in the same units
-        as that of the supplied grid_cellsize.
+        Returns the x and y coordinates of the uv grid pixels for a
+        grid / image of size x size pixels where the grid pixel separation is
+        given by grid_cellsize. The output pixel coordinates will be in the
+        same units as that of the supplied grid_cellsize.
 
         Args:
             grid_cellsize (float): Pixel separation in the grid
@@ -970,9 +988,11 @@ class Imager(object):
                 It will not be less than 16.
 
         Returns:
-            array: Image as a 2D numpy array. Data are ordered as in FITS image.
+            array: Image as a 2D numpy array.
+                Data are ordered as in FITS image.
         """
         if _imager_lib is None:
             raise RuntimeError("OSKAR library not found.")
         return _imager_lib.make_image(uu, vv, ww, amps, fov_deg, size,
-                                      weighting, algorithm, weight, wprojplanes)
+                                      weighting, algorithm, weight,
+                                      wprojplanes)

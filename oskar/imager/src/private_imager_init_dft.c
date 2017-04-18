@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
  */
 
 #include "imager/private_imager.h"
-#include "imager/private_imager_free_dft.h"
 #include "imager/private_imager_init_dft.h"
 #include "math/oskar_evaluate_image_lmn_grid.h"
 #include "math/oskar_cmath.h"
@@ -39,11 +38,13 @@ extern "C" {
 void oskar_imager_init_dft(oskar_Imager* h, int* status)
 {
     int num_pixels;
-    oskar_imager_free_dft(h, status);
     if (*status) return;
 
     /* Calculate pixel coordinate grid required for the DFT imager. */
     num_pixels = h->image_size * h->image_size;
+    oskar_mem_free(h->l, status);
+    oskar_mem_free(h->m, status);
+    oskar_mem_free(h->n, status);
     h->l = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
     h->m = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
     h->n = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);

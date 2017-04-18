@@ -130,7 +130,7 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
 
     /* Set dimensions. */
     if (num_baselines <= 0)
-        num_baselines = (int) oskar_mem_length(amps);
+        num_baselines = (int) oskar_mem_length(uu);
     num_times = 1 + end_time - start_time;
     num_channels = 1 + end_chan - start_chan;
 
@@ -357,7 +357,8 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
             break;
         case OSKAR_WEIGHTING_UNIFORM:
             oskar_imager_weight_uniform(num_vis, pu, pv, ph, h->weight_tmp,
-                    h->cellsize_rad, h->image_size, weights_grid, status);
+                    h->cellsize_rad, oskar_imager_plane_size(h), weights_grid,
+                    status);
             ph = h->weight_tmp;
             break;
         default:
@@ -404,26 +405,29 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, int num_points,
     /* Update the weights grid. */
     if (h->weighting == OSKAR_WEIGHTING_UNIFORM)
     {
-        int num_cells, num_skipped = 0;
+        int grid_size, num_skipped = 0;
+        size_t num_cells;
 
         /* Resize the grid of weights if needed. */
-        num_cells = h->image_size * h->image_size;
-        if ((int)oskar_mem_length(weights_grid) < num_cells)
+        grid_size = oskar_imager_plane_size(h);
+        num_cells = grid_size * grid_size;
+        if (oskar_mem_length(weights_grid) < num_cells)
             oskar_mem_realloc(weights_grid, num_cells, status);
+        if (*status) return;
 
         if (oskar_mem_precision(weights_grid) == OSKAR_DOUBLE)
             oskar_grid_weights_write_d(num_points,
                     oskar_mem_double_const(uu, status),
                     oskar_mem_double_const(vv, status),
                     oskar_mem_double_const(weight, status),
-                    h->cellsize_rad, h->image_size, &num_skipped,
+                    h->cellsize_rad, grid_size, &num_skipped,
                     oskar_mem_double(weights_grid, status));
         else
             oskar_grid_weights_write_f(num_points,
                     oskar_mem_float_const(uu, status),
                     oskar_mem_float_const(vv, status),
                     oskar_mem_float_const(weight, status),
-                    h->cellsize_rad, h->image_size, &num_skipped,
+                    h->cellsize_rad, grid_size, &num_skipped,
                     oskar_mem_float(weights_grid, status));
         if (num_skipped > 0)
             printf("WARNING: Skipped %d visibility weights.\n", num_skipped);
@@ -466,19 +470,14 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
     int i, plane_size;
     if (*status) return;
 
-    /* Allocate the weights grids if required. */
+    /* Allocate empty weights grids if required. */
     if (!h->weights_grids)
     {
         h->weights_grids = (oskar_Mem**)
                 calloc(h->num_planes, sizeof(oskar_Mem*));
-        if (h->weighting == OSKAR_WEIGHTING_UNIFORM)
-        {
-            for (i = 0; i < h->num_planes; ++i)
-            {
-                h->weights_grids[i] = oskar_mem_create(h->imager_prec,
-                        OSKAR_CPU, h->image_size * h->image_size, status);
-            }
-        }
+        for (i = 0; i < h->num_planes; ++i)
+            h->weights_grids[i] = oskar_mem_create(h->imager_prec,
+                    OSKAR_CPU, 0, status);
     }
 
     /* If we're in coordinate-only mode, or the planes already exist,
@@ -490,10 +489,8 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
     h->plane_norm = (double*) calloc(h->num_planes, sizeof(double));
     plane_size = oskar_imager_plane_size(h);
     for (i = 0; i < h->num_planes; ++i)
-    {
         h->planes[i] = oskar_mem_create(oskar_imager_plane_type(h), OSKAR_CPU,
                 plane_size * plane_size, status);
-    }
 
     /* Create FITS files for the planes if required. */
     oskar_imager_create_fits_files(h, status);
