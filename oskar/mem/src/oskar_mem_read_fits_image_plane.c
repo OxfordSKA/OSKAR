@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,9 @@ extern "C" {
 #define FACTOR (2.0*sqrt(2.0*log(2.0)))
 
 oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
-        int i_chan, int i_stokes, int* image_width, int* image_height,
-        double* image_ra_deg, double* image_dec_deg, double* image_cellsize_deg,
-        double* image_time, double* image_freq, double* beam_area_pixels,
+        int i_chan, int i_stokes, int* image_size, double* image_crval_deg,
+        double* image_crpix, double* image_cellsize_deg,
+        double* image_time, double* image_freq_hz, double* beam_area_pixels,
         char** brightness_units, int* status)
 {
     int i, naxis = 0, imagetype = 0, anynul = 0;
@@ -130,18 +130,25 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
         goto range_error;
 
     /* Return requested image metadata. */
-    if (image_width)
-        *image_width   = naxes[0];
-    if (image_height)
-        *image_height  = naxes[1];
-    if (image_ra_deg)
-        *image_ra_deg  = crval[0];
-    if (image_dec_deg)
-        *image_dec_deg = crval[1];
+    if (image_size)
+    {
+        image_size[0] = naxes[0];
+        image_size[1] = naxes[1];
+    }
+    if (image_crval_deg)
+    {
+        image_crval_deg[0] = crval[0];
+        image_crval_deg[1] = crval[1];
+    }
+    if (image_crpix)
+    {
+        image_crpix[0] = crpix[0];
+        image_crpix[1] = crpix[1];
+    }
     if (image_cellsize_deg)
         *image_cellsize_deg = fabs(cdelt[1]);
-    if (image_freq && axis_chan >= 0)
-        *image_freq    = crval[axis_chan] + i_chan * cdelt[axis_chan];
+    if (image_freq_hz && axis_chan >= 0)
+        *image_freq_hz = crval[axis_chan] + i_chan * cdelt[axis_chan];
     if (image_time && axis_time >= 0)
         *image_time    = crval[axis_time] + i_time * cdelt[axis_time];
 

@@ -40,12 +40,12 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
         const char* default_map_units, int override_units, double frequency_hz,
         double spectral_index, int* status)
 {
-    double image_ra_deg = 0.0, image_dec_deg = 0.0;
+    double image_crval_deg[2], image_crpix[2];
     double image_cellsize_deg = 0.0, image_freq_hz = 0.0;
     double beam_area_pixels = 0.0, pixel_area_sr = 0.0;
     char *reported_map_units = 0, ordering = 0, coordsys = 0;
     int naxis = 0, nside = 0;
-    int image_width = 0, image_height = 0;
+    int image_size[2];
     oskar_Sky* t;
     oskar_Mem* data;
     fitsfile* fptr;
@@ -77,13 +77,14 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
     {
         /* Try to load image pixels. */
         data = oskar_mem_read_fits_image_plane(filename, 0, 0, 0,
-                &image_width, &image_height, &image_ra_deg, &image_dec_deg,
+                image_size, image_crval_deg, image_crpix,
                 &image_cellsize_deg, 0, &image_freq_hz, &beam_area_pixels,
                 &reported_map_units, status);
         pixel_area_sr = pow(image_cellsize_deg * M_PI / 180.0, 2.0);
     }
     if (*status)
     {
+        free(reported_map_units);
         oskar_mem_free(data, status);
         return 0;
     }
@@ -102,7 +103,7 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
                 spectral_index, nside, (coordsys == 'G'), status);
     else
         t = oskar_sky_from_image(precision, data,
-                image_width, image_height, image_ra_deg, image_dec_deg,
+                image_size, image_crval_deg, image_crpix,
                 image_cellsize_deg, image_freq_hz, spectral_index, status);
 
     return t;

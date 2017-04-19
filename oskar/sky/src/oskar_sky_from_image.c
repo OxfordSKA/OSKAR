@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,29 +40,20 @@ static void set_pixel(oskar_Sky* sky, int i, int x, int y, double val,
 
 
 oskar_Sky* oskar_sky_from_image(int precision, const oskar_Mem* image,
-        int image_width, int image_height, double image_ra_deg,
-        double image_dec_deg, double image_cellsize_deg, double image_freq_hz,
-        double spectral_index, int* status)
+        const int image_size[2], const double image_crval_deg[2],
+        const double image_crpix[2], double image_cellsize_deg,
+        double image_freq_hz, double spectral_index, int* status)
 {
     int i, type, x, y;
-    double crval[2], crpix[2], cdelt[2], val;
+    double crval[2], cdelt[2], val;
     oskar_Sky* sky;
 
     /* Check if safe to proceed. */
     if (*status) return 0;
 
-    /* Check the image size is even. */
-    if ((image_width % 2) || (image_height % 2))
-    {
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
-        return 0;
-    }
-
     /* Get reference pixels and reference values in radians. */
-    crpix[0] = image_width / 2 + 1;
-    crpix[1] = image_height / 2 + 1;
-    crval[0] = image_ra_deg * M_PI / 180.0;
-    crval[1] = image_dec_deg * M_PI / 180.0;
+    crval[0] = image_crval_deg[0] * M_PI / 180.0;
+    crval[1] = image_crval_deg[1] * M_PI / 180.0;
 
     /* Compute sine of pixel deltas for inverse orthographic projection. */
     cdelt[0] = -sin(image_cellsize_deg * M_PI / 180.0);
@@ -76,16 +67,16 @@ oskar_Sky* oskar_sky_from_image(int precision, const oskar_Mem* image,
     if (type == OSKAR_SINGLE)
     {
         const float *img = oskar_mem_float_const(image, status);
-        for (y = 0, i = 0; y < image_height; ++y)
+        for (y = 0, i = 0; y < image_size[1]; ++y)
         {
-            for (x = 0; x < image_width; ++x)
+            for (x = 0; x < image_size[0]; ++x)
             {
                 /* Check pixel value. */
-                val = (double) (img[image_width * y + x]);
+                val = (double) (img[image_size[0] * y + x]);
                 if (val == 0.0)
                     continue;
 
-                set_pixel(sky, i++, x, y, val, crval, crpix, cdelt,
+                set_pixel(sky, i++, x, y, val, crval, image_crpix, cdelt,
                         image_freq_hz, spectral_index, status);
             }
         }
@@ -93,16 +84,16 @@ oskar_Sky* oskar_sky_from_image(int precision, const oskar_Mem* image,
     else
     {
         const double *img = oskar_mem_double_const(image, status);
-        for (y = 0, i = 0; y < image_height; ++y)
+        for (y = 0, i = 0; y < image_size[1]; ++y)
         {
-            for (x = 0; x < image_width; ++x)
+            for (x = 0; x < image_size[0]; ++x)
             {
                 /* Check pixel value. */
-                val = img[image_width * y + x];
+                val = img[image_size[0] * y + x];
                 if (val == 0.0)
                     continue;
 
-                set_pixel(sky, i++, x, y, val, crval, crpix, cdelt,
+                set_pixel(sky, i++, x, y, val, crval, image_crpix, cdelt,
                         image_freq_hz, spectral_index, status);
             }
         }
