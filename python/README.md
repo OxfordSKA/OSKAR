@@ -1,0 +1,15 @@
+# The OSKAR Python Interface
+
+## Installation
+
+ 1. Make sure OSKAR itself has been built and installed.
+ 2. If necessary, edit the file `setup.cfg` to set the paths to the
+    OSKAR header and library installed on the system.
+ 3. From a terminal prompt in this directory, install the Python
+    interface using `pip install [--user] .`
+    - Note the final dot on the line above. (The `--user` flag is optional.)
+
+## Uninstallation
+
+After installation using the steps above, the OSKAR Python interface can
+be uninstalled using `pip uninstall oskarpy`
