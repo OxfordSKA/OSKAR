@@ -660,7 +660,7 @@ void oskar_imager_set_vis_phase_centre(oskar_Imager* h,
         M = h->M;
         M[0] = cos(d_a);           M[1] = 0.0;      M[2] = sin(d_a);
         M[3] = sin(d_a)*sin(d_d);  M[4] = cos(d_d); M[5] = -cos(d_a)*sin(d_d);
-        M[6] = -sin(d_a)*cos(d_d); M[7] = sin(d_a); M[8] = cos(d_a)*cos(d_d);
+        M[6] = -sin(d_a)*cos(d_d); M[7] = sin(d_d); M[8] = cos(d_a)*cos(d_d);
 
         oskar_convert_lon_lat_to_relative_directions_d(1,
                 &ra_rad, &dec_rad, ra0_rad, dec0_rad, &l1, &m1, &n1);
