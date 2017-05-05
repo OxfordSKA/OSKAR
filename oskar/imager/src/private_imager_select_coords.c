@@ -47,8 +47,8 @@ void oskar_imager_select_coords(const oskar_Imager* h,
     oskar_Mem *uu_ = 0, *vv_ = 0, *ww_ = 0;
     double inv_wavelength;
     const double s = 0.05;
-    const double df = h->freq_inc_hz;
-    const double dt = h->time_inc_sec / 86400.0;
+    const double df = h->freq_inc_hz != 0.0 ? h->freq_inc_hz : 1.0;
+    const double dt = h->time_inc_sec != 0.0 ? h->time_inc_sec / 86400.0 : 1.0;
     const double f0 = h->vis_freq_start_hz;
     const double t0 = h->vis_time_start_mjd_utc + 0.5 * dt;
 
