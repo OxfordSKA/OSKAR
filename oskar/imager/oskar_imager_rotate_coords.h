@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,14 +43,29 @@ extern "C" {
 
 /**
  * @brief
+ * Rotate baseline coordinates to a new phase centre.
  *
  * @details
+ * This function rotates a set of baseline coordinates to a new phase centre.
  *
+ * Prior to calling this function, the new phase centre must be set first
+ * using oskar_imager_set_direction(), and then the original phase centre
+ * must be set using oskar_imager_set_vis_phase_centre().
+ * Note that the order of these function calls is important.
+ *
+ * @param[in] h             Handle to imager.
+ * @param[in] num_coords    Number of baseline coordinates.
+ * @param[in] uu_in         Input baseline UU coordinates.
+ * @param[in] vv_in         Input baseline VV coordinates.
+ * @param[in] ww_in         Input baseline WW coordinates.
+ * @param[out] uu_out       Output baseline UU coordinates.
+ * @param[out] vv_out       Output baseline VV coordinates.
+ * @param[out] ww_out       Output baseline WW coordinates.
  */
 OSKAR_EXPORT
-void oskar_imager_rotate_coords(size_t num_coords, const oskar_Mem* uu_in,
-        const oskar_Mem* vv_in, const oskar_Mem* ww_in, const double M[9],
-        oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww);
+void oskar_imager_rotate_coords(const oskar_Imager* h, size_t num_coords,
+        const oskar_Mem* uu_in, const oskar_Mem* vv_in, const oskar_Mem* ww_in,
+        oskar_Mem* uu_out, oskar_Mem* vv_out, oskar_Mem* ww_out);
 
 #ifdef __cplusplus
 }

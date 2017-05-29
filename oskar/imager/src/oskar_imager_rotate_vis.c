@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,8 @@
  */
 
 #include "math/oskar_cmath.h"
-#include "imager/oskar_imager_rotate_vis.h"
+#include "imager/private_imager.h"
+#include "imager/oskar_imager.h"
 
 #include <stddef.h>
 
@@ -35,25 +36,30 @@
 extern "C" {
 #endif
 
-void oskar_imager_rotate_vis(size_t num_vis, const oskar_Mem* uu,
-        const oskar_Mem* vv, const oskar_Mem* ww, oskar_Mem* amps,
-        const double delta_l, const double delta_m, const double delta_n)
+void oskar_imager_rotate_vis(const oskar_Imager* h, size_t num_vis,
+        const oskar_Mem* uu_in, const oskar_Mem* vv_in, const oskar_Mem* ww_in,
+        oskar_Mem* amps)
 {
     size_t i;
+    const double delta_l = h->delta_l;
+    const double delta_m = h->delta_m;
+    const double delta_n = h->delta_n;
+    const double twopi = 2.0 * M_PI;
 
     if (oskar_mem_precision(amps) == OSKAR_DOUBLE)
     {
         const double *u, *v, *w;
         double2* a;
-        u = (const double*)oskar_mem_void_const(uu);
-        v = (const double*)oskar_mem_void_const(vv);
-        w = (const double*)oskar_mem_void_const(ww);
+        u = (const double*)oskar_mem_void_const(uu_in);
+        v = (const double*)oskar_mem_void_const(vv_in);
+        w = (const double*)oskar_mem_void_const(ww_in);
         a = (double2*)oskar_mem_void(amps);
 
+#pragma omp parallel for private(i)
         for (i = 0; i < num_vis; ++i)
         {
             double arg, phase_re, phase_im, re, im;
-            arg = 2.0*M_PI * (u[i] * delta_l + v[i] * delta_m + w[i] * delta_n);
+            arg = twopi * (u[i] * delta_l + v[i] * delta_m + w[i] * delta_n);
             phase_re = cos(arg);
             phase_im = sin(arg);
             re = a[i].x * phase_re - a[i].y * phase_im;
@@ -66,21 +72,22 @@ void oskar_imager_rotate_vis(size_t num_vis, const oskar_Mem* uu,
     {
         const float *u, *v, *w;
         float2* a;
-        u = (const float*)oskar_mem_void_const(uu);
-        v = (const float*)oskar_mem_void_const(vv);
-        w = (const float*)oskar_mem_void_const(ww);
+        u = (const float*)oskar_mem_void_const(uu_in);
+        v = (const float*)oskar_mem_void_const(vv_in);
+        w = (const float*)oskar_mem_void_const(ww_in);
         a = (float2*)oskar_mem_void(amps);
 
+#pragma omp parallel for private(i)
         for (i = 0; i < num_vis; ++i)
         {
-            float arg, phase_re, phase_im, re, im;
-            arg = 2.0*M_PI * (u[i] * delta_l + v[i] * delta_m + w[i] * delta_n);
+            double arg, phase_re, phase_im, re, im;
+            arg = twopi * (u[i] * delta_l + v[i] * delta_m + w[i] * delta_n);
             phase_re = cos(arg);
             phase_im = sin(arg);
             re = a[i].x * phase_re - a[i].y * phase_im;
             im = a[i].x * phase_im + a[i].y * phase_re;
-            a[i].x = re;
-            a[i].y = im;
+            a[i].x = (float) re;
+            a[i].y = (float) im;
         }
     }
 }

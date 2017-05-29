@@ -37,7 +37,7 @@ extern "C" {
 
 void oskar_imager_init_dft(oskar_Imager* h, int* status)
 {
-    int num_pixels;
+    size_t num_pixels;
     if (*status) return;
 
     /* Calculate pixel coordinate grid required for the DFT imager. */

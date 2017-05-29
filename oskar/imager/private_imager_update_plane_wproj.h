@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,15 +30,16 @@
 #define OSKAR_IMAGER_UPDATE_PLANE_WPROJ_H_
 
 #include <mem/oskar_mem.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_update_plane_wproj(oskar_Imager* h, int num_vis,
+void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
         const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
-        double* plane_norm, int* status);
+        double* plane_norm, size_t* num_skipped, int* status);
 
 #ifdef __cplusplus
 }

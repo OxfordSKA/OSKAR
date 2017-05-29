@@ -30,6 +30,7 @@
 
 #include "imager/oskar_imager_accessors.h"
 #include "imager/oskar_imager_create.h"
+#include "utility/oskar_timer.h"
 
 #include <stdlib.h>
 #include <float.h>
@@ -43,6 +44,13 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     oskar_Imager* h = 0;
     h = (oskar_Imager*) calloc(1, sizeof(oskar_Imager));
 
+    /* Create timers. */
+    h->tmr_grid_finalise = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    h->tmr_grid_update = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    h->tmr_init = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    h->tmr_read = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
+
     /* Create scratch arrays. */
     h->imager_prec = imager_precision;
     h->uu_im       = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
@@ -55,6 +63,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
             OSKAR_CPU, 0, status);
     h->weight_im   = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
     h->weight_tmp  = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
+    h->time_im     = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
 
     /* Check data type. */
     if (imager_precision != OSKAR_SINGLE && imager_precision != OSKAR_DOUBLE)

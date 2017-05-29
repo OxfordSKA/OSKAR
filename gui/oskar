@@ -1,5 +1,5 @@
 #!/bin/bash
 
-# Run the executable inside the oskar.app bundle in the current directory.
+# Run the executable inside the OSKAR.app bundle in the current directory.
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-$SCRIPTPATH/oskar.app/Contents/MacOS/oskar $@
+$SCRIPTPATH/OSKAR.app/Contents/MacOS/oskar $@

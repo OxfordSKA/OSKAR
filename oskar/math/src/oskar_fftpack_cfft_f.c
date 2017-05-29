@@ -80,95 +80,95 @@
  */
 
 #include <math.h>
-#include "imager/oskar_fftpack_cfft.h"
+#include "math/oskar_fftpack_cfft_f.h"
 
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 static void cfftmb(const int lot, const int jump, const int n, const int inc,
-        double *c, double *wsave, double *work);
+        float *c, float *wsave, float *work);
 static void cfftmf(const int lot, const int jump, const int n, const int inc,
-        double *c, double *wsave, double *work);
-static void cfftmi(const int n, double *wsave);
+        float *c, float *wsave, float *work);
+static void cfftmi(const int n, float *wsave);
 static void cmfm1b(const int lot, const int jump, const int n, const int inc,
-        double *restrict c, double *restrict ch, const double *restrict wa,
-        const double fnf, const double *restrict fac);
+        float *restrict c, float *restrict ch, const float *restrict wa,
+        const float fnf, const float *restrict fac);
 static void cmfm1f(const int lot, const int jump, const int n, const int inc,
-        double *restrict c, double *restrict ch, const double *restrict wa,
-        const double fnf, const double *restrict fac);
-static void mcfti1(const int n, double *restrict wa, double *restrict fnf,
-        double *restrict fac);
+        float *restrict c, float *restrict ch, const float *restrict wa,
+        const float fnf, const float *restrict fac);
+static void mcfti1(const int n, float *restrict wa, float *restrict fnf,
+        float *restrict fac);
 
 static void cmf2kb(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa);
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa);
 static void cmf3kb(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa);
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa);
 static void cmf4kb(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa);
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa);
 static void cmf5kb(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa);
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa);
 static void cmfgkb(const int lot, const int ido, const int ip, const int l1,
-        const int lid, const int na, double *restrict cc, double *restrict cc1,
-        const int im1, const int in1, double *restrict ch, double *restrict ch1,
-        const int im2, const int in2, const double *restrict wa);
+        const int lid, const int na, float *restrict cc, float *restrict cc1,
+        const int im1, const int in1, float *restrict ch, float *restrict ch1,
+        const int im2, const int in2, const float *restrict wa);
 
 static void cmf2kf(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa);
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa);
 static void cmf3kf(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa);
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa);
 static void cmf4kf(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa);
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa);
 static void cmf5kf(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa);
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa);
 static void cmfgkf(const int lot, const int ido, const int ip, const int l1,
-        const int lid, const int na, double *restrict cc, double *restrict cc1,
-        const int im1, const int in1, double *restrict ch, double *restrict ch1,
-        const int im2, const int in2, const double *restrict wa);
+        const int lid, const int na, float *restrict cc, float *restrict cc1,
+        const int im1, const int in1, float *restrict ch, float *restrict ch1,
+        const int im2, const int in2, const float *restrict wa);
 
-static void tables(const int ido, const int ip, double *restrict wa);
-static void factor(const int n, int *nf, double *fac);
+static void tables(const int ido, const int ip, float *restrict wa);
+static void factor(const int n, int *nf, float *fac);
 
 
-void oskar_fftpack_cfft2b(const int ldim, const int l, const int m,
-        double *c, double *wsave, double *work)
+void oskar_fftpack_cfft2b_f(const int ldim, const int l, const int m,
+        float *c, float *wsave, float *work)
 {
     /* Transform X lines of C array */
     cfftmb(l, 1, m, ldim, c,
-            &wsave[(l << 1) + (int) (log((double) l) / log(2.0)) + 2], work);
+            &wsave[(l << 1) + (int) (log((float) l) / log(2.0)) + 2], work);
 
     /* Transform Y lines of C array */
     cfftmb(m, ldim, l, 1, c, wsave, work);
 }
 
 
-void oskar_fftpack_cfft2f(const int ldim, const int l, const int m,
-        double *c, double *wsave, double *work)
+void oskar_fftpack_cfft2f_f(const int ldim, const int l, const int m,
+        float *c, float *wsave, float *work)
 {
     /* Transform X lines of C array */
     cfftmf(l, 1, m, ldim, c,
-            &wsave[(l << 1) + (int) (log((double) l) / log(2.0)) + 2], work);
+            &wsave[(l << 1) + (int) (log((float) l) / log(2.0)) + 2], work);
 
     /* Transform Y lines of C array */
     cfftmf(m, ldim, l, 1, c, wsave, work);
 }
 
 
-void oskar_fftpack_cfft2i(const int l, const int m, double *wsave)
+void oskar_fftpack_cfft2i_f(const int l, const int m, float *wsave)
 {
     cfftmi(l, wsave);
-    cfftmi(m, &wsave[(l << 1) + (int) (log((double) l) / log(2.0)) + 2]);
+    cfftmi(m, &wsave[(l << 1) + (int) (log((float) l) / log(2.0)) + 2]);
 }
 
 
 void cfftmb(const int lot, const int jump, const int n, const int inc,
-        double *c, double *wsave, double *work)
+        float *c, float *wsave, float *work)
 {
     int iw1;
     if (n == 1) return;
@@ -178,7 +178,7 @@ void cfftmb(const int lot, const int jump, const int n, const int inc,
 
 
 void cfftmf(const int lot, const int jump, const int n, const int inc,
-        double *c, double *wsave, double *work)
+        float *c, float *wsave, float *work)
 {
     int iw1;
     if (n == 1) return;
@@ -187,7 +187,7 @@ void cfftmf(const int lot, const int jump, const int n, const int inc,
 }
 
 
-void cfftmi(const int n, double *wsave)
+void cfftmi(const int n, float *wsave)
 {
     int iw1;
     if (n == 1) return;
@@ -197,8 +197,8 @@ void cfftmi(const int n, double *wsave)
 
 
 void cmf2kb(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa)
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa)
 {
     int i, k, m1, m2, m1d, m2s, o1, o2, i1, i2;
     wa -= 1;
@@ -209,7 +209,7 @@ void cmf2kb(const int lot, const int ido, const int l1, const int na,
     m2s = 1 - im2;
     if (ido > 1 || na == 1)
     {
-        double ti2, tr2, w1, w2;
+        float ti2, tr2, w1, w2;
         for (k = 1; k <= l1; ++k)
         {
             m2 = m2s;
@@ -252,7 +252,7 @@ void cmf2kb(const int lot, const int ido, const int l1, const int na,
     }
     else
     {
-        double chold1, chold2;
+        float chold1, chold2;
         for (k = 1; k <= l1; ++k)
         {
             for (m1 = 1; im1 < 0 ? m1 >= m1d : m1 <= m1d; m1 += im1)
@@ -272,8 +272,8 @@ void cmf2kb(const int lot, const int ido, const int l1, const int na,
 
 
 void cmf2kf(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa)
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa)
 {
     int i, k, m1, m2, m1d, m2s, o1, o2, i1, i2;
     wa -= 1 + (ido << 1);
@@ -284,7 +284,7 @@ void cmf2kf(const int lot, const int ido, const int l1, const int na,
     m2s = 1 - im2;
     if (ido > 1)
     {
-        double ti2, tr2, w1, w2;
+        float ti2, tr2, w1, w2;
         for (k = 1; k <= l1; ++k)
         {
             m2 = m2s;
@@ -327,8 +327,8 @@ void cmf2kf(const int lot, const int ido, const int l1, const int na,
     }
     else
     {
-        double sn, chold1, chold2;
-        sn = 1. / (double) (l1 << 1);
+        float sn, chold1, chold2;
+        sn = 1. / (float) (l1 << 1);
         if (na == 1)
         {
             for (k = 1; k <= l1; ++k)
@@ -370,13 +370,13 @@ void cmf2kf(const int lot, const int ido, const int l1, const int na,
 
 
 void cmf3kb(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa)
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa)
 {
-    static const double taur = -.5;
-    static const double taui = .866025403784439;
+    static const float taur = -.5;
+    static const float taui = .866025403784439;
     int i, k, m1, m2, m1d, m2s, o1, o2, o3, i1, i2, i3;
-    double ci2, ci3, cr2, cr3, di2, di3, dr2, dr3, ti2, tr2;
+    float ci2, ci3, cr2, cr3, di2, di3, dr2, dr3, ti2, tr2;
     wa -= 1;
     cc -= 2 * (1 + in1 * (1 + l1 * (1 + ido)));
     ch -= 2 * (1 + in2 * (1 + (l1 << 2)));
@@ -385,7 +385,7 @@ void cmf3kb(const int lot, const int ido, const int l1, const int na,
     m2s = 1 - im2;
     if (ido > 1 || na == 1)
     {
-        double w1, w2, w3, w4;
+        float w1, w2, w3, w4;
         for (k = 1; k <= l1; ++k)
         {
             m2 = m2s;
@@ -478,13 +478,13 @@ void cmf3kb(const int lot, const int ido, const int l1, const int na,
 
 
 void cmf3kf(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa)
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa)
 {
-    static const double taur = -.5;
-    static const double taui = -.866025403784439;
+    static const float taur = -.5;
+    static const float taui = -.866025403784439;
     int i, k, m1, m2, m1d, m2s, o1, o2, o3, i1, i2, i3;
-    double sn, ci2, ci3, di2, di3, cr2, cr3, dr2, dr3, ti2, tr2;
+    float sn, ci2, ci3, di2, di3, cr2, cr3, dr2, dr3, ti2, tr2;
     wa -= 1;
     cc -= 2 * (1 + in1 * (1 + l1 * (1 + ido)));
     ch -= 2 * (1 + in2 * (1 + (l1 << 2)));
@@ -493,7 +493,7 @@ void cmf3kf(const int lot, const int ido, const int l1, const int na,
     m2s = 1 - im2;
     if (ido > 1)
     {
-        double w1, w2, w3, w4;
+        float w1, w2, w3, w4;
         for (k = 1; k <= l1; ++k)
         {
             m2 = m2s;
@@ -560,7 +560,7 @@ void cmf3kf(const int lot, const int ido, const int l1, const int na,
     }
     else
     {
-        sn = 1. / (double) (l1 * 3);
+        sn = 1. / (float) (l1 * 3);
         if (na == 1)
         {
             for (k = 1; k <= l1; ++k)
@@ -619,12 +619,12 @@ void cmf3kf(const int lot, const int ido, const int l1, const int na,
 
 
 void cmf4kb(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa)
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa)
 {
     int i, k, m1, m2, m1d, m2s, o1, o2, o3, o4, i1, i2, i3, i4;
-    double ci2, ci3, ci4, cr3, cr2, cr4;
-    double ti1, ti2, ti3, ti4, tr1, tr2, tr3, tr4;
+    float ci2, ci3, ci4, cr3, cr2, cr4;
+    float ti1, ti2, ti3, ti4, tr1, tr2, tr3, tr4;
     wa -= 1;
     cc -= 2 * (1 + in1 * (1 + l1 * (1 + ido)));
     ch -= 2 * (1 + in2 * (1 + l1 * 5));
@@ -633,7 +633,7 @@ void cmf4kb(const int lot, const int ido, const int l1, const int na,
     m2s = 1 - im2;
     if (ido > 1 || na == 1)
     {
-        double w1, w2, w3, w4, w5, w6;
+        float w1, w2, w3, w4, w5, w6;
         for (k = 1; k <= l1; ++k)
         {
             m2 = m2s;
@@ -747,12 +747,12 @@ void cmf4kb(const int lot, const int ido, const int l1, const int na,
 
 
 void cmf4kf(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa)
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa)
 {
     int i, k, m1, m2, m1d, m2s, o1, o2, o3, o4, i1, i2, i3, i4;
-    double sn, ci2, ci3, ci4, cr3, cr2, cr4;
-    double ti1, ti2, ti3, ti4, tr1, tr2, tr3, tr4;
+    float sn, ci2, ci3, ci4, cr3, cr2, cr4;
+    float ti1, ti2, ti3, ti4, tr1, tr2, tr3, tr4;
     wa -= 1;
     cc -= 2 * (1 + in1 * (1 + l1 * (1 + ido)));
     ch -= 2 * (1 + in2 * (1 + l1 * 5));
@@ -761,7 +761,7 @@ void cmf4kf(const int lot, const int ido, const int l1, const int na,
     m2s = 1 - im2;
     if (ido > 1)
     {
-        double w1, w2, w3, w4, w5, w6;
+        float w1, w2, w3, w4, w5, w6;
         for (k = 1; k <= l1; ++k)
         {
             m2 = m2s;
@@ -844,7 +844,7 @@ void cmf4kf(const int lot, const int ido, const int l1, const int na,
     }
     else
     {
-        sn = 1. / (double) (l1 << 2);
+        sn = 1. / (float) (l1 << 2);
         if (na == 1)
         {
             for (k = 1; k <= l1; ++k)
@@ -914,17 +914,17 @@ void cmf4kf(const int lot, const int ido, const int l1, const int na,
 
 
 void cmf5kb(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa)
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa)
 {
-    static const double tr11 = .3090169943749474;
-    static const double ti11 = .9510565162951536;
-    static const double tr12 = -.8090169943749474;
-    static const double ti12 = .5877852522924731;
+    static const float tr11 = .3090169943749474;
+    static const float ti11 = .9510565162951536;
+    static const float tr12 = -.8090169943749474;
+    static const float ti12 = .5877852522924731;
     int i, k, m1, m2, m1d, m2s, o1, o2, o3, o4, o5, i1, i2, i3, i4, i5;
-    double ci2, ci3, ci4, ci5;
-    double di3, di4, di5, di2, cr2, cr3, cr5, cr4, ti2, ti3, ti4;
-    double ti5, dr3, dr4, dr5, dr2, tr2, tr3, tr4, tr5, chold1, chold2;
+    float ci2, ci3, ci4, ci5;
+    float di3, di4, di5, di2, cr2, cr3, cr5, cr4, ti2, ti3, ti4;
+    float ti5, dr3, dr4, dr5, dr2, tr2, tr3, tr4, tr5, chold1, chold2;
     wa -= 1;
     cc -= 2 * (1 + in1 * (1 + l1 * (1 + ido)));
     ch -= 2 * (1 + in2 * (1 + l1 * 6));
@@ -933,7 +933,7 @@ void cmf5kb(const int lot, const int ido, const int l1, const int na,
     m2s = 1 - im2;
     if (ido > 1 || na == 1)
     {
-        double w1, w2, w3, w4, w5, w6, w7, w8;
+        float w1, w2, w3, w4, w5, w6, w7, w8;
         for (k = 1; k <= l1; ++k)
         {
             m2 = m2s;
@@ -1088,17 +1088,17 @@ void cmf5kb(const int lot, const int ido, const int l1, const int na,
 
 
 void cmf5kf(const int lot, const int ido, const int l1, const int na,
-        double *restrict cc, const int im1, const int in1, double *restrict ch,
-        const int im2, const int in2, const double *restrict wa)
+        float *restrict cc, const int im1, const int in1, float *restrict ch,
+        const int im2, const int in2, const float *restrict wa)
 {
-    static const double tr11 = .3090169943749474;
-    static const double ti11 = -.9510565162951536;
-    static const double tr12 = -.8090169943749474;
-    static const double ti12 = -.5877852522924731;
+    static const float tr11 = .3090169943749474;
+    static const float ti11 = -.9510565162951536;
+    static const float tr12 = -.8090169943749474;
+    static const float ti12 = -.5877852522924731;
     int i, k, m1, m2, m1d, m2s, o1, o2, o3, o4, o5, i1, i2, i3, i4, i5;
-    double sn, ci2, ci3, ci4, ci5;
-    double di3, di4, di5, di2, cr2, cr3, cr5, cr4, ti2, ti3, ti4;
-    double ti5, dr3, dr4, dr5, dr2, tr2, tr3, tr4, tr5, chold1, chold2;
+    float sn, ci2, ci3, ci4, ci5;
+    float di3, di4, di5, di2, cr2, cr3, cr5, cr4, ti2, ti3, ti4;
+    float ti5, dr3, dr4, dr5, dr2, tr2, tr3, tr4, tr5, chold1, chold2;
     wa -= 1;
     cc -= 2 * (1 + in1 * (1 + l1 * (1 + ido)));
     ch -= 2 * (1 + in2 * (1 + l1 * 6));
@@ -1107,7 +1107,7 @@ void cmf5kf(const int lot, const int ido, const int l1, const int na,
     m2s = 1 - im2;
     if (ido > 1)
     {
-        double w1, w2, w3, w4, w5, w6, w7, w8;
+        float w1, w2, w3, w4, w5, w6, w7, w8;
         for (k = 1; k <= l1; ++k)
         {
             m2 = m2s;
@@ -1218,7 +1218,7 @@ void cmf5kf(const int lot, const int ido, const int l1, const int na,
     }
     else
     {
-        sn = 1. / (double) (l1 * 5);
+        sn = 1. / (float) (l1 * 5);
         if (na == 1)
         {
             for (k = 1; k <= l1; ++k)
@@ -1313,13 +1313,13 @@ void cmf5kf(const int lot, const int ido, const int l1, const int na,
 
 
 void cmfgkb(const int lot, const int ido, const int ip, const int l1,
-        const int lid, const int na, double *restrict cc, double *restrict cc1,
-        const int im1, const int in1, double *restrict ch, double *restrict ch1,
-        const int im2, const int in2, const double *restrict wa)
+        const int lid, const int na, float *restrict cc, float *restrict cc1,
+        const int im1, const int in1, float *restrict ch, float *restrict ch1,
+        const int im2, const int in2, const float *restrict wa)
 {
     int i, j, k, l, m1, m2, jc, lc, ki, m1d, m2s, ipp2, idlj, ipph, ipm1;
     int i1, i2, i3, o1, o2;
-    double wai, war, chold1, chold2, w1, w2;
+    float wai, war, chold1, chold2, w1, w2;
     ipm1 = ip - 1;
     wa -= 1 + ido * (1 + ipm1);
     cc1 -= 2 * (1 + in1 * (1 + lid));
@@ -1535,13 +1535,13 @@ void cmfgkb(const int lot, const int ido, const int ip, const int l1,
 
 
 void cmfgkf(const int lot, const int ido, const int ip, const int l1,
-        const int lid, const int na, double *restrict cc, double *restrict cc1,
-        const int im1, const int in1, double *restrict ch, double *restrict ch1,
-        const int im2, const int in2, const double *restrict wa)
+        const int lid, const int na, float *restrict cc, float *restrict cc1,
+        const int im1, const int in1, float *restrict ch, float *restrict ch1,
+        const int im2, const int in2, const float *restrict wa)
 {
     int i, j, k, l, m1, m2, jc, lc, ki, m1d, m2s, ipp2, idlj, ipph, ipm1;
     int i1, i2, i3, o1, o2;
-    double sn, wai, war, chold1, chold2, w1, w2;
+    float sn, wai, war, chold1, chold2, w1, w2;
     ipm1 = ip - 1;
     wa -= 1 + ido * (1 + ipm1);
     cc1 -= 2 * (1 + in1 * (1 + lid));
@@ -1733,7 +1733,7 @@ void cmfgkf(const int lot, const int ido, const int ip, const int l1,
     }
     else
     {
-        sn = 1. / (double) (ip * l1);
+        sn = 1. / (float) (ip * l1);
         if (na == 1)
         {
             for (ki = 1; ki <= lid; ++ki)
@@ -1806,8 +1806,8 @@ void cmfgkf(const int lot, const int ido, const int ip, const int l1,
 
 
 void cmfm1b(const int lot, const int jump, const int n, const int inc,
-        double *restrict c, double *restrict ch, const double *restrict wa,
-        const double fnf, const double *restrict fac)
+        float *restrict c, float *restrict ch, const float *restrict wa,
+        const float fnf, const float *restrict fac)
 {
     int k1, l1 = 1, l2, na = 0, nf, ip, iw = 0, lid, ido, nbr;
     nf = (int) fnf;
@@ -1861,8 +1861,8 @@ void cmfm1b(const int lot, const int jump, const int n, const int inc,
 
 
 void cmfm1f(const int lot, const int jump, const int n, const int inc,
-        double *restrict c, double *restrict ch, const double *restrict wa,
-        const double fnf, const double *restrict fac)
+        float *restrict c, float *restrict ch, const float *restrict wa,
+        const float fnf, const float *restrict fac)
 {
     int k1, l1 = 1, l2, na = 0, nf, ip, iw = 0, lid, ido, nbr;
     nf = (int) fnf;
@@ -1915,7 +1915,7 @@ void cmfm1f(const int lot, const int jump, const int n, const int inc,
 }
 
 
-void factor(const int n, int *nf, double *fac)
+void factor(const int n, int *nf, float *fac)
 {
     static const int ntryh[4] = { 4,2,3,5 };
     int j, nl, nq, nr, ntry;
@@ -1935,18 +1935,18 @@ L104:
     nr = nl - ntry * nq;
     if (nr != 0) goto L101;
     ++(*nf);
-    fac[*nf] = (double) ntry;
+    fac[*nf] = (float) ntry;
     nl = nq;
     if (nl != 1) goto L104;
 }
 
 
-void mcfti1(const int n, double *restrict wa, double *restrict fnf,
-        double *restrict fac)
+void mcfti1(const int n, float *restrict wa, float *restrict fnf,
+        float *restrict fac)
 {
     int k1, l1 = 1, l2, nf, ip, iw = 0, ido;
     factor(n, &nf, fac);
-    *fnf = (double) nf;
+    *fnf = (float) nf;
     for (k1 = 0; k1 < nf; ++k1)
     {
         ip = (int) fac[k1];
@@ -1959,27 +1959,27 @@ void mcfti1(const int n, double *restrict wa, double *restrict fnf,
 }
 
 
-void tables(const int ido, const int ip, double *restrict wa)
+void tables(const int ido, const int ip, float *restrict wa)
 {
     int ipm1, i, j;
-    double tpi, arg1, arg2, arg3, arg4, argz;
+    float tpi, arg1, arg2, arg3, arg4, argz;
     ipm1 = ip - 1;
     wa -= (ido * ip);
 
     tpi = 8.0 * atan(1.0);
-    argz = tpi / (double) (ip);
-    arg1 = tpi / (double) (ido * ip);
+    argz = tpi / (float) (ip);
+    arg1 = tpi / (float) (ido * ip);
     for (j = 1; j < ip; ++j)
     {
-        arg2 = (double) j * arg1;
+        arg2 = (float) j * arg1;
         for (i = 0; i < ido; ++i)
         {
-            arg3 = (double) i * arg2;
+            arg3 = (float) i * arg2;
             wa[i + (j + ipm1) * ido] = cos(arg3);
             wa[i + (j + (ipm1 << 1)) * ido] = sin(arg3);
         }
         if (ip <= 5) continue;
-        arg4 = (double) j * argz;
+        arg4 = (float) j * argz;
         wa[(j + ipm1) * ido] = cos(arg4);
         wa[(j + (ipm1 << 1)) * ido] = sin(arg4);
     }

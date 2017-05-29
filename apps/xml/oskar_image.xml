@@ -62,12 +62,6 @@
         <desc>The maximum visibility channel centre frequency to include in
             the image or image cube, in Hz.</desc>
     </s>
-    <s k="time_snapshots" priority="1"><label>Time snapshots</label>
-        <type name="bool" default="false"/>
-        <desc>If true, then produce an image cube containing snapshots
-            for each time step. If false, then use time-synthesis to stack
-            the times in the final image.</desc>
-    </s>
     <s k="time_min_utc"><label>Minimum time (UTC)</label>
         <type name="DateTime" default="0.0"/>
         <desc>The minimum visibility time centroid to include in the image.

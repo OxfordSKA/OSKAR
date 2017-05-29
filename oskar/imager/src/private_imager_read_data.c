@@ -35,6 +35,7 @@
 #include "ms/oskar_measurement_set.h"
 #include "vis/oskar_vis_block.h"
 #include "vis/oskar_vis_header.h"
+#include "utility/oskar_timer.h"
 
 #include <float.h>
 #include <math.h>
@@ -51,9 +52,9 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
 {
 #ifndef OSKAR_NO_MS
     oskar_MeasurementSet* ms;
-    oskar_Mem *uvw, *u, *v, *w, *weight, *data, *scratch = 0, *ptr;
-    int num_times, num_channels, num_stations, num_baselines, num_pols;
-    int start_row, num_rows, start_time = 0, end_time = 0, type;
+    oskar_Mem *uvw, *u, *v, *w, *data, *weight, *time_centroid;
+    int num_channels, num_pols, num_stations, type;
+    size_t num_baselines, start_row, num_rows;
     double *uvw_, *u_, *v_, *w_;
     if (*status) return;
 
@@ -64,38 +65,19 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-    num_rows = (int) oskar_ms_num_rows(ms);
+    num_rows = (size_t) oskar_ms_num_rows(ms);
     num_stations = (int) oskar_ms_num_stations(ms);
     num_baselines = num_stations * (num_stations - 1) / 2;
     num_pols = (int) oskar_ms_num_pols(ms);
     num_channels = (int) oskar_ms_num_channels(ms);
-    num_times = num_rows / num_baselines;
-
-    /* Check for irregular data and override time synthesis mode if required. */
-    if (num_rows % num_baselines != 0)
-    {
-        oskar_log_warning(h->log,
-                "Irregular data detected. Using full time synthesis.");
-        oskar_imager_set_time_min_utc(h, 0.0);
-        oskar_imager_set_time_max_utc(h, -1.0);
-        oskar_imager_set_time_snapshots(h, 0);
-    }
 
     /* Set visibility meta-data. */
     oskar_imager_set_vis_frequency(h,
             oskar_ms_freq_start_hz(ms),
             oskar_ms_freq_inc_hz(ms), num_channels);
-    oskar_imager_set_vis_time(h,
-            oskar_ms_time_start_mjd_utc(ms),
-            oskar_ms_time_inc_sec(ms), num_times);
     oskar_imager_set_vis_phase_centre(h,
             oskar_ms_phase_centre_ra_rad(ms) * 180/M_PI,
             oskar_ms_phase_centre_dec_rad(ms) * 180/M_PI);
-    if (*status)
-    {
-        oskar_ms_close(ms);
-        return;
-    }
 
     /* Create arrays. */
     uvw = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 3 * num_baselines, status);
@@ -104,6 +86,8 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
     w = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_baselines, status);
     weight = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU,
             num_baselines * num_pols, status);
+    time_centroid = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_baselines,
+            status);
     uvw_ = oskar_mem_double(uvw, status);
     u_ = oskar_mem_double(u, status);
     v_ = oskar_mem_double(v, status);
@@ -112,18 +96,15 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
     if (num_pols == 4) type |= OSKAR_MATRIX;
     data = oskar_mem_create(type, OSKAR_CPU,
             num_baselines * num_channels, status);
-    if (num_channels > 1)
-        scratch = oskar_mem_create(type, OSKAR_CPU,
-                num_baselines * num_channels, status);
 
     /* Loop over visibility blocks. */
     for (start_row = 0; start_row < num_rows; start_row += num_baselines)
     {
-        int i, block_size;
-        size_t allocated, required;
+        size_t allocated, required, block_size, i;
         if (*status) break;
 
         /* Read rows from Measurement Set. */
+        oskar_timer_resume(h->tmr_read);
         block_size = num_rows - start_row;
         if (block_size > num_baselines) block_size = num_baselines;
         allocated = oskar_mem_length(uvw) *
@@ -134,35 +115,15 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
                 oskar_mem_element_size(oskar_mem_type(weight));
         oskar_ms_read_column(ms, "WEIGHT", start_row, block_size,
                 allocated, oskar_mem_void(weight), &required, status);
+        allocated = oskar_mem_length(time_centroid) *
+                oskar_mem_element_size(oskar_mem_type(time_centroid));
+        oskar_ms_read_column(ms, "TIME_CENTROID", start_row, block_size,
+                allocated, oskar_mem_void(time_centroid), &required, status);
         allocated = oskar_mem_length(data) *
                 oskar_mem_element_size(oskar_mem_type(data));
         oskar_ms_read_column(ms, h->ms_column, start_row, block_size,
                 allocated, oskar_mem_void(data), &required, status);
-        ptr = data;
         if (*status) break;
-
-        /* Swap baseline and channel dimensions. */
-        if (num_channels != 1)
-        {
-            int b, c, p, k, l;
-            float *in, *out;
-            ptr = scratch;
-            in  = oskar_mem_float(data, status);
-            out = oskar_mem_float(ptr, status);
-            for (c = 0; c < num_channels; ++c)
-            {
-                for (b = 0; b < block_size; ++b)
-                {
-                    for (p = 0; p < num_pols; ++p)
-                    {
-                        k = (num_pols * (c * block_size + b) + p) << 1;
-                        l = (num_pols * (b * num_channels + c) + p) << 1;
-                        out[k] = in[l];
-                        out[k + 1] = in[l + 1];
-                    }
-                }
-            }
-        }
 
         /* Split up baseline coordinates. */
         for (i = 0; i < block_size; ++i)
@@ -173,10 +134,9 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
         }
 
         /* Update the imager with the data. */
-        oskar_imager_update(h, u, v, w, ptr, weight, start_time, end_time,
-                0, num_channels - 1, block_size, num_pols, status);
-        start_time += 1;
-        end_time += 1;
+        oskar_timer_pause(h->tmr_read);
+        oskar_imager_update(h, block_size, 0, num_channels - 1, num_pols,
+                u, v, w, data, weight, time_centroid, status);
         *percent_done = (int) round(100.0 * (
                 (start_row + block_size) / (double)(num_rows * num_files) +
                 i_file / (double)num_files));
@@ -191,8 +151,8 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
     oskar_mem_free(v, status);
     oskar_mem_free(w, status);
     oskar_mem_free(data, status);
-    oskar_mem_free(scratch, status);
     oskar_mem_free(weight, status);
+    oskar_mem_free(time_centroid, status);
     oskar_ms_close(ms);
 #else
     oskar_log_error(h->log, "OSKAR was compiled without Measurement Set support.");
@@ -206,83 +166,128 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
         int* status)
 {
     oskar_Binary* vis_file;
-    oskar_VisBlock* blk;
-    oskar_VisHeader* hdr;
-    oskar_Mem* weight;
+    oskar_VisBlock* block;
+    oskar_VisHeader* header;
+    oskar_Mem *weight, *time_centroid, *time_slice, *scratch = 0, *ptr;
     int max_times_per_block, tags_per_block, i_block, num_blocks;
-    int num_times, num_channels, num_stations, num_baselines, num_pols;
+    int num_times_tot, num_channels_tot, num_stations, num_baselines, num_pols;
+    double time_start_mjd, time_inc_sec;
     if (*status) return;
 
     /* Read the header. */
     vis_file = oskar_binary_create(filename, 'r', status);
-    hdr = oskar_vis_header_read(vis_file, status);
+    header = oskar_vis_header_read(vis_file, status);
     if (*status)
     {
-        oskar_vis_header_free(hdr, status);
+        oskar_vis_header_free(header, status);
         oskar_binary_free(vis_file);
         return;
     }
-    max_times_per_block = oskar_vis_header_max_times_per_block(hdr);
-    tags_per_block = oskar_vis_header_num_tags_per_block(hdr);
-    num_times = oskar_vis_header_num_times_total(hdr);
-    num_channels = oskar_vis_header_num_channels_total(hdr);
-    num_stations = oskar_vis_header_num_stations(hdr);
+    max_times_per_block = oskar_vis_header_max_times_per_block(header);
+    tags_per_block = oskar_vis_header_num_tags_per_block(header);
+    num_times_tot = oskar_vis_header_num_times_total(header);
+    num_channels_tot = oskar_vis_header_num_channels_total(header);
+    num_stations = oskar_vis_header_num_stations(header);
     num_baselines = num_stations * (num_stations - 1) / 2;
-    num_pols = oskar_type_is_matrix(oskar_vis_header_amp_type(hdr)) ? 4 : 1;
-    num_blocks = (num_times + max_times_per_block - 1) /
+    num_pols = oskar_type_is_matrix(oskar_vis_header_amp_type(header)) ? 4 : 1;
+    num_blocks = (num_times_tot + max_times_per_block - 1) /
             max_times_per_block;
+    time_start_mjd = oskar_vis_header_time_start_mjd_utc(header) * 86400.0;
+    time_inc_sec = oskar_vis_header_time_inc_sec(header);
 
     /* Set visibility meta-data. */
     oskar_imager_set_vis_frequency(h,
-            oskar_vis_header_freq_start_hz(hdr),
-            oskar_vis_header_freq_inc_hz(hdr), num_channels);
-    oskar_imager_set_vis_time(h,
-            oskar_vis_header_time_start_mjd_utc(hdr),
-            oskar_vis_header_time_inc_sec(hdr), num_times);
+            oskar_vis_header_freq_start_hz(header),
+            oskar_vis_header_freq_inc_hz(header), num_channels_tot);
     oskar_imager_set_vis_phase_centre(h,
-            oskar_vis_header_phase_centre_ra_deg(hdr),
-            oskar_vis_header_phase_centre_dec_deg(hdr));
-    if (*status)
-    {
-        oskar_vis_header_free(hdr, status);
-        oskar_binary_free(vis_file);
-        return;
-    }
+            oskar_vis_header_phase_centre_ra_deg(header),
+            oskar_vis_header_phase_centre_dec_deg(header));
 
-    /* Create weights array and set all to 1. */
-    weight = oskar_mem_create(
-            oskar_type_precision(oskar_vis_header_amp_type(hdr)),
+    /* Create scratch arrays. Weights are all 1. */
+    time_centroid = oskar_mem_create(OSKAR_DOUBLE,
+            OSKAR_CPU, num_baselines * max_times_per_block, status);
+    time_slice = oskar_mem_create_alias(0, 0, 0, status);
+    weight = oskar_mem_create(h->imager_prec,
             OSKAR_CPU, num_baselines * num_pols * max_times_per_block, status);
     oskar_mem_set_value_real(weight, 1.0, 0, 0, status);
+    if (num_channels_tot > 1)
+        scratch = oskar_mem_create(oskar_vis_header_amp_type(header), OSKAR_CPU,
+                num_baselines * num_channels_tot * max_times_per_block, status);
 
     /* Loop over visibility blocks. */
-    blk = oskar_vis_block_create_from_header(OSKAR_CPU, hdr, status);
+    block = oskar_vis_block_create_from_header(OSKAR_CPU, header, status);
     for (i_block = 0; i_block < num_blocks; ++i_block)
     {
-        int start_time, end_time, start_chan, end_chan, dim_start_and_size[6];
+        int t, num_times, num_channels, start_time, start_chan, end_chan;
+        size_t num_rows;
         if (*status) break;
 
-        /* Read block metadata. */
+        /* Read the visibility data. */
+        oskar_timer_resume(h->tmr_read);
         oskar_binary_set_query_search_start(vis_file,
                 i_block * tags_per_block, status);
-        oskar_binary_read(vis_file, OSKAR_INT,
-                OSKAR_TAG_GROUP_VIS_BLOCK,
-                OSKAR_VIS_BLOCK_TAG_DIM_START_AND_SIZE, i_block,
-                sizeof(dim_start_and_size), dim_start_and_size, status);
-        start_time = dim_start_and_size[0];
-        start_chan = dim_start_and_size[1];
-        end_time   = start_time + dim_start_and_size[2] - 1;
-        end_chan   = start_chan + dim_start_and_size[3] - 1;
+        oskar_vis_block_read(block, header, vis_file, i_block, status);
+        start_time   = oskar_vis_block_start_time_index(block);
+        start_chan   = oskar_vis_block_start_channel_index(block);
+        num_times    = oskar_vis_block_num_times(block);
+        num_channels = oskar_vis_block_num_channels(block);
+        num_rows     = num_times * num_baselines;
+        end_chan     = start_chan + num_channels - 1;
+
+        /* Fill in the time centroid values. */
+        for (t = 0; t < num_times; ++t)
+        {
+            oskar_mem_set_alias(time_slice, time_centroid,
+                    t * num_baselines, num_baselines, status);
+            oskar_mem_set_value_real(time_slice,
+                    time_start_mjd + (start_time + t + 0.5) * time_inc_sec,
+                    0, num_baselines, status);
+        }
+
+        /* Swap baseline and channel dimensions. */
+        ptr = oskar_vis_block_cross_correlations(block);
+#define SWAP_LOOP \
+        for (t = 0; t < num_times; ++t)                                  \
+            for (c = 0; c < num_channels; ++c)                           \
+                for (b = 0; b < num_baselines; ++b)                      \
+                    for (p = 0; p < num_pols; ++p)                       \
+                    {                                                    \
+                        k = (num_pols * (num_baselines *                 \
+                                (num_channels * t + c) + b) + p) << 1;   \
+                        l = (num_pols * (num_channels *                  \
+                                (num_baselines * t + b) + c) + p) << 1;  \
+                        out[l] = in[k];                                  \
+                        out[l + 1] = in[k + 1];                          \
+                    }
+        if (num_channels != 1)
+        {
+            int b, c, p;
+            size_t k, l;
+            if (oskar_mem_precision(ptr) == OSKAR_SINGLE)
+            {
+                float *in, *out;
+                in  = oskar_mem_float(ptr, status);
+                out = oskar_mem_float(scratch, status);
+                SWAP_LOOP
+            }
+            else
+            {
+                double *in, *out;
+                in  = oskar_mem_double(ptr, status);
+                out = oskar_mem_double(scratch, status);
+                SWAP_LOOP
+            }
+            ptr = scratch;
+        }
+#undef SWAP_LOOP
 
         /* Update the imager with the data. */
-        oskar_vis_block_read(blk, hdr, vis_file, i_block, status);
-        oskar_imager_update(h,
-                oskar_vis_block_baseline_uu_metres(blk),
-                oskar_vis_block_baseline_vv_metres(blk),
-                oskar_vis_block_baseline_ww_metres(blk),
-                oskar_vis_block_cross_correlations(blk), weight,
-                start_time, end_time, start_chan, end_chan,
-                num_baselines, num_pols, status);
+        oskar_timer_pause(h->tmr_read);
+        oskar_imager_update(h, num_rows, start_chan, end_chan, num_pols,
+                oskar_vis_block_baseline_uu_metres(block),
+                oskar_vis_block_baseline_vv_metres(block),
+                oskar_vis_block_baseline_ww_metres(block),
+                ptr, weight, time_centroid, status);
         *percent_done = (int) round(100.0 * (
                 (i_block + 1) / (double)(num_blocks * num_files) +
                 i_file / (double)num_files));
@@ -292,9 +297,12 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
             *percent_next = 10 + 10 * (*percent_done / 10);
         }
     }
+    oskar_mem_free(scratch, status);
     oskar_mem_free(weight, status);
-    oskar_vis_block_free(blk, status);
-    oskar_vis_header_free(hdr, status);
+    oskar_mem_free(time_centroid, status);
+    oskar_mem_free(time_slice, status);
+    oskar_vis_block_free(block, status);
+    oskar_vis_header_free(header, status);
     oskar_binary_free(vis_file);
 }
 

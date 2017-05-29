@@ -32,18 +32,16 @@
 #include "imager/private_imager_update_plane_fft.h"
 #include "imager/oskar_grid_simple.h"
 
-#include <stdlib.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
+void oskar_imager_update_plane_fft(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* amps,
         const oskar_Mem* weight, oskar_Mem* plane, double* plane_norm,
-        int* status)
+        size_t* num_skipped, int* status)
 {
-    int grid_size, num_skipped = 0;
+    int grid_size;
     size_t num_cells;
     if (*status) return;
     grid_size = oskar_imager_plane_size(h);
@@ -59,20 +57,18 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
                 oskar_mem_double_const(uu, status),
                 oskar_mem_double_const(vv, status),
                 oskar_mem_double_const(amps, status),
-                oskar_mem_double_const(weight, status), h->cellsize_rad,
-                grid_size, &num_skipped, plane_norm,
+                oskar_mem_double_const(weight, status),
+                h->cellsize_rad, grid_size, num_skipped, plane_norm,
                 oskar_mem_double(plane, status));
     else
         oskar_grid_simple_f(h->support, h->oversample,
-                oskar_mem_double_const(h->conv_func, status), num_vis,
+                oskar_mem_float_const(h->conv_func, status), num_vis,
                 oskar_mem_float_const(uu, status),
                 oskar_mem_float_const(vv, status),
                 oskar_mem_float_const(amps, status),
-                oskar_mem_float_const(weight, status), h->cellsize_rad,
-                grid_size, &num_skipped, plane_norm,
+                oskar_mem_float_const(weight, status),
+                (float) (h->cellsize_rad), grid_size, num_skipped, plane_norm,
                 oskar_mem_float(plane, status));
-    if (num_skipped > 0)
-        printf("WARNING: Skipped %d visibility points.\n", num_skipped);
 }
 
 #ifdef __cplusplus

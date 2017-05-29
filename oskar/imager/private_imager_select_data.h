@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_SELECT_COORDS_H_
-#define OSKAR_IMAGER_SELECT_COORDS_H_
+#ifndef OSKAR_IMAGER_SELECT_DATA_H_
+#define OSKAR_IMAGER_SELECT_DATA_H_
 
 #include <mem/oskar_mem.h>
 #include <stddef.h>
@@ -36,14 +36,31 @@
 extern "C" {
 #endif
 
-void oskar_imager_select_coords(const oskar_Imager* h,
-        int start_time, int end_time, int start_chan, int end_chan,
-        int num_baselines, const oskar_Mem* vis_uu, const oskar_Mem* vis_vv,
-        const oskar_Mem* vis_ww, double im_time_utc, double im_freq_hz,
-        oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, size_t* num, int* status);
+void oskar_imager_select_data(
+        const oskar_Imager* h,
+        size_t num_rows,
+        int start_chan,
+        int end_chan,
+        int num_pols,
+        const oskar_Mem* uu_in,
+        const oskar_Mem* vv_in,
+        const oskar_Mem* ww_in,
+        const oskar_Mem* vis_in,
+        const oskar_Mem* weight_in,
+        const oskar_Mem* time_in,
+        double im_freq_hz,
+        int im_pol,
+        size_t* num_out,
+        oskar_Mem* uu_out,
+        oskar_Mem* vv_out,
+        oskar_Mem* ww_out,
+        oskar_Mem* vis_out,
+        oskar_Mem* weight_out,
+        oskar_Mem* time_out,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_IMAGER_SELECT_COORDS_H_ */
+#endif /* OSKAR_IMAGER_SELECT_DATA_H_ */

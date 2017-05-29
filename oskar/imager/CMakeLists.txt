@@ -3,9 +3,6 @@
 #
 
 set(imager_SRC
-    src/oskar_fftpack_cfft.c
-    src/oskar_fftpack_cfft_f.c
-    src/oskar_fftphase.c
     src/oskar_grid_correction.c
     src/oskar_grid_functions_spheroidal.c
     src/oskar_grid_functions_pillbox.c
@@ -25,6 +22,7 @@ set(imager_SRC
     src/oskar_imager_update.c
     src/private_imager_composite_nearest_even.c
     src/private_imager_create_fits_files.c
+    src/private_imager_filter_time.c
     src/private_imager_filter_uv.c
     src/private_imager_free_gpu_data.c
     src/private_imager_generate_w_phase_screen.c
@@ -34,8 +32,7 @@ set(imager_SRC
     src/private_imager_read_coords.c
     src/private_imager_read_data.c
     src/private_imager_read_dims.c
-    src/private_imager_select_coords.c
-    src/private_imager_select_vis.c
+    src/private_imager_select_data.c
     src/private_imager_set_num_planes.c
     src/private_imager_update_plane_dft.c
     src/private_imager_update_plane_fft.c

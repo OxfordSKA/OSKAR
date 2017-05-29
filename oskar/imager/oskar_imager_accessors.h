@@ -678,20 +678,6 @@ void oskar_imager_set_time_min_utc(oskar_Imager* h, double time_min_mjd_utc);
 
 /**
  * @brief
- * Sets the flag specifying whether to image each time index separately.
- *
- * @details
- * Sets the flag specifying whether to image each time index separately.
- *
- * @param[in,out] h          Handle to imager.
- * @param[in]     value      If true, image each time slice separately;
- *                           if false, use time synthesis.
- */
-OSKAR_EXPORT
-void oskar_imager_set_time_snapshots(oskar_Imager* h, int value);
-
-/**
- * @brief
  * Sets the maximum UV baseline length to image.
  *
  * @details
@@ -751,24 +737,6 @@ void oskar_imager_set_vis_frequency(oskar_Imager* h,
 OSKAR_EXPORT
 void oskar_imager_set_vis_phase_centre(oskar_Imager* h,
         double ra_deg, double dec_deg);
-
-/**
- * @brief
- * Sets the visibility start time.
- *
- * @details
- * Sets the time of time index 0, and the time increment.
- * This is required even if not applying phase rotation or time selection,
- * to ensure the FITS headers are written correctly.
- *
- * @param[in,out] h            Handle to imager.
- * @param[in]     ref_mjd_utc  Time of index 0, as MJD(UTC).
- * @param[in]     inc_sec      Time increment, in seconds.
- * @param[in]     num          Number of time steps in visibility data.
- */
-OSKAR_EXPORT
-void oskar_imager_set_vis_time(oskar_Imager* h,
-        double ref_mjd_utc, double inc_sec, int num);
 
 /**
  * @brief
@@ -836,18 +804,6 @@ double oskar_imager_time_max_utc(const oskar_Imager* h);
  */
 OSKAR_EXPORT
 double oskar_imager_time_min_utc(const oskar_Imager* h);
-
-/**
- * @brief
- * Returns the flag specifying whether to image each time index separately.
- *
- * @details
- * Returns the flag specifying whether to image each time index separately.
- *
- * @param[in] h  Handle to imager.
- */
-OSKAR_EXPORT
-int oskar_imager_time_snapshots(const oskar_Imager* h);
 
 /**
  * @brief

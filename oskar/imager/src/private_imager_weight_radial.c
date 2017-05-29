@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,11 @@
 extern "C" {
 #endif
 
-void oskar_imager_weight_radial(int num_points, const oskar_Mem* uu,
+void oskar_imager_weight_radial(size_t num_points, const oskar_Mem* uu,
         const oskar_Mem* vv, const oskar_Mem* weight_in, oskar_Mem* weight_out,
         int* status)
 {
-    int i;
+    size_t i;
     if (*status) return;
     oskar_mem_realloc(weight_out, num_points, status);
     if (oskar_mem_precision(weight_out) == OSKAR_DOUBLE)

@@ -78,7 +78,7 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
     if (naxis < 2 || naxis > MAX_AXES) goto file_error;
     num_pixels = naxes[0] * naxes[1];
 
-    /* Read all CTYPE, CDELT, CRPIX, CRVAL values. */
+    /* Read all CTYPE, CDELT, CRPIX, CRVAL values, ignoring errors. */
     for (i = 0; i < MAX_AXES; ++i)
     {
         ctype[i] = ctype_str[i];
@@ -87,10 +87,15 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
         crval[i] = 0.0;
         firstpix[i] = 1;
     }
+    *status = 0;
     fits_read_keys_str(fptr, "CTYPE", 1, naxis, ctype, &i, status);
+    *status = 0;
     fits_read_keys_dbl(fptr, "CDELT", 1, naxis, cdelt, &i, status);
+    *status = 0;
     fits_read_keys_dbl(fptr, "CRPIX", 1, naxis, crpix, &i, status);
+    *status = 0;
     fits_read_keys_dbl(fptr, "CRVAL", 1, naxis, crval, &i, status);
+    *status = 0;
 
     /* Identify the axes. */
     for (i = 0; i < naxis; ++i)
@@ -175,7 +180,7 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
     }
 
     /* Calculate beam area. */
-    if (beam_area_pixels)
+    if (beam_area_pixels && fabs(cdelt[0]) > 0.0)
         *beam_area_pixels = 2.0 * M_PI * (bmaj * bmin)
                         / (FACTOR * FACTOR * cdelt[0] * cdelt[0]);
 
@@ -183,7 +188,7 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
     status1 = 0;
     fits_read_key(fptr, TSTRING, "BUNIT", card, 0, &status1);
     i = strlen(card);
-    if (!status1 && i > 0)
+    if (!status1 && i > 0 && brightness_units)
     {
         *brightness_units = (char*) realloc (*brightness_units, i + 1);
         strcpy(*brightness_units, card);

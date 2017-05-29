@@ -38,26 +38,31 @@ extern "C" {
 
 void oskar_imager_init_fft(oskar_Imager* h, int* status)
 {
+    oskar_Mem* tmp = 0;
     if (*status) return;
 
     /* Generate the convolution function. */
-    oskar_mem_free(h->conv_func, status);
-    h->conv_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
+    tmp = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             h->oversample * (h->support + 1), status);
     switch (h->kernel_type)
     {
     case 'S':
         oskar_grid_convolution_function_spheroidal(h->support, h->oversample,
-                oskar_mem_double(h->conv_func, status));
+                oskar_mem_double(tmp, status));
         break;
     case 'P':
         oskar_grid_convolution_function_pillbox(h->support, h->oversample,
-                oskar_mem_double(h->conv_func, status));
+                oskar_mem_double(tmp, status));
         break;
     default:
         *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
         break;
     }
+
+    /* Save the convolution function with appropriate numerical precision. */
+    oskar_mem_free(h->conv_func, status);
+    h->conv_func = oskar_mem_convert_precision(tmp, h->imager_prec, status);
+    oskar_mem_free(tmp, status);
 }
 
 #ifdef __cplusplus

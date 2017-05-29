@@ -36,8 +36,8 @@
 #include "imager/private_imager_composite_nearest_even.h"
 #include "imager/private_imager_generate_w_phase_screen.h"
 #include "imager/private_imager_init_wproj.h"
-#include "imager/oskar_fftpack_cfft.h"
-#include "imager/oskar_fftpack_cfft_f.h"
+#include "math/oskar_fftpack_cfft.h"
+#include "math/oskar_fftpack_cfft_f.h"
 #include "utility/oskar_get_memory_usage.h"
 #include "imager/oskar_grid_functions_spheroidal.h"
 #include "math/oskar_cmath.h"
@@ -61,7 +61,7 @@ extern "C" {
 void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 {
     size_t max_mem_bytes, max_bytes_per_plane, element_size, copy_len;
-    int i, iw, ix, iy, *supp, new_conv_size, oversample;
+    int i, iw, ix, iy, *supp, new_conv_size, oversample, prec;
     int conv_size, conv_size_half, inner, nearest;
     double l_max, max_conv_size, max_uvw, max_val, sampling, sum;
     double *maxes;
@@ -74,8 +74,9 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     char *ptr_out, *ptr_in;
     if (*status) return;
 
-    /* Get GCF padding oversample factor. */
+    /* Get GCF padding oversample factor and imager precision. */
     oversample = h->oversample;
+    prec = h->imager_prec;
 
     /* Calculate required number of w-planes if not set. */
     if (h->ww_max > 0.0)
@@ -113,7 +114,7 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     oskar_mem_free(h->w_support, status);
     h->w_support = oskar_mem_create(OSKAR_INT, OSKAR_CPU,
             h->num_w_planes, status);
-    h->w_kernels = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX, OSKAR_CPU,
+    h->w_kernels = oskar_mem_create(prec | OSKAR_COMPLEX, OSKAR_CPU,
             ((size_t) h->num_w_planes) * ((size_t) conv_size_half) *
             ((size_t) conv_size_half), status);
     supp = oskar_mem_int(h->w_support, status);
@@ -127,16 +128,16 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     sampling *= ((double) oskar_imager_plane_size(h)) / ((double) conv_size);
 
     /* Create scratch arrays and FFT plan for the phase screens. */
-    screen = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
+    screen = oskar_mem_create(prec | OSKAR_COMPLEX,
             OSKAR_CPU, conv_size * conv_size, status);
     screen_ptr = screen;
 #ifdef OSKAR_HAVE_CUDA
     if (h->generate_w_kernels_on_gpu)
     {
-        screen_gpu = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
+        screen_gpu = oskar_mem_create(prec | OSKAR_COMPLEX,
                 OSKAR_GPU, conv_size * conv_size, status);
         screen_ptr = screen_gpu;
-        if (h->imager_prec == OSKAR_DOUBLE)
+        if (prec == OSKAR_DOUBLE)
             cufftPlan2d(&cufft_plan, conv_size, conv_size, CUFFT_Z2Z);
         else
             cufftPlan2d(&cufft_plan, conv_size, conv_size, CUFFT_C2C);
@@ -146,10 +147,10 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     {
         int len_save = 4 * conv_size +
                 2 * (int)(log((double)conv_size) / log(2.0)) + 8;
-        wsave = oskar_mem_create(h->imager_prec, OSKAR_CPU, len_save, status);
-        work = oskar_mem_create(h->imager_prec, OSKAR_CPU,
+        wsave = oskar_mem_create(prec, OSKAR_CPU, len_save, status);
+        work = oskar_mem_create(prec, OSKAR_CPU,
                 2 * conv_size * conv_size, status);
-        if (h->imager_prec == OSKAR_DOUBLE)
+        if (prec == OSKAR_DOUBLE)
             oskar_fftpack_cfft2i(conv_size, conv_size,
                     oskar_mem_double(wsave, status));
         else
@@ -158,9 +159,9 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     }
 
     /* Generate 1D spheroidal tapering function to cover the inner region. */
-    taper = oskar_mem_create(h->imager_prec, OSKAR_CPU, inner, status);
+    taper = oskar_mem_create(prec, OSKAR_CPU, inner, status);
     taper_ptr = taper;
-    if (h->imager_prec == OSKAR_DOUBLE)
+    if (prec == OSKAR_DOUBLE)
     {
         double* t = oskar_mem_double(taper, status);
         for (i = 0; i < inner; ++i)

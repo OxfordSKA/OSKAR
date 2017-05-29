@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 #include "imager/private_imager_init_dft.h"
 #include "imager/private_imager_init_fft.h"
 #include "imager/private_imager_init_wproj.h"
+#include "utility/oskar_timer.h"
 
 #include <stdlib.h>
 
@@ -44,6 +45,7 @@ void oskar_imager_check_init(oskar_Imager* h, int* status)
     /* Don't initialise if we're in "coords only" mode. */
     if (h->coords_only) return;
 
+    oskar_timer_resume(h->tmr_init);
     switch (h->algorithm)
     {
     case OSKAR_ALGORITHM_DFT_2D:
@@ -68,6 +70,7 @@ void oskar_imager_check_init(oskar_Imager* h, int* status)
     default:
         *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     }
+    oskar_timer_pause(h->tmr_init);
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,33 +72,37 @@ void oskar_imager_update_from_block(oskar_Imager* h,
  * supplied visibilities.
  *
  * Visibility selection/filtering and phase rotation are performed
- * if necessary.
- *
- * The baseline data dimension order must be
- * (slowest) time, baseline (fastest).
+ * if necessary. The \p time_centroid parameter may be NULL if time
+ * filtering is not required.
  *
  * The visibility amplitude data dimension order must be
- * (slowest) time, channel, baseline, polarisation (fastest).
+ * (slowest) time/baseline, channel, polarisation (fastest).
+ * This order is the same as that stored in a Measurement Set.
+ *
+ * The visibility weight data dimension order must be:
+ * (slowest) time/baseline, polarisation (fastest).
+ *
+ * Call finalise() to finalise the images after calling this function.
  *
  * @param[in,out] h             Handle to imager.
- * @param[in]     uu            Time-baseline ordered U-coordinates, in metres.
- * @param[in]     vv            Time-baseline ordered V-coordinates, in metres.
- * @param[in]     ww            Time-baseline ordered W-coordinates, in metres.
- * @param[in]     amps          Complex visibility amplitudes.
- * @param[in]     weight        Visibility weights.
- * @param[in]     start_time    Start time index of the visibility block.
- * @param[in]     end_time      End time index of the visibility block.
+ * @param[in]     num_rows      Number of times/baselines.
  * @param[in]     start_chan    Start channel index of the visibility block.
  * @param[in]     end_chan      End channel index of the visibility block.
- * @param[in]     num_baselines Number of baselines in the visibility block.
  * @param[in]     num_pols      Number of polarisations in the visibility block.
+ * @param[in]     uu            Visibility uu coordinates, in metres.
+ * @param[in]     vv            Visibility vv coordinates, in metres.
+ * @param[in]     ww            Visibility ww coordinates, in metres.
+ * @param[in]     amps          Visibility complex amplitudes. See note, above.
+ * @param[in]     weight        Visibility weights. See note, above.
+ * @param[in]     time_centroid Visibility time centroids, at MJD(UTC) seconds
+ *                              (double precision).
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
-        const oskar_Mem* vv, const oskar_Mem* ww, const oskar_Mem* amps,
-        const oskar_Mem* weight, int start_time, int end_time, int start_chan,
-        int end_chan, int num_baselines, int num_pols, int* status);
+void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
+        int end_chan, int num_pols, const oskar_Mem* uu, const oskar_Mem* vv,
+        const oskar_Mem* ww, const oskar_Mem* amps, const oskar_Mem* weight,
+        const oskar_Mem* time_centroid, int* status);
 
 /**
  * @brief
@@ -121,10 +125,10 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
  *
  * @param[in,out] h             Handle to imager.
  * @param[in]     num_vis       Number of visibilities.
- * @param[in]     uu            Baseline uu coordinates, in wavelengths.
- * @param[in]     vv            Baseline vv coordinates, in wavelengths.
- * @param[in]     ww            Baseline ww coordinates, in wavelengths.
- * @param[in]     amps          Input complex visibilities.
+ * @param[in]     uu            Visibility uu coordinates, in wavelengths.
+ * @param[in]     vv            Visibility vv coordinates, in wavelengths.
+ * @param[in]     ww            Visibility ww coordinates, in wavelengths.
+ * @param[in]     amps          Visibility complex amplitudes.
  * @param[in]     weight        Visibility weights.
  * @param[in,out] plane         Updated image or visibility plane.
  * @param[in,out] plane_norm    Updated required normalisation of plane.
@@ -132,7 +136,7 @@ void oskar_imager_update(oskar_Imager* h, const oskar_Mem* uu,
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
+void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
         const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
         double* plane_norm, oskar_Mem* weights_grid, int* status);

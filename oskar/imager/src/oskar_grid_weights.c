@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,125 +35,139 @@
 extern "C" {
 #endif
 
-void oskar_grid_weights_write_d(const int num_points, const double* restrict uu,
-        const double* restrict vv, const double* restrict weight,
-        const double cell_size_rad, const int grid_size,
-        int* restrict num_skipped, double* restrict grid)
+void oskar_grid_weights_write_d(const size_t num_points,
+        const double* restrict uu, const double* restrict vv,
+        const double* restrict weight, const double cell_size_rad,
+        const int grid_size, size_t* restrict num_skipped,
+        double* restrict grid)
 {
-    int i, grid_x, grid_y;
-    const int g_centre = grid_size / 2;
-    const double scale = grid_size * cell_size_rad;
+    size_t i;
+    const int grid_centre = grid_size / 2;
+    const double grid_scale = grid_size * cell_size_rad;
 
     /* Grid the existing weights. */
     *num_skipped = 0;
     for (i = 0; i < num_points; ++i)
     {
         /* Convert UV coordinates to grid coordinates. */
-        grid_x = (int)round(-uu[i] * scale) + g_centre;
-        grid_y = (int)round(vv[i] * scale) + g_centre;
+        const int grid_u = (int)round(-uu[i] * grid_scale) + grid_centre;
+        const int grid_v = (int)round(vv[i] * grid_scale) + grid_centre;
+        size_t t = grid_v;
+        t *= grid_size; /* Tested to avoid int overflow. */
+        t += grid_u;
 
         /* Catch points that would lie outside the grid. */
-        if (grid_x >= grid_size || grid_x < 0 ||
-                grid_y >= grid_size || grid_y < 0)
+        if (grid_u >= grid_size || grid_u < 0 ||
+                grid_v >= grid_size || grid_v < 0)
         {
             *num_skipped += 1;
             continue;
         }
 
         /* Add weight to the grid. */
-        grid[grid_y * grid_size + grid_x] += weight[i];
+        grid[t] += weight[i];
     }
 }
 
-void oskar_grid_weights_read_d(const int num_points, const double* restrict uu,
-        const double* restrict vv, const double* restrict weight_in,
-        double* restrict weight_out, const double cell_size_rad,
-        const int grid_size, int* restrict num_skipped,
-        const double* restrict grid)
+void oskar_grid_weights_read_d(const size_t num_points,
+        const double* restrict uu, const double* restrict vv,
+        const double* restrict weight_in, double* restrict weight_out,
+        const double cell_size_rad, const int grid_size,
+        size_t* restrict num_skipped, const double* restrict grid)
 {
-    int i, grid_x, grid_y;
-    const int g_centre = grid_size / 2;
-    const double scale = grid_size * cell_size_rad;
+    size_t i;
+    const int grid_centre = grid_size / 2;
+    const double grid_scale = grid_size * cell_size_rad;
 
     /* Look up gridded weight density at each point location. */
     *num_skipped = 0;
     for (i = 0; i < num_points; ++i)
     {
         /* Convert UV coordinates to grid coordinates. */
-        grid_x = (int)round(-uu[i] * scale) + g_centre;
-        grid_y = (int)round(vv[i] * scale) + g_centre;
+        const int grid_u = (int)round(-uu[i] * grid_scale) + grid_centre;
+        const int grid_v = (int)round(vv[i] * grid_scale) + grid_centre;
+        size_t t = grid_v;
+        t *= grid_size; /* Tested to avoid int overflow. */
+        t += grid_u;
 
         /* Catch points that would lie outside the grid. */
-        if (grid_x >= grid_size || grid_x < 0 ||
-                grid_y >= grid_size || grid_y < 0)
+        if (grid_u >= grid_size || grid_u < 0 ||
+                grid_v >= grid_size || grid_v < 0)
         {
             *num_skipped += 1;
             continue;
         }
 
         /* Calculate new weight based on gridded point density. */
-        weight_out[i] = weight_in[i] / grid[grid_y * grid_size + grid_x];
+        weight_out[i] = weight_in[i] / grid[t];
     }
 }
 
-void oskar_grid_weights_write_f(const int num_points, const float* restrict uu,
-        const float* restrict vv, const float* restrict weight,
-        const double cell_size_rad, const int grid_size,
-        int* restrict num_skipped, float* restrict grid)
+void oskar_grid_weights_write_f(const size_t num_points,
+        const float* restrict uu, const float* restrict vv,
+        const float* restrict weight, const float cell_size_rad,
+        const int grid_size, size_t* restrict num_skipped,
+        float* restrict grid)
 {
-    int i, grid_x, grid_y;
-    const int g_centre = grid_size / 2;
-    const double scale = grid_size * cell_size_rad;
+    size_t i;
+    const int grid_centre = grid_size / 2;
+    const float grid_scale = grid_size * cell_size_rad;
 
     /* Grid the existing weights. */
     *num_skipped = 0;
     for (i = 0; i < num_points; ++i)
     {
         /* Convert UV coordinates to grid coordinates. */
-        grid_x = (int)round(-uu[i] * scale) + g_centre;
-        grid_y = (int)round(vv[i] * scale) + g_centre;
+        const int grid_u = (int)roundf(-uu[i] * grid_scale) + grid_centre;
+        const int grid_v = (int)roundf(vv[i] * grid_scale) + grid_centre;
+        size_t t = grid_v;
+        t *= grid_size; /* Tested to avoid int overflow. */
+        t += grid_u;
 
         /* Catch points that would lie outside the grid. */
-        if (grid_x >= grid_size || grid_x < 0 ||
-                grid_y >= grid_size || grid_y < 0)
+        if (grid_u >= grid_size || grid_u < 0 ||
+                grid_v >= grid_size || grid_v < 0)
         {
             *num_skipped += 1;
             continue;
         }
 
         /* Add weight to the grid. */
-        grid[grid_y * grid_size + grid_x] += weight[i];
+        grid[t] += weight[i];
     }
 }
 
-void oskar_grid_weights_read_f(const int num_points, const float* restrict uu,
-        const float* restrict vv, const float* restrict weight_in,
-        float* restrict weight_out, const double cell_size_rad,
-        const int grid_size, int* restrict num_skipped,
-        const float* restrict grid)
+void oskar_grid_weights_read_f(const size_t num_points,
+        const float* restrict uu, const float* restrict vv,
+        const float* restrict weight_in, float* restrict weight_out,
+        const float cell_size_rad, const int grid_size,
+        size_t* restrict num_skipped, const float* restrict grid)
 {
-    int i, grid_x, grid_y;
-    const int g_centre = grid_size / 2;
-    const double scale = grid_size * cell_size_rad;
+    size_t i;
+    const int grid_centre = grid_size / 2;
+    const float grid_scale = grid_size * cell_size_rad;
 
     /* Look up gridded weight density at each point location. */
     *num_skipped = 0;
     for (i = 0; i < num_points; ++i)
     {
         /* Convert UV coordinates to grid coordinates. */
-        grid_x = (int)round(-uu[i] * scale) + g_centre;
-        grid_y = (int)round(vv[i] * scale) + g_centre;
+        const int grid_u = (int)roundf(-uu[i] * grid_scale) + grid_centre;
+        const int grid_v = (int)roundf(vv[i] * grid_scale) + grid_centre;
+        size_t t = grid_v;
+        t *= grid_size; /* Tested to avoid int overflow. */
+        t += grid_u;
 
         /* Catch points that would lie outside the grid. */
-        if (grid_x >= grid_size || grid_x < 0 ||
-                grid_y >= grid_size || grid_y < 0)
+        if (grid_u >= grid_size || grid_u < 0 ||
+                grid_v >= grid_size || grid_v < 0)
         {
             *num_skipped += 1;
             continue;
         }
 
         /* Calculate new weight based on gridded point density. */
-        weight_out[i] = weight_in[i] / grid[grid_y * grid_size + grid_x];
+        weight_out[i] = weight_in[i] / grid[t];
     }
 }
 

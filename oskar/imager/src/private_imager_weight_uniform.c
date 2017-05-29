@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,15 +34,15 @@
 extern "C" {
 #endif
 
-void oskar_imager_weight_uniform(int num_points, const oskar_Mem* uu,
+void oskar_imager_weight_uniform(size_t num_points, const oskar_Mem* uu,
         const oskar_Mem* vv, const oskar_Mem* weight_in, oskar_Mem* weight_out,
         double cell_size_rad, int grid_size, const oskar_Mem* weight_grid,
         int* status)
 {
-    int num_skipped = 0;
+    size_t num_skipped = 0;
 
     /* Check the grid exists. */
-    if (!weight_grid || !oskar_mem_void_const(weight_grid))
+    if (!weight_grid || !oskar_mem_allocated(weight_grid))
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;
@@ -70,7 +70,8 @@ void oskar_imager_weight_uniform(int num_points, const oskar_Mem* uu,
                 cell_size_rad, grid_size, &num_skipped,
                 oskar_mem_float_const(weight_grid, status));
     if (num_skipped > 0)
-        printf("WARNING: Skipped %d visibility weights.\n", num_skipped);
+        printf("WARNING: Skipped %lu visibility weights.\n",
+                (unsigned long) num_skipped);
 }
 
 #ifdef __cplusplus

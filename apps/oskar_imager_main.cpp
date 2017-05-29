@@ -109,11 +109,15 @@ int main(int argc, char** argv)
     oskar_Imager* h = oskar_imager_create(s.to_int("double_precision", &e) ?
             OSKAR_DOUBLE : OSKAR_SINGLE, &e);
     oskar_imager_set_log(h, log);
+
+    // Set GPU IDs.
     if (!s.starts_with("cuda_device_ids", "all", &e))
     {
         std::vector<int> ids = s.to_int_list("cuda_device_ids", &e);
         if (ids.size() > 0) oskar_imager_set_gpus(h, ids.size(), &ids[0], &e);
     }
+
+    // Set input and output files.
     std::vector<std::string> files = s.to_string_list("input_vis_data", &e);
     int num_files = files.size();
     char** input_files = (char**) calloc(num_files, sizeof(char*));
@@ -129,6 +133,8 @@ int main(int argc, char** argv)
             s.to_int("scale_norm_with_num_input_files", &e));
     oskar_imager_set_ms_column(h, s.to_string("ms_column", &e).c_str(), &e);
     oskar_imager_set_output_root(h, s.to_string("root_path", &e).c_str());
+
+    // Set remaining imager options.
     oskar_imager_set_image_type(h, s.to_string("image_type", &e).c_str(), &e);
     if (s.to_int("specify_cellsize", &e))
         oskar_imager_set_cellsize(h, s.to_double("cellsize_arcsec", &e));
@@ -138,7 +144,6 @@ int main(int argc, char** argv)
     oskar_imager_set_channel_snapshots(h, s.to_int("channel_snapshots", &e));
     oskar_imager_set_freq_min_hz(h, s.to_double("freq_min_hz", &e));
     oskar_imager_set_freq_max_hz(h, s.to_double("freq_max_hz", &e));
-    oskar_imager_set_time_snapshots(h, s.to_int("time_snapshots", &e));
     oskar_imager_set_time_min_utc(h, s.to_double("time_min_utc", &e));
     oskar_imager_set_time_max_utc(h, s.to_double("time_max_utc", &e));
     oskar_imager_set_uv_filter_min(h, s.to_double("uv_filter_min", &e));

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #include "imager/private_imager_create_fits_files.h"
 
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <fitsio.h>
 
@@ -48,9 +49,8 @@ extern "C" {
 #endif
 
 static fitsfile* create_fits_file(const char* filename, int precision,
-        int width, int height, int num_times, int num_channels,
-        double centre_deg[2], double fov_deg[2], double start_time_mjd,
-        double delta_time_sec, double start_freq_hz, double delta_freq_hz,
+        int width, int height, int num_channels, double centre_deg[2],
+        double fov_deg[2], double start_freq_hz, double delta_freq_hz,
         int* status);
 static void write_axis_header(fitsfile* fptr, int axis_id,
         const char* ctype, const char* ctype_comment, double crval,
@@ -61,10 +61,11 @@ void oskar_imager_create_fits_files(oskar_Imager* h, int* status)
     int i;
     if (*status) return;
     if (!h->image_root) return;
+    oskar_timer_resume(h->tmr_write);
     for (i = 0; i < h->num_im_pols; ++i)
     {
         double fov_deg[2];
-        char f[512];
+        char f[FILENAME_MAX];
         const char *a[] = {"I","Q","U","V"}, *b[] = {"XX","XY","YX","YY"};
 
         /* Construct filename based on image type. */
@@ -98,22 +99,22 @@ void oskar_imager_create_fits_files(oskar_Imager* h, int* status)
         }
 
         fov_deg[0] = fov_deg[1] = h->fov_deg;
-        h->fits_file[i] = create_fits_file(f, h->imager_prec,
-                h->image_size, h->image_size, h->num_im_times,
-                h->num_im_channels, h->im_centre_deg, fov_deg,
-                h->im_times[0], h->time_inc_sec,
+        h->fits_file[i] = create_fits_file(f, h->imager_prec, h->image_size,
+                h->image_size, h->num_im_channels, h->im_centre_deg, fov_deg,
                 h->im_freqs[0], h->freq_inc_hz, status);
+        h->output_name[i] = (char*) realloc(h->output_name[i], 1 + strlen(f));
+        strcpy(h->output_name[i], f);
     }
+    oskar_timer_pause(h->tmr_write);
 }
 
 
 fitsfile* create_fits_file(const char* filename, int precision,
-        int width, int height, int num_times, int num_channels,
-        double centre_deg[2], double fov_deg[2], double start_time_mjd,
-        double delta_time_sec, double start_freq_hz, double delta_freq_hz,
+        int width, int height, int num_channels, double centre_deg[2],
+        double fov_deg[2], double start_freq_hz, double delta_freq_hz,
         int* status)
 {
-    long naxes[4];
+    long naxes[3];
     double delta;
     fitsfile* f = 0;
     FILE* t = 0;
@@ -129,10 +130,10 @@ fitsfile* create_fits_file(const char* filename, int precision,
     naxes[0]  = width;
     naxes[1]  = height;
     naxes[2]  = num_channels;
-    naxes[3]  = num_times;
     fits_create_file(&f, filename, status);
     fits_create_img(f, (precision == OSKAR_DOUBLE ? DOUBLE_IMG : FLOAT_IMG),
-            4, naxes, status);
+            3, naxes, status);
+    fits_set_hdrsize(f, 120, status); /* Reserve some header space for log. */
     fits_write_date(f, status);
 
     /* Write axis headers. */
@@ -144,14 +145,9 @@ fitsfile* create_fits_file(const char* filename, int precision,
             centre_deg[1], delta, height / 2 + 1, 0.0, status);
     write_axis_header(f, 3, "FREQ", "Frequency",
             start_freq_hz, delta_freq_hz, 1.0, 0.0, status);
-    write_axis_header(f, 4, "UTC", "Time",
-            start_time_mjd, delta_time_sec, 1.0, 0.0, status);
 
     /* Write other headers. */
     fits_write_key_str(f, "BUNIT", "JY/BEAM", "Brightness units", status);
-    fits_write_key_str(f, "TIMESYS", "UTC", NULL, status);
-    fits_write_key_str(f, "TIMEUNIT", "s", "Time axis units", status);
-    fits_write_key_dbl(f, "MJD-OBS", start_time_mjd, 10, "Start time", status);
     fits_write_key_dbl(f, "OBSRA", centre_deg[0], 10, "RA", status);
     fits_write_key_dbl(f, "OBSDEC", centre_deg[1], 10, "DEC", status);
     /*fits_flush_file(f, status);*/

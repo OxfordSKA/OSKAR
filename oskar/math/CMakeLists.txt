@@ -17,6 +17,9 @@ set(math_SRC
     src/oskar_evaluate_image_lon_lat_grid.c
     src/oskar_evaluate_image_lm_grid.c
     src/oskar_evaluate_image_lmn_grid.c
+    src/oskar_fftpack_cfft.c
+    src/oskar_fftpack_cfft_f.c
+    src/oskar_fftphase.c
     src/oskar_find_closest_match.c
     src/oskar_fit_ellipse.c
     src/oskar_gaussian.c

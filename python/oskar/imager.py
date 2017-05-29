@@ -261,15 +261,6 @@ class Imager(object):
         """
         return _imager_lib.time_min_utc(self._capsule)
 
-    def get_time_snapshots(self):
-        """Returns the flag specifying whether to image each time separately.
-
-        Returns:
-            boolean: If true, image each time index separately;
-                if false, use time synthesis.
-        """
-        return _imager_lib.time_snapshots(self._capsule)
-
     def get_uv_filter_max(self):
         """Returns the maximum UV baseline length to image, in wavelengths.
 
@@ -301,9 +292,47 @@ class Imager(object):
         """
         _imager_lib.reset_cache(self._capsule)
 
+    def rotate_coords(self, uu_in, vv_in, ww_in):
+        """Rotates baseline coordinates to the new phase centre (if set).
+
+        Prior to calling this method, the new phase centre must be set first
+        using set_direction(), and then the original phase centre
+        must be set using set_vis_phase_centre().
+        Note that the order of these calls is important.
+
+        Args:
+            uu_in (numpy.ndarray): Baseline uu coordinates.
+            vv_in (numpy.ndarray): Baseline vv coordinates.
+            ww_in (numpy.ndarray): Baseline ww coordinates.
+        """
+        _imager_lib.rotate_coords(self._capsule, uu_in, vv_in, ww_in)
+
+    def rotate_vis(self, uu_in, vv_in, ww_in, vis):
+        """Phase-rotates visibility amplitudes to the new phase centre (if set).
+
+        Prior to calling this method, the new phase centre must be set first
+        using set_direction(), and then the original phase centre
+        must be set using set_vis_phase_centre().
+        Note that the order of these calls is important.
+
+        Note that the coordinates (uu_in, vv_in, ww_in) correspond to the
+        original phase centre, and must be in wavelengths.
+
+        Args:
+            uu_in (float, array-like):
+                Original baseline uu coordinates, in wavelengths.
+            vv_in (float, array-like):
+                Original baseline vv coordinates, in wavelengths.
+            ww_in (float, array-like):
+                Original baseline ww coordinates, in wavelengths.
+            vis (numpy.ndarray):
+                Complex visibility amplitudes.
+        """
+        _imager_lib.rotate_vis(self._capsule, uu_in, vv_in, ww_in, vis)
+
     def run(self, uu=None, vv=None, ww=None, amps=None, weight=None,
-            start_time=0, end_time=0, start_channel=0, end_channel=0,
-            num_baselines=0, num_pols=1, return_images=0, return_grids=0):
+            time_centroid=None, start_channel=0, end_channel=0,
+            num_pols=1, return_images=0, return_grids=0):
         """Runs the imager.
 
         Visibilities will be used either from the input file or
@@ -313,10 +342,11 @@ class Imager(object):
         this method using set_vis_* methods.
 
         The visibility amplitude data dimension order must be:
-        (slowest) time, channel, baseline, polarisation (fastest).
+        (slowest) time/baseline, channel, polarisation (fastest).
+        This order is the same as that stored in a Measurement Set.
 
         The visibility weight data dimension order must be:
-        (slowest) time, baseline, polarisation (fastest).
+        (slowest) time/baseline, polarisation (fastest).
 
         If not given, the weights will be treated as all 1.
 
@@ -332,20 +362,16 @@ class Imager(object):
                 Time-baseline ordered vv coordinates, in metres.
             ww (float, array-like, shape (n,)):
                 Time-baseline ordered ww coordinates, in metres.
-            amps (complex float, array-like, shape (n,)):
+            amps (complex float, array-like, shape (m,)):
                 Baseline visibility amplitudes. Length as described above.
-            weight (Optional[float, array-like, shape (m,)]):
+            weight (Optional[float, array-like, shape (p,)]):
                 Visibility weights. Length as described above.
-            start_time (Optional[int]):
-                Start time index of the visibility block. Default 0.
-            end_time (Optional[int]):
-                End time index of the visibility block. Default 0.
+            time_centroid (Optional[float, array-like, shape (n,)]):
+                Visibility time centroid values, as MJD(UTC) seconds.
             start_channel (Optional[int]):
                 Start channel index of the visibility block. Default 0.
             end_channel (Optional[int]):
                 End channel index of the visibility block. Default 0.
-            num_baselines (Optional[int]):
-                Number of baselines in the visibility block. Default n.
             num_pols (Optional[int]):
                 Number of polarisations in the visibility block. Default 1.
             return_images (Optional[int]): Number of image planes to return.
@@ -357,12 +383,11 @@ class Imager(object):
             self.reset_cache()
             if self.weighting == 'Uniform' or self.algorithm == 'W-projection':
                 self.set_coords_only(True)
-                self.update(uu, vv, ww, amps, weight, start_time, end_time,
-                            start_channel, end_channel, num_baselines,
-                            num_pols)
+                self.update(uu, vv, ww, amps, weight, time_centroid,
+                            start_channel, end_channel, num_pols)
                 self.set_coords_only(False)
-            self.update(uu, vv, ww, amps, weight, start_time, end_time,
-                        start_channel, end_channel, num_baselines, num_pols)
+            self.update(uu, vv, ww, amps, weight, time_centroid,
+                        start_channel, end_channel, num_pols)
             return self.finalise(return_images, return_grids)
 
     def set(self, **kwargs):
@@ -588,15 +613,6 @@ class Imager(object):
         """
         _imager_lib.set_time_min_utc(self._capsule, value)
 
-    def set_time_snapshots(self, value):
-        """Sets the flag specifying whether to image each time separately.
-
-        Args:
-            value (boolean): If true, image each time index separately;
-                if false, use time synthesis.
-        """
-        _imager_lib.set_time_snapshots(self._capsule, value)
-
     def set_uv_filter_max(self, max_wavelength):
         """Sets the maximum UV baseline length to image, in wavelengths.
 
@@ -621,7 +637,7 @@ class Imager(object):
 
         Args:
             ref_hz (float):
-                Frequency of index 0, in Hz.
+                Frequency of channel index 0, in Hz.
             inc_hz (Optional[float]):
                 Frequency increment, in Hz. Default 0.0.
             num_channels (Optional[int]):
@@ -639,20 +655,6 @@ class Imager(object):
         """
         _imager_lib.set_vis_phase_centre(self._capsule, ra_deg, dec_deg)
 
-    def set_vis_time(self, ref_mjd_utc, inc_sec=0.0, num_times=1):
-        """Sets the visibility start time.
-
-        Args:
-            ref_mjd_utc (float):
-                Time of index 0, as MJD(UTC).
-            inc_sec (Optional[float]):
-                Time increment, in seconds. Default 0.0.
-            num_times (Optional[int]):
-                Number of time steps in visibility data.
-        """
-        _imager_lib.set_vis_time(self._capsule, ref_mjd_utc, inc_sec,
-                                 num_times)
-
     def set_weighting(self, weighting):
         """Sets the type of visibility weighting to use.
 
@@ -661,18 +663,19 @@ class Imager(object):
         """
         _imager_lib.set_weighting(self._capsule, weighting)
 
-    def update(self, uu, vv, ww, amps, weight=None, start_time=0, end_time=0,
-               start_channel=0, end_channel=0, num_baselines=0, num_pols=1):
+    def update(self, uu, vv, ww, amps, weight=None, time_centroid=None,
+               start_channel=0, end_channel=0, num_pols=1):
         """Runs imager for supplied visibilities, applying optional selection.
 
         The visibility meta-data must be set prior to calling this method
         using set_vis_* methods.
 
         The visibility amplitude data dimension order must be:
-        (slowest) time, channel, baseline, polarisation (fastest).
+        (slowest) time/baseline, channel, polarisation (fastest).
+        This order is the same as that stored in a Measurement Set.
 
         The visibility weight data dimension order must be:
-        (slowest) time, baseline, polarisation (fastest).
+        (slowest) time/baseline, polarisation (fastest).
 
         If not given, the weights will be treated as all 1.
 
@@ -680,31 +683,26 @@ class Imager(object):
 
         Args:
             uu (float, array-like, shape (n,)):
-                Time-baseline ordered uu coordinates, in metres.
+                Visibility uu coordinates, in metres.
             vv (float, array-like, shape (n,)):
-                Time-baseline ordered vv coordinates, in metres.
+                Visibility vv coordinates, in metres.
             ww (float, array-like, shape (n,)):
-                Time-baseline ordered ww coordinates, in metres.
-            amps (complex float, array-like, shape (n,)):
-                Baseline visibility amplitudes. Length as described above.
-            weight (Optional[float, array-like, shape (m,)]):
-                Visibility weights. Length as described above.
-            start_time (Optional[int]):
-                Start time index of the visibility block. Default 0.
-            end_time (Optional[int]):
-                End time index of the visibility block. Default 0.
+                Visibility ww coordinates, in metres.
+            amps (complex float, array-like, shape (m,)):
+                Visibility complex amplitudes. Shape as described above.
+            weight (Optional[float, array-like, shape (p,)]):
+                Visibility weights. Shape as described above.
+            time_centroid (Optional[float, array-like, shape (n,)]):
+                Visibility time centroid values, as MJD(UTC) seconds.
             start_channel (Optional[int]):
                 Start channel index of the visibility block. Default 0.
             end_channel (Optional[int]):
                 End channel index of the visibility block. Default 0.
-            num_baselines (Optional[int]):
-                Number of baselines in the visibility block. Default n.
             num_pols (Optional[int]):
                 Number of polarisations in the visibility block. Default 1.
         """
         _imager_lib.update(self._capsule, uu, vv, ww, amps, weight,
-                           start_time, end_time, start_channel, end_channel,
-                           num_baselines, num_pols)
+                           time_centroid, start_channel, end_channel, num_pols)
 
     def update_from_block(self, header, block):
         """Runs imager for visibility block, applying optional selection.
@@ -744,13 +742,13 @@ class Imager(object):
 
         Args:
             uu (float, array-like, shape (n,)):
-                Baseline uu coordinates, in wavelengths.
+                Visibility uu coordinates, in wavelengths.
             vv (float, array-like, shape (n,)):
-                Baseline vv coordinates, in wavelengths.
+                Visibility vv coordinates, in wavelengths.
             ww (float, array-like, shape (n,)):
-                Baseline ww coordinates, in wavelengths.
+                Visibility ww coordinates, in wavelengths.
             amps (complex float, array-like, shape (n,) or None):
-                Baseline visibility amplitudes.
+                Visibility complex amplitudes.
             weight (float, array-like, shape (n,)):
                 Visibility weights.
             plane (float, array-like or None):
@@ -801,7 +799,6 @@ class Imager(object):
     size = property(get_size, set_size)
     time_max_utc = property(get_time_max_utc, set_time_max_utc)
     time_min_utc = property(get_time_min_utc, set_time_min_utc)
-    time_snapshots = property(get_time_snapshots, set_time_snapshots)
     uv_filter_max = property(get_uv_filter_max, set_uv_filter_max)
     uv_filter_min = property(get_uv_filter_min, set_uv_filter_min)
     weighting = property(get_weighting, set_weighting)

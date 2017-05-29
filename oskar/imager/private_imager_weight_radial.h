@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,12 +30,13 @@
 #define OSKAR_IMAGER_WEIGHT_RADIAL_H_
 
 #include <mem/oskar_mem.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_weight_radial(int num_points, const oskar_Mem* uu,
+void oskar_imager_weight_radial(size_t num_points, const oskar_Mem* uu,
         const oskar_Mem* vv, const oskar_Mem* weight_in, oskar_Mem* weight_out,
         int* status);
 

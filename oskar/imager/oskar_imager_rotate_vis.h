@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,19 +43,35 @@ extern "C" {
 
 /**
  * @brief
- * Performs visibility amplitude phase rotation.
+ * Performs visibility amplitude phase rotation to a new phase centre.
  *
  * @details
- * Note that the coordinates uu, vv, ww are in wavelengths.
+ * This function performs visibility amplitude phase rotation to a new phase
+ * centre.
  *
- * Ref:
+ * Prior to calling this function, the new phase centre must be set first
+ * using oskar_imager_set_direction(), and then the original phase centre
+ * must be set using oskar_imager_set_vis_phase_centre().
+ * Note that the order of these function calls is important.
+ *
+ * Note that the coordinates (uu_in, vv_in, ww_in) correspond to the original
+ * phase centre, and must be in wavelengths.
+ *
+ * Reference:
  * Cornwell, T.J., & Perley, R.A., 1992,
  * "Radio-interferometric imaging of very large fields"
+ *
+ * @param[in] h             Handle to imager.
+ * @param[in] num_vis       Number of visibilities.
+ * @param[in] uu_in         Original baseline UU coordinates, in wavelengths.
+ * @param[in] vv_in         Original baseline VV coordinates, in wavelengths.
+ * @param[in] ww_in         Original baseline WW coordinates, in wavelengths.
+ * @param[in,out] amps      Complex visibility amplitudes.
  */
 OSKAR_EXPORT
-void oskar_imager_rotate_vis(size_t num_vis, const oskar_Mem* uu,
-        const oskar_Mem* vv, const oskar_Mem* ww, oskar_Mem* amps,
-        const double delta_l, const double delta_m, const double delta_n);
+void oskar_imager_rotate_vis(const oskar_Imager* h, size_t num_vis,
+        const oskar_Mem* uu_in, const oskar_Mem* vv_in, const oskar_Mem* ww_in,
+        oskar_Mem* amps);
 
 #ifdef __cplusplus
 }

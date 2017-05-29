@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include "imager/oskar_grid_correction.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,17 +36,19 @@ extern "C" {
 void oskar_grid_correction_d(const int image_size,
         const double* corr_func, double* complex_image)
 {
-    int i, j, k;
-    double cj, t;
+    int i, j;
     for (j = 0; j < image_size; ++j)
     {
-        cj = corr_func[j];
+        size_t k;
+        const double cj = corr_func[j];
+        k = j;
+        k *= image_size; /* Tested to avoid int overflow. */
         for (i = 0; i < image_size; ++i)
         {
-            k = 2 * (i + j * image_size);
-            t = corr_func[i] * cj;
-            complex_image[k] *= t;
-            complex_image[k + 1] *= t;
+            const size_t m = (k + i) << 1;
+            const double t = corr_func[i] * cj;
+            complex_image[m] *= t;
+            complex_image[m + 1] *= t;
         }
     }
 }
@@ -54,17 +57,19 @@ void oskar_grid_correction_d(const int image_size,
 void oskar_grid_correction_f(const int image_size,
         const double* corr_func, float* complex_image)
 {
-    int i, j, k;
-    double cj, t;
+    int i, j;
     for (j = 0; j < image_size; ++j)
     {
-        cj = corr_func[j];
+        size_t k;
+        const double cj = corr_func[j];
+        k = j;
+        k *= image_size; /* Tested to avoid int overflow. */
         for (i = 0; i < image_size; ++i)
         {
-            k = 2 * (i + j * image_size);
-            t = corr_func[i] * cj;
-            complex_image[k] *= t;
-            complex_image[k + 1] *= t;
+            const size_t m = (k + i) << 1;
+            const double t = corr_func[i] * cj;
+            complex_image[m] *= t;
+            complex_image[m + 1] *= t;
         }
     }
 }

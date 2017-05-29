@@ -30,7 +30,6 @@
 
 #include "convert/oskar_convert_cellsize_to_fov.h"
 #include "convert/oskar_convert_fov_to_cellsize.h"
-#include "convert/oskar_convert_lon_lat_to_relative_directions.h"
 #include "imager/oskar_imager.h"
 #include "imager/private_imager_composite_nearest_even.h"
 #include "imager/private_imager_free_gpu_data.h"
@@ -562,7 +561,7 @@ void oskar_imager_set_time_max_utc(oskar_Imager* h, double time_max_mjd_utc)
 {
     if (time_max_mjd_utc != 0.0 && time_max_mjd_utc != DBL_MAX)
         time_max_mjd_utc += 0.01 / 86400.0;
-    h->time_max_utc = time_max_mjd_utc;
+    h->time_max_utc = time_max_mjd_utc * 86400.0;
 }
 
 
@@ -570,13 +569,7 @@ void oskar_imager_set_time_min_utc(oskar_Imager* h, double time_min_mjd_utc)
 {
     if (time_min_mjd_utc != 0.0)
         time_min_mjd_utc -= 0.01 / 86400.0;
-    h->time_min_utc = time_min_mjd_utc;
-}
-
-
-void oskar_imager_set_time_snapshots(oskar_Imager* h, int value)
-{
-    h->time_snaps = value;
+    h->time_min_utc = time_min_mjd_utc * 86400.0;
 }
 
 
@@ -646,24 +639,32 @@ void oskar_imager_set_vis_phase_centre(oskar_Imager* h,
      * rotated baseline coordinates. */
     if (h->direction_type == 'R')
     {
-        double l1, m1, n1, ra_rad, dec_rad, ra0_rad, dec0_rad;
-        double d_a, d_d, *M;
-
-        ra_rad = h->im_centre_deg[0] * DEG2RAD;
-        dec_rad = h->im_centre_deg[1] * DEG2RAD;
-        ra0_rad = ra_deg * DEG2RAD;
-        dec0_rad = dec_deg * DEG2RAD;
-        d_a = ra0_rad - ra_rad; /* These are meant to be swapped: -delta_ra. */
-        d_d = dec_rad - dec0_rad;
+        double l1, m1, n1, d_a, d_d, dec_rad, dec0_rad, *M;
+        double sin_d_a, cos_d_a, sin_d_d, cos_d_d;
+        double sin_dec, cos_dec, sin_dec0, cos_dec0;
 
         /* Rotate by -delta_ra around v, then delta_dec around u. */
+        dec_rad = h->im_centre_deg[1] * DEG2RAD;
+        dec0_rad = dec_deg * DEG2RAD;
+        d_a = (ra_deg - h->im_centre_deg[0]) * DEG2RAD; /* For -delta_ra. */
+        d_d = (h->im_centre_deg[1] - dec_deg) * DEG2RAD;
+        sin_d_a = sin(d_a);
+        cos_d_a = cos(d_a);
+        sin_d_d = sin(d_d);
+        cos_d_d = cos(d_d);
         M = h->M;
-        M[0] = cos(d_a);           M[1] = 0.0;      M[2] = sin(d_a);
-        M[3] = sin(d_a)*sin(d_d);  M[4] = cos(d_d); M[5] = -cos(d_a)*sin(d_d);
-        M[6] = -sin(d_a)*cos(d_d); M[7] = sin(d_d); M[8] = cos(d_a)*cos(d_d);
+        M[0] =  cos_d_a;           M[1] = 0.0;     M[2] =  sin_d_a;
+        M[3] =  sin_d_a * sin_d_d; M[4] = cos_d_d; M[5] = -cos_d_a * sin_d_d;
+        M[6] = -sin_d_a * cos_d_d; M[7] = sin_d_d; M[8] =  cos_d_a * cos_d_d;
 
-        oskar_convert_lon_lat_to_relative_directions_d(1,
-                &ra_rad, &dec_rad, ra0_rad, dec0_rad, &l1, &m1, &n1);
+        /* Convert from spherical to tangent-plane to get delta (l, m, n). */
+        sin_dec0 = sin(dec0_rad);
+        cos_dec0 = cos(dec0_rad);
+        sin_dec  = sin(dec_rad);
+        cos_dec  = cos(dec_rad);
+        l1 = cos_dec  * -sin_d_a;
+        m1 = cos_dec0 * sin_dec - sin_dec0 * cos_dec * cos_d_a;
+        n1 = sin_dec0 * sin_dec + cos_dec0 * cos_dec * cos_d_a;
         h->delta_l = 0 - l1;
         h->delta_m = 0 - m1;
         h->delta_n = 1 - n1;
@@ -673,18 +674,6 @@ void oskar_imager_set_vis_phase_centre(oskar_Imager* h,
         h->im_centre_deg[0] = ra_deg;
         h->im_centre_deg[1] = dec_deg;
     }
-}
-
-
-void oskar_imager_set_vis_time(oskar_Imager* h,
-        double ref_mjd_utc, double inc_sec, int num)
-{
-    h->vis_time_start_mjd_utc = ref_mjd_utc;
-    h->time_inc_sec = inc_sec;
-    if (!h->planes)
-        update_set(ref_mjd_utc + 0.5 * inc_sec / 86400.0, inc_sec / 86400.0,
-                num, &(h->num_sel_times), &(h->sel_times), 0.01 / 86400.0,
-                h->time_min_utc, h->time_max_utc);
 }
 
 
@@ -714,19 +703,15 @@ int oskar_imager_size(const oskar_Imager* h)
 
 double oskar_imager_time_max_utc(const oskar_Imager* h)
 {
-    return h->time_max_utc == 0.0 ? 0.0 : h->time_max_utc - 0.01 / 86400.0;
+    return h->time_max_utc == 0.0 ? 0.0 :
+            (h->time_max_utc / 86400.0) - 0.01 / 86400.0;
 }
 
 
 double oskar_imager_time_min_utc(const oskar_Imager* h)
 {
-    return h->time_min_utc == 0.0 ? 0.0 : h->time_min_utc + 0.01 / 86400.0;
-}
-
-
-int oskar_imager_time_snapshots(const oskar_Imager* h)
-{
-    return h->time_snaps;
+    return h->time_min_utc == 0.0 ? 0.0 :
+            (h->time_min_utc / 86400.0) + 0.01 / 86400.0;
 }
 
 

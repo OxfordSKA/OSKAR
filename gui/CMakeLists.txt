@@ -51,8 +51,10 @@ if (Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Network_FOUND)
         set_source_files_properties(${gui_ICON} PROPERTIES
             MACOSX_PACKAGE_LOCATION "Resources")
         add_executable(${target} MACOSX_BUNDLE ${gui_ICON} ${gui_SRC})
+        set_target_properties(${target} PROPERTIES OUTPUT_NAME OSKAR)
     else (APPLE)
         add_executable(${target} ${gui_SRC})
+        set_target_properties(${target} PROPERTIES OUTPUT_NAME oskar)
     endif (APPLE)
     target_link_libraries(${target}
             oskar_settings
@@ -60,7 +62,6 @@ if (Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Network_FOUND)
             Qt5::Widgets
             Qt5::Network
     )
-    set_target_properties(${target} PROPERTIES OUTPUT_NAME oskar)
     install(TARGETS ${target} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
     if (APPLE)
         # For convenience, add a BASH script to run the binary inside

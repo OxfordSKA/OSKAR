@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 #include "imager/oskar_imager_free.h"
 #include "imager/oskar_imager_reset_cache.h"
 #include "imager/private_imager_free_gpu_data.h"
+#include "utility/oskar_timer.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -51,6 +52,12 @@ void oskar_imager_free(oskar_Imager* h, int* status)
     oskar_mem_free(h->vis_im, status);
     oskar_mem_free(h->weight_im, status);
     oskar_mem_free(h->weight_tmp, status);
+    oskar_mem_free(h->time_im, status);
+    oskar_timer_free(h->tmr_grid_finalise);
+    oskar_timer_free(h->tmr_grid_update);
+    oskar_timer_free(h->tmr_init);
+    oskar_timer_free(h->tmr_read);
+    oskar_timer_free(h->tmr_write);
 
     oskar_imager_free_gpu_data(h, status);
     for (i = 0; i < h->num_files; ++i)

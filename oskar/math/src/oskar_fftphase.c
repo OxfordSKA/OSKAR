@@ -26,24 +26,77 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_SELECT_VIS_H_
-#define OSKAR_IMAGER_SELECT_VIS_H_
-
-#include <mem/oskar_mem.h>
+#include "math/oskar_fftphase.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_select_vis(const oskar_Imager* h,
-        int start_time, int end_time, int start_chan, int end_chan,
-        int num_baselines, int num_pols, const oskar_Mem* data,
-        const oskar_Mem* weight_in, double im_time_utc, double im_freq_hz,
-        int im_pol, oskar_Mem* data_out, oskar_Mem* weight_out,
-        size_t* num, int* status);
+void oskar_fftphase_cf(const int num_x, const int num_y, float* complex_data)
+{
+    int ix, iy;
+    for (iy = 0; iy < num_y; ++iy)
+    {
+        size_t i1 = iy;
+        i1 *= num_x;
+        for (ix = 0; ix < num_x; ++ix)
+        {
+            const size_t i = (i1 + ix) << 1;
+            const int x = 1 - (((ix + iy) & 1) << 1);
+            complex_data[i]     *= x;
+            complex_data[i + 1] *= x;
+        }
+    }
+}
+
+void oskar_fftphase_f(const int num_x, const int num_y, float* data)
+{
+    int ix, iy;
+    for (iy = 0; iy < num_y; ++iy)
+    {
+        size_t i1 = iy;
+        i1 *= num_x;
+        for (ix = 0; ix < num_x; ++ix)
+        {
+            const size_t i = i1 + ix;
+            data[i] *= (1 - (((ix + iy) & 1) << 1));
+        }
+    }
+}
+
+void oskar_fftphase_cd(const int num_x, const int num_y, double* complex_data)
+{
+    int ix, iy;
+    for (iy = 0; iy < num_y; ++iy)
+    {
+        size_t i1 = iy;
+        i1 *= num_x;
+        for (ix = 0; ix < num_x; ++ix)
+        {
+            const size_t i = (i1 + ix) << 1;
+            const int x = 1 - (((ix + iy) & 1) << 1);
+            complex_data[i]     *= x;
+            complex_data[i + 1] *= x;
+        }
+    }
+}
+
+void oskar_fftphase_d(const int num_x, const int num_y, double* data)
+{
+    int ix, iy;
+    for (iy = 0; iy < num_y; ++iy)
+    {
+        size_t i1 = iy;
+        i1 *= num_x;
+        for (ix = 0; ix < num_x; ++ix)
+        {
+            const size_t i = i1 + ix;
+            data[i] *= (1 - (((ix + iy) & 1) << 1));
+        }
+    }
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_IMAGER_SELECT_VIS_H_ */

@@ -42,7 +42,6 @@ void oskar_imager_read_dims_ms(oskar_Imager* h, const char* filename,
 {
 #ifndef OSKAR_NO_MS
     oskar_MeasurementSet* ms;
-    int num_times, num_channels, num_stations, num_baselines, num_rows;
     if (*status) return;
 
     /* Read the header. */
@@ -52,29 +51,12 @@ void oskar_imager_read_dims_ms(oskar_Imager* h, const char* filename,
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-    num_rows = (int) oskar_ms_num_rows(ms);
-    num_stations = (int) oskar_ms_num_stations(ms);
-    num_baselines = num_stations * (num_stations - 1) / 2;
-    num_channels = (int) oskar_ms_num_channels(ms);
-    num_times = num_rows / num_baselines;
-
-    /* Check for irregular data and override time synthesis mode if required. */
-    if (num_rows % num_baselines != 0)
-    {
-        oskar_log_warning(h->log,
-                "Irregular data detected. Using full time synthesis.");
-        oskar_imager_set_time_min_utc(h, 0.0);
-        oskar_imager_set_time_max_utc(h, -1.0);
-        oskar_imager_set_time_snapshots(h, 0);
-    }
 
     /* Set visibility meta-data. */
     oskar_imager_set_vis_frequency(h,
             oskar_ms_freq_start_hz(ms),
-            oskar_ms_freq_inc_hz(ms), num_channels);
-    oskar_imager_set_vis_time(h,
-            oskar_ms_time_start_mjd_utc(ms),
-            oskar_ms_time_inc_sec(ms), num_times);
+            oskar_ms_freq_inc_hz(ms),
+            (int) oskar_ms_num_channels(ms));
     oskar_ms_close(ms);
 #else
     oskar_log_error(h->log, "OSKAR was compiled without Measurement Set support.");
@@ -87,29 +69,25 @@ void oskar_imager_read_dims_vis(oskar_Imager* h, const char* filename,
         int* status)
 {
     oskar_Binary* vis_file;
-    oskar_VisHeader* hdr;
+    oskar_VisHeader* header;
     if (*status) return;
 
     /* Read the header. */
     vis_file = oskar_binary_create(filename, 'r', status);
-    hdr = oskar_vis_header_read(vis_file, status);
+    header = oskar_vis_header_read(vis_file, status);
     if (*status)
     {
-        oskar_vis_header_free(hdr, status);
+        oskar_vis_header_free(header, status);
         oskar_binary_free(vis_file);
         return;
     }
 
     /* Set visibility meta-data. */
     oskar_imager_set_vis_frequency(h,
-            oskar_vis_header_freq_start_hz(hdr),
-            oskar_vis_header_freq_inc_hz(hdr),
-            oskar_vis_header_num_channels_total(hdr));
-    oskar_imager_set_vis_time(h,
-            oskar_vis_header_time_start_mjd_utc(hdr),
-            oskar_vis_header_time_inc_sec(hdr),
-            oskar_vis_header_num_times_total(hdr));
-    oskar_vis_header_free(hdr, status);
+            oskar_vis_header_freq_start_hz(header),
+            oskar_vis_header_freq_inc_hz(header),
+            oskar_vis_header_num_channels_total(header));
+    oskar_vis_header_free(header, status);
     oskar_binary_free(vis_file);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,8 +48,8 @@ extern "C" {
  * Updates gridded weights for the supplied visibility points.
  *
  * @param[in] num_points        Number of data points.
- * @param[in] uu                Baseline UU coordinates, in wavelengths.
- * @param[in] vv                Baseline VV coordinates, in wavelengths.
+ * @param[in] uu                Baseline uu coordinates, in wavelengths.
+ * @param[in] vv                Baseline vv coordinates, in wavelengths.
  * @param[in] weight            Input visibility weights.
  * @param[in] cell_size_rad     Cell size, in radians.
  * @param[in] grid_size         Side length of grid.
@@ -56,10 +57,11 @@ extern "C" {
  * @param[in,out] grid          Gridded weights.
  */
 OSKAR_EXPORT
-void oskar_grid_weights_write_d(const int num_points, const double* restrict uu,
-        const double* restrict vv, const double* restrict weight,
-        const double cell_size_rad, const int grid_size,
-        int* restrict num_skipped, double* restrict grid);
+void oskar_grid_weights_write_d(const size_t num_points,
+        const double* restrict uu, const double* restrict vv,
+        const double* restrict weight, const double cell_size_rad,
+        const int grid_size, size_t* restrict num_skipped,
+        double* restrict grid);
 
 /**
  * @brief
@@ -70,8 +72,8 @@ void oskar_grid_weights_write_d(const int num_points, const double* restrict uu,
  * uniform weighting.
  *
  * @param[in] num_points        Number of data points.
- * @param[in] uu                Baseline UU coordinates, in wavelengths.
- * @param[in] vv                Baseline VV coordinates, in wavelengths.
+ * @param[in] uu                Baseline uu coordinates, in wavelengths.
+ * @param[in] vv                Baseline vv coordinates, in wavelengths.
  * @param[in] weight            Input visibility weights.
  * @param[in] cell_size_rad     Cell size, in radians.
  * @param[in] grid_size         Side length of grid.
@@ -79,11 +81,11 @@ void oskar_grid_weights_write_d(const int num_points, const double* restrict uu,
  * @param[in,out] grid          Gridded weights.
  */
 OSKAR_EXPORT
-void oskar_grid_weights_read_d(const int num_points, const double* restrict uu,
-        const double* restrict vv, const double* restrict weight_in,
-        double* restrict weight_out, const double cell_size_rad,
-        const int grid_size, int* restrict num_skipped,
-        const double* restrict grid);
+void oskar_grid_weights_read_d(const size_t num_points,
+        const double* restrict uu, const double* restrict vv,
+        const double* restrict weight_in, double* restrict weight_out,
+        const double cell_size_rad, const int grid_size,
+        size_t* restrict num_skipped, const double* restrict grid);
 
 /**
  * @brief
@@ -93,8 +95,8 @@ void oskar_grid_weights_read_d(const int num_points, const double* restrict uu,
  * Updates gridded weights for the supplied visibility points.
  *
  * @param[in] num_points        Number of data points.
- * @param[in] uu                Baseline UU coordinates, in wavelengths.
- * @param[in] vv                Baseline VV coordinates, in wavelengths.
+ * @param[in] uu                Baseline uu coordinates, in wavelengths.
+ * @param[in] vv                Baseline vv coordinates, in wavelengths.
  * @param[in] weight            Input visibility weights.
  * @param[in] cell_size_rad     Cell size, in radians.
  * @param[in] grid_size         Side length of grid.
@@ -102,10 +104,11 @@ void oskar_grid_weights_read_d(const int num_points, const double* restrict uu,
  * @param[in,out] grid          Gridded weights.
  */
 OSKAR_EXPORT
-void oskar_grid_weights_write_f(const int num_points, const float* restrict uu,
-        const float* restrict vv, const float* restrict weight,
-        const double cell_size_rad, const int grid_size,
-        int* restrict num_skipped, float* restrict grid);
+void oskar_grid_weights_write_f(const size_t num_points,
+        const float* restrict uu, const float* restrict vv,
+        const float* restrict weight, const float cell_size_rad,
+        const int grid_size, size_t* restrict num_skipped,
+        float* restrict grid);
 
 /**
  * @brief
@@ -116,8 +119,8 @@ void oskar_grid_weights_write_f(const int num_points, const float* restrict uu,
  * uniform weighting.
  *
  * @param[in] num_points        Number of data points.
- * @param[in] uu                Baseline UU coordinates, in wavelengths.
- * @param[in] vv                Baseline VV coordinates, in wavelengths.
+ * @param[in] uu                Baseline uu coordinates, in wavelengths.
+ * @param[in] vv                Baseline vv coordinates, in wavelengths.
  * @param[in] weight            Input visibility weights.
  * @param[in] cell_size_rad     Cell size, in radians.
  * @param[in] grid_size         Side length of grid.
@@ -125,11 +128,11 @@ void oskar_grid_weights_write_f(const int num_points, const float* restrict uu,
  * @param[in,out] grid          Gridded weights.
  */
 OSKAR_EXPORT
-void oskar_grid_weights_read_f(const int num_points, const float* restrict uu,
-        const float* restrict vv, const float* restrict weight_in,
-        float* restrict weight_out, const double cell_size_rad,
-        const int grid_size, int* restrict num_skipped,
-        const float* restrict grid);
+void oskar_grid_weights_read_f(const size_t num_points,
+        const float* restrict uu, const float* restrict vv,
+        const float* restrict weight_in, float* restrict weight_out,
+        const float cell_size_rad, const int grid_size,
+        size_t* restrict num_skipped, const float* restrict grid);
 
 #ifdef __cplusplus
 }

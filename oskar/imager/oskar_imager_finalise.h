@@ -93,7 +93,7 @@ void oskar_imager_finalise_plane(oskar_Imager* h,
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_trim_image(oskar_Mem* plane,
+void oskar_imager_trim_image(oskar_Imager* h, oskar_Mem* plane,
         int plane_size, int image_size, int* status);
 
 #ifdef __cplusplus

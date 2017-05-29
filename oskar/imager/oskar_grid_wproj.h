@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,10 +52,10 @@ extern "C" {
  * @param[in] oversample     GCF oversample factor.
  * @param[in] conv_size_half Side length of W-kernel cube.
  * @param[in] conv_func      GCF cube (W-kernels).
- * @param[in] num_vis        Number of visibility points.
- * @param[in] uu             Baseline UU coordinates, in wavelengths.
- * @param[in] vv             Baseline VV coordinates, in wavelengths.
- * @param[in] ww             Baseline WW coordinates, in wavelengths.
+ * @param[in] num_points     Number of visibility points.
+ * @param[in] uu             Visibility baseline uu coordinates, in wavelengths.
+ * @param[in] vv             Visibility baseline vv coordinates, in wavelengths.
+ * @param[in] ww             Visibility baseline ww coordinates, in wavelengths.
  * @param[in] vis            Complex visibilities for each baseline.
  * @param[in] weight         Visibility weight for each baseline.
  * @param[in] cell_size_rad  Cell size, in radians.
@@ -65,14 +66,24 @@ extern "C" {
  * @param[in,out] grid       Updated complex visibility grid.
  */
 OSKAR_EXPORT
-void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
-        const int oversample, const int conv_size_half,
-        const double* restrict conv_func, const int num_vis,
-        const double* restrict uu, const double* restrict vv,
-        const double* restrict ww, const double* restrict vis,
-        const double* restrict weight, const double cell_size_rad,
-        const double w_scale, const int grid_size, int* restrict num_skipped,
-        double* restrict norm, double* restrict grid);
+void oskar_grid_wproj_d(
+        const size_t num_w_planes,
+        const int* restrict support,
+        const int oversample,
+        const int conv_size_half,
+        const double* restrict conv_func,
+        const size_t num_points,
+        const double* restrict uu,
+        const double* restrict vv,
+        const double* restrict ww,
+        const double* restrict vis,
+        const double* restrict weight,
+        const double cell_size_rad,
+        const double w_scale,
+        const int grid_size,
+        size_t* restrict num_skipped,
+        double* restrict norm,
+        double* restrict grid);
 
 /**
  * @brief
@@ -83,13 +94,13 @@ void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
  *
  * @param[in] num_w_planes   Number of W-projection planes.
  * @param[in] support        GCF support size per W-plane.
- * @param[in] oversample    GCF oversample factor.
+ * @param[in] oversample     GCF oversample factor.
  * @param[in] conv_size_half Side length of W-kernel cube.
  * @param[in] conv_func      GCF cube (W-kernels).
- * @param[in] num_vis        Number of visibility points.
- * @param[in] uu             Baseline UU coordinates, in wavelengths.
- * @param[in] vv             Baseline VV coordinates, in wavelengths.
- * @param[in] ww             Baseline WW coordinates, in wavelengths.
+ * @param[in] num_points     Number of visibility points.
+ * @param[in] uu             Visibility baseline uu coordinates, in wavelengths.
+ * @param[in] vv             Visibility baseline vv coordinates, in wavelengths.
+ * @param[in] ww             Visibility baseline ww coordinates, in wavelengths.
  * @param[in] vis            Complex visibilities for each baseline.
  * @param[in] weight         Visibility weight for each baseline.
  * @param[in] cell_size_rad  Cell size, in radians.
@@ -100,14 +111,24 @@ void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
  * @param[in,out] grid       Updated complex visibility grid.
  */
 OSKAR_EXPORT
-void oskar_grid_wproj_f(const int num_w_planes, const int* restrict support,
-        const int oversample, const int conv_size_half,
-        const float* restrict conv_func, const int num_vis,
-        const float* restrict uu, const float* restrict vv,
-        const float* restrict ww, const float* restrict vis,
-        const float* restrict weight, const double cell_size_rad,
-        const double w_scale, const int grid_size, int* restrict num_skipped,
-        double* restrict norm, float* restrict grid);
+void oskar_grid_wproj_f(
+        const size_t num_w_planes,
+        const int* restrict support,
+        const int oversample,
+        const int conv_size_half,
+        const float* restrict conv_func,
+        const size_t num_points,
+        const float* restrict uu,
+        const float* restrict vv,
+        const float* restrict ww,
+        const float* restrict vis,
+        const float* restrict weight,
+        const float cell_size_rad,
+        const float w_scale,
+        const int grid_size,
+        size_t* restrict num_skipped,
+        double* restrict norm,
+        float* restrict grid);
 
 #ifdef __cplusplus
 }

@@ -34,189 +34,182 @@
 extern "C" {
 #endif
 
-void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
-        const int oversample, const int conv_size_half,
-        const double* restrict conv_func, const int num_vis,
-        const double* restrict uu, const double* restrict vv,
-        const double* restrict ww, const double* restrict vis,
-        const double* restrict weight, const double cell_size_rad,
-        const double w_scale, const int grid_size, int* restrict num_skipped,
-        double* restrict norm, double* restrict grid)
+void oskar_grid_wproj_d(
+        const size_t num_w_planes,
+        const int* restrict support,
+        const int oversample,
+        const int conv_size_half,
+        const double* restrict conv_func,
+        const size_t num_points,
+        const double* restrict uu,
+        const double* restrict vv,
+        const double* restrict ww,
+        const double* restrict vis,
+        const double* restrict weight,
+        const double cell_size_rad,
+        const double w_scale,
+        const int grid_size,
+        size_t* restrict num_skipped,
+        double* restrict norm,
+        double* restrict grid)
 {
-    int i;
-    const int g_centre = grid_size / 2;
-    const int kernel_dim = conv_size_half * conv_size_half;
-    const double scale = grid_size * cell_size_rad;
+    size_t i;
+    const size_t kernel_dim = conv_size_half * conv_size_half;
+    const int grid_centre = grid_size / 2;
+    const double grid_scale = grid_size * cell_size_rad;
 
     /* Loop over visibilities. */
     *num_skipped = 0;
-    for (i = 0; i < num_vis; ++i)
+    for (i = 0; i < num_points; ++i)
     {
-        size_t p;
-        double cwt[2], pos_u, pos_v, val[2], sum, w, ww_i;
-        int ix, iy, j, k, grid_u, grid_v, grid_w, off_u, off_v, wsupport;
-        int kernel_start;
+        double sum = 0.0;
+        int j, k;
 
         /* Convert UV coordinates to grid coordinates. */
-        pos_u = -uu[i] * scale;
-        pos_v = vv[i] * scale;
-        ww_i = ww[i];
-        grid_u = (int)round(pos_u) + g_centre;
-        grid_v = (int)round(pos_v) + g_centre;
-        grid_w = (int)round(sqrt(fabs(ww_i * w_scale))); /* w-plane index */
-        if (grid_w >= num_w_planes) grid_w = num_w_planes - 1;
+        const double pos_u = -uu[i] * grid_scale;
+        const double pos_v = vv[i] * grid_scale;
+        const double ww_i = ww[i];
+        const double conv_conj = (ww_i > 0.0) ? -1.0 : 1.0;
+        const size_t grid_w = (size_t)round(sqrt(fabs(ww_i * w_scale)));
+        const int grid_u = (int)round(pos_u) + grid_centre;
+        const int grid_v = (int)round(pos_v) + grid_centre;
+
+        /* Get visibility data. */
+        const double weight_i = weight[i];
+        const double v_re = weight_i * vis[2 * i];
+        const double v_im = weight_i * vis[2 * i + 1];
+
+        /* Scaled distance from nearest grid point. */
+        const int off_u = (int)round((round(pos_u) - pos_u) * oversample);
+        const int off_v = (int)round((round(pos_v) - pos_v) * oversample);
+
+        /* Get kernel support size and start offset. */
+        const int w_support = grid_w < num_w_planes ?
+                support[grid_w] : support[num_w_planes - 1];
+        const size_t kernel_start = grid_w < num_w_planes ?
+                grid_w * kernel_dim : (num_w_planes - 1) * kernel_dim;
 
         /* Catch points that would lie outside the grid. */
-        wsupport = support[grid_w];
-        if (grid_u + wsupport >= grid_size || grid_u - wsupport < 0 ||
-                grid_v + wsupport >= grid_size || grid_v - wsupport < 0)
+        if (grid_u + w_support >= grid_size || grid_u - w_support < 0 ||
+                grid_v + w_support >= grid_size || grid_v - w_support < 0)
         {
             *num_skipped += 1;
             continue;
         }
 
-        /* Scaled distance from nearest grid point. */
-        off_u = (int)round((grid_u - g_centre - pos_u) * oversample);
-        off_v = (int)round((grid_v - g_centre - pos_v) * oversample);
-
-        /* Convolve this point. */
-        kernel_start = grid_w * kernel_dim;
-        w = weight[i];
-        val[0] = w * vis[2 * i];
-        val[1] = w * vis[2 * i + 1];
-        sum = 0.0;
-        if (ww_i > 0.0)
+        /* Convolve this point onto the grid. */
+        for (j = -w_support; j <= w_support; ++j)
         {
-            for (j = -wsupport; j <= wsupport; ++j)
+            size_t p1, t1;
+            p1 = grid_v + j;
+            p1 *= grid_size; /* Tested to avoid int overflow. */
+            p1 += grid_u;
+            t1 = abs(off_v + j * oversample);
+            t1 *= conv_size_half;
+            t1 += kernel_start;
+            for (k = -w_support; k <= w_support; ++k)
             {
-                iy = abs(off_v + j * oversample);
-                for (k = -wsupport; k <= wsupport; ++k)
-                {
-                    ix = abs(off_u + k * oversample);
-                    p = 2 * (kernel_start + iy * conv_size_half + ix);
-                    cwt[0] = conv_func[p];
-                    cwt[1] = -conv_func[p + 1]; /* Conjugate. */
-                    sum += cwt[0]; /* Real part only. */
-                    p = 2 * (((grid_v + j) * grid_size) + grid_u + k);
-                    grid[p]     += (val[0] * cwt[0] - val[1] * cwt[1]);
-                    grid[p + 1] += (val[1] * cwt[0] + val[0] * cwt[1]);
-                }
+                size_t p = (t1 + abs(off_u + k * oversample)) << 1;
+                const double c_re = conv_func[p];
+                const double c_im = conv_func[p + 1] * conv_conj;
+                p = (p1 + k) << 1;
+                grid[p]     += (v_re * c_re - v_im * c_im);
+                grid[p + 1] += (v_im * c_re + v_re * c_im);
+                sum += c_re; /* Real part only. */
             }
         }
-        else
-        {
-            for (j = -wsupport; j <= wsupport; ++j)
-            {
-                iy = abs(off_v + j * oversample);
-                for (k = -wsupport; k <= wsupport; ++k)
-                {
-                    ix = abs(off_u + k * oversample);
-                    p = 2 * (kernel_start + iy * conv_size_half + ix);
-                    cwt[0] = conv_func[p];
-                    cwt[1] = conv_func[p + 1];
-                    sum += cwt[0]; /* Real part only. */
-                    p = 2 * (((grid_v + j) * grid_size) + grid_u + k);
-                    grid[p]     += (val[0] * cwt[0] - val[1] * cwt[1]);
-                    grid[p + 1] += (val[1] * cwt[0] + val[0] * cwt[1]);
-                }
-            }
-        }
-        *norm += sum * w;
+        *norm += sum * weight_i;
     }
 }
 
 
-void oskar_grid_wproj_f(const int num_w_planes, const int* restrict support,
-        const int oversample, const int conv_size_half,
-        const float* restrict conv_func, const int num_vis,
-        const float* restrict uu, const float* restrict vv,
-        const float* restrict ww, const float* restrict vis,
-        const float* restrict weight, const double cell_size_rad,
-        const double w_scale, const int grid_size, int* restrict num_skipped,
-        double* restrict norm, float* restrict grid)
+void oskar_grid_wproj_f(
+        const size_t num_w_planes,
+        const int* restrict support,
+        const int oversample,
+        const int conv_size_half,
+        const float* restrict conv_func,
+        const size_t num_points,
+        const float* restrict uu,
+        const float* restrict vv,
+        const float* restrict ww,
+        const float* restrict vis,
+        const float* restrict weight,
+        const float cell_size_rad,
+        const float w_scale,
+        const int grid_size,
+        size_t* restrict num_skipped,
+        double* restrict norm,
+        float* restrict grid)
 {
-    int i;
-    const int g_centre = grid_size / 2;
-    const int kernel_dim = conv_size_half * conv_size_half;
-    const double scale = grid_size * cell_size_rad;
+    size_t i;
+    const size_t kernel_dim = conv_size_half * conv_size_half;
+    const int grid_centre = grid_size / 2;
+    const float grid_scale = grid_size * cell_size_rad;
 
     /* Loop over visibilities. */
     *num_skipped = 0;
-    for (i = 0; i < num_vis; ++i)
+    for (i = 0; i < num_points; ++i)
     {
-        size_t p;
-        double cwt[2], pos_u, pos_v, val[2], sum, w, ww_i;
-        int ix, iy, j, k, grid_u, grid_v, grid_w, off_u, off_v, wsupport;
-        int kernel_start;
+        double sum = 0.0;
+        int j, k;
 
         /* Convert UV coordinates to grid coordinates. */
-        pos_u = -uu[i] * scale;
-        pos_v = vv[i] * scale;
-        ww_i = ww[i];
-        grid_u = (int)round(pos_u) + g_centre;
-        grid_v = (int)round(pos_v) + g_centre;
-        grid_w = (int)round(sqrt(fabs(ww_i * w_scale))); /* w-plane index */
-        if (grid_w >= num_w_planes) grid_w = num_w_planes - 1;
+        const float pos_u = -uu[i] * grid_scale;
+        const float pos_v = vv[i] * grid_scale;
+        const float ww_i = ww[i];
+        const float conv_conj = (ww_i > 0.0f) ? -1.0f : 1.0f;
+        const size_t grid_w = (size_t)roundf(sqrtf(fabsf(ww_i * w_scale)));
+        const int grid_u = (int)roundf(pos_u) + grid_centre;
+        const int grid_v = (int)roundf(pos_v) + grid_centre;
+
+        /* Get visibility data. */
+        const float weight_i = weight[i];
+        const float v_re = weight_i * vis[2 * i];
+        const float v_im = weight_i * vis[2 * i + 1];
+
+        /* Scaled distance from nearest grid point. */
+        const int off_u = (int)roundf((roundf(pos_u) - pos_u) * oversample);
+        const int off_v = (int)roundf((roundf(pos_v) - pos_v) * oversample);
+
+        /* Get kernel support size and start offset. */
+        const int w_support = grid_w < num_w_planes ?
+                support[grid_w] : support[num_w_planes - 1];
+        const size_t kernel_start = grid_w < num_w_planes ?
+                grid_w * kernel_dim : (num_w_planes - 1) * kernel_dim;
 
         /* Catch points that would lie outside the grid. */
-        wsupport = support[grid_w];
-        if (grid_u + wsupport >= grid_size || grid_u - wsupport < 0 ||
-                grid_v + wsupport >= grid_size || grid_v - wsupport < 0)
+        if (grid_u + w_support >= grid_size || grid_u - w_support < 0 ||
+                grid_v + w_support >= grid_size || grid_v - w_support < 0)
         {
             *num_skipped += 1;
             continue;
         }
 
-        /* Scaled distance from nearest grid point. */
-        off_u = (int)round((grid_u - g_centre - pos_u) * oversample);
-        off_v = (int)round((grid_v - g_centre - pos_v) * oversample);
-
-        /* Convolve this point. */
-        kernel_start = grid_w * kernel_dim;
-        w = weight[i];
-        val[0] = w * vis[2 * i];
-        val[1] = w * vis[2 * i + 1];
-        sum = 0.0;
-        if (ww_i > 0.0)
+        /* Convolve this point onto the grid. */
+        for (j = -w_support; j <= w_support; ++j)
         {
-            for (j = -wsupport; j <= wsupport; ++j)
+            size_t p1, t1;
+            p1 = grid_v + j;
+            p1 *= grid_size; /* Tested to avoid int overflow. */
+            p1 += grid_u;
+            t1 = abs(off_v + j * oversample);
+            t1 *= conv_size_half;
+            t1 += kernel_start;
+            for (k = -w_support; k <= w_support; ++k)
             {
-                iy = abs(off_v + j * oversample);
-                for (k = -wsupport; k <= wsupport; ++k)
-                {
-                    ix = abs(off_u + k * oversample);
-                    p = 2 * (kernel_start + iy * conv_size_half + ix);
-                    cwt[0] = conv_func[p];
-                    cwt[1] = -conv_func[p + 1]; /* Conjugate. */
-                    sum += cwt[0]; /* Real part only. */
-                    p = 2 * (((grid_v + j) * grid_size) + grid_u + k);
-                    grid[p]     += (val[0] * cwt[0] - val[1] * cwt[1]);
-                    grid[p + 1] += (val[1] * cwt[0] + val[0] * cwt[1]);
-                }
+                size_t p = (t1 + abs(off_u + k * oversample)) << 1;
+                const float c_re = conv_func[p];
+                const float c_im = conv_func[p + 1] * conv_conj;
+                p = (p1 + k) << 1;
+                grid[p]     += (v_re * c_re - v_im * c_im);
+                grid[p + 1] += (v_im * c_re + v_re * c_im);
+                sum += c_re; /* Real part only. */
             }
         }
-        else
-        {
-            for (j = -wsupport; j <= wsupport; ++j)
-            {
-                iy = abs(off_v + j * oversample);
-                for (k = -wsupport; k <= wsupport; ++k)
-                {
-                    ix = abs(off_u + k * oversample);
-                    p = 2 * (kernel_start + iy * conv_size_half + ix);
-                    cwt[0] = conv_func[p];
-                    cwt[1] = conv_func[p + 1];
-                    sum += cwt[0]; /* Real part only. */
-                    p = 2 * (((grid_v + j) * grid_size) + grid_u + k);
-                    grid[p]     += (val[0] * cwt[0] - val[1] * cwt[1]);
-                    grid[p + 1] += (val[1] * cwt[0] + val[0] * cwt[1]);
-                }
-            }
-        }
-        *norm += sum * w;
+        *norm += sum * weight_i;
     }
 }
-
 
 #ifdef __cplusplus
 }

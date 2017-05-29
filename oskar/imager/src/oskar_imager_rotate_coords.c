@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imager/oskar_imager_rotate_coords.h"
+#include "imager/private_imager.h"
+#include "imager/oskar_imager.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_rotate_coords(size_t num_coords, const oskar_Mem* uu_in,
-        const oskar_Mem* vv_in, const oskar_Mem* ww_in, const double M[9],
-        oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww)
+void oskar_imager_rotate_coords(const oskar_Imager* h, size_t num_coords,
+        const oskar_Mem* uu_in, const oskar_Mem* vv_in, const oskar_Mem* ww_in,
+        oskar_Mem* uu_out, oskar_Mem* vv_out, oskar_Mem* ww_out)
 {
     size_t i;
-    double s[3], t[3];
+    const double *M = h->M;
     if (oskar_mem_precision(uu_in) == OSKAR_SINGLE)
     {
         float *uu_o, *vv_o, *ww_o;
@@ -45,16 +46,19 @@ void oskar_imager_rotate_coords(size_t num_coords, const oskar_Mem* uu_in,
         uu_i = (const float*)oskar_mem_void_const(uu_in);
         vv_i = (const float*)oskar_mem_void_const(vv_in);
         ww_i = (const float*)oskar_mem_void_const(ww_in);
-        uu_o = (float*)oskar_mem_void(uu);
-        vv_o = (float*)oskar_mem_void(vv);
-        ww_o = (float*)oskar_mem_void(ww);
+        uu_o = (float*)oskar_mem_void(uu_out);
+        vv_o = (float*)oskar_mem_void(vv_out);
+        ww_o = (float*)oskar_mem_void(ww_out);
+
+#pragma omp parallel for private(i)
         for (i = 0; i < num_coords; ++i)
         {
-            s[0] = uu_i[i]; s[1] = vv_i[i]; s[2] = ww_i[i];
-            t[0] = M[0] * s[0] + M[1] * s[1] + M[2] * s[2];
-            t[1] = M[3] * s[0] + M[4] * s[1] + M[5] * s[2];
-            t[2] = M[6] * s[0] + M[7] * s[1] + M[8] * s[2];
-            uu_o[i] = t[0]; vv_o[i] = t[1]; ww_o[i] = t[2];
+            double s0, s1, s2, t0, t1, t2;
+            s0 = uu_i[i]; s1 = vv_i[i]; s2 = ww_i[i];
+            t0 = M[0] * s0 + M[1] * s1 + M[2] * s2;
+            t1 = M[3] * s0 + M[4] * s1 + M[5] * s2;
+            t2 = M[6] * s0 + M[7] * s1 + M[8] * s2;
+            uu_o[i] = t0; vv_o[i] = t1; ww_o[i] = t2;
         }
     }
     else
@@ -64,16 +68,19 @@ void oskar_imager_rotate_coords(size_t num_coords, const oskar_Mem* uu_in,
         uu_i = (const double*)oskar_mem_void_const(uu_in);
         vv_i = (const double*)oskar_mem_void_const(vv_in);
         ww_i = (const double*)oskar_mem_void_const(ww_in);
-        uu_o = (double*)oskar_mem_void(uu);
-        vv_o = (double*)oskar_mem_void(vv);
-        ww_o = (double*)oskar_mem_void(ww);
+        uu_o = (double*)oskar_mem_void(uu_out);
+        vv_o = (double*)oskar_mem_void(vv_out);
+        ww_o = (double*)oskar_mem_void(ww_out);
+
+#pragma omp parallel for private(i)
         for (i = 0; i < num_coords; ++i)
         {
-            s[0] = uu_i[i]; s[1] = vv_i[i]; s[2] = ww_i[i];
-            t[0] = M[0] * s[0] + M[1] * s[1] + M[2] * s[2];
-            t[1] = M[3] * s[0] + M[4] * s[1] + M[5] * s[2];
-            t[2] = M[6] * s[0] + M[7] * s[1] + M[8] * s[2];
-            uu_o[i] = t[0]; vv_o[i] = t[1]; ww_o[i] = t[2];
+            double s0, s1, s2, t0, t1, t2;
+            s0 = uu_i[i]; s1 = vv_i[i]; s2 = ww_i[i];
+            t0 = M[0] * s0 + M[1] * s1 + M[2] * s2;
+            t1 = M[3] * s0 + M[4] * s1 + M[5] * s2;
+            t2 = M[6] * s0 + M[7] * s1 + M[8] * s2;
+            uu_o[i] = t0; vv_o[i] = t1; ww_o[i] = t2;
         }
     }
 }

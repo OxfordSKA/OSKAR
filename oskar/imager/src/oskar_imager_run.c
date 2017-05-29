@@ -82,12 +82,6 @@ void oskar_imager_run(oskar_Imager* h,
 
     if (h->log)
     {
-        oskar_log_message(h->log, 'M', 0, "Using %d time centroids(s)",
-                h->num_sel_times);
-        if (h->num_sel_times > 0)
-            oskar_log_message(h->log, 'M', 1, "Range MJD(UTC) %.11f to %.11f",
-                    h->sel_times[0],
-                    h->sel_times[h->num_sel_times - 1]);
         oskar_log_message(h->log, 'M', 0, "Using %d frequency channel(s)",
                 h->num_sel_freqs);
         if (h->num_sel_freqs > 0)
@@ -97,7 +91,7 @@ void oskar_imager_run(oskar_Imager* h,
     }
 
     /* Check data ranges. */
-    if (h->num_sel_times == 0 || h->num_sel_freqs == 0)
+    if (h->num_sel_freqs == 0)
     {
         if (h->log)
             oskar_log_error(h->log, "No data selected.");
@@ -150,8 +144,10 @@ void oskar_imager_run(oskar_Imager* h,
         if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
         {
             oskar_log_message(h->log, 'M', 0,
-                    "Baseline W range is %.3f to %.3f wavelengths",
-                    h->ww_min, h->ww_max);
+                    "Baseline W values (wavelengths)");
+            oskar_log_message(h->log, 'M', 1, "Min: %.12e", h->ww_min);
+            oskar_log_message(h->log, 'M', 1, "Max: %.12e", h->ww_max);
+            oskar_log_message(h->log, 'M', 1, "RMS: %.12e", h->ww_rms);
             oskar_log_message(h->log, 'M', 0, "Using %d W-planes.",
                     oskar_imager_num_w_planes(h));
         }

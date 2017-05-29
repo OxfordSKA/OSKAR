@@ -33,6 +33,7 @@
 #include <fitsio.h>
 #include <mem/oskar_mem.h>
 #include <log/oskar_log.h>
+#include <utility/oskar_timer.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,13 +50,15 @@ typedef struct DeviceData DeviceData;
 
 struct oskar_Imager
 {
+    char* output_name[4];
     fitsfile* fits_file[4];
     oskar_Log* log;
+    oskar_Timer *tmr_grid_update, *tmr_grid_finalise, *tmr_init;
+    oskar_Timer *tmr_read, *tmr_write;
 
     /* Settings parameters. */
     int imager_prec, num_gpus, *cuda_device_ids, fft_on_gpu;
-    int chan_snaps, time_snaps;
-    int im_type, num_im_times, num_im_channels, num_im_pols, pol_offset;
+    int chan_snaps, im_type, num_im_channels, num_im_pols, pol_offset;
     int algorithm, image_size, use_stokes, support, oversample;
     int generate_w_kernels_on_gpu, set_cellsize, set_fov, weighting;
     int num_files, scale_norm_with_num_input_files;
@@ -65,16 +68,15 @@ struct oskar_Imager
     double time_min_utc, time_max_utc, freq_min_hz, freq_max_hz;
 
     /* Visibility meta-data. */
-    int num_sel_freqs, num_sel_times;
-    double *im_freqs, *im_times, *sel_freqs, *sel_times;
+    int num_sel_freqs;
+    double *im_freqs, *sel_freqs;
     double vis_freq_start_hz, freq_inc_hz;
-    double vis_time_start_mjd_utc, time_inc_sec;
 
     /* Scratch data. */
-    oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im, *weight_im;
+    oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im, *weight_im, *time_im;
     oskar_Mem *uu_tmp, *vv_tmp, *ww_tmp, *stokes, *weight_tmp;
     int coords_only; /* Set if doing a first pass for uniform weighting. */
-    int num_planes; /* For each output time, channel and polarisation. */
+    int num_planes; /* For each output channel and polarisation. */
     double *plane_norm, delta_l, delta_m, delta_n, M[9];
     oskar_Mem **planes, **weights_grids;
 

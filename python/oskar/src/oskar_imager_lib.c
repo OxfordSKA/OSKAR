@@ -526,6 +526,133 @@ static PyObject* reset_cache(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* rotate_coords(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject *obj[] = {0, 0, 0, 0};
+    oskar_Mem *uu_c, *vv_c, *ww_c;
+    PyArrayObject *uu = 0, *vv = 0, *ww = 0;
+    int status = 0;
+    size_t num_coords;
+
+    /* Parse inputs. */
+    if (!PyArg_ParseTuple(args, "OOOO", &obj[0], &obj[1], &obj[2], &obj[3]))
+        return 0;
+    if (!(h = get_handle_imager(obj[0]))) return 0;
+
+    /* Make sure input objects are arrays. Convert if required. */
+    uu = (PyArrayObject*) PyArray_FROM_OF(obj[1], NPY_ARRAY_INOUT_ARRAY);
+    vv = (PyArrayObject*) PyArray_FROM_OF(obj[2], NPY_ARRAY_INOUT_ARRAY);
+    ww = (PyArrayObject*) PyArray_FROM_OF(obj[3], NPY_ARRAY_INOUT_ARRAY);
+    if (!uu || !vv || !ww)
+        goto fail;
+
+    /* Check dimensions. */
+    num_coords = (size_t) PyArray_SIZE(uu);
+    if (num_coords != (size_t) PyArray_SIZE(vv) ||
+            num_coords != (size_t) PyArray_SIZE(ww))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Data dimension mismatch.");
+        goto fail;
+    }
+
+    /* Pointers to arrays. */
+    uu_c = oskar_mem_create_alias_from_raw(PyArray_DATA(uu),
+            oskar_type_from_numpy(uu), OSKAR_CPU, num_coords, &status);
+    vv_c = oskar_mem_create_alias_from_raw(PyArray_DATA(vv),
+            oskar_type_from_numpy(vv), OSKAR_CPU, num_coords, &status);
+    ww_c = oskar_mem_create_alias_from_raw(PyArray_DATA(ww),
+            oskar_type_from_numpy(ww), OSKAR_CPU, num_coords, &status);
+
+    /* Rotate the baseline coordinates. */
+    Py_BEGIN_ALLOW_THREADS
+    oskar_imager_rotate_coords(h,
+            num_coords, uu_c, vv_c, ww_c, uu_c, vv_c, ww_c);
+    Py_END_ALLOW_THREADS
+    oskar_mem_free(uu_c, &status);
+    oskar_mem_free(vv_c, &status);
+    oskar_mem_free(ww_c, &status);
+
+    Py_XDECREF(uu);
+    Py_XDECREF(vv);
+    Py_XDECREF(ww);
+    return Py_BuildValue("");
+
+fail:
+    Py_XDECREF(uu);
+    Py_XDECREF(vv);
+    Py_XDECREF(ww);
+    return 0;
+}
+
+
+static PyObject* rotate_vis(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject *obj[] = {0, 0, 0, 0, 0};
+    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c;
+    PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amp = 0;
+    int status = 0;
+    size_t num_vis;
+
+    /* Parse inputs. */
+    if (!PyArg_ParseTuple(args, "OOOOO", &obj[0], &obj[1], &obj[2], &obj[3],
+            &obj[4]))
+        return 0;
+    if (!(h = get_handle_imager(obj[0]))) return 0;
+
+    /* Make sure input objects are arrays. Convert if required. */
+    uu = (PyArrayObject*) PyArray_FROM_OF(obj[1], NPY_ARRAY_IN_ARRAY);
+    vv = (PyArrayObject*) PyArray_FROM_OF(obj[2], NPY_ARRAY_IN_ARRAY);
+    ww = (PyArrayObject*) PyArray_FROM_OF(obj[3], NPY_ARRAY_IN_ARRAY);
+    amp = (PyArrayObject*) PyArray_FROM_OF(obj[4], NPY_ARRAY_INOUT_ARRAY);
+    if (!uu || !vv || !ww || !amp)
+        goto fail;
+
+    /* Check dimensions. */
+    num_vis = (size_t) PyArray_SIZE(amp);
+    if (num_vis != (size_t) PyArray_SIZE(uu) ||
+            num_vis != (size_t) PyArray_SIZE(vv) ||
+            num_vis != (size_t) PyArray_SIZE(ww))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Data dimension mismatch.");
+        goto fail;
+    }
+
+    /* Pointers to arrays. */
+    uu_c = oskar_mem_create_alias_from_raw(PyArray_DATA(uu),
+            oskar_type_from_numpy(uu), OSKAR_CPU, num_vis, &status);
+    vv_c = oskar_mem_create_alias_from_raw(PyArray_DATA(vv),
+            oskar_type_from_numpy(vv), OSKAR_CPU, num_vis, &status);
+    ww_c = oskar_mem_create_alias_from_raw(PyArray_DATA(ww),
+            oskar_type_from_numpy(ww), OSKAR_CPU, num_vis, &status);
+    amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amp),
+            oskar_type_from_numpy(amp), OSKAR_CPU, num_vis, &status);
+
+    /* Phase-rotate the visibility amplitudes. */
+    Py_BEGIN_ALLOW_THREADS
+    oskar_imager_rotate_vis(h, num_vis, uu_c, vv_c, ww_c, amp_c);
+    Py_END_ALLOW_THREADS
+    oskar_mem_free(uu_c, &status);
+    oskar_mem_free(vv_c, &status);
+    oskar_mem_free(ww_c, &status);
+    oskar_mem_free(amp_c, &status);
+
+    Py_XDECREF(uu);
+    Py_XDECREF(vv);
+    Py_XDECREF(ww);
+    Py_XDECREF(amp);
+    return Py_BuildValue("");
+
+fail:
+    Py_XDECREF(uu);
+    Py_XDECREF(vv);
+    Py_XDECREF(ww);
+    Py_XDECREF(amp);
+    return 0;
+}
+
+
 static PyObject* run(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -963,18 +1090,6 @@ static PyObject* set_time_min_utc(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* set_time_snapshots(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    int value = 0;
-    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
-    if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_time_snapshots(h, value);
-    return Py_BuildValue("");
-}
-
-
 static PyObject* set_uv_filter_max(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -1020,19 +1135,6 @@ static PyObject* set_vis_phase_centre(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "Odd", &capsule, &ra, &dec)) return 0;
     if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_vis_phase_centre(h, ra, dec);
-    return Py_BuildValue("");
-}
-
-
-static PyObject* set_vis_time(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    int num = 0;
-    double ref = 0.0, inc = 0.0;
-    if (!PyArg_ParseTuple(args, "Oddi", &capsule, &ref, &inc, &num)) return 0;
-    if (!(h = get_handle_imager(capsule))) return 0;
-    oskar_imager_set_vis_time(h, ref, inc, num);
     return Py_BuildValue("");
 }
 
@@ -1089,32 +1191,20 @@ static PyObject* time_min_utc(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* time_snapshots(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    int flag = 0;
-    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_imager(capsule))) return 0;
-    flag = oskar_imager_time_snapshots(h);
-    return Py_BuildValue("O", flag ? Py_True : Py_False);
-}
-
-
 static PyObject* update(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
-    PyObject *obj[] = {0, 0, 0, 0, 0, 0};
-    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *weight_c;
-    PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0;
-    int start_time = 0, end_time = 0, start_chan = 0, end_chan = 0;
-    int num_baselines = 0, num_pols = 1, vis_type;
-    int num_times, num_chan, num_coords, num_vis, num_weights, status = 0;
+    PyObject *obj[] = {0, 0, 0, 0, 0, 0, 0};
+    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *weight_c, *time_centroid_c = 0;
+    PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0;
+    PyArrayObject *weight = 0, *time_centroid = 0;
+    int start_chan = 0, end_chan = 0, num_pols = 1, vis_type, status = 0;
+    size_t num_rows, num_vis, num_weights;
 
     /* Parse inputs. */
-    if (!PyArg_ParseTuple(args, "OOOOOOiiiiii", &obj[0], &obj[1], &obj[2],
-            &obj[3], &obj[4], &obj[5], &start_time, &end_time,
-            &start_chan, &end_chan, &num_baselines, &num_pols))
+    if (!PyArg_ParseTuple(args, "OOOOOOOiii", &obj[0],
+            &obj[1], &obj[2], &obj[3], &obj[4], &obj[5], &obj[6],
+            &start_chan, &end_chan, &num_pols))
         return 0;
     if (!(h = get_handle_imager(obj[0]))) return 0;
 
@@ -1131,6 +1221,14 @@ static PyObject* update(PyObject* self, PyObject* args)
     {
         weight = (PyArrayObject*) PyArray_FROM_OF(obj[5], NPY_ARRAY_IN_ARRAY);
         if (!weight) goto fail;
+    }
+
+    /* Check if time centroid values are present. */
+    if (obj[6] != Py_None)
+    {
+        time_centroid = (PyArrayObject*) PyArray_FROM_OTF(obj[6],
+                NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+        if (!time_centroid) goto fail;
     }
 
     /* Check visibility data are complex. */
@@ -1150,23 +1248,19 @@ static PyObject* update(PyObject* self, PyObject* args)
     }
 
     /* Get dimensions. */
-    if (num_baselines == 0)
-        num_baselines = (int) PyArray_SIZE(amps);
-    num_times = 1 + end_time - start_time;
-    num_chan = 1 + end_chan - start_chan;
-    num_coords = num_times * num_baselines;
-    num_vis = num_coords * num_chan;
-    num_weights = num_coords * num_pols;
+    num_rows = (size_t) PyArray_SIZE(uu);
+    num_vis = num_rows * (1 + end_chan - start_chan);
+    num_weights = num_rows * num_pols;
     vis_type = oskar_type_from_numpy(amps);
     if (num_pols == 4) vis_type |= OSKAR_MATRIX;
 
     /* Pointers to input arrays. */
     uu_c = oskar_mem_create_alias_from_raw(PyArray_DATA(uu),
-            oskar_type_from_numpy(uu), OSKAR_CPU, num_coords, &status);
+            oskar_type_from_numpy(uu), OSKAR_CPU, num_rows, &status);
     vv_c = oskar_mem_create_alias_from_raw(PyArray_DATA(vv),
-            oskar_type_from_numpy(vv), OSKAR_CPU, num_coords, &status);
+            oskar_type_from_numpy(vv), OSKAR_CPU, num_rows, &status);
     ww_c = oskar_mem_create_alias_from_raw(PyArray_DATA(ww),
-            oskar_type_from_numpy(ww), OSKAR_CPU, num_coords, &status);
+            oskar_type_from_numpy(ww), OSKAR_CPU, num_rows, &status);
     amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amps),
             vis_type, OSKAR_CPU, num_vis, &status);
     if (weight)
@@ -1181,18 +1275,25 @@ static PyObject* update(PyObject* self, PyObject* args)
                 num_weights, &status);
         oskar_mem_set_value_real(weight_c, 1.0, 0, num_weights, &status);
     }
+    if (time_centroid)
+    {
+        time_centroid_c = oskar_mem_create_alias_from_raw(
+                PyArray_DATA(time_centroid),
+                oskar_type_from_numpy(time_centroid),
+                OSKAR_CPU, num_rows, &status);
+    }
 
     /* Update the imager with the supplied visibility data. */
     Py_BEGIN_ALLOW_THREADS
-    oskar_imager_update(h, uu_c, vv_c, ww_c, amp_c, weight_c,
-            start_time, end_time, start_chan, end_chan,
-            num_baselines, num_pols, &status);
+    oskar_imager_update(h, num_rows, start_chan, end_chan, num_pols,
+            uu_c, vv_c, ww_c, amp_c, weight_c, time_centroid_c, &status);
     Py_END_ALLOW_THREADS
     oskar_mem_free(uu_c, &status);
     oskar_mem_free(vv_c, &status);
     oskar_mem_free(ww_c, &status);
     oskar_mem_free(amp_c, &status);
     oskar_mem_free(weight_c, &status);
+    oskar_mem_free(time_centroid_c, &status);
 
     /* Check for errors. */
     if (status)
@@ -1207,6 +1308,7 @@ static PyObject* update(PyObject* self, PyObject* args)
     Py_XDECREF(ww);
     Py_XDECREF(amps);
     Py_XDECREF(weight);
+    Py_XDECREF(time_centroid);
     return Py_BuildValue("");
 
 fail:
@@ -1215,6 +1317,7 @@ fail:
     Py_XDECREF(ww);
     Py_XDECREF(amps);
     Py_XDECREF(weight);
+    Py_XDECREF(time_centroid);
     return 0;
 }
 
@@ -1243,8 +1346,8 @@ static PyObject* update_from_block(PyObject* self, PyObject* args)
     if (status)
     {
         PyErr_Format(PyExc_RuntimeError,
-                "oskar_imager_update_block() failed with code %d (%s).", status,
-                oskar_get_error_string(status));
+                "oskar_imager_update_from_block() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
         return 0;
     }
     return Py_BuildValue("");
@@ -1260,7 +1363,8 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
     PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0;
     PyArrayObject *plane = 0, *weights_grid = 0;
     double plane_norm = 0.0;
-    int num_vis, status = 0;
+    int status = 0;
+    size_t num_vis;
 
     /* Parse inputs:
      * capsule, uu, vv, ww, amps, weight, plane, plane_norm, weights_grid. */
@@ -1309,10 +1413,10 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
     }
 
     /* Check dimensions. */
-    num_vis = (int) PyArray_SIZE(weight);
-    if (num_vis != (int) PyArray_SIZE(uu) ||
-            num_vis != (int) PyArray_SIZE(vv) ||
-            num_vis != (int) PyArray_SIZE(ww))
+    num_vis = (size_t) PyArray_SIZE(weight);
+    if (num_vis != (size_t) PyArray_SIZE(uu) ||
+            num_vis != (size_t) PyArray_SIZE(vv) ||
+            num_vis != (size_t) PyArray_SIZE(ww))
     {
         PyErr_SetString(PyExc_RuntimeError, "Input data dimension mismatch.");
         goto fail;
@@ -1433,7 +1537,8 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     oskar_Imager* h;
     PyObject *obj[] = {0, 0, 0, 0, 0};
     PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0, *im = 0;
-    int num_cells, num_pixels, num_vis, plane_size = 0, size = 0;
+    size_t num_cells, num_pixels, num_vis;
+    int plane_size = 0, size = 0;
     int dft = 0, status = 0, type = 0, wproj = 0, uniform = 0, wprojplanes = -1;
     double fov_deg = 0.0, norm = 0.0;
     const char *weighting_type = 0, *algorithm_type = 0;
@@ -1470,10 +1575,10 @@ static PyObject* make_image(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_RuntimeError, "Input data arrays must be 1D.");
         goto fail;
     }
-    num_vis = (int) PyArray_SIZE(amps);
-    if (num_vis != (int) PyArray_SIZE(uu) ||
-            num_vis != (int) PyArray_SIZE(vv) ||
-            num_vis != (int) PyArray_SIZE(ww))
+    num_vis = (size_t) PyArray_SIZE(amps);
+    if (num_vis != (size_t) PyArray_SIZE(uu) ||
+            num_vis != (size_t) PyArray_SIZE(vv) ||
+            num_vis != (size_t) PyArray_SIZE(ww))
     {
         PyErr_SetString(PyExc_RuntimeError, "Input data dimension mismatch.");
         goto fail;
@@ -1559,7 +1664,7 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c, weight_c,
             plane, &norm, weights_grid, &status);
     oskar_imager_finalise_plane(h, plane, norm, &status);
-    oskar_imager_trim_image(plane, plane_size, size, &status);
+    oskar_imager_trim_image(h, plane, plane_size, size, &status);
 
     /* Free temporaries. */
     oskar_mem_free(uu_c, &status);
@@ -1646,6 +1751,10 @@ static PyMethodDef methods[] =
         {"plane_size", (PyCFunction)plane_size, METH_VARARGS, "plane_size()"},
         {"reset_cache", (PyCFunction)reset_cache,
                 METH_VARARGS, "reset_cache()"},
+        {"rotate_coords", (PyCFunction)rotate_coords,
+                METH_VARARGS, "rotate_coords(uu, vv, ww)"},
+        {"rotate_vis", (PyCFunction)rotate_vis,
+                METH_VARARGS, "rotate_vis(uu_in, vv_in, ww_in, amps)"},
         {"run", (PyCFunction)run,
                 METH_VARARGS, "run(return_images, return_grids)"},
         {"scale_norm_with_num_input_files",
@@ -1695,8 +1804,6 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "set_time_max_utc(value)"},
         {"set_time_min_utc", (PyCFunction)set_time_min_utc,
                 METH_VARARGS, "set_time_min_utc(value)"},
-        {"set_time_snapshots", (PyCFunction)set_time_snapshots,
-                METH_VARARGS, "set_time_snapshots(value)"},
         {"set_uv_filter_max", (PyCFunction)set_uv_filter_max,
                 METH_VARARGS, "set_uv_filter_max(max_wavelengths)"},
         {"set_uv_filter_min", (PyCFunction)set_uv_filter_min,
@@ -1705,8 +1812,6 @@ static PyMethodDef methods[] =
                 "set_vis_frequency(ref_hz, inc_hz, num_channels)"},
         {"set_vis_phase_centre", (PyCFunction)set_vis_phase_centre,
                 METH_VARARGS, "set_vis_phase_centre(ra_deg, dec_deg)"},
-        {"set_vis_time", (PyCFunction)set_vis_time,
-                METH_VARARGS, "set_vis_time(ref_mjd_utc, inc_sec, num_times)"},
         {"set_weighting", (PyCFunction)set_weighting,
                 METH_VARARGS, "set_weighting(type)"},
         {"size", (PyCFunction)size, METH_VARARGS, "size()"},
@@ -1714,11 +1819,9 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "time_max_utc()"},
         {"time_min_utc", (PyCFunction)time_min_utc,
                 METH_VARARGS, "time_min_utc()"},
-        {"time_snapshots", (PyCFunction)time_snapshots,
-                METH_VARARGS, "time_snapshots()"},
         {"update", (PyCFunction)update, METH_VARARGS,
-                "update(uu, vv, ww, amps, weight, start_time, end_time, "
-                "start_chan, end_chan, num_baselines, num_pols)"},
+                "update(uu, vv, ww, amps, weight, time_centroid, "
+                "start_chan, end_chan, num_pols)"},
         {"update_from_block", (PyCFunction)update_from_block,
                 METH_VARARGS, "update_from_block(vis_header, vis_block)"},
         {"update_plane", (PyCFunction)update_plane, METH_VARARGS,

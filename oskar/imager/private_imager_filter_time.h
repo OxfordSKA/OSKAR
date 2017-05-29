@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,72 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imager/oskar_fftphase.h"
+#ifndef OSKAR_IMAGER_FILTER_TIME_H_
+#define OSKAR_IMAGER_FILTER_TIME_H_
+
+/**
+ * @file oskar_imager_filter_time.h
+ */
+
+#include <oskar_global.h>
+#include <mem/oskar_mem.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_fftphase_cf(const int num_x, const int num_y, float* complex_data)
-{
-    int iy;
-    for (iy = 0; iy < num_y; ++iy)
-    {
-        int ix, i, x;
-        for (ix = 0; ix < num_x; ++ix)
-        {
-            i = 2 * (iy * num_x + ix);
-            x = 1 - 2 * ((ix + iy) & 1);
-            complex_data[i+0] *= x;
-            complex_data[i+1] *= x;
-        }
-    }
-}
-
-void oskar_fftphase_f(const int num_x, const int num_y, float* data)
-{
-    int iy;
-    for (iy = 0; iy < num_y; ++iy)
-    {
-        int ix, i;
-        for (ix = 0; ix < num_x; ++ix)
-        {
-            i = iy * num_x + ix;
-            data[i] *= (1 - 2 * ((ix + iy) & 1));
-        }
-    }
-}
-
-void oskar_fftphase_cd(const int num_x, const int num_y, double* complex_data)
-{
-    int iy;
-    for (iy = 0; iy < num_y; ++iy)
-    {
-        int ix, i, x;
-        for (ix = 0; ix < num_x; ++ix)
-        {
-            i = 2 * (iy * num_x + ix);
-            x = 1 - 2 * ((ix + iy) & 1);
-            complex_data[i+0] *= x;
-            complex_data[i+1] *= x;
-        }
-    }
-}
-
-void oskar_fftphase_d(const int num_x, const int num_y, double* data)
-{
-    int iy;
-    for (iy = 0; iy < num_y; ++iy)
-    {
-        int ix, i;
-        for (ix = 0; ix < num_x; ++ix)
-        {
-            i = iy * num_x + ix;
-            data[i] *= (1 - 2 * ((ix + iy) & 1));
-        }
-    }
-}
+/**
+ * @brief
+ * Filters supplied visibility data using the time range.
+ *
+ * @details
+ * Filters supplied visibility data using the time range,
+ * if it has been set. If not set, this function returns immediately.
+ *
+ * @param[in,out] h             Handle to imager.
+ * @param[in,out] num_vis       On input, number of supplied visibilities;
+ *                              on output, number of visibilities remaining.
+ * @param[in,out] uu            Baseline uu coordinates, in wavelengths.
+ * @param[in,out] vv            Baseline vv coordinates, in wavelengths.
+ * @param[in,out] ww            Baseline ww coordinates, in wavelengths.
+ * @param[in,out] amp           Baseline complex visibility amplitudes.
+ * @param[in,out] weight        Baseline visibility weights.
+ * @param[in,out] time_centroid Time centroid values as MJD(UTC) _seconds_
+ *                              (double precision).
+ * @param[in,out] status        Status return code.
+ */
+OSKAR_EXPORT
+void oskar_imager_filter_time(const oskar_Imager* h, size_t* num_vis,
+        oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amp,
+        oskar_Mem* weight, oskar_Mem* time_centroid, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_IMAGER_FILTER_TIME_H_ */

@@ -46,17 +46,11 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
 
     /* Clear selected axes. */
     free(h->sel_freqs);
-    free(h->sel_times);
     free(h->im_freqs);
-    free(h->im_times);
     h->sel_freqs = 0;
-    h->sel_times = 0;
     h->im_freqs = 0;
-    h->im_times = 0;
     h->num_sel_freqs = 0;
-    h->num_sel_times = 0;
     h->num_im_channels = 0;
-    h->num_im_times = 0;
 
     /* Clear FFT caches. */
     oskar_mem_free(h->corr_func, status);
@@ -104,6 +98,7 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     oskar_mem_realloc(h->vis_im, 0, status);
     oskar_mem_realloc(h->weight_im, 0, status);
     oskar_mem_realloc(h->weight_tmp, 0, status);
+    oskar_mem_realloc(h->time_im, 0, status);
     oskar_mem_free(h->stokes, status);
     h->stokes = 0;
 
@@ -113,6 +108,8 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
         if (h->fits_file[i])
             ffclos(h->fits_file[i], status);
         h->fits_file[i] = 0;
+        free(h->output_name[i]);
+        h->output_name[i] = 0;
     }
 
     /* Clear the number of image planes. */
