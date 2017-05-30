@@ -181,8 +181,8 @@ pattern corresponds to parts of the pattern below the horizon (the pointing
 direction for this observation starts near the horizon).
 
 \anchor example_bp_fig
-\image html beam_pattern.png "FITS image showing the voltage amplitude pattern in theta for the X-dipoles, and plotted using the 'square root' scale in DS9. The beam pattern is for the first station, the first channel (100 MHz), at the first time snapshot."
-\image latex beam_pattern.png "FITS image showing the voltage amplitude pattern in theta for the X-dipoles, and plotted using the 'square root' scale in DS9. The beam pattern is for the first station, the first channel (100 MHz), at the first time snapshot." width=13cm
+\image html beam_pattern.png "The voltage amplitude pattern in theta for the X-dipoles, and plotted using the 'square root' scale in DS9. The beam pattern is for the first station, the first channel (100 MHz), at the first time snapshot."
+\image latex beam_pattern.png "The voltage amplitude pattern in theta for the X-dipoles, and plotted using the 'square root' scale in DS9. The beam pattern is for the first station, the first channel (100 MHz), at the first time snapshot." width=13cm
 
 \latexonly
 \newpage
@@ -253,12 +253,12 @@ This will simultaneously load the file and select the
 
 The **Image settings** group is \ref example_imager_settings "shown below".
 
-For this example, the imager is configured to generate a FITS image cube
-consisting of images of 256 by 256 pixels covering a field-of-view of 4
-degrees around the observation phase centre. The polarisation, time and
-frequency dimensions of the image cube depend on the image type, and whether
-time and channel snapshots have been selected. The settings in this example
-use time synthesis to generate a Stokes I image cube containing three channels.
+For this example, the imager is configured to generate a FITS image of 256
+by 256 pixels covering a field-of-view of 4 degrees around the observation
+phase centre. The frequency dimension of the image (or image cube) depends
+on whether channel snapshots has been selected. The settings in this example
+use frequency synthesis to generate a single Stokes I image using visibility
+data from all three channels in the input file.
 
 \anchor example_imager_settings
 \image html oskar_gui_3.png "Imager settings"
@@ -271,18 +271,18 @@ use time synthesis to generate a Stokes I image cube containing three channels.
 To run the imager, ensure the **oskar_imager** application is
 selected, and press the **Run** button next to the application selector.
 While the imager is running, a progress log will be shown. The file name of
-the image cube is generated from the **Output image root path** setting and
+the image is generated from the **Output image root path** setting and
 the **Image type**, using the pattern
 <tt>\<root path\>_\<image type\>.fits</tt>. The image generated in this
 example can be found in the directory from which the OSKAR GUI was started
 with the name <tt>example_image_I.fits</tt>.
 
-The \ref example_image_fig "figure below" shows a slice of this generated
-FITS image cube for the first frequency channel.
+The \ref example_image_fig "figure below" shows the image resulting from using
+this example data.
 
 \anchor example_image_fig
-\image html raw_image.png "FITS image showing the raw (dirty) image formed by imaging the example simulated visibilities with the OSKAR imager. The image is for channel 0 (100 MHz)."
-\image latex raw_image.png "FITS image showing the raw (dirty) image formed by imaging the example simulated visibilities with the OSKAR imager. The image is for channel 0 (100 MHz)." width=13cm
+\image html raw_image.png "The raw (dirty) image formed by imaging the example simulated visibilities with the OSKAR imager."
+\image latex raw_image.png "The raw (dirty) image formed by imaging the example simulated visibilities with the OSKAR imager." width=13cm
 
 \latexonly
 \newpage
@@ -302,8 +302,8 @@ it is valid (we have chosen 100 MHz in this example), and the output telescope
 or station directory that the data files should be saved into. We want to use
 this data only for the first station, so we have selected the
 <tt>telescope.tm/station000</tt> directory here. (If we wanted to use the same
-element pattern data for all stations, then selecting the top-level telescope
-directory would be necessary instead.)
+element pattern data for all stations, then select the top-level telescope
+directory instead.)
 
 \anchor example_fit_settings
 \image html oskar_gui_4.png "Settings for the element pattern fitting procedure."
@@ -349,8 +349,8 @@ the theta response of the X dipole. At time slice 10 it should appear
 \endlatexonly
 
 \anchor example_fit_dipole_pattern
-\image html custom_element.png "FITS image showing a custom element pattern (which happens to be for an ideal dipole) at time slice 10 of the data cube."
-\image latex custom_element.png "FITS image showing a custom element pattern (which happens to be for an ideal dipole) at time slice 10 of the data cube." width=13cm
+\image html custom_element.png "A custom element pattern (which happens to be for an ideal dipole) at time slice 10 of the data cube."
+\image latex custom_element.png "A custom element pattern (which happens to be for an ideal dipole) at time slice 10 of the data cube." width=13cm
 
 There is a slight difference between this output and that from an analytical
 dipole, because the element response in this case was generated by fitting
@@ -391,6 +391,6 @@ is \ref example_fit_beam_pattern "shown below".
 | 9        | 2014-07-22 | Updated for new element pattern fitting procedure in OSKAR 2.5.0.
 | 10       | 2014-09-09 | Updated figures for revised default settings in OSKAR 2.5.1.
 | 11       | 2015-04-27 | Updated for revised settings in OSKAR 2.6.0.
-| 12       | 2017-01-11 | Updated for revised GUI in OSKAR 2.7.0.
+| 12       | 2017-05-30 | Updated for revised settings and GUI in OSKAR 2.7.0.
 
 */
