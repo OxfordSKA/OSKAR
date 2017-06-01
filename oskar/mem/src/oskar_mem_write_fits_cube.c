@@ -49,11 +49,30 @@ static void write_pixels(oskar_Mem* data, const char* filename,
         int width, int height, int num_planes, int i_plane, int* status)
 {
     long naxes[3], firstpix[3], num_pix;
+    int dims_ok = 0;
     fitsfile* f = 0;
     if (*status) return;
     if (oskar_file_exists(filename))
+    {
+        int naxis = 0, imagetype = 0;
         fits_open_file(&f, filename, READWRITE, status);
-    else
+        fits_get_img_param(f, 3, &imagetype, &naxis, naxes, status);
+        if (naxis == 3 &&
+                naxes[0] == width &&
+                naxes[1] == height &&
+                naxes[2] == num_planes)
+        {
+            dims_ok = 1;
+        }
+        else
+        {
+            *status = 0;
+            fits_close_file(f, status);
+            remove(filename);
+            f = 0;
+        }
+    }
+    if (!dims_ok)
     {
         naxes[0] = width;
         naxes[1] = height;
