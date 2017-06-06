@@ -87,11 +87,25 @@ size_t* oskar_ms_column_shape(const oskar_MeasurementSet* p, const char* column,
     size_t i = 0, *t = 0;
     if (!p->ms || !p->ms->tableDesc().isColumn(column)) return 0;
 
-    const IPosition& shape = p->ms->tableDesc().columnDesc(column).shape();
-    if ((*ndim = (int) shape.size()))
+    const ColumnDesc& cdesc = p->ms->tableDesc().columnDesc(column);
+    const IPosition& shape = cdesc.shape();
+    if (shape.size() > 0)
     {
+        *ndim = (int) shape.size();
         t = (size_t*) calloc(*ndim, sizeof(size_t));
         for (i = 0; i < *ndim; ++i) t[i] = shape(i);
+    }
+    else if (p->ms->nrow() > 0)
+    {
+        // If shape is not fixed, return shape of first cell instead.
+        TableColumn tc(*(p->ms), column);
+        IPosition shape = tc.shape(0);
+        if (shape.size() > 0)
+        {
+            *ndim = (int) shape.size();
+            t = (size_t*) calloc(*ndim, sizeof(size_t));
+            for (i = 0; i < *ndim; ++i) t[i] = shape(i);
+        }
     }
     return t;
 }
