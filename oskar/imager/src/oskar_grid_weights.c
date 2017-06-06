@@ -99,7 +99,7 @@ void oskar_grid_weights_read_d(const size_t num_points,
         }
 
         /* Calculate new weight based on gridded point density. */
-        weight_out[i] = weight_in[i] / grid[t];
+        weight_out[i] = (grid[t] != 0.0) ? weight_in[i] / grid[t] : 0.0;
     }
 }
 
@@ -167,7 +167,7 @@ void oskar_grid_weights_read_f(const size_t num_points,
         }
 
         /* Calculate new weight based on gridded point density. */
-        weight_out[i] = weight_in[i] / grid[t];
+        weight_out[i] = (grid[t] != 0.0) ? weight_in[i] / grid[t] : 0.0;
     }
 }
 
