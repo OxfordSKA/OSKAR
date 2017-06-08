@@ -83,6 +83,11 @@ class BuildExt(build_ext):
         self.rpath.append(d)
         self.libraries.append('oskar')
 
+        # Explicitly link liboskar_ms if we have it.
+        # (Required on some Linux distributions.)
+        if self.dir_contains('oskar_ms.', self.library_dirs):
+            self.libraries.append('oskar_ms')
+
         # Check we can find the OSKAR headers.
         h = self.find_file(join('oskar', 'oskar_version.h'), self.include_dirs)
         if not h:
