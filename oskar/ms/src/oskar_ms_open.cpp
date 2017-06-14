@@ -33,6 +33,7 @@
 #include <casa/Arrays/Vector.h>
 
 #include <cstdlib>
+#include <cstdio>
 
 using namespace casa;
 
@@ -52,8 +53,10 @@ oskar_MeasurementSet* oskar_ms_open(const char* filename)
         p->msc = new MSColumns(*(p->ms));
         p->msmc = new MSMainColumns(*(p->ms));
     }
-    catch (...)
+    catch (AipsError& e)
     {
+        fprintf(stderr, "Caught AipsError: %s\n", e.what());
+        fflush(stderr);
         oskar_ms_close(p);
         return 0;
     }
