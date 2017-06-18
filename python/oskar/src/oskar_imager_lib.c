@@ -965,10 +965,18 @@ static PyObject* set_input_file(PyObject* self, PyObject* args)
     if (!(h = get_handle_imager(capsule))) return 0;
 
     /* Check to see if the list is really a list, or a string. */
+#if PY_MAJOR_VERSION >= 3
+    if (PyUnicode_Check(list))
+#else
     if (PyString_Check(list))
+#endif
     {
         char* file;
+#if PY_MAJOR_VERSION >= 3
+        file = PyUnicode_AsUTF8(list);
+#else
         file = PyString_AsString(list);
+#endif
         oskar_imager_set_input_files(h, 1, &file, &status);
         return Py_BuildValue("i", status);
     }
@@ -980,7 +988,11 @@ static PyObject* set_input_file(PyObject* self, PyObject* args)
         files = (char**) calloc(num_files, sizeof(char*));
         for (i = 0; i < num_files; ++i)
         {
+#if PY_MAJOR_VERSION >= 3
+            files[i] = PyUnicode_AsUTF8(PyList_GetItem(list, i));
+#else
             files[i] = PyString_AsString(PyList_GetItem(list, i));
+#endif
         }
         oskar_imager_set_input_files(h, num_files, files, &status);
         free(files);
