@@ -41,7 +41,7 @@ except ImportError:
 class Binary(object):
     """This class provides a Python interface to an OSKAR binary data file."""
 
-    def __init__(self, filename, mode='r'):
+    def __init__(self, filename, mode=b'r'):
         """Constructs a handle to a binary data file.
 
         Args:
