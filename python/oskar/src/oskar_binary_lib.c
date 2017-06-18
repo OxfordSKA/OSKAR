@@ -30,6 +30,7 @@
 
 #include <oskar.h>
 #include <string.h>
+#include <stdlib.h>
 
 /* http://docs.scipy.org/doc/numpy-dev/reference/c-api.deprecations.html */
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -122,7 +123,7 @@ static PyObject* read_data(PyObject* self, PyObject* args)
 {
     oskar_Binary* h = 0;
     PyObject *capsule = 0, *grp = 0, *tag = 0, *data_type = 0, *array = 0;
-    int dtype = 0, i = 0, tag_idx = 0, status = 0;
+    int dtype = 0, i = 0, tag_idx = 0, status = 0, use_ints = 0, use_strs = 0;
     size_t num_elements = 0, bytes = 0;
     if (!PyArg_ParseTuple(args, "OOOiO", &capsule, &grp, &tag, &tag_idx,
             &data_type))
@@ -130,33 +131,61 @@ static PyObject* read_data(PyObject* self, PyObject* args)
     if (!(h = get_handle(capsule))) return 0;
 
     /* Get requested data type, if supplied. */
-    if (data_type != Py_None) dtype = (int) PyInt_AsLong(data_type);
+    if (data_type != Py_None)
+    {
+#if PY_MAJOR_VERSION >= 3
+        dtype = (int) PyLong_AsLong(data_type);
+#else
+        dtype = (int) PyInt_AsLong(data_type);
+#endif
+    }
 
     /* Check if group and tag identifiers are integers or strings
      * and get the chunk index, accordingly. */
-    if (PyInt_Check(grp) && PyInt_Check(tag))
+#if PY_MAJOR_VERSION >= 3
+    use_ints = PyLong_Check(grp) && PyLong_Check(tag);
+    use_strs = PyUnicode_Check(grp) && PyUnicode_Check(tag);
+#else
+    use_ints = PyInt_Check(grp) && PyInt_Check(tag);
+    use_strs = PyString_Check(grp) && PyString_Check(tag);
+#endif
+    if (use_ints)
     {
-        i = oskar_binary_query(h, (unsigned char) dtype,
-                (unsigned char) PyInt_AsLong(grp),
-                (unsigned char) PyInt_AsLong(tag), tag_idx, &bytes, &status);
+        int i_grp, i_tag;
+#if PY_MAJOR_VERSION >= 3
+        i_grp = (int) PyLong_AsLong(grp);
+        i_tag = (int) PyLong_AsLong(tag);
+#else
+        i_grp = (int) PyInt_AsLong(grp);
+        i_tag = (int) PyInt_AsLong(tag);
+#endif
+        i = oskar_binary_query(h, (unsigned char) dtype, (unsigned char) i_grp,
+                (unsigned char) i_tag, tag_idx, &bytes, &status);
         if (i < 0)
         {
             PyErr_Format(PyExc_RuntimeError,
                     "Tag (%i,%i:%i) not found in binary file.",
-                    (int) PyInt_AsLong(grp), (int) PyInt_AsLong(tag), tag_idx);
+                    i_grp, i_tag, tag_idx);
             return 0;
         }
     }
-    else if (PyString_Check(grp) && PyString_Check(tag))
+    else if (use_strs)
     {
+        char *s_grp, *s_tag;
+#if PY_MAJOR_VERSION >= 3
+        s_grp = PyUnicode_AsUTF8(grp);
+        s_tag = PyUnicode_AsUTF8(tag);
+#else
+        s_grp = PyString_AsString(grp);
+        s_tag = PyString_AsString(tag);
+#endif
         i = oskar_binary_query_ext(h, (unsigned char) dtype,
-                PyString_AsString(grp),
-                PyString_AsString(tag), tag_idx, &bytes, &status);
+                s_grp, s_tag, tag_idx, &bytes, &status);
         if (i < 0)
         {
             PyErr_Format(PyExc_RuntimeError,
                     "Tag (%s,%s:%i) not found in binary file.",
-                    PyString_AsString(grp), PyString_AsString(tag), tag_idx);
+                    s_grp, s_tag, tag_idx);
             return 0;
         }
     }
@@ -174,13 +203,16 @@ static PyObject* read_data(PyObject* self, PyObject* args)
     if (dtype == OSKAR_CHAR)
     {
         /* Read a string. */
-        array = PyString_FromStringAndSize(0, bytes);
-        oskar_binary_read_block(h, i, PyString_Size(array),
-                PyString_AsString(array), &status);
+        char* data = (char*) calloc(bytes, 1);
+        oskar_binary_read_block(h, i, bytes, data, &status);
         if (status) goto fail;
-        while (PyString_Size(array) > 1 &&
-                PyString_AsString(array)[PyString_Size(array) - 1] == '\0')
-            _PyString_Resize(&array, PyString_Size(array) - 1);
+        while (bytes > 1 && data[bytes - 1] == '\0') bytes--;
+#if PY_MAJOR_VERSION >= 3
+        array = PyUnicode_DecodeUTF8(data, bytes, NULL);
+#else
+        array = PyString_FromStringAndSize(data, bytes);
+#endif
+        free(data);
         return Py_BuildValue("N", array);
     }
     else if ((dtype == OSKAR_INT || dtype == OSKAR_SINGLE ||
