@@ -6,8 +6,10 @@
  2. If necessary, edit the file `setup.cfg` to set the paths to the
     OSKAR header and library installed on the system.
  3. From a terminal prompt in this directory, install the Python
-    interface using `pip install [--user] .`
-    - Note the final dot on the line above. (The `--user` flag is optional.)
+    interface using `pip install --user .`
+    - **Note the final dot on the line above!**
+    - The `--user` flag is optional, but you may need root permission
+      without it.
 
 ## Uninstallation
 
