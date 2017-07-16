@@ -46,7 +46,7 @@ void oskar_sky_save(const char* filename, const oskar_Sky* sky, int* status)
     if (*status) return;
 
     /* Check sky model is in CPU memory. */
-    if (oskar_sky_mem_location(sky) == OSKAR_GPU)
+    if (oskar_sky_mem_location(sky) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;

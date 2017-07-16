@@ -47,7 +47,7 @@ extern "C" {
  * Creates and initialises a telescope model structure.
  *
  * @param[in] type         Array element type (OSKAR_SINGLE or OSKAR_DOUBLE).
- * @param[in] location     Memory location (OSKAR_CPU or OSKAR_GPU).
+ * @param[in] location     Memory location.
  * @param[in] num_stations Number of stations.
  * @param[in,out]  status  Status return code.
  *

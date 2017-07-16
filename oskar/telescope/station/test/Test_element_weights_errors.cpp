@@ -148,7 +148,7 @@ TEST(element_weights_errors, test_apply)
             d_gain, d_gain_error, d_phase, d_phase_error,
             0, 0, 0, d_errors, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_element_multiply(NULL, d_weights, d_errors, num_elements, &status);
+    oskar_mem_multiply(NULL, d_weights, d_errors, num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Write memory to file for inspection.

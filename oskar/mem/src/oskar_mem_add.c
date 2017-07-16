@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include "mem/oskar_mem.h"
 #include "mem/oskar_mem_add_cuda.h"
+#include "utility/oskar_cl_utils.h"
 #include "utility/oskar_device_utils.h"
 #include <stdlib.h>
 
@@ -40,6 +41,9 @@ void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
 {
     int type, precision, location;
     size_t i;
+#ifdef OSKAR_HAVE_OPENCL
+    cl_kernel k = 0;
+#endif
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -102,6 +106,14 @@ void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
+        else if (location & OSKAR_CL)
+        {
+#ifdef OSKAR_HAVE_OPENCL
+            k = oskar_cl_kernel("mem_add_double");
+#else
+            *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+#endif
+        }
         else
             *status = OSKAR_ERR_BAD_LOCATION;
     }
@@ -127,6 +139,14 @@ void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
+        else if (location & OSKAR_CL)
+        {
+#ifdef OSKAR_HAVE_OPENCL
+            k = oskar_cl_kernel("mem_add_float");
+#else
+            *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+#endif
+        }
         else
             *status = OSKAR_ERR_BAD_LOCATION;
     }
@@ -134,6 +154,54 @@ void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
+
+#ifdef OSKAR_HAVE_OPENCL
+    /* Call OpenCL kernel if required. */
+    if ((location & OSKAR_CL) && !*status)
+    {
+        if (k)
+        {
+            cl_device_type dev_type;
+            cl_int error, gpu, n;
+            size_t global_size, local_size;
+
+            /* Set kernel arguments. */
+            clGetDeviceInfo(oskar_cl_device_id(),
+                    CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_type, NULL);
+            gpu = dev_type & CL_DEVICE_TYPE_GPU;
+            n = (cl_int) num_elements;
+            error = clSetKernelArg(k, 0, sizeof(cl_int), &n);
+            error |= clSetKernelArg(k, 1, sizeof(cl_mem),
+                    oskar_mem_cl_buffer_const(in1, status));
+            error |= clSetKernelArg(k, 2, sizeof(cl_mem),
+                    oskar_mem_cl_buffer_const(in2, status));
+            error |= clSetKernelArg(k, 3, sizeof(cl_mem),
+                    oskar_mem_cl_buffer(out, status));
+            if (*status) return;
+            if (error != CL_SUCCESS)
+            {
+                *status = OSKAR_ERR_INVALID_ARGUMENT;
+                return;
+            }
+
+            /* Launch kernel on current command queue. */
+            local_size = gpu ? 256 : 128;
+            global_size = ((num_elements + local_size - 1) / local_size) *
+                    local_size;
+            error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
+                        &global_size, &local_size, 0, NULL, NULL);
+            if (error != CL_SUCCESS)
+            {
+                *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
+                return;
+            }
+        }
+        else
+        {
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+        }
+    }
+#endif
 }
 
 #ifdef __cplusplus

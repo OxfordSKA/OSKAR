@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
-#include "mem/oskar_mem_create_alias_from_raw.h"
 
 #include <stdlib.h>
 

@@ -56,13 +56,6 @@ oskar_Vis* oskar_vis_create(int amp_type, int location, int num_channels,
         return 0;
     }
 
-    /* Check location. */
-    if (location != OSKAR_GPU && location != OSKAR_CPU)
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;
-        return 0;
-    }
-
     /* Allocate the structure. */
     vis = (oskar_Vis*) malloc(sizeof(oskar_Vis));
 

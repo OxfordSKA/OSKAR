@@ -51,7 +51,7 @@ void oskar_mem_add_real(oskar_Mem* mem, double val, int* status)
         return;
 
     /* Check location. */
-    if (location == OSKAR_GPU)
+    if (location != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;

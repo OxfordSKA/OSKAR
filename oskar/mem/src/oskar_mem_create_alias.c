@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
-#include "mem/oskar_mem_element_size.h"
-#include "mem/oskar_mem_create_alias.h"
 
 #include <stdlib.h>
 
@@ -54,15 +53,32 @@ oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
     mem->owner = 0; /* Structure does not own the memory. */
     if (src)
     {
-        size_t offset_bytes;
-        offset_bytes = offset * oskar_mem_element_size(src->type);
+        size_t element_size = oskar_mem_element_size(src->type);
         mem->type = src->type;
         mem->location = src->location;
         mem->num_elements = num_elements;
-        mem->data = (void*)(((char*)(src->data)) + offset_bytes);
+#ifdef OSKAR_HAVE_OPENCL
+        if (mem->location & OSKAR_CL)
+        {
+            cl_int error = 0;
+            cl_buffer_region r;
+            r.origin = element_size * offset;
+            r.size   = element_size * num_elements;
+            mem->buffer = clCreateSubBuffer(src->buffer,
+                    CL_MEM_READ_WRITE, CL_BUFFER_CREATE_TYPE_REGION,
+                    &r, &error);
+            if (error != CL_SUCCESS)
+                *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        }
+        else
+#endif
+        {
+            size_t offset_bytes = offset * element_size;
+            mem->data = (void*)(((char*)(src->data)) + offset_bytes);
+        }
     }
 
-    /* Return a handle the new structure .*/
+    /* Return a handle to the new structure. */
     return mem;
 }
 

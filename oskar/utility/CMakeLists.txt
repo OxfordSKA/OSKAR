@@ -4,6 +4,7 @@
 
 set(utility_SRC
     src/oskar_binary_write_metadata.c
+    src/oskar_cl_utils.cpp
     src/oskar_device_utils.c
     src/oskar_dir.c
     src/oskar_file_exists.c

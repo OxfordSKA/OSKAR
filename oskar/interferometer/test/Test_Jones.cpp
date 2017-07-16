@@ -38,12 +38,13 @@
 #include <cstdlib>
 #include <cmath>
 
-#define LC   OSKAR_CPU
-#define LG   OSKAR_GPU
-#define TSC  OSKAR_SINGLE_COMPLEX
-#define TSCM OSKAR_SINGLE_COMPLEX_MATRIX
-#define TDC  OSKAR_DOUBLE_COMPLEX
-#define TDCM OSKAR_DOUBLE_COMPLEX_MATRIX
+#define CPU  OSKAR_CPU
+#define GPU  OSKAR_GPU
+#define CL   OSKAR_CL
+#define SC   OSKAR_SINGLE_COMPLEX
+#define SCM  OSKAR_SINGLE_COMPLEX_MATRIX
+#define DC   OSKAR_DOUBLE_COMPLEX
+#define DCM  OSKAR_DOUBLE_COMPLEX_MATRIX
 
 static void check_values(const oskar_Mem* approx, const oskar_Mem* accurate)
 {
@@ -146,9 +147,9 @@ void t_join_in_place(int in_type1A, int in_type2A, int in_loc1A, int in_loc2A,
     oskar_Jones *in1A, *in2A, *in1B, *in2B;
 
     // Create the timers.
-    timerA = oskar_timer_create(in_type1A == OSKAR_GPU ?
+    timerA = oskar_timer_create(in_loc1A == OSKAR_GPU ?
             OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
-    timerB = oskar_timer_create(in_type1B == OSKAR_GPU ?
+    timerB = oskar_timer_create(in_loc1B == OSKAR_GPU ?
             OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
 
     // Run test A.
@@ -316,91 +317,313 @@ static void test_ones(int precision, int location)
 
 TEST(Jones, join_scal_scal_scal_singleCPU_doubleCPU)
 {
-    t_join(TSC, TSC, TSC, LC, LC, LC,
-            TDC, TDC, TDC, LC, LC, LC, 0, 0);
+    t_join(SC, SC, SC, CPU, CPU, CPU,
+            DC, DC, DC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_scal_singleCPU_doubleCPU)
 {
-    t_join(TSCM, TSC, TSC, LC, LC, LC,
-            TDCM, TDC, TDC, LC, LC, LC, 0, 0);
+    t_join(SCM, SC, SC, CPU, CPU, CPU,
+            DCM, DC, DC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_matx_singleCPU_doubleCPU)
 {
-    t_join(TSCM, TSC, TSCM, LC, LC, LC,
-            TDCM, TDC, TDCM, LC, LC, LC, 0, 0);
+    t_join(SCM, SC, SCM, CPU, CPU, CPU,
+            DCM, DC, DCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_matx_matx_singleCPU_doubleCPU)
 {
-    t_join(TSCM, TSCM, TSCM, LC, LC, LC,
-            TDCM, TDCM, TDCM, LC, LC, LC, 0, 0);
+    t_join(SCM, SCM, SCM, CPU, CPU, CPU,
+            DCM, DCM, DCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_scal_scal_scal_singleCPU_doubleCPU)
 {
-    t_join_in_place(TSC, TSC, LC, LC,
-            TDC, TDC, LC, LC, 0, 0);
+    t_join_in_place(SC, SC, CPU, CPU,
+            DC, DC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_scal_singleCPU_doubleCPU)
 {
-    t_join_in_place(TSCM, TSC, LC, LC,
-            TDCM, TDC, LC, LC, 0, 0);
+    t_join_in_place(SCM, SC, CPU, CPU,
+            DCM, DC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_matx_singleCPU_doubleCPU)
 {
-    t_join_in_place(TSCM, TSCM, LC, LC,
-            TDCM, TDCM, LC, LC, 0, 0);
+    t_join_in_place(SCM, SCM, CPU, CPU,
+            DCM, DCM, CPU, CPU, 0, 0);
 }
 
-#ifdef OSKAR_HAVE_CUDA
+#ifdef OSKAR_HAVE_OPENCL
 
+// OpenCL only. ///////////////////////////////////////////////////////////////
+
+TEST(Jones, join_scal_scal_scal_singleCL_doubleCL)
+{
+    t_join(SC, SC, SC, CL, CL, CL,
+            DC, DC, DC, CL, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_scal_singleCL_doubleCL)
+{
+    t_join(SCM, SC, SC, CL, CL, CL,
+            DCM, DC, DC, CL, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_matx_singleCL_doubleCL)
+{
+    t_join(SCM, SC, SCM, CL, CL, CL,
+            DCM, DC, DCM, CL, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_singleCL_doubleCL)
+{
+    t_join(SCM, SCM, SCM, CL, CL, CL,
+            DCM, DCM, DCM, CL, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_singleCL_doubleCL)
+{
+    t_join_in_place(SC, SC, CL, CL,
+            DC, DC, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_singleCL_doubleCL)
+{
+    t_join_in_place(SCM, SC, CL, CL,
+            DCM, DC, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_singleCL_doubleCL)
+{
+    t_join_in_place(SCM, SCM, CL, CL,
+            DCM, DCM, CL, CL, 0, 0);
+}
+
+
+// Compare CPU and OpenCL. ////////////////////////////////////////////////////
+
+// Single CL, single CPU.
+TEST(Jones, join_scal_scal_scal_singleCL_singleCPU)
+{
+    t_join(SC, SC, SC, CL, CL, CL,
+            SC, SC, SC, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_scal_singleCL_singleCPU)
+{
+    t_join(SCM, SC, SC, CL, CL, CL,
+            SCM, SC, SC, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_matx_singleCL_singleCPU)
+{
+    t_join(SCM, SC, SCM, CL, CL, CL,
+            SCM, SC, SCM, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_singleCL_singleCPU)
+{
+    t_join(SCM, SCM, SCM, CL, CL, CL,
+            SCM, SCM, SCM, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_singleCL_singleCPU)
+{
+    t_join_in_place(SC, SC, CL, CL,
+            SC, SC, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_singleCL_singleCPU)
+{
+    t_join_in_place(SCM, SC, CL, CL,
+            SCM, SC, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_singleCL_singleCPU)
+{
+    t_join_in_place(SCM, SCM, CL, CL,
+            SCM, SCM, CPU, CPU, 0, 0);
+}
+
+// Double CL, double CPU.
+TEST(Jones, join_scal_scal_scal_doubleCL_doubleCPU)
+{
+    t_join(DC, DC, DC, CL, CL, CL,
+            DC, DC, DC, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_scal_doubleCL_doubleCPU)
+{
+    t_join(DCM, DC, DC, CL, CL, CL,
+            DCM, DC, DC, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_matx_doubleCL_doubleCPU)
+{
+    t_join(DCM, DC, DCM, CL, CL, CL,
+            DCM, DC, DCM, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_doubleCL_doubleCPU)
+{
+    t_join(DCM, DCM, DCM, CL, CL, CL,
+            DCM, DCM, DCM, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_doubleCL_doubleCPU)
+{
+    t_join_in_place(DC, DC, CL, CL,
+            DC, DC, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_doubleCL_doubleCPU)
+{
+    t_join_in_place(DCM, DC, CL, CL,
+            DCM, DC, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_doubleCL_doubleCPU)
+{
+    t_join_in_place(DCM, DCM, CL, CL,
+            DCM, DCM, CPU, CPU, 0, 0);
+}
+
+// Single CL, double CPU.
+TEST(Jones, join_scal_scal_scal_singleCL_doubleCPU)
+{
+    t_join(SC, SC, SC, CL, CL, CL,
+            DC, DC, DC, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_scal_singleCL_doubleCPU)
+{
+    t_join(SCM, SC, SC, CL, CL, CL,
+            DCM, DC, DC, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_matx_singleCL_doubleCPU)
+{
+    t_join(SCM, SC, SCM, CL, CL, CL,
+            DCM, DC, DCM, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_singleCL_doubleCPU)
+{
+    t_join(SCM, SCM, SCM, CL, CL, CL,
+            DCM, DCM, DCM, CPU, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_singleCL_doubleCPU)
+{
+    t_join_in_place(SC, SC, CL, CL,
+            DC, DC, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_singleCL_doubleCPU)
+{
+    t_join_in_place(SCM, SC, CL, CL,
+            DCM, DC, CPU, CPU, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_singleCL_doubleCPU)
+{
+    t_join_in_place(SCM, SCM, CL, CL,
+            DCM, DCM, CPU, CPU, 0, 0);
+}
+
+// Single CPU, double CL.
+TEST(Jones, join_scal_scal_scal_singleCPU_doubleCL)
+{
+    t_join(SC, SC, SC, CPU, CPU, CPU,
+            DC, DC, DC, CL, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_scal_singleCPU_doubleCL)
+{
+    t_join(SCM, SC, SC, CPU, CPU, CPU,
+            DCM, DC, DC, CL, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_matx_singleCPU_doubleCL)
+{
+    t_join(SCM, SC, SCM, CPU, CPU, CPU,
+            DCM, DC, DCM, CL, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_singleCPU_doubleCL)
+{
+    t_join(SCM, SCM, SCM, CPU, CPU, CPU,
+            DCM, DCM, DCM, CL, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_singleCPU_doubleCL)
+{
+    t_join_in_place(SC, SC, CPU, CPU,
+            DC, DC, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_singleCPU_doubleCL)
+{
+    t_join_in_place(SCM, SC, CPU, CPU,
+            DCM, DC, CL, CL, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_singleCPU_doubleCL)
+{
+    t_join_in_place(SCM, SCM, CPU, CPU,
+            DCM, DCM, CL, CL, 0, 0);
+}
+
+#endif
+
+#ifdef OSKAR_HAVE_CUDA
 
 // GPU only. //////////////////////////////////////////////////////////////////
 
 TEST(Jones, join_scal_scal_scal_singleGPU_doubleGPU)
 {
-    t_join(TSC, TSC, TSC, LG, LG, LG,
-            TDC, TDC, TDC, LG, LG, LG, 0, 0);
+    t_join(SC, SC, SC, GPU, GPU, GPU,
+            DC, DC, DC, GPU, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_scal_singleGPU_doubleGPU)
 {
-    t_join(TSCM, TSC, TSC, LG, LG, LG,
-            TDCM, TDC, TDC, LG, LG, LG, 0, 0);
+    t_join(SCM, SC, SC, GPU, GPU, GPU,
+            DCM, DC, DC, GPU, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_matx_singleGPU_doubleGPU)
 {
-    t_join(TSCM, TSC, TSCM, LG, LG, LG,
-            TDCM, TDC, TDCM, LG, LG, LG, 0, 0);
+    t_join(SCM, SC, SCM, GPU, GPU, GPU,
+            DCM, DC, DCM, GPU, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_matx_matx_matx_singleGPU_doubleGPU)
 {
-    t_join(TSCM, TSCM, TSCM, LG, LG, LG,
-            TDCM, TDCM, TDCM, LG, LG, LG, 0, 0);
+    t_join(SCM, SCM, SCM, GPU, GPU, GPU,
+            DCM, DCM, DCM, GPU, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_scal_scal_scal_singleGPU_doubleGPU)
 {
-    t_join_in_place(TSC, TSC, LG, LG,
-            TDC, TDC, LG, LG, 0, 0);
+    t_join_in_place(SC, SC, GPU, GPU,
+            DC, DC, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_scal_singleGPU_doubleGPU)
 {
-    t_join_in_place(TSCM, TSC, LG, LG,
-            TDCM, TDC, LG, LG, 0, 0);
+    t_join_in_place(SCM, SC, GPU, GPU,
+            DCM, DC, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_matx_singleGPU_doubleGPU)
 {
-    t_join_in_place(TSCM, TSCM, LG, LG,
-            TDCM, TDCM, LG, LG, 0, 0);
+    t_join_in_place(SCM, SCM, GPU, GPU,
+            DCM, DCM, GPU, GPU, 0, 0);
 }
 
 
@@ -409,173 +632,173 @@ TEST(Jones, join_in_place_matx_matx_matx_singleGPU_doubleGPU)
 // Single GPU, single CPU.
 TEST(Jones, join_scal_scal_scal_singleGPU_singleCPU)
 {
-    t_join(TSC, TSC, TSC, LG, LG, LG,
-            TSC, TSC, TSC, LC, LC, LC, 0, 0);
+    t_join(SC, SC, SC, GPU, GPU, GPU,
+            SC, SC, SC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_scal_singleGPU_singleCPU)
 {
-    t_join(TSCM, TSC, TSC, LG, LG, LG,
-            TSCM, TSC, TSC, LC, LC, LC, 0, 0);
+    t_join(SCM, SC, SC, GPU, GPU, GPU,
+            SCM, SC, SC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_matx_singleGPU_singleCPU)
 {
-    t_join(TSCM, TSC, TSCM, LG, LG, LG,
-            TSCM, TSC, TSCM, LC, LC, LC, 0, 0);
+    t_join(SCM, SC, SCM, GPU, GPU, GPU,
+            SCM, SC, SCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_matx_matx_singleGPU_singleCPU)
 {
-    t_join(TSCM, TSCM, TSCM, LG, LG, LG,
-            TSCM, TSCM, TSCM, LC, LC, LC, 0, 0);
+    t_join(SCM, SCM, SCM, GPU, GPU, GPU,
+            SCM, SCM, SCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_scal_scal_scal_singleGPU_singleCPU)
 {
-    t_join_in_place(TSC, TSC, LG, LG,
-            TSC, TSC, LC, LC, 0, 0);
+    t_join_in_place(SC, SC, GPU, GPU,
+            SC, SC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_scal_singleGPU_singleCPU)
 {
-    t_join_in_place(TSCM, TSC, LG, LG,
-            TSCM, TSC, LC, LC, 0, 0);
+    t_join_in_place(SCM, SC, GPU, GPU,
+            SCM, SC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_matx_singleGPU_singleCPU)
 {
-    t_join_in_place(TSCM, TSCM, LG, LG,
-            TSCM, TSCM, LC, LC, 0, 0);
+    t_join_in_place(SCM, SCM, GPU, GPU,
+            SCM, SCM, CPU, CPU, 0, 0);
 }
 
 // Double GPU, double CPU.
 TEST(Jones, join_scal_scal_scal_doubleGPU_doubleCPU)
 {
-    t_join(TDC, TDC, TDC, LG, LG, LG,
-            TDC, TDC, TDC, LC, LC, LC, 0, 0);
+    t_join(DC, DC, DC, GPU, GPU, GPU,
+            DC, DC, DC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_scal_doubleGPU_doubleCPU)
 {
-    t_join(TDCM, TDC, TDC, LG, LG, LG,
-            TDCM, TDC, TDC, LC, LC, LC, 0, 0);
+    t_join(DCM, DC, DC, GPU, GPU, GPU,
+            DCM, DC, DC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_matx_doubleGPU_doubleCPU)
 {
-    t_join(TDCM, TDC, TDCM, LG, LG, LG,
-            TDCM, TDC, TDCM, LC, LC, LC, 0, 0);
+    t_join(DCM, DC, DCM, GPU, GPU, GPU,
+            DCM, DC, DCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_matx_matx_doubleGPU_doubleCPU)
 {
-    t_join(TDCM, TDCM, TDCM, LG, LG, LG,
-            TDCM, TDCM, TDCM, LC, LC, LC, 0, 0);
+    t_join(DCM, DCM, DCM, GPU, GPU, GPU,
+            DCM, DCM, DCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_scal_scal_scal_doubleGPU_doubleCPU)
 {
-    t_join_in_place(TDC, TDC, LG, LG,
-            TDC, TDC, LC, LC, 0, 0);
+    t_join_in_place(DC, DC, GPU, GPU,
+            DC, DC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_scal_doubleGPU_doubleCPU)
 {
-    t_join_in_place(TDCM, TDC, LG, LG,
-            TDCM, TDC, LC, LC, 0, 0);
+    t_join_in_place(DCM, DC, GPU, GPU,
+            DCM, DC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_matx_doubleGPU_doubleCPU)
 {
-    t_join_in_place(TDCM, TDCM, LG, LG,
-            TDCM, TDCM, LC, LC, 0, 0);
+    t_join_in_place(DCM, DCM, GPU, GPU,
+            DCM, DCM, CPU, CPU, 0, 0);
 }
 
 // Single GPU, double CPU.
 TEST(Jones, join_scal_scal_scal_singleGPU_doubleCPU)
 {
-    t_join(TSC, TSC, TSC, LG, LG, LG,
-            TDC, TDC, TDC, LC, LC, LC, 0, 0);
+    t_join(SC, SC, SC, GPU, GPU, GPU,
+            DC, DC, DC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_scal_singleGPU_doubleCPU)
 {
-    t_join(TSCM, TSC, TSC, LG, LG, LG,
-            TDCM, TDC, TDC, LC, LC, LC, 0, 0);
+    t_join(SCM, SC, SC, GPU, GPU, GPU,
+            DCM, DC, DC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_matx_singleGPU_doubleCPU)
 {
-    t_join(TSCM, TSC, TSCM, LG, LG, LG,
-            TDCM, TDC, TDCM, LC, LC, LC, 0, 0);
+    t_join(SCM, SC, SCM, GPU, GPU, GPU,
+            DCM, DC, DCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_matx_matx_singleGPU_doubleCPU)
 {
-    t_join(TSCM, TSCM, TSCM, LG, LG, LG,
-            TDCM, TDCM, TDCM, LC, LC, LC, 0, 0);
+    t_join(SCM, SCM, SCM, GPU, GPU, GPU,
+            DCM, DCM, DCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_scal_scal_scal_singleGPU_doubleCPU)
 {
-    t_join_in_place(TSC, TSC, LG, LG,
-            TDC, TDC, LC, LC, 0, 0);
+    t_join_in_place(SC, SC, GPU, GPU,
+            DC, DC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_scal_singleGPU_doubleCPU)
 {
-    t_join_in_place(TSCM, TSC, LG, LG,
-            TDCM, TDC, LC, LC, 0, 0);
+    t_join_in_place(SCM, SC, GPU, GPU,
+            DCM, DC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_matx_singleGPU_doubleCPU)
 {
-    t_join_in_place(TSCM, TSCM, LG, LG,
-            TDCM, TDCM, LC, LC, 0, 0);
+    t_join_in_place(SCM, SCM, GPU, GPU,
+            DCM, DCM, CPU, CPU, 0, 0);
 }
 
 // Single CPU, double GPU.
 TEST(Jones, join_scal_scal_scal_singleCPU_doubleGPU)
 {
-    t_join(TSC, TSC, TSC, LC, LC, LC,
-            TDC, TDC, TDC, LG, LG, LG, 0, 0);
+    t_join(SC, SC, SC, CPU, CPU, CPU,
+            DC, DC, DC, GPU, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_scal_singleCPU_doubleGPU)
 {
-    t_join(TSCM, TSC, TSC, LC, LC, LC,
-            TDCM, TDC, TDC, LG, LG, LG, 0, 0);
+    t_join(SCM, SC, SC, CPU, CPU, CPU,
+            DCM, DC, DC, GPU, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_matx_singleCPU_doubleGPU)
 {
-    t_join(TSCM, TSC, TSCM, LC, LC, LC,
-            TDCM, TDC, TDCM, LG, LG, LG, 0, 0);
+    t_join(SCM, SC, SCM, CPU, CPU, CPU,
+            DCM, DC, DCM, GPU, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_matx_matx_matx_singleCPU_doubleGPU)
 {
-    t_join(TSCM, TSCM, TSCM, LC, LC, LC,
-            TDCM, TDCM, TDCM, LG, LG, LG, 0, 0);
+    t_join(SCM, SCM, SCM, CPU, CPU, CPU,
+            DCM, DCM, DCM, GPU, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_scal_scal_scal_singleCPU_doubleGPU)
 {
-    t_join_in_place(TSC, TSC, LC, LC,
-            TDC, TDC, LG, LG, 0, 0);
+    t_join_in_place(SC, SC, CPU, CPU,
+            DC, DC, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_scal_singleCPU_doubleGPU)
 {
-    t_join_in_place(TSCM, TSC, LC, LC,
-            TDCM, TDC, LG, LG, 0, 0);
+    t_join_in_place(SCM, SC, CPU, CPU,
+            DCM, DC, GPU, GPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_matx_singleCPU_doubleGPU)
 {
-    t_join_in_place(TSCM, TSCM, LC, LC,
-            TDCM, TDCM, LG, LG, 0, 0);
+    t_join_in_place(SCM, SCM, CPU, CPU,
+            DCM, DCM, GPU, GPU, 0, 0);
 }
 
 
@@ -584,87 +807,87 @@ TEST(Jones, join_in_place_matx_matx_matx_singleCPU_doubleGPU)
 // Single mixed GPU/CPU, single CPU.
 TEST(Jones, join_scal_scal_scal_singleMix_singleCPU)
 {
-    t_join(TSC, TSC, TSC, LG, LC, LG,
-            TSC, TSC, TSC, LC, LC, LC, 0, 0);
+    t_join(SC, SC, SC, GPU, CPU, GPU,
+            SC, SC, SC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_scal_singleMix_singleCPU)
 {
-    t_join(TSCM, TSC, TSC, LG, LC, LG,
-            TSCM, TSC, TSC, LC, LC, LC, 0, 0);
+    t_join(SCM, SC, SC, GPU, CPU, GPU,
+            SCM, SC, SC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_matx_singleMix_singleCPU)
 {
-    t_join(TSCM, TSC, TSCM, LG, LC, LG,
-            TSCM, TSC, TSCM, LC, LC, LC, 0, 0);
+    t_join(SCM, SC, SCM, GPU, CPU, GPU,
+            SCM, SC, SCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_matx_matx_singleMix_singleCPU)
 {
-    t_join(TSCM, TSCM, TSCM, LG, LC, LG,
-            TSCM, TSCM, TSCM, LC, LC, LC, 0, 0);
+    t_join(SCM, SCM, SCM, GPU, CPU, GPU,
+            SCM, SCM, SCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_scal_scal_scal_singleMix_singleCPU)
 {
-    t_join_in_place(TSC, TSC, LG, LC,
-            TSC, TSC, LC, LC, 0, 0);
+    t_join_in_place(SC, SC, GPU, CPU,
+            SC, SC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_scal_singleMix_singleCPU)
 {
-    t_join_in_place(TSCM, TSC, LG, LC,
-            TSCM, TSC, LC, LC, 0, 0);
+    t_join_in_place(SCM, SC, GPU, CPU,
+            SCM, SC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_matx_singleMix_singleCPU)
 {
-    t_join_in_place(TSCM, TSCM, LG, LC,
-            TSCM, TSCM, LC, LC, 0, 0);
+    t_join_in_place(SCM, SCM, GPU, CPU,
+            SCM, SCM, CPU, CPU, 0, 0);
 }
 
 // Double mixed GPU/CPU, double CPU.
 TEST(Jones, join_scal_scal_scal_doubleMix_doubleCPU)
 {
-    t_join(TDC, TDC, TDC, LG, LC, LG,
-            TDC, TDC, TDC, LC, LC, LC, 0, 0);
+    t_join(DC, DC, DC, GPU, CPU, GPU,
+            DC, DC, DC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_scal_doubleMix_doubleCPU)
 {
-    t_join(TDCM, TDC, TDC, LG, LC, LG,
-            TDCM, TDC, TDC, LC, LC, LC, 0, 0);
+    t_join(DCM, DC, DC, GPU, CPU, GPU,
+            DCM, DC, DC, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_scal_matx_doubleMix_doubleCPU)
 {
-    t_join(TDCM, TDC, TDCM, LG, LC, LG,
-            TDCM, TDC, TDCM, LC, LC, LC, 0, 0);
+    t_join(DCM, DC, DCM, GPU, CPU, GPU,
+            DCM, DC, DCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_matx_matx_matx_doubleMix_doubleCPU)
 {
-    t_join(TDCM, TDCM, TDCM, LG, LC, LG,
-            TDCM, TDCM, TDCM, LC, LC, LC, 0, 0);
+    t_join(DCM, DCM, DCM, GPU, CPU, GPU,
+            DCM, DCM, DCM, CPU, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_scal_scal_scal_doubleMix_doubleCPU)
 {
-    t_join_in_place(TDC, TDC, LG, LC,
-            TDC, TDC, LC, LC, 0, 0);
+    t_join_in_place(DC, DC, GPU, CPU,
+            DC, DC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_scal_doubleMix_doubleCPU)
 {
-    t_join_in_place(TDCM, TDC, LG, LC,
-            TDCM, TDC, LC, LC, 0, 0);
+    t_join_in_place(DCM, DC, GPU, CPU,
+            DCM, DC, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, join_in_place_matx_matx_matx_doubleMix_doubleCPU)
 {
-    t_join_in_place(TDCM, TDCM, LG, LC,
-            TDCM, TDCM, LC, LC, 0, 0);
+    t_join_in_place(DCM, DCM, GPU, CPU,
+            DCM, DCM, CPU, CPU, 0, 0);
 }
 
 TEST(Jones, set_ones_singleGPU)

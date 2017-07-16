@@ -128,6 +128,10 @@ void oskar_convert_enu_directions_to_theta_phi(int num_points,
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
+    else
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+    }
 }
 
 #ifdef __cplusplus

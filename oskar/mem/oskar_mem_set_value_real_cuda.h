@@ -40,8 +40,6 @@
 extern "C" {
 #endif
 
-/* Kernel wrappers. ======================================================== */
-
 /* Single precision. */
 OSKAR_EXPORT
 void oskar_mem_set_value_real_cuda_r_f(int num, float* data, float value);
@@ -62,40 +60,6 @@ void oskar_mem_set_value_real_cuda_c_d(int num, double2* data, double value);
 
 OSKAR_EXPORT
 void oskar_mem_set_value_real_cuda_m_d(int num, double4c* data, double value);
-
-
-#ifdef __CUDACC__
-
-/* Kernels. ================================================================ */
-
-/* Single precision. */
-__global__
-void oskar_mem_set_value_real_cudak_r_f(const int num, float* data,
-        const float value);
-
-__global__
-void oskar_mem_set_value_real_cudak_c_f(const int num, float2* data,
-        const float value);
-
-__global__
-void oskar_mem_set_value_real_cudak_m_f(const int num, float4c* data,
-        const float value);
-
-
-/* Double precision. */
-__global__
-void oskar_mem_set_value_real_cudak_r_d(const int num, double* data,
-        const double value);
-
-__global__
-void oskar_mem_set_value_real_cudak_c_d(const int num, double2* data,
-        const double value);
-
-__global__
-void oskar_mem_set_value_real_cudak_m_d(const int num, double4c* data,
-        const double value);
-
-#endif /* __CUDACC__ */
 
 #ifdef __cplusplus
 }

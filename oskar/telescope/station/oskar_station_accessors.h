@@ -80,7 +80,7 @@ int oskar_station_precision(const oskar_Station* model);
  *
  * @param[in] model   Pointer to station model.
  *
- * @return The memory location (OSKAR_CPU or OSKAR_GPU).
+ * @return The memory location.
  */
 OSKAR_EXPORT
 int oskar_station_mem_location(const oskar_Station* model);

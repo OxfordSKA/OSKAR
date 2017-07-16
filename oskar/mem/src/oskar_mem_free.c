@@ -30,8 +30,8 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include "mem/private_mem.h"
 #include "mem/oskar_mem.h"
+#include "mem/private_mem.h"
 #include "utility/oskar_device_utils.h"
 
 #include <stdlib.h>
@@ -48,7 +48,16 @@ void oskar_mem_free(oskar_Mem* mem, int* status)
     /* Must proceed with trying to free the memory, regardless of the
      * status code value. */
 
-    /* Only free the memory if the structure actually owns it. */
+#ifdef OSKAR_HAVE_OPENCL
+    /* Free OpenCL memory if there is a buffer object here. */
+    /* This should also be OK for aliases (sub-buffers) as they are
+     * reference-counted. */
+    if (mem->location & OSKAR_CL)
+        clReleaseMemObject(mem->buffer);
+
+    /* For bare pointers, free the memory if the structure actually owns it. */
+    else
+#endif
     if (mem->owner && mem->data)
     {
         /* Check whether the memory is on the host or the device. */

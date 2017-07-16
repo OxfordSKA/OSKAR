@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,19 @@
 
 #include <stddef.h> /* For size_t */
 
+#include <oskar_global.h>
+
+#ifdef OSKAR_HAVE_OPENCL
+
+#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
+#include <CL/cl.h>
+#endif
+
+#endif
+
 struct oskar_Mem
 {
     int type;            /* Enumerated element type of memory block. */
@@ -38,6 +51,10 @@ struct oskar_Mem
     size_t num_elements; /* Number of elements in memory block. */
     int owner;           /* Flag set if the structure owns the memory. */
     void* data;          /* Data pointer. */
+
+#ifdef OSKAR_HAVE_OPENCL
+    cl_mem buffer;       /* Handle to OpenCL buffer. */
+#endif
 };
 
 #ifndef OSKAR_MEM_TYPEDEF_

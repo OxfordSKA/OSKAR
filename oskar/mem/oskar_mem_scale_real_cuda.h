@@ -39,29 +39,11 @@
 extern "C" {
 #endif
 
-/* Kernel wrappers. ======================================================== */
-
-/* Single precision. */
 OSKAR_EXPORT
 void oskar_mem_scale_real_cuda_f(int num, float value, float* a);
 
-/* Double precision. */
 OSKAR_EXPORT
 void oskar_mem_scale_real_cuda_d(int num, double value, double* a);
-
-#ifdef __CUDACC__
-
-/* Kernels. ================================================================ */
-
-/* Single precision. */
-__global__
-void oskar_mem_scale_real_cudak_f(int num, float value, float* a);
-
-/* Double precision. */
-__global__
-void oskar_mem_scale_real_cudak_d(int num, double value, double* a);
-
-#endif /* __CUDACC__ */
 
 #ifdef __cplusplus
 }

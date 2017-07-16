@@ -2,6 +2,8 @@
 # oskar/CMakeLists.txt
 #
 
+include(oskar_build_macros)
+
 # Build OSKAR sub-libraries.
 add_subdirectory(apps)
 add_subdirectory(binary)
@@ -27,9 +29,18 @@ set(${libname}_folders
 foreach (module ${${libname}_folders})
     add_subdirectory(${module})
     foreach (file ${${module}_SRC})
-        list(APPEND ${libname}_SRC ${module}/${file})
+        get_filename_component(fileext ${file} EXT)
+        if (fileext STREQUAL ".cl")
+            list(APPEND cl_SRC ${module}/${file})
+        else()
+            list(APPEND ${libname}_SRC ${module}/${file})
+        endif()
     endforeach()
 endforeach()
+
+if (OpenCL_FOUND)
+    OSKAR_WRAP_CL(${libname}_SRC ${cl_SRC})
+endif()
 
 if (CUDA_FOUND)
     set(CUDA_GENERATED_OUTPUT_DIR
@@ -47,6 +58,11 @@ target_link_libraries(${libname}
 # Link with oskar_ms if we have casacore.
 if (CASACORE_FOUND)
     target_link_libraries(${libname} oskar_ms)
+endif()
+
+# Link with OpenCL if we have it.
+if (OpenCL_FOUND)
+    target_link_libraries(${libname} ${OpenCL_LIBRARIES})
 endif()
 
 # Link with cuFFT if we have CUDA.

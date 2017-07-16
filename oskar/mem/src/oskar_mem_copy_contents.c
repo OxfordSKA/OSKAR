@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,10 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include "utility/oskar_device_utils.h"
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
+#include "utility/oskar_cl_utils.h"
+#include "utility/oskar_device_utils.h"
 
 #include <string.h>
 
@@ -52,7 +53,7 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     if (*status) return;
 
     /* Return immediately if there is nothing to copy. */
-    if (src->data == NULL || src->num_elements == 0 || num_elements == 0)
+    if (src->num_elements == 0 || num_elements == 0)
         return;
 
     /* Check the data types. */
@@ -87,7 +88,7 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
         return;
     }
 
-    /* Host to device. */
+    /* Host to CUDA device. */
     else if (location_src == OSKAR_CPU && location_dst == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
@@ -99,7 +100,7 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
         return;
     }
 
-    /* Device to host. */
+    /* CUDA device to host. */
     else if (location_src == OSKAR_GPU && location_dst == OSKAR_CPU)
     {
 #ifdef OSKAR_HAVE_CUDA
@@ -111,7 +112,7 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
         return;
     }
 
-    /* Device to device. */
+    /* CUDA device to CUDA device. */
     else if (location_src == OSKAR_GPU && location_dst == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
@@ -119,6 +120,73 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
         oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        return;
+    }
+
+    /* Host to OpenCL device. */
+    else if (location_src == OSKAR_CPU && (location_dst & OSKAR_CL))
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        cl_int error;
+        if (!source)
+        {
+            *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+            return;
+        }
+        error = clEnqueueWriteBuffer(oskar_cl_command_queue(), dst->buffer,
+                CL_TRUE, start_dst, bytes, source, 0, NULL, NULL);
+        if (error != CL_SUCCESS)
+        {
+            size_t available;
+            clGetMemObjectInfo(dst->buffer, CL_MEM_SIZE,
+                    sizeof(size_t), &available, NULL);
+            fprintf(stderr, "clEnqueueWriteBuffer() error (%d): "
+                    "Copy size: %lu, Offset: %lu, Available: %lu\n",
+                    error,
+                    (unsigned long) bytes,
+                    (unsigned long) start_dst,
+                    (unsigned long) available);
+            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
+        }
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+#endif
+        return;
+    }
+
+    /* OpenCL device to host. */
+    else if ((location_src & OSKAR_CL) && location_dst == OSKAR_CPU)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        cl_int error;
+        error = clEnqueueReadBuffer(oskar_cl_command_queue(), src->buffer,
+                CL_TRUE, start_src, bytes, destination, 0, NULL, NULL);
+        if (error != CL_SUCCESS)
+        {
+            fprintf(stderr, "clEnqueueReadBuffer() error (%d)\n", error);
+            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
+        }
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+#endif
+        return;
+    }
+
+    /* OpenCL device to OpenCL device. */
+    else if ((location_src & OSKAR_CL) && (location_dst & OSKAR_CL))
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        cl_int error;
+        error = clEnqueueCopyBuffer(oskar_cl_command_queue(), src->buffer,
+                dst->buffer, start_src, start_dst, bytes, 0, NULL, NULL);
+        if (error != CL_SUCCESS)
+        {
+            fprintf(stderr, "clEnqueueCopyBuffer() error (%d)\n", error);
+            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
+        }
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
         return;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,10 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include "utility/oskar_device_utils.h"
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
+#include "utility/oskar_cl_utils.h"
+#include "utility/oskar_device_utils.h"
 
 #include <stdlib.h>
 
@@ -94,6 +95,19 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
         oskar_device_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+    }
+    else if (location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        /* Allocate OpenCL memory buffer using the current context. */
+        cl_int error = 0;
+        mem->buffer = clCreateBuffer(oskar_cl_context(),
+                CL_MEM_READ_WRITE, bytes, NULL, &error);
+        if (error != CL_SUCCESS)
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
     }
     else

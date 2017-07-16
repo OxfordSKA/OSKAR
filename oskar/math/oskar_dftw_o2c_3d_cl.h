@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mem/oskar_mem.h"
+#ifndef OSKAR_DFTW_O2C_3D_CL_H_
+#define OSKAR_DFTW_O2C_3D_CL_H_
+
+#include <oskar_global.h>
+#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-oskar_Mem* oskar_mem_create_copy_from_raw(void* ptr, int type, int location,
-        size_t num_elements, int* status)
-{
-    oskar_Mem *m = 0, *t = 0;
-    if (*status) return 0;
-
-    /* Create the handles. */
-    m = oskar_mem_create(type, location, num_elements, status);
-    t = oskar_mem_create_alias_from_raw(ptr, type, location, num_elements,
-            status);
-    oskar_mem_copy(m, t, status);
-    oskar_mem_free(t, status);
-
-    /* Return a handle the structure .*/
-    return m;
-}
+OSKAR_EXPORT
+void oskar_dftw_o2c_3d_cl(unsigned int num_in, double wavenumber,
+        const oskar_Mem* x_in, const oskar_Mem* y_in, const oskar_Mem* z_in,
+        const oskar_Mem* weights_in, unsigned int num_out,
+        const oskar_Mem* x_out, const oskar_Mem* y_out, const oskar_Mem* z_out,
+        oskar_Mem* output, int* status);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

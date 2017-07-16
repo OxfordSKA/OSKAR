@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,9 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include "mem/private_mem.h"
 #include "mem/oskar_mem.h"
+#include "mem/private_mem.h"
+#include "utility/oskar_cl_utils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -61,6 +62,22 @@ void oskar_mem_clear_contents(oskar_Mem* mem, int* status)
         cudaMemset(mem->data, 0, size);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+    }
+    else if (mem->location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        cl_int error;
+        char zero = '\0';
+        error = clEnqueueFillBuffer(oskar_cl_command_queue(),
+                mem->buffer, &zero, sizeof(char), 0, size, 0, NULL, NULL);
+        if (error != CL_SUCCESS)
+        {
+            fprintf(stderr, "clEnqueueFillBuffer() error (%d)\n", error);
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+        }
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
     }
     else

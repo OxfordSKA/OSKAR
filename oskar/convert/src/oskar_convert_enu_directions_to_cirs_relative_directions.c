@@ -118,11 +118,6 @@ void oskar_convert_enu_directions_to_cirs_relative_directions(
 
     /* Get location and check consistency. */
     location = oskar_mem_location(x);
-    if (location != OSKAR_CPU && location != OSKAR_GPU)
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;
-        return;
-    }
     if (location != oskar_mem_location(y) ||
             location != oskar_mem_location(z) ||
             location != oskar_mem_location(l) ||

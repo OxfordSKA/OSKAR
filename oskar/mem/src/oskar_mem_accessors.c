@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mem/private_mem.h"
 #include "mem/oskar_mem.h"
+#include "mem/private_mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +37,30 @@ int oskar_mem_allocated(const oskar_Mem* mem)
 {
     return mem->data ? 1 : 0;
 }
+
+#ifdef OSKAR_HAVE_OPENCL
+cl_mem* oskar_mem_cl_buffer(oskar_Mem* mem, int* status)
+{
+    if (mem->location & OSKAR_CL)
+        return &mem->buffer;
+    else
+    {
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return 0;
+    }
+}
+
+const cl_mem* oskar_mem_cl_buffer_const(const oskar_Mem* mem, int* status)
+{
+    if (mem->location & OSKAR_CL)
+        return &mem->buffer;
+    else
+    {
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return 0;
+    }
+}
+#endif
 
 size_t oskar_mem_length(const oskar_Mem* mem)
 {

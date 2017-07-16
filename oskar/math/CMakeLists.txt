@@ -22,7 +22,7 @@ set(math_SRC
     src/oskar_fftphase.c
     src/oskar_find_closest_match.c
     src/oskar_fit_ellipse.c
-    src/oskar_gaussian.c
+    src/oskar_gaussian_circular.c
     src/oskar_healpix_npix_to_nside.c
     src/oskar_lapack_subset.c
     src/oskar_linspace.c
@@ -48,8 +48,22 @@ if (CUDA_FOUND)
         #src/oskar_dftw_m2m_3d_indexed_input_cuda.cu
         src/oskar_dftw_o2c_2d_cuda.cu
         src/oskar_dftw_o2c_3d_cuda.cu
-        src/oskar_gaussian_cuda.cu
         src/oskar_prefix_sum_cuda.cu
+        src/oskar_gaussian_circular_cuda.cu
+    )
+endif()
+
+if (OpenCL_FOUND)
+    list(APPEND math_SRC
+        src/oskar_dftw_c2c_2d_cl.c
+        src/oskar_dftw_c2c_2d.cl
+        src/oskar_dftw_c2c_3d_cl.c
+        src/oskar_dftw_c2c_3d.cl
+        src/oskar_dftw_o2c_2d_cl.c
+        src/oskar_dftw_o2c_2d.cl
+        src/oskar_dftw_o2c_3d_cl.c
+        src/oskar_dftw_o2c_3d.cl
+        src/oskar_gaussian_circular.cl
     )
 endif()
 

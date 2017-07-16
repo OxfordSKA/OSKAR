@@ -71,19 +71,6 @@ OSKAR_EXPORT
 void oskar_mem_add_cuda_d(int num_elements, const double* d_a,
         const double* d_b, double* d_c);
 
-#ifdef __CUDACC__
-
-/* Kernels. */
-__global__
-void oskar_mem_add_cudak_f(int num_elements, const float* a,
-        const float* b, float* c);
-
-__global__
-void oskar_mem_add_cudak_d(int num_elements, const double* a,
-        const double* b, double* c);
-
-#endif /* __CUDACC__ */
-
 #ifdef __cplusplus
 }
 #endif

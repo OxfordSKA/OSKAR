@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,36 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_mem_allocated(const oskar_Mem* mem);
+
+#ifdef OSKAR_HAVE_OPENCL
+/**
+ * @brief
+ * Returns handle to the OpenCL memory buffer object, if applicable.
+ *
+ * @details
+ * Returns handle to the OpenCL memory buffer object, if applicable.
+ *
+ * @param[in] mem Pointer to the memory block.
+ *
+ * @return OpenCL memory buffer handle.
+ */
+OSKAR_EXPORT
+cl_mem* oskar_mem_cl_buffer(oskar_Mem* mem, int* status);
+
+/**
+ * @brief
+ * Returns handle to the OpenCL memory buffer object, if applicable.
+ *
+ * @details
+ * Returns handle to the OpenCL memory buffer object, if applicable.
+ *
+ * @param[in] mem Pointer to the memory block.
+ *
+ * @return OpenCL memory buffer handle.
+ */
+OSKAR_EXPORT
+const cl_mem* oskar_mem_cl_buffer_const(const oskar_Mem* mem, int* status);
+#endif
 
 /**
  * @brief

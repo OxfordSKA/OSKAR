@@ -46,11 +46,6 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;
     }
-    if (location != OSKAR_CPU && location != OSKAR_GPU)
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;
-        return 0;
-    }
 
     /* Allocate and initialise a station model structure. */
     model = (oskar_Station*) malloc(sizeof(oskar_Station));

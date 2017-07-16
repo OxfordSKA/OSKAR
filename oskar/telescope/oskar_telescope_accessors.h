@@ -66,7 +66,7 @@ int oskar_telescope_precision(const oskar_Telescope* model);
  *
  * @param[in] model   Pointer to telescope model.
  *
- * @return The memory location (OSKAR_CPU or OSKAR_GPU).
+ * @return The enumerated memory location.
  */
 OSKAR_EXPORT
 int oskar_telescope_mem_location(const oskar_Telescope* model);

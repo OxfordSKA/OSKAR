@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,10 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include "utility/oskar_device_utils.h"
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
+#include "utility/oskar_cl_utils.h"
+#include "utility/oskar_device_utils.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -134,6 +135,44 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         mem->num_elements = num_elements;
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+    }
+    else if (mem->location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        /* Allocate and initialise a new block of memory. */
+        cl_int error = 0;
+        size_t copy_size;
+        cl_mem mem_new;
+        mem_new = clCreateBuffer(oskar_cl_context(),
+                CL_MEM_READ_WRITE, new_size, NULL, &error);
+        if (error != CL_SUCCESS)
+        {
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            return;
+        }
+
+        /* Copy contents of old block to new block. */
+        copy_size = (old_size > new_size) ? new_size : old_size;
+        if (copy_size > 0)
+        {
+            error = clEnqueueCopyBuffer(oskar_cl_command_queue(), mem->buffer,
+                    mem_new, 0, 0, copy_size, 0, NULL, NULL);
+            if (error != CL_SUCCESS)
+            {
+                fprintf(stderr, "%s:%d\n", __FILE__, __LINE__);
+                *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
+            }
+        }
+
+        /* Free the old buffer. */
+        clReleaseMemObject(mem->buffer);
+
+        /* Set the new meta-data. */
+        mem->buffer = mem_new;
+        mem->num_elements = num_elements;
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
     }
     else

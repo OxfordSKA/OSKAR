@@ -30,8 +30,8 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include "mem/private_mem.h"
 #include "mem/oskar_mem.h"
+#include "mem/private_mem.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -69,7 +69,7 @@ void oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
     {
         if (to->location == OSKAR_CPU)
             memcpy((char*)(to->data) + offset_bytes, from, mem_size);
-        else
+        else if (to->location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             cudaMemcpy((char*)(to->data) + offset_bytes, from,
@@ -78,6 +78,8 @@ void oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
+        else
+            *status = OSKAR_ERR_BAD_LOCATION;
     }
     else if (from_location == OSKAR_GPU)
     {
@@ -85,9 +87,11 @@ void oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
         if (to->location == OSKAR_CPU)
             cudaMemcpy((char*)(to->data) + offset_bytes, from,
                     mem_size, cudaMemcpyDeviceToHost);
-        else
+        else if (to->location == OSKAR_GPU)
             cudaMemcpy((char*)(to->data) + offset_bytes, from,
                     mem_size, cudaMemcpyDeviceToDevice);
+        else
+            *status = OSKAR_ERR_BAD_LOCATION;
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

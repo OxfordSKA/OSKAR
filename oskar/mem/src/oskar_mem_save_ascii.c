@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mem/private_mem.h"
 #include "mem/oskar_mem.h"
-#include "mem/oskar_mem_save_ascii.h"
+#include "mem/private_mem.h"
 
 #include <stdarg.h>
 

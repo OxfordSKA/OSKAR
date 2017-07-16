@@ -139,23 +139,110 @@ TEST(Mem, add_in_place)
 
 
 #ifdef OSKAR_HAVE_CUDA
-TEST(Mem, add_gpu)
+TEST(Mem, add_gpu_single)
 {
-    // Use Case: memory on the GPU.
-    int num_elements = 10, status = 0;
-    oskar_Mem *in1, *in2, *out;
-    in1 = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_GPU,
-            num_elements, &status);
-    in2 = oskar_mem_create_copy(in1, OSKAR_GPU, &status);
-    out = oskar_mem_create_copy(in1, OSKAR_GPU, &status);
-    oskar_mem_add(out, in1, in2, num_elements, &status);
+    int num_elements = 445, prec = OSKAR_SINGLE, status = 0;
+    oskar_Mem *in1, *in2, *in1_cl, *in2_cl, *out, *out_cl;
+    in1 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
+    in2 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
+    float* A = oskar_mem_float(in1, &status);
+    float* B = oskar_mem_float(in2, &status);
+    for (int i = 0; i < num_elements; ++i)
+    {
+        A[i] = (float) i + 0.2f;
+        B[i] = (float) (2*i) + 0.4f;
+    }
+    in1_cl = oskar_mem_create_copy(in1, OSKAR_GPU, &status);
+    in2_cl = oskar_mem_create_copy(in2, OSKAR_GPU, &status);
+    out_cl = oskar_mem_create(prec, OSKAR_GPU, num_elements, &status);
     ASSERT_EQ(0, status);
+    oskar_mem_add(out_cl, in1_cl, in2_cl, num_elements, &status);
+    ASSERT_EQ(0, status);
+    out = oskar_mem_create_copy(out_cl, OSKAR_CPU, &status);
+    float* C = oskar_mem_float(out, &status);
+    ASSERT_EQ(0, status);
+    for (int i = 0; i < num_elements; ++i)
+    {
+        EXPECT_FLOAT_EQ(A[i] + B[i], C[i]);
+    }
     oskar_mem_free(in1, &status);
+    oskar_mem_free(in1_cl, &status);
     oskar_mem_free(in2, &status);
+    oskar_mem_free(in2_cl, &status);
     oskar_mem_free(out, &status);
+    oskar_mem_free(out_cl, &status);
 }
 #endif
 
+#ifdef OSKAR_HAVE_OPENCL
+TEST(Mem, add_cl_single)
+{
+    int num_elements = 445, prec = OSKAR_SINGLE, status = 0;
+    oskar_Mem *in1, *in2, *in1_cl, *in2_cl, *out, *out_cl;
+    in1 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
+    in2 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
+    float* A = oskar_mem_float(in1, &status);
+    float* B = oskar_mem_float(in2, &status);
+    for (int i = 0; i < num_elements; ++i)
+    {
+        A[i] = (float) i + 0.2f;
+        B[i] = (float) (2*i) + 0.4f;
+    }
+    in1_cl = oskar_mem_create_copy(in1, OSKAR_CL, &status);
+    in2_cl = oskar_mem_create_copy(in2, OSKAR_CL, &status);
+    out_cl = oskar_mem_create(prec, OSKAR_CL, num_elements, &status);
+    ASSERT_EQ(0, status);
+    oskar_mem_add(out_cl, in1_cl, in2_cl, num_elements, &status);
+    ASSERT_EQ(0, status);
+    out = oskar_mem_create_copy(out_cl, OSKAR_CPU, &status);
+    float* C = oskar_mem_float(out, &status);
+    ASSERT_EQ(0, status);
+    for (int i = 0; i < num_elements; ++i)
+    {
+        EXPECT_FLOAT_EQ(A[i] + B[i], C[i]);
+    }
+    oskar_mem_free(in1, &status);
+    oskar_mem_free(in1_cl, &status);
+    oskar_mem_free(in2, &status);
+    oskar_mem_free(in2_cl, &status);
+    oskar_mem_free(out, &status);
+    oskar_mem_free(out_cl, &status);
+}
+
+TEST(Mem, add_cl_double)
+{
+    int num_elements = 445, prec = OSKAR_DOUBLE, status = 0;
+    oskar_Mem *in1, *in2, *in1_cl, *in2_cl, *out, *out_cl;
+    in1 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
+    in2 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
+    double* A = oskar_mem_double(in1, &status);
+    double* B = oskar_mem_double(in2, &status);
+    for (int i = 0; i < num_elements; ++i)
+    {
+        A[i] = (double) i + 0.2f;
+        B[i] = (double) (2*i) + 0.4f;
+    }
+    in1_cl = oskar_mem_create_copy(in1, OSKAR_CL, &status);
+    in2_cl = oskar_mem_create_copy(in2, OSKAR_CL, &status);
+    out_cl = oskar_mem_create(prec, OSKAR_CL, num_elements, &status);
+    ASSERT_EQ(0, status);
+    oskar_mem_add(out_cl, in1_cl, in2_cl, num_elements, &status);
+    ASSERT_EQ(0, status);
+    out = oskar_mem_create_copy(out_cl, OSKAR_CPU, &status);
+    double* C = oskar_mem_double(out, &status);
+    ASSERT_EQ(0, status);
+    for (int i = 0; i < num_elements; ++i)
+    {
+        EXPECT_DOUBLE_EQ(A[i] + B[i], C[i]);
+    }
+    oskar_mem_free(in1, &status);
+    oskar_mem_free(in1_cl, &status);
+    oskar_mem_free(in2, &status);
+    oskar_mem_free(in2_cl, &status);
+    oskar_mem_free(out, &status);
+    oskar_mem_free(out_cl, &status);
+}
+#endif
 
 TEST(Mem, not_enough_output_elements)
 {

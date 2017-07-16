@@ -36,11 +36,7 @@
 
 static const bool verbose = false;
 static const bool save = false;
-#ifdef OSKAR_HAVE_CUDA
-static const int location = OSKAR_GPU;
-#else
-static const int location = OSKAR_CPU;
-#endif
+static const int n = 544357;
 
 static void report_time(int n, const char* type,
         const char* prec, const char* loc, double sec)
@@ -56,66 +52,127 @@ TEST(Mem, random_uniform)
     int c1 = 437;
     int c2 = 0;
     int c3 = 0xDECAFBAD;
-    int n = 544357;
     int status = 0;
     double max_err = 0.0, avg_err = 0.0;
     oskar_Mem* v_cpu_f = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, n, &status);
-    oskar_Mem* v_dev_f = oskar_mem_create(OSKAR_SINGLE, location, n, &status);
     oskar_Mem* v_cpu_d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, n, &status);
-    oskar_Mem* v_dev_d = oskar_mem_create(OSKAR_DOUBLE, location, n, &status);
+#ifdef OSKAR_HAVE_CUDA
+    oskar_Mem* v_gpu_f = oskar_mem_create(OSKAR_SINGLE, OSKAR_GPU, n, &status);
+    oskar_Mem* v_gpu_d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, n, &status);
+#endif
+#ifdef OSKAR_HAVE_OPENCL
+    oskar_Mem* v_cl_f = oskar_mem_create(OSKAR_SINGLE, OSKAR_CL, n, &status);
+    oskar_Mem* v_cl_d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CL, n, &status);
+#endif
     oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
 
-    // Run in single precision.
+    // Run on CPU.
     oskar_timer_start(tmr);
     oskar_mem_random_uniform(v_cpu_f, seed, c1, c2, c3, &status);
     report_time(n, "uniform", "single", "CPU", oskar_timer_elapsed(tmr));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(tmr);
-    oskar_mem_random_uniform(v_dev_f, seed, c1, c2, c3, &status);
-    report_time(n, "uniform", "single", "device", oskar_timer_elapsed(tmr));
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-
-    // Check consistency between CPU and device results.
-    oskar_mem_evaluate_relative_error(v_dev_f, v_cpu_f, 0,
-            &max_err, &avg_err, 0, &status);
-    EXPECT_LT(max_err, 1e-5);
-    EXPECT_LT(avg_err, 1e-5);
-
-    // Run in double precision.
-    oskar_timer_start(tmr);
     oskar_mem_random_uniform(v_cpu_d, seed, c1, c2, c3, &status);
     report_time(n, "uniform", "double", "CPU", oskar_timer_elapsed(tmr));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_timer_start(tmr);
-    oskar_mem_random_uniform(v_dev_d, seed, c1, c2, c3, &status);
-    report_time(n, "uniform", "double", "device", oskar_timer_elapsed(tmr));
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    // Check consistency between CPU and device results.
-    oskar_mem_evaluate_relative_error(v_dev_d, v_cpu_d, 0,
-            &max_err, &avg_err, 0, &status);
-    EXPECT_LT(max_err, 1e-10);
-    EXPECT_LT(avg_err, 1e-10);
+#ifdef OSKAR_HAVE_CUDA
+    // Run on GPU with CUDA.
+    oskar_timer_start(tmr);
+    oskar_mem_random_uniform(v_gpu_f, seed, c1, c2, c3, &status);
+    report_time(n, "uniform", "single", "GPU", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_uniform(v_gpu_f, seed, c1, c2, c3, &status);
+    report_time(n, "uniform", "single", "GPU", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_uniform(v_gpu_d, seed, c1, c2, c3, &status);
+    report_time(n, "uniform", "double", "GPU", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_uniform(v_gpu_d, seed, c1, c2, c3, &status);
+    report_time(n, "uniform", "double", "GPU", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+#endif
+
+#ifdef OSKAR_HAVE_OPENCL
+    // Run on OpenCL.
+    oskar_timer_start(tmr);
+    oskar_mem_random_uniform(v_cl_f, seed, c1, c2, c3, &status);
+    report_time(n, "uniform", "single", "OpenCL", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_uniform(v_cl_f, seed, c1, c2, c3, &status);
+    report_time(n, "uniform", "single", "OpenCL", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_uniform(v_cl_d, seed, c1, c2, c3, &status);
+    report_time(n, "uniform", "double", "OpenCL", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_uniform(v_cl_d, seed, c1, c2, c3, &status);
+    report_time(n, "uniform", "double", "OpenCL", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+#endif
 
     // Check consistency between single and double precision.
     oskar_mem_evaluate_relative_error(v_cpu_f, v_cpu_d, 0,
             &max_err, &avg_err, 0, &status);
-    EXPECT_LT(max_err, 1e-5);
     EXPECT_LT(avg_err, 1e-5);
+
+#ifdef OSKAR_HAVE_CUDA
+    // Check consistency between CPU and GPU results.
+    oskar_mem_evaluate_relative_error(v_gpu_f, v_cpu_f, 0,
+            &max_err, &avg_err, 0, &status);
+    EXPECT_LT(avg_err, 1e-5);
+    oskar_mem_evaluate_relative_error(v_gpu_d, v_cpu_d, 0,
+            &max_err, &avg_err, 0, &status);
+    EXPECT_LT(avg_err, 1e-10);
+#endif
+
+#ifdef OSKAR_HAVE_OPENCL
+    // Check consistency between CPU and OpenCL results.
+    oskar_mem_evaluate_relative_error(v_cl_f, v_cpu_f, 0,
+            &max_err, &avg_err, 0, &status);
+    EXPECT_LT(avg_err, 1e-5);
+    oskar_mem_evaluate_relative_error(v_cl_d, v_cpu_d, 0,
+            &max_err, &avg_err, 0, &status);
+    EXPECT_LT(avg_err, 1e-10);
+#endif
 
     if (save)
     {
+        size_t num_mem = 2;
         FILE* fhan = fopen("random_uniform.txt", "w");
-        oskar_mem_save_ascii(fhan, 4, n, &status,
-                v_cpu_f, v_dev_f, v_cpu_d, v_dev_d);
+#ifdef OSKAR_HAVE_CUDA
+        num_mem += 2;
+#endif
+#ifdef OSKAR_HAVE_OPENCL
+        num_mem += 2;
+#endif
+        oskar_mem_save_ascii(fhan, num_mem, n, &status, v_cpu_f, v_cpu_d
+#ifdef OSKAR_HAVE_CUDA
+                , v_gpu_f, v_gpu_d
+#endif
+#ifdef OSKAR_HAVE_OPENCL
+                , v_cl_f, v_cl_d
+#endif
+                );
         fclose(fhan);
     }
 
     // Free memory.
     oskar_mem_free(v_cpu_f, &status);
-    oskar_mem_free(v_dev_f, &status);
     oskar_mem_free(v_cpu_d, &status);
-    oskar_mem_free(v_dev_d, &status);
+#ifdef OSKAR_HAVE_CUDA
+    oskar_mem_free(v_gpu_f, &status);
+    oskar_mem_free(v_gpu_d, &status);
+#endif
+#ifdef OSKAR_HAVE_OPENCL
+    oskar_mem_free(v_cl_f, &status);
+    oskar_mem_free(v_cl_d, &status);
+#endif
     oskar_timer_free(tmr);
 }
 
@@ -125,63 +182,127 @@ TEST(Mem, random_gaussian)
     int c1 = 437;
     int c2 = 0;
     int c3 = 0xDECAFBAD;
-    int n = 267587;
     int status = 0;
     double max_err = 0.0, avg_err = 0.0;
     oskar_Mem* v_cpu_f = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, n, &status);
-    oskar_Mem* v_dev_f = oskar_mem_create(OSKAR_SINGLE, location, n, &status);
     oskar_Mem* v_cpu_d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, n, &status);
-    oskar_Mem* v_dev_d = oskar_mem_create(OSKAR_DOUBLE, location, n, &status);
+#ifdef OSKAR_HAVE_CUDA
+    oskar_Mem* v_gpu_f = oskar_mem_create(OSKAR_SINGLE, OSKAR_GPU, n, &status);
+    oskar_Mem* v_gpu_d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, n, &status);
+#endif
+#ifdef OSKAR_HAVE_OPENCL
+    oskar_Mem* v_cl_f = oskar_mem_create(OSKAR_SINGLE, OSKAR_CL, n, &status);
+    oskar_Mem* v_cl_d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CL, n, &status);
+#endif
     oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
 
-    // Run in single precision.
+    // Run on CPU.
     oskar_timer_start(tmr);
     oskar_mem_random_gaussian(v_cpu_f, seed, c1, c2, c3, 1.0, &status);
     report_time(n, "Gaussian", "single", "CPU", oskar_timer_elapsed(tmr));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(tmr);
-    oskar_mem_random_gaussian(v_dev_f, seed, c1, c2, c3, 1.0, &status);
-    report_time(n, "Gaussian", "single", "device", oskar_timer_elapsed(tmr));
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-
-    // Check consistency between CPU and device results.
-    oskar_mem_evaluate_relative_error(v_dev_f, v_cpu_f, 0,
-            &max_err, &avg_err, 0, &status);
-    EXPECT_LT(avg_err, 1e-5);
-
-    // Run in double precision.
-    oskar_timer_start(tmr);
     oskar_mem_random_gaussian(v_cpu_d, seed, c1, c2, c3, 1.0, &status);
     report_time(n, "Gaussian", "double", "CPU", oskar_timer_elapsed(tmr));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_timer_start(tmr);
-    oskar_mem_random_gaussian(v_dev_d, seed, c1, c2, c3, 1.0, &status);
-    report_time(n, "Gaussian", "double", "device", oskar_timer_elapsed(tmr));
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    // Check consistency between CPU and device results.
-    oskar_mem_evaluate_relative_error(v_dev_d, v_cpu_d, 0,
-            &max_err, &avg_err, 0, &status);
-    EXPECT_LT(avg_err, 1e-10);
+#ifdef OSKAR_HAVE_CUDA
+    // Run on GPU with CUDA.
+    oskar_timer_start(tmr);
+    oskar_mem_random_gaussian(v_gpu_f, seed, c1, c2, c3, 1.0, &status);
+    report_time(n, "Gaussian", "single", "GPU", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_gaussian(v_gpu_f, seed, c1, c2, c3, 1.0, &status);
+    report_time(n, "Gaussian", "single", "GPU", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_gaussian(v_gpu_d, seed, c1, c2, c3, 1.0, &status);
+    report_time(n, "Gaussian", "double", "GPU", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_gaussian(v_gpu_d, seed, c1, c2, c3, 1.0, &status);
+    report_time(n, "Gaussian", "double", "GPU", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+#endif
+
+#ifdef OSKAR_HAVE_OPENCL
+    // Run on OpenCL.
+    oskar_timer_start(tmr);
+    oskar_mem_random_gaussian(v_cl_f, seed, c1, c2, c3, 1.0, &status);
+    report_time(n, "Gaussian", "single", "OpenCL", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_gaussian(v_cl_f, seed, c1, c2, c3, 1.0, &status);
+    report_time(n, "Gaussian", "single", "OpenCL", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_gaussian(v_cl_d, seed, c1, c2, c3, 1.0, &status);
+    report_time(n, "Gaussian", "double", "OpenCL", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(tmr);
+    oskar_mem_random_gaussian(v_cl_d, seed, c1, c2, c3, 1.0, &status);
+    report_time(n, "Gaussian", "double", "OpenCL", oskar_timer_elapsed(tmr));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+#endif
 
     // Check consistency between single and double precision.
     oskar_mem_evaluate_relative_error(v_cpu_f, v_cpu_d, 0,
             &max_err, &avg_err, 0, &status);
     EXPECT_LT(avg_err, 1e-5);
 
+#ifdef OSKAR_HAVE_CUDA
+    // Check consistency between CPU and GPU results.
+    oskar_mem_evaluate_relative_error(v_gpu_f, v_cpu_f, 0,
+            &max_err, &avg_err, 0, &status);
+    EXPECT_LT(avg_err, 1e-5);
+    oskar_mem_evaluate_relative_error(v_gpu_d, v_cpu_d, 0,
+            &max_err, &avg_err, 0, &status);
+    EXPECT_LT(avg_err, 1e-10);
+#endif
+
+#ifdef OSKAR_HAVE_OPENCL
+    // Check consistency between CPU and OpenCL results.
+    oskar_mem_evaluate_relative_error(v_cl_f, v_cpu_f, 0,
+            &max_err, &avg_err, 0, &status);
+    EXPECT_LT(avg_err, 1e-5);
+    oskar_mem_evaluate_relative_error(v_cl_d, v_cpu_d, 0,
+            &max_err, &avg_err, 0, &status);
+    EXPECT_LT(avg_err, 1e-10);
+#endif
+
     if (save)
     {
+        size_t num_mem = 2;
         FILE* fhan = fopen("random_gaussian.txt", "w");
-        oskar_mem_save_ascii(fhan, 4, n, &status,
-                v_cpu_f, v_dev_f, v_cpu_d, v_dev_d);
+#ifdef OSKAR_HAVE_CUDA
+        num_mem += 2;
+#endif
+#ifdef OSKAR_HAVE_OPENCL
+        num_mem += 2;
+#endif
+        oskar_mem_save_ascii(fhan, num_mem, n, &status, v_cpu_f, v_cpu_d
+#ifdef OSKAR_HAVE_CUDA
+                , v_gpu_f, v_gpu_d
+#endif
+#ifdef OSKAR_HAVE_OPENCL
+                , v_cl_f, v_cl_d
+#endif
+                );
         fclose(fhan);
     }
 
     // Free memory.
     oskar_mem_free(v_cpu_f, &status);
-    oskar_mem_free(v_dev_f, &status);
     oskar_mem_free(v_cpu_d, &status);
-    oskar_mem_free(v_dev_d, &status);
+#ifdef OSKAR_HAVE_CUDA
+    oskar_mem_free(v_gpu_f, &status);
+    oskar_mem_free(v_gpu_d, &status);
+#endif
+#ifdef OSKAR_HAVE_OPENCL
+    oskar_mem_free(v_cl_f, &status);
+    oskar_mem_free(v_cl_d, &status);
+#endif
     oskar_timer_free(tmr);
 }
 
@@ -191,9 +312,14 @@ TEST(Mem, random_gaussian_accum)
     int seed = 1;
     int blocksize = 256;
     int rounds = 10240;
-    oskar_Mem* block = oskar_mem_create(OSKAR_DOUBLE, location,
+#ifdef OSKAR_HAVE_CUDA
+    int location = OSKAR_GPU;
+#else
+    int location = OSKAR_CPU;
+#endif
+    oskar_Mem* block = oskar_mem_create(OSKAR_SINGLE, location,
             blocksize, &status);
-    oskar_Mem* total = oskar_mem_create(OSKAR_DOUBLE, location,
+    oskar_Mem* total = oskar_mem_create(OSKAR_SINGLE, location,
             blocksize * rounds, &status);
 
     for (int i = 0; i < rounds; ++i)

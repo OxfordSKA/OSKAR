@@ -50,7 +50,7 @@ extern "C" {
  * no longer required.
  *
  * @param[in]  type         Enumerated data type of memory contents.
- * @param[in]  location     Location of memory (OSKAR_CPU or OSKAR_GPU).
+ * @param[in]  location     Location of memory.
  * @param[in]  num_elements Number of antenna elements in the station.
  * @param[in,out]  status   Status return code.
  */

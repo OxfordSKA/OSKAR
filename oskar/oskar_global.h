@@ -49,32 +49,34 @@ enum OSKAR_ERROR_CODES
     OSKAR_ERR_FUNCTION_NOT_AVAILABLE                   = -4,
     OSKAR_ERR_OUT_OF_RANGE                             = -5,
     OSKAR_ERR_MEMORY_ALLOC_FAILURE                     = -6,
-    OSKAR_ERR_MEMORY_NOT_ALLOCATED                     = -7,
-    OSKAR_ERR_TYPE_MISMATCH                            = -8,
-    OSKAR_ERR_LOCATION_MISMATCH                        = -9,
-    OSKAR_ERR_DIMENSION_MISMATCH                       = -10,
-    OSKAR_ERR_VALUE_MISMATCH                           = -11,
-    OSKAR_ERR_BAD_DATA_TYPE                            = -12,
-    OSKAR_ERR_BAD_LOCATION                             = -13,
-    OSKAR_ERR_BAD_UNITS                                = -14,
-    OSKAR_ERR_CUDA_NOT_AVAILABLE                       = -15,
-    OSKAR_ERR_OPENCL_NOT_AVAILABLE                     = -16,
-    OSKAR_ERR_COMPUTE_DEVICES                          = -17,
+    OSKAR_ERR_MEMORY_COPY_FAILURE                      = -7,
+    OSKAR_ERR_MEMORY_NOT_ALLOCATED                     = -8,
+    OSKAR_ERR_TYPE_MISMATCH                            = -9,
+    OSKAR_ERR_LOCATION_MISMATCH                        = -10,
+    OSKAR_ERR_DIMENSION_MISMATCH                       = -11,
+    OSKAR_ERR_VALUE_MISMATCH                           = -12,
+    OSKAR_ERR_BAD_DATA_TYPE                            = -13,
+    OSKAR_ERR_BAD_LOCATION                             = -14,
+    OSKAR_ERR_BAD_UNITS                                = -15,
+    OSKAR_ERR_CUDA_NOT_AVAILABLE                       = -16,
+    OSKAR_ERR_OPENCL_NOT_AVAILABLE                     = -17,
+    OSKAR_ERR_KERNEL_LAUNCH_FAILURE                    = -18,
+    OSKAR_ERR_COMPUTE_DEVICES                          = -19,
 
     /* The following enumerators are under review... */
-    OSKAR_ERR_SPLINE_COEFF_FAIL                        = -18,
-    OSKAR_ERR_SPLINE_EVAL_FAIL                         = -19,
-    OSKAR_ERR_ELLIPSE_FIT_FAILED                       = -20,
-    OSKAR_ERR_SETTINGS_TELESCOPE                       = -21,
-    OSKAR_ERR_SETUP_FAIL                               = -22,
-    OSKAR_ERR_SETUP_FAIL_SKY                           = -23,
-    OSKAR_ERR_SETUP_FAIL_TELESCOPE                     = -24,
-    OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH    = -25,
-    OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING = -26,
-    OSKAR_ERR_BAD_SKY_FILE                             = -27,
-    OSKAR_ERR_BAD_POINTING_FILE                        = -28,
-    OSKAR_ERR_BAD_COORD_FILE                           = -29,
-    OSKAR_ERR_BAD_GSM_FILE                             = -30
+    OSKAR_ERR_SPLINE_COEFF_FAIL                        = -20,
+    OSKAR_ERR_SPLINE_EVAL_FAIL                         = -21,
+    OSKAR_ERR_ELLIPSE_FIT_FAILED                       = -22,
+    OSKAR_ERR_SETTINGS_TELESCOPE                       = -23,
+    OSKAR_ERR_SETUP_FAIL                               = -24,
+    OSKAR_ERR_SETUP_FAIL_SKY                           = -25,
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE                     = -26,
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH    = -27,
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING = -28,
+    OSKAR_ERR_BAD_SKY_FILE                             = -29,
+    OSKAR_ERR_BAD_POINTING_FILE                        = -30,
+    OSKAR_ERR_BAD_COORD_FILE                           = -31,
+    OSKAR_ERR_BAD_GSM_FILE                             = -32
 
     /*
      * Codes -75 to -99 are reserved for settings errors.
@@ -142,6 +144,7 @@ enum OSKAR_DIRECTION_TYPE
     #define __launch_bounds__(...)
     #define OSKAR_CUDAK_CONF(...)
     #define OSKAR_HAVE_CUDA
+    #define OSKAR_HAVE_OPENCL
     #define __CUDACC__
     #define __CUDA_ARCH__ 200
     #define _OPENMP

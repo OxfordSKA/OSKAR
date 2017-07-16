@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mem/private_mem.h"
 #include "mem/oskar_mem.h"
-
 #include "mem/oskar_mem_set_value_real_cuda.h"
+#include "mem/private_mem.h"
+#include "utility/oskar_cl_utils.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,13 +55,16 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
 
     if (location == OSKAR_CPU)
     {
-        if (type == OSKAR_DOUBLE)
+        switch (type)
+        {
+        case OSKAR_DOUBLE:
         {
             double *v;
             v = (double*)(mem->data) + offset;
             for (i = 0; i < n; ++i) v[i] = val;
+            break;
         }
-        else if (type == OSKAR_DOUBLE_COMPLEX)
+        case OSKAR_DOUBLE_COMPLEX:
         {
             double2 *v;
             v = (double2*)(mem->data) + offset;
@@ -70,8 +73,9 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
                 v[i].x = val;
                 v[i].y = 0.0;
             }
+            break;
         }
-        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
         {
             double4c d;
             double4c *v;
@@ -88,14 +92,16 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
                 d.d.y = 0.0;
                 v[i] = d;
             }
+            break;
         }
-        else if (type == OSKAR_SINGLE)
+        case OSKAR_SINGLE:
         {
             float *v;
             v = (float*)(mem->data) + offset;
             for (i = 0; i < n; ++i) v[i] = (float)val;
+            break;
         }
-        else if (type == OSKAR_SINGLE_COMPLEX)
+        case OSKAR_SINGLE_COMPLEX:
         {
             float2 *v;
             v = (float2*)(mem->data) + offset;
@@ -104,8 +110,9 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
                 v[i].x = (float)val;
                 v[i].y = 0.0f;
             }
+            break;
         }
-        else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
         {
             float4c d;
             float4c *v;
@@ -122,47 +129,139 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
                 d.d.y = 0.0f;
                 v[i] = d;
             }
+            break;
         }
-        else
+        default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+            break;
+        }
     }
     else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_DOUBLE)
+        switch (type)
         {
+        case OSKAR_DOUBLE:
             oskar_mem_set_value_real_cuda_r_d(n,
                     (double*)(mem->data) + offset, val);
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX)
-        {
+            break;
+        case OSKAR_DOUBLE_COMPLEX:
             oskar_mem_set_value_real_cuda_c_d(n,
                     (double2*)(mem->data) + offset, val);
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-        {
+            break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
             oskar_mem_set_value_real_cuda_m_d(n,
                     (double4c*)(mem->data) + offset, val);
-        }
-        else if (type == OSKAR_SINGLE)
-        {
+            break;
+        case OSKAR_SINGLE:
             oskar_mem_set_value_real_cuda_r_f(n,
                     (float*)(mem->data) + offset, (float)val);
-        }
-        else if (type == OSKAR_SINGLE_COMPLEX)
-        {
+            break;
+        case OSKAR_SINGLE_COMPLEX:
             oskar_mem_set_value_real_cuda_c_f(n,
                     (float2*)(mem->data) + offset, (float)val);
-        }
-        else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-        {
+            break;
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
             oskar_mem_set_value_real_cuda_m_f(n,
                     (float4c*)(mem->data) + offset, (float)val);
-        }
-        else
+            break;
+        default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+            break;
+        }
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+    }
+    else if (location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        cl_int error = 0;
+        size_t element_size, offset_bytes, size_bytes;
+        element_size = oskar_mem_element_size(type);
+        offset_bytes = offset * element_size;
+        size_bytes = n * element_size;
+        switch (type)
+        {
+        case OSKAR_DOUBLE:
+        {
+            cl_double c_val = (cl_double) val;
+            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
+                    mem->buffer, &c_val, sizeof(cl_double),
+                    offset_bytes, size_bytes, 0, NULL, NULL);
+            break;
+        }
+        case OSKAR_DOUBLE_COMPLEX:
+        {
+            cl_double2 c_val;
+            c_val.s[0] = (cl_double) val;
+            c_val.s[1] = 0.0;
+            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
+                    mem->buffer, &c_val, sizeof(cl_double2),
+                    offset_bytes, size_bytes, 0, NULL, NULL);
+            break;
+        }
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+        {
+            cl_double8 c_val;
+            c_val.s[0] = (cl_double) val;
+            c_val.s[1] = 0.0;
+            c_val.s[2] = 0.0;
+            c_val.s[3] = 0.0;
+            c_val.s[4] = 0.0;
+            c_val.s[5] = 0.0;
+            c_val.s[6] = (cl_double) val;
+            c_val.s[7] = 0.0;
+            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
+                    mem->buffer, &c_val, sizeof(cl_double8),
+                    offset_bytes, size_bytes, 0, NULL, NULL);
+            break;
+        }
+        case OSKAR_SINGLE:
+        {
+            cl_float c_val = (cl_float) val;
+            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
+                    mem->buffer, &c_val, sizeof(cl_float),
+                    offset_bytes, size_bytes, 0, NULL, NULL);
+            break;
+        }
+        case OSKAR_SINGLE_COMPLEX:
+        {
+            cl_float2 c_val;
+            c_val.s[0] = (cl_float) val;
+            c_val.s[1] = 0.0f;
+            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
+                    mem->buffer, &c_val, sizeof(cl_float2),
+                    offset_bytes, size_bytes, 0, NULL, NULL);
+            break;
+        }
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+        {
+            cl_float8 c_val;
+            c_val.s[0] = (cl_float) val;
+            c_val.s[1] = 0.0f;
+            c_val.s[2] = 0.0f;
+            c_val.s[3] = 0.0f;
+            c_val.s[4] = 0.0f;
+            c_val.s[5] = 0.0f;
+            c_val.s[6] = (cl_float) val;
+            c_val.s[7] = 0.0f;
+            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
+                    mem->buffer, &c_val, sizeof(cl_float8),
+                    offset_bytes, size_bytes, 0, NULL, NULL);
+            break;
+        }
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            break;
+        }
+        if (error != CL_SUCCESS)
+        {
+            fprintf(stderr, "clEnqueueFillBuffer() error (%d)\n", error);
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+        }
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
     }
     else

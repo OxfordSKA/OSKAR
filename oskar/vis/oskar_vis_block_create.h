@@ -48,10 +48,6 @@ extern "C" {
  * handle to it. The structure holds visibility data for all baselines, and
  * a set of times and channels.
  *
- * Allowed values of the \p location parameter are
- * - OSKAR_CPU
- * - OSKAR_GPU
- *
  * The dimension order is fixed. The polarisation dimension is implicit in the
  * data type (matrix or scalar) and is therefore the fastest varying.
  * From slowest to fastest varying, the remaining dimensions are:
@@ -75,7 +71,7 @@ extern "C" {
  * The structure must be deallocated using oskar_vis_block_free() when it is
  * no longer required.
  *
- * @param[in] location         Memory location (OSKAR_CPU or OSKAR_GPU).
+ * @param[in] location         Enumerated memory location.
  * @param[in] amp_type         Memory type of visibility amplitudes.
  * @param[in] num_times        Number of times in the block.
  * @param[in] num_channels     Number of channels in the block.

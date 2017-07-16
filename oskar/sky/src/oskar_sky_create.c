@@ -47,11 +47,6 @@ oskar_Sky* oskar_sky_create(int type, int location, int num_sources,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;
     }
-    if (location != OSKAR_CPU && location != OSKAR_GPU)
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;
-        return 0;
-    }
 
     /* Allocate and initialise a sky model structure. */
     model = (oskar_Sky*) malloc(sizeof(oskar_Sky));

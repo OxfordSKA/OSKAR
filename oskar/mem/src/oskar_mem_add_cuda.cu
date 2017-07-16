@@ -28,6 +28,28 @@
 
 #include "mem/oskar_mem_add_cuda.h"
 
+/* Kernels. ================================================================ */
+
+/* Single precision. */
+__global__
+void oskar_mem_add_cudak_f(int num_elements, const float* a,
+        const float* b, float* c)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num_elements) return;
+    c[i] = a[i] + b[i];
+}
+
+/* Double precision. */
+__global__
+void oskar_mem_add_cudak_d(int num_elements, const double* a,
+        const double* b, double* c)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num_elements) return;
+    c[i] = a[i] + b[i];
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -52,30 +74,6 @@ void oskar_mem_add_cuda_d(int num_elements, const double* d_a,
     num_blocks = (num_elements + num_threads - 1) / num_threads;
     oskar_mem_add_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_elements, d_a, d_b, d_c);
-}
-
-/* Kernels. ================================================================ */
-
-/* Single precision. */
-__global__
-void oskar_mem_add_cudak_f(int num_elements, const float* a,
-        const float* b, float* c)
-{
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num_elements) return;
-
-    c[i] = a[i] + b[i];
-}
-
-/* Double precision. */
-__global__
-void oskar_mem_add_cudak_d(int num_elements, const double* a,
-        const double* b, double* c)
-{
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num_elements) return;
-
-    c[i] = a[i] + b[i];
 }
 
 #ifdef __cplusplus

@@ -28,26 +28,6 @@
 
 #include "mem/oskar_mem_scale_real_cuda.h"
 
-/* Kernel wrappers. ======================================================== */
-
-/* Single precision. */
-void oskar_mem_scale_real_cuda_f(int num, float value, float* a)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num + num_threads - 1) / num_threads;
-    oskar_mem_scale_real_cudak_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num, value, a);
-}
-
-/* Double precision. */
-void oskar_mem_scale_real_cuda_d(int num, double value, double* a)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num + num_threads - 1) / num_threads;
-    oskar_mem_scale_real_cudak_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num, value, a);
-}
-
 /* Kernels. ================================================================ */
 
 /* Single precision. */
@@ -66,4 +46,24 @@ void oskar_mem_scale_real_cudak_d(int num, double value, double* a)
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < num)
         a[i] *= value;
+}
+
+/* Kernel wrappers. ======================================================== */
+
+/* Single precision. */
+void oskar_mem_scale_real_cuda_f(int num, float value, float* a)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num + num_threads - 1) / num_threads;
+    oskar_mem_scale_real_cudak_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num, value, a);
+}
+
+/* Double precision. */
+void oskar_mem_scale_real_cuda_d(int num, double value, double* a)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num + num_threads - 1) / num_threads;
+    oskar_mem_scale_real_cudak_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num, value, a);
 }

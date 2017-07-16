@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_GAUSSIAN_H_
-#define OSKAR_GAUSSIAN_H_
+#ifndef OSKAR_DFTW_C2C_2D_CL_H_
+#define OSKAR_DFTW_C2C_2D_CL_H_
 
-/**
- * @file oskar_gaussian.h
- */
-
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 OSKAR_EXPORT
-void oskar_gaussian_f(float2* z, int n, const float* x,
-        const float* y, float std);
-
-OSKAR_EXPORT
-void oskar_gaussian_mf(float4c* z, int n, const float* x,
-        const float* y, float std);
-
-OSKAR_EXPORT
-void oskar_gaussian_d(double2* z, int n, const double* x,
-        const double* y, double std);
-
-OSKAR_EXPORT
-void oskar_gaussian_md(double4c* z, int n, const double* x,
-        const double* y, double std);
+void oskar_dftw_c2c_2d_cl(unsigned int num_in, double wavenumber,
+        const oskar_Mem* x_in, const oskar_Mem* y_in,
+        const oskar_Mem* weights_in, unsigned int num_out,
+        const oskar_Mem* x_out, const oskar_Mem* y_out,
+        const oskar_Mem* data, oskar_Mem* output, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_GAUSSIAN_H_ */
+#endif

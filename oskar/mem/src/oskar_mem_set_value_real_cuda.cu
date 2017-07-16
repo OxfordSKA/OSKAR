@@ -28,6 +28,72 @@
 
 #include "mem/oskar_mem_set_value_real_cuda.h"
 
+/* Kernels. ================================================================ */
+
+/* Single precision. */
+__global__
+void oskar_mem_set_value_real_cudak_r_f(const int num, float* data,
+        const float value)
+{
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num) return;
+    data[i] = value;
+}
+
+__global__
+void oskar_mem_set_value_real_cudak_c_f(const int num, float2* data,
+        const float value)
+{
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num) return;
+    data[i] = make_float2(value, 0.0f);
+}
+
+__global__
+void oskar_mem_set_value_real_cudak_m_f(const int num, float4c* data,
+        const float value)
+{
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num) return;
+    data[i].a = make_float2(value, 0.0f);
+    data[i].b = make_float2(0.0f, 0.0f);
+    data[i].c = make_float2(0.0f, 0.0f);
+    data[i].d = make_float2(value, 0.0f);
+}
+
+
+/* Double precision. */
+__global__
+void oskar_mem_set_value_real_cudak_r_d(const int num, double* data,
+        const double value)
+{
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num) return;
+    data[i] = value;
+}
+
+__global__
+void oskar_mem_set_value_real_cudak_c_d(const int num, double2* data,
+        const double value)
+{
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num) return;
+    data[i] = make_double2(value, 0.0);
+}
+
+__global__
+void oskar_mem_set_value_real_cudak_m_d(const int num, double4c* data,
+        const double value)
+{
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num) return;
+    data[i].a = make_double2(value, 0.0);
+    data[i].b = make_double2(0.0, 0.0);
+    data[i].c = make_double2(0.0, 0.0);
+    data[i].d = make_double2(value, 0.0);
+}
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -83,90 +149,6 @@ void oskar_mem_set_value_real_cuda_m_d(int num, double4c* data, double value)
     num_blocks = (num + num_threads - 1) / num_threads;
     oskar_mem_set_value_real_cudak_m_d OSKAR_CUDAK_CONF(num_blocks,
             num_threads) (num, data, value);
-}
-
-
-/* Kernels. ================================================================ */
-
-/* Single precision. */
-__global__
-void oskar_mem_set_value_real_cudak_r_f(const int num, float* data,
-        const float value)
-{
-    /* Get the array index ID that this thread is working on. */
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num) return;
-
-    /* Set the value. */
-    data[i] = value;
-}
-
-__global__
-void oskar_mem_set_value_real_cudak_c_f(const int num, float2* data,
-        const float value)
-{
-    /* Get the array index ID that this thread is working on. */
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num) return;
-
-    /* Set the value. */
-    data[i] = make_float2(value, 0.0f);
-}
-
-__global__
-void oskar_mem_set_value_real_cudak_m_f(const int num, float4c* data,
-        const float value)
-{
-    /* Get the array index ID that this thread is working on. */
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num) return;
-
-    /* Set the value. */
-    data[i].a = make_float2(value, 0.0f);
-    data[i].b = make_float2(0.0f, 0.0f);
-    data[i].c = make_float2(0.0f, 0.0f);
-    data[i].d = make_float2(value, 0.0f);
-}
-
-
-/* Double precision. */
-__global__
-void oskar_mem_set_value_real_cudak_r_d(const int num, double* data,
-        const double value)
-{
-    /* Get the array index ID that this thread is working on. */
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num) return;
-
-    /* Set the value. */
-    data[i] = value;
-}
-
-__global__
-void oskar_mem_set_value_real_cudak_c_d(const int num, double2* data,
-        const double value)
-{
-    /* Get the array index ID that this thread is working on. */
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num) return;
-
-    /* Set the value. */
-    data[i] = make_double2(value, 0.0);
-}
-
-__global__
-void oskar_mem_set_value_real_cudak_m_d(const int num, double4c* data,
-        const double value)
-{
-    /* Get the array index ID that this thread is working on. */
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num) return;
-
-    /* Set the value. */
-    data[i].a = make_double2(value, 0.0);
-    data[i].b = make_double2(0.0, 0.0);
-    data[i].c = make_double2(0.0, 0.0);
-    data[i].d = make_double2(value, 0.0);
 }
 
 #ifdef __cplusplus

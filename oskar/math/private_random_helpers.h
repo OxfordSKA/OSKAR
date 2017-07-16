@@ -31,13 +31,11 @@
 
 #include <oskar_global.h>
 #include <math/oskar_cmath.h>
-#include <Random123/philox.h>
+#include <math/private_random_generators.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/* Helper functions. */
 
 OSKAR_INLINE
 float oskar_int_to_range_0_to_1_f(const unsigned long in)
@@ -106,41 +104,6 @@ void oskar_box_muller_d(unsigned long u0, unsigned long u1,
     *f0 *= r;
     *f1 *= r;
 }
-
-/* Set up key and counter, and generate two random integers.
- * Use 32-bit integers for both single and double floating-point precision:
- * This preserves random sequences, and should be perfectly valid for both
- * (a random integer is the same, regardless of precision!). */
-#define OSKAR_R123_GENERATE_2(S,C0,C1)           \
-        philox2x32_key_t k;                      \
-        philox2x32_ctr_t c;                      \
-        union {                                  \
-            philox2x32_ctr_t c;                  \
-            uint32_t i[2];                       \
-        } u;                                     \
-        k.v[0] = S;                              \
-        c.v[0] = C0;                             \
-        c.v[1] = C1;                             \
-        u.c = philox2x32(c, k);
-
-/* Set up key and counter, and generate four random integers.
- * Use 32-bit integers for both single and double floating-point precision:
- * This preserves random sequences, and should be perfectly valid for both
- * (a random integer is the same, regardless of precision!). */
-#define OSKAR_R123_GENERATE_4(S,C0,C1,C2,C3)     \
-        philox4x32_key_t k;                      \
-        philox4x32_ctr_t c;                      \
-        union {                                  \
-            philox4x32_ctr_t c;                  \
-            uint32_t i[4];                       \
-        } u;                                     \
-        k.v[0] = S;                              \
-        k.v[1] = 0xCAFEF00DuL;                   \
-        c.v[0] = C0;                             \
-        c.v[1] = C1;                             \
-        c.v[2] = C2;                             \
-        c.v[3] = C3;                             \
-        u.c = philox4x32(c, k);
 
 #ifdef __cplusplus
 }

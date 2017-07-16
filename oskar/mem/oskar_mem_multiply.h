@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_ELEMENT_MULTIPLY_H_
-#define OSKAR_MEM_ELEMENT_MULTIPLY_H_
+#ifndef OSKAR_MEM_MULTIPLY_H_
+#define OSKAR_MEM_MULTIPLY_H_
 
 /**
- * @file oskar_mem_element_multiply.h
+ * @file oskar_mem_multiply.h
  */
 
 #include <oskar_global.h>
@@ -48,10 +48,8 @@ extern "C" {
  * This function multiplies each element of one array by each element in
  * another array.
  *
- * Using Matlab syntax, this can be expressed as c = a .* b
- *
- * The arrays can be in either CPU or GPU memory, but will be copied to the GPU
- * if necessary before performing the multiplication.
+ * The arrays can be in either CPU or GPU memory, but will be copied to the
+ * output memory location if necessary before performing the multiplication.
  *
  * If c is NULL on input then the operation becomes a = a .* b.
  *
@@ -62,53 +60,53 @@ extern "C" {
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_element_multiply(oskar_Mem* c, oskar_Mem* a, const oskar_Mem* b,
+void oskar_mem_multiply(oskar_Mem* c, oskar_Mem* a, const oskar_Mem* b,
         size_t num, int* status);
 
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_rr_r_f(size_t num, float* c,
+void oskar_mem_multiply_rr_r_f(size_t num, float* c,
         const float* a, const float* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cc_c_f(size_t num, float2* c,
+void oskar_mem_multiply_cc_c_f(size_t num, float2* c,
         const float2* a, const float2* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cc_m_f(size_t num, float4c* c,
+void oskar_mem_multiply_cc_m_f(size_t num, float4c* c,
         const float2* a, const float2* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cm_m_f(size_t num, float4c* c,
+void oskar_mem_multiply_cm_m_f(size_t num, float4c* c,
         const float2* a, const float4c* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_mm_m_f(size_t num, float4c* c,
+void oskar_mem_multiply_mm_m_f(size_t num, float4c* c,
         const float4c* a, const float4c* b);
 
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_rr_r_d(size_t num, double* c,
+void oskar_mem_multiply_rr_r_d(size_t num, double* c,
         const double* a, const double* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cc_c_d(size_t num, double2* c,
+void oskar_mem_multiply_cc_c_d(size_t num, double2* c,
         const double2* a, const double2* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cc_m_d(size_t num, double4c* c,
+void oskar_mem_multiply_cc_m_d(size_t num, double4c* c,
         const double2* a, const double2* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cm_m_d(size_t num, double4c* c,
+void oskar_mem_multiply_cm_m_d(size_t num, double4c* c,
         const double2* a, const double4c* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_mm_m_d(size_t num, double4c* c,
+void oskar_mem_multiply_mm_m_d(size_t num, double4c* c,
         const double4c* a, const double4c* b);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_ELEMENT_MULTIPLY_H_ */
+#endif /* OSKAR_MEM_MULTIPLY_H_ */

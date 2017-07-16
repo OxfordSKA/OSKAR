@@ -70,3 +70,23 @@ macro(OSKAR_APP)
     endif()
 
 endmacro(OSKAR_APP)
+
+# Wraps an OpenCL kernel source file to stringify it.
+macro(OSKAR_WRAP_CL SRC_LIST)
+    set(OPENCL_STRINGIFY ${PROJECT_SOURCE_DIR}/cmake/oskar_cl_stringify.cmake)
+    foreach (CL_FILE ${ARGN})
+        get_filename_component(name_ ${CL_FILE} NAME_WE)
+        set(CL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${CL_FILE})
+        set(CXX_FILE ${CMAKE_CURRENT_BINARY_DIR}/${name_}_cl_kernel.cpp)
+        add_custom_command(OUTPUT ${CXX_FILE}
+            COMMAND ${CMAKE_COMMAND}
+                -D CL_FILE:FILEPATH=${CL_FILE}
+                -D CXX_FILE:FILEPATH=${CXX_FILE}
+                -P ${OPENCL_STRINGIFY}
+            MAIN_DEPENDENCY ${CL_FILE}
+            DEPENDS ${CL_FILE} ${OPENCL_STRINGIFY}
+            VERBATIM
+        )
+        list(APPEND ${SRC_LIST} ${CXX_FILE})
+    endforeach()
+endmacro(OSKAR_WRAP_CL)

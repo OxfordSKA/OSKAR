@@ -5,8 +5,10 @@
 if (FIND_CUDA OR NOT DEFINED FIND_CUDA)
     find_package(CUDA 5.5)
 endif()
+if (FIND_OPENCL OR NOT DEFINED FIND_OPENCL)
+    find_package(OpenCL QUIET)
+endif()
 find_package(CasaCore)
-find_package(OpenCL QUIET)
 find_package(OpenMP)
 
 if (NOT CUDA_FOUND)
@@ -15,6 +17,10 @@ if (NOT CUDA_FOUND)
     message("===============================================================================")
 else()
     add_definitions(-DOSKAR_HAVE_CUDA)
+endif()
+
+if (OpenCL_FOUND)
+    add_definitions(-DOSKAR_HAVE_OPENCL)
 endif()
 
 if (NOT CASACORE_FOUND)

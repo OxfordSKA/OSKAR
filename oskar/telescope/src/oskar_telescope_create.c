@@ -50,11 +50,6 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;
     }
-    if (location != OSKAR_CPU && location != OSKAR_GPU)
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;
-        return 0;
-    }
 
     /* Allocate the data structure. */
     telescope = (oskar_Telescope*) malloc(sizeof(oskar_Telescope));

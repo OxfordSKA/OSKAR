@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,16 @@
 
 #include <gtest/gtest.h>
 #include "utility/oskar_device_utils.h"
+#include "utility/oskar_cl_utils.h"
 
 int main(int argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
+    oskar_cl_init("GPU", "AMD|NVIDIA");
+    //oskar_cl_init("GPU", "INTEL");
+    //oskar_cl_init("CPU", NULL);
     int val = RUN_ALL_TESTS();
     oskar_device_reset();
+    oskar_cl_free();
     return val;
 }

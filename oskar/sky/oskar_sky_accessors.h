@@ -56,8 +56,7 @@ int oskar_sky_precision(const oskar_Sky* sky);
  * @brief Returns the memory location of data in the sky model.
  *
  * @details
- * Returns the memory location of data in the sky model (either
- * OSKAR_CPU or OSKAR_GPU).
+ * Returns the memory location of data in the sky model.
  *
  * @param[in] sky Pointer to sky model.
  */

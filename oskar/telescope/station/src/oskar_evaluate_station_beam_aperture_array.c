@@ -166,8 +166,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                     oskar_mem_scale_real(array, 1.0 / num_elements, status);
 
                 /* Element-wise multiply to join array and element pattern. */
-                oskar_mem_element_multiply(beam, beam, array, num_points,
-                        status);
+                oskar_mem_multiply(beam, beam, array, num_points, status);
             }
         }
 

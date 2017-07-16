@@ -27,7 +27,6 @@
  */
 
 #include "mem/oskar_mem.h"
-#include "mem/oskar_mem_convert_precision.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,8 +75,7 @@ oskar_Mem* oskar_mem_convert_precision(const oskar_Mem* input,
         type |= OSKAR_MATRIX;
         num_elements *= 4;
     }
-    output = oskar_mem_create(type, OSKAR_CPU, oskar_mem_length(in),
-            status);
+    output = oskar_mem_create(type, OSKAR_CPU, oskar_mem_length(in), status);
 
     /* Convert the data. */
     if (input_precision == OSKAR_SINGLE &&

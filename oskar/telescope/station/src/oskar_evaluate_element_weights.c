@@ -71,14 +71,13 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
                 oskar_station_unique_id(station), weights_error, status);
 
         /* Modify the weights (complex multiply with error vector). */
-        oskar_mem_element_multiply(0, weights, weights_error,
-                num_elements, status);
+        oskar_mem_multiply(0, weights, weights_error, num_elements, status);
     }
 
     /* Modify the weights using the provided apodisation values. */
     if (oskar_station_apply_element_weight(station))
     {
-        oskar_mem_element_multiply(0, weights,
+        oskar_mem_multiply(0, weights,
                 oskar_station_element_weight_const(station), num_elements,
                 status);
     }

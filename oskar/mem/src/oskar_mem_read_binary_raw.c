@@ -82,10 +82,10 @@ oskar_Mem* oskar_mem_read_binary_raw(const char* filename, int type,
     fclose(stream);
 
     /* Copy to GPU memory if required. */
-    if (location == OSKAR_GPU)
+    if (location != OSKAR_CPU)
     {
         oskar_Mem* gpu;
-        gpu = oskar_mem_create_copy(mem, OSKAR_GPU, status);
+        gpu = oskar_mem_create_copy(mem, location, status);
         oskar_mem_free(mem, status);
         return gpu;
     }

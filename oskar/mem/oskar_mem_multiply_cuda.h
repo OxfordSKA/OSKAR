@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,45 +26,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_CREATE_COPY_FROM_RAW_H_
-#define OSKAR_MEM_CREATE_COPY_FROM_RAW_H_
-
-/**
- * @file oskar_mem_create_copy_from_raw.h
- */
+#ifndef OSKAR_MEM_MULTIPLY_CUDA_H_
+#define OSKAR_MEM_MULTIPLY_CUDA_H_
 
 #include <oskar_global.h>
-#include <stddef.h>
+#include <utility/oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Creates a copy of a block of memory from a raw pointer.
- *
- * @details
- * This function creates a handle to an OSKAR memory block containing a
- * copy of an existing array.
- *
- * A handle to the memory is returned. The handle must be deallocated
- * using oskar_mem_free() when it is no longer required.
- *
- * @param[in] ptr           Pointer to existing memory.
- * @param[in] type          Enumerated data type of memory contents.
- * @param[in] location      Either OSKAR_CPU or OSKAR_GPU.
- * @param[in] num_elements  Number of elements of type \p type in the array.
- * @param[in,out]  status   Status return code.
- *
- * @return A handle to the memory block structure.
- */
+/* Single precision. */
 OSKAR_EXPORT
-oskar_Mem* oskar_mem_create_copy_from_raw(void* ptr, int type, int location,
-        size_t num_elements, int* status);
+void oskar_mem_multiply_cuda_rr_r_f(int num, float* d_c,
+        const float* d_a, const float* d_b);
+
+OSKAR_EXPORT
+void oskar_mem_multiply_cuda_cc_c_f(int num, float2* d_c,
+        const float2* d_a, const float2* d_b);
+
+OSKAR_EXPORT
+void oskar_mem_multiply_cuda_cc_m_f(int num, float4c* d_c,
+        const float2* d_a, const float2* d_b);
+
+OSKAR_EXPORT
+void oskar_mem_multiply_cuda_cm_m_f(int num, float4c* d_c,
+        const float2* d_a, const float4c* d_b);
+
+OSKAR_EXPORT
+void oskar_mem_multiply_cuda_mm_m_f(int num, float4c* d_c,
+        const float4c* d_a, const float4c* d_b);
+
+/* Double precision. */
+OSKAR_EXPORT
+void oskar_mem_multiply_cuda_rr_r_d(int num, double* d_c,
+        const double* d_a, const double* d_b);
+
+OSKAR_EXPORT
+void oskar_mem_multiply_cuda_cc_c_d(int num, double2* d_c,
+        const double2* d_a, const double2* d_b);
+
+OSKAR_EXPORT
+void oskar_mem_multiply_cuda_cc_m_d(int num, double4c* d_c,
+        const double2* d_a, const double2* d_b);
+
+OSKAR_EXPORT
+void oskar_mem_multiply_cuda_cm_m_d(int num, double4c* d_c,
+        const double2* d_a, const double4c* d_b);
+
+OSKAR_EXPORT
+void oskar_mem_multiply_cuda_mm_m_d(int num, double4c* d_c,
+        const double4c* d_a, const double4c* d_b);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_CREATE_COPY_FROM_RAW_H_ */
+#endif /* OSKAR_MEM_MULTIPLY_CUDA_H_ */

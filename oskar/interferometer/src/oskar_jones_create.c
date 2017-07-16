@@ -43,7 +43,7 @@ oskar_Jones* oskar_jones_create(int type, int location, int num_stations,
     int base_type;
     size_t n_elements;
 
-    /* Check type and location. */
+    /* Check type. */
     base_type = oskar_type_precision(type);
     if (base_type != OSKAR_SINGLE && base_type != OSKAR_DOUBLE)
     {
@@ -53,11 +53,6 @@ oskar_Jones* oskar_jones_create(int type, int location, int num_stations,
     if (!oskar_type_is_complex(type))
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return 0;
-    }
-    if (location != OSKAR_CPU && location != OSKAR_GPU)
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;
         return 0;
     }
 
