@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_DFTW_O2C_3D_CL_H_
-#define OSKAR_DFTW_O2C_3D_CL_H_
+#ifndef OSKAR_DFTW_C2C_3D_CL_H_
+#define OSKAR_DFTW_C2C_3D_CL_H_
 
 #include <oskar_global.h>
 #include <mem/oskar_mem.h>
@@ -37,7 +37,7 @@ extern "C" {
 #endif
 
 OSKAR_EXPORT
-void oskar_dftw_o2c_3d_cl(unsigned int num_in, double wavenumber,
+void oskar_dftw_c2c_3d_cl(unsigned int num_in, double wavenumber,
         const oskar_Mem* x_in, const oskar_Mem* y_in, const oskar_Mem* z_in,
         const oskar_Mem* weights_in, unsigned int num_out,
         const oskar_Mem* x_out, const oskar_Mem* y_out, const oskar_Mem* z_out,
