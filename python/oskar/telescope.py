@@ -1,7 +1,7 @@
 #
 #  This file is part of OSKAR.
 #
-# Copyright (c) 2016, The University of Oxford
+# Copyright (c) 2016-2017, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -69,6 +69,26 @@ class Telescope(object):
             dir_name (str): Path to telescope model directory to load.
         """
         _telescope_lib.load(self._capsule, dir_name)
+
+    def get_identical_stations(self):
+        """Returns true if all stations are identical, false if not."""
+        return _telescope_lib.identical_stations(self._capsule)
+
+    def get_max_station_depth(self):
+        """Returns the maximum station nesting depth."""
+        return _telescope_lib.max_station_depth(self._capsule)
+
+    def get_max_station_size(self):
+        """Returns the maximum station size."""
+        return _telescope_lib.max_station_size(self._capsule)
+
+    def get_num_baselines(self):
+        """Returns the number of baselines in the telescope model."""
+        return _telescope_lib.num_baselines(self._capsule)
+
+    def get_num_stations(self):
+        """Returns the number of stations in the telescope model."""
+        return _telescope_lib.num_stations(self._capsule)
 
     def set_allow_station_beam_duplication(self, value):
         """Sets whether station beams will be copied if stations are identical.
@@ -290,3 +310,10 @@ class Telescope(object):
         """
         _telescope_lib.set_uv_filter(
             self._capsule, uv_filter_min, uv_filter_max, uv_filter_units)
+
+    # Properties.
+    identical_stations = property(get_identical_stations)
+    max_station_depth = property(get_max_station_depth)
+    max_station_size = property(get_max_station_size)
+    num_baselines = property(get_num_baselines)
+    num_stations = property(get_num_stations)

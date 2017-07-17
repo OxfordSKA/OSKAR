@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,6 +100,57 @@ static PyObject* load(PyObject* self, PyObject* args)
         return 0;
     }
     return Py_BuildValue("");
+}
+
+
+static PyObject* identical_stations(PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    return Py_BuildValue("O", oskar_telescope_identical_stations(h) ?
+            Py_True : Py_False);
+}
+
+
+static PyObject* max_station_depth(PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    return Py_BuildValue("i", oskar_telescope_max_station_depth(h));
+}
+
+
+static PyObject* max_station_size(PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    return Py_BuildValue("i", oskar_telescope_max_station_size(h));
+}
+
+
+static PyObject* num_baselines(PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    return Py_BuildValue("i", oskar_telescope_num_baselines(h));
+}
+
+
+static PyObject* num_stations(PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    return Py_BuildValue("i", oskar_telescope_num_stations(h));
 }
 
 
@@ -596,29 +647,39 @@ static PyMethodDef methods[] =
 {
         {"create", (PyCFunction)create, METH_VARARGS, "create(type)"},
         {"load", (PyCFunction)load, METH_VARARGS, "load(input_dir)"},
+        {"identical_stations", (PyCFunction)identical_stations,
+                METH_VARARGS, "identical_stations()"},
+        {"max_station_depth", (PyCFunction)max_station_depth,
+                METH_VARARGS, "max_station_depth()"},
+        {"max_station_size", (PyCFunction)max_station_size,
+                METH_VARARGS, "max_station_size()"},
+        {"num_baselines", (PyCFunction)num_baselines,
+                METH_VARARGS, "num_baselines()"},
+        {"num_stations", (PyCFunction)num_stations,
+                METH_VARARGS, "num_stations()"},
         {"set_allow_station_beam_duplication",
-                (PyCFunction)set_allow_station_beam_duplication, METH_VARARGS,
-                "set_allow_station_beam_duplication(value)"},
+                (PyCFunction)set_allow_station_beam_duplication,
+                METH_VARARGS, "set_allow_station_beam_duplication(value)"},
         {"set_channel_bandwidth", (PyCFunction)set_channel_bandwidth,
                 METH_VARARGS, "set_channel_bandwidth(channel_bandwidth_hz)"},
-        {"set_enable_noise", (PyCFunction)set_enable_noise, METH_VARARGS,
-                "set_enable_noise(value, seed)"},
+        {"set_enable_noise", (PyCFunction)set_enable_noise,
+                METH_VARARGS, "set_enable_noise(value, seed)"},
         {"set_enable_numerical_patterns",
-                (PyCFunction)set_enable_numerical_patterns, METH_VARARGS,
-                "set_enable_numerical_patterns(value)"},
+                (PyCFunction)set_enable_numerical_patterns,
+                METH_VARARGS, "set_enable_numerical_patterns(value)"},
         {"set_gaussian_station_beam_width",
                 (PyCFunction)set_gaussian_station_beam_width, METH_VARARGS,
                 "set_gaussian_station_beam_width(fwhm_deg, ref_freq_hz)"},
         {"set_noise_freq", (PyCFunction)set_noise_freq, METH_VARARGS,
                 "set_noise_freq(start_freq_hz, inc_hz, num_channels)"},
-        {"set_noise_rms", (PyCFunction)set_noise_rms, METH_VARARGS,
-                "set_noise_rms(start, end)"},
-        {"set_phase_centre", (PyCFunction)set_phase_centre, METH_VARARGS,
-                "set_phase_centre(ra_rad, dec_rad)"},
-        {"set_pol_mode", (PyCFunction)set_pol_mode, METH_VARARGS,
-                "set_pol_mode(type)"},
-        {"set_position", (PyCFunction)set_position, METH_VARARGS,
-                "set_position(longitude, latitude, altitude)"},
+        {"set_noise_rms", (PyCFunction)set_noise_rms,
+                METH_VARARGS, "set_noise_rms(start, end)"},
+        {"set_phase_centre", (PyCFunction)set_phase_centre,
+                METH_VARARGS, "set_phase_centre(ra_rad, dec_rad)"},
+        {"set_pol_mode", (PyCFunction)set_pol_mode,
+                METH_VARARGS, "set_pol_mode(type)"},
+        {"set_position", (PyCFunction)set_position,
+                METH_VARARGS, "set_position(longitude, latitude, altitude)"},
         {"set_station_coords_ecef", (PyCFunction)set_station_coords_ecef,
                 METH_VARARGS, "set_station_coords_ecef(longitude, latitude, "
                         "altitude, x, y, z, x_err, y_err, z_err)"},
