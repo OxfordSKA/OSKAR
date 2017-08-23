@@ -15,3 +15,9 @@
 
 After installation using the steps above, the OSKAR Python interface can
 be uninstalled using `pip uninstall oskarpy`
+
+## Notes
+
+- Both Python 2.7 and Python 3 are supported.
+- Some examples showing how the Python interface can be used are shown
+  in `examples/sim*` and `examples/spead`.
