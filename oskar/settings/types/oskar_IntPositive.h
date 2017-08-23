@@ -36,34 +36,22 @@
  * @file oskar_IntPositive.h
  */
 
-#include "settings/types/oskar_AbstractSettingsType.h"
+#include "settings/types/oskar_Int.h"
 
 namespace oskar {
 
-
-class OSKAR_SETTINGS_EXPORT IntPositive : public AbstractSettingsType
+class OSKAR_SETTINGS_EXPORT IntPositive : public Int
 {
 public:
     IntPositive();
-    virtual ~IntPositive();
+    virtual ~IntPositive() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
-    bool is_default() const;
-
-    int value() const { return value_; }
-    int default_value() const { return default_; }
-
-    bool operator==(const IntPositive& other) const;
-    bool operator>(const IntPositive& other) const;
 
 private:
     bool from_string_(const std::string& s, int& value) const;
-    int default_;
-    int value_;
 };
 
 } /* namespace oskar */

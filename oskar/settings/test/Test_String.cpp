@@ -38,11 +38,11 @@ TEST(settings_types, String)
 {
     String s;
     ASSERT_TRUE(s.set_default("hello"));
-    ASSERT_STREQ("hello", s.get_default().c_str());
-    ASSERT_STREQ("hello", s.get_value().c_str());
+    ASSERT_STREQ("hello", s.get_default());
+    ASSERT_STREQ("hello", s.get_value());
     ASSERT_TRUE(s.is_default());
     ASSERT_TRUE(s.set_value("there"));
     ASSERT_FALSE(s.is_default());
-    ASSERT_STREQ("there", s.get_value().c_str());
+    ASSERT_STREQ("there", s.get_value());
 }
 

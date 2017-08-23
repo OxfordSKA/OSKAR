@@ -35,12 +35,12 @@ extern "C" {
 
 FILE* oskar_log_file_handle(oskar_Log* l)
 {
-    return l->file;
+    return l ? l->file : 0;
 }
 
 void oskar_log_set_keep_file(oskar_Log* l, int value)
 {
-    l->keep_file = value;
+    if (l) l->keep_file = value;
 }
 
 void oskar_log_set_file_priority(oskar_Log* l, int value)

@@ -29,8 +29,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "settings/oskar_SettingsTree.h"
 #include "settings/oskar_SettingsDeclareXml.h"
+#include "settings/oskar_SettingsDependency.h"
+#include "settings/oskar_SettingsKey.h"
+#include "settings/oskar_SettingsTree.h"
 #include "settings/oskar_settings_utility_string.h"
 #include <iostream>
 #include <sstream>
@@ -149,13 +151,14 @@ bool add_setting_deps(node* s, oskar::SettingsTree* settings)
 
         // Dependency node (has key, condition, value defined).
         if (dependency_node)
-            if (!settings->add_dependency(k, v, c)) return false;
+            if (!settings->add_dependency(k.c_str(), v.c_str(), c.c_str()))
+                return false;
 
         // Logic node (will only have group defined, if that).
         if (logic_node)
         {
             // Process any child nodes.
-            if (!settings->begin_dependency_group(g)) return false;
+            if (!settings->begin_dependency_group(g.c_str())) return false;
             if (!add_setting_deps(n, settings)) return false;
             settings->end_dependency_group();
         }
@@ -169,7 +172,7 @@ bool declare_setting(node* s, const string& key_root,
         oskar::SettingsTree* settings)
 {
     // Get a pointer to the type node.
-    string type_name, default_value, options;
+    string key, type_name, default_value, options;
     vector<string> names;
     names.push_back(string("type"));
     names.push_back(string("t"));
@@ -191,9 +194,10 @@ bool declare_setting(node* s, const string& key_root,
     }
 
     // Add the setting.
-    if (!settings->add_setting(key_root + key_leaf,
-            get_label(s), get_description(s),
-            type_name, default_value, options, required, priority))
+    key = key_root + key_leaf;
+    if (!settings->add_setting(key.c_str(), get_label(s).c_str(),
+            get_description(s).c_str(), type_name.c_str(),
+            default_value.c_str(), options.c_str(), required, priority))
         return false;
 
     // Add any dependencies.
@@ -253,11 +257,12 @@ bool iterate_settings(node* n, const string key_root,
 
 namespace oskar {
 
-bool settings_declare_xml(SettingsTree* settings, std::string xml)
+bool settings_declare_xml(SettingsTree* settings, const char* xml)
 {
     if (!settings) return false;
     doc_t doc;
-    doc.parse<0>(&xml[0]);
+    string xml_copy(xml);
+    doc.parse<0>(&xml_copy[0]);
 
     node* root_node = doc.first_node("root");
     string key_root = "";

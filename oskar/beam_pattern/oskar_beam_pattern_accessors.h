@@ -83,7 +83,7 @@ void oskar_beam_pattern_set_coordinate_type(oskar_BeamPattern* h, char option);
 
 OSKAR_EXPORT
 void oskar_beam_pattern_set_gpus(oskar_BeamPattern* h, int num_gpus,
-        int* cuda_device_ids, int* status);
+        const int* cuda_device_ids, int* status);
 
 OSKAR_EXPORT
 void oskar_beam_pattern_set_image_size(oskar_BeamPattern* h,
@@ -123,7 +123,7 @@ void oskar_beam_pattern_set_sky_model_file(oskar_BeamPattern* h,
 
 OSKAR_EXPORT
 void oskar_beam_pattern_set_station_ids(oskar_BeamPattern* h,
-        int num_stations, int* ids);
+        int num_stations, const int* ids);
 
 OSKAR_EXPORT
 void oskar_beam_pattern_set_stokes(oskar_BeamPattern* h, const char* stokes);

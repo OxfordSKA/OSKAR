@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_option_parser.h"
 #include "apps/oskar_settings_log.h"
 #include "apps/oskar_settings_to_sky.h"
 #include "apps/oskar_settings_to_telescope.h"

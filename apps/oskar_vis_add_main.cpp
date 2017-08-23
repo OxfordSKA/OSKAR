@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_option_parser.h"
 #include "vis/oskar_vis.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"

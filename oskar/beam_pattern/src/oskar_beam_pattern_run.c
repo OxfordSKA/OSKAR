@@ -82,7 +82,7 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 {
     int i = 0, i_global = 0, num_threads = 1;
     int cp = 0, tp = 0, fp = 0; /* Loop indices for previous iteration. */
-    if (*status) return;
+    if (*status || !h) return;
 
     /* Check root name exists. */
     if (!h->root_path)

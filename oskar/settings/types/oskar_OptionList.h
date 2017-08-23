@@ -55,27 +55,23 @@ namespace oskar {
 class OSKAR_SETTINGS_EXPORT OptionList : public AbstractSettingsType
 {
 public:
-    OptionList();
-    virtual ~OptionList();
+    OptionList() {}
+    virtual ~OptionList() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& s);
-    std::string get_default() const;
     bool set_value(const std::string& s);
-    std::string get_value() const;
     bool is_default() const;
 
-    int size() const { return options_.size(); }
-    std::vector<std::string> options() const { return options_; }
-    std::string option(int i) const { return options_[i]; }
+    int size() const;
+    const char* option(int i) const;
 
     bool operator==(const OptionList& other) const;
-    bool operator>(const OptionList& other) const;
+    bool operator>(const OptionList&) const { return false; }
 
 private:
     bool from_string_(std::string& value, const std::string& s) const;
     std::vector<std::string> options_;
-    std::string default_, value_;
 };
 
 } /* namespace oskar */

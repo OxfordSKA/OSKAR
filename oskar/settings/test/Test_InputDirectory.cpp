@@ -39,10 +39,10 @@ TEST(settings_types, InputDirectory)
     InputDirectory dir;
     ASSERT_TRUE(dir.init(""));  // Does nothing.
     ASSERT_TRUE(dir.set_default("/foo/bar"));
-    ASSERT_STREQ("/foo/bar", dir.get_default().c_str());
+    ASSERT_STREQ("/foo/bar", dir.get_default());
     ASSERT_TRUE(dir.is_default());
     ASSERT_TRUE(dir.set_value("/this/is/a/test/dir/"));
-    ASSERT_STREQ("/this/is/a/test/dir/", dir.get_value().c_str());
+    ASSERT_STREQ("/this/is/a/test/dir/", dir.get_value());
     ASSERT_FALSE(dir.is_default());
 }
 

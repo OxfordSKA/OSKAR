@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,45 +42,27 @@ extern "C" {
 
 /**
  * @brief
- * Updates the horizon mask based on the vertical direction cosine
- * (single precision).
+ * Ensures source mask value is 1 if the source is visible.
  *
  * @details
- * This kernel updates the horizon mask to determine whether a source is
+ * This function sets the horizon mask to 1 if a source is
  * visible from a particular station.
  *
- * The operation performed is simply:
- *
- * mask |= (condition > 0)
- *
  * @param[in] num_sources The number of source positions.
+ * @param[in] l           Source l-direction cosines relative to phase centre.
+ * @param[in] m           Source m-direction cosines relative to phase centre.
+ * @param[in] n           Source n-direction cosines relative to phase centre.
+ * @param[in] ha0_rad     Local apparent hour angle of phase centre, in radians.
+ * @param[in] dec0_rad    Local apparent declination of phase centre, in radians.
+ * @param[in] lat_rad     The observer's geodetic latitude, in radians.
  * @param[in,out] mask    The input and output mask vector.
- * @param[in] condition   The vector of conditions to test.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_update_horizon_mask_f(int num_sources, int* mask,
-        const float* condition);
-
-/**
- * @brief
- * Updates the horizon mask based on the vertical direction cosine
- * (double precision).
- *
- * @details
- * This kernel updates the horizon mask to determine whether a source is
- * visible from a particular station.
- *
- * The operation performed is simply:
- *
- * mask |= (condition > 0)
- *
- * @param[in] num_sources The number of source positions.
- * @param[in,out] mask    The input and output mask vector.
- * @param[in] condition   The vector of conditions to test.
- */
-OSKAR_EXPORT
-void oskar_update_horizon_mask_d(int num_sources, int* mask,
-        const double* condition);
+void oskar_update_horizon_mask(int num_sources, const oskar_Mem* l,
+        const oskar_Mem* m, const oskar_Mem* n, const double ha0_rad,
+        const double dec0_rad, const double lat_rad, oskar_Mem* mask,
+        int* status);
 
 #ifdef __cplusplus
 }

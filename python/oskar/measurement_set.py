@@ -1,5 +1,4 @@
-#
-#  This file is part of OSKAR.
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2016-2017, The University of Oxford
 # All rights reserved.
@@ -31,7 +30,9 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-from __future__ import absolute_import, division
+"""Interfaces to a Measurement Set."""
+
+from __future__ import absolute_import, division, print_function
 try:
     from . import _measurement_set_lib
 except ImportError:
@@ -46,11 +47,28 @@ class MeasurementSet(object):
         if _measurement_set_lib is None:
             raise RuntimeError(
                 "OSKAR was compiled without Measurement Set support.")
-        self._capsule = 0
+        self._capsule = None
+
+    def capsule_get(self):
+        """Returns the C capsule wrapped by the class."""
+        return self._capsule
+
+    def capsule_set(self, new_capsule):
+        """Sets the C capsule wrapped by the class.
+
+        Args:
+            new_capsule (capsule): The new capsule to set.
+        """
+        if _measurement_set_lib.capsule_name(new_capsule) == \
+                'oskar_MeasurementSet':
+            del self._capsule
+            self._capsule = new_capsule
+        else:
+            raise RuntimeError("Capsule is not of type oskar_MeasurementSet.")
 
     @classmethod
     def create(cls, file_name, num_stations, num_channels, num_pols,
-               ref_freq_hz, chan_width_hz, write_autocorr=False,
+               ref_freq_hz, freq_inc_hz, write_autocorr=False,
                write_crosscorr=True):
         """Creates a new, empty Measurement Set with the given name.
 
@@ -61,8 +79,8 @@ class MeasurementSet(object):
             num_pols (int):       The number of polarisations (1, 2 or 4).
             ref_freq_hz (float):
                 The frequency at the centre of channel 0, in Hz.
-            chan_width_hz (float):
-                The width of each channel, in Hz.
+            freq_inc_hz (float):
+                The increment between channels, in Hz.
             write_autocorr (Optional[bool]):
                 If set, allow for write of auto-correlation data.
             write_crosscorr (Optional[bool]):
@@ -72,9 +90,9 @@ class MeasurementSet(object):
             raise RuntimeError(
                 "OSKAR was compiled without Measurement Set support.")
         t = MeasurementSet()
-        t._capsule = _measurement_set_lib.create(
+        t.capsule = _measurement_set_lib.create(
             file_name, num_stations, num_channels, num_pols,
-            ref_freq_hz, chan_width_hz, write_autocorr, write_crosscorr)
+            ref_freq_hz, freq_inc_hz, write_autocorr, write_crosscorr)
         return t
 
     def get_freq_inc_hz(self):
@@ -120,7 +138,7 @@ class MeasurementSet(object):
             raise RuntimeError(
                 "OSKAR was compiled without Measurement Set support.")
         t = MeasurementSet()
-        t._capsule = _measurement_set_lib.open(file_name)
+        t.capsule = _measurement_set_lib.open(file_name)
         return t
 
     def read_column(self, column, start_row, num_rows):
@@ -246,6 +264,7 @@ class MeasurementSet(object):
             num_baselines, vis)
 
     # Properties
+    capsule = property(capsule_get, capsule_set)
     freq_inc_hz = property(get_freq_inc_hz)
     freq_start_hz = property(get_freq_start_hz)
     num_channels = property(get_num_channels)

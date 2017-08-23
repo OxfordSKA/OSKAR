@@ -38,10 +38,10 @@ TEST(settings_types, InputFile)
 {
     InputFile f;
     ASSERT_TRUE(f.set_default("foo.txt"));
-    ASSERT_STREQ("foo.txt", f.get_default().c_str());
+    ASSERT_STREQ("foo.txt", f.get_default());
     ASSERT_TRUE(f.is_default());
     ASSERT_TRUE(f.set_value("bar.txt"));
-    ASSERT_STREQ("bar.txt", f.get_value().c_str());
+    ASSERT_STREQ("bar.txt", f.get_value());
     ASSERT_FALSE(f.is_default());
 }
 

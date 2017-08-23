@@ -29,6 +29,40 @@
 #include "sky/oskar_scale_flux_with_frequency_cuda.h"
 #include "sky/oskar_scale_flux_with_frequency_inline.h"
 
+/* Kernels. ================================================================ */
+
+/* Single precision. */
+__global__
+void oskar_scale_flux_with_frequency_cudak_f(const int num_sources,
+        const float frequency, float* restrict I, float* restrict Q,
+        float* restrict U, float* restrict V,
+        float* restrict ref_freq, const float* restrict sp_index,
+        const float* restrict rm)
+{
+    /* Get source index and check bounds. */
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num_sources) return;
+
+    oskar_scale_flux_with_frequency_inline_f(frequency,
+            &I[i], &Q[i], &U[i], &V[i], &ref_freq[i], sp_index[i], rm[i]);
+}
+
+/* Double precision. */
+__global__
+void oskar_scale_flux_with_frequency_cudak_d(const int num_sources,
+        const double frequency, double* restrict I, double* restrict Q,
+        double* restrict U, double* restrict V,
+        double* restrict ref_freq, const double* restrict sp_index,
+        const double* restrict rm)
+{
+    /* Get source index and check bounds. */
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num_sources) return;
+
+    oskar_scale_flux_with_frequency_inline_d(frequency,
+            &I[i], &Q[i], &U[i], &V[i], &ref_freq[i], sp_index[i], rm[i]);
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -57,41 +91,6 @@ void oskar_scale_flux_with_frequency_cuda_d(int num_sources,
     oskar_scale_flux_with_frequency_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources, frequency,
             d_I, d_Q, d_U, d_V, d_ref_freq, d_sp_index, d_rm);
-}
-
-
-/* Kernels. ================================================================ */
-
-/* Single precision. */
-__global__
-void oskar_scale_flux_with_frequency_cudak_f(const int num_sources,
-        const float frequency, float* __restrict__ I, float* __restrict__ Q,
-        float* __restrict__ U, float* __restrict__ V,
-        float* __restrict__ ref_freq, const float* __restrict__ sp_index,
-        const float* __restrict__ rm)
-{
-    /* Get source index and check bounds. */
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num_sources) return;
-
-    oskar_scale_flux_with_frequency_inline_f(frequency,
-            &I[i], &Q[i], &U[i], &V[i], &ref_freq[i], sp_index[i], rm[i]);
-}
-
-/* Double precision. */
-__global__
-void oskar_scale_flux_with_frequency_cudak_d(const int num_sources,
-        const double frequency, double* __restrict__ I, double* __restrict__ Q,
-        double* __restrict__ U, double* __restrict__ V,
-        double* __restrict__ ref_freq, const double* __restrict__ sp_index,
-        const double* __restrict__ rm)
-{
-    /* Get source index and check bounds. */
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num_sources) return;
-
-    oskar_scale_flux_with_frequency_inline_d(frequency,
-            &I[i], &Q[i], &U[i], &V[i], &ref_freq[i], sp_index[i], rm[i]);
 }
 
 #ifdef __cplusplus

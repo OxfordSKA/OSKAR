@@ -554,7 +554,7 @@ void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
  */
 OSKAR_EXPORT
 void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
-        char* const* filenames, int* status);
+        const char* const* filenames, int* status);
 
 /**
  * @brief

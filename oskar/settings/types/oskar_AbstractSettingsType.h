@@ -34,15 +34,6 @@
 
 #include <settings/oskar_settings_macros.h>
 
-#ifdef __GNUC__
-#define DEPRECATED(func) func __attribute__ ((deprecated))
-#elif defined(_MSC_VER)
-#define DEPRECATED(func) __declspec(deprecated) func
-#else
-#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
-#define DEPRECATED(func) func
-#endif
-
 /**
  * @file oskar_AbstractSettingsType.h
  */
@@ -65,20 +56,23 @@ public:
     /// Initialises the type from a CSV parameter string.
     virtual bool init(const std::string& parameters) = 0;
 
+    /// Gets the default as a string.
+    const char* get_default() const;
+
+    /// Gets the value as a string.
+    const char* get_value() const;
+
+    /// Returns true if the value is the same as the default.
+    virtual bool is_default() const = 0;
+
     /// Sets the default value from a string
     virtual bool set_default(const std::string& value) = 0;
-
-    /// Gets the default as a string.
-    virtual std::string get_default() const = 0;
 
     /// Sets the value from a string
     virtual bool set_value(const std::string& value) = 0;
 
-    /// Gets the value as a string.
-    virtual std::string get_value() const = 0;
-
-    /// Returns true if the value is the same as the default.
-    virtual bool is_default() const = 0;
+protected:
+    std::string str_default_, str_value_;
 };
 
 } /* namespace oskar */

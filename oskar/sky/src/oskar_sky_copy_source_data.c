@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,113 +26,214 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sky/private_sky.h"
+#include "sky/oskar_sky.h"
 #include "sky/oskar_sky_copy_source_data.h"
+#include "sky/oskar_sky_copy_source_data_cuda.h"
+#include "utility/oskar_device_utils.h"
+
+#define CF(m) oskar_mem_float(m, status)
+#define CFC(m) oskar_mem_float_const(m, status)
+#define CD(m) oskar_mem_double(m, status)
+#define CDC(m) oskar_mem_double_const(m, status)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_sky_copy_source_data_f(
-        int num, int* num_out, const int* mask,
-        const float* ra_in,   float* ra_out,
-        const float* dec_in,  float* dec_out,
-        const float* I_in,    float* I_out,
-        const float* Q_in,    float* Q_out,
-        const float* U_in,    float* U_out,
-        const float* V_in,    float* V_out,
-        const float* ref_in,  float* ref_out,
-        const float* sp_in,   float* sp_out,
-        const float* rm_in,   float* rm_out,
-        const float* l_in,    float* l_out,
-        const float* m_in,    float* m_out,
-        const float* n_in,    float* n_out,
-        const float* a_in,    float* a_out,
-        const float* b_in,    float* b_out,
-        const float* c_in,    float* c_out,
-        const float* maj_in,  float* maj_out,
-        const float* min_in,  float* min_out,
-        const float* pa_in,   float* pa_out
-        )
+#define COPY_SOURCE_DATA \
+        for (i = 0; i < num_in; ++i) \
+            if (mask[i]) \
+            { \
+                o_ra[num_out]  = ra[i]; \
+                o_dec[num_out] = dec[i]; \
+                o_I[num_out]   = I[i]; \
+                o_Q[num_out]   = Q[i]; \
+                o_U[num_out]   = U[i]; \
+                o_V[num_out]   = V[i]; \
+                o_ref[num_out] = ref[i]; \
+                o_sp[num_out]  = sp[i]; \
+                o_rm[num_out]  = rm[i]; \
+                o_l[num_out]   = l[i]; \
+                o_m[num_out]   = m[i]; \
+                o_n[num_out]   = n[i]; \
+                o_a[num_out]   = a[i]; \
+                o_b[num_out]   = b[i]; \
+                o_c[num_out]   = c[i]; \
+                o_maj[num_out] = maj[i]; \
+                o_min[num_out] = min[i]; \
+                o_pa[num_out]  = pa[i]; \
+                num_out++; \
+            }
+
+void oskar_sky_copy_source_data(const oskar_Sky* in,
+        const oskar_Mem* horizon_mask, const oskar_Mem* indices,
+        oskar_Sky* out, int* status)
 {
-    int i, i_out = 0;
-    for (i = 0; i < num; ++i)
+    int i, num_in, num_out = 0, type;
+    const int *mask;
+    if (*status) return;
+    type = oskar_sky_precision(out);
+    mask = oskar_mem_int_const(horizon_mask, status);
+    num_in = oskar_sky_num_sources(in);
+    switch (type)
     {
-        if (mask[i])
+    case OSKAR_SINGLE:
+    {
+        const float *ra, *dec, *I, *Q, *U, *V;
+        const float *ref, *sp, *rm, *l, *m, *n;
+        const float *a, *b, *c, *maj, *min, *pa;
+        float *o_ra, *o_dec, *o_I, *o_Q, *o_U, *o_V;
+        float *o_ref, *o_sp, *o_rm, *o_l, *o_m, *o_n;
+        float *o_a, *o_b, *o_c, *o_maj, *o_min, *o_pa;
+
+        /* Inputs. */
+        ra = CFC(oskar_sky_ra_rad_const(in));
+        dec = CFC(oskar_sky_dec_rad_const(in));
+        I = CFC(oskar_sky_I_const(in));
+        Q = CFC(oskar_sky_Q_const(in));
+        U = CFC(oskar_sky_U_const(in));
+        V = CFC(oskar_sky_V_const(in));
+        ref = CFC(oskar_sky_reference_freq_hz_const(in));
+        sp = CFC(oskar_sky_spectral_index_const(in));
+        rm = CFC(oskar_sky_rotation_measure_rad_const(in));
+        l = CFC(oskar_sky_l_const(in));
+        m = CFC(oskar_sky_m_const(in));
+        n = CFC(oskar_sky_n_const(in));
+        a = CFC(oskar_sky_gaussian_a_const(in));
+        b = CFC(oskar_sky_gaussian_b_const(in));
+        c = CFC(oskar_sky_gaussian_c_const(in));
+        maj = CFC(oskar_sky_fwhm_major_rad_const(in));
+        min = CFC(oskar_sky_fwhm_minor_rad_const(in));
+        pa = CFC(oskar_sky_position_angle_rad_const(in));
+
+        /* Outputs. */
+        o_ra = CF(oskar_sky_ra_rad(out));
+        o_dec = CF(oskar_sky_dec_rad(out));
+        o_I = CF(oskar_sky_I(out));
+        o_Q = CF(oskar_sky_Q(out));
+        o_U = CF(oskar_sky_U(out));
+        o_V = CF(oskar_sky_V(out));
+        o_ref = CF(oskar_sky_reference_freq_hz(out));
+        o_sp = CF(oskar_sky_spectral_index(out));
+        o_rm = CF(oskar_sky_rotation_measure_rad(out));
+        o_l = CF(oskar_sky_l(out));
+        o_m = CF(oskar_sky_m(out));
+        o_n = CF(oskar_sky_n(out));
+        o_a = CF(oskar_sky_gaussian_a(out));
+        o_b = CF(oskar_sky_gaussian_b(out));
+        o_c = CF(oskar_sky_gaussian_c(out));
+        o_maj = CF(oskar_sky_fwhm_major_rad(out));
+        o_min = CF(oskar_sky_fwhm_minor_rad(out));
+        o_pa = CF(oskar_sky_position_angle_rad(out));
+
+        /* Copy source data. */
+        if (oskar_sky_mem_location(in) == OSKAR_GPU)
         {
-            ra_out[i_out]  = ra_in[i];
-            dec_out[i_out] = dec_in[i];
-            I_out[i_out]   = I_in[i];
-            Q_out[i_out]   = Q_in[i];
-            U_out[i_out]   = U_in[i];
-            V_out[i_out]   = V_in[i];
-            ref_out[i_out] = ref_in[i];
-            sp_out[i_out]  = sp_in[i];
-            rm_out[i_out]  = rm_in[i];
-            l_out[i_out]   = l_in[i];
-            m_out[i_out]   = m_in[i];
-            n_out[i_out]   = n_in[i];
-            a_out[i_out]   = a_in[i];
-            b_out[i_out]   = b_in[i];
-            c_out[i_out]   = c_in[i];
-            maj_out[i_out] = maj_in[i];
-            min_out[i_out] = min_in[i];
-            pa_out[i_out]  = pa_in[i];
-            (i_out)++;
+#ifdef OSKAR_HAVE_CUDA
+            oskar_sky_copy_source_data_cuda_f(num_in, &num_out, mask,
+                    oskar_mem_int_const(indices, status),
+                    ra, o_ra, dec, o_dec, I, o_I, Q, o_Q, U, o_U, V, o_V,
+                    ref, o_ref, sp, o_sp, rm, o_rm, l, o_l, m, o_m, n, o_n,
+                    a, o_a, b, o_b, c, o_c, maj, o_maj, min, o_min, pa, o_pa);
+            oskar_device_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
         }
+        else if (oskar_sky_mem_location(in) == OSKAR_CPU)
+        {
+            COPY_SOURCE_DATA
+        }
+        else
+            *status = OSKAR_ERR_BAD_LOCATION;
+        break;
     }
-    *num_out = i_out;
+    case OSKAR_DOUBLE:
+    {
+        const double *ra, *dec, *I, *Q, *U, *V;
+        const double *ref, *sp, *rm, *l, *m, *n;
+        const double *a, *b, *c, *maj, *min, *pa;
+        double *o_ra, *o_dec, *o_I, *o_Q, *o_U, *o_V;
+        double *o_ref, *o_sp, *o_rm, *o_l, *o_m, *o_n;
+        double *o_a, *o_b, *o_c, *o_maj, *o_min, *o_pa;
+
+        /* Inputs. */
+        ra = CDC(oskar_sky_ra_rad_const(in));
+        dec = CDC(oskar_sky_dec_rad_const(in));
+        I = CDC(oskar_sky_I_const(in));
+        Q = CDC(oskar_sky_Q_const(in));
+        U = CDC(oskar_sky_U_const(in));
+        V = CDC(oskar_sky_V_const(in));
+        ref = CDC(oskar_sky_reference_freq_hz_const(in));
+        sp = CDC(oskar_sky_spectral_index_const(in));
+        rm = CDC(oskar_sky_rotation_measure_rad_const(in));
+        l = CDC(oskar_sky_l_const(in));
+        m = CDC(oskar_sky_m_const(in));
+        n = CDC(oskar_sky_n_const(in));
+        a = CDC(oskar_sky_gaussian_a_const(in));
+        b = CDC(oskar_sky_gaussian_b_const(in));
+        c = CDC(oskar_sky_gaussian_c_const(in));
+        maj = CDC(oskar_sky_fwhm_major_rad_const(in));
+        min = CDC(oskar_sky_fwhm_minor_rad_const(in));
+        pa = CDC(oskar_sky_position_angle_rad_const(in));
+
+        /* Outputs. */
+        o_ra = CD(oskar_sky_ra_rad(out));
+        o_dec = CD(oskar_sky_dec_rad(out));
+        o_I = CD(oskar_sky_I(out));
+        o_Q = CD(oskar_sky_Q(out));
+        o_U = CD(oskar_sky_U(out));
+        o_V = CD(oskar_sky_V(out));
+        o_ref = CD(oskar_sky_reference_freq_hz(out));
+        o_sp = CD(oskar_sky_spectral_index(out));
+        o_rm = CD(oskar_sky_rotation_measure_rad(out));
+        o_l = CD(oskar_sky_l(out));
+        o_m = CD(oskar_sky_m(out));
+        o_n = CD(oskar_sky_n(out));
+        o_a = CD(oskar_sky_gaussian_a(out));
+        o_b = CD(oskar_sky_gaussian_b(out));
+        o_c = CD(oskar_sky_gaussian_c(out));
+        o_maj = CD(oskar_sky_fwhm_major_rad(out));
+        o_min = CD(oskar_sky_fwhm_minor_rad(out));
+        o_pa = CD(oskar_sky_position_angle_rad(out));
+
+        /* Copy source data. */
+        if (oskar_sky_mem_location(in) == OSKAR_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            oskar_sky_copy_source_data_cuda_d(num_in, &num_out, mask,
+                    oskar_mem_int_const(indices, status),
+                    ra, o_ra, dec, o_dec, I, o_I, Q, o_Q, U, o_U, V, o_V,
+                    ref, o_ref, sp, o_sp, rm, o_rm, l, o_l, m, o_m, n, o_n,
+                    a, o_a, b, o_b, c, o_c, maj, o_maj, min, o_min, pa, o_pa);
+            oskar_device_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else if (oskar_sky_mem_location(in) == OSKAR_CPU)
+        {
+            COPY_SOURCE_DATA
+        }
+        else
+            *status = OSKAR_ERR_BAD_LOCATION;
+        break;
+    }
+    default:
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        break;
+    }
+
+    /* Copy metadata. */
+    out->use_extended = in->use_extended;
+    out->reference_ra_rad = in->reference_ra_rad;
+    out->reference_dec_rad = in->reference_dec_rad;
+
+    /* Set the number of sources in the output sky model. */
+    out->num_sources = num_out;
 }
 
-void oskar_sky_copy_source_data_d(
-        int num, int* num_out, const int* mask,
-        const double* ra_in,   double* ra_out,
-        const double* dec_in,  double* dec_out,
-        const double* I_in,    double* I_out,
-        const double* Q_in,    double* Q_out,
-        const double* U_in,    double* U_out,
-        const double* V_in,    double* V_out,
-        const double* ref_in,  double* ref_out,
-        const double* sp_in,   double* sp_out,
-        const double* rm_in,   double* rm_out,
-        const double* l_in,    double* l_out,
-        const double* m_in,    double* m_out,
-        const double* n_in,    double* n_out,
-        const double* a_in,    double* a_out,
-        const double* b_in,    double* b_out,
-        const double* c_in,    double* c_out,
-        const double* maj_in,  double* maj_out,
-        const double* min_in,  double* min_out,
-        const double* pa_in,   double* pa_out
-        )
-{
-    int i, i_out = 0;
-    for (i = 0; i < num; ++i)
-    {
-        if (mask[i])
-        {
-            ra_out[i_out]  = ra_in[i];
-            dec_out[i_out] = dec_in[i];
-            I_out[i_out]   = I_in[i];
-            Q_out[i_out]   = Q_in[i];
-            U_out[i_out]   = U_in[i];
-            V_out[i_out]   = V_in[i];
-            ref_out[i_out] = ref_in[i];
-            sp_out[i_out]  = sp_in[i];
-            rm_out[i_out]  = rm_in[i];
-            l_out[i_out]   = l_in[i];
-            m_out[i_out]   = m_in[i];
-            n_out[i_out]   = n_in[i];
-            a_out[i_out]   = a_in[i];
-            b_out[i_out]   = b_in[i];
-            c_out[i_out]   = c_in[i];
-            maj_out[i_out] = maj_in[i];
-            min_out[i_out] = min_in[i];
-            pa_out[i_out]  = pa_in[i];
-            i_out++;
-        }
-    }
-    *num_out = i_out;
-}
 
 #ifdef __cplusplus
 }

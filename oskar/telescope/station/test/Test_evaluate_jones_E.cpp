@@ -29,11 +29,11 @@
 #include <gtest/gtest.h>
 
 #include "telescope/oskar_telescope.h"
-#include "simulator/oskar_jones.h"
+#include "interferometer/oskar_jones.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
 #include "math/oskar_evaluate_image_lmn_grid.h"
-#include "simulator/oskar_evaluate_jones_E.h"
+#include "interferometer/oskar_evaluate_jones_E.h"
 #include "utility/oskar_get_error_string.h"
 
 #include "math/oskar_cmath.h"

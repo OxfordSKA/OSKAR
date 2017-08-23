@@ -29,64 +29,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "settings/oskar_settings_utility_string.h"
 #include "settings/types/oskar_String.h"
-#include <sstream>
 
 namespace oskar {
 
-String::String()
-{
-}
-
-String::~String()
-{
-}
-
 bool String::init(const std::string& /*s*/)
 {
-    default_.clear();
-    value_.clear();
+    str_default_.clear();
+    str_value_.clear();
     return true;
 }
 
 bool String::set_default(const std::string& value)
 {
-    default_ = value;
-    value_ = default_;
+    str_default_ = value;
+    str_value_ = str_default_;
     return true;
-}
-
-std::string String::get_default() const
-{
-    return default_;
 }
 
 bool String::set_value(const std::string& value)
 {
-    value_ = value;
+    str_value_ = value;
     return true;
-}
-
-std::string String::get_value() const
-{
-    return value_;
 }
 
 bool String::is_default() const
 {
-    return value_ == default_;
+    return str_value_ == str_default_;
 }
 
 bool String::operator==(const String& other) const
 {
-    return value_ == other.value_;
-}
-
-bool String::operator>(const String& ) const
-{
-    return false;
+    return str_value_ == other.str_value_;
 }
 
 } // namespace oskar
-

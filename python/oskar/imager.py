@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 #
-#  This file is part of OSKAR.
-#
 # Copyright (c) 2014-2017, The University of Oxford
 # All rights reserved.
 #
@@ -31,32 +29,64 @@
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
 #
-"""
-This module provides a Python interface to OSKAR imaging functions.
-"""
 
-from __future__ import absolute_import, division
+"""Interfaces to the OSKAR imager."""
+
+from __future__ import absolute_import, division, print_function
 import math
 import numpy
 try:
     from . import _imager_lib
-except ImportError:
+except ImportError as e:
+    print("Import error: " + str(e))
     _imager_lib = None
 
 
 class Imager(object):
     """This class provides a Python interface to the OSKAR imager."""
 
-    def __init__(self, precision='double'):
-        """Creates an OSKAR imager object.
+    def __init__(self, precision=None, settings=None):
+        """Creates an OSKAR imager.
 
         Args:
-            precision (str): Either 'double' or 'single' to specify
-                the numerical precision of the images.
+            precision (Optional[str]):
+                Either 'double' or 'single' to specify the numerical
+                precision of the images. Default 'double'.
+            settings (Optional[oskar.SettingsTree]):
+                Optional settings to use to set up the imager.
         """
         if _imager_lib is None:
             raise RuntimeError("OSKAR library not found.")
-        self._capsule = _imager_lib.create(precision)
+        self._capsule = None
+        if precision is not None and settings is not None:
+            raise RuntimeError("Specify either precision or all settings.")
+        if precision is None:
+            precision = 'double'  # Set default.
+        if settings is not None:
+            img = settings.to_imager()
+            self._capsule = img.capsule
+        self._precision = precision
+
+    def capsule_ensure(self):
+        """Ensures the C capsule exists."""
+        if self._capsule is None:
+            self._capsule = _imager_lib.create(self._precision)
+
+    def capsule_get(self):
+        """Returns the C capsule wrapped by the class."""
+        return self._capsule
+
+    def capsule_set(self, new_capsule):
+        """Sets the C capsule wrapped by the class.
+
+        Args:
+            new_capsule (capsule): The new capsule to set.
+        """
+        if _imager_lib.capsule_name(new_capsule) == 'oskar_Imager':
+            del self._capsule
+            self._capsule = new_capsule
+        else:
+            raise RuntimeError("Capsule is not of type oskar_Imager.")
 
     def check_init(self):
         """Initialises the imager algorithm if it has not already been done.
@@ -64,6 +94,7 @@ class Imager(object):
         All imager options and data must have been set appropriately
         before calling this function.
         """
+        self.capsule_ensure()
         _imager_lib.check_init(self._capsule)
 
     def finalise(self, return_images=0, return_grids=0):
@@ -78,6 +109,7 @@ class Imager(object):
             return_images (Optional[int]): Number of image planes to return.
             return_grids (Optional[int]): Number of grid planes to return.
         """
+        self.capsule_ensure()
         return _imager_lib.finalise(self._capsule, return_images, return_grids)
 
     def finalise_plane(self, plane, plane_norm):
@@ -94,6 +126,7 @@ class Imager(object):
                 On input, the plane to finalise; on output, the image plane.
             plane_norm (float): Plane normalisation to apply.
         """
+        self.capsule_ensure()
         _imager_lib.finalise_plane(self._capsule, plane, plane_norm)
 
     def get_algorithm(self):
@@ -102,6 +135,7 @@ class Imager(object):
         Returns:
             str: The imager algorithm.
         """
+        self.capsule_ensure()
         return _imager_lib.algorithm(self._capsule)
 
     def get_cellsize(self):
@@ -110,6 +144,7 @@ class Imager(object):
         Returns:
             float: The cell size, in arcsec.
         """
+        self.capsule_ensure()
         return _imager_lib.cellsize(self._capsule)
 
     def get_channel_snapshots(self):
@@ -119,6 +154,7 @@ class Imager(object):
             boolean: If true, image each channel index separately;
                 if false, use frequency synthesis.
         """
+        self.capsule_ensure()
         return _imager_lib.channel_snapshots(self._capsule)
 
     def get_coords_only(self):
@@ -127,6 +163,7 @@ class Imager(object):
         Returns:
             boolean: If true, imager is in coordinate-only mode.
         """
+        self.capsule_ensure()
         return _imager_lib.coords_only(self._capsule)
 
     def get_fft_on_gpu(self):
@@ -135,6 +172,7 @@ class Imager(object):
         Returns:
             boolean: If true, use the GPU for FFTs.
         """
+        self.capsule_ensure()
         return _imager_lib.fft_on_gpu(self._capsule)
 
     def get_fov(self):
@@ -143,6 +181,7 @@ class Imager(object):
         Returns:
             float: The image field-of-view, in degrees.
         """
+        self.capsule_ensure()
         return _imager_lib.fov(self._capsule)
 
     def get_freq_max_hz(self):
@@ -151,6 +190,7 @@ class Imager(object):
         Returns:
             float: The maximum frequency of visibility data to image, in Hz.
         """
+        self.capsule_ensure()
         return _imager_lib.freq_max_hz(self._capsule)
 
     def get_freq_min_hz(self):
@@ -159,6 +199,7 @@ class Imager(object):
         Returns:
             float: The minimum frequency of visibility data to image, in Hz.
         """
+        self.capsule_ensure()
         return _imager_lib.freq_min_hz(self._capsule)
 
     def get_generate_w_kernels_on_gpu(self):
@@ -167,6 +208,7 @@ class Imager(object):
         Returns:
             boolean: If true, use the GPU to generate W-kernels.
         """
+        self.capsule_ensure()
         return _imager_lib.generate_w_kernels_on_gpu(self._capsule)
 
     def get_image_size(self):
@@ -175,6 +217,7 @@ class Imager(object):
         Returns:
             int: The image side length, in pixels.
         """
+        self.capsule_ensure()
         return _imager_lib.image_size(self._capsule)
 
     def get_image_type(self):
@@ -183,6 +226,7 @@ class Imager(object):
         Returns:
             str: The image (polarisation) type.
         """
+        self.capsule_ensure()
         return _imager_lib.image_type(self._capsule)
 
     def get_input_file(self):
@@ -191,6 +235,7 @@ class Imager(object):
         Returns:
             str: The input file name.
         """
+        self.capsule_ensure()
         return _imager_lib.input_file(self._capsule)
 
     def get_ms_column(self):
@@ -199,6 +244,7 @@ class Imager(object):
         Returns:
             str: The column name.
         """
+        self.capsule_ensure()
         return _imager_lib.ms_column(self._capsule)
 
     def get_num_w_planes(self):
@@ -207,6 +253,7 @@ class Imager(object):
         Returns:
             int: The number of W-planes used.
         """
+        self.capsule_ensure()
         return _imager_lib.num_w_planes(self._capsule)
 
     def get_output_root(self):
@@ -215,6 +262,7 @@ class Imager(object):
         Returns:
             str: The output root file name.
         """
+        self.capsule_ensure()
         return _imager_lib.output_root(self._capsule)
 
     def get_plane_size(self):
@@ -226,6 +274,7 @@ class Imager(object):
         Returns:
             int: Plane side length.
         """
+        self.capsule_ensure()
         return _imager_lib.plane_size(self._capsule)
 
     def get_scale_norm_with_num_input_files(self):
@@ -235,6 +284,7 @@ class Imager(object):
         Returns:
             boolean: The option value (true or false).
         """
+        self.capsule_ensure()
         return _imager_lib.scale_norm_with_num_input_files(self._capsule)
 
     def get_size(self):
@@ -243,6 +293,7 @@ class Imager(object):
         Returns:
             int: The image side length, in pixels.
         """
+        self.capsule_ensure()
         return _imager_lib.size(self._capsule)
 
     def get_time_max_utc(self):
@@ -251,6 +302,7 @@ class Imager(object):
         Returns:
             float: The maximum time of visibility data, as MJD(UTC).
         """
+        self.capsule_ensure()
         return _imager_lib.time_max_utc(self._capsule)
 
     def get_time_min_utc(self):
@@ -259,6 +311,7 @@ class Imager(object):
         Returns:
             float: The minimum time of visibility data, as MJD(UTC).
         """
+        self.capsule_ensure()
         return _imager_lib.time_min_utc(self._capsule)
 
     def get_uv_filter_max(self):
@@ -267,6 +320,7 @@ class Imager(object):
         Returns:
             float: Maximum UV baseline length to image, in wavelengths.
         """
+        self.capsule_ensure()
         return _imager_lib.uv_filter_max(self._capsule)
 
     def get_uv_filter_min(self):
@@ -275,6 +329,7 @@ class Imager(object):
         Returns:
             float: Minimum UV baseline length to image, in wavelengths.
         """
+        self.capsule_ensure()
         return _imager_lib.uv_filter_min(self._capsule)
 
     def get_weighting(self):
@@ -283,6 +338,7 @@ class Imager(object):
         Returns:
             str: The weighting scheme.
         """
+        self.capsule_ensure()
         return _imager_lib.weighting(self._capsule)
 
     def reset_cache(self):
@@ -290,6 +346,7 @@ class Imager(object):
 
         This is used to clear any data added using update().
         """
+        self.capsule_ensure()
         _imager_lib.reset_cache(self._capsule)
 
     def rotate_coords(self, uu_in, vv_in, ww_in):
@@ -305,6 +362,7 @@ class Imager(object):
             vv_in (numpy.ndarray): Baseline vv coordinates.
             ww_in (numpy.ndarray): Baseline ww coordinates.
         """
+        self.capsule_ensure()
         _imager_lib.rotate_coords(self._capsule, uu_in, vv_in, ww_in)
 
     def rotate_vis(self, uu_in, vv_in, ww_in, vis):
@@ -328,6 +386,7 @@ class Imager(object):
             vis (numpy.ndarray):
                 Complex visibility amplitudes.
         """
+        self.capsule_ensure()
         _imager_lib.rotate_vis(self._capsule, uu_in, vv_in, ww_in, vis)
 
     def run(self, uu=None, vv=None, ww=None, amps=None, weight=None,
@@ -377,7 +436,8 @@ class Imager(object):
             return_images (Optional[int]): Number of image planes to return.
             return_grids (Optional[int]): Number of grid planes to return.
         """
-        if amps is None:
+        self.capsule_ensure()
+        if uu is None:
             return _imager_lib.run(self._capsule, return_images, return_grids)
         else:
             self.reset_cache()
@@ -405,6 +465,7 @@ class Imager(object):
             algorithm_type (str): Either 'FFT', 'DFT 2D', 'DFT 3D' or
                 'W-projection'.
         """
+        self.capsule_ensure()
         _imager_lib.set_algorithm(self._capsule, algorithm_type)
 
     def set_cellsize(self, cellsize_arcsec):
@@ -417,6 +478,7 @@ class Imager(object):
         Args:
             cellsize_arcsec (float): Image cell size, in arcsec.
         """
+        self.capsule_ensure()
         _imager_lib.set_cellsize(self._capsule, cellsize_arcsec)
 
     def set_channel_snapshots(self, value):
@@ -426,6 +488,7 @@ class Imager(object):
             value (boolean): If true, image each channel separately;
                 if false, use frequency synthesis.
         """
+        self.capsule_ensure()
         _imager_lib.set_channel_snapshots(self._capsule, value)
 
     def set_coords_only(self, flag):
@@ -444,10 +507,12 @@ class Imager(object):
             flag (boolean):
                 If true, ignore visibility data and use coordinates only.
         """
+        self.capsule_ensure()
         _imager_lib.set_coords_only(self._capsule, flag)
 
     def set_default_direction(self):
         """Clears any direction override."""
+        self.capsule_ensure()
         _imager_lib.set_default_direction(self._capsule)
 
     def set_direction(self, ra_deg, dec_deg):
@@ -457,6 +522,7 @@ class Imager(object):
             ra_deg (float): The new image Right Ascension, in degrees.
             dec_deg (float): The new image Declination, in degrees.
         """
+        self.capsule_ensure()
         _imager_lib.set_direction(self._capsule, ra_deg, dec_deg)
 
     def set_fft_on_gpu(self, value):
@@ -465,6 +531,7 @@ class Imager(object):
         Args:
             value (boolean): If true, use the GPU for FFTs.
         """
+        self.capsule_ensure()
         _imager_lib.set_fft_on_gpu(self._capsule, value)
 
     def set_fov(self, fov_deg):
@@ -477,6 +544,7 @@ class Imager(object):
         Args:
             fov_deg (float): Field of view, in degrees.
         """
+        self.capsule_ensure()
         _imager_lib.set_fov(self._capsule, fov_deg)
 
     def set_freq_max_hz(self, value):
@@ -488,6 +556,7 @@ class Imager(object):
             value (float):
                 Maximum frequency of visibility data to image, in Hz.
         """
+        self.capsule_ensure()
         _imager_lib.set_freq_max_hz(self._capsule, value)
 
     def set_freq_min_hz(self, value):
@@ -497,6 +566,7 @@ class Imager(object):
             value (float):
                 Minimum frequency of visibility data to image, in Hz.
         """
+        self.capsule_ensure()
         _imager_lib.set_freq_min_hz(self._capsule, value)
 
     def set_generate_w_kernels_on_gpu(self, value):
@@ -505,6 +575,7 @@ class Imager(object):
         Args:
             value (boolean): If true, use the GPU to generate W-kernels.
         """
+        self.capsule_ensure()
         _imager_lib.set_generate_w_kernels_on_gpu(self._capsule, value)
 
     def set_grid_kernel(self, kernel_type, support, oversample):
@@ -517,6 +588,7 @@ class Imager(object):
                 The kernel width is 2 * support + 1.
             oversample (int): Oversample factor used for look-up table.
         """
+        self.capsule_ensure()
         _imager_lib.set_grid_kernel(self._capsule, kernel_type,
                                     support, oversample)
 
@@ -526,6 +598,7 @@ class Imager(object):
         Args:
             size (int): Image side length in pixels.
         """
+        self.capsule_ensure()
         self.set_size(size)
 
     def set_image_type(self, image_type):
@@ -535,6 +608,7 @@ class Imager(object):
             image_type (str): Either 'STOKES', 'I', 'Q', 'U', 'V',
                 'LINEAR', 'XX', 'XY', 'YX', 'YY' or 'PSF'.
         """
+        self.capsule_ensure()
         _imager_lib.set_image_type(self._capsule, image_type)
 
     def set_input_file(self, filename):
@@ -544,6 +618,7 @@ class Imager(object):
             filename (str):
                 Path to input Measurement Set or OSKAR visibility file.
         """
+        self.capsule_ensure()
         _imager_lib.set_input_file(self._capsule, filename)
 
     def set_ms_column(self, column):
@@ -552,6 +627,7 @@ class Imager(object):
         Args:
             column (str): Name of the column to use.
         """
+        self.capsule_ensure()
         _imager_lib.set_ms_column(self._capsule, column)
 
     def set_num_w_planes(self, num_planes):
@@ -562,6 +638,7 @@ class Imager(object):
         Args:
             num_planes (int): Number of W-planes to use.
         """
+        self.capsule_ensure()
         _imager_lib.set_num_w_planes(self._capsule, num_planes)
 
     def set_output_root(self, filename):
@@ -570,6 +647,7 @@ class Imager(object):
         Args:
             filename (str): Root path.
         """
+        self.capsule_ensure()
         _imager_lib.set_output_root(self._capsule, filename)
 
     def set_scale_norm_with_num_input_files(self, value):
@@ -585,6 +663,7 @@ class Imager(object):
         Args:
             value (boolean): Option value.
         """
+        self.capsule_ensure()
         _imager_lib.set_scale_norm_with_num_input_files(self._capsule, value)
 
     def set_size(self, size):
@@ -593,6 +672,7 @@ class Imager(object):
         Args:
             size (int): Image side length in pixels.
         """
+        self.capsule_ensure()
         _imager_lib.set_size(self._capsule, size)
 
     def set_time_max_utc(self, value):
@@ -603,6 +683,7 @@ class Imager(object):
         Args:
             value (float): The maximum time of visibility data, as MJD(UTC).
         """
+        self.capsule_ensure()
         _imager_lib.set_time_max_utc(self._capsule, value)
 
     def set_time_min_utc(self, value):
@@ -611,6 +692,7 @@ class Imager(object):
         Args:
             value (float): The minimum time of visibility data, as MJD(UTC).
         """
+        self.capsule_ensure()
         _imager_lib.set_time_min_utc(self._capsule, value)
 
     def set_uv_filter_max(self, max_wavelength):
@@ -622,6 +704,7 @@ class Imager(object):
         Args:
             max_wavelength (float): Maximum UV distance, in wavelengths.
         """
+        self.capsule_ensure()
         _imager_lib.set_uv_filter_max(self._capsule, max_wavelength)
 
     def set_uv_filter_min(self, min_wavelength):
@@ -630,6 +713,7 @@ class Imager(object):
         Args:
             min_wavelength (float): Minimum UV distance, in wavelengths.
         """
+        self.capsule_ensure()
         _imager_lib.set_uv_filter_min(self._capsule, min_wavelength)
 
     def set_vis_frequency(self, ref_hz, inc_hz=0.0, num_channels=1):
@@ -643,6 +727,7 @@ class Imager(object):
             num_channels (Optional[int]):
                 Number of channels in visibility data. Default 1.
         """
+        self.capsule_ensure()
         _imager_lib.set_vis_frequency(self._capsule,
                                       ref_hz, inc_hz, num_channels)
 
@@ -653,6 +738,7 @@ class Imager(object):
             ra_deg (float): Right Ascension of phase centre, in degrees.
             dec_deg (float): Declination of phase centre, in degrees.
         """
+        self.capsule_ensure()
         _imager_lib.set_vis_phase_centre(self._capsule, ra_deg, dec_deg)
 
     def set_weighting(self, weighting):
@@ -661,9 +747,10 @@ class Imager(object):
         Args:
             weighting (str): Either 'Natural', 'Radial' or 'Uniform'.
         """
+        self.capsule_ensure()
         _imager_lib.set_weighting(self._capsule, weighting)
 
-    def update(self, uu, vv, ww, amps, weight=None, time_centroid=None,
+    def update(self, uu, vv, ww, amps=None, weight=None, time_centroid=None,
                start_channel=0, end_channel=0, num_pols=1):
         """Runs imager for supplied visibilities, applying optional selection.
 
@@ -679,6 +766,9 @@ class Imager(object):
 
         If not given, the weights will be treated as all 1.
 
+        The time_centroid parameter may be None if time filtering is not
+        required.
+
         Call finalise() to finalise the images after calling this function.
 
         Args:
@@ -688,7 +778,7 @@ class Imager(object):
                 Visibility vv coordinates, in metres.
             ww (float, array-like, shape (n,)):
                 Visibility ww coordinates, in metres.
-            amps (complex float, array-like, shape (m,)):
+            amps (Optional[complex float, array-like, shape (m,)]):
                 Visibility complex amplitudes. Shape as described above.
             weight (Optional[float, array-like, shape (p,)]):
                 Visibility weights. Shape as described above.
@@ -701,6 +791,7 @@ class Imager(object):
             num_pols (Optional[int]):
                 Number of polarisations in the visibility block. Default 1.
         """
+        self.capsule_ensure()
         _imager_lib.update(self._capsule, uu, vv, ww, amps, weight,
                            time_centroid, start_channel, end_channel, num_pols)
 
@@ -710,13 +801,12 @@ class Imager(object):
         Call finalise() to finalise the images after calling this function.
 
         Args:
-            header (oskar.VisHeader):
-                Handle to an OSKAR visibility header.
-            block (oskar.VisBlock):
-                Handle to an OSKAR visibility block.
+            header (oskar.VisHeader): OSKAR visibility header.
+            block (oskar.VisBlock):   OSKAR visibility block.
         """
-        _imager_lib.update_from_block(self._capsule, header._capsule,
-                                      block._capsule)
+        self.capsule_ensure()
+        _imager_lib.update_from_block(self._capsule, header.capsule,
+                                      block.capsule)
 
     def update_plane(self, uu, vv, ww, amps, weight, plane, plane_norm,
                      weights_grid=None):
@@ -737,6 +827,8 @@ class Imager(object):
         amplitudes are ignored, the plane is untouched and the weights grid
         is updated instead.
 
+        If the weight parameter is None, the weights will be treated as all 1.
+
         Call finalise_plane() to finalise the image after calling this
         function.
 
@@ -749,7 +841,7 @@ class Imager(object):
                 Visibility ww coordinates, in wavelengths.
             amps (complex float, array-like, shape (n,) or None):
                 Visibility complex amplitudes.
-            weight (float, array-like, shape (n,)):
+            weight (float, array-like, shape (n,) or None):
                 Visibility weights.
             plane (float, array-like or None):
                 Plane to update.
@@ -762,12 +854,14 @@ class Imager(object):
         Returns:
             float: Updated plane normalisation.
         """
+        self.capsule_ensure()
         return _imager_lib.update_plane(self._capsule, uu, vv, ww, amps,
                                         weight, plane, plane_norm,
                                         weights_grid)
 
     # Properties.
     algorithm = property(get_algorithm, set_algorithm)
+    capsule = property(capsule_get, capsule_set)
     cell = property(get_cellsize, set_cellsize)
     cellsize = property(get_cellsize, set_cellsize)
     cellsize_arcsec = property(get_cellsize, set_cellsize)

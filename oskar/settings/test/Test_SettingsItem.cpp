@@ -30,9 +30,8 @@
  */
 
 #include <gtest/gtest.h>
-#include <vector>
-#include <string>
 #include "settings/oskar_SettingsItem.h"
+#include "settings/oskar_SettingsValue.h"
 #include "settings/oskar_SettingsDependencyGroup.h"
 
 using namespace oskar;
@@ -52,9 +51,9 @@ TEST(SettingsItem, test)
         SettingsItem i("key", "label", "description",
                        "IntRange", "5", "5, 10");
         ASSERT_EQ(SettingsItem::SETTING, i.item_type());
-        ASSERT_EQ(SettingsValue::INT_RANGE, i.value().type());
+        ASSERT_EQ(SettingsValue::INT_RANGE, i.settings_value().type());
         ASSERT_TRUE(i.set_value("7"));
-        ASSERT_STREQ("7", i.value().get_value().c_str());
+        ASSERT_STREQ("7", i.value());
         // TODO(BM) test ability to check the range from this interface.
         // TODO(BM) test ability to trap failed initialisation of types.
     }
@@ -65,8 +64,8 @@ TEST(SettingsItem, simple_deps)
     {
         SettingsItem i("key", "", "", "Double");
         ASSERT_EQ(SettingsItem::SETTING, i.item_type());
-        ASSERT_EQ(SettingsValue::DOUBLE, i.value().type());
-        ASSERT_STREQ("0.0", i.value().get_value().c_str());
+        ASSERT_EQ(SettingsValue::DOUBLE, i.settings_value().type());
+        ASSERT_STREQ("0.0", i.value());
         ASSERT_TRUE(i.add_dependency("another_key", "true", "EQ"));
         ASSERT_EQ(1, i.num_dependencies());
     }

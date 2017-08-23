@@ -402,68 +402,16 @@ TEST(SkyModel, filter_by_flux)
         oskar_sky_filter_by_flux(sky_cpu, flux_min, flux_max, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-        // Filter on GPU.
-        oskar_Sky* sky_gpu = oskar_sky_create_copy(sky_input,
-                device_loc, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_sky_filter_by_flux(sky_gpu, flux_min, flux_max, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-
-        // Check filtered sky models are the same.
-        oskar_Sky* sky_gpu_temp = oskar_sky_create_copy(sky_gpu,
-                OSKAR_CPU, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        EXPECT_EQ(oskar_sky_num_sources(sky_gpu),
-                oskar_sky_num_sources(sky_cpu));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_ra_rad_const(sky_gpu_temp),
-                oskar_sky_ra_rad_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_dec_rad_const(sky_gpu_temp),
-                oskar_sky_dec_rad_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_I_const(sky_gpu_temp),
-                oskar_sky_I_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_Q_const(sky_gpu_temp),
-                oskar_sky_Q_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_U_const(sky_gpu_temp),
-                oskar_sky_U_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_V_const(sky_gpu_temp),
-                oskar_sky_V_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(
-                oskar_sky_reference_freq_hz_const(sky_gpu_temp),
-                oskar_sky_reference_freq_hz_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(
-                oskar_sky_spectral_index_const(sky_gpu_temp),
-                oskar_sky_spectral_index_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_l_const(sky_gpu_temp),
-                oskar_sky_l_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_m_const(sky_gpu_temp),
-                oskar_sky_m_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_n_const(sky_gpu_temp),
-                oskar_sky_n_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(
-                oskar_sky_fwhm_major_rad_const(sky_gpu_temp),
-                oskar_sky_fwhm_major_rad_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(
-                oskar_sky_fwhm_minor_rad_const(sky_gpu_temp),
-                oskar_sky_fwhm_minor_rad_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(
-                oskar_sky_position_angle_rad_const(sky_gpu_temp),
-                oskar_sky_position_angle_rad_const(sky_cpu), 0, &status));
-
         // Check that there are no sources with fluxes outside the range.
         float* I_cpu = oskar_mem_float(oskar_sky_I(sky_cpu), &status);
-        float* I_gpu = oskar_mem_float(oskar_sky_I(sky_gpu_temp), &status);
         for (i = 0; i < oskar_sky_num_sources(sky_cpu); ++i)
         {
             EXPECT_LE(I_cpu[i], flux_max) << "CPU flux filter failed: i=" << i;
-            EXPECT_LE(I_gpu[i], flux_max) << "GPU flux filter failed: i=" << i;
             EXPECT_GE(I_cpu[i], flux_min) << "CPU flux filter failed: i=" << i;
-            EXPECT_GE(I_gpu[i], flux_min) << "GPU flux filter failed: i=" << i;
         }
 
         // Free sky models.
         oskar_sky_free(sky_cpu, &status);
-        oskar_sky_free(sky_gpu, &status);
-        oskar_sky_free(sky_gpu_temp, &status);
         oskar_sky_free(sky_input, &status);
     }
 
@@ -491,68 +439,16 @@ TEST(SkyModel, filter_by_flux)
         oskar_sky_filter_by_flux(sky_cpu, flux_min, flux_max, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-        // Filter on GPU.
-        oskar_Sky* sky_gpu = oskar_sky_create_copy(sky_input,
-                device_loc, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_sky_filter_by_flux(sky_gpu, flux_min, flux_max, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-
-        // Check filtered sky models are the same.
-        oskar_Sky* sky_gpu_temp = oskar_sky_create_copy(sky_gpu,
-                OSKAR_CPU, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        EXPECT_EQ(oskar_sky_num_sources(sky_gpu),
-                oskar_sky_num_sources(sky_cpu));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_ra_rad_const(sky_gpu_temp),
-                oskar_sky_ra_rad_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_dec_rad_const(sky_gpu_temp),
-                oskar_sky_dec_rad_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_I_const(sky_gpu_temp),
-                oskar_sky_I_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_Q_const(sky_gpu_temp),
-                oskar_sky_Q_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_U_const(sky_gpu_temp),
-                oskar_sky_U_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_V_const(sky_gpu_temp),
-                oskar_sky_V_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(
-                oskar_sky_reference_freq_hz_const(sky_gpu_temp),
-                oskar_sky_reference_freq_hz_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(
-                oskar_sky_spectral_index_const(sky_gpu_temp),
-                oskar_sky_spectral_index_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_l_const(sky_gpu_temp),
-                oskar_sky_l_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_m_const(sky_gpu_temp),
-                oskar_sky_m_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(oskar_sky_n_const(sky_gpu_temp),
-                oskar_sky_n_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(
-                oskar_sky_fwhm_major_rad_const(sky_gpu_temp),
-                oskar_sky_fwhm_major_rad_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(
-                oskar_sky_fwhm_minor_rad_const(sky_gpu_temp),
-                oskar_sky_fwhm_minor_rad_const(sky_cpu), 0, &status));
-        EXPECT_EQ(0, oskar_mem_different(
-                oskar_sky_position_angle_rad_const(sky_gpu_temp),
-                oskar_sky_position_angle_rad_const(sky_cpu), 0, &status));
-
         // Check that there are no sources with fluxes outside the range.
         double* I_cpu = oskar_mem_double(oskar_sky_I(sky_cpu), &status);
-        double* I_gpu = oskar_mem_double(oskar_sky_I(sky_gpu_temp), &status);
         for (i = 0; i < oskar_sky_num_sources(sky_cpu); ++i)
         {
             EXPECT_LE(I_cpu[i], flux_max) << "CPU flux filter failed: i=" << i;
-            EXPECT_LE(I_gpu[i], flux_max) << "GPU flux filter failed: i=" << i;
             EXPECT_GE(I_cpu[i], flux_min) << "CPU flux filter failed: i=" << i;
-            EXPECT_GE(I_gpu[i], flux_min) << "GPU flux filter failed: i=" << i;
         }
 
         // Free sky models.
         oskar_sky_free(sky_cpu, &status);
-        oskar_sky_free(sky_gpu, &status);
-        oskar_sky_free(sky_gpu_temp, &status);
         oskar_sky_free(sky_input, &status);
     }
 }
@@ -562,6 +458,7 @@ TEST(SkyModel, horizon_clip)
 {
     int status = 0;
     int type = OSKAR_SINGLE;
+    oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
 
     // Constants.
     const double deg2rad = M_PI / 180.0;
@@ -620,6 +517,7 @@ TEST(SkyModel, horizon_clip)
         oskar_Sky* sky_in_gpu = oskar_sky_create_copy(sky_in_cpu, loc, &status);
 
         // Horizon clip should succeed.
+        oskar_timer_start(tmr);
         oskar_sky_horizon_clip(sky_out, sky_in_gpu, telescope, 0.0, work,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -651,6 +549,7 @@ TEST(SkyModel, horizon_clip)
         oskar_Sky* sky_out = oskar_sky_create(type, loc, 0, &status);
 
         // Horizon clip should succeed.
+        oskar_timer_start(tmr);
         oskar_sky_horizon_clip(sky_out, sky_in_cpu, telescope, 0.0, work,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -669,6 +568,7 @@ TEST(SkyModel, horizon_clip)
         oskar_station_work_free(work, &status);
     }
 
+    oskar_timer_free(tmr);
     oskar_sky_free(sky_in_cpu, &status);
     oskar_telescope_free(telescope, &status);
 }

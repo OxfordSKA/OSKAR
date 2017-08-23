@@ -34,75 +34,51 @@
 
 namespace oskar {
 
-OptionList::OptionList()
-{
-}
-
-OptionList::~OptionList()
-{
-}
-
 bool OptionList::init(const std::string& s)
 {
     options_.clear();
     options_ = oskar_settings_utility_string_get_type_params(s);
+    if (options_.size() > 0)
+        set_default(options_[0]);
     return true;
 }
 
 bool OptionList::set_default(const std::string& value)
 {
-    bool ok = from_string_(default_, value);
-    if (ok) {
-        value_ = default_;
-    }
-    else {
-        value_.clear();
-        default_.clear();
-    }
+    bool ok = from_string_(str_default_, value);
+    if (ok)
+        set_value(value);
     return ok;
-}
-
-std::string OptionList::get_default() const
-{
-    return default_;
 }
 
 bool OptionList::set_value(const std::string& value)
 {
-    return from_string_(value_, value);
+    return from_string_(str_value_, value);
 }
 
-std::string OptionList::get_value() const
-{
-    return value_;
-}
-
-bool OptionList::is_default() const
-{
-    return value_ == default_;
-}
+bool OptionList::is_default() const { return str_value_ == str_default_; }
 
 bool OptionList::operator==(const OptionList& other) const
 {
-    return value_ == other.value_;
+    return str_value_ == other.str_value_;
 }
 
-bool OptionList::operator>(const OptionList& ) const
+int OptionList::size() const
 {
-    return false;
+    return (int) options_.size();
+}
+
+const char* OptionList::option(int i) const
+{
+    return i < (int) options_.size() ? options_[i].c_str() : 0;
 }
 
 bool OptionList::from_string_(std::string& value, const std::string& s) const
 {
-    if (s.empty() && !default_.empty()) {
-        return false;
-    }
-    if (default_.empty() && s.empty()) {
-        value = s;
-        return true;
-    }
-    for (size_t i = 0; i < options_.size(); ++i) {
-        if (oskar_settings_utility_string_starts_with(options_[i], s)) {
+    for (size_t i = 0; i < options_.size(); ++i)
+    {
+        if (oskar_settings_utility_string_starts_with(options_[i], s))
+        {
             value = options_[i];
             return true;
         }
@@ -111,4 +87,3 @@ bool OptionList::from_string_(std::string& value, const std::string& s) const
 }
 
 } // namespace oskar
-

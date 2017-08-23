@@ -1,5 +1,4 @@
-#
-#  This file is part of OSKAR.
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2016-2017, The University of Oxford
 # All rights reserved.
@@ -31,11 +30,14 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-from __future__ import absolute_import, division
+"""Interfaces to the OSKAR visibility header."""
+
+from __future__ import absolute_import, division, print_function
 from oskar.binary import Binary
 try:
     from . import _vis_header_lib
-except ImportError:
+except ImportError as e:
+    print("Import error: " + str(e))
     _vis_header_lib = None
 
 
@@ -48,72 +50,111 @@ class VisHeader(object):
             raise RuntimeError("OSKAR library not found.")
         self._capsule = None
 
+    def capsule_ensure(self):
+        """Ensures the C capsule exists."""
+        if self._capsule is None:
+            raise RuntimeError(
+                "Call Interferometer.vis_header() for the visibility header.")
+
+    def capsule_get(self):
+        """Returns the C capsule wrapped by the class."""
+        return self._capsule
+
+    def capsule_set(self, new_capsule):
+        """Sets the C capsule wrapped by the class.
+
+        Args:
+            new_capsule (capsule): The new capsule to set.
+        """
+        if _vis_header_lib.capsule_name(new_capsule) == 'oskar_VisHeader':
+            del self._capsule
+            self._capsule = new_capsule
+        else:
+            raise RuntimeError("Capsule is not of type oskar_VisHeader.")
+
     def get_amp_type(self):
         """Returns the OSKAR data type of the visibility amplitude array."""
+        self.capsule_ensure()
         return _vis_header_lib.amp_type(self._capsule)
 
     def get_channel_bandwidth_hz(self):
         """Returns the width of each frequency channel, in Hz."""
+        self.capsule_ensure()
         return _vis_header_lib.channel_bandwidth_hz(self._capsule)
 
     def get_coord_precision(self):
         """Returns the OSKAR data type of the baseline coordinate arrays."""
+        self.capsule_ensure()
         return _vis_header_lib.coord_precision(self._capsule)
 
     def get_freq_inc_hz(self):
         """Returns the frequency channel increment, in Hz."""
+        self.capsule_ensure()
         return _vis_header_lib.freq_inc_hz(self._capsule)
 
     def get_freq_start_hz(self):
         """Returns the frequency of the first channel, in Hz."""
+        self.capsule_ensure()
         return _vis_header_lib.freq_start_hz(self._capsule)
 
     def get_max_channels_per_block(self):
         """Returns the maximum number of channels per visibility block."""
+        self.capsule_ensure()
         return _vis_header_lib.max_channels_per_block(self._capsule)
 
     def get_max_times_per_block(self):
         """Returns the maximum number of time samples per visibility block."""
+        self.capsule_ensure()
         return _vis_header_lib.max_times_per_block(self._capsule)
 
     def get_num_channels_total(self):
         """Returns the total number of frequency channels."""
+        self.capsule_ensure()
         return _vis_header_lib.num_channels_total(self._capsule)
 
     def get_num_stations(self):
         """Returns the number of stations."""
+        self.capsule_ensure()
         return _vis_header_lib.num_stations(self._capsule)
 
     def get_num_tags_per_block(self):
         """Returns the number of binary data tags per visibility block."""
+        self.capsule_ensure()
         return _vis_header_lib.num_tags_per_block(self._capsule)
 
     def get_num_times_total(self):
         """Returns the total number of time samples."""
+        self.capsule_ensure()
         return _vis_header_lib.num_times_total(self._capsule)
 
     def get_phase_centre_ra_deg(self):
         """Returns the phase centre Right Ascension, in degrees."""
+        self.capsule_ensure()
         return _vis_header_lib.phase_centre_ra_deg(self._capsule)
 
     def get_phase_centre_dec_deg(self):
         """Returns the phase centre Declination, in degrees."""
+        self.capsule_ensure()
         return _vis_header_lib.phase_centre_dec_deg(self._capsule)
 
     def get_time_start_mjd_utc(self):
         """Returns the start time, as MJD(UTC)."""
+        self.capsule_ensure()
         return _vis_header_lib.time_start_mjd_utc(self._capsule)
 
     def get_time_inc_sec(self):
         """Returns the time increment, in seconds."""
+        self.capsule_ensure()
         return _vis_header_lib.time_inc_sec(self._capsule)
 
     def get_time_average_sec(self):
         """Returns the time averaging period, in seconds."""
+        self.capsule_ensure()
         return _vis_header_lib.time_average_sec(self._capsule)
 
     # Properties
     amp_type = property(get_amp_type)
+    capsule = property(capsule_get, capsule_set)
     channel_bandwidth_hz = property(get_channel_bandwidth_hz)
     coord_precision = property(get_coord_precision)
     freq_inc_hz = property(get_freq_inc_hz)
@@ -146,9 +187,9 @@ class VisHeader(object):
             raise RuntimeError("OSKAR library not found.")
         t = VisHeader()
         if isinstance(binary_file, Binary):
-            t._capsule = _vis_header_lib.read_header(binary_file._capsule)
+            t.capsule = _vis_header_lib.read_header(binary_file.capsule)
             return (t, binary_file)
         else:
             b = Binary(binary_file, 'r')
-            t._capsule = _vis_header_lib.read_header(b._capsule)
+            t.capsule = _vis_header_lib.read_header(b.capsule)
             return (t, b)

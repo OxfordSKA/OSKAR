@@ -26,18 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_option_parser.h"
+#include "apps/oskar_app_settings.h"
 #include "apps/oskar_settings_log.h"
 #include "log/oskar_log.h"
-#include "settings/oskar_SettingsTree.h"
-#include "settings/oskar_SettingsDeclareXml.h"
-#include "settings/oskar_SettingsFileHandlerIni.h"
 #include "telescope/station/element/oskar_element.h"
 #include "utility/oskar_dir.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
-
-#include "apps/xml/oskar_fit_element_data_xml_all.h"
 
 #include <sstream>
 #include <iomanip>
@@ -45,31 +41,21 @@
 #include <cstdio>
 
 using namespace oskar;
-using std::vector;
 using std::string;
-using std::pair;
 
-static const char settings_def[] = oskar_fit_element_data_XML_STR;
+static const char app[] = "oskar_fit_element_data";
 
 static string construct_element_pathname(string output_dir,
         int port, int element_type_index, double frequency_hz);
 
 int main(int argc, char** argv)
 {
-    OptionParser opt("oskar_fit_element_data", oskar_version_string(),
-            settings_def);
+    OptionParser opt(app, oskar_version_string(), oskar_app_settings(app));
     opt.add_settings_options();
     opt.add_flag("-q", "Suppress printing.", false, "--quiet");
     if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
-    const char* settings_file = opt.get_arg(0);
+    const char* settings = opt.get_arg(0);
     int e = 0;
-
-    // Declare settings.
-    SettingsTree s;
-    SettingsFileHandlerIni handler("oskar_fit_element_data",
-            oskar_version_string());
-    settings_declare_xml(&s, settings_def);
-    s.set_file_handler(&handler);
 
     // Create the log if necessary.
     oskar_Log* log = 0;
@@ -78,12 +64,12 @@ int main(int argc, char** argv)
         int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
         log = oskar_log_create(OSKAR_LOG_MESSAGE, priority);
         oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
-        oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
+        oskar_log_section(log, 'M', "Loading settings file '%s'", settings);
     }
 
     // Load the settings file.
-    vector<pair<string, string> > failed_keys;
-    if (!s.load(settings_file, failed_keys))
+    SettingsTree* s = oskar_app_settings_tree(app, settings);
+    if (!s)
     {
         oskar_log_error(log, "Failed to read settings file.");
         if (log) oskar_log_free(log);
@@ -93,37 +79,39 @@ int main(int argc, char** argv)
     // Get/set setting if necessary.
     if (opt.is_set("--get"))
     {
-        printf("%s\n", s.to_string(opt.get_arg(1), &e).c_str());
+        printf("%s\n", s->to_string(opt.get_arg(1), &e));
+        SettingsTree::free(s);
         return !e ? 0 : EXIT_FAILURE;
     }
     else if (opt.is_set("--set"))
     {
         const char* key = opt.get_arg(1);
         const char* val = opt.get_arg(2);
-        bool ok = val ? s.set_value(key, val) : s.set_default(key);
+        bool ok = val ? s->set_value(key, val) : s->set_default(key);
         if (!ok) oskar_log_error(log, "Failed to set '%s'='%s'", key, val);
+        SettingsTree::free(s);
         return ok ? 0 : EXIT_FAILURE;
     }
 
     // Write settings to log.
     oskar_log_set_keep_file(log, 0);
-    oskar_settings_log(&s, log, failed_keys);
+    oskar_settings_log(s, log);
 
     // Get the main settings.
-    s.begin_group("element_fit");
-    string input_cst_file = s.to_string("input_cst_file", &e);
-    string input_scalar_file = s.to_string("input_scalar_file", &e);
-    string output_dir = s.to_string("output_directory", &e);
-    string pol_type = s.to_string("pol_type", &e);
-    // string coordinate_system = s.to_string("coordinate_system", &e);
-    int element_type_index = s.to_int("element_type_index", &e);
-    double frequency_hz = s.to_double("frequency_hz", &e);
+    s->begin_group("element_fit");
+    string input_cst_file = s->to_string("input_cst_file", &e);
+    string input_scalar_file = s->to_string("input_scalar_file", &e);
+    string output_dir = s->to_string("output_directory", &e);
+    string pol_type = s->to_string("pol_type", &e);
+    // string coordinate_system = s->to_string("coordinate_system", &e);
+    int element_type_index = s->to_int("element_type_index", &e);
+    double frequency_hz = s->to_double("frequency_hz", &e);
     double average_fractional_error =
-            s.to_double("average_fractional_error", &e);
+            s->to_double("average_fractional_error", &e);
     double average_fractional_error_factor_increase =
-            s.to_double("average_fractional_error_factor_increase", &e);
-    int ignore_below_horizon = s.to_int("ignore_data_below_horizon", &e);
-    int ignore_at_pole = s.to_int("ignore_data_at_pole", &e);
+            s->to_double("average_fractional_error_factor_increase", &e);
+    int ignore_below_horizon = s->to_int("ignore_data_below_horizon", &e);
+    int ignore_at_pole = s->to_int("ignore_data_at_pole", &e);
     int port = pol_type == "X" ? 1 : pol_type == "Y" ? 2 : 0;
 
     // Check that the input and output files have been set.
@@ -131,7 +119,8 @@ int main(int argc, char** argv)
             output_dir.empty())
     {
         oskar_log_error(log, "Specify input and output file names.");
-        return OSKAR_ERR_FILE_IO;
+        SettingsTree::free(s);
+        return EXIT_FAILURE;
     }
 
     // Create an element model.
@@ -187,16 +176,13 @@ int main(int argc, char** argv)
     }
 
     // Check for errors.
-    if (e)
-    {
-        oskar_log_error(log, "Run failed with code %i: %s.", e,
-                oskar_get_error_string(e));
-    }
+    if (e) oskar_log_error(log, "Run failed with code %i: %s.", e,
+            oskar_get_error_string(e));
 
     // Free memory.
     oskar_element_free(element, &e);
     oskar_log_free(log);
-
+    SettingsTree::free(s);
     return e;
 }
 

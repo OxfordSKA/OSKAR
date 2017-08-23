@@ -27,7 +27,6 @@
  */
 
 #include "sky/oskar_sky.h"
-#include "sky/oskar_sky_filter_by_flux_cuda.h"
 #include "utility/oskar_device_utils.h"
 
 #include <float.h>
@@ -59,6 +58,12 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
     type = oskar_sky_precision(sky);
     num_sources = oskar_sky_num_sources(sky);
 
+    /* Filtering is only supported for data in host memory. */
+    if (location != OSKAR_CPU)
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
 
     if (type == OSKAR_SINGLE)
     {
@@ -83,44 +88,30 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
         b_    = oskar_mem_float(oskar_sky_gaussian_b(sky), status);
         c_    = oskar_mem_float(oskar_sky_gaussian_c(sky), status);
 
-        if (location == OSKAR_CPU)
+        for (in = 0; in < num_sources; ++in)
         {
-            for (in = 0; in < num_sources; ++in)
-            {
-                if (!(I_[in] > (float)min_I && I_[in] <= (float)max_I))
-                    continue;
+            if (!(I_[in] > (float)min_I && I_[in] <= (float)max_I))
+                continue;
 
-                ra_[out]   = ra_[in];
-                dec_[out]  = dec_[in];
-                I_[out]    = I_[in];
-                Q_[out]    = Q_[in];
-                U_[out]    = U_[in];
-                V_[out]    = V_[in];
-                ref_[out]  = ref_[in];
-                spix_[out] = spix_[in];
-                rm_[out]   = rm_[in];
-                l_[out]    = l_[in];
-                m_[out]    = m_[in];
-                n_[out]    = n_[in];
-                maj_[out]  = maj_[in];
-                min_[out]  = min_[in];
-                pa_[out]   = pa_[in];
-                a_[out]    = a_[in];
-                b_[out]    = b_[in];
-                c_[out]    = c_[in];
-                out++;
-            }
-        }
-        else if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_sky_filter_by_flux_cuda_f(num_sources, &out, min_I, max_I,
-                    ra_, dec_, I_, Q_, U_, V_, ref_, spix_, rm_, l_, m_, n_,
-                    a_, b_, c_, maj_, min_, pa_);
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
+            ra_[out]   = ra_[in];
+            dec_[out]  = dec_[in];
+            I_[out]    = I_[in];
+            Q_[out]    = Q_[in];
+            U_[out]    = U_[in];
+            V_[out]    = V_[in];
+            ref_[out]  = ref_[in];
+            spix_[out] = spix_[in];
+            rm_[out]   = rm_[in];
+            l_[out]    = l_[in];
+            m_[out]    = m_[in];
+            n_[out]    = n_[in];
+            maj_[out]  = maj_[in];
+            min_[out]  = min_[in];
+            pa_[out]   = pa_[in];
+            a_[out]    = a_[in];
+            b_[out]    = b_[in];
+            c_[out]    = c_[in];
+            out++;
         }
     }
     else if (type == OSKAR_DOUBLE)
@@ -146,44 +137,30 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
         b_    = oskar_mem_double(oskar_sky_gaussian_b(sky), status);
         c_    = oskar_mem_double(oskar_sky_gaussian_c(sky), status);
 
-        if (location == OSKAR_CPU)
+        for (in = 0; in < num_sources; ++in)
         {
-            for (in = 0; in < num_sources; ++in)
-            {
-                if (!(I_[in] > min_I && I_[in] <= max_I))
-                    continue;
+            if (!(I_[in] > min_I && I_[in] <= max_I))
+                continue;
 
-                ra_[out]   = ra_[in];
-                dec_[out]  = dec_[in];
-                I_[out]    = I_[in];
-                Q_[out]    = Q_[in];
-                U_[out]    = U_[in];
-                V_[out]    = V_[in];
-                ref_[out]  = ref_[in];
-                spix_[out] = spix_[in];
-                rm_[out]   = rm_[in];
-                l_[out]    = l_[in];
-                m_[out]    = m_[in];
-                n_[out]    = n_[in];
-                maj_[out]  = maj_[in];
-                min_[out]  = min_[in];
-                pa_[out]   = pa_[in];
-                a_[out]    = a_[in];
-                b_[out]    = b_[in];
-                c_[out]    = c_[in];
-                out++;
-            }
-        }
-        else if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_sky_filter_by_flux_cuda_d(num_sources, &out, min_I, max_I,
-                    ra_, dec_, I_, Q_, U_, V_, ref_, spix_, rm_, l_, m_, n_,
-                    a_, b_, c_, maj_, min_, pa_);
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
+            ra_[out]   = ra_[in];
+            dec_[out]  = dec_[in];
+            I_[out]    = I_[in];
+            Q_[out]    = Q_[in];
+            U_[out]    = U_[in];
+            V_[out]    = V_[in];
+            ref_[out]  = ref_[in];
+            spix_[out] = spix_[in];
+            rm_[out]   = rm_[in];
+            l_[out]    = l_[in];
+            m_[out]    = m_[in];
+            n_[out]    = n_[in];
+            maj_[out]  = maj_[in];
+            min_[out]  = min_[in];
+            pa_[out]   = pa_[in];
+            a_[out]    = a_[in];
+            b_[out]    = b_[in];
+            c_[out]    = c_[in];
+            out++;
         }
     }
     else

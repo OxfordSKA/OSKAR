@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -37,7 +37,7 @@
 #ifdef __cplusplus
 
 #include <settings/oskar_settings_types.h>
-#include <ttl/var/variant.hpp>
+#include <settings/extern/ttl/var/variant.hpp>
 
 namespace oskar {
 
@@ -107,22 +107,19 @@ public:
 
 public:
     SettingsValue::TypeId type() const;
-    static SettingsValue::TypeId get_type_id(const std::string& type_name);
+    static SettingsValue::TypeId type_id(const char* type_name);
     static const char* type_name(SettingsValue::TypeId type);
-    std::string type_name() const;
+    const char* type_name() const;
 
     template <typename T> T& get();
     template <typename T> const T& get() const;
-    template <typename T1, typename T2> bool set(const T2& v);
-    template <typename T> std::string value() const;
 
     /* Basic string methods for interfacing with the type. */
-    bool init(const std::string& type, const std::string& param);
-    bool init(TypeId type, const std::string& param);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string&);
-    std::string get_value() const;
-    std::string get_default() const;
+    bool init(const char* type, const char* param);
+    bool set_default(const char* value);
+    bool set_value(const char* value);
+    const char* get_value() const;
+    const char* get_default() const;
     bool is_default() const;
     bool is_set() const;
 
@@ -130,10 +127,10 @@ public:
     double to_double(bool& ok) const;
     int to_int(bool& ok) const;
     unsigned int to_unsigned(bool& ok) const;
-    std::string to_string() const;
-    std::vector<std::string> to_string_list(bool& ok) const;
-    std::vector<int> to_int_list(bool& ok) const;
-    std::vector<double> to_double_list(bool& ok) const;
+    const char* to_string() const;
+    const char* const* to_string_list(int* size, bool& ok) const;
+    const int* to_int_list(int* size, bool& ok) const;
+    const double* to_double_list(int* size, bool& ok) const;
 
     bool operator==(const SettingsValue& other) const;
     bool operator!=(const SettingsValue& other) const;
@@ -141,8 +138,6 @@ public:
     bool operator>=(const SettingsValue& other) const;
     bool operator<(const SettingsValue& other) const;
     bool operator<=(const SettingsValue& other) const;
-
-    operator std::string() const;
 
 private:
     void create_(SettingsValue::TypeId type);
@@ -162,33 +157,8 @@ const T& SettingsValue::get() const
     return ttl::var::get<T>(value_);
 }
 
-template <typename T1, typename T2>
-bool SettingsValue::set(const T2& v)
-{
-    return ttl::var::get<T1>(value_).set_value(v);
-}
-
-template <typename T>
-std::string SettingsValue::value() const
-{
-    return ttl::var::get<T>(value_).get_value();
-}
-
 } /* namespace oskar */
 
 #endif /* __cplusplus */
-
-enum OSKAR_SETTINGS_ERRORS
-{
-    OSKAR_ERR_SETTINGS_NO_VALUE = -200,
-    OSKAR_ERR_SETTINGS_INT_CONVERSION_FAIL = -201,
-    OSKAR_ERR_SETTINGS_UNSIGNED_INT_CONVERSION_FAIL = -202,
-    OSKAR_ERR_SETTINGS_DOUBLE_CONVERSION_FAIL = -203,
-    OSKAR_ERR_SETTINGS_INT_LIST_CONVERSION_FAIL = -204,
-    OSKAR_ERR_SETTINGS_DOUBLE_LIST_CONVERSION_FAIL = -205,
-    OSKAR_ERR_SETTINGS_STRING_LIST_CONVERSION_FAIL = -206,
-    OSKAR_ERR_SETTINGS_LOAD = -207,
-    OSKAR_ERR_SETTINGS_SAVE = -208
-};
 
 #endif /* OSKAR_SETTINGS_VALUE_HPP_ */

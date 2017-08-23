@@ -37,18 +37,18 @@ using namespace oskar;
 TEST(settings_types, RandomSeed)
 {
     RandomSeed s;
-    ASSERT_STREQ("1", s.get_value().c_str());
+    ASSERT_STREQ("1", s.get_value());
     ASSERT_TRUE(s.init(""));
     ASSERT_FALSE(s.set_default("0"));
     ASSERT_TRUE(s.set_default("time"));
     ASSERT_TRUE(s.is_default());
-    ASSERT_STREQ("time", s.get_default().c_str());
+    ASSERT_STREQ("time", s.get_default());
     ASSERT_TRUE(s.set_value("12345"));
     ASSERT_FALSE(s.is_default());
-    ASSERT_STREQ("12345", s.get_value().c_str());
+    ASSERT_STREQ("12345", s.get_value());
     ASSERT_EQ(12345, s.value());
     ASSERT_TRUE(s.set_value("t"));
-    ASSERT_STREQ("time", s.get_value().c_str());
+    ASSERT_STREQ("time", s.get_value());
     ASSERT_TRUE(s.set_value("Time"));
-    ASSERT_STREQ("time", s.get_value().c_str());
+    ASSERT_STREQ("time", s.get_value());
 }

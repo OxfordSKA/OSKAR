@@ -40,19 +40,15 @@ TEST(settings_types, OptionList)
     ASSERT_TRUE(l.init("a,    b,"
                     ""
                     "c"));
-    ASSERT_EQ(3u, l.options().size());
     ASSERT_EQ(3, l.size());
-    ASSERT_STREQ("a", l.options()[0].c_str());
-    ASSERT_STREQ("b", l.options()[1].c_str());
-    ASSERT_STREQ("c", l.options()[2].c_str());
-    ASSERT_STREQ("", l.get_value().c_str());
+    ASSERT_STREQ("a", l.get_value());
     ASSERT_TRUE(l.is_default());
     ASSERT_FALSE(l.set_default("z"));
-    ASSERT_STREQ("", l.get_default().c_str());
+    ASSERT_STREQ("a", l.get_default());
     ASSERT_TRUE(l.set_default("b"));
-    ASSERT_STREQ("b", l.get_default().c_str());
+    ASSERT_STREQ("b", l.get_default());
     ASSERT_TRUE(l.set_value("a"));
     ASSERT_FALSE(l.is_default());
-    ASSERT_STREQ("a", l.get_value().c_str());
+    ASSERT_STREQ("a", l.get_value());
 }
 

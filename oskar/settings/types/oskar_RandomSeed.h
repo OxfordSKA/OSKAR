@@ -45,13 +45,11 @@ class OSKAR_SETTINGS_EXPORT RandomSeed : public AbstractSettingsType
 {
 public:
     RandomSeed();
-    virtual ~RandomSeed();
+    virtual ~RandomSeed() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
     bool is_default() const;
 
     int value() const { return value_; }
@@ -61,7 +59,8 @@ public:
     bool operator>(const RandomSeed& other) const;
 
 private:
-    bool from_string_(const std::string& s, int& value) const;
+    static bool from_string(const std::string& s, int& value);
+    static std::string to_string(int value);
     int default_, value_;
 };
 

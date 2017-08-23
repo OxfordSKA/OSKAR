@@ -40,29 +40,26 @@ static const char module_doc[] =
         "This module provides an interface to an OSKAR binary file.";
 static const char name[] = "oskar_Binary";
 
-static void binary_free(PyObject* capsule)
+static void* get_handle(PyObject* capsule, const char* name)
 {
-    oskar_Binary* h = (oskar_Binary*) PyCapsule_GetPointer(capsule, name);
-    oskar_binary_free(h);
-}
-
-
-static oskar_Binary* get_handle(PyObject* capsule)
-{
-    oskar_Binary* h = 0;
+    void* h = 0;
     if (!PyCapsule_CheckExact(capsule))
     {
-        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
         return 0;
     }
-    h = (oskar_Binary*) PyCapsule_GetPointer(capsule, name);
-    if (!h)
+    if (!(h = PyCapsule_GetPointer(capsule, name)))
     {
-        PyErr_SetString(PyExc_RuntimeError,
-                "Unable to convert PyCapsule object to oskar_Binary.");
+        PyErr_Format(PyExc_RuntimeError, "Capsule is not of type %s.", name);
         return 0;
     }
     return h;
+}
+
+
+static void binary_free(PyObject* capsule)
+{
+    oskar_binary_free((oskar_Binary*) get_handle(capsule, name));
 }
 
 
@@ -79,6 +76,19 @@ static int numpy_type_from_oskar(int type)
     case OSKAR_DOUBLE_COMPLEX_MATRIX: return NPY_CDOUBLE;
     }
     return 0;
+}
+
+
+static PyObject* capsule_name(PyObject* self, PyObject* args)
+{
+    PyObject *capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!PyCapsule_CheckExact(capsule))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
+        return 0;
+    }
+    return Py_BuildValue("s", PyCapsule_GetName(capsule));
 }
 
 
@@ -114,7 +124,7 @@ static PyObject* num_tags(PyObject* self, PyObject* args)
     oskar_Binary* h = 0;
     PyObject *capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Binary*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_binary_num_tags(h));
 }
 
@@ -128,7 +138,7 @@ static PyObject* read_data(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "OOOiO", &capsule, &grp, &tag, &tag_idx,
             &data_type))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Binary*) get_handle(capsule, name))) return 0;
 
     /* Get requested data type, if supplied. */
     if (data_type != Py_None)
@@ -274,7 +284,7 @@ static PyObject* set_query_search_start(PyObject* self, PyObject* args)
     PyObject *capsule = 0;
     int start = 0, status = 0;
     if (!PyArg_ParseTuple(args, "Oi", &capsule, &start)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Binary*) get_handle(capsule, name))) return 0;
     oskar_binary_set_query_search_start(h, start, &status);
 
     /* Check for errors. */
@@ -292,6 +302,8 @@ static PyObject* set_query_search_start(PyObject* self, PyObject* args)
 /* Method table. */
 static PyMethodDef methods[] =
 {
+        {"capsule_name", (PyCFunction)capsule_name,
+                METH_VARARGS, "capsule_name()"},
         {"create", (PyCFunction)create,
                 METH_VARARGS, "create(filename, mode)"},
         {"num_tags", (PyCFunction)num_tags, METH_VARARGS, "num_tags()"},

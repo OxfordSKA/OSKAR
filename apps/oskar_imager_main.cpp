@@ -26,40 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_app_settings.h"
+#include "apps/oskar_option_parser.h"
 #include "apps/oskar_settings_log.h"
+#include "apps/oskar_settings_to_imager.h"
 #include "imager/oskar_imager.h"
 #include "log/oskar_log.h"
-#include "settings/oskar_SettingsTree.h"
-#include "settings/oskar_SettingsDeclareXml.h"
-#include "settings/oskar_SettingsFileHandlerIni.h"
 #include "utility/oskar_timer.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
 
-#include "apps/xml/oskar_imager_xml_all.h"
-
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 using namespace oskar;
 
-static const char settings_def[] = oskar_imager_XML_STR;
+static const char app[] = "oskar_imager";
 
 int main(int argc, char** argv)
 {
-    OptionParser opt("oskar_imager", oskar_version_string(), settings_def);
+    OptionParser opt(app, oskar_version_string(), oskar_app_settings(app));
     opt.add_settings_options();
     opt.add_flag("-q", "Suppress printing.", false, "--quiet");
     if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
-    const char* settings_file = opt.get_arg(0);
-    int e = 0;
-
-    // Declare settings.
-    SettingsTree s;
-    SettingsFileHandlerIni handler("oskar_imager", oskar_version_string());
-    settings_declare_xml(&s, settings_def);
-    s.set_file_handler(&handler);
+    const char* settings = opt.get_arg(0);
+    int status = 0;
 
     // Create the log if necessary.
     oskar_Log* log = 0;
@@ -68,12 +60,12 @@ int main(int argc, char** argv)
         int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
         log = oskar_log_create(OSKAR_LOG_MESSAGE, priority);
         oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
-        oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
+        oskar_log_section(log, 'M', "Loading settings file '%s'", settings);
     }
 
     // Load the settings file.
-    std::vector<std::pair<std::string, std::string> > failed_keys;
-    if (!s.load(settings_file, failed_keys))
+    SettingsTree* s = oskar_app_settings_tree(app, settings);
+    if (!s)
     {
         oskar_log_error(log, "Failed to read settings file.");
         if (log) oskar_log_free(log);
@@ -83,112 +75,66 @@ int main(int argc, char** argv)
     // Get/set setting if necessary.
     if (opt.is_set("--get"))
     {
-        printf("%s\n", s.to_string(opt.get_arg(1), &e).c_str());
-        return !e ? 0 : EXIT_FAILURE;
+        printf("%s\n", s->to_string(opt.get_arg(1), &status));
+        SettingsTree::free(s);
+        return !status ? 0 : EXIT_FAILURE;
     }
     else if (opt.is_set("--set"))
     {
         const char* key = opt.get_arg(1);
         const char* val = opt.get_arg(2);
-        bool ok = val ? s.set_value(key, val) : s.set_default(key);
+        bool ok = val ? s->set_value(key, val) : s->set_default(key);
         if (!ok) oskar_log_error(log, "Failed to set '%s'='%s'", key, val);
+        SettingsTree::free(s);
         return ok ? 0 : EXIT_FAILURE;
+    }
+
+    // Ensure the images are going somewhere.
+    if (!strlen(s->to_string("image/root_path", &status)))
+    {
+        int n = 0;
+        const char* const* files =
+                s->to_string_list("image/input_vis_data", &n, &status);
+        if (n == 0 || !files || !files[0] || !strlen(files[0]))
+        {
+            oskar_log_error(log, "No input file or output file has been set.");
+            if (log) oskar_log_free(log);
+            SettingsTree::free(s);
+            return EXIT_FAILURE;
+        }
+        const char* ptr = strrchr(files[0], '.');
+        std::string fname(files[0], ptr ? (ptr - files[0]) : strlen(files[0]));
+        s->set_value("image/root_path", fname.c_str(), false);
     }
 
     // Write settings to log.
     oskar_log_set_keep_file(log, 0);
-    oskar_settings_log(&s, log, failed_keys);
+    oskar_settings_log(s, log);
 
-    // Create imager and set values from settings.
-    s.begin_group("image");
-    if (s.to_string("root_path", &e).empty())
-    {
-        oskar_log_error(log, "No output file has been set.");
-        return EXIT_FAILURE;
-    }
-    oskar_Imager* h = oskar_imager_create(s.to_int("double_precision", &e) ?
-            OSKAR_DOUBLE : OSKAR_SINGLE, &e);
-    oskar_imager_set_log(h, log);
-
-    // Set GPU IDs.
-    if (!s.starts_with("cuda_device_ids", "all", &e))
-    {
-        std::vector<int> ids = s.to_int_list("cuda_device_ids", &e);
-        if (ids.size() > 0) oskar_imager_set_gpus(h, ids.size(), &ids[0], &e);
-    }
-
-    // Set input and output files.
-    std::vector<std::string> files = s.to_string_list("input_vis_data", &e);
-    int num_files = files.size();
-    char** input_files = (char**) calloc(num_files, sizeof(char*));
-    for (int i = 0; i < num_files; ++i)
-    {
-        input_files[i] = (char*) calloc(1 + files[i].length(), sizeof(char));
-        strcpy(input_files[i], files[i].c_str());
-    }
-    oskar_imager_set_input_files(h, num_files, input_files, &e);
-    for (int i = 0; i < num_files; ++i) free(input_files[i]);
-    free(input_files);
-    oskar_imager_set_scale_norm_with_num_input_files(h,
-            s.to_int("scale_norm_with_num_input_files", &e));
-    oskar_imager_set_ms_column(h, s.to_string("ms_column", &e).c_str(), &e);
-    oskar_imager_set_output_root(h, s.to_string("root_path", &e).c_str());
-
-    // Set remaining imager options.
-    oskar_imager_set_image_type(h, s.to_string("image_type", &e).c_str(), &e);
-    if (s.to_int("specify_cellsize", &e))
-        oskar_imager_set_cellsize(h, s.to_double("cellsize_arcsec", &e));
-    else
-        oskar_imager_set_fov(h, s.to_double("fov_deg", &e));
-    oskar_imager_set_size(h, s.to_int("size", &e), &e);
-    oskar_imager_set_channel_snapshots(h, s.to_int("channel_snapshots", &e));
-    oskar_imager_set_freq_min_hz(h, s.to_double("freq_min_hz", &e));
-    oskar_imager_set_freq_max_hz(h, s.to_double("freq_max_hz", &e));
-    oskar_imager_set_time_min_utc(h, s.to_double("time_min_utc", &e));
-    oskar_imager_set_time_max_utc(h, s.to_double("time_max_utc", &e));
-    oskar_imager_set_uv_filter_min(h, s.to_double("uv_filter_min", &e));
-    oskar_imager_set_uv_filter_max(h, s.to_double("uv_filter_max", &e));
-    oskar_imager_set_algorithm(h, s.to_string("algorithm", &e).c_str(), &e);
-    oskar_imager_set_weighting(h, s.to_string("weighting", &e).c_str(), &e);
-    if (s.starts_with("algorithm", "FFT", &e) ||
-            s.starts_with("algorithm", "fft", &e))
-    {
-        oskar_imager_set_grid_kernel(h,
-                s.to_string("fft/kernel_type", &e).c_str(),
-                s.to_int("fft/support", &e),
-                s.to_int("fft/oversample", &e), &e);
-    }
-    if (!s.starts_with("wproj/num_w_planes", "auto", &e))
-        oskar_imager_set_num_w_planes(h, s.to_int("wproj/num_w_planes", &e));
-    oskar_imager_set_fft_on_gpu(h, s.to_int("fft/use_gpu", &e));
-    oskar_imager_set_generate_w_kernels_on_gpu(h,
-            s.to_int("wproj/generate_w_kernels_on_gpu", &e));
-    if (s.first_letter("direction", &e) == 'R')
-        oskar_imager_set_direction(h,
-                s.to_double("direction/ra_deg", &e),
-                s.to_double("direction/dec_deg", &e));
+    // Set up the imager.
+    oskar_Imager* imager = oskar_settings_to_imager(s, log, &status);
 
     // Make the images.
     oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
-    if (!e)
+    if (imager && !status)
     {
         oskar_log_section(log, 'M', "Starting imager...");
         oskar_timer_resume(tmr);
-        oskar_imager_run(h, 0, 0, 0, 0, &e);
+        oskar_imager_run(imager, 0, 0, 0, 0, &status);
     }
 
     // Check for errors.
-    if (!e)
-        oskar_log_message(log, 'M', 0, "Imaging completed in %.3f sec.",
+    if (!status)
+        oskar_log_message(log, 'M', 0, "Run completed in %.3f sec.",
                 oskar_timer_elapsed(tmr));
     else
-        oskar_log_error(log, "Run failed with code %i: %s.", e,
-                oskar_get_error_string(e));
+        oskar_log_error(log, "Run failed with code %i: %s.", status,
+                oskar_get_error_string(status));
 
     // Free memory.
     oskar_timer_free(tmr);
-    oskar_imager_free(h, &e);
+    oskar_imager_free(imager, &status);
     oskar_log_free(log);
-
-    return e;
+    SettingsTree::free(s);
+    return status;
 }

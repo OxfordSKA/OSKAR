@@ -1,8 +1,11 @@
 #!/usr/bin/env python
-from numpy import get_include
+# -*- coding: utf-8 -*-
+"""Installs the OSKAR Python bindings."""
+
 from os.path import join, isfile, dirname
 import os
 import platform
+from numpy import get_include
 try:
     from setuptools import setup, Extension
     from setuptools.command.build_ext import build_ext
@@ -15,10 +18,12 @@ oskar_compatibility_version = '2.7'
 
 # Define the extension modules to build.
 modules = [
+    ('_apps_lib', 'oskar_apps_lib.cpp'),
     ('_binary_lib', 'oskar_binary_lib.c'),
     ('_imager_lib', 'oskar_imager_lib.c'),
     ('_measurement_set_lib', 'oskar_measurement_set_lib.c'),
-    ('_simulator_lib', 'oskar_simulator_lib.c'),
+    ('_interferometer_lib', 'oskar_interferometer_lib.c'),
+    ('_settings_lib', 'oskar_settings_lib.cpp'),
     ('_sky_lib', 'oskar_sky_lib.c'),
     ('_telescope_lib', 'oskar_telescope_lib.c'),
     ('_utils', 'oskar_utils.c'),
@@ -82,9 +87,8 @@ class BuildExt(build_ext):
                 "using -L or --library-dirs")
         self.rpath.append(d)
         self.libraries.append('oskar')
-
-        # Explicitly link liboskar_ms if we have it.
-        # (Required on some Linux distributions.)
+        self.libraries.append('oskar_apps')
+        self.libraries.append('oskar_settings')
         if self.dir_contains('oskar_ms.', self.library_dirs):
             self.libraries.append('oskar_ms')
 
@@ -138,7 +142,7 @@ def get_oskarpy_version():
 extensions = []
 for m in modules:
     extensions.append(Extension(
-        'oskar.' + m[0], sources=[join('oskar', 'src', m[1])], language='c'))
+        'oskar.' + m[0], sources=[join('oskar', 'src', m[1])]))
 setup(
     name='oskarpy',
     version=get_oskarpy_version(),
@@ -146,17 +150,17 @@ setup(
     packages=['oskar'],
     ext_modules=extensions,
     classifiers=[
-            'Development Status :: 3 - Alpha',
-            'Environment :: Console',
-            'Intended Audience :: Science/Research',
-            'Topic :: Scientific/Engineering :: Astronomy',
-            'License :: OSI Approved :: BSD License',
-            'Operating System :: POSIX',
-            'Programming Language :: C',
-            'Programming Language :: Python :: 2.7',
-            'Programming Language :: Python :: 3'
+        'Development Status :: 3 - Alpha',
+        'Environment :: Console',
+        'Intended Audience :: Science/Research',
+        'Topic :: Scientific/Engineering :: Astronomy',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: POSIX',
+        'Programming Language :: C',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3'
     ],
-    author='OSKAR Developers',
+    author='University of Oxford',
     author_email='oskar@oerc.ox.ac.uk',
     url='http://oskar.oerc.ox.ac.uk',
     license='BSD',

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -29,29 +29,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "settings/oskar_SettingsKey.h"
 #include "settings/oskar_settings_utility_string.h"
-#include <iostream>
 
 using namespace std;
 
 namespace oskar {
 
-SettingsKey::SettingsKey(char separator)
-: sep_(separator)
+SettingsKey::SettingsKey(char separator) : sep_(separator) {}
+
+SettingsKey::SettingsKey(const char* key, char separator)
+{
+    from_string(key, separator);
+}
+
+SettingsKey::~SettingsKey()
 {
 }
 
-SettingsKey::SettingsKey(const std::string& key, char separator)
-: key_(key), sep_(separator)
+const char* SettingsKey::back() const { return tokens_.back().c_str(); }
+
+int SettingsKey::depth() const { return tokens_.size() - 1; }
+
+bool SettingsKey::empty() const { return key_.empty(); }
+
+void SettingsKey::from_string(const char* key, char separator)
 {
     tokens_.clear();
-    std::string s = key_;
-    std::string delimiter(1, sep_);
+    key_ = string(key);
+    sep_ = separator;
+    string s = key_;
+    string delimiter(1, sep_);
     size_t pos = 0;
-    std::string token;
-    while ((pos = s.find(delimiter)) != std::string::npos) {
+    string token;
+    while ((pos = s.find(delimiter)) != string::npos)
+    {
         token = s.substr(0, pos);
         tokens_.push_back(token);
         s.erase(0, pos + delimiter.length());
@@ -59,32 +71,9 @@ SettingsKey::SettingsKey(const std::string& key, char separator)
     tokens_.push_back(s);
 }
 
-SettingsKey::~SettingsKey()
-{
-}
+char SettingsKey::separator() const { return sep_; }
 
-SettingsKey::SettingsKey(const SettingsKey& other)
-{
-    key_ = other.key_;
-    tokens_ = other.tokens_;
-    sep_ = other.sep_;
-}
-
-
-void SettingsKey::set_separator(char s)
-{
-    sep_ = s;
-}
-
-char SettingsKey::separator() const
-{
-    return sep_;
-}
-
-bool SettingsKey::empty() const
-{
-    return key_.empty();
-}
+void SettingsKey::set_separator(char s) { sep_ = s; }
 
 bool SettingsKey::operator==(const SettingsKey& other) const
 {
@@ -92,53 +81,8 @@ bool SettingsKey::operator==(const SettingsKey& other) const
                     oskar_settings_utility_string_to_upper(other.key_));
 }
 
-SettingsKey::operator const std::string&() const
-{
-    return key_;
-}
+const char* SettingsKey::operator[](int i) const { return tokens_[i].c_str(); }
 
-std::string SettingsKey::operator[](int i) const
-{
-    return tokens_[i];
-}
-
-int SettingsKey::depth() const
-{
-    return tokens_.size() - 1;
-}
-
-int SettingsKey::size() const
-{
-    return tokens_.size();
-}
-
-std::string SettingsKey::front() const
-{
-    return tokens_.front();
-}
-
-std::string SettingsKey::back() const
-{
-    return tokens_.back();
-}
-
-std::string SettingsKey::group() const
-{
-    std::string s;
-    for (unsigned i = 0; i < tokens_.size() - 1; ++i) {
-        s += tokens_[i] + sep_;
-    }
-    return s;
-}
-
-const char* SettingsKey::c_str() const
-{
-    return key_.c_str();
-}
-
-std::ostream& operator<< (std::ostream& stream, const SettingsKey& k)
-{
-    return stream << k.key_;
-}
+SettingsKey::operator const char*() const { return key_.c_str(); }
 
 } // namespace oskar

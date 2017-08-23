@@ -56,25 +56,23 @@ class OSKAR_SETTINGS_EXPORT DoubleList : public AbstractSettingsType
 {
 public:
     DoubleList();
-    virtual ~DoubleList();
+    virtual ~DoubleList() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& s);
-    std::string get_default() const;
     bool set_value(const std::string& s);
-    std::string get_value() const;
     bool is_default() const;
 
-    std::vector<double> values() const;
+    int size() const;
+    const double* values() const;
 
     bool operator==(const DoubleList& other) const;
-    bool operator>(const DoubleList& other) const;
+    bool operator>(const DoubleList&) const { return false; }
 
 private:
     bool from_string_(std::vector<double>& values, const std::string& s) const;
     std::string to_string_(const std::vector<double>& values) const;
-    std::vector<double> value_;
-    std::vector<double> default_;
+    std::vector<double> default_, value_;
     char delimiter_;
 };
 

@@ -11,6 +11,7 @@ set(${name}_SRC
     Test_random.cpp
     Test_cond2_2x2.cpp
     Test_fit_ellipse.cpp
+    Test_prefix_sum.cpp
 )
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)

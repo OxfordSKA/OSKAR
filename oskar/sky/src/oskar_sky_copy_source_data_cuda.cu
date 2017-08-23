@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,27 +27,60 @@
  */
 
 #include "sky/oskar_sky_copy_source_data_cuda.h"
-#include <thrust/device_vector.h> // Must be included before thrust/copy.h
-#include <thrust/copy.h>
+#include <cuda_runtime_api.h>
 
-using thrust::copy_if;
-using thrust::device_pointer_cast;
-using thrust::device_ptr;
-
-struct is_true
+template<typename T>
+__global__
+void oskar_sky_copy_source_data_cudak(const int num,
+        const int* restrict mask, const int* restrict indices,
+        const T* ra_in,   T* ra_out,
+        const T* dec_in,  T* dec_out,
+        const T* I_in,    T* I_out,
+        const T* Q_in,    T* Q_out,
+        const T* U_in,    T* U_out,
+        const T* V_in,    T* V_out,
+        const T* ref_in,  T* ref_out,
+        const T* sp_in,   T* sp_out,
+        const T* rm_in,   T* rm_out,
+        const T* l_in,    T* l_out,
+        const T* m_in,    T* m_out,
+        const T* n_in,    T* n_out,
+        const T* a_in,    T* a_out,
+        const T* b_in,    T* b_out,
+        const T* c_in,    T* c_out,
+        const T* maj_in,  T* maj_out,
+        const T* min_in,  T* min_out,
+        const T* pa_in,   T* pa_out
+        )
 {
-    __host__ __device__
-    bool operator()(const int x) {return (bool)x;}
-};
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num) return;
+    if (mask[i])
+    {
+        int i_out = indices[i];
+        ra_out[i_out]  = ra_in[i];
+        dec_out[i_out] = dec_in[i];
+        I_out[i_out]   = I_in[i];
+        Q_out[i_out]   = Q_in[i];
+        U_out[i_out]   = U_in[i];
+        V_out[i_out]   = V_in[i];
+        ref_out[i_out] = ref_in[i];
+        sp_out[i_out]  = sp_in[i];
+        rm_out[i_out]  = rm_in[i];
+        l_out[i_out]   = l_in[i];
+        m_out[i_out]   = m_in[i];
+        n_out[i_out]   = n_in[i];
+        a_out[i_out]   = a_in[i];
+        b_out[i_out]   = b_in[i];
+        c_out[i_out]   = c_in[i];
+        maj_out[i_out] = maj_in[i];
+        min_out[i_out] = min_in[i];
+        pa_out[i_out]  = pa_in[i];
+    }
+}
 
-#define DPC(ptr) device_pointer_cast(ptr)
-
-// Don't pass structure pointers here, because this takes ages to compile,
-// and we don't want to keep recompiling if any of the other headers change!
-
-extern "C"
-void oskar_sky_copy_source_data_cuda_f(
-        int num, int* num_out, const int* mask,
+void oskar_sky_copy_source_data_cuda_f(int num,
+        int* num_out, const int* mask, const int* indices,
         const float* ra_in,   float* ra_out,
         const float* dec_in,  float* dec_out,
         const float* I_in,    float* I_out,
@@ -68,36 +101,22 @@ void oskar_sky_copy_source_data_cuda_f(
         const float* pa_in,   float* pa_out
         )
 {
-    device_ptr<const int> m = device_pointer_cast(mask);
-
-    // Copy sources to new arrays based on mask values.
-    device_ptr<float> out = copy_if(DPC(ra_in), DPC(ra_in) + num, m,
-            DPC(ra_out), is_true());
-    copy_if(DPC(dec_in), DPC(dec_in) + num, m, DPC(dec_out), is_true());
-    copy_if(DPC(I_in), DPC(I_in) + num, m, DPC(I_out), is_true());
-    copy_if(DPC(Q_in), DPC(Q_in) + num, m, DPC(Q_out), is_true());
-    copy_if(DPC(U_in), DPC(U_in) + num, m, DPC(U_out), is_true());
-    copy_if(DPC(V_in), DPC(V_in) + num, m, DPC(V_out), is_true());
-    copy_if(DPC(ref_in), DPC(ref_in) + num, m, DPC(ref_out), is_true());
-    copy_if(DPC(sp_in), DPC(sp_in) + num, m, DPC(sp_out), is_true());
-    copy_if(DPC(rm_in), DPC(rm_in) + num, m, DPC(rm_out), is_true());
-    copy_if(DPC(l_in), DPC(l_in) + num, m, DPC(l_out), is_true());
-    copy_if(DPC(m_in), DPC(m_in) + num, m, DPC(m_out), is_true());
-    copy_if(DPC(n_in), DPC(n_in) + num, m, DPC(n_out), is_true());
-    copy_if(DPC(a_in), DPC(a_in) + num, m, DPC(a_out), is_true());
-    copy_if(DPC(b_in), DPC(b_in) + num, m, DPC(b_out), is_true());
-    copy_if(DPC(c_in), DPC(c_in) + num, m, DPC(c_out), is_true());
-    copy_if(DPC(maj_in), DPC(maj_in) + num, m, DPC(maj_out), is_true());
-    copy_if(DPC(min_in), DPC(min_in) + num, m, DPC(min_out), is_true());
-    copy_if(DPC(pa_in), DPC(pa_in) + num, m, DPC(pa_out), is_true());
-
-    // Get the number of sources copied.
-    *num_out = out - DPC(ra_out);
+    int num_blocks, num_threads = 256;
+    num_blocks = (num + num_threads - 1) / num_threads;
+    oskar_sky_copy_source_data_cudak<float>
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num, mask, indices, ra_in, ra_out, dec_in, dec_out,
+            I_in, I_out, Q_in, Q_out, U_in, U_out, V_in, V_out,
+            ref_in, ref_out, sp_in, sp_out, rm_in, rm_out,
+            l_in, l_out, m_in, m_out, n_in, n_out,
+            a_in, a_out, b_in, b_out, c_in, c_out,
+            maj_in, maj_out, min_in, min_out, pa_in, pa_out);
+    cudaMemcpy(num_out, &indices[num-1], sizeof(int), cudaMemcpyDeviceToHost);
+    (*num_out)++;
 }
 
-extern "C"
-void oskar_sky_copy_source_data_cuda_d(
-        int num, int* num_out, const int* mask,
+void oskar_sky_copy_source_data_cuda_d(int num,
+        int* num_out, const int* mask, const int* indices,
         const double* ra_in,   double* ra_out,
         const double* dec_in,  double* dec_out,
         const double* I_in,    double* I_out,
@@ -118,29 +137,16 @@ void oskar_sky_copy_source_data_cuda_d(
         const double* pa_in,   double* pa_out
         )
 {
-    device_ptr<const int> m = device_pointer_cast(mask);
-
-    // Copy sources to new arrays based on mask values.
-    device_ptr<double> out = copy_if(DPC(ra_in), DPC(ra_in) + num, m,
-            DPC(ra_out), is_true());
-    copy_if(DPC(dec_in), DPC(dec_in) + num, m, DPC(dec_out), is_true());
-    copy_if(DPC(I_in), DPC(I_in) + num, m, DPC(I_out), is_true());
-    copy_if(DPC(Q_in), DPC(Q_in) + num, m, DPC(Q_out), is_true());
-    copy_if(DPC(U_in), DPC(U_in) + num, m, DPC(U_out), is_true());
-    copy_if(DPC(V_in), DPC(V_in) + num, m, DPC(V_out), is_true());
-    copy_if(DPC(ref_in), DPC(ref_in) + num, m, DPC(ref_out), is_true());
-    copy_if(DPC(sp_in), DPC(sp_in) + num, m, DPC(sp_out), is_true());
-    copy_if(DPC(rm_in), DPC(rm_in) + num, m, DPC(rm_out), is_true());
-    copy_if(DPC(l_in), DPC(l_in) + num, m, DPC(l_out), is_true());
-    copy_if(DPC(m_in), DPC(m_in) + num, m, DPC(m_out), is_true());
-    copy_if(DPC(n_in), DPC(n_in) + num, m, DPC(n_out), is_true());
-    copy_if(DPC(a_in), DPC(a_in) + num, m, DPC(a_out), is_true());
-    copy_if(DPC(b_in), DPC(b_in) + num, m, DPC(b_out), is_true());
-    copy_if(DPC(c_in), DPC(c_in) + num, m, DPC(c_out), is_true());
-    copy_if(DPC(maj_in), DPC(maj_in) + num, m, DPC(maj_out), is_true());
-    copy_if(DPC(min_in), DPC(min_in) + num, m, DPC(min_out), is_true());
-    copy_if(DPC(pa_in), DPC(pa_in) + num, m, DPC(pa_out), is_true());
-
-    // Get the number of sources copied.
-    *num_out = out - DPC(ra_out);
+    int num_blocks, num_threads = 256;
+    num_blocks = (num + num_threads - 1) / num_threads;
+    oskar_sky_copy_source_data_cudak<double>
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num, mask, indices, ra_in, ra_out, dec_in, dec_out,
+            I_in, I_out, Q_in, Q_out, U_in, U_out, V_in, V_out,
+            ref_in, ref_out, sp_in, sp_out, rm_in, rm_out,
+            l_in, l_out, m_in, m_out, n_in, n_out,
+            a_in, a_out, b_in, b_out, c_in, c_out,
+            maj_in, maj_out, min_in, min_out, pa_in, pa_out);
+    cudaMemcpy(num_out, &indices[num-1], sizeof(int), cudaMemcpyDeviceToHost);
+    (*num_out)++;
 }

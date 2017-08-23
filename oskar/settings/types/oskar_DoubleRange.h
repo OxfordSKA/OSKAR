@@ -64,13 +64,11 @@ public:
     enum Format { AUTO, EXPONENT };
 
     DoubleRange();
-    virtual ~DoubleRange();
+    virtual ~DoubleRange() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& s);
-    std::string get_default() const;
     bool set_value(const std::string& s);
-    std::string get_value() const;
     bool is_default() const;
 
     double min() const { return min_; }

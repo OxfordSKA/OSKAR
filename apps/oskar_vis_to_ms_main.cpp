@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_option_parser.h"
 #include "binary/oskar_binary.h"
 #include "log/oskar_log.h"
 #include "mem/oskar_binary_read_mem.h"

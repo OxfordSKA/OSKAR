@@ -34,6 +34,7 @@
 struct oskar_StationWork
 {
     oskar_Mem* horizon_mask;     /* Integer. */
+    oskar_Mem* source_indices;   /* Integer. */
 
     oskar_Mem* enu_direction_x;  /* Real scalar. ENU direction cosine. */
     oskar_Mem* enu_direction_y;  /* Real scalar. ENU direction cosine. */

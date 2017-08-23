@@ -35,213 +35,126 @@
 #include <iostream>
 
 using namespace std;
+using ttl::var::get;
 
 namespace oskar {
 
-IntListExt::IntListExt()
-: delimiter_(',')
+IntListExt::IntListExt() : delimiter_(',')
 {
 }
 
-IntListExt::~IntListExt()
+bool IntListExt::init(const string& s)
 {
+    if (s.empty()) return false;
+    special_value_ = string(s);
+    default_ = special_value_;
+    value_ = special_value_;
+    return true;
 }
 
-bool IntListExt::init(const std::string& s)
+bool IntListExt::set_default(const string& value)
 {
-    if (!s.empty()) {
-        special_value_ = s;
-        default_ = special_string();
-        value_ = special_string();
-        return true;
-    }
-    return false;
+    bool ok = from_string_(value, default_);
+    str_default_ = to_string_(default_);
+    if (ok)
+        set_value(value);
+    return ok;
 }
 
-bool IntListExt::set_default(const std::string& value)
+bool IntListExt::set_value(const string& value)
 {
-    if (value.find(delimiter_) == std::string::npos) {
-        if (value == special_value_) {
-            default_ = value;
-            value_ = value;
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-    else {
-        std::vector<int> v;
-        default_ = v;
-        bool ok = from_string_(value, ttl::var::get<std::vector<int> >(default_));
-        value_ = default_;
-        return (ok && from_string_(value, v));
-    }
-}
-
-std::string IntListExt::get_default() const
-{
-    if (!default_.is_singular()) {
-        if (default_.which() == 0) {
-            return to_string_(ttl::var::get<std::vector<int> >(default_));
-        }
-        else {
-            return ttl::var::get<std::string>(default_);
-        }
-    }
-    return std::string();
-}
-
-bool IntListExt::set_value(const std::string& value)
-{
-    if (value.find(delimiter_) == std::string::npos) {
-        if (value == special_value_) {
-            value_ = value;
-            return true;
-        } else {
-            std::vector<int> v;
-            value_ = v;
-            return from_string_(value, ttl::var::get<std::vector<int> >(value_));
-        }
-    }
-    else {
-        std::vector<int> v;
-        value_ = v;
-        return from_string_(value, ttl::var::get<std::vector<int> >(value_));
-    }
-}
-
-std::string IntListExt::get_value() const
-{
-    if (!value_.is_singular()) {
-        if (value_.which() == 0) {
-            return to_string_(ttl::var::get<std::vector<int> >(value_));
-        }
-        else {
-            return ttl::var::get<std::string>(value_);
-        }
-    }
-    return std::string();
+    bool ok = from_string_(value, value_);
+    str_value_ = to_string_(value_);
+    return ok;
 }
 
 bool IntListExt::is_default() const
 {
-    if (default_.is_singular() || value_.is_singular())
-        return false;
-    if (default_.which() == value_.which()) {
-        if (default_.which() == 0) {
-            const std::vector<int>& v = ttl::var::get<std::vector<int> >(value_);
-            const std::vector<int>& d = ttl::var::get<std::vector<int> >(default_);
-            if (v.size() != d.size()) {
-                return false;
-            }
-            for (unsigned int i = 0; i < v.size(); ++i) {
-                if (v.at(i) != d.at(i)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        else {
-            return ttl::var::get<std::string>(default_) ==
-                            ttl::var::get<std::string>(value_);
-        }
-    }
-    return false;
+    return compare_(value_, default_);
+}
+
+const char* IntListExt::special_string() const
+{
+    return special_value_.c_str();
 }
 
 bool IntListExt::is_extended() const
 {
-    if (!value_.is_singular() && value_.which() == 1) {
-        return true;
-    }
-    return false;
+    return (!value_.is_singular() && value_.which() == 1) ? true : false;
 }
 
 int IntListExt::size() const
 {
-    if (!value_.is_singular()) {
-        if (value_.which() == 0) {
-            return ttl::var::get<std::vector<int> >(value_).size();
-        }
-        else {
-            return 1;
-        }
+    if (value_.is_singular()) return 0;
+    return (value_.which() == 0) ? get<vector<int> >(value_).size() : 1;
+}
+
+const int* IntListExt::values() const
+{
+    if (!value_.is_singular() && value_.which() == 0)
+    {
+        vector<int> v = get<vector<int> >(value_);
+        return (v.size() > 0) ? &v[0] : 0;
     }
     return 0;
 }
 
-std::vector<int> IntListExt::values() const
-{
-    if (!value_.is_singular() && value_.which() == 0) {
-        return ttl::var::get<std::vector<int> >(value_);
-    }
-    return std::vector<int>();
-}
-
 bool IntListExt::operator==(const IntListExt& other) const
 {
-    using ttl::var::get;
-
-    if (value_.is_singular() || other.value_.is_singular())
-        return false;
-    if (value_.which() == other.value_.which()) {
-        if (default_.which() == 0) {
-            const std::vector<int>& v = get<std::vector<int> >(value_);
-            const std::vector<int>& d = get<std::vector<int> >(other.value_);
-            if (v.size() != d.size()) {
-                return false;
-            }
-            for (unsigned int i = 0; i < v.size(); ++i) {
-                if (v.at(i) != d.at(i)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        else {
-            return get<std::string>(value_) == get<std::string>(other.value_);
-        }
-    }
-    return false;
+    return compare_(value_, other.value_);
 }
 
-bool IntListExt::operator>(const IntListExt& ) const
+bool IntListExt::compare_(const Value& a, const Value& b)
 {
-    return false;
-}
-
-bool IntListExt::from_string_(const std::string& s, std::vector<int>& values) const
-{
-    // Clear any existing values.
-    values.clear();
-
-    // Convert the string to a vector of ints.
-    std::istringstream ss(s);
-    std::string token;
-    while (std::getline(ss, token, delimiter_))
+    if (a.is_singular() || b.is_singular()) return false;
+    if (a.which() != b.which()) return false;
+    if (a.which() != 0)
+        return get<string>(a) == get<string>(b);
+    else
     {
-        bool valid = true;
-        int v = oskar_settings_utility_string_to_int(token, &valid);
-        if (!valid) {
-            values.clear();
-            return false;
-        }
-        values.push_back(v);
+        const vector<int>& v = get<vector<int> >(a);
+        const vector<int>& d = get<vector<int> >(b);
+        if (v.size() != d.size()) return false;
+        for (size_t i = 0; i < v.size(); ++i) if (v[i] != d[i]) return false;
     }
     return true;
 }
 
-std::string IntListExt::to_string_(const std::vector<int>& values) const
+bool IntListExt::from_string_(const string& s, Value& val) const
 {
-    std::ostringstream ss;
-    for (size_t i = 0; i < values.size(); ++i) {
+    if (s.find(delimiter_) == string::npos && s == special_value_)
+    {
+        val = s;
+        return true;
+    }
+
+    // Convert the string to a vector of ints.
+    vector<int> values;
+    istringstream ss(s);
+    string token;
+    while (getline(ss, token, delimiter_))
+    {
+        bool valid = true;
+        int v = oskar_settings_utility_string_to_int(token, &valid);
+        if (!valid) return false;
+        values.push_back(v);
+    }
+    val = values;
+    return true;
+}
+
+string IntListExt::to_string_(const Value& v)
+{
+    if (v.is_singular()) return string();
+    if (v.which() != 0) return get<string>(v);
+    const vector<int>& values = get<vector<int> >(v);
+    ostringstream ss;
+    for (size_t i = 0; i < values.size(); ++i)
+    {
         ss << values.at(i);
-        if (i < values.size() - 1)
-            ss << delimiter_;
+        if (i < values.size() - 1) ss << delimiter_;
     }
     return ss.str();
 }
 
 } // namespace oskar
-

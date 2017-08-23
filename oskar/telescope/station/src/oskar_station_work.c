@@ -50,6 +50,7 @@ oskar_StationWork* oskar_station_work_create(int type,
 
     /* Initialise arrays. */
     work->horizon_mask = oskar_mem_create(OSKAR_INT, location, 0, status);
+    work->source_indices = oskar_mem_create(OSKAR_INT, location, 0, status);
     work->theta_modified = oskar_mem_create(type, location, 0, status);
     work->phi_modified = oskar_mem_create(type, location, 0, status);
     work->enu_direction_x = oskar_mem_create(type, location, 0, status);
@@ -71,10 +72,10 @@ oskar_StationWork* oskar_station_work_create(int type,
 void oskar_station_work_free(oskar_StationWork* work, int* status)
 {
     int i;
-
     if (!work) return;
 
     oskar_mem_free(work->horizon_mask, status);
+    oskar_mem_free(work->source_indices, status);
     oskar_mem_free(work->theta_modified, status);
     oskar_mem_free(work->phi_modified, status);
     oskar_mem_free(work->enu_direction_x, status);
@@ -97,6 +98,11 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
 oskar_Mem* oskar_station_work_horizon_mask(oskar_StationWork* work)
 {
     return work->horizon_mask;
+}
+
+oskar_Mem* oskar_station_work_source_indices(oskar_StationWork* work)
+{
+    return work->source_indices;
 }
 
 oskar_Mem* oskar_station_work_enu_direction_x(oskar_StationWork* work)

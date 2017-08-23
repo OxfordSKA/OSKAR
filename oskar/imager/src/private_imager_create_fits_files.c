@@ -60,7 +60,7 @@ void oskar_imager_create_fits_files(oskar_Imager* h, int* status)
 {
     int i;
     if (*status) return;
-    if (!h->image_root) return;
+    if (!h->output_root) return;
     oskar_timer_resume(h->tmr_write);
     for (i = 0; i < h->num_im_pols; ++i)
     {
@@ -72,27 +72,27 @@ void oskar_imager_create_fits_files(oskar_Imager* h, int* status)
         switch (h->im_type)
         {
         case OSKAR_IMAGE_TYPE_STOKES:
-            SNPRINTF(f, sizeof(f), "%s_%s.fits", h->image_root, a[i]); break;
+            SNPRINTF(f, sizeof(f), "%s_%s.fits", h->output_root, a[i]); break;
         case OSKAR_IMAGE_TYPE_I:
-            SNPRINTF(f, sizeof(f), "%s_I.fits", h->image_root); break;
+            SNPRINTF(f, sizeof(f), "%s_I.fits", h->output_root); break;
         case OSKAR_IMAGE_TYPE_Q:
-            SNPRINTF(f, sizeof(f), "%s_Q.fits", h->image_root); break;
+            SNPRINTF(f, sizeof(f), "%s_Q.fits", h->output_root); break;
         case OSKAR_IMAGE_TYPE_U:
-            SNPRINTF(f, sizeof(f), "%s_U.fits", h->image_root); break;
+            SNPRINTF(f, sizeof(f), "%s_U.fits", h->output_root); break;
         case OSKAR_IMAGE_TYPE_V:
-            SNPRINTF(f, sizeof(f), "%s_V.fits", h->image_root); break;
+            SNPRINTF(f, sizeof(f), "%s_V.fits", h->output_root); break;
         case OSKAR_IMAGE_TYPE_LINEAR:
-            SNPRINTF(f, sizeof(f), "%s_%s.fits", h->image_root, b[i]); break;
+            SNPRINTF(f, sizeof(f), "%s_%s.fits", h->output_root, b[i]); break;
         case OSKAR_IMAGE_TYPE_XX:
-            SNPRINTF(f, sizeof(f), "%s_XX.fits", h->image_root); break;
+            SNPRINTF(f, sizeof(f), "%s_XX.fits", h->output_root); break;
         case OSKAR_IMAGE_TYPE_XY:
-            SNPRINTF(f, sizeof(f), "%s_XY.fits", h->image_root); break;
+            SNPRINTF(f, sizeof(f), "%s_XY.fits", h->output_root); break;
         case OSKAR_IMAGE_TYPE_YX:
-            SNPRINTF(f, sizeof(f), "%s_YX.fits", h->image_root); break;
+            SNPRINTF(f, sizeof(f), "%s_YX.fits", h->output_root); break;
         case OSKAR_IMAGE_TYPE_YY:
-            SNPRINTF(f, sizeof(f), "%s_YY.fits", h->image_root); break;
+            SNPRINTF(f, sizeof(f), "%s_YY.fits", h->output_root); break;
         case OSKAR_IMAGE_TYPE_PSF:
-            SNPRINTF(f, sizeof(f), "%s_PSF.fits", h->image_root); break;
+            SNPRINTF(f, sizeof(f), "%s_PSF.fits", h->output_root); break;
         default:
             *status = OSKAR_ERR_INVALID_ARGUMENT;
             break;

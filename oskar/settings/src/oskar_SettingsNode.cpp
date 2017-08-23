@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -30,140 +30,144 @@
  */
 
 #include "settings/oskar_SettingsNode.h"
+#include <cstring>
+#include <vector>
 
 using namespace std;
 
 namespace oskar {
 
-SettingsNode::SettingsNode()
-: SettingsItem(),
-  parent_(0),
-  children_(vector<SettingsNode*>()),
-  value_set_counter_(0)
+struct SettingsNodePrivate
 {
+    SettingsNode* parent;
+    vector<SettingsNode*> children;
+    /* Counter used to determine if the item or its children have been set.
+     * Incremented by 1 for each item or child with a value not at default. */
+    int value_set_counter;
+};
+
+SettingsNode::SettingsNode() : SettingsItem()
+{
+    p = new SettingsNodePrivate;
+    p->parent = 0;
+    p->value_set_counter = 0;
 }
 
-SettingsNode::SettingsNode(const SettingsNode& node, SettingsNode* parent)
-: SettingsItem(node),
-  parent_(parent),
-  children_(node.children_),
-  value_set_counter_(0)
-{
-}
-
-SettingsNode::SettingsNode(const string& key,
-             const string& label,
-             const string& description,
-             const string& type_name,
-             const string& type_default,
-             const string& type_parameters,
+SettingsNode::SettingsNode(const char* key,
+             const char* label,
+             const char* description,
+             const char* type_name,
+             const char* type_default,
+             const char* type_parameters,
              bool is_required,
              int priority)
 : SettingsItem(key, label, description, type_name, type_default,
-        type_parameters, is_required, priority),
-  parent_(0),
-  children_(vector<SettingsNode*>()),
-  value_set_counter_(0)
+        type_parameters, is_required, priority)
 {
+    p = new SettingsNodePrivate;
+    p->parent = 0;
+    p->value_set_counter = 0;
 }
 
 SettingsNode::~SettingsNode()
 {
-    for (unsigned i = 0; i < children_.size(); ++i)
-        delete children_.at(i);
+    for (unsigned i = 0; i < p->children.size(); ++i)
+        delete p->children[i];
+    delete p;
 }
 
 bool SettingsNode::value_or_child_set() const
 {
-    return value_set_counter_ > 0;
+    return p->value_set_counter > 0;
 }
 
 int SettingsNode::num_children() const
 {
-    return children_.size();
+    return p->children.size();
 }
 
-SettingsNode* SettingsNode::add_child(const SettingsNode& node)
+SettingsNode* SettingsNode::add_child(SettingsNode* node)
 {
-    if (node.item_type() != SettingsItem::INVALID) {
-        children_.push_back(new SettingsNode(node, this));
-        update_priority(node.priority());
-        return children_.back();
+    if (node->item_type() != SettingsItem::INVALID)
+    {
+        node->p->parent = this;
+        p->children.push_back(node);
+        update_priority(node->priority());
+        return p->children.back();
     }
-    else {
-        return 0;
-    }
+    return 0;
 }
 
 SettingsNode* SettingsNode::child(int i)
 {
-    return children_.at(i);
+    return p->children[i];
 }
 
 const SettingsNode* SettingsNode::child(int i) const
 {
-    return children_.at(i);
+    return p->children[i];
 }
 
-
-SettingsNode* SettingsNode::child(const std::string& key)
+SettingsNode* SettingsNode::child(const char* key)
 {
-    for (unsigned i = 0; i < children_.size(); ++i)
-        if (children_.at(i)->key() == key) return children_.at(i);
+    for (unsigned i = 0; i < p->children.size(); ++i)
+        if (!strcmp(p->children[i]->key(), key))
+            return p->children[i];
     return 0;
 }
 
-const SettingsNode* SettingsNode::child(const std::string& key) const
+const SettingsNode* SettingsNode::child(const char* key) const
 {
-    for (unsigned i = 0; i < children_.size(); ++i)
-        if (children_.at(i)->key() == key) return children_.at(i);
+    for (unsigned i = 0; i < p->children.size(); ++i)
+        if (!strcmp(p->children[i]->key(), key))
+            return p->children[i];
     return 0;
 }
 
 const SettingsNode* SettingsNode::parent() const
 {
-    return parent_;
+    return p->parent;
 }
 
 int SettingsNode::child_number() const
 {
-    if (parent_)
+    if (p->parent)
     {
-        for (unsigned i = 0; i < children_.size(); ++i)
-            if (children_.at(i) == this) return i;
+        for (unsigned i = 0; i < p->children.size(); ++i)
+            if (p->children[i] == this) return i;
     }
     return 0;
 }
 
-bool SettingsNode::set_value(const std::string& v)
+bool SettingsNode::set_value(const char* v)
 {
-    bool was_set = value().is_set();
+    bool was_set = is_set();
     bool ok = SettingsItem::set_value(v);
-    bool is_set = value().is_set();
-    // Only update the counter if the set state has changed. ie. changed from
-    // default to non default.
-    if (was_set != is_set)
-        update_value_set_counter_(is_set);
+    bool now_set = is_set();
+    // Only update the counter if the set state has changed.
+    // ie. changed from default to non default.
+    if (was_set != now_set)
+        update_value_set_counter_(now_set);
     return ok;
 }
 
 void SettingsNode::update_value_set_counter_(bool increment_counter)
 {
     if (increment_counter)
-        ++value_set_counter_;
+        ++(p->value_set_counter);
     else
-        --value_set_counter_;
+        --(p->value_set_counter);
 
     // Recursively set the counter for parents.
-    if (parent_)
-        parent_->update_value_set_counter_(increment_counter);
+    if (p->parent)
+        p->parent->update_value_set_counter_(increment_counter);
 }
 
 void SettingsNode::update_priority(int priority)
 {
-    this->priority_ += priority;
-    if (parent_)
-        parent_->update_priority(priority);
+    set_priority(SettingsItem::priority() + priority);
+    if (p->parent)
+        p->parent->update_priority(priority);
 }
 
 } // namespace oskar

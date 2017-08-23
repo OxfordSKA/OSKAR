@@ -37,13 +37,7 @@
 #include <settings/oskar_SettingsTree.h>
 #include <log/oskar_log.h>
 
-#include <string>
-#include <utility>
-#include <vector>
-
 OSKAR_APPS_EXPORT
-void oskar_settings_log(const oskar::SettingsTree* tree, oskar_Log* log,
-        const std::vector<std::pair<std::string, std::string> >& failed_keys =
-                std::vector<std::pair<std::string, std::string> >());
+void oskar_settings_log(const oskar::SettingsTree* tree, oskar_Log* log);
 
 #endif /* OSKAR_SETTINGS_LOG_H_ */

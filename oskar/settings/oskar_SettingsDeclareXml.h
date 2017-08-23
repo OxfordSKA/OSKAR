@@ -33,17 +33,16 @@
 #define OSKAR_SETTINGS_DECLARE_XML_HPP_
 
 #include <settings/oskar_settings_macros.h>
-#include <settings/oskar_SettingsTree.h>
 
 #ifdef __cplusplus
 
-#include <string>
-
 namespace oskar {
+
+class SettingsTree;
 
 /*! Populates a settings tree from the specified @p xml string */
 OSKAR_SETTINGS_EXPORT
-bool settings_declare_xml(SettingsTree* settings, std::string xml);
+bool settings_declare_xml(SettingsTree* settings, const char* xml);
 
 } /* namespace oskar */
 

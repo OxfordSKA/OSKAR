@@ -29,62 +29,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "settings/oskar_settings_utility_string.h"
 #include "settings/types/oskar_InputFile.h"
-#include <sstream>
+#include "settings/oskar_settings_utility_string.h"
 
 namespace oskar {
 
-InputFile::InputFile()
-{
-}
-
-InputFile::~InputFile()
-{
-}
-
-bool InputFile::init(const std::string& /*param*/)
-{
-    return true;
-}
-
 bool InputFile::set_default(const std::string& value)
 {
-    default_ = oskar_settings_utility_string_trim(value);
-    value_ = default_;
+    str_default_ = oskar_settings_utility_string_trim(value);
+    str_value_ = str_default_;
     return true;
-}
-
-std::string InputFile::get_default() const
-{
-    return default_;
 }
 
 bool InputFile::set_value(const std::string& value)
 {
-    value_ = oskar_settings_utility_string_trim(value);
+    str_value_ = oskar_settings_utility_string_trim(value);
     return true;
 }
 
-std::string InputFile::get_value() const
-{
-    return value_;
-}
-
-bool InputFile::is_default() const
-{
-    return value_ == default_;
-}
-
-bool InputFile::operator==(const InputFile& other) const
-{
-    return value_ == other.value_;
-}
-
-bool InputFile::operator>(const InputFile& ) const
-{
-    return false;
-}
-
 } // namespace oskar
-

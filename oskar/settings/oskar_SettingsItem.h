@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -36,14 +36,16 @@
  * @file oskar_SettingsItem.h
  */
 
-#include <settings/oskar_SettingsValue.h>
-#include <settings/oskar_SettingsKey.h>
-#include <settings/oskar_SettingsDependency.h>
-#include <settings/oskar_SettingsDependencyGroup.h>
+#include <settings/oskar_settings_macros.h>
 
 #ifdef __cplusplus
 
 namespace oskar {
+
+class SettingsDependencyGroup;
+class SettingsKey;
+class SettingsValue;
+struct SettingsItemPrivate;
 
 /*!
  * @class SettingsItem
@@ -84,74 +86,80 @@ public:
     SettingsItem();
 
     /*! Constructor. */
-    SettingsItem(const std::string& key,
-                 const std::string& label = std::string(),
-                 const std::string& description = std::string(),
-                 const std::string& type_name = std::string(),
-                 const std::string& type_default = std::string(),
-                 const std::string& type_parameters = std::string(),
+    SettingsItem(const char* key,
+                 const char* label = 0,
+                 const char* description = 0,
+                 const char* type_name = 0,
+                 const char* type_default = 0,
+                 const char* type_parameters = 0,
                  bool is_required = false,
                  int priority = 0);
 
     /*! Destructor. */
     virtual ~SettingsItem();
 
+    /*! Adds a dependency to the current group */
+    bool add_dependency(const char* dependency_key,
+                        const char* value,
+                        const char* logic = 0);
+
     /*! Begin a dependency group with a specified combination @p logic */
-    bool begin_dependency_group(const std::string& logic);
+    bool begin_dependency_group(const char* logic);
+
+    /*! Return the root of the settings dependency tree. */
+    const SettingsDependencyGroup* dependency_tree() const;
+
+    /*! Return the setting description as a string. */
+    const char* description() const;
+
+    /*! Return the default value as a string. */
+    const char* default_value() const;
 
     /*! Close the current dependency group. */
     void end_dependency_group();
 
-    /*! Adds a dependency to the current group */
-    bool add_dependency(const std::string& dependency_key,
-                        const std::string& value,
-                        const std::string& logic = "EQ");
+    /*! Return true if the setting is required. */
+    bool is_required() const;
+
+    /*! Return true if the setting has been set (i.e. is not default). */
+    bool is_set() const;
 
     /*! Return the settings item type, label or setting. */
     SettingsItem::ItemType item_type() const;
 
-    /*! Return the setting key */
-    const SettingsKey& key() const { return key_; }
+    /*! Return the setting key as a string. */
+    const char* key() const;
 
-    /*! Return the setting label (short description) */
-    const std::string& label() const { return label_; }
+    /*! Return the setting label (short description). */
+    const char* label() const;
 
-    /*! Return the setting description */
-    const std::string& description() const { return description_; }
+    /*! Return the number of dependencies of the setting. */
+    int num_dependencies() const;
 
-    /*! Return true if the setting is required. */
-    bool is_required() const { return required_; }
-
-    /*! Set the value of the setting. */
-    bool set_value(const std::string& value);
-
-    /*! Return a reference to the settings value object. */
-    const SettingsValue& value() const { return value_; }
+    /*! Return the number of dependency groups of the setting. */
+    int num_dependency_groups() const;
 
     /*! Return the priority of the setting. */
-    int priority() const { return priority_; }
+    int priority() const;
 
-    /*! Return the number of dependencies of the setting */
-    int num_dependencies() const { return num_dependencies_; }
+    /*! Return a reference to the settings key object. */
+    const SettingsKey& settings_key() const;
 
-    /*! Return the number of dependency groups of the setting */
-    int num_dependency_groups() const { return num_dependency_groups_; }
+    /*! Return a reference to the settings value object. */
+    const SettingsValue& settings_value() const;
 
-    /*! Return the root of the settings dependency tree. */
-    const SettingsDependencyGroup* dependency_tree() const { return root_; }
+    /*! Set the value of the setting. */
+    bool set_value(const char* value);
+
+    /*! Return the setting value as a string. */
+    const char* value() const;
 
 protected:
-    SettingsKey key_;
-    std::string label_;
-    std::string description_;
-    SettingsValue value_;
-    bool required_;
-    int priority_;
+    void set_priority(int value);
 
-    int num_dependency_groups_;
-    int num_dependencies_;
-    SettingsDependencyGroup* root_;
-    SettingsDependencyGroup* current_group_;
+private:
+    SettingsItem(const SettingsItem& item);
+    SettingsItemPrivate* p;
 };
 
 } /* namespace oskar */

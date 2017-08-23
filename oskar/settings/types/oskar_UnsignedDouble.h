@@ -36,7 +36,7 @@
  * @file oskar_UnsignedDouble.h
  */
 
-#include "settings/types/oskar_AbstractSettingsType.h"
+#include "settings/types/oskar_Double.h"
 
 namespace oskar {
 
@@ -49,30 +49,14 @@ namespace oskar {
  * @details
  */
 
-class OSKAR_SETTINGS_EXPORT UnsignedDouble : public AbstractSettingsType
+class OSKAR_SETTINGS_EXPORT UnsignedDouble : public Double
 {
 public:
-    enum Format { AUTO, EXPONENT };
-
     UnsignedDouble();
-    virtual ~UnsignedDouble();
+    virtual ~UnsignedDouble() {}
 
-    bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
-    bool is_default() const;
-
-    double value() const { return value_; }
-    double default_value() const { return default_; }
-
-    bool operator==(const UnsignedDouble& other) const;
-    bool operator>(const UnsignedDouble& other) const;
-
-private:
-    Format format_;
-    double default_, value_;
 };
 
 } /* namespace oskar */

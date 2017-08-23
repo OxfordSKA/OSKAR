@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/oskar_option_parser.h"
 #include "apps/oskar_settings_log.h"
 #include "apps/oskar_settings_to_telescope.h"
 #include "apps/oskar_sim_tec_screen.h"
-#include "apps/oskar_OptionParser.h"
 #include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
 #include "utility/oskar_version_string.h"
@@ -45,9 +45,6 @@
 #include <fitsio.h>
 
 using namespace oskar;
-using std::vector;
-using std::string;
-using std::pair;
 
 static fitsfile* create_fits_file(const char* filename, int precision,
         int width, int height, int num_times, double centre_deg[2],

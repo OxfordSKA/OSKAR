@@ -1,5 +1,4 @@
-#
-#  This file is part of OSKAR.
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2016, The University of Oxford
 # All rights reserved.
@@ -31,6 +30,8 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
+"""Interfaces to OSKAR utility functions."""
+
 from __future__ import absolute_import
 try:
     from . import _utils
@@ -43,4 +44,3 @@ def oskar_version_string():
     if _utils is None:
         raise RuntimeError("OSKAR library not found.")
     return _utils.version_string()
-

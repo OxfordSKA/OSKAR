@@ -1,5 +1,4 @@
-#
-#  This file is part of OSKAR.
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2014-2017, The University of Oxford
 # All rights reserved.
@@ -38,12 +37,14 @@ from __future__ import absolute_import
 
 from oskar._version import __version__
 from oskar.binary import Binary
+from oskar.imager import Imager
+from oskar.imaging_interferometer import ImagingInterferometer
+from oskar.measurement_set import MeasurementSet
+from oskar.settings_tree import SettingsTree
+from oskar.interferometer import Interferometer
 from oskar.sky import Sky
 from oskar.telescope import Telescope
-from oskar.simulator import Simulator
-from oskar.imaging_simulator import ImagingSimulator
-from oskar.imager import Imager
+from oskar.utils import oskar_version_string
 from oskar.vis_block import VisBlock
 from oskar.vis_header import VisHeader
-from oskar.measurement_set import MeasurementSet
 from oskar.bda import BDA, apply_gains, vis_list_to_matrix

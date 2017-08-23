@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -40,21 +40,19 @@
 
 #ifdef __cplusplus
 
-#include <vector>
-#include <string>
-
 namespace oskar {
+
+struct SettingsNodePrivate;
 
 /*!
  * @class SettingsNode
  *
- * @brief A node with the settings tree, inherits @class SettingsItem.
+ * @brief A node within the settings tree, inherits @class SettingsItem.
  *
  * @details
  * Settings tree node class which specialises a settings item for use within
- * a tree-like structure.
+ * a tree structure.
  */
-
 class OSKAR_SETTINGS_EXPORT SettingsNode : public SettingsItem
 {
  public:
@@ -62,15 +60,12 @@ class OSKAR_SETTINGS_EXPORT SettingsNode : public SettingsItem
     SettingsNode();
 
     /*! Constructor */
-    SettingsNode(const SettingsNode& node, SettingsNode* parent = 0);
-
-    /*! Constructor */
-    SettingsNode(const std::string& key,
-                 const std::string& label = std::string(),
-                 const std::string& description = std::string(),
-                 const std::string& type_name = std::string(),
-                 const std::string& type_default = std::string(),
-                 const std::string& type_parameters = std::string(),
+    SettingsNode(const char* key,
+                 const char* label = 0,
+                 const char* description = 0,
+                 const char* type_name = 0,
+                 const char* type_default = 0,
+                 const char* type_parameters = 0,
                  bool is_required = false,
                  int priority = 0);
 
@@ -81,7 +76,7 @@ class OSKAR_SETTINGS_EXPORT SettingsNode : public SettingsItem
     int num_children() const;
 
     /*! Add a child node */
-    SettingsNode* add_child(const SettingsNode& node);
+    SettingsNode* add_child(SettingsNode* node);
 
     /*! Return a pointer to the child node with index @p i */
     SettingsNode* child(int i);
@@ -90,10 +85,10 @@ class OSKAR_SETTINGS_EXPORT SettingsNode : public SettingsItem
     const SettingsNode* child(int i) const;
 
     /*! Return a pointer to the child node with key @p key */
-    SettingsNode* child(const std::string& key);
+    SettingsNode* child(const char* key);
 
     /*! Return a const pointer to the child node with key @p key */
-    const SettingsNode* child(const std::string& key) const;
+    const SettingsNode* child(const char* key) const;
 
     /*! Return a pointer to the node's parent */
     const SettingsNode* parent() const;
@@ -105,17 +100,16 @@ class OSKAR_SETTINGS_EXPORT SettingsNode : public SettingsItem
     bool value_or_child_set() const;
 
     /*! Set the value field of the node. */
-    bool set_value(const std::string& value);
+    bool set_value(const char* value);
 
  private:
-    /* Increment or decrementing the value set counter. */
+    /* Disable copy constructor. */
+    SettingsNode(const SettingsNode&);
+
     void update_value_set_counter_(bool increment_counter);
     void update_priority(int priority);
-    SettingsNode* parent_;
-    std::vector<SettingsNode*> children_;
-    /* Counter used to determine if the item or its children have been set.
-     * Incremented by 1 for each item or child with a value not at default. */
-    int value_set_counter_;
+
+    SettingsNodePrivate* p;
 };
 
 } /* namespace oskar */

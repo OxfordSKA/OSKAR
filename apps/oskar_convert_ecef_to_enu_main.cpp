@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_option_parser.h"
 #include "convert/oskar_convert_ecef_to_enu.h"
 #include "log/oskar_log.h"
 #include "math/oskar_cmath.h"

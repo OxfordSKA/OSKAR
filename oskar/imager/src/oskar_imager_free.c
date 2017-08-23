@@ -63,7 +63,8 @@ void oskar_imager_free(oskar_Imager* h, int* status)
     for (i = 0; i < h->num_files; ++i)
         free(h->input_files[i]);
     free(h->input_files);
-    free(h->image_root);
+    free(h->input_root);
+    free(h->output_root);
     free(h->ms_column);
     free(h);
 }

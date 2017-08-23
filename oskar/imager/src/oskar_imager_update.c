@@ -205,6 +205,27 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
 
     /* Convert precision of input data if required. */
     u_in = uu; v_in = vv; w_in = ww; weight_in = weight;
+    if (!h->coords_only)
+    {
+        if (!amps)
+        {
+            *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+            return;
+        }
+        amp_in = amps;
+        if (oskar_mem_precision(amps) != h->imager_prec)
+        {
+            ta = oskar_mem_convert_precision(amps, h->imager_prec, status);
+            amp_in = ta;
+        }
+
+        /* Convert linear polarisations to Stokes parameters if required. */
+        if (h->use_stokes)
+        {
+            oskar_imager_linear_to_stokes(amp_in, &h->stokes, status);
+            amp_in = h->stokes;
+        }
+    }
     if (oskar_mem_precision(uu) != h->imager_prec)
     {
         tu = oskar_mem_convert_precision(uu, h->imager_prec, status);
@@ -224,22 +245,6 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
     {
         th = oskar_mem_convert_precision(weight, h->imager_prec, status);
         weight_in = th;
-    }
-    if (!h->coords_only)
-    {
-        amp_in = amps;
-        if (oskar_mem_precision(amps) != h->imager_prec)
-        {
-            ta = oskar_mem_convert_precision(amps, h->imager_prec, status);
-            amp_in = ta;
-        }
-
-        /* Convert linear polarisations to Stokes parameters if required. */
-        if (h->use_stokes)
-        {
-            oskar_imager_linear_to_stokes(amp_in, &h->stokes, status);
-            amp_in = h->stokes;
-        }
     }
 
     /* Ensure work arrays are large enough. */

@@ -34,48 +34,34 @@
 
 namespace oskar {
 
-IntPositive::IntPositive() : default_(1), value_(1)
+IntPositive::IntPositive()
 {
-}
-
-IntPositive::~IntPositive()
-{
+    (void) init(std::string());
 }
 
 bool IntPositive::init(const std::string& /*s*/)
 {
     default_ = 1;
     value_ = 1;
+    str_default_ = "1";
+    str_value_ = "1";
     return true;
 }
 
 bool IntPositive::set_default(const std::string& value)
 {
     bool ok = from_string_(value, default_);
-    if (ok) {
-        value_ = default_;
-    }
+    str_default_ = oskar_settings_utility_int_to_string(default_);
+    if (ok)
+        set_value(value);
     return ok;
-}
-
-std::string IntPositive::get_default() const
-{
-    return oskar_settings_utility_int_to_string(default_);
 }
 
 bool IntPositive::set_value(const std::string& value)
 {
-    return from_string_(value, value_);
-}
-
-std::string IntPositive::get_value() const
-{
-    return oskar_settings_utility_int_to_string(value_);
-}
-
-bool IntPositive::is_default() const
-{
-    return default_ == value_;
+    bool ok = from_string_(value, value_);
+    str_value_ = oskar_settings_utility_int_to_string(value_);
+    return ok;
 }
 
 bool IntPositive::from_string_(const std::string& s, int& value) const
@@ -90,15 +76,4 @@ bool IntPositive::from_string_(const std::string& s, int& value) const
     return false;
 }
 
-bool IntPositive::operator==(const IntPositive& other) const
-{
-    return value_ == other.value_;
-}
-
-bool IntPositive::operator>(const IntPositive& other) const
-{
-    return value_ > other.value_;
-}
-
 } // namespace oskar
-

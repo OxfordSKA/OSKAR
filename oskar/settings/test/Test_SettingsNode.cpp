@@ -33,7 +33,7 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
+#include "settings/oskar_SettingsKey.h"
 #include "settings/oskar_SettingsNode.h"
 
 using namespace oskar;
@@ -45,9 +45,8 @@ TEST(SettingsNode, test)
     ASSERT_EQ(0, root.parent());
     ASSERT_EQ(0, root.num_children());
 
-    SettingsNode* node;
-    node = root.add_child(SettingsNode("keyA"));
+    SettingsNode* node = root.add_child(new SettingsNode("keyA"));
     ASSERT_EQ(1, root.num_children());
-    ASSERT_STREQ("keyA", node->key().c_str());
+    ASSERT_STREQ("keyA", node->key());
     ASSERT_EQ(SettingsItem::LABEL, node->item_type());
 }

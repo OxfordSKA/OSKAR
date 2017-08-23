@@ -66,27 +66,23 @@ public:
         Time::Format format;
     };
 
-    Time() {}
+    Time();
     virtual ~Time() {}
 
     bool init(const std::string& param);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
     bool is_default() const;
 
     Value value() const { return value_; }
-    Value default_value() const { return default_; }
     double to_seconds() const;
 
     bool operator==(const Time& other) const;
     bool operator>(const Time& other) const;
 
+private:
     static bool from_string(const std::string& s, Value& value);
     static std::string to_string(const Value& value);
-
-private:
     Value default_, value_;
 };
 

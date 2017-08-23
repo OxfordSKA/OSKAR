@@ -36,6 +36,9 @@
 #include <oskar_global.h>
 #include <telescope/oskar_telescope.h>
 #include <log/oskar_log.h>
+
+#ifdef __cplusplus
+
 #include <settings/oskar_SettingsTree.h>
 
 /**
@@ -55,5 +58,7 @@
 OSKAR_APPS_EXPORT
 oskar_Telescope* oskar_settings_to_telescope(oskar::SettingsTree* s,
         oskar_Log* log, int* status);
+
+#endif
 
 #endif /* OSKAR_SETTINGS_TO_TELESCOPE_H_ */

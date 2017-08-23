@@ -53,37 +53,22 @@ class SettingsNode;
  *
  * Write of the ini file.
  * - Loop though settings in the tree and write.
- *
- * Requirements to interface with the tree.
- * - When a setting is modified in the tree write it to the ini file.
- * - When the ini file is modified update the settings tree.
- *
- * SettingsTree tree;
- * tree.set_ini_file(ini_file)
- * tree.define_settings(xml_string);
- *
- *
  */
-class OSKAR_SETTINGS_EXPORT SettingsFileHandlerIni :
-public oskar::SettingsFileHandler
+class OSKAR_SETTINGS_EXPORT SettingsFileHandlerIni
+: public SettingsFileHandler
 {
 public:
-    SettingsFileHandlerIni(const std::string& app, const std::string& version);
+    SettingsFileHandlerIni(const char* app, const char* version);
     virtual ~SettingsFileHandlerIni();
 
-    virtual std::string read(const std::string& file_name,
-            const std::string& key) const;
-    virtual bool read_all(SettingsTree* tree,
-            std::vector<std::pair<std::string, std::string> >& invalid);
+    virtual char* read(const char* file_name, const char* key) const;
+    virtual bool read_all(SettingsTree* tree);
     virtual bool write_all(const SettingsTree* tree);
-    virtual void set_file_name(const std::string& name);
 
 private:
     SettingsFileHandlerIni(const SettingsFileHandlerIni&);
     const SettingsFileHandlerIni& operator=(
             const SettingsFileHandlerIni&);
-    static std::string trim(const std::string& s,
-            const std::string& whitespace);
     void write(const SettingsNode* item);
     void write_header();
 

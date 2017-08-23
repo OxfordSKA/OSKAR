@@ -43,19 +43,12 @@ TEST(SettingsKey, test1)
 {
     SettingsKey k("a/b/c/d");
     ASSERT_EQ(3, k.depth());
-    ASSERT_EQ(4, k.size());
-    ASSERT_STREQ("a", k[0].c_str());
-    ASSERT_STREQ("b", k[1].c_str());
-    ASSERT_STREQ("c", k[2].c_str());
-    ASSERT_STREQ("d", k[3].c_str());
+    ASSERT_STREQ("a", k[0]);
+    ASSERT_STREQ("b", k[1]);
+    ASSERT_STREQ("c", k[2]);
+    ASSERT_STREQ("d", k[3]);
 
-    ASSERT_STREQ("a", k.front().c_str());
-    ASSERT_STREQ("d", k.back().c_str());
-    ASSERT_STREQ("a/b/c/", k.group().c_str());
-
-    std::string key = k;
-    ASSERT_STREQ("a/b/c/d", key.c_str());
-    std::string key2;
-    key2 = k;
+    ASSERT_STREQ("d", k.back());
+    ASSERT_STREQ("a/b/c/d", k);
 }
 

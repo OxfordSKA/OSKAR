@@ -106,6 +106,8 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
                 image_size, image_crval_deg, image_crpix,
                 image_cellsize_deg, image_freq_hz, spectral_index, status);
 
+    /* Free pixel data and return sky model. */
+    oskar_mem_free(data, status);
     return t;
 }
 

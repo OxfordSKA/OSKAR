@@ -39,49 +39,27 @@ static const char module_doc[] =
         "This module provides an interface to an OSKAR visibility block.";
 static const char name[] = "oskar_VisBlock";
 
+static void* get_handle(PyObject* capsule, const char* name)
+{
+    void* h = 0;
+    if (!PyCapsule_CheckExact(capsule))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
+        return 0;
+    }
+    if (!(h = PyCapsule_GetPointer(capsule, name)))
+    {
+        PyErr_Format(PyExc_RuntimeError, "Capsule is not of type %s.", name);
+        return 0;
+    }
+    return h;
+}
+
+
 static void vis_block_free(PyObject* capsule)
 {
     int status = 0;
-    oskar_VisBlock* h = (oskar_VisBlock*) PyCapsule_GetPointer(capsule, name);
-    oskar_vis_block_free(h, &status);
-}
-
-
-static oskar_VisBlock* get_handle_block(PyObject* capsule)
-{
-    oskar_VisBlock* h = 0;
-    if (!PyCapsule_CheckExact(capsule))
-    {
-        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
-        return 0;
-    }
-    h = (oskar_VisBlock*) PyCapsule_GetPointer(capsule, name);
-    if (!h)
-    {
-        PyErr_SetString(PyExc_RuntimeError,
-                "Unable to convert PyCapsule object to oskar_VisBlock.");
-        return 0;
-    }
-    return h;
-}
-
-
-static oskar_VisHeader* get_handle_header(PyObject* capsule)
-{
-    oskar_VisHeader* h = 0;
-    if (!PyCapsule_CheckExact(capsule))
-    {
-        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
-        return 0;
-    }
-    h = (oskar_VisHeader*) PyCapsule_GetPointer(capsule, name);
-    if (!h)
-    {
-        PyErr_SetString(PyExc_RuntimeError,
-                "Unable to convert PyCapsule object to oskar_VisHeader.");
-        return 0;
-    }
-    return h;
+    oskar_vis_block_free((oskar_VisBlock*) get_handle(capsule, name), &status);
 }
 
 
@@ -93,7 +71,7 @@ static PyObject* auto_correlations(PyObject* self, PyObject* args)
     PyArrayObject *array = 0;
     npy_intp dims[4];
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
 
     /* Check that auto-correlations exist. */
     if (!oskar_vis_block_has_auto_correlations(h))
@@ -115,6 +93,19 @@ static PyObject* auto_correlations(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* capsule_name(PyObject* self, PyObject* args)
+{
+    PyObject *capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!PyCapsule_CheckExact(capsule))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
+        return 0;
+    }
+    return Py_BuildValue("s", PyCapsule_GetName(capsule));
+}
+
+
 static PyObject* create_from_header(PyObject* self, PyObject* args)
 {
     oskar_VisBlock* h = 0;
@@ -122,7 +113,8 @@ static PyObject* create_from_header(PyObject* self, PyObject* args)
     PyObject *capsule = 0, *header = 0;
     int status = 0;
     if (!PyArg_ParseTuple(args, "O", &header)) return 0;
-    if (!(hdr = get_handle_header(header))) return 0;
+    if (!(hdr = (oskar_VisHeader*) get_handle(header, "oskar_VisHeader")))
+        return 0;
     h = oskar_vis_block_create_from_header(OSKAR_CPU, hdr, &status);
     capsule = PyCapsule_New((void*)h, name,
             (PyCapsule_Destructor)vis_block_free);
@@ -138,7 +130,7 @@ static PyObject* baseline_uu_metres(PyObject* self, PyObject* args)
     PyArrayObject *array = 0;
     npy_intp dims[2];
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
 
     /* Check that cross-correlations exist. */
     if (!oskar_vis_block_has_cross_correlations(h))
@@ -166,7 +158,7 @@ static PyObject* baseline_vv_metres(PyObject* self, PyObject* args)
     PyArrayObject *array = 0;
     npy_intp dims[2];
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
 
     /* Check that cross-correlations exist. */
     if (!oskar_vis_block_has_cross_correlations(h))
@@ -194,7 +186,7 @@ static PyObject* baseline_ww_metres(PyObject* self, PyObject* args)
     PyArrayObject *array = 0;
     npy_intp dims[2];
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
 
     /* Check that cross-correlations exist. */
     if (!oskar_vis_block_has_cross_correlations(h))
@@ -222,7 +214,7 @@ static PyObject* cross_correlations(PyObject* self, PyObject* args)
     PyArrayObject *array = 0;
     npy_intp dims[4];
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
 
     /* Check that cross-correlations exist. */
     if (!oskar_vis_block_has_cross_correlations(h))
@@ -249,7 +241,7 @@ static PyObject* num_baselines(PyObject* self, PyObject* args)
     oskar_VisBlock* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_block_num_baselines(h));
 }
 
@@ -259,7 +251,7 @@ static PyObject* num_channels(PyObject* self, PyObject* args)
     oskar_VisBlock* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_block_num_channels(h));
 }
 
@@ -269,7 +261,7 @@ static PyObject* num_pols(PyObject* self, PyObject* args)
     oskar_VisBlock* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_block_num_pols(h));
 }
 
@@ -279,7 +271,7 @@ static PyObject* num_stations(PyObject* self, PyObject* args)
     oskar_VisBlock* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_block_num_stations(h));
 }
 
@@ -289,7 +281,7 @@ static PyObject* num_times(PyObject* self, PyObject* args)
     oskar_VisBlock* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_block_num_times(h));
 }
 
@@ -299,7 +291,7 @@ static PyObject* start_channel_index(PyObject* self, PyObject* args)
     oskar_VisBlock* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_block_start_channel_index(h));
 }
 
@@ -309,7 +301,7 @@ static PyObject* start_time_index(PyObject* self, PyObject* args)
     oskar_VisBlock* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle_block(capsule))) return 0;
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_block_start_time_index(h));
 }
 
@@ -319,6 +311,8 @@ static PyMethodDef methods[] =
 {
         {"auto_correlations", (PyCFunction)auto_correlations,
                 METH_VARARGS, "auto_correlations()"},
+        {"capsule_name", (PyCFunction)capsule_name,
+                METH_VARARGS, "capsule_name()"},
         {"create_from_header", (PyCFunction)create_from_header,
                 METH_VARARGS, "create_from_header(header)"},
         {"baseline_uu_metres", (PyCFunction)baseline_uu_metres,

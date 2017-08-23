@@ -38,8 +38,8 @@ TEST(settings_types, UInt)
 {
     UnsignedInt i;
     ASSERT_TRUE(i.set_default("1"));
-    ASSERT_STREQ("1", i.get_default().c_str());
-    ASSERT_STREQ("1", i.get_value().c_str());
+    ASSERT_STREQ("1", i.get_default());
+    ASSERT_STREQ("1", i.get_value());
     ASSERT_TRUE(i.is_default());
     ASSERT_TRUE(i.set_value("9"));
     ASSERT_FALSE(i.is_default());

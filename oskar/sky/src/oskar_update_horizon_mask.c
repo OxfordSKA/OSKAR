@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,30 +27,90 @@
  */
 
 #include "sky/oskar_update_horizon_mask.h"
+#include "sky/oskar_update_horizon_mask_cuda.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_update_horizon_mask_f(int num_sources, int* mask,
-        const float* condition)
+void oskar_update_horizon_mask(int num_sources, const oskar_Mem* l,
+        const oskar_Mem* m, const oskar_Mem* n, const double ha0_rad,
+        const double dec0_rad, const double lat_rad, oskar_Mem* mask,
+        int* status)
 {
-    int i;
-    for (i = 0; i < num_sources; ++i)
+    int i, type, location, *mask_;
+    double cos_ha0, sin_dec0, cos_dec0, sin_lat, cos_lat;
+    double ll, mm, nn;
+    if (*status) return;
+    type = oskar_mem_precision(l);
+    location = oskar_mem_location(mask);
+    mask_ = oskar_mem_int(mask, status);
+    cos_ha0  = cos(ha0_rad);
+    sin_dec0 = sin(dec0_rad);
+    cos_dec0 = cos(dec0_rad);
+    sin_lat  = sin(lat_rad);
+    cos_lat  = cos(lat_rad);
+    ll = cos_lat * sin(ha0_rad);
+    mm = sin_lat * cos_dec0 - cos_lat * cos_ha0 * sin_dec0;
+    nn = sin_lat * sin_dec0 + cos_lat * cos_ha0 * cos_dec0;
+    switch (type)
     {
-        mask[i] = mask[i] | (condition[i] > 0.0f);
+    case OSKAR_SINGLE:
+    {
+        float ll_, mm_, nn_;
+        const float *l_, *m_, *n_;
+        l_ = oskar_mem_float_const(l, status);
+        m_ = oskar_mem_float_const(m, status);
+        n_ = oskar_mem_float_const(n, status);
+        ll_ = (float) ll;
+        mm_ = (float) mm;
+        nn_ = (float) nn;
+        if (location == OSKAR_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            oskar_update_horizon_mask_cuda_f(num_sources, l_, m_, n_,
+                    ll_, mm_, nn_, mask_);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else if (location == OSKAR_CPU)
+        {
+            for (i = 0; i < num_sources; ++i)
+                mask_[i] |= ((l_[i] * ll_ + m_[i] * mm_ + n_[i] * nn_) > 0.);
+        }
+        else
+            *status = OSKAR_ERR_BAD_LOCATION;
+        break;
     }
-}
-
-/* Double precision. */
-void oskar_update_horizon_mask_d(int num_sources, int* mask,
-        const double* condition)
-{
-    int i;
-    for (i = 0; i < num_sources; ++i)
+    case OSKAR_DOUBLE:
     {
-        mask[i] = mask[i] | (condition[i] > 0.0);
+        const double *l_, *m_, *n_;
+        l_ = oskar_mem_double_const(l, status);
+        m_ = oskar_mem_double_const(m, status);
+        n_ = oskar_mem_double_const(n, status);
+        if (location == OSKAR_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            oskar_update_horizon_mask_cuda_d(num_sources, l_, m_, n_,
+                    ll, mm, nn, mask_);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else if (location == OSKAR_CPU)
+        {
+            for (i = 0; i < num_sources; ++i)
+                mask_[i] |= ((l_[i] * ll + m_[i] * mm + n_[i] * nn) > 0.);
+        }
+        else
+            *status = OSKAR_ERR_BAD_LOCATION;
+        break;
+    }
+    default:
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        break;
     }
 }
 

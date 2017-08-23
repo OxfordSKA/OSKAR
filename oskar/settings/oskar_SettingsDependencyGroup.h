@@ -64,7 +64,7 @@ class OSKAR_SETTINGS_EXPORT SettingsDependencyGroup
     enum GroupLogic { UNDEF = -1, AND, OR };
 
     /*! Constructor */
-    SettingsDependencyGroup(const std::string& group_logic,
+    SettingsDependencyGroup(const char* group_logic,
                             SettingsDependencyGroup* parent = 0);
 
     /*! Destructor */
@@ -74,7 +74,7 @@ class OSKAR_SETTINGS_EXPORT SettingsDependencyGroup
     int num_children() const;
 
     /*! Add a child group. */
-    SettingsDependencyGroup* add_child(const std::string& logic = "AND");
+    SettingsDependencyGroup* add_child(const char* logic = 0);
 
     /*! Return a pointer to the child group with index @p i */
     SettingsDependencyGroup* get_child(int i);
@@ -92,8 +92,8 @@ class OSKAR_SETTINGS_EXPORT SettingsDependencyGroup
     GroupLogic group_logic() const;
 
     /*! Add a dependency to the group */
-    void add_dependency(const std::string& key, const std::string& value,
-                        const std::string& logic = std::string());
+    void add_dependency(const char* key, const char* value,
+                        const char* logic = 0);
 
     /*! Add a dependency to the group */
     void add_dependency(const SettingsDependency& dep);
@@ -103,7 +103,7 @@ class OSKAR_SETTINGS_EXPORT SettingsDependencyGroup
 
     /*! Convert a group logic string a group logic enum value. */
     static SettingsDependencyGroup::GroupLogic string_to_group_logic(
-                    const std::string& s);
+                    const char* s);
 
  private:
     SettingsDependencyGroup* parent_;

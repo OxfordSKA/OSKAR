@@ -32,12 +32,11 @@
 #ifndef OSKAR_SETTINGS_TYPE_UINT_H_
 #define OSKAR_SETTINGS_TYPE_UINT_H_
 
-#include "settings/types/oskar_AbstractSettingsType.h"
-
-
 /**
  * @file oskar_UnsignedInt.h
  */
+
+#include "settings/types/oskar_AbstractSettingsType.h"
 
 namespace oskar {
 
@@ -54,13 +53,11 @@ class OSKAR_SETTINGS_EXPORT UnsignedInt : public AbstractSettingsType
 {
 public:
     UnsignedInt();
-    virtual ~UnsignedInt();
+    virtual ~UnsignedInt() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
     bool is_default() const;
 
     unsigned int value() const { return value_; }

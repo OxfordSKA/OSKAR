@@ -167,7 +167,7 @@ int oskar_imager_num_w_planes(const oskar_Imager* h)
 
 const char* oskar_imager_output_root(const oskar_Imager* h)
 {
-    return h->image_root;
+    return h->output_root;
 }
 
 
@@ -467,16 +467,20 @@ void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
 
 
 void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
-        char* const* filenames, int* status)
+        const char* const* filenames, int* status)
 {
     int i;
+    char* ptr;
+    size_t root_len;
     if (*status) return;
     for (i = 0; i < h->num_files; ++i)
         free(h->input_files[i]);
     free(h->input_files);
+    free(h->input_root);
     h->input_files = 0;
+    h->input_root = 0;
     h->num_files = num_files;
-    if (num_files == 0) return;
+    if (num_files == 0 || !filenames) return;
     h->input_files = (char**) calloc(num_files, sizeof(char*));
     for (i = 0; i < num_files; ++i)
     {
@@ -488,6 +492,11 @@ void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
             strcpy(h->input_files[i], filenames[i]);
         }
     }
+    if (!filenames[0]) return;
+    ptr = strrchr(filenames[0], '.');
+    root_len = ptr ? (ptr - filenames[0]) : strlen(filenames[0]);
+    h->input_root = (char*) calloc(1 + root_len, 1);
+    memcpy(h->input_root, filenames[0], root_len);
 }
 
 
@@ -513,13 +522,13 @@ void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
 void oskar_imager_set_output_root(oskar_Imager* h, const char* filename)
 {
     int len = 0;
-    free(h->image_root);
-    h->image_root = 0;
+    free(h->output_root);
+    h->output_root = 0;
     if (filename) len = strlen(filename);
     if (len > 0)
     {
-        h->image_root = calloc(1 + len, 1);
-        strcpy(h->image_root, filename);
+        h->output_root = calloc(1 + len, 1);
+        strcpy(h->output_root, filename);
     }
 }
 
@@ -625,8 +634,8 @@ void oskar_imager_set_vis_frequency(oskar_Imager* h,
     h->vis_freq_start_hz = ref_hz;
     h->freq_inc_hz = inc_hz;
     if (!h->planes)
-        update_set(ref_hz, inc_hz,
-                num, &(h->num_sel_freqs), &(h->sel_freqs), 0.01,
+        update_set(ref_hz, inc_hz, num,
+                &(h->num_sel_freqs), &(h->sel_freqs), 0.01,
                 h->freq_min_hz, h->freq_max_hz);
 }
 
@@ -680,6 +689,13 @@ void oskar_imager_set_vis_phase_centre(oskar_Imager* h,
 void oskar_imager_set_num_w_planes(oskar_Imager* h, int value)
 {
     h->num_w_planes = value;
+    if (value > 0)
+    {
+        h->ww_max = 0.0;
+        h->ww_min = 0.0;
+        h->ww_points = 0;
+        h->ww_rms = 0.0;
+    }
 }
 
 

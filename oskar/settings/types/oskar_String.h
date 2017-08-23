@@ -52,21 +52,16 @@ namespace oskar {
 class OSKAR_SETTINGS_EXPORT String : public AbstractSettingsType
 {
 public:
-    String();
-    virtual ~String();
+    String() {}
+    virtual ~String() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
     bool is_default() const;
 
     bool operator==(const String& other) const;
-    bool operator>(const String& other) const;
-
-private:
-    std::string default_, value_;
+    bool operator>(const String&) const { return false; }
 };
 
 } /* namespace oskar */

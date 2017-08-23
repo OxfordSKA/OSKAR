@@ -28,6 +28,7 @@ set(math_SRC
     src/oskar_linspace.c
     src/oskar_matrix_multiply.c
     src/oskar_meshgrid.c
+    src/oskar_prefix_sum.c
     src/oskar_random_broken_power_law.c
     src/oskar_random_gaussian.c
     src/oskar_random_power_law.c
@@ -48,6 +49,7 @@ if (CUDA_FOUND)
         src/oskar_dftw_o2c_2d_cuda.cu
         src/oskar_dftw_o2c_3d_cuda.cu
         src/oskar_gaussian_cuda.cu
+        src/oskar_prefix_sum_cuda.cu
     )
 endif()
 

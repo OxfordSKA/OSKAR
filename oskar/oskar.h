@@ -29,13 +29,16 @@
 #ifndef OSKAR_H_
 #define OSKAR_H_
 
+#include <apps/oskar_apps.h>
 #include <binary/oskar_binary.h>
 #include <beam_pattern/oskar_beam_pattern.h>
 #include <imager/oskar_imager.h>
 #include <mem/oskar_mem.h>
 #include <ms/oskar_measurement_set.h>
 #include <telescope/oskar_telescope.h>
-#include <simulator/oskar_simulator.h>
+#include <interferometer/oskar_interferometer.h>
+#include <settings/oskar_SettingsNode.h>
+#include <settings/oskar_SettingsTree.h>
 #include <sky/oskar_sky.h>
 #include <utility/oskar_get_error_string.h>
 #include <utility/oskar_timer.h>

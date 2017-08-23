@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import numpy
+from __future__ import print_function
 import os
-import oskar
 import time
+import numpy
+import oskar
 
 if __name__ == '__main__':
     # Global options.
@@ -44,9 +45,10 @@ if __name__ == '__main__':
     imagers[0].set(weighting='Natural', output_root=output_root+'_Natural')
     imagers[1].set(weighting='Uniform', output_root=output_root+'_Uniform')
 
-    # Set up the basic simulator.
-    simulator = oskar.Simulator(precision)
+    # Set up the basic interferometer simulator.
+    simulator = oskar.Interferometer(precision)
     simulator.set_settings_path(os.path.abspath(__file__))
+    simulator.set_max_sources_per_chunk(500)
     simulator.set_sky_model(sky)
     simulator.set_telescope_model(tel)
     simulator.set_observation_frequency(100.0e6)
@@ -56,7 +58,7 @@ if __name__ == '__main__':
 
     # Simulate and image visibilities.
     start = time.time()
-    print('Running simulator...')
+    print('Running interferometer simulator...')
     simulator.run()
     for i, imager in enumerate(imagers):
         print('Running imager %d...' % i)

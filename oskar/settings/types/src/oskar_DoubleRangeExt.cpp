@@ -35,28 +35,26 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
-#include <iostream>
 
 using namespace std;
+using ttl::var::get;
 
 namespace oskar {
 
 DoubleRangeExt::DoubleRangeExt()
-: min_(-DBL_MAX), max_(DBL_MAX), format_(AUTO), value_(0.0), default_(0.0)
 {
+    (void) init(string());
 }
 
-DoubleRangeExt::~DoubleRangeExt()
-{
-}
-
-bool DoubleRangeExt::init(const std::string& s)
+bool DoubleRangeExt::init(const string& s)
 {
     // Reset the value.
     ext_min_.clear();
     ext_max_.clear();
     value_ = 0.0;
     default_ = 0.0;
+    str_default_ = "0.0";
+    str_value_ = "0.0";
 
     // Extract range from the parameter CSV string.
     // Parameters, p, for DoubleRangeExt should be length 3 or 4.
@@ -67,11 +65,8 @@ bool DoubleRangeExt::init(const std::string& s)
     //  - For the double range parameters, p[0] and p[1], special values
     //    of 'MIN' and 'MAX' map to -DBL_MAX and DBL_MIN respectively.
     bool ok = true;
-    std::vector<std::string> p;
-    p = oskar_settings_utility_string_get_type_params(s);
-    if (p.size() < 3u || p.size() > 4u) {
-        return false;
-    }
+    vector<string> p = oskar_settings_utility_string_get_type_params(s);
+    if (p.size() < 3u || p.size() > 4u) return false;
     if (p[0] == "-DBL_MAX" || p[0] == "-MAX")
         min_ = -DBL_MAX;
     else if (p[0] == "DBL_MIN" || p[0] == "-DBL_MIN"
@@ -91,157 +86,81 @@ bool DoubleRangeExt::init(const std::string& s)
     return ok;
 }
 
-bool DoubleRangeExt::set_default(const std::string& value)
+bool DoubleRangeExt::set_default(const string& value)
 {
     bool ok = from_string_(default_, value);
-    if (ok) {
-        if (default_.which() == DOUBLE)
-            format_ = (value.find_first_of('e') != std::string::npos) ? EXPONENT : AUTO;
-        value_ = default_;
-    }
+    if (default_.which() == DOUBLE)
+        format_ = (value.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+    str_default_ = to_string_(default_);
+    if (ok)
+        set_value(value);
     return ok;
 }
 
-std::string DoubleRangeExt::get_default() const
-{
-    return to_string_(default_);
-}
-
-bool DoubleRangeExt::set_value(const std::string& value)
+bool DoubleRangeExt::set_value(const string& value)
 {
     bool ok = from_string_(value_, value);
     if (value_.which() == DOUBLE)
-        format_ = (value.find_first_of('e') != std::string::npos) ? EXPONENT : AUTO;
+        format_ = (value.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+    str_value_ = to_string_(value_);
     return ok;
-}
-
-std::string DoubleRangeExt::get_value() const
-{
-    return to_string_(value_);
 }
 
 double DoubleRangeExt::value() const
 {
-    if (is_max()) return max_;
-    if (is_min()) return min_;
-    return ttl::var::get<double>(value_);
-}
-
-double DoubleRangeExt::default_value() const
-{
-    if (default_.which() == STRING &&
-            ttl::var::get<std::string>(default_) == ext_max_)
+    if (value_.which() == STRING && get<string>(value_) == ext_max_)
         return max_;
-    if (default_.which() == STRING &&
-            ttl::var::get<std::string>(default_) == ext_min_)
+    if (value_.which() == STRING && get<string>(value_) == ext_min_)
         return min_;
-    return ttl::var::get<double>(default_);
+    return get<double>(value_);
 }
-
 
 bool DoubleRangeExt::is_default() const
 {
-    if (value_.is_singular() || default_.is_singular()) return false;
-    if (value_.which() == default_.which()) {
-        if (value_.which() == DOUBLE) {
-            if (fabs(ttl::var::get<double>(value_) -
-                     ttl::var::get<double>(default_)) < DBL_MIN) {
-                return true;
-            }
-        }
-        else if (value_.which() == STRING) {
-            return ttl::var::get<std::string>(value_) ==
-                            ttl::var::get<std::string>(default_);
-        }
-    }
-    return false;
-}
-
-bool DoubleRangeExt::set_value(double d)
-{
-    return from_double_(value_, d);
-}
-
-bool DoubleRangeExt::set_default(double d)
-{
-    bool ok = from_double_(default_, d);
-    if (ok) {
-        value_ = default_;
-    }
-    return ok;
+    return compare_(value_, default_);
 }
 
 bool DoubleRangeExt::operator==(const DoubleRangeExt& other) const
 {
-    if (value_.is_singular() || other.value_.is_singular())
-        return false;
-
-    if (value_.which() == other.value_.which()) {
-        if (value_.which() == DOUBLE) {
-            return (fabs(ttl::var::get<double>(value_) -
-                         ttl::var::get<double>(other.value_)) < DBL_MIN);
-        }
-        else if (value_.which() == STRING) {
-            return ttl::var::get<std::string>(value_) ==
-                            ttl::var::get<std::string>(other.value_);
-        }
-    }
-    return false;
+    return compare_(value_, other.value_);
 }
 
 bool DoubleRangeExt::operator>(const DoubleRangeExt& other) const
 {
-    if (value_.is_singular() || other.value_.is_singular())
-        return false;
-    if (value_.which() == other.value_.which()) {
-        if (value_.which() == DOUBLE) {
-            return ttl::var::get<double>(value_) >
-                ttl::var::get<double>(other.value_);
-        }
-        else if (value_.which() == STRING) {
-            return false;
-        }
-    }
+    if (value_.is_singular() || other.value_.is_singular()) return false;
+    if (value_.which() != other.value_.which()) return false;
+    if (value_.which() == DOUBLE)
+        return get<double>(value_) > get<double>(other.value_);
     return false;
 }
 
-bool DoubleRangeExt::from_double_(Value& value, double d) const
+bool DoubleRangeExt::compare_(const Value& a, const Value& b)
 {
-    if (d < min_ && !ext_min_.empty()) {
-        value = ext_min_;
-    }
-    else if (d > max_ && !ext_max_.empty()) {
-        value = ext_max_;
-    }
-    else {
-        if (d >= max_) value = max_;
-        else if (d <= min_) value = min_;
-        else value = d;
-    }
-    return true;
+    if (a.is_singular() || b.is_singular()) return false;
+    if (a.which() != b.which()) return false;
+    if (a.which() == DOUBLE)
+        return (fabs(get<double>(a) - get<double>(b)) < DBL_MIN);
+    if (a.which() == STRING)
+        return get<string>(a) == get<string>(b);
+    return false;
 }
 
-bool DoubleRangeExt::from_string_(Value& value, const std::string& s) const
+bool DoubleRangeExt::from_string_(Value& value, const string& s) const
 {
-    if (s.empty())
-        return false;
+    if (s.empty()) return false;
 
-    if (s == ext_min_) {
+    if (s == ext_min_)
         value = ext_min_;
-    }
-    else if (s == ext_max_) {
+    else if (s == ext_max_)
         value = ext_max_;
-    }
     else {
         bool ok = true;
         double v = oskar_settings_utility_string_to_double(s, &ok);
         if (!ok) return false;
-        if (v < min_ && !ext_min_.empty()) {
+        if (v < min_ && !ext_min_.empty())
             value = ext_min_;
-        }
-        else if (v > max_ && !ext_max_.empty()) {
+        else if (v > max_ && !ext_max_.empty())
             value = ext_max_;
-        }
         else {
             if (v >= max_) value = max_;
             else if (v <= min_) value = min_;
@@ -251,23 +170,23 @@ bool DoubleRangeExt::from_string_(Value& value, const std::string& s) const
     return true;
 }
 
-std::string DoubleRangeExt::to_string_(const Value& value) const
+string DoubleRangeExt::to_string_(const Value& value) const
 {
-    if (value.is_singular()) return std::string();
+    if (value.is_singular()) return string();
     if (value.which() == DOUBLE) {
-        double v = ttl::var::get<double>(value);
+        double v = get<double>(value);
         int n = 16;
         if (v != 0.0 && v > 1.0) {
             n -= (floor(log10(v)) + 1);
         }
-        std::string s = oskar_settings_utility_double_to_string_2(v, format_ == AUTO ? 'g' : 'e');
+        string s = oskar_settings_utility_double_to_string_2(v,
+                format_ == AUTO ? 'g' : 'e');
         return s;
     }
     else if (value.which() == STRING) {
-        return ttl::var::get<std::string>(value);
+        return get<string>(value);
     }
-    return std::string();
+    return string();
 }
 
 } // namespace oskar
-

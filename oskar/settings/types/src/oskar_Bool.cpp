@@ -32,63 +32,42 @@
 #include "settings/oskar_settings_utility_string.h"
 #include "settings/types/oskar_Bool.h"
 
-#include <sstream>
-
 namespace oskar {
 
 Bool::Bool()
-: default_(false), value_(false)
 {
-}
-
-Bool::~Bool()
-{
+    (void) init(std::string());
 }
 
 bool Bool::init(const std::string& /*s*/)
 {
     default_ = false;
     value_ = false;
+    str_default_ = "false";
+    str_value_ = "false";
     return true;
 }
 
 bool Bool::set_default(const std::string& s)
 {
     default_ = oskar_settings_utility_string_starts_with(s, "TRUE", false);
-    value_ = default_;
+    str_default_ = default_ ? "true" : "false";
+    set_value(s);
     return true;
-}
-
-std::string Bool::get_default() const
-{
-    return default_ ? "true" : "false";
 }
 
 bool Bool::set_value(const std::string& s)
 {
     value_ = oskar_settings_utility_string_starts_with(s, "TRUE", false);
+    str_value_ = value_ ? "true" : "false";
     return true;
 }
 
-std::string Bool::get_value() const
-{
-    return value_ ? "true" : "false";
-}
-
-bool Bool::is_default() const
-{
-    return value_ == default_;
-}
+bool Bool::is_default() const { return value_ == default_; }
 
 bool Bool::operator==(const Bool& other) const
 {
     return value_ == other.value_;
 }
 
-bool Bool::operator>(const Bool&) const
-{
-    return false;
-}
-
 } // namespace oskar
-

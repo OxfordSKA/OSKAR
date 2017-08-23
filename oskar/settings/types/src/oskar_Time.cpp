@@ -36,45 +36,41 @@
 #include <iostream>
 #include <cmath>
 #include <cfloat>
-#include <iostream>
 
 using namespace std;
 
 namespace oskar {
 
+Time::Time()
+{
+    (void) init(string());
+}
+
 bool Time::init(const string& /*s*/)
 {
     default_.clear();
     value_.clear();
+    str_default_ = to_string(default_);
+    str_value_ = to_string(value_);
     return true;
 }
 
 bool Time::set_default(const string& val)
 {
     bool ok = from_string(val, default_);
-    if (ok) {
-        value_ = default_;
-    }
-    else {
-        default_.clear();
-        value_.clear();
-    }
+    str_default_ = to_string(default_);
+    if (ok)
+        set_value(val);
+    else
+        init(string());
     return ok;
-}
-
-string Time::get_default() const
-{
-    return to_string(default_);
 }
 
 bool Time::set_value(const string& val)
 {
-    return from_string(val, value_);
-}
-
-string Time::get_value() const
-{
-    return to_string(value_);
+    bool ok = from_string(val, value_);
+    str_value_ = to_string(value_);
+    return ok;
 }
 
 bool Time::is_default() const
@@ -107,7 +103,7 @@ bool Time::from_string(const string& s, Value& val)
     bool ok = true;
     if (s.empty())
     {
-        val.clear();
+        //val.clear();
         return false;
     }
     // s.zzzzzzzzz
@@ -125,23 +121,17 @@ bool Time::from_string(const string& s, Value& val)
         istringstream ss(s);
         string token;
         getline(ss, token, ':');
-        val.hours = oskar_settings_utility_string_to_int(token);
-        if (val.hours < 0) {
-            val.hours = 0;
-            return false;
-        }
+        int hours = oskar_settings_utility_string_to_int(token);
+        if (hours < 0) return false;
         getline(ss, token, ':');
-        val.minutes = oskar_settings_utility_string_to_int(token);
-        if (val.minutes < 0 || val.minutes > 59) {
-            val.minutes = 0;
-            return false;
-        }
+        int minutes = oskar_settings_utility_string_to_int(token);
+        if (minutes < 0 || minutes > 59) return false;
         getline(ss, token);
-        val.seconds = oskar_settings_utility_string_to_double(token, &ok);
-        if (val.seconds < 0.0 || val.seconds >= 60.0) {
-            val.seconds = 0.0;
-            return false;
-        }
+        double seconds = oskar_settings_utility_string_to_double(token, &ok);
+        if (seconds < 0.0 || seconds >= 60.0) return false;
+        val.hours = hours;
+        val.minutes = minutes;
+        val.seconds = seconds;
         val.format = TIME_STRING;
     }
     return true;
@@ -172,4 +162,3 @@ string Time::to_string(const Value& val)
 }
 
 } // namespace oskar
-

@@ -39,8 +39,8 @@ def make_image(uu_m, vv_m, amps, freq_hz, im_size, cell_size_uv_m,
     using a grid pixel size rather than image pixel size or field-of-view.
 
     Args:
-        uu_m (array_like, float): Baseline uu coordiantes, in metres
-        vv_m (array_like, flaot): Baseline vv coordiantes, in metres
+        uu_m (array_like, float): Baseline uu coordinates, in metres
+        vv_m (array_like, float): Baseline vv coordinates, in metres
         amps (array_like, complex): Visibility amplitudes
         freq_hz (float): Observation frequency, in Hz
         im_size (int): Image dimension (assumes square image)
@@ -66,7 +66,7 @@ def make_image(uu_m, vv_m, amps, freq_hz, im_size, cell_size_uv_m,
                output_root=image_root_name)
     imager.set_vis_frequency(freq_hz)
     imager.set_vis_phase_centre(ra_deg, dec_deg)
-    imager_data = imager.run(uu_m, vv_m, ww_m, amps, return_grids=True)
+    imager_data = imager.run(uu_m, vv_m, ww_m, amps, return_grids=1)
     image_grid = imager_data['grids'].squeeze()
     return image_grid, '%s_%s.fits' % (image_root_name, image_type)
 

@@ -91,4 +91,13 @@ double oskar_settings_utility_string_to_double(const std::string& s, bool *ok);
 std::string oskar_format_string(const std::string fmt, ...);
 #endif
 
+// Returns true if the two vectors are the same.
+template <typename T>
+static bool compare_vectors(const std::vector<T>& a, const std::vector<T>& b)
+{
+    if (a.size() != b.size()) return false;
+    for (size_t i = 0; i < a.size(); ++i) if (a[i] != b[i]) return false;
+    return true;
+}
+
 #endif /* OSKAR_SETTINGS_UTILITY_STRING_HPP_ */

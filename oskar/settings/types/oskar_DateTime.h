@@ -83,14 +83,12 @@ public:
     };
 
  public:
-    DateTime() {}
+    DateTime();
     virtual ~DateTime() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
     bool is_default() const;
 
     Value value() const { return value_; }
@@ -121,8 +119,7 @@ public:
     static bool parse_time(const std::string& s, Value& val);
 
  private:
-    Value value_;
-    Value default_;
+    Value default_, value_;
 };
 
 } /* namespace oskar */

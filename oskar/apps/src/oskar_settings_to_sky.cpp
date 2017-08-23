@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,8 @@
 
 #include "math/oskar_cmath.h"
 #include <cstdlib> /* For srand() */
-#include <string>
-#include <vector>
+#include <cstring>
 
-using std::string;
-using std::vector;
 using oskar::SettingsTree;
 
 #define D2R M_PI/180.0
@@ -75,12 +72,12 @@ static void set_up_pol(oskar_Sky* sky, SettingsTree* s, int* status);
 
 oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
 {
-    string filename;
-    if (*status) return 0;
+    const char* filename;
+    if (*status || !s) return 0;
     s->clear_group();
 
     /* Create an empty sky model. */
-    oskar_log_section(log, 'M', "Sky model");
+    if (log) oskar_log_section(log, 'M', "Sky model set-up");
     int type = s->to_int("simulator/double_precision", status) ?
             OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_Sky* sky = oskar_sky_create(type, OSKAR_CPU, 0, status);
@@ -106,7 +103,7 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
     int num_sources = oskar_sky_num_sources(sky);
     if (num_sources == 0)
     {
-        oskar_log_warning(log, "Sky model contains no sources.");
+        if (log) oskar_log_warning(log, "Sky model contains no sources.");
         s->clear_group();
         return sky;
     }
@@ -118,7 +115,7 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
         double std_dev = s->to_double("spectral_index/std_dev", status);
         double ref = s->to_double("spectral_index/ref_frequency_hz", status);
         int seed = s->to_int("spectral_index/seed", status);
-        oskar_log_message(log, 'M', 0,
+        if (log) oskar_log_message(log, 'M', 0,
                 "Overriding source spectral index values...");
         for (int i = 0; i < num_sources; ++i)
         {
@@ -127,7 +124,7 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
             val[0] = std_dev * val[0] + mean;
             oskar_sky_set_spectral_index(sky, i, ref, val[0], status);
         }
-        oskar_log_message(log, 'M', 1, "done.");
+        if (log) oskar_log_message(log, 'M', 1, "done.");
     }
 
     if (*status)
@@ -136,26 +133,22 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
         return sky;
     }
 
-    /* Print summary data. */
-    oskar_log_message(log, 'M', 0, "Sky model summary");
-    oskar_log_value(log, 'M', 1, "Num. sources", "%d", num_sources);
-
     /* Write text file. */
     filename = s->to_string("output_text_file", status);
-    if (filename.length() > 0 && !*status)
+    if (filename && strlen(filename) > 0 && !*status)
     {
-        oskar_log_message(log, 'M', 1,
-                "Writing sky model text file: %s", filename.c_str());
-        oskar_sky_save(filename.c_str(), sky, status);
+        if (log) oskar_log_message(log, 'M', 1,
+                "Writing sky model text file: %s", filename);
+        oskar_sky_save(filename, sky, status);
     }
 
     /* Write binary file. */
     filename = s->to_string("output_binary_file", status);
-    if (filename.length() > 0 && !*status)
+    if (filename && strlen(filename) > 0 && !*status)
     {
-        oskar_log_message(log, 'M', 1,
-                "Writing sky model binary file: %s", filename.c_str());
-        oskar_sky_write(filename.c_str(), sky, status);
+        if (log) oskar_log_message(log, 'M', 1,
+                "Writing sky model binary file: %s", filename);
+        oskar_sky_write(filename, sky, status);
     }
 
     s->clear_group();
@@ -166,40 +159,38 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
 static void load_osm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
+    int num_files = 0;
     s->begin_group("oskar_sky_model");
-    vector<string> files = s->to_string_list("file", status);
-    for (size_t i = 0; i < files.size(); ++i)
+    const char* const* files = s->to_string_list("file", &num_files, status);
+    for (int i = 0; i < num_files; ++i)
     {
+        int binary_file_error = 0;
         if (*status) break;
-        string filename = files[i];
-        if (!filename.empty())
+        if (!files[i] || strlen(files[i]) == 0) continue;
+
+        /* Load into a temporary sky model. */
+        if (log) oskar_log_message(log, 'M', 0,
+                "Loading OSKAR sky model file '%s' ...", files[i]);
+
+        /* Try to read sky model as a binary file first. */
+        /* If this fails, read it as an ASCII file. */
+        oskar_Sky* t = oskar_sky_read(files[i],
+                OSKAR_CPU, &binary_file_error);
+        if (binary_file_error)
+            t = oskar_sky_load(files[i],
+                    oskar_sky_precision(sky), status);
+
+        /* Apply filters and extended source over-ride. */
+        set_up_filter(t, s, ra0, dec0, status);
+        set_up_extended(t, s, status);
+
+        /* Append to sky model. */
+        if (!*status)
         {
-            int binary_file_error = 0;
-
-            /* Load into a temporary sky model. */
-            oskar_log_message(log, 'M', 0,
-                    "Loading OSKAR sky model file '%s' ...", filename.c_str());
-
-            /* Try to read sky model as a binary file first. */
-            /* If this fails, read it as an ASCII file. */
-            oskar_Sky* t = oskar_sky_read(filename.c_str(),
-                    OSKAR_CPU, &binary_file_error);
-            if (binary_file_error)
-                t = oskar_sky_load(filename.c_str(),
-                        oskar_sky_precision(sky), status);
-
-            /* Apply filters and extended source over-ride. */
-            set_up_filter(t, s, ra0, dec0, status);
-            set_up_extended(t, s, status);
-
-            /* Append to sky model. */
-            if (!*status)
-            {
-                oskar_sky_append(sky, t, status);
-                oskar_log_message(log, 'M', 1, "done.");
-            }
-            oskar_sky_free(t, status);
+            oskar_sky_append(sky, t, status);
+            if (log) oskar_log_message(log, 'M', 1, "done.");
         }
+        oskar_sky_free(t, status);
     }
     s->end_group();
 }
@@ -208,13 +199,13 @@ static void load_osm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
 static void load_gsm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
-    string filename = s->to_string("gsm/file", status);
-    if (*status || filename.empty()) return;
+    const char* filename = s->to_string("gsm/file", status);
+    if (*status || !filename || strlen(filename) == 0) return;
 
     /* Load the file. */
-    oskar_log_message(log, 'M', 0, "Loading GSM data...");
+    if (log) oskar_log_message(log, 'M', 0, "Loading GSM data...");
     oskar_Mem* data = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
-    int num_pixels = (int) oskar_mem_load_ascii(filename.c_str(),
+    int num_pixels = (int) oskar_mem_load_ascii(filename,
             1, status, data, "");
 
     /* Compute nside from npix. */
@@ -247,7 +238,7 @@ static void load_gsm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
     if (!*status)
     {
         oskar_sky_append(sky, t, status);
-        oskar_log_message(log, 'M', 1, "done.");
+        if (log) oskar_log_message(log, 'M', 1, "done.");
     }
     oskar_sky_free(t, status);
 }
@@ -256,25 +247,25 @@ static void load_gsm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
 static void load_fits_image(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
+    int num_files = 0;
     s->begin_group("fits_image");
-    vector<string> files = s->to_string_list("file", status);
-    string default_map_units = s->to_string("default_map_units", status);
+    const char* const* files = s->to_string_list("file", &num_files, status);
+    const char* default_map_units = s->to_string("default_map_units", status);
     int override_map_units = s->to_int("override_map_units", status);
     double min_peak_fraction = s->to_double("min_peak_fraction", status);
     double min_abs_val = s->to_double("min_abs_val", status);
     double spectral_index = s->to_double("spectral_index", status);
-    for (size_t i = 0; i < files.size(); ++i)
+    for (int i = 0; i < num_files; ++i)
     {
         if (*status) break;
-        string filename = files[i];
-        if (filename.empty()) continue;
-        oskar_log_message(log, 'M', 0,
-                "Loading FITS file '%s' ...", filename.c_str());
+        if (!files[i] || strlen(files[i]) == 0) continue;
+        if (log) oskar_log_message(log, 'M', 0,
+                "Loading FITS file '%s' ...", files[i]);
 
         /* Convert the image into a sky model. */
         oskar_Sky* t = oskar_sky_from_fits_file(oskar_sky_precision(sky),
-                filename.c_str(), min_peak_fraction, min_abs_val,
-                default_map_units.c_str(), override_map_units,
+                files[i], min_peak_fraction, min_abs_val,
+                default_map_units, override_map_units,
                 0.0, spectral_index, status);
         if (*status == OSKAR_ERR_BAD_UNITS)
             oskar_log_error(log, "Units error: Need K, mK, Jy/pixel or "
@@ -287,7 +278,7 @@ static void load_fits_image(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         if (!*status)
         {
             oskar_sky_append(sky, t, status);
-            oskar_log_message(log, 'M', 1, "done.");
+            if (log) oskar_log_message(log, 'M', 1, "done.");
         }
         oskar_sky_free(t, status);
     }
@@ -298,28 +289,28 @@ static void load_fits_image(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
 static void load_healpix_fits(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
+    int num_files = 0;
     s->begin_group("healpix_fits");
-    vector<string> files = s->to_string_list("file", status);
-    string default_map_units = s->to_string("default_map_units", status);
+    const char* const* files = s->to_string_list("file", &num_files, status);
+    const char* default_map_units = s->to_string("default_map_units", status);
     int override_map_units = s->to_int("override_map_units", status);
     double min_peak_fraction = s->to_double("min_peak_fraction", status);
     double min_abs_val = s->to_double("min_abs_val", status);
     double spectral_index = s->to_double("spectral_index", status);
     double freq_hz = s->to_double("freq_hz", status);
-    for (size_t i = 0; i < files.size(); ++i)
+    for (int i = 0; i < num_files; ++i)
     {
         if (*status) break;
-        string filename = files[i];
-        if (filename.empty()) continue;
+        if (!files[i] || strlen(files[i]) == 0) continue;
 
         /* Read the data from file. */
-        oskar_log_message(log, 'M', 0,
-                "Loading HEALPix FITS file '%s' ...", filename.c_str());
+        if (log) oskar_log_message(log, 'M', 0,
+                "Loading HEALPix FITS file '%s' ...", files[i]);
 
         /* Convert the image into a sky model. */
         oskar_Sky* t = oskar_sky_from_fits_file(oskar_sky_precision(sky),
-                filename.c_str(), min_peak_fraction, min_abs_val,
-                default_map_units.c_str(), override_map_units,
+                files[i], min_peak_fraction, min_abs_val,
+                default_map_units, override_map_units,
                 freq_hz, spectral_index, status);
         if (*status == OSKAR_ERR_BAD_UNITS)
             oskar_log_error(log, "Units error: Need K, mK, Jy/pixel or "
@@ -333,7 +324,7 @@ static void load_healpix_fits(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         if (!*status)
         {
             oskar_sky_append(sky, t, status);
-            oskar_log_message(log, 'M', 1, "done.");
+            if (log) oskar_log_message(log, 'M', 1, "done.");
         }
         oskar_sky_free(t, status);
     }
@@ -350,7 +341,8 @@ static void gen_grid(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         return;
 
     /* Generate a sky model containing the grid. */
-    oskar_log_message(log, 'M', 0, "Generating source grid positions...");
+    if (log)
+        oskar_log_message(log, 'M', 0, "Generating source grid positions...");
     s->begin_group("generator/grid");
     double fov_rad = s->to_double("fov_deg", status) * D2R;
     double mean_flux_jy = s->to_double("mean_flux_jy", status);
@@ -368,7 +360,7 @@ static void gen_grid(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
     if (!*status)
     {
         oskar_sky_append(sky, t, status);
-        oskar_log_message(log, 'M', 1, "done.");
+        if (log) oskar_log_message(log, 'M', 1, "done.");
     }
     oskar_sky_free(t, status);
 }
@@ -383,7 +375,8 @@ static void gen_healpix(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         return;
 
     /* Generate the new positions into a temporary sky model. */
-    oskar_log_message(log, 'M', 0, "Generating HEALPix source positions...");
+    if (log)
+        oskar_log_message(log, 'M', 0, "Generating HEALPix source positions...");
     int npix = 12 * nside * nside;
     int type = oskar_sky_precision(sky);
     oskar_Sky* t = oskar_sky_create(type, OSKAR_CPU, npix, status);
@@ -407,7 +400,7 @@ static void gen_healpix(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
     if (!*status)
     {
         oskar_sky_append(sky, t, status);
-        oskar_log_message(log, 'M', 1, "done.");
+        if (log) oskar_log_message(log, 'M', 1, "done.");
     }
     oskar_sky_free(t, status);
 }
@@ -423,7 +416,7 @@ static void gen_rpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         return;
 
     /* Generate the sources into a temporary sky model. */
-    oskar_log_message(log, 'M', 0,
+    if (log) oskar_log_message(log, 'M', 0,
             "Generating random power law source distribution...");
     s->begin_group("generator/random_power_law");
     double flux_min = s->to_double("flux_min", status);
@@ -442,7 +435,7 @@ static void gen_rpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
     if (!*status)
     {
         oskar_sky_append(sky, t, status);
-        oskar_log_message(log, 'M', 1, "done.");
+        if (log) oskar_log_message(log, 'M', 1, "done.");
     }
     oskar_sky_free(t, status);
 }
@@ -458,7 +451,7 @@ static void gen_rbpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         return;
 
     /* Generate the sources into a temporary sky model. */
-    oskar_log_message(log, 'M', 0,
+    if (log) oskar_log_message(log, 'M', 0,
             "Generating random broken power law source distribution...");
     s->begin_group("generator/random_broken_power_law");
     double flux_min = s->to_double("flux_min", status);
@@ -491,7 +484,7 @@ static void gen_rbpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
     if (!*status)
     {
         oskar_sky_append(sky, t, status);
-        oskar_log_message(log, 'M', 1, "done.");
+        if (log) oskar_log_message(log, 'M', 1, "done.");
     }
     oskar_sky_free(t, status);
 }

@@ -31,61 +31,42 @@
 
 #include "settings/oskar_settings_utility_string.h"
 #include "settings/types/oskar_RandomSeed.h"
-#include <climits>
-#include <vector>
 
 namespace oskar {
 
 RandomSeed::RandomSeed()
-: default_(1), value_(1)
 {
-}
-
-RandomSeed::~RandomSeed()
-{
+    (void) init(std::string());
 }
 
 bool RandomSeed::init(const std::string& /*s*/)
 {
     default_ = 1;
     value_ = 1;
+    str_default_ = "1";
+    str_value_ = "1";
     return true;
 }
 
 bool RandomSeed::set_default(const std::string& s)
 {
-    bool ok = from_string_(s, default_);
-    if (ok) {
-        value_ = default_;
-    }
-    else {
-        default_ = 1;
-        value_ = 1;
-    }
+    bool ok = from_string(s, default_);
+    str_default_ = to_string(default_);
+    if (ok)
+        set_value(s);
+    else
+        init(std::string());
     return ok;
-}
-
-std::string RandomSeed::get_default() const
-{
-    if (default_ < 1) return "time";
-    else return oskar_settings_utility_int_to_string(default_);
 }
 
 bool RandomSeed::set_value(const std::string& s)
 {
-    return from_string_(s, value_);
+    bool ok = from_string(s, value_);
+    str_value_ = to_string(value_);
+    return ok;
 }
 
-std::string RandomSeed::get_value() const
-{
-    if (value_ < 1) return "time";
-    else return oskar_settings_utility_int_to_string(value_);
-}
-
-bool RandomSeed::is_default() const
-{
-    return value_ == default_;
-}
+bool RandomSeed::is_default() const { return value_ == default_; }
 
 bool RandomSeed::operator==(const RandomSeed& other) const
 {
@@ -97,7 +78,7 @@ bool RandomSeed::operator>(const RandomSeed& other) const
     return value_ > other.value_;
 }
 
-bool RandomSeed::from_string_(const std::string& s, int& value) const
+bool RandomSeed::from_string(const std::string& s, int& value)
 {
     if (oskar_settings_utility_string_starts_with("TIME", s, false)) {
         value = -1;
@@ -106,13 +87,15 @@ bool RandomSeed::from_string_(const std::string& s, int& value) const
     bool ok = true;
     int i = oskar_settings_utility_string_to_int(s, &ok);
     if (!ok) return false;
-    if (i < 1) {
-        value = -1;
-        return false;
-    }
+    if (i < 1) return false;
     value = i;
     return true;
 }
 
-} // namespace oskar
+std::string RandomSeed::to_string(int value)
+{
+    if (value < 1) return "time";
+    else return oskar_settings_utility_int_to_string(value);
+}
 
+} // namespace oskar

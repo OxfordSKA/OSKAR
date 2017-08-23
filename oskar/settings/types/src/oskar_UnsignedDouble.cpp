@@ -31,89 +31,41 @@
 
 #include "settings/types/oskar_UnsignedDouble.h"
 #include "settings/oskar_settings_utility_string.h"
-#include <sstream>
-#include <cmath>
-#include <cfloat>
-#include <iostream>
 
 using namespace std;
 
 namespace oskar {
 
-UnsignedDouble::UnsignedDouble()
-: format_(AUTO), default_(0.0), value_(0.0)
-{
-}
+UnsignedDouble::UnsignedDouble() : Double() {}
 
-UnsignedDouble::~UnsignedDouble()
-{
-}
-
-bool UnsignedDouble::init(const std::string& /*s*/)
-{
-    format_ = AUTO;
-    default_ = 0.0;
-    value_ = 0.0;
-    return true;
-}
-
-bool UnsignedDouble::set_default(const std::string& value)
+bool UnsignedDouble::set_default(const string& value)
 {
     double v = 0.0;
     bool ok = true;
-    format_ = (value.find_first_of('e') != std::string::npos) ? EXPONENT : AUTO;
+    format_ = (value.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
     v = oskar_settings_utility_string_to_double(value, &ok);
-    if (v < 0.0)
-        return false;
+    if (v < 0.0) return false;
     default_ = v;
-    if (ok) {
-        value_ = default_;
-    }
-    else {
-        format_ = AUTO;
-        value_ = 0.0;
-        default_ = 0.0;
-    }
+    str_default_ = oskar_settings_utility_double_to_string_2(default_,
+            (format_ == AUTO ? 'g' : 'e'));
+    if (ok)
+        set_value(value);
+    else
+        (void) init(string());
     return ok;
 }
 
-std::string UnsignedDouble::get_default() const
-{
-    return oskar_settings_utility_double_to_string_2(default_,
-                                                     format_ == AUTO ? 'g' : 'e');
-}
-
-bool UnsignedDouble::set_value(const std::string& value)
+bool UnsignedDouble::set_value(const string& value)
 {
     double v = 0.0;
     bool ok = true;
-    format_ = (value.find_first_of('e') == std::string::npos) ? AUTO : EXPONENT;
+    format_ = (value.find_first_of('e') == string::npos) ? AUTO : EXPONENT;
     v = oskar_settings_utility_string_to_double(value, &ok);
     if (v < 0.0) return false;
     value_ = v;
+    str_value_ = oskar_settings_utility_double_to_string_2(value_,
+            (format_ == AUTO ? 'g' : 'e'));
     return ok;
 }
 
-std::string UnsignedDouble::get_value() const
-{
-    return oskar_settings_utility_double_to_string_2(value_,
-                                                     format_ == AUTO ? 'g' : 'e');
-}
-
-bool UnsignedDouble::is_default() const
-{
-    return (fabs(value_ - default_) < DBL_EPSILON);
-}
-
-bool UnsignedDouble::operator==(const UnsignedDouble& other) const
-{
-    return (fabs(value_ - other.value_) < DBL_EPSILON);
-}
-
-bool UnsignedDouble::operator>(const UnsignedDouble& other) const
-{
-    return (value_ > other.value_);
-}
-
 } // namespace oskar
-

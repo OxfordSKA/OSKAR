@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,16 +44,17 @@ extern "C" {
  * Copies source data to new arrays based on mask values (single precision).
  *
  * @details
- * Copies source data to new arrays wherever the input mask value is positive.
+ * Copies source data to new arrays wherever the input mask value is true.
  *
  * Each of the output arrays must be sized large enough to hold all the input
  * data if necessary.
  *
- * Note that all pointers refer to device memory.
+ * Note that all arrays must be in device memory.
  *
  * @param[in] num       Number of input sources.
  * @param[out] num_out  Number of sources copied.
  * @param[in] mask      Input mask values.
+ * @param[in] indices   Indices into output array from prefix sum.
  * @param[in] ra_in     Input right ascension coordinates.
  * @param[out] ra_out   Output right ascension coordinates.
  * @param[in] dec_in    Input declination coordinates.
@@ -92,8 +93,8 @@ extern "C" {
  * @param[out] pa_out   Output Gaussian position angle values.
  */
 OSKAR_EXPORT
-void oskar_sky_copy_source_data_cuda_f(
-        int num, int* num_out, const int* mask,
+void oskar_sky_copy_source_data_cuda_f(int num,
+        int* num_out, const int* mask, const int* indices,
         const float* ra_in,   float* ra_out,
         const float* dec_in,  float* dec_out,
         const float* I_in,    float* I_out,
@@ -119,16 +120,17 @@ void oskar_sky_copy_source_data_cuda_f(
  * Copies source data to new arrays based on mask values (double precision).
  *
  * @details
- * Copies source data to new arrays wherever the input mask value is positive.
+ * Copies source data to new arrays wherever the input mask value is true.
  *
  * Each of the output arrays must be sized large enough to hold all the input
  * data if necessary.
  *
- * Note that all pointers refer to device memory.
+ * Note that all arrays must be in device memory.
  *
  * @param[in] num       Number of input sources.
  * @param[out] num_out  Number of sources copied.
  * @param[in] mask      Input mask values.
+ * @param[in] indices   Indices into output array from prefix sum.
  * @param[in] ra_in     Input right ascension coordinates.
  * @param[out] ra_out   Output right ascension coordinates.
  * @param[in] dec_in    Input declination coordinates.
@@ -167,8 +169,8 @@ void oskar_sky_copy_source_data_cuda_f(
  * @param[out] pa_out   Output Gaussian position angle values.
  */
 OSKAR_EXPORT
-void oskar_sky_copy_source_data_cuda_d(
-        int num, int* num_out, const int* mask,
+void oskar_sky_copy_source_data_cuda_d(int num,
+        int* num_out, const int* mask, const int* indices,
         const double* ra_in,   double* ra_out,
         const double* dec_in,  double* dec_out,
         const double* I_in,    double* I_out,

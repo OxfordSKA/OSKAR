@@ -42,10 +42,17 @@ using namespace std;
 
 namespace oskar {
 
+DateTime::DateTime()
+{
+    (void) init(string());
+}
+
 bool DateTime::init(const string& /*s*/)
 {
     value_.clear();
     default_.clear();
+    str_value_ = to_string(value_);
+    str_default_ = to_string(default_);
     return true;
 }
 
@@ -53,27 +60,20 @@ bool DateTime::set_default(const string& s)
 {
     bool ok = true;
     default_ = from_string(s, ok);
+    str_default_ = to_string(default_);
     if (ok)
-        value_ = default_;
+        set_value(s);
+    else
+        (void) init(string());
     return ok;
-}
-
-string DateTime::get_default() const
-{
-    return to_string(default_);
 }
 
 bool DateTime::set_value(const string& s)
 {
-//    cout << "DateTime::set_value() " << s << endl;
     bool ok = true;
     value_ = from_string(s, ok);
+    str_value_ = to_string(value_);
     return ok;
-}
-
-string DateTime::get_value() const
-{
-    return to_string(value_);
 }
 
 bool DateTime::is_default() const

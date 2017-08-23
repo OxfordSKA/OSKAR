@@ -55,13 +55,11 @@ public:
     enum Format { AUTO, EXPONENT };
 
     Double();
-    virtual ~Double();
+    virtual ~Double() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
     bool is_default() const;
 
     double value() const { return value_; }
@@ -70,7 +68,7 @@ public:
     bool operator==(const Double& other) const;
     bool operator>(const Double& other) const;
 
-private:
+protected:
     Format format_;
     double default_, value_;
 };

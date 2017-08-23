@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_option_parser.h"
 #include "convert/oskar_convert_healpix_ring_to_theta_phi.h"
 #include "log/oskar_log.h"
 #include "math/oskar_angular_distance.h"

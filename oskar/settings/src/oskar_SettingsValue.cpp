@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2017, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -91,20 +91,20 @@ const char* SettingsValue::type_name(SettingsValue::TypeId type)
         case TIME: return "Time";
         case UNSIGNED_DOUBLE: return "UnsignedDouble";
         case UNSIGNED_INT: return "UnsignedInt";
-        default: return 0;
+        default: return "Undef";
     }
 }
 
-string SettingsValue::type_name() const
+const char* SettingsValue::type_name() const
 {
-    const char* t = type_name(type());
-    return t ? string(t) : "Undef";
+    return type_name(type());
 }
 
 
-SettingsValue::TypeId SettingsValue::get_type_id(const string& type_name)
+SettingsValue::TypeId SettingsValue::type_id(const char* type_name)
 {
-    string t = oskar_settings_utility_string_to_upper(type_name);
+    string t = type_name ?
+            oskar_settings_utility_string_to_upper(type_name) : string();
     if (t == "BOOL") return BOOL;
     else if (t == "DATETIME") return DATE_TIME;
     else if (t == "DOUBLE") return DOUBLE;
@@ -132,47 +132,46 @@ SettingsValue::TypeId SettingsValue::get_type_id(const string& type_name)
     else return UNDEF;
 }
 
-bool SettingsValue::init(const string& type, const string& param)
+bool SettingsValue::init(const char* type, const char* param)
 {
-    TypeId type_id = get_type_id(type);
-    if (type_id == UNDEF) {
+    TypeId id = type_id(type);
+    if (id == UNDEF) {
         cerr << "ERROR: Failed to initialise settings value, undefined type." << endl;
+        return false;
     }
-    return this->init(type_id, param);
+    create_(id);
+    AbstractSettingsType* t = get_(id);
+    string par = param ? string(param) : string();
+    return t ? t->init(par) : false;
 }
 
-bool SettingsValue::init(TypeId type, const string& param)
-{
-    create_(type);
-    AbstractSettingsType* t = get_(type);
-    return t ? t->init(param) : false;
-}
-
-bool SettingsValue::set_default(const string& value)
+bool SettingsValue::set_default(const char* value)
 {
     AbstractSettingsType* t = get_(type());
-    return t ? t->set_default(value) : false;
+    string val = value ? string(value) : string();
+    return t ? t->set_default(val) : false;
 }
 
-string SettingsValue::get_value() const
+const char* SettingsValue::get_value() const
 {
     const AbstractSettingsType* t =
             const_cast<SettingsValue*>(this)->get_(type());
     // Note: The type would not exist if there is no default and no default init
-    return t ? t->get_value() : string();
+    return t ? t->get_value() : "";
 }
 
-std::string SettingsValue::get_default() const
+const char* SettingsValue::get_default() const
 {
     const AbstractSettingsType* t =
             const_cast<SettingsValue*>(this)->get_(type());
-    return t ? t->get_default() : string();
+    return t ? t->get_default() : "";
 }
 
-bool SettingsValue::set_value(const string& s)
+bool SettingsValue::set_value(const char* value)
 {
     AbstractSettingsType* t = get_(type());
-    return t ? t->set_value(s) : false;
+    string val = value ? string(value) : string();
+    return t ? t->set_value(val) : false;
 }
 
 bool SettingsValue::is_default() const
@@ -209,13 +208,12 @@ double SettingsValue::to_double(bool& ok) const
             return get<DoubleRangeExt>(value_).value();
         case DOUBLE_LIST:
         {
-            vector<double> t = get<DoubleList>(value_).values();
-            if (t.size() < 1)
+            if (get<DoubleList>(value_).size() < 1)
             {
                 ok = false;
                 return 0.0;
             }
-            return t[0];
+            return get<DoubleList>(value_).values()[0];
         }
         case TIME:
             return get<Time>(value_).to_seconds();
@@ -252,13 +250,12 @@ int SettingsValue::to_int(bool& ok) const
             return get<UnsignedInt>(value_).value();
         case INT_LIST:
         {
-            vector<int> t = get<IntList>(value_).values();
-            if (t.size() < 1)
+            if (get<IntList>(value_).size() < 1)
             {
                 ok = false;
                 return 0;
             }
-            return t[0];
+            return get<IntList>(value_).values()[0];
         }
         case BOOL:
             return static_cast<int>(get<Bool>(value_).value());
@@ -287,72 +284,69 @@ unsigned int SettingsValue::to_unsigned(bool& ok) const
     return 0u;
 }
 
-string SettingsValue::to_string() const
+const char* SettingsValue::to_string() const
 {
     return get_value();
 }
 
-vector<string> SettingsValue::to_string_list(bool& ok) const
+const char* const* SettingsValue::to_string_list(int* size, bool& ok) const
 {
-    ok = true;
-    vector<string> list;
-    if (value_.is_singular()) {
-        ok = false;
-        return list;
-    }
+    ok = false;
+    if (value_.is_singular()) return 0;
     switch (value_.which())
     {
         case STRING_LIST:
-            return ttl::var::get<StringList>(value_).values();
+            ok = true;
+            *size = ttl::var::get<StringList>(value_).size();
+            if (*size > 0)
+                return ttl::var::get<StringList>(value_).values();
+            break;
         case INPUT_FILE_LIST:
-            return ttl::var::get<InputFileList>(value_).values();
+            ok = true;
+            *size = ttl::var::get<InputFileList>(value_).size();
+            if (*size > 0)
+                return ttl::var::get<InputFileList>(value_).values();
+            break;
         default:
-            ok = false;
             break;
     };
-    return list;
+    return 0;
 }
 
-vector<int> SettingsValue::to_int_list(bool& ok) const
+const int* SettingsValue::to_int_list(int* size, bool& ok) const
 {
-    ok = true;
-    vector<int> list;
-    if (value_.is_singular()) {
-        ok = false;
-        return list;
-    }
+    ok = false;
+    if (value_.is_singular()) return 0;
     switch (value_.which())
     {
         case INT_LIST:
-            list = ttl::var::get<IntList>(value_).values();
+            ok = true;
+            *size = ttl::var::get<IntList>(value_).size();
+            if (*size > 0)
+                return ttl::var::get<IntList>(value_).values();
             break;
         default:
-            ok = false;
             break;
     };
-    if (list.size() == 0) ok = false;
-    return list;
+    return 0;
 }
 
-vector<double> SettingsValue::to_double_list(bool& ok) const
+const double* SettingsValue::to_double_list(int* size, bool& ok) const
 {
-    ok = true;
-    vector<double> list;
-    if (value_.is_singular()) {
-        ok = false;
-        return list;
-    }
+    ok = false;
+    if (value_.is_singular()) return 0;
     switch (value_.which())
     {
         case DOUBLE_LIST:
-            list = ttl::var::get<DoubleList>(value_).values();
+            ok = true;
+            *size = ttl::var::get<DoubleList>(value_).size();
+            if (*size > 0)
+                return ttl::var::get<DoubleList>(value_).values();
             break;
         default:
-            ok = false;
             break;
     };
-    if (list.size() == 0) ok = false;
-    return list;
+    return 0;
 }
 
 
@@ -488,11 +482,6 @@ bool SettingsValue::operator<(const SettingsValue& other) const
 bool SettingsValue::operator<=(const SettingsValue& other) const
 {
     return !(*this > other);
-}
-
-SettingsValue::operator std::string() const
-{
-    return to_string();
 }
 
 void SettingsValue::create_(TypeId type)

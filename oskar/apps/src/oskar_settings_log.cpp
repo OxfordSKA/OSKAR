@@ -27,6 +27,10 @@
  */
 
 #include "apps/oskar_settings_log.h"
+#include "settings/oskar_SettingsNode.h"
+#include <cstring>
+
+using namespace std;
 
 static void oskar_settings_log_private(const oskar::SettingsTree* s,
         oskar_Log* log, const oskar::SettingsNode* node, int depth)
@@ -36,29 +40,27 @@ static void oskar_settings_log_private(const oskar::SettingsTree* s,
     if (node->priority() > 0 || node->value_or_child_set() ||
             node->is_required())
     {
-        const std::string& label = node->label();
-        const std::string& value = node->value().to_string();
-        if (value.size() == 0)
-            oskar_log_message(log, 'M', depth, label.c_str());
-        else if (value.size() > 35)
-            oskar_log_message(log, 'M', depth,
-                    "%s: %s", label.c_str(), value.c_str());
+        const char* label = node->label();
+        const char* value = node->value();
+        const int len = strlen(value);
+        if (len == 0)
+            oskar_log_message(log, 'M', depth, label);
+        else if (len > 35)
+            oskar_log_message(log, 'M', depth, "%s: %s", label, value);
         else
-            oskar_log_value(log, 'M', depth,
-                    label.c_str(), "%s", value.c_str());
+            oskar_log_value(log, 'M', depth, label, "%s", value);
 
         for (int i = 0; i < node->num_children(); ++i)
             oskar_settings_log_private(s, log, node->child(i), depth + 1);
     }
 }
 
-void oskar_settings_log(const oskar::SettingsTree* s, oskar_Log* log,
-        const std::vector<std::pair<std::string, std::string> >& failed_keys)
+void oskar_settings_log(const oskar::SettingsTree* s, oskar_Log* log)
 {
     const oskar::SettingsNode* node = s->root_node();
     for (int i = 0; i < node->num_children(); ++i)
         oskar_settings_log_private(s, log, node->child(i), 0);
-    for (size_t i = 0; i < failed_keys.size(); ++i)
+    for (int i = 0; i < s->num_failed_keys(); ++i)
         oskar_log_warning(log, "Ignoring '%s'='%s'",
-                failed_keys[i].first.c_str(), failed_keys[i].second.c_str());
+                s->failed_key(i), s->failed_key_value(i));
 }

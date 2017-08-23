@@ -40,8 +40,8 @@ TEST(SettingsDependency, test1)
     SettingsDependency d("a/b/c",
                  "2.0",
                  "EQ");
-    ASSERT_STREQ("a/b/c", d.key().c_str());
-    ASSERT_STREQ("2.0", d.value().c_str());
+    ASSERT_STREQ("a/b/c", d.key());
+    ASSERT_STREQ("2.0", d.value());
     ASSERT_EQ(SettingsDependency::EQ, d.logic());
 }
 

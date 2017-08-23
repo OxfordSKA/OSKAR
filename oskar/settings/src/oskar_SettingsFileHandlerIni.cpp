@@ -30,15 +30,27 @@
  */
 
 #include "settings/oskar_SettingsFileHandlerIni.h"
+#include "settings/oskar_SettingsDependency.h"
+#include "settings/oskar_SettingsNode.h"
 #include "settings/oskar_SettingsTree.h"
-#include <iostream>
-#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <string>
 
 using namespace std;
 
 namespace oskar {
+
+static string trim(const string& s, const string& whitespace)
+{
+    size_t i0 = s.find_first_not_of(whitespace);
+    if (i0 == std::string::npos) return "";
+    size_t i1 = s.find_last_not_of(whitespace);
+    return s.substr(i0, i1 - i0 + 1);
+}
 
 struct SettingsFileHandlerIniPrivate
 {
@@ -47,7 +59,7 @@ struct SettingsFileHandlerIniPrivate
 };
 
 SettingsFileHandlerIni::SettingsFileHandlerIni(
-        const string& app, const string& version)
+        const char* app, const char* version)
 : SettingsFileHandler(app, version)
 {
     p = new SettingsFileHandlerIniPrivate;
@@ -58,25 +70,18 @@ SettingsFileHandlerIni::~SettingsFileHandlerIni()
     delete p;
 }
 
-string SettingsFileHandlerIni::trim(const string& s, const string& whitespace)
-{
-    size_t i0 = s.find_first_not_of(whitespace);
-    if (i0 == std::string::npos) return "";
-    size_t i1 = s.find_last_not_of(whitespace);
-    return s.substr(i0, i1 - i0 + 1);
-}
-
-string SettingsFileHandlerIni::read(const string& file_name,
-        const string& key) const
+char* SettingsFileHandlerIni::read(const char* file_name,
+        const char* key) const
 {
     // Open the file.
-    if (file_name.empty()) return string();
+    if (!file_name || strlen(file_name) == 0) return 0;
     ifstream file;
-    file.open(file_name.c_str());
-    if (!file) return string();
+    file.open(file_name);
+    if (!file) return 0;
 
     // Loop over each line.
     string value;
+    string key_ = string(key);
     for (string line, group, k; getline(file, line);)
     {
         line = trim(line, " \t");
@@ -99,7 +104,7 @@ string SettingsFileHandlerIni::read(const string& file_name,
                 if (k[i] == '\\' || k[i] == '.') k[i] = '/';
 
             // Check if we have found the required key.
-            if (k == key)
+            if (k == key_)
             {
                 getline(ss, value);
                 break;
@@ -112,17 +117,20 @@ string SettingsFileHandlerIni::read(const string& file_name,
         }
     }
     file.close();
-    return value;
+
+    // Copy the string into a char array and return it.
+    char* buffer = (char*) calloc(1 + value.size(), sizeof(char));
+    if (value.size() > 0) memcpy(buffer, value.c_str(), value.size());
+    return buffer;
 }
 
-bool SettingsFileHandlerIni::read_all(SettingsTree* tree,
-        vector<pair<string, string> >& invalid)
+bool SettingsFileHandlerIni::read_all(SettingsTree* tree)
 {
-    if (file_name_.empty()) return false;
+    if (!file_name() || strlen(file_name()) == 0) return false;
 
     // Open the file.
     ifstream file;
-    file.open(file_name_.c_str());
+    file.open(file_name());
     if (!file) return false;
 
     // Loop over each line.
@@ -151,8 +159,9 @@ bool SettingsFileHandlerIni::read_all(SettingsTree* tree,
             // Try to set the item, and record if it fails.
             if (k == "version" || k == "app")
                 continue;
-            if (!tree->set_value(k, v, false))
-                invalid.push_back(make_pair(k, v));
+
+            if (!tree->set_value(k.c_str(), v.c_str(), false))
+                tree->add_failed(k.c_str(), v.c_str());
         }
         else if (!line.empty() && line[0] == '[')
         {
@@ -166,10 +175,10 @@ bool SettingsFileHandlerIni::read_all(SettingsTree* tree,
 
 bool SettingsFileHandlerIni::write_all(const SettingsTree* tree)
 {
-    if (file_name_.empty()) return false;
+    if (!file_name() || strlen(file_name()) == 0) return false;
 
     // Open the file.
-    p->file.open(file_name_.c_str(), ofstream::trunc);
+    p->file.open(file_name(), ofstream::trunc);
     if (!p->file) return false;
 
     // Recursively write from the root node.
@@ -180,18 +189,12 @@ bool SettingsFileHandlerIni::write_all(const SettingsTree* tree)
     return true;
 }
 
-void SettingsFileHandlerIni::set_file_name(const string& name)
-{
-    file_name_ = name;
-}
-
 void SettingsFileHandlerIni::write(const SettingsNode* node)
 {
-    const SettingsValue& val = node->value();
     string k = string(node->key());
-    if (val.type() != SettingsValue::UNDEF)
+    if (node->item_type() == SettingsItem::SETTING)
     {
-        if (node->value_or_child_set() || write_defaults_)
+        if (node->value_or_child_set() || this->write_defaults())
         {
             // Find the top-level group.
             size_t i = k.find_first_of("/\\.");
@@ -205,7 +208,7 @@ void SettingsFileHandlerIni::write(const SettingsNode* node)
                 }
                 k = k.substr(i + 1);
             }
-            p->file << k << "=" << val.to_string() << endl;
+            p->file << k << "=" << node->value() << endl;
         }
     }
     for (int i = 0; i < node->num_children(); ++i)
@@ -215,8 +218,8 @@ void SettingsFileHandlerIni::write(const SettingsNode* node)
 void SettingsFileHandlerIni::write_header()
 {
     p->file << "[General]" << endl;
-    p->file << "app=" << app_ << endl;
-    p->file << "version=" << version_ << endl;
+    p->file << "app=" << this->app() << endl;
+    p->file << "version=" << this->version() << endl;
 }
 
 } // namespace oskar

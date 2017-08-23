@@ -38,16 +38,16 @@ TEST(settings_types, UnsignedDouble)
 {
     UnsignedDouble i;
     ASSERT_TRUE(i.set_default("1.0"));
-    ASSERT_STREQ("1.0", i.get_default().c_str());
-    ASSERT_STREQ("1.0", i.get_value().c_str());
+    ASSERT_STREQ("1.0", i.get_default());
+    ASSERT_STREQ("1.0", i.get_value());
     ASSERT_TRUE(i.is_default());
     ASSERT_TRUE(i.set_value("1.0e6"));
-    ASSERT_STREQ("1.0e+06", i.get_value().c_str());
+    ASSERT_STREQ("1.0e+06", i.get_value());
     ASSERT_FALSE(i.is_default());
     ASSERT_DOUBLE_EQ(1.0e6, i.value());
     ASSERT_DOUBLE_EQ(1.0, i.default_value());
 
     ASSERT_TRUE(i.set_value("2.0e6"));
-    ASSERT_STREQ("2.0e+06", i.get_value().c_str());
+    ASSERT_STREQ("2.0e+06", i.get_value());
 }
 

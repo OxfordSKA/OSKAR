@@ -37,8 +37,8 @@ using namespace oskar;
 TEST(settings_types, IntRange)
 {
     IntRange r;
-    ASSERT_STREQ("0", r.get_default().c_str());
-    ASSERT_STREQ("0", r.get_value().c_str());
+    ASSERT_STREQ("0", r.get_default());
+    ASSERT_STREQ("0", r.get_value());
     ASSERT_TRUE(r.is_default());
     ASSERT_TRUE(r.init("2,5"));
     ASSERT_EQ(2, r.min());
@@ -48,7 +48,7 @@ TEST(settings_types, IntRange)
     ASSERT_TRUE(r.is_default());
     ASSERT_TRUE(r.set_value("4"));
     ASSERT_EQ(4, r.value());
-    ASSERT_STREQ("4", r.get_value().c_str());
+    ASSERT_STREQ("4", r.get_value());
     ASSERT_FALSE(r.is_default());
 }
 

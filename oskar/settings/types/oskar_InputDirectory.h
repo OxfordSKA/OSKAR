@@ -36,7 +36,7 @@
  * @file oskar_InputDirectory.h
  */
 
-#include "settings/types/oskar_AbstractSettingsType.h"
+#include "settings/types/oskar_String.h"
 
 namespace oskar {
 
@@ -49,25 +49,14 @@ namespace oskar {
  *
  */
 
-class OSKAR_SETTINGS_EXPORT InputDirectory : public AbstractSettingsType
+class OSKAR_SETTINGS_EXPORT InputDirectory : public String
 {
 public:
-    InputDirectory();
-    virtual ~InputDirectory();
+    InputDirectory() : String() {};
+    virtual ~InputDirectory() {};
 
-    bool init(const std::string& parameters);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
-    bool is_default() const;
-
-    bool operator==(const InputDirectory& other) const;
-    bool operator>(const InputDirectory& other) const;
-
-private:
-    std::string value_;
-    std::string default_;
 };
 
 } /* namespace oskar */

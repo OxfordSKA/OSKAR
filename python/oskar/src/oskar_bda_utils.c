@@ -54,30 +54,27 @@ typedef struct Complex {
 static PyObject* apply_gains(PyObject* self, PyObject* args)
 {
     /* Read input arguments */
-    PyObject *vis_in_ = NULL;
-    PyObject *gains_ = NULL;
+    PyObject *vis_in_ = 0, *gains_ = 0;
+    PyObject *pyo_vis_in = 0, *pyo_vis_out = 0, *pyo_gains = 0;
     if (!PyArg_ParseTuple(args, "OO", &vis_in_, &gains_))
-        return NULL;
+        return 0;
 
     /* Return an ndarray from the python objects */
-    int typenum = NPY_CDOUBLE;
-    int requirements = NPY_ARRAY_IN_ARRAY;
-    PyObject* pyo_vis_in = PyArray_FROM_OTF(vis_in_, typenum, requirements);
-    if (!pyo_vis_in) goto fail;
-    PyObject* pyo_gains = PyArray_FROM_OTF(gains_, typenum, requirements);
-    if (!pyo_gains) goto fail;
+    pyo_vis_in = PyArray_FROM_OTF(vis_in_, NPY_CDOUBLE, NPY_ARRAY_IN_ARRAY);
+    pyo_gains = PyArray_FROM_OTF(gains_, NPY_CDOUBLE, NPY_ARRAY_IN_ARRAY);
+    if (!pyo_vis_in || !pyo_gains) goto fail;
 
     /* TODO(BM) Error checking on the dims! */
     int nd_vis = PyArray_NDIM((PyArrayObject*)pyo_vis_in);
     npy_intp* vis_dims = PyArray_DIMS((PyArrayObject*)pyo_vis_in);
-    int num_vis = vis_dims[0];
+    /*int num_vis = (int) vis_dims[0];*/
 
-    int nd_gains = PyArray_NDIM((PyArrayObject*)pyo_gains);
+    /*int nd_gains = PyArray_NDIM((PyArrayObject*)pyo_gains);*/
     npy_intp* gains_dims = PyArray_DIMS((PyArrayObject*)pyo_gains);
-    int num_antennas = gains_dims[0];
+    int num_antennas = (int) gains_dims[0];
 
     /* Create PyObject for output visibilities */
-    PyObject* pyo_vis_out = PyArray_SimpleNew(nd_vis, vis_dims, NPY_CDOUBLE);
+    pyo_vis_out = PyArray_SimpleNew(nd_vis, vis_dims, NPY_CDOUBLE);
 
     /* Apply the gains: v_out = gp * v_in * conj(gq) */
     DComplex* v_out = (DComplex*)PyArray_DATA((PyArrayObject*)pyo_vis_out);
@@ -92,19 +89,22 @@ static PyObject* apply_gains(PyObject* self, PyObject* args)
         }
     }
     /* Decrement references to temporary array objects. */
-    Py_DECREF(pyo_vis_in);
-    Py_DECREF(pyo_gains);
+    Py_XDECREF(pyo_vis_in);
+    Py_XDECREF(pyo_gains);
     return Py_BuildValue("N", pyo_vis_out);
 
+    /*
     printf("  - Ref count: %zi, %zi, %zi\n",
             PyArray_REFCOUNT(pyo_vis_in),
             PyArray_REFCOUNT(pyo_gains),
             PyArray_REFCOUNT(pyo_vis_out));
+    */
 
 fail:
     Py_XDECREF(pyo_gains);
     Py_XDECREF(pyo_vis_in);
-    return NULL;
+    Py_XDECREF(pyo_vis_out);
+    return 0;
 }
 
 
@@ -115,29 +115,27 @@ fail:
 static PyObject* apply_gains_2(PyObject* self, PyObject* args)
 {
     /* Read input arguments */
-    PyObject *vis_in_o = NULL, *gains_o = NULL;
+    PyObject *vis_in_o = 0, *gains_o = 0;
+    PyObject *pyo_vis_in = 0, *pyo_vis_out = 0, *pyo_gains = 0;
     if (!PyArg_ParseTuple(args, "OO", &vis_in_o, &gains_o))
-        return NULL;
+        return 0;
 
     /* Return an ndarray from the python objects */
-    int typenum = NPY_CFLOAT;
-    int requirements = NPY_ARRAY_IN_ARRAY;
-    PyObject* pyo_vis_in = PyArray_FROM_OTF(vis_in_o, typenum, requirements);
-    if (!pyo_vis_in) goto fail;
-    PyObject* pyo_gains = PyArray_FROM_OTF(gains_o, typenum, requirements);
-    if (!pyo_gains) goto fail;
+    pyo_vis_in = PyArray_FROM_OTF(vis_in_o, NPY_CFLOAT, NPY_ARRAY_IN_ARRAY);
+    pyo_gains = PyArray_FROM_OTF(gains_o, NPY_CFLOAT, NPY_ARRAY_IN_ARRAY);
+    if (!pyo_vis_in || !pyo_gains) goto fail;
 
     /* TODO(BM) Error checking on the dims! */
     int nd_vis = PyArray_NDIM((PyArrayObject*)pyo_vis_in);
     npy_intp* vis_dims = PyArray_DIMS((PyArrayObject*)pyo_vis_in);
-    int num_vis = vis_dims[0];
+    /*int num_vis = (int) vis_dims[0];*/
 
-    int nd_gains = PyArray_NDIM((PyArrayObject*)pyo_gains);
+    /*int nd_gains = PyArray_NDIM((PyArrayObject*)pyo_gains);*/
     npy_intp* gains_dims = PyArray_DIMS((PyArrayObject*)pyo_gains);
-    int num_antennas = gains_dims[0];
+    int num_antennas = (int) gains_dims[0];
 
     /* Create PyObject for output visibilities */
-    PyObject* pyo_vis_out = PyArray_SimpleNew(nd_vis, vis_dims, NPY_CFLOAT);
+    pyo_vis_out = PyArray_SimpleNew(nd_vis, vis_dims, NPY_CFLOAT);
 
     /* Apply the gains: v_out = gp * v_in * conj(gq) */
     Complex* v_out = (Complex*)PyArray_DATA((PyArrayObject*)pyo_vis_out);
@@ -152,14 +150,15 @@ static PyObject* apply_gains_2(PyObject* self, PyObject* args)
         }
     }
     /* Decrement references to temporary array objects. */
-    Py_DECREF(pyo_vis_in);
-    Py_DECREF(pyo_gains);
+    Py_XDECREF(pyo_vis_in);
+    Py_XDECREF(pyo_gains);
     return Py_BuildValue("N", pyo_vis_out);
 
 fail:
     Py_XDECREF(pyo_gains);
     Py_XDECREF(pyo_vis_in);
-    return NULL;
+    Py_XDECREF(pyo_vis_out);
+    return 0;
 }
 
 
@@ -181,10 +180,10 @@ static PyObject* vis_list_to_matrix(PyObject* self, PyObject* args)
                                               NPY_ARRAY_IN_ARRAY);
     if (!pyo_vis_list) goto fail;
 
-    /* TODO(BM) Error checking on the dims! */
+    /* TODO(BM) Error checking on the dims!
     int nd_vis = PyArray_NDIM((PyArrayObject*)pyo_vis_list);
     npy_intp* vis_dims = PyArray_DIMS((PyArrayObject*)pyo_vis_list);
-    int num_vis = vis_dims[0];
+    int num_vis = vis_dims[0];*/
 
     /* Create PyObject for output visibilities */
     npy_intp dims[] = { num_ant, num_ant };
@@ -206,12 +205,12 @@ static PyObject* vis_list_to_matrix(PyObject* self, PyObject* args)
     }
 
     /* Decrement references to temporary array objects. */
-    Py_DECREF(pyo_vis_list);
+    Py_XDECREF(pyo_vis_list);
     return Py_BuildValue("N", pyo_vis_matrix);
 
 fail:
     Py_XDECREF(pyo_vis_list);
-    return NULL;
+    return 0;
 }
 
 
@@ -232,10 +231,10 @@ static PyObject* vis_list_to_matrix_2(PyObject* self, PyObject* args)
                                               NPY_ARRAY_IN_ARRAY);
     if (!pyo_vis_list) goto fail;
 
-    /* TODO(BM) Error checking on the dims! */
+    /* TODO(BM) Error checking on the dims!
     int nd_vis = PyArray_NDIM((PyArrayObject*)pyo_vis_list);
     npy_intp* vis_dims = PyArray_DIMS((PyArrayObject*)pyo_vis_list);
-    int num_vis = vis_dims[0];
+    int num_vis = vis_dims[0];*/
 
     /* Create PyObject for output visibilities */
     npy_intp dims[] = { num_ant, num_ant };
@@ -257,12 +256,12 @@ static PyObject* vis_list_to_matrix_2(PyObject* self, PyObject* args)
     }
 
     /* Decrement references to temporary array objects. */
-    Py_DECREF(pyo_vis_list);
+    Py_XDECREF(pyo_vis_list);
     return Py_BuildValue("N", pyo_vis_matrix);
 
 fail:
     Py_XDECREF(pyo_vis_list);
-    return NULL;
+    return 0;
 }
 
 
@@ -427,7 +426,6 @@ static double inv_sinc(double value)
 
 static void bda_free(PyObject* capsule)
 {
-    int status = 0;
     oskar_BDA* h = (oskar_BDA*) PyCapsule_GetPointer(capsule, name);
     oskar_bda_free(h);
 }
@@ -438,14 +436,14 @@ static oskar_BDA* get_handle(PyObject* capsule)
     oskar_BDA* h = 0;
     if (!PyCapsule_CheckExact(capsule))
     {
-        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
         return 0;
     }
     h = (oskar_BDA*) PyCapsule_GetPointer(capsule, name);
     if (!h)
     {
         PyErr_SetString(PyExc_RuntimeError,
-                "Unable to convert PyCapsule object to pointer.");
+                "Capsule is not of type oskar_BDA.");
         return 0;
     }
     return h;

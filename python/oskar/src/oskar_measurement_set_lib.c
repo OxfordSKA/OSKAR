@@ -39,30 +39,26 @@ static const char module_doc[] =
         "This module provides an interface to the OSKAR Measurement Set wrapper.";
 static const char name[] = "oskar_MeasurementSet";
 
-static void ms_free(PyObject* capsule)
+static void* get_handle(PyObject* capsule, const char* name)
 {
-    oskar_MeasurementSet* h =
-            (oskar_MeasurementSet*) PyCapsule_GetPointer(capsule, name);
-    oskar_ms_close(h);
-}
-
-
-static oskar_MeasurementSet* get_handle(PyObject* capsule)
-{
-    oskar_MeasurementSet* h = 0;
+    void* h = 0;
     if (!PyCapsule_CheckExact(capsule))
     {
-        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
         return 0;
     }
-    h = (oskar_MeasurementSet*) PyCapsule_GetPointer(capsule, name);
-    if (!h)
+    if (!(h = PyCapsule_GetPointer(capsule, name)))
     {
-        PyErr_SetString(PyExc_RuntimeError,
-                "Unable to convert PyCapsule object to oskar_MeasurementSet.");
+        PyErr_Format(PyExc_RuntimeError, "Capsule is not of type %s.", name);
         return 0;
     }
     return h;
+}
+
+
+static void ms_free(PyObject* capsule)
+{
+    oskar_ms_close((oskar_MeasurementSet*) get_handle(capsule, name));
 }
 
 
@@ -106,13 +102,26 @@ static const char* numpy_string_from_numpy_type(int type)
 }
 
 
+static PyObject* capsule_name(PyObject* self, PyObject* args)
+{
+    PyObject *capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!PyCapsule_CheckExact(capsule))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
+        return 0;
+    }
+    return Py_BuildValue("s", PyCapsule_GetName(capsule));
+}
+
+
 static PyObject* column_element_size(PyObject* self, PyObject* args)
 {
     oskar_MeasurementSet* h = 0;
     PyObject* capsule = 0;
     const char* column = 0;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &column)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_ms_column_element_size(h, column));
 }
 
@@ -123,7 +132,7 @@ static PyObject* column_element_type(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     const char* column = 0;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &column)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("s", numpy_string_from_numpy_type(
             numpy_type_from_ms_type(oskar_ms_column_element_type(h, column))));
 }
@@ -165,7 +174,7 @@ static PyObject* freq_inc_hz(PyObject* self, PyObject* args)
     oskar_MeasurementSet* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_ms_freq_inc_hz(h));
 }
 
@@ -175,7 +184,7 @@ static PyObject* freq_start_hz(PyObject* self, PyObject* args)
     oskar_MeasurementSet* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_ms_freq_start_hz(h));
 }
 
@@ -185,7 +194,7 @@ static PyObject* num_channels(PyObject* self, PyObject* args)
     oskar_MeasurementSet* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_ms_num_channels(h));
 }
 
@@ -195,7 +204,7 @@ static PyObject* num_pols(PyObject* self, PyObject* args)
     oskar_MeasurementSet* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_ms_num_pols(h));
 }
 
@@ -205,7 +214,7 @@ static PyObject* num_rows(PyObject* self, PyObject* args)
     oskar_MeasurementSet* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_ms_num_rows(h));
 }
 
@@ -215,7 +224,7 @@ static PyObject* num_stations(PyObject* self, PyObject* args)
     oskar_MeasurementSet* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_ms_num_stations(h));
 }
 
@@ -225,7 +234,7 @@ static PyObject* phase_centre_ra_rad(PyObject* self, PyObject* args)
     oskar_MeasurementSet* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_ms_phase_centre_ra_rad(h));
 }
 
@@ -235,7 +244,7 @@ static PyObject* phase_centre_dec_rad(PyObject* self, PyObject* args)
     oskar_MeasurementSet* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_ms_phase_centre_dec_rad(h));
 }
 
@@ -275,7 +284,7 @@ static PyObject* read_column(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "Osii", &capsule, &column, &start_row,
             &num_rows))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
 
     /* Get the type and shape of the column. */
     type = numpy_type_from_ms_type(oskar_ms_column_element_type(h, column));
@@ -327,7 +336,7 @@ static PyObject* read_coords(PyObject* self, PyObject* args)
     int start_row = 0, num_rows = 0, status = 0;
     if (!PyArg_ParseTuple(args, "Oii", &capsule, &start_row, &num_rows))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
 
     /* Create numpy arrays to return. */
     dims[0] = num_rows;
@@ -372,7 +381,7 @@ static PyObject* read_vis(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "Oiiiis", &capsule, &start_row, &start_channel,
             &num_channels, &num_baselines, &column_name))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
 
     /* Create numpy array to return. */
     dims[0] = num_channels;
@@ -408,7 +417,7 @@ static PyObject* set_phase_centre(PyObject* self, PyObject* args)
     double lon_rad = 0.0, lat_rad = 0.0;
     if (!PyArg_ParseTuple(args, "Odd", &capsule, &lon_rad, &lat_rad))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     oskar_ms_set_phase_centre(h, 0, lon_rad, lat_rad);
     return Py_BuildValue("");
 }
@@ -419,7 +428,7 @@ static PyObject* time_inc_sec(PyObject* self, PyObject* args)
     oskar_MeasurementSet* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_ms_time_inc_sec(h));
 }
 
@@ -429,7 +438,7 @@ static PyObject* time_start_mjd_utc(PyObject* self, PyObject* args)
     oskar_MeasurementSet* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("d", oskar_ms_time_start_mjd_utc(h));
 }
 
@@ -446,7 +455,7 @@ static PyObject* write_coords(PyObject* self, PyObject* args)
             &start_row, &num_baselines, &obj[0], &obj[1], &obj[2],
             &exposure_sec, &interval_sec, &time_stamp))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
 
     /* Make sure input objects are arrays. Convert if required. */
     uu = (PyArrayObject*) PyArray_FROM_OF(obj[0], NPY_ARRAY_IN_ARRAY);
@@ -504,7 +513,7 @@ static PyObject* write_vis(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "OiiiiO", &capsule, &start_row,
             &start_channel, &num_channels, &num_baselines, &obj))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
 
     /* Make sure input objects are arrays. Convert if required. */
     vis = (PyArrayObject*) PyArray_FROM_OF(obj, NPY_ARRAY_IN_ARRAY);
@@ -549,6 +558,8 @@ fail:
 /* Method table. */
 static PyMethodDef methods[] =
 {
+        {"capsule_name", (PyCFunction)capsule_name,
+                METH_VARARGS, "capsule_name()"},
         {"column_element_type", (PyCFunction)column_element_type,
                 METH_VARARGS, "column_element_type(column)"},
         {"column_element_size", (PyCFunction)column_element_size,

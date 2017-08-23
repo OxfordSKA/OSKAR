@@ -1,5 +1,4 @@
-#
-#  This file is part of OSKAR.
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2017, The University of Oxford
 # All rights reserved.
@@ -31,10 +30,13 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-from __future__ import absolute_import
+"""Interfaces to OSKAR binary files."""
+
+from __future__ import absolute_import, print_function
 try:
     from . import _binary_lib
-except ImportError:
+except ImportError as e:
+    print("Import error: " + str(e))
     _binary_lib = None
 
 
@@ -50,10 +52,34 @@ class Binary(object):
         """
         if _binary_lib is None:
             raise RuntimeError("OSKAR library not found.")
-        self._capsule = _binary_lib.create(filename, mode)
+        self._filename = filename
+        self._mode = mode
+        self._capsule = None
+
+    def capsule_ensure(self):
+        """Ensures the C capsule exists."""
+        if self._capsule is None:
+            self._capsule = _binary_lib.create(self._filename, self._mode)
+
+    def capsule_get(self):
+        """Returns the C capsule wrapped by the class."""
+        return self._capsule
+
+    def capsule_set(self, new_capsule):
+        """Sets the C capsule wrapped by the class.
+
+        Args:
+            new_capsule (capsule): The new capsule to set.
+        """
+        if _binary_lib.capsule_name(new_capsule) == 'oskar_Binary':
+            del self._capsule
+            self._capsule = new_capsule
+        else:
+            raise RuntimeError("Capsule is not of type oskar_Binary.")
 
     def get_num_tags(self):
         """Returns the number of data tags in the file."""
+        self.capsule_ensure()
         return _binary_lib.num_tags(self._capsule)
 
     def read(self, group, tag, user_index=0, data_type=None):
@@ -74,6 +100,7 @@ class Binary(object):
                 If not given, the first type found matching the other filters
                 is returned.
         """
+        self.capsule_ensure()
         return _binary_lib.read_data(self._capsule, group, tag, user_index,
                                      data_type)
 
@@ -83,7 +110,9 @@ class Binary(object):
         Args:
             start (int): Index at which to start search query.
         """
+        self.capsule_ensure()
         _binary_lib.set_query_search_start(self._capsule, start)
 
     # Properties
+    capsule = property(capsule_get, capsule_set)
     num_tags = property(get_num_tags)

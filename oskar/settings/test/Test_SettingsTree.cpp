@@ -31,8 +31,9 @@
 
 #include <gtest/gtest.h>
 
-#include "settings/oskar_SettingsTree.h"
 #include "settings/oskar_SettingsDeclareXml.h"
+#include "settings/oskar_SettingsItem.h"
+#include "settings/oskar_SettingsTree.h"
 #include "settings/oskar_settings_utility_string.h"
 #include <string>
 
@@ -64,11 +65,13 @@ TEST(SettingsTree, test)
     ASSERT_EQ(6, s.num_items());
     ASSERT_EQ(3, s.num_settings());
 
-    ASSERT_EQ("b", s.value("sky/generator/type")->get_value());
+    int status = 0;
+    ASSERT_STREQ("b", s.to_string("sky/generator/type", &status));
+    ASSERT_EQ(0, status);
     ASSERT_TRUE(s.item("telescope/directory")->is_required());
 
     ASSERT_TRUE(s.set_value("sky/file", "sky.osm"));
-    ASSERT_EQ("sky.osm", s["sky/file"]->get_value());
+    ASSERT_STREQ("sky.osm", s["sky/file"]);
     ASSERT_FALSE(s.contains("a/b/c"));
     s.print();
 
@@ -134,9 +137,9 @@ TEST(SettingsTree, test2)
         s.end_group();
     }
 
-    bool ok = true;
-    ASSERT_EQ(0, s.value("g1/b")->to_int(ok));
-    ASSERT_TRUE(ok);
+    int status = 0;
+    ASSERT_EQ(0, s.to_int("g1/b", &status));
+    ASSERT_EQ(0, status);
     ASSERT_TRUE(s.dependencies_satisfied("g1"));
     ASSERT_TRUE(s.dependencies_satisfied("g1/b"));
     ASSERT_FALSE(s.dependencies_satisfied("g1/d"));
@@ -237,8 +240,10 @@ TEST(SettingsTree, simple_deps)
 
     ASSERT_TRUE(s.set_value("keyA", "true"));
 
-    ASSERT_EQ("true", s.value("keyA")->get_value());
-    ASSERT_EQ("true", s["keyA"]->get_value());
+    int status = 0;
+    ASSERT_STREQ("true", s.to_string("keyA", &status));
+    ASSERT_EQ(0, status);
+    ASSERT_STREQ("true", s["keyA"]);
 
     ASSERT_TRUE(s.dependencies_satisfied("KEYB"));
 }

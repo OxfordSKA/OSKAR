@@ -37,7 +37,7 @@
  */
 
 #include <vector>
-#include "settings/types/oskar_AbstractSettingsType.h"
+#include "settings/types/oskar_StringList.h"
 
 namespace oskar {
 
@@ -50,31 +50,11 @@ namespace oskar {
  *
  */
 
-class OSKAR_SETTINGS_EXPORT InputFileList : public AbstractSettingsType
+class OSKAR_SETTINGS_EXPORT InputFileList : public StringList
 {
 public:
-    InputFileList();
-    virtual ~InputFileList();
-
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    std::string get_default() const;
-    bool set_value(const std::string& value);
-    std::string get_value() const;
-    bool is_default() const;
-
-    std::vector<std::string> values() const { return value_; }
-    std::vector<std::string> default_values() const { return default_; }
-    int size() const { return value_.size(); }
-
-    bool operator==(const InputFileList& other) const;
-    bool operator>(const InputFileList& other) const;
-
-private:
-    std::string to_string_(const std::vector<std::string>& values) const;
-    std::vector<std::string> default_;
-    std::vector<std::string> value_;
-    char delimiter_;
+    InputFileList() : StringList() {}
+    virtual ~InputFileList() {}
 };
 
 } /* namespace oskar */

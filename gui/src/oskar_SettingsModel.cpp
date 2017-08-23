@@ -32,6 +32,9 @@
 #include "gui/oskar_SettingsModel.h"
 #include "settings/oskar_settings_types.h"
 #include "settings/oskar_SettingsTree.h"
+#include "settings/oskar_SettingsNode.h"
+#include "settings/oskar_SettingsKey.h"
+#include "settings/oskar_SettingsValue.h"
 #include <QtGui/QFontMetrics>
 #include <QtGui/QIcon>
 #include <QtCore/QFile>
@@ -80,7 +83,9 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
         return QVariant();
 
     const SettingsNode* node = get_node(index);
-    const string key = node->key();
+    const SettingsValue& value = node->settings_value();
+    const SettingsValue::TypeId type = value.type();
+    const char* key = node->key();
 
     // Check for roles common to all columns.
     switch (role)
@@ -114,7 +119,7 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
     }
     case Qt::ToolTipRole:
     {
-        QString tooltip = QString::fromStdString(node->description());
+        QString tooltip = QString(node->description());
         if (!tooltip.isEmpty())
         {
             tooltip = "<p>" + tooltip + "</p>";
@@ -127,20 +132,19 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
         return tooltip;
     }
     case KeyRole:
-        return QString::fromStdString(node->key());
+        return QString(key);
     case ValueRole:
-        return QString::fromStdString(node->value().get_value());
+        return QString(node->value());
     case DefaultRole:
-        return QString::fromStdString(node->value().get_default());
+        return QString(node->default_value());
     case TypeRole:
-        return node->value().type();
+        return type;
     case ItemTypeRole:
         return node->item_type();
     case RangeRole:
     {
-        const SettingsValue& value = node->value();
         QList<QVariant> range;
-        switch (value.type())
+        switch (type)
         {
         case SettingsValue::INT_RANGE:
         {
@@ -161,24 +165,23 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
     }
     case ExtRangeRole:
     {
-        const SettingsValue& value = node->value();
         QList<QVariant> range;
-        switch (value.type())
+        switch (type)
         {
         case SettingsValue::INT_RANGE_EXT:
         {
             range.append(value.get<IntRangeExt>().min());
             range.append(value.get<IntRangeExt>().max());
-            range.append(QString::fromStdString(value.get<IntRangeExt>().ext_min()));
-            range.append(QString::fromStdString(value.get<IntRangeExt>().ext_max()));
+            range.append(QString(value.get<IntRangeExt>().ext_min()));
+            range.append(QString(value.get<IntRangeExt>().ext_max()));
             return range;
         }
         case SettingsValue::DOUBLE_RANGE_EXT:
         {
             range.append(value.get<DoubleRangeExt>().min());
             range.append(value.get<DoubleRangeExt>().max());
-            range.append(QString::fromStdString(value.get<DoubleRangeExt>().ext_min()));
-            range.append(QString::fromStdString(value.get<DoubleRangeExt>().ext_max()));
+            range.append(QString(value.get<DoubleRangeExt>().ext_min()));
+            range.append(QString(value.get<DoubleRangeExt>().ext_max()));
             return range;
         }
         default:
@@ -188,13 +191,12 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
     }
     case OptionsRole:
     {
-        const SettingsValue& value = node->value();
         QStringList options;
-        if (value.type() == SettingsValue::OPTION_LIST)
+        if (type == SettingsValue::OPTION_LIST)
         {
             const OptionList& l = value.get<OptionList>();
             for (int i = 0; i < l.size(); ++i)
-                options.push_back(QString::fromStdString(l.option(i)));
+                options.push_back(QString(l.option(i)));
         }
         return options;
     }
@@ -208,11 +210,7 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
         switch (role)
         {
         case Qt::DisplayRole:
-        {
-            if (displayKey_)
-                return QString::fromStdString(node->key());
-            return QString::fromStdString(node->label());
-        }
+            return displayKey_ ? QString(key) : QString(node->label());
         case Qt::DecorationRole:
         {
             // Note: Maybe icons should be disabled unless there is an icon
@@ -221,11 +219,11 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
             //
             // Alternatively, figure out how to move the icon to the
             // right-hand end of the label?
-            if (node->value().type() == SettingsValue::INPUT_FILE ||
-                    node->value().type() == SettingsValue::INPUT_FILE_LIST ||
-                    node->value().type() == SettingsValue::INPUT_DIRECTORY)
+            if (type == SettingsValue::INPUT_FILE ||
+                    type == SettingsValue::INPUT_FILE_LIST ||
+                    type == SettingsValue::INPUT_DIRECTORY)
                 return QIcon(":/icons/open.png");
-            else if (node->value().type() == SettingsValue::OUTPUT_FILE)
+            else if (type == SettingsValue::OUTPUT_FILE)
                 return QIcon(":/icons/save.png");
             break;
         }
@@ -238,32 +236,22 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
         switch (role)
         {
         case Qt::DisplayRole:
-            if (node->item_type() == SettingsItem::SETTING) {
-                switch (node->value().type())
-                {
-                    default:
-                        return QString::fromStdString(node->value().get_value());
-                }
-            }
-            break;
         case Qt::EditRole:
-            if (node->item_type() == SettingsItem::SETTING) {
-                return QString::fromStdString(node->value().get_value());
-            }
+        {
+            if (node->item_type() == SettingsItem::SETTING)
+                return QString(node->value());
             break;
+        }
         case Qt::CheckStateRole:
         {
-            if (node->value().type() == SettingsValue::BOOL)
-            {
-                QVariant val = node->value().get<Bool>().value();
-                return val.toBool() ? Qt::Checked : Qt::Unchecked;
-            }
+            if (type == SettingsValue::BOOL)
+                return value.get<Bool>().value() ? Qt::Checked : Qt::Unchecked;
             break;
         }
         case Qt::SizeHintRole:
         {
             int width = QApplication::fontMetrics().width(
-                    QString::fromStdString(node->label())) + 10;
+                    QString(node->label())) + 10;
             return QSize(width, 26);
         }
         default:
@@ -282,9 +270,10 @@ Qt::ItemFlags SettingsModel::flags(const QModelIndex& index) const
     const SettingsNode* node = get_node(index);
     if (!settings_->dependencies_satisfied(node->key()))
         return Qt::ItemIsSelectable;
-    if (index.column() == 0 || node->item_type() == SettingsItem::LABEL)
+    int column = index.column();
+    if (column == 0 || node->item_type() == SettingsItem::LABEL)
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    if (index.column() == 1 && node->value().type() == SettingsValue::BOOL)
+    if (column == 1 && node->settings_value().type() == SettingsValue::BOOL)
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable |  Qt::ItemIsUserCheckable;
 
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
@@ -322,9 +311,8 @@ QModelIndex SettingsModel::index(int row, int column,
 void SettingsModel::load_settings_file(const QString& filename)
 {
     if (!filename.isEmpty()) filename_ = filename;
-    vector<pair<string, string> > failed;
     lastModified_ = QDateTime::currentDateTime();
-    settings_->load(filename.toStdString(), failed);
+    settings_->load(filename.toLatin1().constData());
     refresh(QModelIndex());
 }
 
@@ -332,7 +320,7 @@ void SettingsModel::save_settings_file(const QString& filename)
 {
     if (!filename.isEmpty()) filename_ = filename;
     lastModified_ = QDateTime::currentDateTime();
-    settings_->save(filename.toStdString());
+    settings_->save(filename.toLatin1().constData());
 }
 
 QModelIndex SettingsModel::parent(const QModelIndex& index) const
@@ -401,18 +389,19 @@ bool SettingsModel::setData(const QModelIndex& idx, const QVariant& value,
         if (idx.column() == 1)
         {
             lastModified_ = QDateTime::currentDateTime();
-            std::string value;
-            if (node->value().type() == SettingsValue::INPUT_FILE_LIST) {
+            QString value;
+            if (node->settings_value().type() == SettingsValue::INPUT_FILE_LIST)
+            {
                 QStringList l = data.toStringList();
                 for (int i = 0; i < l.size(); ++i) {
-                    value += l[i].toStdString();
+                    value += l[i];
                     if (i < l.size()) value += ",";
                 }
             }
             else {
-                value = data.toString().toStdString();
+                value = data.toString();
             }
-            settings_->set_value(node->key(), value);
+            settings_->set_value(node->key(), value.toLatin1().constData());
 
             QModelIndex i(idx);
             while (i.isValid())
@@ -454,7 +443,7 @@ void SettingsModel::reset_group_(const SettingsNode* node)
 {
     for (int i = 0; i < node->num_children(); ++i) {
         const SettingsNode* child = node->child(i);
-        settings_->set_value(child->key(), child->value().get_default());
+        settings_->set_value(child->key(), child->default_value());
         reset_group_(child);
     }
 }

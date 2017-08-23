@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -116,7 +116,7 @@ void oskar_beam_pattern_set_cross_power_raw_text(oskar_BeamPattern* h,
 
 
 void oskar_beam_pattern_set_gpus(oskar_BeamPattern* h, int num,
-        int* ids, int* status)
+        const int* ids, int* status)
 {
     int i, num_gpus_avail;
     if (*status) return;
@@ -241,10 +241,11 @@ void oskar_beam_pattern_set_sky_model_file(oskar_BeamPattern* h,
 
 
 void oskar_beam_pattern_set_station_ids(oskar_BeamPattern* h,
-        int num_stations, int* ids)
+        int num_stations, const int* ids)
 {
     int i;
     h->num_active_stations = num_stations;
+    if (num_stations < 0) return;
     h->station_ids = (int*) realloc(h->station_ids, num_stations * sizeof(int));
     for (i = 0; i < num_stations; ++i) h->station_ids[i] = ids[i];
 }
@@ -262,14 +263,23 @@ void oskar_beam_pattern_set_stokes(oskar_BeamPattern* h, const char* stokes)
 void oskar_beam_pattern_set_telescope_model(oskar_BeamPattern* h,
         const oskar_Telescope* model, int* status)
 {
-    if (*status) return;
+    if (*status || !h || !model) return;
 
     /* Check the model is not empty. */
-    if (oskar_telescope_num_stations(model) == 0)
+    const int num_stations = oskar_telescope_num_stations(model);
+    if (num_stations == 0)
     {
         oskar_log_error(h->log, "Telescope model is empty.");
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
+    }
+    if (h->num_active_stations < 0)
+    {
+        int i;
+        h->num_active_stations = num_stations;
+        h->station_ids = (int*)
+                realloc(h->station_ids, num_stations * sizeof(int));
+        for (i = 0; i < num_stations; ++i) h->station_ids[i] = i;
     }
 
     /* Remove any existing telescope model, and copy the new one. */

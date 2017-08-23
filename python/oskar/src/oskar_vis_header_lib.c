@@ -39,30 +39,29 @@ static const char module_doc[] =
         "This module provides an interface to an OSKAR visibility header.";
 static const char name[] = "oskar_VisHeader";
 
-static void vis_header_free(PyObject* capsule)
-{
-    int status = 0;
-    oskar_VisHeader* h = (oskar_VisHeader*) PyCapsule_GetPointer(capsule, name);
-    oskar_vis_header_free(h, &status);
-}
-
 static void* get_handle(PyObject* capsule, const char* name)
 {
     void* h = 0;
     if (!PyCapsule_CheckExact(capsule))
     {
-        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
         return 0;
     }
     if (!(h = PyCapsule_GetPointer(capsule, name)))
     {
-        PyErr_Format(PyExc_RuntimeError,
-                "Unable to convert PyCapsule object to %s.", name);
+        PyErr_Format(PyExc_RuntimeError, "Capsule is not of type %s.", name);
         return 0;
     }
     return h;
 }
 
+
+static void vis_header_free(PyObject* capsule)
+{
+    int status = 0;
+    oskar_vis_header_free((oskar_VisHeader*)
+            get_handle(capsule, name), &status);
+}
 
 static PyObject* amp_type(PyObject* self, PyObject* args)
 {
@@ -71,6 +70,19 @@ static PyObject* amp_type(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_header_amp_type(h));
+}
+
+
+static PyObject* capsule_name(PyObject* self, PyObject* args)
+{
+    PyObject *capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!PyCapsule_CheckExact(capsule))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
+        return 0;
+    }
+    return Py_BuildValue("s", PyCapsule_GetName(capsule));
 }
 
 
@@ -259,6 +271,8 @@ static PyObject* time_average_sec(PyObject* self, PyObject* args)
 static PyMethodDef methods[] =
 {
         {"amp_type", (PyCFunction)amp_type, METH_VARARGS, "amp_type()"},
+        {"capsule_name", (PyCFunction)capsule_name,
+                METH_VARARGS, "capsule_name()"},
         {"channel_bandwidth_hz", (PyCFunction)channel_bandwidth_hz,
                 METH_VARARGS, "channel_bandwidth_hz()"},
         {"coord_precision", (PyCFunction)coord_precision,

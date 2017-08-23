@@ -1,0 +1,20 @@
+{
+    "stream_config":
+    {
+        "max_packet_size": 1472,
+        "rate": 0.0,
+        "burst_size": 8000,
+        "max_heaps": 4
+    },
+    "streams":
+    [
+        {
+            "port": 41000,
+            "host": "127.0.0.1"
+        },
+        {
+            "port": 41001,
+            "host": "127.0.0.1"
+        }
+    ]
+}

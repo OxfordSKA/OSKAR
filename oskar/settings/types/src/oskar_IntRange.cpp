@@ -35,24 +35,23 @@
 #include <climits>
 #include <vector>
 
-#include <iostream>
+using namespace std;
 
 namespace oskar {
 
-IntRange::IntRange() : min_(-INT_MAX), max_(INT_MAX), default_(0), value_(0)
+IntRange::IntRange()
 {
+    (void) init(string());
 }
 
-IntRange::~IntRange()
-{
-}
-
-bool IntRange::init(const std::string& s)
+bool IntRange::init(const string& s)
 {
     min_ = -INT_MAX;
     max_ =  INT_MAX;
     default_ = 0;
     value_ = 0;
+    str_default_ = "0";
+    str_value_ = "0";
 
     // Extract range from the parameter CSV string.
     // Parameters, p, for IntRange should be length 0, 1 or 2.
@@ -64,11 +63,9 @@ bool IntRange::init(const std::string& s)
     // these will resolve as -INT_MAX and INT_MAX respectively.
     //
     bool ok = true;
-    std::vector<std::string> p;
-    p = oskar_settings_utility_string_get_type_params(s);
-    if (p.size() == 0u) {
+    vector<string> p = oskar_settings_utility_string_get_type_params(s);
+    if (p.size() == 0u)
         return true;
-    }
     else if (p.size() == 1u) {
         if (p[0] == "MIN") min_ = -INT_MAX;
         else min_ = oskar_settings_utility_string_to_int(p[0], &ok);
@@ -87,29 +84,20 @@ bool IntRange::init(const std::string& s)
     return false;
 }
 
-
-bool IntRange::set_default(const std::string& value)
+bool IntRange::set_default(const string& value)
 {
     bool ok = from_string_(value, default_);
-    if (ok) {
-        value_ = default_;
-    }
+    str_default_ = oskar_settings_utility_int_to_string(default_);
+    if (ok)
+        set_value(value);
     return ok;
 }
 
-std::string IntRange::get_default() const
+bool IntRange::set_value(const string& value)
 {
-    return oskar_settings_utility_int_to_string(default_);
-}
-
-bool IntRange::set_value(const std::string& value)
-{
-    return from_string_(value, value_);
-}
-
-std::string IntRange::get_value() const
-{
-    return oskar_settings_utility_int_to_string(value_);
+    bool ok = from_string_(value, value_);
+    str_value_ = oskar_settings_utility_int_to_string(value_);
+    return ok;
 }
 
 bool IntRange::is_default() const
@@ -127,7 +115,7 @@ bool IntRange::operator>(const IntRange& other) const
     return value_ > other.value_;
 }
 
-bool IntRange::from_string_(const std::string& s, int& value) const
+bool IntRange::from_string_(const string& s, int& value) const
 {
     bool ok = true;
     int i = oskar_settings_utility_string_to_int(s, &ok);
@@ -143,4 +131,3 @@ bool IntRange::from_string_(const std::string& s, int& value) const
 }
 
 } // namespace oskar
-

@@ -44,7 +44,6 @@ if (CUDA_FOUND)
         src/oskar_scale_flux_with_frequency_cuda.cu
         #src/oskar_rebin_sky_cuda.cu # Doesn't work on compute 1.3 architectures.
         src/oskar_sky_copy_source_data_cuda.cu
-        src/oskar_sky_filter_by_flux_cuda.cu
         src/oskar_update_horizon_mask_cuda.cu
     )
 endif()

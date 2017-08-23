@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_option_parser.h"
 #include "math/oskar_cmath.h"
 #include "mem/oskar_mem.h"
 #include "telescope/station/oskar_station.h"

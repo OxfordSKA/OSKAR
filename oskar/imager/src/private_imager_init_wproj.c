@@ -52,7 +52,7 @@ extern "C" {
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
-/*#define SAVE_KERNELS 1*/
+#define SAVE_KERNELS 0
 
 /*
  * W-kernel generation is based on CASA implementation
@@ -71,7 +71,7 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     oskar_Mem *screen = 0, *screen_gpu = 0, *screen_ptr = 0;
     oskar_Mem *taper = 0, *taper_gpu = 0, *taper_ptr = 0;
     oskar_Mem *wsave = 0, *work = 0;
-    char *ptr_out, *ptr_in;
+    char *ptr_out, *ptr_in, *fname = 0;
     if (*status) return;
 
     /* Get GCF padding oversample factor and imager precision. */
@@ -383,10 +383,13 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     }
     oskar_mem_scale_real(h->w_kernels, 1.0 / sum, status);
 
-#ifdef SAVE_KERNELS
-    oskar_mem_write_fits_cube(h->w_kernels, "kernels_norm",
+#if SAVE_KERNELS
+    fname = (char*) calloc(20 + (h->input_root ? strlen(h->input_root) : 0), 1);
+    sprintf(fname, "%s_KERNELS", h->input_root ? h->input_root : "");
+    oskar_mem_write_fits_cube(h->w_kernels, fname,
             conv_size_half, conv_size_half, h->num_w_planes, -1, status);
 #endif
+    free(fname);
 }
 
 #ifdef __cplusplus

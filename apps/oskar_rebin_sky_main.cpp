@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_option_parser.h"
 #include "oskar_rebin_sky_cuda.h"
 #include "log/oskar_log.h"
 #include "sky/oskar_sky.h"

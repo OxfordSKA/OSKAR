@@ -136,7 +136,7 @@ void oskar_imager_finalise(oskar_Imager* h,
         oskar_log_value(h->log, 'M', 0, "Write image data", "%.3f s",
                 oskar_timer_elapsed(h->tmr_write));
         oskar_log_section(h->log, 'M', "Imaging complete");
-        if (h->image_root)
+        if (h->output_root)
         {
             oskar_log_message(h->log, 'M', 0, "Output(s):");
             for (i = 0; i < h->num_im_pols; ++i)

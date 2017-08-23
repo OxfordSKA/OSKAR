@@ -77,7 +77,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     QGridLayout* gridLayout = new QGridLayout;
 
     // Create the settings model.
-    handler_ = NULL;
     settings_ = new SettingsTree;
     model_ = new SettingsModel(settings_, this);
     QSortFilterProxyModel* modelProxy_ = new SettingsModelFilter(this);
@@ -211,7 +210,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
 
 MainWindow::~MainWindow()
 {
-    if (handler_) delete handler_;
     delete settings_;
 }
 
@@ -229,7 +227,8 @@ void MainWindow::clear()
             return;
     }
     files_[current_app_] = QString();
-    if (handler_) handler_->set_file_name(std::string());
+    if (settings_->file_handler())
+        settings_->file_handler()->set_file_name("");
     settings_->set_defaults();
     model_->refresh();
     setWindowTitle(title_);
@@ -237,6 +236,7 @@ void MainWindow::clear()
 
 void MainWindow::open(QString filename)
 {
+    char* temp_string;
     if (files_[current_app_].isEmpty() && settings_->is_modified())
     {
         QMessageBox msgBox(this);
@@ -253,7 +253,7 @@ void MainWindow::open(QString filename)
     if (filename.isEmpty())
         filename = QFileDialog::getOpenFileName(this, "Open Settings",
                 files_[current_app_]);
-    if (!handler_ || filename.isEmpty()) return;
+    if (!settings_->file_handler() || filename.isEmpty()) return;
 
     // Check the file exists.
     if (!QFile::exists(filename))
@@ -269,8 +269,10 @@ void MainWindow::open(QString filename)
     }
 
     // Open the file by selecting the application.
-    QString app = QString::fromStdString(
-            handler_->read(filename.toStdString(), "app"));
+    temp_string = settings_->file_handler()->read(
+            filename.toLatin1().constData(), "app");
+    QString app = temp_string ? QString(temp_string) : QString();
+    free(temp_string);
     int app_index = -1;
     if (!app.isEmpty())
         app_index = selector_->findText(app);
@@ -296,8 +298,10 @@ void MainWindow::open(QString filename)
     }
 
     // Check the version of the application that created the file.
-    QString ver_file = QString::fromStdString(
-            handler_->read(filename.toStdString(), "version"));
+    temp_string = settings_->file_handler()->read(
+            filename.toLatin1().constData(), "version");
+    QString ver_file = temp_string ? QString(temp_string) : QString();
+    free(temp_string);
     QStringList vers_file = ver_file.split('.');
     QStringList vers_app = current_app_version_.split('.');
     int major_file = (vers_file.size() > 0) ? vers_file[0].toInt() : 0;
@@ -473,16 +477,16 @@ void MainWindow::appChanged(QString text)
     }
 
     // Set the file handler for the application.
-    if (handler_) delete handler_;
-    handler_ = new SettingsFileHandlerIni(
-            current_app_.toStdString(), current_app_version_.toStdString());
-    settings_->set_file_handler(handler_);
+    SettingsFileHandlerIni* handler = new SettingsFileHandlerIni(
+            current_app_.toLatin1().constData(),
+            current_app_version_.toLatin1().constData());
+    settings_->set_file_handler(handler);
 
     // Declare application settings, load settings file, and reset the model.
     model_->beginReset();
     try
     {
-        settings_declare_xml(settings_, std::string(settings.constData()));
+        settings_declare_xml(settings_, settings.constData());
     }
     catch (std::exception& e)
     {

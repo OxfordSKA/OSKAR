@@ -31,62 +31,51 @@
 
 #include "settings/types/oskar_Double.h"
 #include "settings/oskar_settings_utility_string.h"
-#include <sstream>
-#include <cmath>
 #include <cfloat>
+#include <cmath>
+
+using namespace std;
 
 namespace oskar {
 
 Double::Double()
-: format_(AUTO), default_(0.0), value_(0.0)
 {
+    (void) init(string());
 }
 
-Double::~Double()
-{
-}
-
-bool Double::init(const std::string& /*s*/)
+bool Double::init(const string& /*s*/)
 {
     format_ = AUTO;
     default_ = 0.0;
     value_ = 0.0;
+    str_default_ = "0.0";
+    str_value_ = "0.0";
     return true;
 }
 
-bool Double::set_default(const std::string& value)
+bool Double::set_default(const string& value)
 {
     bool ok = true;
-    format_ = (value.find_first_of('e') != std::string::npos) ? EXPONENT : AUTO;
-    default_ = oskar_settings_utility_string_to_double(value, &ok);
-    if (ok) {
-        value_ = default_;
-    }
-    else {
-        value_ = 0.0;
-        default_ = 0.0;
-    }
-    return ok;
+    double d = oskar_settings_utility_string_to_double(value, &ok);
+    if (!ok) return false;
+    format_ = (value.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+    default_ = d;
+    str_default_ = oskar_settings_utility_double_to_string_2(default_,
+            (format_ == AUTO ? 'g' : 'e'));
+    set_value(value);
+    return true;
 }
 
-std::string Double::get_default() const
-{
-    return oskar_settings_utility_double_to_string_2(default_,
-                                             (format_ == AUTO ? 'g' : 'e'));
-}
-
-bool Double::set_value(const std::string& value)
+bool Double::set_value(const string& value)
 {
     bool ok = true;
-    format_ = (value.find_first_of('e') != std::string::npos) ? EXPONENT : AUTO;
-    value_ = oskar_settings_utility_string_to_double(value, &ok);
-    return ok;
-}
-
-std::string Double::get_value() const
-{
-    return oskar_settings_utility_double_to_string_2(value_,
-                                             (format_ == AUTO ? 'g' : 'e'));
+    double d = oskar_settings_utility_string_to_double(value, &ok);
+    if (!ok) return false;
+    format_ = (value.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+    value_ = d;
+    str_value_ = oskar_settings_utility_double_to_string_2(value_,
+            (format_ == AUTO ? 'g' : 'e'));
+    return true;
 }
 
 bool Double::is_default() const
@@ -105,4 +94,3 @@ bool Double::operator>(const Double& other) const
 }
 
 } // namespace oskar
-

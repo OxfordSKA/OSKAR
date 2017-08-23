@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_option_parser.h"
 #include "correlate/oskar_cross_correlate.h"
 #include "sky/oskar_sky.h"
-#include "simulator/oskar_jones.h"
+#include "interferometer/oskar_jones.h"
 #include "mem/oskar_mem.h"
 #include "telescope/oskar_telescope.h"
 #include "utility/oskar_get_error_string.h"

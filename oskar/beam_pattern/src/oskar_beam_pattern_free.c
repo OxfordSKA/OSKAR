@@ -37,6 +37,7 @@ extern "C" {
 
 void oskar_beam_pattern_free(oskar_BeamPattern* h, int* status)
 {
+    if (!h) return;
     oskar_beam_pattern_reset_cache(h, status);
     oskar_telescope_free(h->tel, status);
     oskar_timer_free(h->tmr_sim);

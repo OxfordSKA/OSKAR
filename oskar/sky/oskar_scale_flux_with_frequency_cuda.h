@@ -115,26 +115,6 @@ void oskar_scale_flux_with_frequency_cuda_d(int num_sources,
         double frequency, double* d_I, double* d_Q, double* d_U, double* d_V,
         double* d_ref_freq, const double* d_sp_index, const double* d_rm);
 
-#ifdef __CUDACC__
-
-/* Kernels. */
-
-__global__
-void oskar_scale_flux_with_frequency_cudak_f(const int num_sources,
-        const float frequency, float* __restrict__ I, float* __restrict__ Q,
-        float* __restrict__ U, float* __restrict__ V,
-        float* __restrict__ ref_freq, const float* __restrict__ sp_index,
-        const float* __restrict__ rm);
-
-__global__
-void oskar_scale_flux_with_frequency_cudak_d(const int num_sources,
-        const double frequency, double* __restrict__ I, double* __restrict__ Q,
-        double* __restrict__ U, double* __restrict__ V,
-        double* __restrict__ ref_freq, const double* __restrict__ sp_index,
-        const double* __restrict__ rm);
-
-#endif /* __CUDACC__ */
-
 #ifdef __cplusplus
 }
 #endif

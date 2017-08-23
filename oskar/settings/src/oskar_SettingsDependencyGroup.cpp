@@ -32,11 +32,12 @@
 #include "settings/oskar_SettingsKey.h"
 #include "settings/oskar_SettingsDependency.h"
 #include "settings/oskar_SettingsDependencyGroup.h"
+#include <cstring>
 
 namespace oskar {
 
-SettingsDependencyGroup::SettingsDependencyGroup(const std::string& logic,
-                                                 SettingsDependencyGroup* parent)
+SettingsDependencyGroup::SettingsDependencyGroup(const char* logic,
+        SettingsDependencyGroup* parent)
 : parent_(parent)
 {
     logic_ = string_to_group_logic(logic);
@@ -53,7 +54,7 @@ int SettingsDependencyGroup::num_children() const
 }
 
 SettingsDependencyGroup* SettingsDependencyGroup::add_child(
-                const std::string& logic)
+                const char* logic)
 {
     children_.push_back(new SettingsDependencyGroup(logic, this));
     return children_.back();
@@ -84,9 +85,8 @@ SettingsDependencyGroup::GroupLogic SettingsDependencyGroup::group_logic() const
     return logic_;
 }
 
-void SettingsDependencyGroup::add_dependency(const std::string& key,
-                                             const std::string& value,
-                                             const std::string& logic)
+void SettingsDependencyGroup::add_dependency(const char* key,
+        const char* value, const char* logic)
 {
     dependencies_.push_back(SettingsDependency(key, value, logic));
 }
@@ -104,14 +104,15 @@ const SettingsDependency* SettingsDependencyGroup::get_dependency(
 }
 
 SettingsDependencyGroup::GroupLogic
-SettingsDependencyGroup::string_to_group_logic(const std::string& s)
+SettingsDependencyGroup::string_to_group_logic(const char* s)
 {
-    if (s == "AND")
+    if (!s || strlen(s) == 0)
         return SettingsDependencyGroup::AND;
-    else if (s == "OR")
+    if (!strncmp(s, "AND", 3))
+        return SettingsDependencyGroup::AND;
+    else if (!strncmp(s, "OR", 2))
         return SettingsDependencyGroup::OR;
-    else
-        return SettingsDependencyGroup::UNDEF;
+    return SettingsDependencyGroup::UNDEF;
 }
 
 } // namespace oskar

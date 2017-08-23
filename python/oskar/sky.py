@@ -1,5 +1,4 @@
-#
-#  This file is part of OSKAR.
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2016, The University of Oxford
 # All rights reserved.
@@ -31,28 +30,43 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-from __future__ import absolute_import, division
+"""Interfaces to the OSKAR sky model."""
+
+from __future__ import absolute_import, division, print_function
 import math
 import numpy
 try:
     from . import _sky_lib
-except ImportError:
+except ImportError as e:
+    print("Import error: " + str(e))
     _sky_lib = None
 
 
 class Sky(object):
     """This class provides a Python interface to an OSKAR sky model."""
 
-    def __init__(self, precision='double'):
+    def __init__(self, precision=None, settings=None):
         """Creates an OSKAR sky model.
 
         Args:
-            precision (Optional[str]): Either 'double' or 'single' to specify
-                the numerical precision of the data.
+            precision (Optional[str]):
+                Either 'double' or 'single' to specify the numerical
+                precision of the sky model. Default 'double'.
+            settings (Optional[oskar.SettingsTree]):
+                Optional settings to use to set up the sky model.
         """
         if _sky_lib is None:
             raise RuntimeError("OSKAR library not found.")
-        self._capsule = _sky_lib.create(precision)
+        self._capsule = None
+        if precision is not None and settings is not None:
+            raise RuntimeError("Specify either precision or all settings.")
+        if precision is None:
+            precision = 'double'  # Set default.
+        if settings is not None:
+            sky = settings.to_sky()
+            self._capsule = sky.capsule
+            self._settings = settings
+        self._precision = precision
 
     def append(self, other):
         """Appends data from another sky model.
@@ -60,7 +74,8 @@ class Sky(object):
         Args:
             other (oskar.Sky): Another sky model.
         """
-        _sky_lib.append(self._capsule, other._capsule)
+        self.capsule_ensure()
+        _sky_lib.append(self._capsule, other.capsule)
 
     def append_sources(self, ra_deg, dec_deg, I, Q=None, U=None, V=None,
                        ref_freq_hz=None, spectral_index=None,
@@ -90,6 +105,7 @@ class Sky(object):
             position_angle_deg (Optional[float, array-like]):
                 Source Gaussian position angle values, in degrees.
         """
+        self.capsule_ensure()
         if Q is None:
             Q = numpy.zeros_like(I)
         if U is None:
@@ -121,12 +137,35 @@ class Sky(object):
         Args:
             filename (str): Name of file to load.
         """
+        self.capsule_ensure()
         _sky_lib.append_file(self._capsule, filename)
+
+    def capsule_ensure(self):
+        """Ensures the C capsule exists."""
+        if self._capsule is None:
+            self._capsule = _sky_lib.create(self._precision)
+
+    def capsule_get(self):
+        """Returns the C capsule wrapped by the class."""
+        return self._capsule
+
+    def capsule_set(self, new_capsule):
+        """Sets the C capsule wrapped by the class.
+
+        Args:
+            new_capsule (capsule): The new capsule to set.
+        """
+        if _sky_lib.capsule_name(new_capsule) == 'oskar_Sky':
+            del self._capsule
+            self._capsule = new_capsule
+        else:
+            raise RuntimeError("Capsule is not of type oskar_Sky.")
 
     def create_copy(self):
         """Creates a copy of the sky model."""
+        self.capsule_ensure()
         t = Sky()
-        t._capsule = _sky_lib.create_copy(self._capsule)
+        t.capsule = _sky_lib.create_copy(self._capsule)
         return t
 
     def filter_by_flux(self, min_flux_jy, max_flux_jy):
@@ -138,6 +177,7 @@ class Sky(object):
             min_flux_jy (float): Minimum allowed flux, in Jy.
             max_flux_jy (float): Maximum allowed flux, in Jy.
         """
+        self.capsule_ensure()
         _sky_lib.filter_by_flux(self._capsule, min_flux_jy, max_flux_jy)
 
     def filter_by_radius(self, inner_radius_deg, outer_radius_deg,
@@ -152,10 +192,39 @@ class Sky(object):
             ra0_deg (float): Right Ascension of phase centre, in degrees.
             dec0_deg (float): Declination of phase centre, in degrees.
         """
+        self.capsule_ensure()
         _sky_lib.filter_by_radius(
             self._capsule, math.radians(inner_radius_deg),
             math.radians(outer_radius_deg),
             math.radians(ra0_deg), math.radians(dec0_deg))
+
+    @classmethod
+    def from_array(cls, array, precision='double'):
+        """Creates a new sky model from a 2D numpy array.
+
+        The format of the array is the same as that in sky model text files.
+        Each column specifies a different source parameter, and each row
+        specifies data for a different source.
+
+        The array could be created, for example, like:
+        array = numpy.zeros((num_sources, num_parameters))
+
+        There must be at least 3 columns present (RA, Dec, Stokes I).
+        Parameters for missing columns will take default values.
+
+        If the array is 1-dimensional, it will be treated as specifying
+        parameters only for a single source.
+
+        Args:
+            array (float, array-like): Input array.
+            precision (Optional[str]): Either 'double' or 'single' to specify
+                the numerical precision of the sky model.
+        """
+        if _sky_lib is None:
+            raise RuntimeError("OSKAR library not found.")
+        t = Sky()
+        t.capsule = _sky_lib.from_array(array, precision)
+        return t
 
     @classmethod
     def from_fits_file(cls, filename, min_peak_fraction=0.0, min_abs_val=0.0,
@@ -183,12 +252,12 @@ class Sky(object):
             spectral_index (Optional[float]):
                 Spectral index value to give to each pixel.
             precision (Optional[str]): Either 'double' or 'single' to specify
-                the numerical precision of the data.
+                the numerical precision of the sky model.
         """
         if _sky_lib is None:
             raise RuntimeError("OSKAR library not found.")
         t = Sky()
-        t._capsule = _sky_lib.from_fits_file(
+        t.capsule = _sky_lib.from_fits_file(
             filename, min_peak_fraction, min_abs_val, default_map_units,
             override_units, frequency_hz, spectral_index, precision)
         return t
@@ -208,12 +277,12 @@ class Sky(object):
             std_flux_jy (float):  Standard deviation Stokes-I flux, in Jy.
             seed (int):           Random generator seed.
             precision (Optional[str]): Either 'double' or 'single' to specify
-                the numerical precision of the data.
+                the numerical precision of the sky model.
         """
         if _sky_lib is None:
             raise RuntimeError("OSKAR library not found.")
         t = Sky()
-        t._capsule = _sky_lib.generate_grid(
+        t.capsule = _sky_lib.generate_grid(
             ra0_deg, dec0_deg, side_length, fov_deg, mean_flux_jy,
             std_flux_jy, seed, precision)
         return t
@@ -221,7 +290,7 @@ class Sky(object):
     @classmethod
     def generate_random_power_law(cls, num_sources, min_flux_jy, max_flux_jy,
                                   power_law_index, seed=1, precision='double'):
-        """Generates sources scattered randomly over the sphere.
+        """Generates sources scattered randomly over the celestial sphere.
 
         Args:
             num_sources (int):       The number of sources to generate.
@@ -230,12 +299,12 @@ class Sky(object):
             power_law_index (float): Power law index/exponent.
             seed (int):              Random generator seed.
             precision (Optional[str]): Either 'double' or 'single' to specify
-                the numerical precision of the data.
+                the numerical precision of the sky model.
         """
         if _sky_lib is None:
             raise RuntimeError("OSKAR library not found.")
         t = Sky()
-        t._capsule = _sky_lib.generate_random_power_law(
+        t.capsule = _sky_lib.generate_random_power_law(
             num_sources, min_flux_jy, max_flux_jy, power_law_index, seed,
             precision)
         return t
@@ -246,6 +315,7 @@ class Sky(object):
         Returns:
             int: Number of sources in the sky model.
         """
+        self.capsule_ensure()
         return _sky_lib.num_sources(self._capsule)
 
     @classmethod
@@ -255,12 +325,12 @@ class Sky(object):
         Args:
             filename (str): Name of file to load.
             precision (Optional[str]): Either 'double' or 'single' to specify
-                the numerical precision of the data.
+                the numerical precision of the sky model.
         """
         if _sky_lib is None:
             raise RuntimeError("OSKAR library not found.")
         t = Sky()
-        t._capsule = _sky_lib.load(filename, precision)
+        t.capsule = _sky_lib.load(filename, precision)
         return t
 
     def save(self, filename):
@@ -269,7 +339,24 @@ class Sky(object):
         Args:
             filename (str): Name of file to write.
         """
+        self.capsule_ensure()
         _sky_lib.save(self._capsule, filename)
 
+    def to_array(self):
+        """Returns a copy of the sky model as a 2D numpy array.
+
+        Returns:
+            numpy.ndarray: A copy of the sky model.
+        """
+        self.capsule_ensure()
+        array = _sky_lib.to_array(self._capsule)
+        array[:, 0] *= (180.0 / math.pi)
+        array[:, 1] *= (180.0 / math.pi)
+        array[:, 9] *= (180.0 / math.pi) * 3600.0
+        array[:, 10] *= (180.0 / math.pi) * 3600.0
+        array[:, 11] *= (180.0 / math.pi)
+        return array
+
     # Properties
+    capsule = property(capsule_get, capsule_set)
     num_sources = property(get_num_sources)

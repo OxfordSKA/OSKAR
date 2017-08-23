@@ -29,62 +29,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "settings/oskar_settings_utility_string.h"
 #include "settings/types/oskar_InputDirectory.h"
-#include <sstream>
+#include "settings/oskar_settings_utility_string.h"
 
 namespace oskar {
 
-InputDirectory::InputDirectory()
-{
-}
-
-InputDirectory::~InputDirectory()
-{
-}
-
-bool InputDirectory::init(const std::string& /*parameters*/)
-{
-    return true;
-}
-
 bool InputDirectory::set_default(const std::string& value)
 {
-    default_ = oskar_settings_utility_string_trim(value);
-    value_ = default_;
+    str_default_ = oskar_settings_utility_string_trim(value);
+    str_value_ = str_default_;
     return true;
-}
-
-std::string InputDirectory::get_default() const
-{
-    return default_;
 }
 
 bool InputDirectory::set_value(const std::string& value)
 {
-    value_ = oskar_settings_utility_string_trim(value);
+    str_value_ = oskar_settings_utility_string_trim(value);
     return true;
 }
 
-std::string InputDirectory::get_value() const
-{
-    return value_;
-}
-
-bool InputDirectory::is_default() const
-{
-    return value_ == default_;
-}
-
-bool InputDirectory::operator==(const InputDirectory& other) const
-{
-    return value_ == other.value_;
-}
-
-bool InputDirectory::operator>(const InputDirectory& ) const
-{
-    return false;
-}
-
 } // namespace oskar
-

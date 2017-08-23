@@ -38,7 +38,7 @@
 
 #include <vector>
 #include "settings/types/oskar_AbstractSettingsType.h"
-#include <ttl/var/variant.hpp>
+#include "settings/extern/ttl/var/variant.hpp"
 
 namespace oskar {
 
@@ -56,29 +56,27 @@ class OSKAR_SETTINGS_EXPORT IntListExt : public AbstractSettingsType
 
  public:
     IntListExt();
-    virtual ~IntListExt();
+    virtual ~IntListExt() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
     bool is_default() const;
 
-    std::string special_string() const { return special_value_; }
+    const char* special_string() const;
     bool is_extended() const;
     int size() const;
-    std::vector<int> values() const;
+    const int* values() const;
 
     bool operator==(const IntListExt& other) const;
-    bool operator>(const IntListExt& other) const;
+    bool operator>(const IntListExt&) const { return false; }
 
  private:
-    bool from_string_(const std::string& s, std::vector<int>& values) const;
-    std::string to_string_(const std::vector<int>& values) const;
+    static bool compare_(const Value& a, const Value& b);
+    bool from_string_(const std::string& s, Value& val) const;
+    std::string to_string_(const Value& v);
     std::string special_value_;
-    Value default_;
-    Value value_;
+    Value value_, default_;
     char delimiter_;
 };
 

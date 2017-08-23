@@ -36,12 +36,9 @@
 
 #ifdef __cplusplus
 
-#include <string>
-#include <utility>
-#include <vector>
-
 namespace oskar {
 
+struct SettingsFileHandlerPrivate;
 class SettingsTree;
 
 /**
@@ -52,25 +49,21 @@ class SettingsTree;
 class OSKAR_SETTINGS_EXPORT SettingsFileHandler
 {
 public:
-    SettingsFileHandler(const std::string app, const std::string& version) :
-        write_defaults_(false), app_(app), version_(version) {}
-    virtual ~SettingsFileHandler() {}
+    SettingsFileHandler(const char* app, const char* version);
+    virtual ~SettingsFileHandler();
 
-    std::string file_name() const { return file_name_; }
-    virtual std::string read(const std::string& file_name,
-            const std::string& key) const = 0;
-    virtual bool read_all(SettingsTree* tree,
-            std::vector<std::pair<std::string, std::string> >& invalid) = 0;
+    const char* app() const;
+    const char* version() const;
+    const char* file_name() const;
+    virtual char* read(const char* file_name, const char* key) const = 0;
+    virtual bool read_all(SettingsTree* tree) = 0;
     virtual bool write_all(const SettingsTree* tree) = 0;
-    virtual void set_file_name(const std::string& name) = 0;
-    void set_write_defaults(bool value) { write_defaults_ = value; }
+    void set_file_name(const char* name);
+    void set_write_defaults(bool value);
+    bool write_defaults() const;
 
-protected:
-    bool write_defaults_;
-    std::string app_;
-    std::string version_;
-    std::string file_version_;
-    std::string file_name_;
+private:
+    SettingsFileHandlerPrivate* p;
 };
 
 } /* namespace oskar */

@@ -37,17 +37,17 @@ using namespace oskar;
 TEST(settings_types, IntPositive)
 {
     IntPositive i;
-    ASSERT_STREQ("1", i.get_value().c_str());
+    ASSERT_STREQ("1", i.get_value());
     ASSERT_TRUE(i.init(""));
     ASSERT_TRUE(i.set_default("10"));
     ASSERT_EQ(10, i.default_value());
     ASSERT_EQ(10, i.value());
-    ASSERT_STREQ("10", i.get_default().c_str());
+    ASSERT_STREQ("10", i.get_default());
     ASSERT_TRUE(i.is_default());
     ASSERT_FALSE(i.set_value("-20"));
     ASSERT_EQ(10, i.value());
     ASSERT_TRUE(i.set_value("20"));
     ASSERT_EQ(20, i.value());
     ASSERT_FALSE(i.is_default());
-    ASSERT_STREQ("20", i.get_value().c_str());
+    ASSERT_STREQ("20", i.get_value());
 }

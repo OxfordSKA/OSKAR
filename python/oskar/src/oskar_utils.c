@@ -45,7 +45,7 @@ static PyObject* version_string(PyObject* self, PyObject* args)
 static PyMethodDef methods[] =
 {
         {"version_string", (PyCFunction)version_string,
-                METH_VARARGS, "version_string()"},
+                METH_NOARGS, "version_string()"},
         {NULL, NULL, 0, NULL}
 };
 

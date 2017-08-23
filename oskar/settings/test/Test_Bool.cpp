@@ -38,13 +38,12 @@ TEST(settings_types, Bool)
 {
     Bool b;
     ASSERT_TRUE(b.set_default("false"));
-    ASSERT_STREQ("false", b.get_default().c_str());
-    ASSERT_STREQ("false", b.get_value().c_str());
+    ASSERT_STREQ("false", b.get_default());
+    ASSERT_STREQ("false", b.get_value());
     ASSERT_TRUE(b.is_default());
     ASSERT_TRUE(b.set_value("true"));
-    ASSERT_STREQ("true", b.get_value().c_str());
+    ASSERT_STREQ("true", b.get_value());
     ASSERT_FALSE(b.is_default());
     ASSERT_TRUE(b.value());
-    ASSERT_FALSE(b.default_value());
 }
 

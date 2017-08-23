@@ -44,7 +44,6 @@ namespace oskar {
 class SettingsModel;
 class SettingsView;
 class SettingsTree;
-class SettingsFileHandler;
 
 class MainWindow : public QMainWindow
 {
@@ -84,7 +83,6 @@ private:
     QLineEdit* filter_;
     QComboBox* selector_;
     SettingsTree* settings_;
-    SettingsFileHandler* handler_;
     SettingsView* view_;
     SettingsModel* model_;
     QHash<QString, QString> files_;

@@ -45,7 +45,7 @@ TEST(settings_types, DoubleRange)
         ASSERT_TRUE(r.is_default());
         ASSERT_TRUE(r.set_value("2.3"));
         // FIXME(BM) better double to string conversion.
-        EXPECT_STREQ("2.3", r.get_value().c_str());
+        EXPECT_STREQ("2.3", r.get_value());
         ASSERT_DOUBLE_EQ(2.3, r.value());
         ASSERT_DOUBLE_EQ(0.999999999999, r.default_value());
         ASSERT_DOUBLE_EQ(-DBL_MAX, r.min());

@@ -36,7 +36,7 @@
  * @file oskar_OutputFile.h
  */
 
-#include "settings/types/oskar_AbstractSettingsType.h"
+#include "settings/types/oskar_InputFile.h"
 
 namespace oskar {
 
@@ -48,28 +48,12 @@ namespace oskar {
  * @details
  *
  */
-
-// TODO(BM) just inherit String?
-class OSKAR_SETTINGS_EXPORT OutputFile : public AbstractSettingsType
+class OSKAR_SETTINGS_EXPORT OutputFile : public InputFile
 {
 public:
-    OutputFile();
-    virtual ~OutputFile();
-
-    bool init(const std::string& s);
-    bool set_default(const std::string& s);
-    std::string get_default() const;
-    bool set_value(const std::string& s);
-    std::string get_value() const;
-    bool is_default() const;
-
-    bool operator==(const OutputFile& other) const;
-    bool operator>(const OutputFile& other) const;
-
-private:
-    std::string default_, value_;
+    OutputFile() {}
+    virtual ~OutputFile() {}
 };
-
 } /* namespace oskar */
 
 #endif /* OSKAR_SETTINGS_TYPE_OUTPUT_FILE_H_ */

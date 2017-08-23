@@ -34,7 +34,7 @@
  */
 
 #include <oskar_global.h>
-#include <simulator/oskar_jones.h>
+#include <interferometer/oskar_jones.h>
 #include <sky/oskar_sky.h>
 #include <mem/oskar_mem.h>
 

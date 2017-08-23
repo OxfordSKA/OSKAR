@@ -39,6 +39,7 @@
 #include <settings/oskar_settings_macros.h>
 
 #ifdef __cplusplus
+#include <string>
 
 namespace oskar {
 
@@ -64,15 +65,15 @@ public:
     enum Logic { UNDEF, EQ, NE, GT, GE, LT, LE };
 
     /*! Constructor. */
-    SettingsDependency(const std::string& key,
-                       const std::string& value,
-                       const std::string& logic = "EQ");
+    SettingsDependency(const char* key,
+            const char* value,
+            const char* logic = 0);
 
     /*! Return the dependency key */
-    const std::string& key() const { return key_; }
+    const char* key() const;
 
     /*! Return the dependency value */
-    const std::string& value() const { return value_; }
+    const char* value() const;
 
     /*! Return the dependency value logic */
     SettingsDependency::Logic logic() const { return logic_; }
@@ -87,11 +88,10 @@ public:
     static const char* logic_to_string(const SettingsDependency::Logic&);
 
     /*! Static method to convert logic string to logic enum. */
-    static SettingsDependency::Logic string_to_logic(const std::string&);
+    static SettingsDependency::Logic string_to_logic(const char*);
 
 private:
-    std::string key_;
-    std::string value_;
+    std::string key_, value_;
     SettingsDependency::Logic logic_;
 };
 

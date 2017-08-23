@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2017, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -40,7 +40,6 @@
 
 #ifdef __cplusplus
 
-#include <iostream>
 #include <vector>
 #include <string>
 
@@ -62,60 +61,45 @@ public:
     SettingsKey(char separator = '/');
 
     /*! Constructor */
-    SettingsKey(const std::string& key, char separator = '/');
+    SettingsKey(const char* key, char separator = '/');
 
     /*! Destructor */
     ~SettingsKey();
 
-    /*! Copy constructor */
-    SettingsKey(const SettingsKey&);
-
-    /*! Set the key separator */
-    void set_separator(char s = '/');
-
-    /*! Return the key separator */
-    char separator() const;
-
-    /*! Returns true if the key is empty */
-    bool empty() const;
+    /*! Return the last element of the key. */
+    const char* back() const;
 
     /*! Return the depth of the key (depth = size - 1). */
     int depth() const;
 
-    /*! Return the number of separated items in the key */
-    int size() const;
+    /*! Returns true if the key is empty */
+    bool empty() const;
+
+    /*! Creates the key from a string. */
+    void from_string(const char* key, char separator = '/');
+
+    /*! Return the key separator */
+    char separator() const;
+
+    /*! Set the key separator */
+    void set_separator(char s = '/');
 
     /*! Equality operator */
     bool operator==(const SettingsKey& other) const;
 
-    /*! Implicit conversion operator. */
-    operator const std::string&() const;
-
     /*! Operator to access sub-elements of the key. */
-    std::string operator[](int i) const;
+    const char* operator[](int i) const;
 
-    /*! Return the first element of the key. */
-    std::string front() const;
-
-    /*! Return the last element of the key. */
-    std::string back() const;
-
-    /*! Return the group key string of the key */
-    std::string group() const;
-
-    /*! Convert the key to a const char array */
-    const char* c_str() const;
-
-    /*! Stream insertion operator */
-    friend std::ostream& operator<<(std::ostream& stream, const SettingsKey& k);
+    /*! Implicit conversion operator. */
+    operator const char*() const;
 
 private:
+    SettingsKey(const SettingsKey&);
+
+    char sep_;
     std::string key_;
     std::vector<std::string> tokens_;
-    char sep_;
 };
-
-std::ostream& operator<< (std::ostream& stream, const SettingsKey& k);
 
 } /* namespace oskar */
 

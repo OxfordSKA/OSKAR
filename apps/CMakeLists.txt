@@ -3,7 +3,6 @@
 #
 
 add_subdirectory(test)
-add_subdirectory(xml)
 
 # === Include build macros used for apps.
 include(${OSKAR_SOURCE_DIR}/cmake/oskar_build_macros.cmake)
@@ -70,7 +69,5 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
         GROUP_READ GROUP_EXECUTE
         WORLD_READ WORLD_EXECUTE
     PATTERN "CMakeFiles" EXCLUDE
-    PATTERN "gui" EXCLUDE
     PATTERN "test" EXCLUDE
-    PATTERN "xml" EXCLUDE
 )

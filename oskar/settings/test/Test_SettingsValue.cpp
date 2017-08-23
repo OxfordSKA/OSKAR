@@ -29,24 +29,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ttl/var/variant.hpp>
 #include <gtest/gtest.h>
-#include <iostream>
-#include <string>
-#include <climits>
-#include <vector>
-#include "settings/oskar_settings_utility_string.h"
 #include "settings/oskar_SettingsValue.h"
 #include "settings/oskar_settings_types.h"
 
-using namespace std;
 using namespace oskar;
 
 TEST(SettingsValue, test1)
 {
     SettingsValue v;
     ASSERT_EQ(SettingsValue::UNDEF, v.type());
-    ASSERT_STREQ("Undef", v.type_name().c_str());
+    ASSERT_STREQ("Undef", v.type_name());
 
     Bool b;
     ASSERT_TRUE(b.set_default("false"));
@@ -54,42 +47,40 @@ TEST(SettingsValue, test1)
     v = Bool();
     ASSERT_EQ(SettingsValue::BOOL, v.type());
     ASSERT_TRUE(v.is_default());
-    ASSERT_TRUE(v.get<Bool>().set_default("false"));
-    ASSERT_TRUE(v.get<Bool>().set_value("true"));
+    ASSERT_TRUE(v.set_default("false"));
+    ASSERT_TRUE(v.set_value("true"));
     ASSERT_FALSE(v.is_default());
-    ASSERT_STREQ("true", v.get<Bool>().get_value().c_str());
-    ASSERT_TRUE(v.set<Bool>("false"));
+    ASSERT_STREQ("true", v.get_value());
+    ASSERT_TRUE(v.set_value("false"));
     ASSERT_TRUE(v.is_default());
-    ASSERT_STREQ("false", v.get<Bool>().get_value().c_str());
-    ASSERT_STREQ("false", v.value<Bool>().c_str());
-    ASSERT_STREQ("false", v.get_value().c_str());
+    ASSERT_STREQ("false", v.get_value());
 
     ASSERT_TRUE(v.init("DateTime", ""));
     ASSERT_EQ(SettingsValue::DATE_TIME, v.type());
-    ASSERT_TRUE(v.set<DateTime>("1985-5-23T5:6:12.12345"));
+    ASSERT_TRUE(v.set_value("1985-5-23T5:6:12.12345"));
     ASSERT_EQ(1985, v.get<DateTime>().value().year);
     ASSERT_EQ(DateTime::ISO, v.get<DateTime>().value().style);
-    ASSERT_EQ(std::string(), v.get<DateTime>().get_default());
-    ASSERT_STREQ("1985-05-23T05:06:12.12345", v.get_value().c_str());
+    ASSERT_STREQ("", v.get_default());
+    ASSERT_STREQ("1985-05-23T05:06:12.12345", v.get_value());
 
     ASSERT_TRUE(v.init("Double", ""));
     ASSERT_TRUE(v.set_default("2.0"));
     ASSERT_EQ(SettingsValue::DOUBLE, v.type());
-    ASSERT_STREQ("Double", v.type_name().c_str());
+    ASSERT_STREQ("Double", v.type_name());
 
     bool ok = false;
     ASSERT_TRUE(v.init("DoubleRangeExt", "-MAX,MAX,min,max"));
-    ASSERT_TRUE(v.get<DoubleRangeExt>().set_default("min"));
+    ASSERT_TRUE(v.set_default("min"));
     ASSERT_TRUE(v.set_value("10.0"));
     ASSERT_DOUBLE_EQ(10.0, v.to_double(ok));
     ASSERT_TRUE(ok);
     ASSERT_TRUE(v.set_value("min"));
     ASSERT_DOUBLE_EQ(-DBL_MAX, v.to_double(ok));
-    ASSERT_STREQ("min", v.to_string().c_str());
+    ASSERT_STREQ("min", v.to_string());
     ASSERT_TRUE(ok);
     ASSERT_TRUE(v.set_value("max"));
     ASSERT_DOUBLE_EQ(DBL_MAX, v.to_double(ok));
-    ASSERT_STREQ("max", v.to_string().c_str());
+    ASSERT_STREQ("max", v.to_string());
     ASSERT_TRUE(ok);
 }
 

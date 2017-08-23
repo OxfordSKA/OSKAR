@@ -53,20 +53,17 @@ class OSKAR_SETTINGS_EXPORT Bool : public AbstractSettingsType
 {
 public:
     Bool();
-    virtual ~Bool();
+    virtual ~Bool() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
     bool is_default() const;
 
     bool value() const { return value_; }
-    bool default_value() const { return default_; }
 
     bool operator==(const Bool& other) const;
-    bool operator>(const Bool& other) const;
+    bool operator>(const Bool&) const { return false; }
 
 private:
     bool default_, value_;

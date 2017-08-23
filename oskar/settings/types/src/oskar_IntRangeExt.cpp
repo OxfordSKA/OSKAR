@@ -36,19 +36,16 @@
 #include <iostream>
 
 using namespace std;
+using ttl::var::get;
 
 namespace oskar {
 
 IntRangeExt::IntRangeExt()
-: min_(-INT_MAX), max_(INT_MAX), default_(0), value_(0)
 {
+    (void) init(string());
 }
 
-IntRangeExt::~IntRangeExt()
-{
-}
-
-bool IntRangeExt::init(const std::string& s)
+bool IntRangeExt::init(const string& s)
 {
     ext_min_.clear();
     ext_max_.clear();
@@ -56,6 +53,8 @@ bool IntRangeExt::init(const std::string& s)
     max_ =  INT_MAX;
     value_ = 0;
     default_ = 0;
+    str_default_ = "0";
+    str_value_ = "0";
 
     // Extract range from the parameter CSV string.
     // Parameters, p, for IntRangeExt should be of length between 3 and 4
@@ -71,8 +70,7 @@ bool IntRangeExt::init(const std::string& s)
     //   INT_MAX (note this is not possible when there is also a max string)
     //
     bool ok = true;
-    std::vector<std::string> p;
-    p = oskar_settings_utility_string_get_type_params(s);
+    vector<string> p = oskar_settings_utility_string_get_type_params(s);
     // For less than 3 values, just use IntRange instead!
     if (p.size() < 3u || p.size() > 4u) {
         return false;
@@ -95,89 +93,60 @@ bool IntRangeExt::init(const std::string& s)
     return ok;
 }
 
-
-bool IntRangeExt::set_default(const std::string &value)
+bool IntRangeExt::set_default(const string &value)
 {
     bool ok = from_string_(default_, value);
-    if (ok) {
-        value_ = default_;
-    }
+    str_default_ = to_string_(default_);
+    if (ok)
+        set_value(value);
     return ok;
 }
 
-std::string IntRangeExt::get_default() const
+bool IntRangeExt::set_value(const string& value)
 {
-    return to_string_(default_);
-}
-
-bool IntRangeExt::set_value(const std::string& value)
-{
-    return from_string_(value_, value);
-}
-
-std::string IntRangeExt::get_value() const
-{
-    return to_string_(value_);
+    bool ok = from_string_(value_, value);
+    str_value_ = to_string_(value_);
+    return ok;
 }
 
 bool IntRangeExt::is_default() const
 {
-    if (value_.is_singular() || default_.is_singular()) return false;
-    if (value_.which() == default_.which()) {
-        if (value_.which() == INT) {
-            return (ttl::var::get<int>(value_) == ttl::var::get<int>(default_));
-        }
-        else if (value_.which() == STRING) {
-            return (ttl::var::get<std::string>(value_)
-                            == ttl::var::get<std::string>(default_));
-        }
-    }
-    return false;
+    return compare_(value_, default_);
 }
 
-bool IntRangeExt::set_value(int i)
+int IntRangeExt::value() const
 {
-    return from_int_(value_, i);
-}
-
-bool IntRangeExt::set_default(int i)
-{
-    return from_int_(default_, i);
+    if (value_.which() == STRING && get<string>(value_) == ext_max_)
+        return max_;
+    if (value_.which() == STRING && get<string>(value_) == ext_min_)
+        return min_;
+    return get<int>(value_);
 }
 
 bool IntRangeExt::operator==(const IntRangeExt& other) const
 {
-    using ttl::var::get;
-    if (value_.is_singular() || other.value_.is_singular())
-        return false;
-    if (value_.which() == other.value_.which()) {
-        if (value_.which() == INT) {
-            return (get<int>(value_) == get<int>(default_));
-        }
-        else if (value_.which() == STRING) {
-            return (get<std::string>(value_) == get<std::string>(default_));
-        }
-    }
-    return false;
+    return compare_(value_, other.value_);
 }
 
 bool IntRangeExt::operator>(const IntRangeExt& other) const
 {
-    using ttl::var::get;
-    if (value_.is_singular() || other.value_.is_singular())
-        return false;
-    if (value_.which() == other.value_.which()) {
-        if (value_.which() == INT) {
-            return (get<int>(value_) > get<int>(default_));
-        }
-        else if (value_.which() == STRING) {
-            return false;
-        }
-    }
+    if (value_.is_singular() || other.value_.is_singular()) return false;
+    if (value_.which() == other.value_.which()) return false;
+    if (value_.which() == STRING) return false;
+    if (value_.which() == INT) return (get<int>(value_) > get<int>(default_));
     return false;
 }
 
-bool IntRangeExt::from_string_(Value& value, const std::string& s) const
+bool IntRangeExt::compare_(const Value& a, const Value& b)
+{
+    if (a.is_singular() || b.is_singular()) return false;
+    if (a.which() != b.which()) return false;
+    if (a.which() == STRING) return (get<string>(a) == get<string>(b));
+    if (a.which() == INT) return (get<int>(a) == get<int>(b));
+    return false;
+}
+
+bool IntRangeExt::from_string_(Value& value, const string& s) const
 {
     // Catch cases where the range is being set with a special string.
     if (oskar_settings_utility_string_starts_with(ext_min_, s)) {
@@ -198,55 +167,20 @@ bool IntRangeExt::from_string_(Value& value, const std::string& s) const
             return true;
         }
         // If the integer is out of range, set it to the closest special value.
-        else if (i < min_) {
-            value = ext_min_;
-            return false;
-        }
-        else if (i > max_ && !ext_max_.empty()) {
-            value = ext_max_;
-            return false;
-        }
-        else {
-            return false;
-        }
+        else if (i < min_) value = ext_min_;
+        else if (i > max_ && !ext_max_.empty()) value = ext_max_;
     }
+    return false;
 }
 
-bool IntRangeExt::from_int_(Value& value, int i) const
+string IntRangeExt::to_string_(const Value& value) const
 {
-    if (i < min_ && !ext_min_.empty()) {
-        value = ext_min_;
-        return false;
-    }
-    else if (i > max_ && !ext_max_.empty()) {
-        value = ext_max_;
-        return false;
-    }
-    else {
-        if (i >= max_) {
-            value = max_;
-            return false;
-        }
-        else if (i <= min_) {
-            value = min_;
-            return true;
-        }
-        else value = i;
-    }
-    return true;
-}
-
-std::string IntRangeExt::to_string_(const Value& value) const
-{
-    if (value.is_singular()) return std::string();
-    if (value.which() == INT) {
-        return oskar_settings_utility_int_to_string(ttl::var::get<int>(value));
-    }
-    else if (value.which() == STRING) {
-        return ttl::var::get<std::string>(value);
-    }
-    return std::string();
+    if (value.is_singular()) return string();
+    if (value.which() == INT)
+        return oskar_settings_utility_int_to_string(get<int>(value));
+    else if (value.which() == STRING)
+        return get<string>(value);
+    return string();
 }
 
 } // namespace oskar
-

@@ -1,5 +1,4 @@
-#
-#  This file is part of OSKAR.
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2016-2017, The University of Oxford
 # All rights reserved.
@@ -31,12 +30,15 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-from __future__ import absolute_import, division
+"""Interfaces to OSKAR telescope model."""
+
+from __future__ import absolute_import, division, print_function
 import math
 import numpy
 try:
     from . import _telescope_lib
-except ImportError:
+except ImportError as e:
+    print("Import error: " + str(e))
     _telescope_lib = None
 
 
@@ -44,16 +46,49 @@ class Telescope(object):
     """This class provides a Python interface to an OSKAR telescope model.
     """
 
-    def __init__(self, precision='double'):
-        """Creates a handle to an OSKAR telescope model.
+    def __init__(self, precision=None, settings=None):
+        """Creates an OSKAR telescope model.
 
         Args:
-            precision (str): Either 'double' or 'single' to specify
-                the numerical precision of the data.
+            precision (Optional[str]):
+                Either 'double' or 'single' to specify the numerical
+                precision of the data. Default 'double'.
+            settings (Optional[oskar.SettingsTree]):
+                Optional settings to use to set up the telescope model.
         """
         if _telescope_lib is None:
             raise RuntimeError("OSKAR library not found.")
-        self._capsule = _telescope_lib.create(precision)
+        self._capsule = None
+        if precision is not None and settings is not None:
+            raise RuntimeError("Specify either precision or all settings.")
+        if precision is None:
+            precision = 'double'  # Set default.
+        if settings is not None:
+            tel = settings.to_telescope()
+            self._capsule = tel.capsule
+            self._settings = settings
+        self._precision = precision
+
+    def capsule_ensure(self):
+        """Ensures the C capsule exists."""
+        if self._capsule is None:
+            self._capsule = _telescope_lib.create(self._precision)
+
+    def capsule_get(self):
+        """Returns the C capsule wrapped by the class."""
+        return self._capsule
+
+    def capsule_set(self, new_capsule):
+        """Sets the C capsule wrapped by the class.
+
+        Args:
+            new_capsule (capsule): The new capsule to set.
+        """
+        if _telescope_lib.capsule_name(new_capsule) == 'oskar_Telescope':
+            del self._capsule
+            self._capsule = new_capsule
+        else:
+            raise RuntimeError("Capsule is not of type oskar_Telescope.")
 
     def load(self, dir_name):
         """Loads an OSKAR telescope model directory.
@@ -68,26 +103,32 @@ class Telescope(object):
         Args:
             dir_name (str): Path to telescope model directory to load.
         """
+        self.capsule_ensure()
         _telescope_lib.load(self._capsule, dir_name)
 
     def get_identical_stations(self):
         """Returns true if all stations are identical, false if not."""
+        self.capsule_ensure()
         return _telescope_lib.identical_stations(self._capsule)
 
     def get_max_station_depth(self):
         """Returns the maximum station nesting depth."""
+        self.capsule_ensure()
         return _telescope_lib.max_station_depth(self._capsule)
 
     def get_max_station_size(self):
         """Returns the maximum station size."""
+        self.capsule_ensure()
         return _telescope_lib.max_station_size(self._capsule)
 
     def get_num_baselines(self):
         """Returns the number of baselines in the telescope model."""
+        self.capsule_ensure()
         return _telescope_lib.num_baselines(self._capsule)
 
     def get_num_stations(self):
         """Returns the number of stations in the telescope model."""
+        self.capsule_ensure()
         return _telescope_lib.num_stations(self._capsule)
 
     def set_allow_station_beam_duplication(self, value):
@@ -95,8 +136,10 @@ class Telescope(object):
 
         Args:
             value (int):
-                If true, station beams will be copied if stations are identical.
+                If true, station beams will be copied if stations are
+                identical.
         """
+        self.capsule_ensure()
         _telescope_lib.set_allow_station_beam_duplication(self._capsule, value)
 
     def set_channel_bandwidth(self, channel_bandwidth_hz):
@@ -105,6 +148,7 @@ class Telescope(object):
         Args:
             channel_bandwidth_hz (float): The channel bandwidth, in Hz.
         """
+        self.capsule_ensure()
         _telescope_lib.set_channel_bandwidth(
             self._capsule, channel_bandwidth_hz)
 
@@ -115,6 +159,7 @@ class Telescope(object):
             value (int): If true, thermal noise will be added to visibilities.
             seed (int): Random number generator seed.
         """
+        self.capsule_ensure()
         _telescope_lib.set_enable_noise(self._capsule, value, seed)
 
     def set_enable_numerical_patterns(self, value):
@@ -123,6 +168,7 @@ class Telescope(object):
         Args:
             value (int): If true, numerical element patterns will be loaded.
         """
+        self.capsule_ensure()
         _telescope_lib.set_enable_numerical_patterns(self._capsule, value)
 
     def set_gaussian_station_beam_width(self, fwhm_deg, ref_freq_hz):
@@ -134,6 +180,7 @@ class Telescope(object):
             ref_freq_hz (float):
                 The reference frequency at which the FWHM applies, in Hz.
         """
+        self.capsule_ensure()
         _telescope_lib.set_gaussian_station_beam_width(
             self._capsule, fwhm_deg, ref_freq_hz)
 
@@ -141,10 +188,14 @@ class Telescope(object):
         """Sets the frequencies at which noise is defined.
 
         Args:
-            start_hz (float):             Start frequency, in Hz.
-            inc_hz (Optional[float]):     Frequency increment, in Hz. Default 0.
-            num_channels (Optioanl[int]): Number of channels. Default 1.
+            start_hz (float):
+                Start frequency, in Hz.
+            inc_hz (Optional[float]):
+                Frequency increment, in Hz. Default 0.
+            num_channels (Optioanl[int]):
+                Number of channels. Default 1.
         """
+        self.capsule_ensure()
         _telescope_lib.set_noise_freq(
             self._capsule, start_hz, inc_hz, num_channels)
 
@@ -157,6 +208,7 @@ class Telescope(object):
             start (float): Value at first frequency, in Jy.
             end (Optional[float]): Value at last frequency, in Jy.
         """
+        self.capsule_ensure()
         if end is None:
             end = start
         _telescope_lib.set_noise_rms(self._capsule, start, end)
@@ -168,6 +220,7 @@ class Telescope(object):
             ra_deg (float): Right Ascension, in degrees.
             dec_deg (float): Declination, in degrees.
         """
+        self.capsule_ensure()
         _telescope_lib.set_phase_centre(
             self._capsule, math.radians(ra_deg), math.radians(dec_deg))
 
@@ -177,6 +230,7 @@ class Telescope(object):
         Args:
             mode (str): Either 'Scalar' or 'Full'.
         """
+        self.capsule_ensure()
         _telescope_lib.set_pol_mode(self._capsule, mode)
 
     def set_position(self, longitude_deg, latitude_deg, altitude_m=0.0):
@@ -187,6 +241,7 @@ class Telescope(object):
             latitude_deg (float):  Array centre latitude, in degrees.
             altitude_m (float):    Array centre altitude, in metres.
         """
+        self.capsule_ensure()
         _telescope_lib.set_position(
             self._capsule, math.radians(longitude_deg),
             math.radians(latitude_deg), altitude_m)
@@ -213,6 +268,7 @@ class Telescope(object):
             z_err (Optional[float, array-like]):
                 Station z coordinate error, in metres.
         """
+        self.capsule_ensure()
         if z is None:
             z = numpy.zeros_like(x)
         if x_err is None:
@@ -247,6 +303,7 @@ class Telescope(object):
             z_err (Optional[float, array-like]):
                 Station z coordinate error, in metres.
         """
+        self.capsule_ensure()
         if x_err is None:
             x_err = numpy.zeros_like(x)
         if y_err is None:
@@ -274,6 +331,7 @@ class Telescope(object):
             station_altitudes_m (Optional[float, array-like]):
                 Station altitudes, in metres.
         """
+        self.capsule_ensure()
         if station_altitudes_m is None:
             station_altitudes_m = numpy.zeros_like(station_longitudes_deg)
         _telescope_lib.set_station_coords_wgs84(
@@ -290,6 +348,7 @@ class Telescope(object):
                 Station type, either "Array", "Gaussian" or "Isotropic".
                 Only the first letter is checked.
         """
+        self.capsule_ensure()
         _telescope_lib.set_station_type(self._capsule, type_string)
 
     def set_time_average(self, time_average_sec):
@@ -298,6 +357,7 @@ class Telescope(object):
         Args:
             time_average_sec (float): The time averaging interval, in seconds.
         """
+        self.capsule_ensure()
         _telescope_lib.set_time_average(self._capsule, time_average_sec)
 
     def set_uv_filter(self, uv_filter_min, uv_filter_max, uv_filter_units):
@@ -308,10 +368,12 @@ class Telescope(object):
             uv_filter_max (float): Maximum value for UV filter.
             uv_filter_units (str): Units of filter ('Metres' or 'Wavelengths').
         """
+        self.capsule_ensure()
         _telescope_lib.set_uv_filter(
             self._capsule, uv_filter_min, uv_filter_max, uv_filter_units)
 
     # Properties.
+    capsule = property(capsule_get, capsule_set)
     identical_stations = property(get_identical_stations)
     max_station_depth = property(get_max_station_depth)
     max_station_size = property(get_max_station_size)

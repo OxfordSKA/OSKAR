@@ -26,14 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_OptionParser.h"
+#include "apps/oskar_option_parser.h"
+#include "apps/oskar_app_settings.h"
 #include "apps/oskar_settings_log.h"
 #include "apps/oskar_settings_to_telescope.h"
 #include "binary/oskar_binary.h"
 #include "log/oskar_log.h"
-#include "settings/oskar_SettingsTree.h"
-#include "settings/oskar_SettingsDeclareXml.h"
-#include "settings/oskar_SettingsFileHandlerIni.h"
 #include "telescope/oskar_telescope.h"
 #include "utility/oskar_file_exists.h"
 #include "utility/oskar_get_error_string.h"
@@ -41,32 +39,23 @@
 #include "vis/oskar_vis_block.h"
 #include "vis/oskar_vis_header.h"
 
-#include "apps/xml/oskar_sim_interferometer_xml_all.h"
-
 #include <iostream>
 #include <string>
 #include <vector>
 
 using namespace oskar;
-using std::vector;
-using std::string;
-using std::pair;
-
 using namespace std;
 
-static const char settings_def[] = oskar_sim_interferometer_XML_STR;
+static const char app[] = "oskar_vis_add_noise";
+static const char app_s[] = "oskar_sim_interferometer";
 
-//-----------------------------------------------------------------------------
-//void log_noise_settings(oskar_Log* log, oskar_Settings* settings);
-//-----------------------------------------------------------------------------
 
 int main(int argc, char** argv)
 {
     int status = 0;
 
     // Obtain command line options & arguments.
-    OptionParser opt("oskar_vis_add_noise", oskar_version_string(),
-            settings_def);
+    OptionParser opt(app, oskar_version_string(), oskar_app_settings(app_s));
     opt.set_description("Application to add noise to OSKAR binary visibility "
             "files.");
     opt.add_required("OSKAR visibility file(s)...");
@@ -75,19 +64,12 @@ int main(int argc, char** argv)
     opt.add_flag("-q", "Suppress all logging output.");
     if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
-    string settings_file;
-    opt.get("-s")->getString(settings_file);
+    string settings;
+    opt.get("-s")->getString(settings);
     vector<string> vis_filename_in = opt.get_input_files();
     int num_files = vis_filename_in.size();
     bool verbose = opt.is_set("-v") ? true : false;
     bool quiet   = opt.is_set("-q") ? true : false;
-
-    // Declare settings.
-    SettingsTree s;
-    SettingsFileHandlerIni handler("oskar_vis_add_noise",
-            oskar_version_string());
-    settings_declare_xml(&s, settings_def);
-    s.set_file_handler(&handler);
 
     // Create the log.
     int file_priority = OSKAR_LOG_MESSAGE;
@@ -97,47 +79,43 @@ int main(int argc, char** argv)
     oskar_Log* log = oskar_log_create(file_priority, term_priority);
     oskar_log_set_keep_file(log, false);
     oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
+    oskar_log_section(log, 'M', "Loading settings file '%s'",
+            settings.c_str());
 
     // Load the settings file.
-    oskar_log_section(log, 'M', "Loading settings file '%s'",
-            settings_file.c_str());
-    vector<pair<string, string> > failed_keys;
-    if (!s.load(settings_file, failed_keys))
+    SettingsTree* s = oskar_app_settings_tree(app_s, settings.c_str());
+    if (!s)
     {
         oskar_log_error(log, "Failed to read settings file.");
-        oskar_log_free(log);
-        return OSKAR_ERR_FILE_IO;
+        if (log) oskar_log_free(log);
+        return EXIT_FAILURE;
     }
 
     // Write settings to log.
-    oskar_settings_log(&s, log, failed_keys);
-    if (!s.to_int("interferometer/noise/enable", &status))
+    oskar_settings_log(s, log);
+    if (!s->to_int("interferometer/noise/enable", &status))
     {
         oskar_log_error(log, "Noise addition disabled in the settings.");
         oskar_log_free(log);
+        SettingsTree::free(s);
         return EXIT_FAILURE;
     }
 
     // Set up the telescope model.
-    oskar_Telescope* tel = oskar_settings_to_telescope(&s, log, &status);
+    oskar_Telescope* tel = oskar_settings_to_telescope(s, log, &status);
     oskar_telescope_analyse(tel, &status);
-    if (status)
-    {
-        oskar_log_error(log, "Error: %s", oskar_get_error_string(status));
-        oskar_telescope_free(tel, &status);
-        oskar_log_free(log);
-        return EXIT_FAILURE;
-    }
 
     // Create list of output vis file names.
     vector<string> vis_filename_out(num_files);
     for (int i = 0; i < (int)vis_filename_out.size(); ++i)
     {
+        if (status) break;
         string str = vis_filename_in[i];
-        if (!oskar_file_exists(str.c_str())) {
+        if (!oskar_file_exists(str.c_str()))
+        {
             oskar_log_error(log, "Visibility file %s not found.", str.c_str());
-            oskar_log_free(log);
-            return EXIT_FAILURE;
+            status = OSKAR_ERR_FILE_IO;
+            break;
         }
         // TODO check if the file exists
         str.erase(str.end()-4, str.end());
@@ -145,14 +123,19 @@ int main(int argc, char** argv)
     }
 
     // Print a summary of what is about to happen.
-    oskar_log_line(log, 'D', ' ');
-    oskar_log_line(log, 'D', '-');
-    oskar_log_value(log, 'D', -1, "Number of input files", "%li", num_files);
-    for (int i = 0; i < num_files; ++i)
-        oskar_log_message(log, 'D', 1, "%s", vis_filename_in[i].c_str());
-    oskar_log_value(log, 'D', -1, "Settings file", "%s", settings_file.c_str());
-    oskar_log_value(log, 'D', -1, "Verbose", "%s", (verbose?"true":"false"));
-    oskar_log_line(log, 'D', '-');
+    if (!status)
+    {
+        oskar_log_line(log, 'D', ' ');
+        oskar_log_line(log, 'D', '-');
+        oskar_log_value(log, 'D', -1, "Number of input files", "%i", num_files);
+        for (int i = 0; i < num_files; ++i)
+            oskar_log_message(log, 'D', 1, "%s", vis_filename_in[i].c_str());
+        oskar_log_value(log, 'D', -1, "Settings file", "%s",
+                settings.c_str());
+        oskar_log_value(log, 'D', -1, "Verbose", "%s",
+                verbose ? "true" : "false");
+        oskar_log_line(log, 'D', '-');
+    }
 
     // Add uncorrelated noise to each of the visibility files.
     for (int i = 0; i < num_files; ++i)
@@ -184,20 +167,13 @@ int main(int argc, char** argv)
         oskar_VisBlock* blk = oskar_vis_block_create_from_header(OSKAR_CPU,
                 hdr, &status);
 
-        // Loop over blocks.
+        // Loop over blocks and add noise to each one.
         for (int b = 0; b < num_blocks; ++b)
         {
-            // Check for errors.
             if (status) break;
-
-            // Read the block.
             oskar_vis_block_read(blk, hdr, h_in, b, &status);
-
-            // Add noise to the block.
             oskar_vis_block_add_system_noise(blk, hdr, tel, b, station_work,
                     &status);
-
-            // Write the block.
             oskar_vis_block_write(blk, h_out, b, &status);
         }
 
@@ -214,5 +190,6 @@ int main(int argc, char** argv)
     if (status)
         oskar_log_error(log, "Error: %s", oskar_get_error_string(status));
     oskar_log_free(log);
-    return status;
+    SettingsTree::free(s);
+    return status == 0 ? 0 : EXIT_FAILURE;
 }

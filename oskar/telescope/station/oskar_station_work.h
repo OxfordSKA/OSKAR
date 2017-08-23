@@ -81,6 +81,9 @@ OSKAR_EXPORT
 oskar_Mem* oskar_station_work_horizon_mask(oskar_StationWork* work);
 
 OSKAR_EXPORT
+oskar_Mem* oskar_station_work_source_indices(oskar_StationWork* work);
+
+OSKAR_EXPORT
 oskar_Mem* oskar_station_work_enu_direction_x(oskar_StationWork* work);
 
 OSKAR_EXPORT

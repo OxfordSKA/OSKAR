@@ -48,7 +48,7 @@ static void set_station_data(oskar_Station* station, SettingsTree* s,
 oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         oskar_Log* log, int* status)
 {
-    if (*status) return 0;
+    if (*status || !s) return 0;
     s->clear_group();
 
     /* Create an empty telescope model. */
@@ -63,7 +63,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
                 s->to_int("interferometer/noise/enable", status),
                 s->to_int("interferometer/noise/seed", status));
     oskar_telescope_set_pol_mode(t,
-            s->to_string("telescope/pol_mode", status).c_str(), status);
+            s->to_string("telescope/pol_mode", status), status);
     oskar_telescope_set_allow_station_beam_duplication(t,
             s->to_int("telescope/allow_station_beam_duplication", status));
     oskar_telescope_set_enable_numerical_patterns(t,
@@ -73,8 +73,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     /************************************************************************/
     /* Load telescope model folders to define the stations. */
     oskar_telescope_load(t,
-            s->to_string("telescope/input_directory", status).c_str(),
-            log, status);
+            s->to_string("telescope/input_directory", status), log, status);
     if (*status) return t;
 
     /* Return if no stations were found. */
@@ -89,7 +88,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     /************************************************************************/
     /* Set remaining options after the stations have been defined. */
     oskar_telescope_set_station_type(t,
-            s->to_string("telescope/station_type", status).c_str(), status);
+            s->to_string("telescope/station_type", status), status);
     oskar_telescope_set_gaussian_station_beam_width(t,
             s->to_double("telescope/gaussian_beam/fwhm_deg", status),
             s->to_double("telescope/gaussian_beam/ref_freq_hz", status));
@@ -116,7 +115,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         oskar_telescope_set_uv_filter(t,
                 s->to_double("uv_filter_min", status),
                 s->to_double("uv_filter_max", status),
-                s->to_string("uv_filter_units", status).c_str(), status);
+                s->to_string("uv_filter_units", status), status);
         switch (s->first_letter("noise/freq", status))
         {
         case 'R': /* Range. */
@@ -132,7 +131,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
             break;
         case 'D': /* Data file. */
             oskar_telescope_set_noise_freq_file(t,
-                    s->to_string("noise/freq/file", status).c_str(), status);
+                    s->to_string("noise/freq/file", status), status);
             break;
         }
         switch (s->first_letter("noise/rms", status))
@@ -144,7 +143,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
             break;
         case 'D': /* Data file. */
             oskar_telescope_set_noise_rms_file(t,
-                    s->to_string("noise/rms/file", status).c_str(), status);
+                    s->to_string("noise/rms/file", status), status);
             break;
         }
     }
@@ -232,7 +231,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     /* Apply pointing file override. */
     s->clear_group();
     oskar_telescope_load_pointing_file(t,
-            s->to_string("observation/pointing_file", status).c_str(), status);
+            s->to_string("observation/pointing_file", status), status);
 
     return t;
 }

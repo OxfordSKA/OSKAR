@@ -56,27 +56,23 @@ class OSKAR_SETTINGS_EXPORT IntList : public AbstractSettingsType
 {
 public:
     IntList();
-    virtual ~IntList();
+    virtual ~IntList() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
     bool is_default() const;
 
-    std::vector<int> values() const { return value_; }
-    std::vector<int> default_values() const { return default_; }
-    int size() const { return value_.size(); }
+    int size() const;
+    const int* values() const;
 
     bool operator==(const IntList& other) const;
-    bool operator>(const IntList& other) const;
+    bool operator>(const IntList&) const { return false; }
 
 private:
     bool from_string_(const std::string& s, std::vector<int>& values) const;
     std::string to_string_(const std::vector<int>& values) const;
-    std::vector<int> default_;
-    std::vector<int> value_;
+    std::vector<int> default_, value_;
     char delimiter_;
 };
 

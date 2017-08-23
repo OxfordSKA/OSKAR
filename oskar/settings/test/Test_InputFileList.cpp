@@ -38,30 +38,29 @@ TEST(settings_types, InputFileList)
 {
     InputFileList l;
     ASSERT_TRUE(l.set_default("foo.txt,bar.txt"));
-    ASSERT_EQ(2u, l.default_values().size());
     ASSERT_EQ(2, l.size());
-    ASSERT_STREQ("foo.txt", l.values()[0].c_str());
-    ASSERT_STREQ("bar.txt", l.values()[1].c_str());
-    ASSERT_STREQ("foo.txt,bar.txt", l.get_default().c_str());
-    ASSERT_STREQ("foo.txt,bar.txt", l.get_value().c_str());
+    ASSERT_STREQ("foo.txt", l.values()[0]);
+    ASSERT_STREQ("bar.txt", l.values()[1]);
+    ASSERT_STREQ("foo.txt,bar.txt", l.get_default());
+    ASSERT_STREQ("foo.txt,bar.txt", l.get_value());
     ASSERT_TRUE(l.is_default());
     ASSERT_TRUE(l.set_value("a.dat, b.dat, c.zip"));
     ASSERT_FALSE(l.is_default());
     ASSERT_EQ(3, l.size());
-    ASSERT_STREQ("a.dat", l.values()[0].c_str());
-    ASSERT_STREQ("b.dat", l.values()[1].c_str());
-    ASSERT_STREQ("c.zip", l.values()[2].c_str());
-    ASSERT_STREQ("a.dat,b.dat,c.zip", l.get_value().c_str());
+    ASSERT_STREQ("a.dat", l.values()[0]);
+    ASSERT_STREQ("b.dat", l.values()[1]);
+    ASSERT_STREQ("c.zip", l.values()[2]);
+    ASSERT_STREQ("a.dat,b.dat,c.zip", l.get_value());
 
     //value="a.txt,   b.txt"
     ASSERT_TRUE(l.set_value("\"a.txt,   b.txt\""));
-    ASSERT_EQ(1u, l.values().size());
-    ASSERT_STREQ("a.txt,   b.txt", l.values()[0].c_str());
+    ASSERT_EQ(1, l.size());
+    ASSERT_STREQ("a.txt,   b.txt", l.values()[0]);
 
 //    //value=""c.txt",   d.txt"
 //    ASSERT_TRUE(l.set_value("\"\"c.txt\",   d.txt\""));
-//    ASSERT_EQ(2u, l.values().size());
-//    ASSERT_STREQ("c.txt", l.values()[0].c_str());
-//    ASSERT_STREQ("d.txt", l.values()[1].c_str());
+//    ASSERT_EQ(2, l.size());
+//    ASSERT_STREQ("c.txt", l.values()[0]);
+//    ASSERT_STREQ("d.txt", l.values()[1]);
 }
 

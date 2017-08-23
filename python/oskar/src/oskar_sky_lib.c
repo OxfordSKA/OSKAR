@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,30 +39,30 @@ static const char module_doc[] =
         "This module provides an interface to the OSKAR sky model.";
 static const char name[] = "oskar_Sky";
 
-static void sky_free(PyObject* capsule)
-{
-    int status = 0;
-    oskar_Sky* h = (oskar_Sky*) PyCapsule_GetPointer(capsule, name);
-    oskar_sky_free(h, &status);
-}
+#define deg2rad 1.74532925199432957692369e-2
+#define arcsec2rad 4.84813681109535993589914e-6
 
-
-static oskar_Sky* get_handle(PyObject* capsule)
+static void* get_handle(PyObject* capsule, const char* name)
 {
-    oskar_Sky* h = 0;
+    void* h = 0;
     if (!PyCapsule_CheckExact(capsule))
     {
-        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
         return 0;
     }
-    h = (oskar_Sky*) PyCapsule_GetPointer(capsule, name);
-    if (!h)
+    if (!(h = PyCapsule_GetPointer(capsule, name)))
     {
-        PyErr_SetString(PyExc_RuntimeError,
-                "Unable to convert PyCapsule object to pointer.");
+        PyErr_Format(PyExc_RuntimeError, "Capsule is not of type %s.", name);
         return 0;
     }
     return h;
+}
+
+
+static void sky_free(PyObject* capsule)
+{
+    int status = 0;
+    oskar_sky_free((oskar_Sky*) get_handle(capsule, name), &status);
 }
 
 
@@ -86,8 +86,8 @@ static PyObject* append(PyObject* self, PyObject* args)
     PyObject *capsule1 = 0, *capsule2 = 0;
     int status = 0;
     if (!PyArg_ParseTuple(args, "OO", &capsule1, &capsule2)) return 0;
-    if (!(h1 = get_handle(capsule1))) return 0;
-    if (!(h2 = get_handle(capsule2))) return 0;
+    if (!(h1 = (oskar_Sky*) get_handle(capsule1, name))) return 0;
+    if (!(h2 = (oskar_Sky*) get_handle(capsule2, name))) return 0;
 
     /* Append the sky model. */
     oskar_sky_append(h1, h2, &status);
@@ -119,7 +119,7 @@ static PyObject* append_sources(PyObject* self, PyObject* args)
             &obj[1], &obj[2], &obj[3], &obj[4], &obj[5], &obj[6],
             &obj[7], &obj[8], &obj[9], &obj[10], &obj[11], &obj[12]))
         return 0;
-    if (!(h = get_handle(obj[0]))) return 0;
+    if (!(h = (oskar_Sky*) get_handle(obj[0], name))) return 0;
 
     /* Make sure input objects are arrays. Convert if required. */
     flags = NPY_ARRAY_FORCECAST | NPY_ARRAY_IN_ARRAY;
@@ -269,17 +269,17 @@ fail:
 
 static PyObject* append_file(PyObject* self, PyObject* args)
 {
-    oskar_Sky *h = 0, *t = 0;
+    oskar_Sky *h = 0, *temp = 0;
     PyObject* capsule = 0;
     int status = 0;
     const char* filename = 0;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &filename)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Sky*) get_handle(capsule, name))) return 0;
 
     /* Load the sky model. */
-    t = oskar_sky_load(filename, oskar_sky_precision(h), &status);
-    oskar_sky_append(h, t, &status);
-    oskar_sky_free(t, &status);
+    temp = oskar_sky_load(filename, oskar_sky_precision(h), &status);
+    oskar_sky_append(h, temp, &status);
+    oskar_sky_free(temp, &status);
 
     /* Check for errors. */
     if (status)
@@ -290,6 +290,19 @@ static PyObject* append_file(PyObject* self, PyObject* args)
         return 0;
     }
     return Py_BuildValue("");
+}
+
+
+static PyObject* capsule_name(PyObject* self, PyObject* args)
+{
+    PyObject *capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!PyCapsule_CheckExact(capsule))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
+        return 0;
+    }
+    return Py_BuildValue("s", PyCapsule_GetName(capsule));
 }
 
 
@@ -313,7 +326,7 @@ static PyObject* create_copy(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     int status = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Sky*) get_handle(capsule, name))) return 0;
     t = oskar_sky_create_copy(h, OSKAR_CPU, &status);
 
     /* Check for errors. */
@@ -339,7 +352,7 @@ static PyObject* filter_by_flux(PyObject* self, PyObject* args)
     double min_flux_jy = 0.0, max_flux_jy = 0.0;
     if (!PyArg_ParseTuple(args, "Odd", &capsule, &min_flux_jy, &max_flux_jy))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Sky*) get_handle(capsule, name))) return 0;
 
     /* Filter the sky model. */
     oskar_sky_filter_by_flux(h, min_flux_jy, max_flux_jy, &status);
@@ -366,7 +379,7 @@ static PyObject* filter_by_radius(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "Odddd", &capsule,
             &inner_radius_rad, &outer_radius_rad, &ra0_rad, &dec0_rad))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Sky*) get_handle(capsule, name))) return 0;
 
     /* Filter the sky model. */
     oskar_sky_filter_by_radius(h, inner_radius_rad, outer_radius_rad,
@@ -381,6 +394,98 @@ static PyObject* filter_by_radius(PyObject* self, PyObject* args)
         return 0;
     }
     return Py_BuildValue("");
+}
+
+static PyObject* from_array(PyObject* self, PyObject* args)
+{
+    oskar_Sky* h = 0;
+    PyObject *array_object = 0, *capsule = 0;
+    PyArrayObject* array = 0;
+    npy_intp* dims = 0;
+    const char* type = 0;
+    int status = 0, flags, i, num_dims, num_columns, num_sources = 0, prec;
+    double par[12];
+    if (!PyArg_ParseTuple(args, "Os", &array_object, &type)) return 0;
+
+    /* Get a handle to the array and its dimensions. */
+    flags = NPY_ARRAY_FORCECAST | NPY_ARRAY_IN_ARRAY;
+    array = (PyArrayObject*) PyArray_FROM_OTF(array_object, NPY_DOUBLE, flags);
+    if (!array) goto fail;
+    num_dims = PyArray_NDIM(array);
+    dims = PyArray_DIMS(array);
+
+    /* Check dimensions. */
+    if (num_dims > 2)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Array has too many dimensions.");
+        goto fail;
+    }
+    num_columns = (num_dims == 2) ? (int) dims[1] : (int) dims[0];
+    num_sources = (num_dims == 2) ? (int) dims[0] : 1;
+    if (num_columns < 3)
+    {
+        PyErr_SetString(PyExc_RuntimeError,
+                "Must specify at least RA, Dec and Stokes I values.");
+        goto fail;
+    }
+    if (num_columns > 12)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Too many source parameters.");
+        goto fail;
+    }
+
+    /* Create the sky model. */
+    prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
+    h = oskar_sky_create(prec, OSKAR_CPU, 0, &status);
+
+    /* Set the size of the sky model. */
+    oskar_sky_resize(h, num_sources, &status);
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_resize() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        goto fail;
+    }
+    if (num_dims == 1)
+    {
+        memset(par, 0, sizeof(par));
+        memcpy(par, PyArray_DATA(array), num_columns * sizeof(double));
+        oskar_sky_set_source(h, 0, par[0] * deg2rad,
+                par[1] * deg2rad, par[2], par[3], par[4], par[5],
+                par[6], par[7], par[8], par[9] * arcsec2rad,
+                par[10] * arcsec2rad, par[11] * deg2rad, &status);
+    }
+    else
+    {
+        for (i = 0; i < num_sources; ++i)
+        {
+            memset(par, 0, sizeof(par));
+            memcpy(par, PyArray_GETPTR2(array, i, 0),
+                    num_columns * sizeof(double));
+            oskar_sky_set_source(h, i, par[0] * deg2rad,
+                    par[1] * deg2rad, par[2], par[3], par[4], par[5],
+                    par[6], par[7], par[8], par[9] * arcsec2rad,
+                    par[10] * arcsec2rad, par[11] * deg2rad, &status);
+            if (status) break;
+        }
+    }
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_set_source() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        goto fail;
+    }
+
+    Py_DECREF(array);
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+
+fail:
+    oskar_sky_free(h, &status);
+    Py_XDECREF(array);
+    return 0;
 }
 
 
@@ -399,7 +504,6 @@ static PyObject* from_fits_file(PyObject* self, PyObject* args)
     h = oskar_sky_from_fits_file(prec, filename, min_peak_fraction,
             min_abs_val, default_map_units, override_units, frequency_hz,
             spectral_index, &status);
-    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
 
     /* Check for errors. */
     if (status)
@@ -407,8 +511,10 @@ static PyObject* from_fits_file(PyObject* self, PyObject* args)
         PyErr_Format(PyExc_RuntimeError,
                 "oskar_sky_from_fits_file() failed with code %d (%s).",
                 status, oskar_get_error_string(status));
+        oskar_sky_free(h, &status);
         return 0;
     }
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
@@ -483,7 +589,6 @@ static PyObject* load(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "ss", &filename, &type)) return 0;
     prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
     h = oskar_sky_load(filename, prec, &status);
-    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
 
     /* Check for errors. */
     if (status)
@@ -491,8 +596,10 @@ static PyObject* load(PyObject* self, PyObject* args)
         PyErr_Format(PyExc_RuntimeError,
                 "oskar_sky_load() failed with code %d (%s).",
                 status, oskar_get_error_string(status));
+        oskar_sky_free(h, &status);
         return 0;
     }
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)sky_free);
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
@@ -502,7 +609,7 @@ static PyObject* num_sources(PyObject* self, PyObject* args)
     oskar_Sky *h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Sky*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_sky_num_sources(h));
 }
 
@@ -514,7 +621,7 @@ static PyObject* save(PyObject* self, PyObject* args)
     int status = 0;
     const char* filename = 0;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &filename)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Sky*) get_handle(capsule, name))) return 0;
 
     /* Save the sky model. */
     oskar_sky_save(filename, h, &status);
@@ -531,23 +638,81 @@ static PyObject* save(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* to_array(PyObject* self, PyObject* args)
+{
+    oskar_Sky *h = 0;
+    PyArrayObject* array1 = 0;
+    PyObject* capsule = 0, *array2 = 0;
+    npy_intp dims[2];
+    int num_sources = 0, type = 0;
+    size_t num_bytes;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = (oskar_Sky*) get_handle(capsule, name))) return 0;
+    num_sources = oskar_sky_num_sources(h);
+    type = oskar_sky_precision(h);
+
+    /* Create a transposed array. */
+    dims[0] = 12;
+    dims[1] = num_sources;
+    array1 = (PyArrayObject*)PyArray_SimpleNew(2, dims,
+            type == OSKAR_DOUBLE ? NPY_DOUBLE : NPY_FLOAT);
+
+    /* Copy the data into it. */
+    num_bytes = (type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
+    num_bytes *= num_sources;
+    memcpy(PyArray_GETPTR2(array1, 0, 0),
+            oskar_mem_void(oskar_sky_ra_rad(h)), num_bytes);
+    memcpy(PyArray_GETPTR2(array1, 1, 0),
+            oskar_mem_void(oskar_sky_dec_rad(h)), num_bytes);
+    memcpy(PyArray_GETPTR2(array1, 2, 0),
+            oskar_mem_void(oskar_sky_I(h)), num_bytes);
+    memcpy(PyArray_GETPTR2(array1, 3, 0),
+            oskar_mem_void(oskar_sky_Q(h)), num_bytes);
+    memcpy(PyArray_GETPTR2(array1, 4, 0),
+            oskar_mem_void(oskar_sky_U(h)), num_bytes);
+    memcpy(PyArray_GETPTR2(array1, 5, 0),
+            oskar_mem_void(oskar_sky_V(h)), num_bytes);
+    memcpy(PyArray_GETPTR2(array1, 6, 0),
+            oskar_mem_void(oskar_sky_reference_freq_hz(h)), num_bytes);
+    memcpy(PyArray_GETPTR2(array1, 7, 0),
+            oskar_mem_void(oskar_sky_spectral_index(h)), num_bytes);
+    memcpy(PyArray_GETPTR2(array1, 8, 0),
+            oskar_mem_void(oskar_sky_rotation_measure_rad(h)), num_bytes);
+    memcpy(PyArray_GETPTR2(array1, 9, 0),
+            oskar_mem_void(oskar_sky_fwhm_major_rad(h)), num_bytes);
+    memcpy(PyArray_GETPTR2(array1, 10, 0),
+            oskar_mem_void(oskar_sky_fwhm_minor_rad(h)), num_bytes);
+    memcpy(PyArray_GETPTR2(array1, 11, 0),
+            oskar_mem_void(oskar_sky_position_angle_rad(h)), num_bytes);
+
+    /* Return a transposed copy. */
+    array2 = PyArray_Transpose(array1, 0);
+    Py_DECREF(array1);
+    return Py_BuildValue("N", array2);
+}
+
+
 /* Method table. */
 static PyMethodDef methods[] =
 {
-        {"create", (PyCFunction)create, METH_VARARGS, "create(precision)"},
-        {"create_copy", (PyCFunction)create_copy,
-                METH_VARARGS, "create_copy(sky)"},
         {"append", (PyCFunction)append, METH_VARARGS, "append(sky)"},
         {"append_sources", (PyCFunction)append_sources, METH_VARARGS,
                 "append_sources(ra, dec, I, Q, U, V, ref_freq, spectral_index, "
                 "rotation_measure, major, minor, position_angle)"},
         {"append_file", (PyCFunction)append_file,
                 METH_VARARGS, "append_file(filename)"},
+        {"capsule_name", (PyCFunction)capsule_name,
+                METH_VARARGS, "capsule_name()"},
+        {"create", (PyCFunction)create, METH_VARARGS, "create(precision)"},
+        {"create_copy", (PyCFunction)create_copy,
+                METH_VARARGS, "create_copy(sky)"},
         {"filter_by_flux", (PyCFunction)filter_by_flux,
                 METH_VARARGS, "filter_by_flux(min_flux_jy, max_flux_jy)"},
         {"filter_by_radius", (PyCFunction)filter_by_radius,
                 METH_VARARGS, "filter_by_radius(inner_radius_rad, "
                 "outer_radius_rad, ra0_rad, dec0_rad)"},
+        {"from_array", (PyCFunction)from_array,
+                METH_VARARGS, "from_array(array)"},
         {"from_fits_file", (PyCFunction)from_fits_file,
                 METH_VARARGS, "from_fits_file(filename, min_peak_fraction, "
                 "min_abs_val, default_map_units, override_map_units, "
@@ -562,6 +727,7 @@ static PyMethodDef methods[] =
         {"num_sources", (PyCFunction)num_sources,
                 METH_VARARGS, "num_sources()"},
         {"save", (PyCFunction)save, METH_VARARGS, "save(filename)"},
+        {"to_array", (PyCFunction)to_array, METH_VARARGS, "to_array()"},
         {NULL, NULL, 0, NULL}
 };
 

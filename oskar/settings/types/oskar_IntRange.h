@@ -63,13 +63,11 @@ class OSKAR_SETTINGS_EXPORT IntRange : public AbstractSettingsType
 {
 public:
     IntRange();
-    virtual ~IntRange();
+    virtual ~IntRange() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
     bool is_default() const;
 
     int value() const { return value_; }

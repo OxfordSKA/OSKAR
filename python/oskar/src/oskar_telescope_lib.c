@@ -39,30 +39,40 @@ static const char module_doc[] =
         "This module provides an interface to the OSKAR telescope model.";
 static const char name[] = "oskar_Telescope";
 
-static void telescope_free(PyObject* capsule)
+static void* get_handle(PyObject* capsule, const char* name)
 {
-    int status = 0;
-    oskar_Telescope* h = (oskar_Telescope*) PyCapsule_GetPointer(capsule, name);
-    oskar_telescope_free(h, &status);
-}
-
-
-static oskar_Telescope* get_handle(PyObject* capsule)
-{
-    oskar_Telescope* h = 0;
+    void* h = 0;
     if (!PyCapsule_CheckExact(capsule))
     {
-        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
         return 0;
     }
-    h = (oskar_Telescope*) PyCapsule_GetPointer(capsule, name);
-    if (!h)
+    if (!(h = PyCapsule_GetPointer(capsule, name)))
     {
-        PyErr_SetString(PyExc_RuntimeError,
-                "Unable to convert PyCapsule object to pointer.");
+        PyErr_Format(PyExc_RuntimeError, "Capsule is not of type %s.", name);
         return 0;
     }
     return h;
+}
+
+
+static void telescope_free(PyObject* capsule)
+{
+    int status = 0;
+    oskar_telescope_free((oskar_Telescope*) get_handle(capsule, name), &status);
+}
+
+
+static PyObject* capsule_name(PyObject* self, PyObject* args)
+{
+    PyObject *capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!PyCapsule_CheckExact(capsule))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Object is not a PyCapsule.");
+        return 0;
+    }
+    return Py_BuildValue("s", PyCapsule_GetName(capsule));
 }
 
 
@@ -88,7 +98,7 @@ static PyObject* load(PyObject* self, PyObject* args)
     int status = 0;
     const char* dir_name;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &dir_name)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     oskar_telescope_load(h, dir_name, 0, &status);
 
     /* Check for errors. */
@@ -108,7 +118,7 @@ static PyObject* identical_stations(PyObject* self, PyObject* args)
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("O", oskar_telescope_identical_stations(h) ?
             Py_True : Py_False);
 }
@@ -119,7 +129,7 @@ static PyObject* max_station_depth(PyObject* self, PyObject* args)
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_telescope_max_station_depth(h));
 }
 
@@ -129,7 +139,7 @@ static PyObject* max_station_size(PyObject* self, PyObject* args)
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_telescope_max_station_size(h));
 }
 
@@ -139,7 +149,7 @@ static PyObject* num_baselines(PyObject* self, PyObject* args)
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_telescope_num_baselines(h));
 }
 
@@ -149,7 +159,7 @@ static PyObject* num_stations(PyObject* self, PyObject* args)
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_telescope_num_stations(h));
 }
 
@@ -161,7 +171,7 @@ static PyObject* set_allow_station_beam_duplication(PyObject* self,
     PyObject* capsule = 0;
     int value = 0;
     if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     oskar_telescope_set_allow_station_beam_duplication(h, value);
     return Py_BuildValue("");
 }
@@ -174,7 +184,7 @@ static PyObject* set_channel_bandwidth(PyObject* self, PyObject* args)
     double channel_bandwidth_hz = 0.0;
     if (!PyArg_ParseTuple(args, "Od", &capsule,
             &channel_bandwidth_hz)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     oskar_telescope_set_channel_bandwidth(h, channel_bandwidth_hz);
     return Py_BuildValue("");
 }
@@ -186,7 +196,7 @@ static PyObject* set_enable_noise(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     int value = 0, seed = 0;
     if (!PyArg_ParseTuple(args, "Oii", &capsule, &value, &seed)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     oskar_telescope_set_enable_noise(h, value, (unsigned int) seed);
     return Py_BuildValue("");
 }
@@ -198,7 +208,7 @@ static PyObject* set_enable_numerical_patterns(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     int value = 0;
     if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     oskar_telescope_set_enable_numerical_patterns(h, value);
     return Py_BuildValue("");
 }
@@ -212,7 +222,7 @@ static PyObject* set_gaussian_station_beam_width(PyObject* self,
     double fwhm_deg = 0.0, ref_freq_hz = 0.0;
     if (!PyArg_ParseTuple(args, "Odd", &capsule, &fwhm_deg, &ref_freq_hz))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
 
     /* Check stations exist. */
     if (oskar_telescope_num_stations(h) == 0)
@@ -233,7 +243,7 @@ static PyObject* set_noise_freq(PyObject* self, PyObject* args)
     double start_hz = 0.0, inc_hz = 0.0;
     if (!PyArg_ParseTuple(args, "Oddi", &capsule, &start_hz, &inc_hz,
             &num_channels)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
 
     /* Check stations exist. */
     if (oskar_telescope_num_stations(h) == 0)
@@ -262,7 +272,7 @@ static PyObject* set_noise_rms(PyObject* self, PyObject* args)
     int status = 0;
     double start = 0.0, end = 0.0;
     if (!PyArg_ParseTuple(args, "Odd", &capsule, &start, &end)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
 
     /* Check stations exist. */
     if (oskar_telescope_num_stations(h) == 0)
@@ -292,7 +302,7 @@ static PyObject* set_phase_centre(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     double ra_rad = 0.0, dec_rad = 0.0;
     if (!PyArg_ParseTuple(args, "Odd", &capsule, &ra_rad, &dec_rad)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
 
     /* Check stations exist. */
     if (oskar_telescope_num_stations(h) == 0)
@@ -313,7 +323,7 @@ static PyObject* set_pol_mode(PyObject* self, PyObject* args)
     int status = 0;
     const char* mode;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &mode)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     oskar_telescope_set_pol_mode(h, mode, &status);
     if (status)
     {
@@ -331,7 +341,7 @@ static PyObject* set_position(PyObject* self, PyObject* args)
     double longitude_rad = 0.0, latitude_rad = 0.0, altitude_m = 0.0;
     if (!PyArg_ParseTuple(args, "Oddd", &capsule,
             &longitude_rad, &latitude_rad, &altitude_m)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     oskar_telescope_set_position(h, longitude_rad, latitude_rad, altitude_m);
     return Py_BuildValue("");
 }
@@ -350,7 +360,7 @@ static PyObject* set_station_coords_ecef(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "OdddOOOOOO", &obj[0],
             &longitude, &latitude, &altitude,
             &obj[1], &obj[2], &obj[3], &obj[4], &obj[5], &obj[6])) return 0;
-    if (!(h = get_handle(obj[0]))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(obj[0], name))) return 0;
 
     /* Make sure input objects are arrays. Convert if required. */
     flags = NPY_ARRAY_FORCECAST | NPY_ARRAY_IN_ARRAY;
@@ -439,7 +449,7 @@ static PyObject* set_station_coords_enu(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "OdddOOOOOO", &obj[0],
             &longitude, &latitude, &altitude,
             &obj[1], &obj[2], &obj[3], &obj[4], &obj[5], &obj[6])) return 0;
-    if (!(h = get_handle(obj[0]))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(obj[0], name))) return 0;
 
     /* Make sure input objects are arrays. Convert if required. */
     flags = NPY_ARRAY_FORCECAST | NPY_ARRAY_IN_ARRAY;
@@ -528,7 +538,7 @@ static PyObject* set_station_coords_wgs84(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "OdddOOO", &obj[0],
             &longitude, &latitude, &altitude,
             &obj[1], &obj[2], &obj[3])) return 0;
-    if (!(h = get_handle(obj[0]))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(obj[0], name))) return 0;
 
     /* Make sure input objects are arrays. Convert if required. */
     flags = NPY_ARRAY_FORCECAST | NPY_ARRAY_IN_ARRAY;
@@ -590,7 +600,7 @@ static PyObject* set_station_type(PyObject* self, PyObject* args)
     int status = 0;
     const char* type_string = 0;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &type_string)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
 
     /* Check stations exist. */
     if (oskar_telescope_num_stations(h) == 0)
@@ -614,7 +624,7 @@ static PyObject* set_time_average(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     double time_average_sec = 0.0;
     if (!PyArg_ParseTuple(args, "Od", &capsule, &time_average_sec)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
     oskar_telescope_set_time_average(h, time_average_sec);
     return Py_BuildValue("");
 }
@@ -629,7 +639,7 @@ static PyObject* set_uv_filter(PyObject* self, PyObject* args)
     const char* units = 0;
     if (!PyArg_ParseTuple(args, "Odds", &capsule,
             &uv_filter_min, &uv_filter_max, &units)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
 
     oskar_telescope_set_uv_filter(h,
             uv_filter_min, uv_filter_max, units, &status);
@@ -645,6 +655,8 @@ static PyObject* set_uv_filter(PyObject* self, PyObject* args)
 /* Method table. */
 static PyMethodDef methods[] =
 {
+        {"capsule_name", (PyCFunction)capsule_name,
+                METH_VARARGS, "capsule_name()"},
         {"create", (PyCFunction)create, METH_VARARGS, "create(type)"},
         {"load", (PyCFunction)load, METH_VARARGS, "load(input_dir)"},
         {"identical_stations", (PyCFunction)identical_stations,

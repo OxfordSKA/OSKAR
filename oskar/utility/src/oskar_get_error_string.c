@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include "utility/oskar_get_error_string.h"
 #include "binary/oskar_binary.h"
+#include "settings/oskar_settings_macros.h"
 
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
@@ -111,6 +112,21 @@ const char* oskar_get_error_string(int error)
     case OSKAR_ERR_BINARY_TAG_OUT_OF_RANGE:return "binary tag out of range";
     case OSKAR_ERR_BINARY_CRC_FAIL:        return "CRC code mismatch";
 
+    /* OSKAR settings errors. */
+    case OSKAR_ERR_SETTINGS_NO_VALUE:
+        return "setting not found";
+    case OSKAR_ERR_SETTINGS_INT_CONVERSION_FAIL:
+        return "settings int conversion failure";
+    case OSKAR_ERR_SETTINGS_UNSIGNED_INT_CONVERSION_FAIL:
+        return "settings unsigned int conversion failure";
+    case OSKAR_ERR_SETTINGS_DOUBLE_CONVERSION_FAIL:
+        return "settings double conversion failure";
+    case OSKAR_ERR_SETTINGS_INT_LIST_CONVERSION_FAIL:
+        return "settings int list conversion failure";
+    case OSKAR_ERR_SETTINGS_DOUBLE_LIST_CONVERSION_FAIL:
+        return "settings double list conversion failure";
+    case OSKAR_ERR_SETTINGS_STRING_LIST_CONVERSION_FAIL:
+        return "settings string list conversion failure";
     default:
         break;
     };

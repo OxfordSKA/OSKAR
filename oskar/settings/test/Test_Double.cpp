@@ -38,8 +38,8 @@ TEST(settings_types, Double)
 {
     Double d;
     ASSERT_TRUE(d.set_default("1.5"));
-    ASSERT_STREQ("1.5", d.get_default().c_str());
-    ASSERT_STREQ("1.5", d.get_value().c_str());
+    ASSERT_STREQ("1.5", d.get_default());
+    ASSERT_STREQ("1.5", d.get_value());
     ASSERT_TRUE(d.is_default());
     ASSERT_TRUE(d.set_value("9.123456789e23"));
     ASSERT_FALSE(d.is_default());
@@ -49,7 +49,7 @@ TEST(settings_types, Double)
 
     ASSERT_TRUE(d.set_value("0.1234567e6"));
     ASSERT_DOUBLE_EQ(0.1234567e6, d.value());
-    ASSERT_STREQ("1.234567e+05", d.get_value().c_str());
+    ASSERT_STREQ("1.234567e+05", d.get_value());
 
     ASSERT_TRUE(d.set_value("-12.12345"));
     ASSERT_DOUBLE_EQ(-12.12345, d.value());

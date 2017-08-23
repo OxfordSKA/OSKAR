@@ -37,7 +37,7 @@
  */
 
 #include "settings/types/oskar_AbstractSettingsType.h"
-#include <ttl/var/variant.hpp>
+#include "settings/extern/ttl/var/variant.hpp"
 
 namespace oskar {
 
@@ -73,38 +73,24 @@ public:
     enum Format { AUTO, EXPONENT };
 
     DoubleRangeExt();
-    virtual ~DoubleRangeExt();
+    virtual ~DoubleRangeExt() {}
 
     bool init(const std::string& s);
     bool set_default(const std::string& value);
-    std::string get_default() const;
     bool set_value(const std::string& value);
-    std::string get_value() const;
     bool is_default() const;
 
-    bool set_value(double d);
-    bool set_default(double d);
-
     double value() const;
-    double default_value() const;
     double min() const { return min_; }
     double max() const { return max_; }
-    std::string ext_min() const { return ext_min_; }
-    std::string ext_max() const { return ext_max_; }
-    bool is_max() const {
-        return (value_.which() == STRING &&
-                        ttl::var::get<std::string>(value_) == ext_max_);
-    }
-    bool is_min() const {
-        return (value_.which() == STRING &&
-                        ttl::var::get<std::string>(value_) == ext_min_);
-    }
+    const char* ext_min() const { return ext_min_.c_str(); }
+    const char* ext_max() const { return ext_max_.c_str(); }
 
     bool operator==(const DoubleRangeExt& other) const;
     bool operator>(const DoubleRangeExt& other) const;
 
 private:
-    bool from_double_(Value& value, double d) const;
+    static bool compare_(const Value& a, const Value& b);
     bool from_string_(Value& value, const std::string& s) const;
     std::string to_string_(const Value& value) const;
 
@@ -112,8 +98,7 @@ private:
     std::string ext_min_, ext_max_;
     enum value_types { DOUBLE, STRING };
     Format format_;
-    Value value_;
-    Value default_;
+    Value default_, value_;
 };
 
 } /* namespace oskar */

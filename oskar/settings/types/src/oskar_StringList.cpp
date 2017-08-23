@@ -34,85 +34,68 @@
 
 #include <sstream>
 
+using namespace std;
+
 namespace oskar {
 
-StringList::StringList()
-: delimiter_(',')
-{
-}
+StringList::StringList() : delimiter_(',') {}
 
-StringList::~StringList()
-{
-}
-
-bool StringList::init(const std::string& /*s*/)
+bool StringList::init(const string& /*s*/)
 {
      // TODO(BM) allow a a different delimiter via the init method?
      value_.clear();
      default_.clear();
+     pointers_.clear();
      return true;
 }
 
-bool StringList::set_default(const std::string& s)
+bool StringList::set_default(const string& s)
 {
     default_ = oskar_settings_utility_string_get_type_params(s);
-    value_.clear();
-    for (unsigned int i = 0; i < default_.size(); ++i) {
-        value_.push_back(default_.at(i));
-    }
+    str_default_ = to_string_(default_);
+    set_value(s);
     return true;
 }
 
-std::string StringList::get_default() const
-{
-    return to_string_(default_);
-}
-
-bool StringList::set_value(const std::string& s)
+bool StringList::set_value(const string& s)
 {
     value_ = oskar_settings_utility_string_get_type_params(s);
+    str_value_ = to_string_(value_);
+    pointers_.clear();
+    for (size_t i = 0; i < value_.size(); ++i)
+        pointers_.push_back(value_[i].c_str());
     return true;
-}
-
-std::string StringList::get_value() const
-{
-    return to_string_(value_);
 }
 
 bool StringList::is_default() const
 {
-    if (value_.size() != default_.size()) return false;
-    for (unsigned int i = 0; i < default_.size(); ++i) {
-        if (value_[i] != default_[i]) {
-            return false;
-        }
-    }
-    return true;
+    return compare_vectors(value_, default_);
 }
 
-std::string StringList::to_string_(const std::vector<std::string>& values) const
+int StringList::size() const
 {
-    std::ostringstream ss;
-    for (size_t i = 0u; i < values.size(); ++i) {
-        ss << values.at(i);
-        if (i < values.size() - 1)
-            ss << delimiter_;
-    }
-    return ss.str();
+    return (int) value_.size();
+}
+
+const char* const* StringList::values() const
+{
+    return pointers_.size() > 0 ? &pointers_[0] : 0;
 }
 
 bool StringList::operator==(const StringList& other) const
 {
-    if (value_.size() != other.value_.size()) return false;
-    for (unsigned int i = 0; i < value_.size(); ++i)
-        if (value_[i] != other.value_[i]) return false;
-    return true;
+    return compare_vectors(value_, other.value_);
 }
 
-bool StringList::operator>(const StringList& ) const
+string StringList::to_string_(const vector<string>& values) const
 {
-    return false;
+    ostringstream ss;
+    for (size_t i = 0u; i < values.size(); ++i)
+    {
+        ss << values.at(i);
+        if (i < values.size() - 1) ss << delimiter_;
+    }
+    return ss.str();
 }
 
 } // namespace oskar
-

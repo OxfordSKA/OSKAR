@@ -41,40 +41,39 @@ TEST(settings_types, DoubleRangeExt)
     {
         // This should fail as there is no extended string
         ASSERT_FALSE(r.init("2.0,5.0"));
-        ASSERT_STREQ("0.0", r.get_default().c_str());
+        ASSERT_STREQ("0.0", r.get_default());
     }
     {
         ASSERT_TRUE(r.init("2.0,5.0,min"));
-        ASSERT_STREQ("0.0", r.get_default().c_str());
+        ASSERT_STREQ("0.0", r.get_default());
         ASSERT_TRUE(r.set_default("3.2"));
         ASSERT_TRUE(r.is_default());
         // FIXME(BM) double to string printing...
-        EXPECT_STREQ("3.2", r.get_default().c_str());
-        EXPECT_STREQ("3.2", r.get_value().c_str());
+        EXPECT_STREQ("3.2", r.get_default());
+        EXPECT_STREQ("3.2", r.get_value());
         ASSERT_DOUBLE_EQ(3.2, r.value());
-        ASSERT_DOUBLE_EQ(3.2, r.default_value());
         ASSERT_TRUE(r.set_value("5.1"));
-        ASSERT_STREQ("5.0", r.get_value().c_str());
+        ASSERT_STREQ("5.0", r.get_value());
         ASSERT_TRUE(r.set_value("1.1"));
-        ASSERT_STREQ("min", r.get_value().c_str());
+        ASSERT_STREQ("min", r.get_value());
         ASSERT_TRUE(r.set_value("2.1234567891"));
-        ASSERT_STREQ("2.1234567891", r.get_value().c_str());
+        ASSERT_STREQ("2.1234567891", r.get_value());
     }
     {
         ASSERT_TRUE(r.init("2.0,5.0,min, max"));
-        ASSERT_STREQ("0.0", r.get_value().c_str());
-        ASSERT_STREQ("0.0", r.get_default().c_str());
+        ASSERT_STREQ("0.0", r.get_value());
+        ASSERT_STREQ("0.0", r.get_default());
         ASSERT_TRUE(r.set_value("3.0"));
-        ASSERT_STREQ("3.0", r.get_value().c_str());
-        ASSERT_TRUE(r.set_value(3.53));
-        EXPECT_STREQ("3.53", r.get_value().c_str());
+        ASSERT_STREQ("3.0", r.get_value());
+        ASSERT_TRUE(r.set_value("3.53"));
+        EXPECT_STREQ("3.53", r.get_value());
         ASSERT_DOUBLE_EQ(3.53, r.value());
         ASSERT_TRUE(r.set_value("5.1"));
-        ASSERT_STREQ("max", r.get_value().c_str());
+        ASSERT_STREQ("max", r.get_value());
         ASSERT_TRUE(r.set_value("1.1"));
-        ASSERT_STREQ("min", r.get_value().c_str());
+        ASSERT_STREQ("min", r.get_value());
         ASSERT_TRUE(r.set_value("2.1234567891"));
-        ASSERT_STREQ("2.1234567891", r.get_value().c_str());
+        ASSERT_STREQ("2.1234567891", r.get_value());
     }
     {
         ASSERT_TRUE(r.init("MIN,MAX,MAX"));
@@ -82,14 +81,14 @@ TEST(settings_types, DoubleRangeExt)
     {
         ASSERT_TRUE(r.init("-MAX,MAX,min,max"));
         ASSERT_TRUE(r.set_default("min"));
-        ASSERT_STREQ("min", r.get_value().c_str());
+        ASSERT_STREQ("min", r.get_value());
     }
     {
         ASSERT_TRUE(r.init("-MAX,MAX,min,max"));
         ASSERT_TRUE(r.set_default("max"));
-        ASSERT_STREQ("max", r.get_value().c_str());
+        ASSERT_STREQ("max", r.get_value());
         r.set_value("10.0");
-        ASSERT_STREQ("10.0", r.get_value().c_str());
+        ASSERT_STREQ("10.0", r.get_value());
     }
 }
 

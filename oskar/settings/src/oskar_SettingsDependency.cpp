@@ -31,16 +31,27 @@
 
 #include "settings/oskar_SettingsKey.h"
 #include "settings/oskar_SettingsDependency.h"
+#include <cstring>
 
 namespace oskar {
 
-
-SettingsDependency::SettingsDependency(const std::string& key,
-                       const std::string& value,
-                       const std::string& logic)
-: key_(key), value_(value)
+SettingsDependency::SettingsDependency(const char* key,
+                       const char* value,
+                       const char* logic)
 {
+    key_ = std::string(key);
+    value_ = std::string(value);
     logic_ = SettingsDependency::string_to_logic(logic);
+}
+
+const char* SettingsDependency::key() const
+{
+    return key_.c_str();
+}
+
+const char* SettingsDependency::value() const
+{
+    return value_.c_str();
 }
 
 bool SettingsDependency::is_valid() const
@@ -70,17 +81,16 @@ const char* SettingsDependency::logic_to_string(
     return "";
 }
 
-SettingsDependency::Logic SettingsDependency::string_to_logic(const std::string& s)
+SettingsDependency::Logic SettingsDependency::string_to_logic(const char* s)
 {
-    Logic l = UNDEF;
-    if (s.empty())      l = EQ;
-    else if (s == "EQ") l = EQ;
-    else if (s == "NE") l = NE;
-    else if (s == "GT") l = GT;
-    else if (s == "GE") l = GE;
-    else if (s == "LT") l = LT;
-    else if (s == "LE") l = LE;
-    return l;
+    if (!s || strlen(s) == 0) return EQ;
+    if (!strncmp(s, "EQ", 2)) return EQ;
+    if (!strncmp(s, "NE", 2)) return NE;
+    if (!strncmp(s, "GT", 2)) return GT;
+    if (!strncmp(s, "GE", 2)) return GE;
+    if (!strncmp(s, "LT", 2)) return LT;
+    if (!strncmp(s, "LE", 2)) return LE;
+    return UNDEF;
 }
 
 } // namespace oskar

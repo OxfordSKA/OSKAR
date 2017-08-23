@@ -50,13 +50,13 @@ TEST(settings_types, DateTime)
     {
         EXPECT_TRUE(t.set_default("1-2-2015 10:05:23.2"));
         EXPECT_TRUE(t.is_default());
-        EXPECT_STREQ("01-02-2015 10:05:23.2", t.get_value().c_str());
+        EXPECT_STREQ("01-02-2015 10:05:23.2", t.get_value());
     }
     // CASA style
     {
         EXPECT_TRUE(t.set_value("2015/1/2/03:04:05.6"));
         EXPECT_FALSE(t.is_default());
-        EXPECT_STREQ("2015/01/02/03:04:05.6", t.get_value().c_str());
+        EXPECT_STREQ("2015/01/02/03:04:05.6", t.get_value());
     }
     // International style
     {
@@ -64,7 +64,7 @@ TEST(settings_types, DateTime)
         EXPECT_FALSE(t.is_default());
         EXPECT_DOUBLE_EQ(6.7, t.value().seconds);
         EXPECT_DOUBLE_EQ(23.2, t.default_value().seconds);
-        EXPECT_STREQ("2015-02-03 04:05:06.7", t.get_value().c_str());
+        EXPECT_STREQ("2015-02-03 04:05:06.7", t.get_value());
     }
     // International style
     {
@@ -77,7 +77,7 @@ TEST(settings_types, DateTime)
         EXPECT_EQ(12, t.value().month);
         EXPECT_EQ(2015, t.value().year);
         EXPECT_DOUBLE_EQ(23.2, t.default_value().seconds);
-        EXPECT_STREQ("2015-12-31 23:59:59.0", t.get_value().c_str());
+        EXPECT_STREQ("2015-12-31 23:59:59.0", t.get_value());
     }
     // ISO style
     {
@@ -104,13 +104,13 @@ TEST(settings_types, DateTime)
         DateTime t1;
         EXPECT_TRUE(t1.set_value("46113.7654321"));
         EXPECT_EQ(DateTime::MJD, t1.format());
-        EXPECT_STREQ("46113.7654321", t1.get_value().c_str());
+        EXPECT_STREQ("46113.7654321", t1.get_value());
         EXPECT_DOUBLE_EQ(46113.7654321, t1.to_mjd());
     }
     {
         DateTime t1;
         t1.set_value("45464844.54646541");
-        EXPECT_STREQ("45464844.546465", t1.get_value().c_str());
+        EXPECT_STREQ("45464844.546465", t1.get_value());
     }
 
 }

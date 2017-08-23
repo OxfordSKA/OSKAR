@@ -15,10 +15,10 @@ set(${libname}_folders
     convert
     correlate
     imager
+    interferometer
     log
     math
     mem
-    simulator
     sky
     splines
     telescope
@@ -93,12 +93,14 @@ endif ()
 # and give subdirectories control over which headers are installed.
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/oskar"
     DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
-    FILES_MATCHING PATTERN "oskar*.h"
+    FILES_MATCHING REGEX "(oskar.*h)|(.*hpp)"
     PATTERN ${install_include_dir} EXCLUDE
+    PATTERN private* EXCLUDE
     PATTERN *dierckx* EXCLUDE
     PATTERN src  EXCLUDE
     PATTERN test EXCLUDE
     PATTERN tests EXCLUDE
+    PATTERN xml EXCLUDE
     PATTERN .git EXCLUDE)
 install(FILES ${PROJECT_BINARY_DIR}/oskar/oskar_version.h
     DESTINATION "${OSKAR_INCLUDE_INSTALL_DIR}/oskar")

@@ -2,8 +2,18 @@
 # oskar/apps/CMakeLists.txt
 #
 
+add_subdirectory(xml)
+
 set(apps_SRC
+    src/oskar_app_settings_fit_element_data.cpp
+    src/oskar_app_settings_imager.cpp
+    src/oskar_app_settings_sim_beam_pattern.cpp
+    src/oskar_app_settings_sim_interferometer.cpp
+    src/oskar_app_settings.cpp
     src/oskar_settings_log.cpp
+    src/oskar_settings_to_beam_pattern.cpp
+    src/oskar_settings_to_imager.cpp
+    src/oskar_settings_to_interferometer.cpp
     src/oskar_settings_to_sky.cpp
     src/oskar_settings_to_telescope.cpp
     # src/oskar_sim_tec_screen.cpp

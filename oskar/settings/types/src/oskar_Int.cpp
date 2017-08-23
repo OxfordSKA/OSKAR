@@ -31,61 +31,42 @@
 
 #include "settings/types/oskar_Int.h"
 #include "settings/oskar_settings_utility_string.h"
-#include <sstream>
-#include <iostream>
-
-using namespace std;
 
 namespace oskar {
 
 Int::Int()
-: default_(0), value_(0)
 {
+    (void) init(std::string());
 }
 
-Int::~Int()
+bool Int::init(const std::string& /*s*/)
 {
-}
-
-bool Int::init(const std::string& s)
-{
-    if (!s.empty()) {
-        return false;
-    }
     default_ = 0;
     value_ = 0;
+    str_default_ = "0";
+    str_value_ = "0";
     return true;
 }
 
 bool Int::set_default(const std::string& value)
 {
     bool ok = true;
-    default_ = oskar_settings_utility_string_to_int(value, &ok);
-    if (ok) {
-        value_ = default_;
-    }
-    else {
-        value_ = 0;
-        default_ = 0;
-    }
-    return ok;
-}
-
-std::string Int::get_default() const
-{
-    return oskar_settings_utility_int_to_string(default_);
+    int i = oskar_settings_utility_string_to_int(value, &ok);
+    if (!ok) return false;
+    default_ = i;
+    str_default_ = oskar_settings_utility_int_to_string(default_);
+    set_value(value);
+    return true;
 }
 
 bool Int::set_value(const std::string& value)
 {
     bool ok = true;
-    value_ = oskar_settings_utility_string_to_int(value, &ok);
-    return ok;
-}
-
-std::string Int::get_value() const
-{
-    return oskar_settings_utility_int_to_string(value_);
+    int i = oskar_settings_utility_string_to_int(value, &ok);
+    if (!ok) return false;
+    value_ = i;
+    str_value_ = oskar_settings_utility_int_to_string(value_);
+    return true;
 }
 
 bool Int::is_default() const
@@ -104,4 +85,3 @@ bool Int::operator>(const Int& other) const
 }
 
 } // namespace oskar
-

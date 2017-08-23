@@ -31,59 +31,44 @@
 
 #include "settings/oskar_settings_utility_string.h"
 #include "settings/types/oskar_UnsignedInt.h"
-#include <sstream>
+
+using namespace std;
 
 namespace oskar {
 
 UnsignedInt::UnsignedInt()
-: default_(0), value_(0)
 {
+    (void) init(string());
 }
 
-UnsignedInt::~UnsignedInt()
-{
-}
-
-bool UnsignedInt::init(const std::string& /*s*/)
+bool UnsignedInt::init(const string& /*s*/)
 {
     default_ = 0;
     value_ = 0;
+    str_default_ = "0";
+    str_value_ = "0";
     return true;
 }
 
-bool UnsignedInt::set_default(const std::string& value)
+bool UnsignedInt::set_default(const string& value)
 {
     bool ok = true;
-    int i =  oskar_settings_utility_string_to_int(value, &ok);
-    if (!ok || i < 0) {
-        i = 0;
-        return false;
-    }
+    int i = oskar_settings_utility_string_to_int(value, &ok);
+    if (!ok || i < 0) return false;
     default_ = i;
-    value_ = default_;
+    str_default_ = oskar_settings_utility_int_to_string(default_);
+    set_value(value);
     return true;
 }
 
-std::string UnsignedInt::get_default() const
-{
-    return oskar_settings_utility_int_to_string(default_);
-}
-
-bool UnsignedInt::set_value(const std::string& value)
+bool UnsignedInt::set_value(const string& value)
 {
     bool ok = true;
-    int i =  oskar_settings_utility_string_to_int(value, &ok);
-    if (!ok || i < 0) {
-        i = 0;
-        return false;
-    }
+    int i = oskar_settings_utility_string_to_int(value, &ok);
+    if (!ok || i < 0) return false;
     value_ = i;
+    str_value_ = oskar_settings_utility_int_to_string(value_);
     return true;
-}
-
-std::string UnsignedInt::get_value() const
-{
-    return oskar_settings_utility_int_to_string(value_);
 }
 
 bool UnsignedInt::is_default() const
@@ -102,4 +87,3 @@ bool UnsignedInt::operator>(const UnsignedInt& other) const
 }
 
 } // namespace oskar
-

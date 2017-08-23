@@ -36,6 +36,9 @@
 #include <oskar_global.h>
 #include <sky/oskar_sky.h>
 #include <log/oskar_log.h>
+
+#ifdef __cplusplus
+
 #include <settings/oskar_SettingsTree.h>
 
 /**
@@ -55,5 +58,7 @@
 OSKAR_APPS_EXPORT
 oskar_Sky* oskar_settings_to_sky(oskar::SettingsTree* s,
         oskar_Log* log, int* status);
+
+#endif
 
 #endif /* OSKAR_SETTINGS_TO_SKY_H_ */

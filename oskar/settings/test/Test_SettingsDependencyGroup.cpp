@@ -44,12 +44,12 @@ TEST(SettingsDependencyGroup, test1)
     ASSERT_EQ(2, g->num_dependencies());
     ASSERT_EQ(0, g->num_children());
 
-    ASSERT_STREQ("key1", g->get_dependency(0)->key().c_str());
-    ASSERT_STREQ("value1", g->get_dependency(0)->value().c_str());
+    ASSERT_STREQ("key1", g->get_dependency(0)->key());
+    ASSERT_STREQ("value1", g->get_dependency(0)->value());
     ASSERT_EQ(SettingsDependency::EQ, g->get_dependency(0)->logic());
 
-    ASSERT_STREQ("key2", g->get_dependency(1)->key().c_str());
-    ASSERT_STREQ("value2", g->get_dependency(1)->value().c_str());
+    ASSERT_STREQ("key2", g->get_dependency(1)->key());
+    ASSERT_STREQ("value2", g->get_dependency(1)->value());
     ASSERT_EQ(SettingsDependency::NE, g->get_dependency(1)->logic());
 
     SettingsDependencyGroup* group = g->add_child("AND");

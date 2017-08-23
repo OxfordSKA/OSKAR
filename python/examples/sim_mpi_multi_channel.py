@@ -43,9 +43,10 @@ if __name__ == '__main__':
     tel.set_station_type('Isotropic')
 
     # Set up the basic simulator and run simulation.
-    simulator = oskar.Simulator(precision)
+    simulator = oskar.Interferometer(precision)
     simulator.set_settings_path(os.path.abspath(__file__))
-    simulator.set_sky_model(sky, max_sources_per_chunk=sky.num_sources+1)
+    simulator.set_max_sources_per_chunk(sky.num_sources+1)
+    simulator.set_sky_model(sky)
     simulator.set_telescope_model(tel)
     simulator.set_observation_frequency(frequency_hz)
     simulator.set_observation_time(

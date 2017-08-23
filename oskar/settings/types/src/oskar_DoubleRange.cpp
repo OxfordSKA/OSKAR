@@ -38,23 +38,23 @@
 #include <cfloat>
 #include <iostream>
 
+using namespace std;
+
 namespace oskar {
 
 DoubleRange::DoubleRange()
-: format_(AUTO), min_(-DBL_MAX), max_(DBL_MAX), value_(0.0), default_(0.0)
 {
+    init(string());
 }
 
-DoubleRange::~DoubleRange()
-{
-}
-
-bool DoubleRange::init(const std::string& s)
+bool DoubleRange::init(const string& s)
 {
     min_   = -DBL_MAX;
     max_   =  DBL_MAX;
     value_ = 0.0;
     default_ = 0.0;
+    str_default_ = "0.0";
+    str_value_ = "0.0";
     format_ = AUTO;
 
     // Extract range from the parameter CSV string.
@@ -66,8 +66,7 @@ bool DoubleRange::init(const std::string& s)
     // Notes: if p[0] is the string 'MIN' or p[1] is the string 'MAX'
     // these will resolve as -DBL_MAX and DBL_MAX respectively.
     bool ok = true;
-    std::vector<std::string> p;
-    p = oskar_settings_utility_string_get_type_params(s);
+    vector<string> p = oskar_settings_utility_string_get_type_params(s);
     if (p.size() == 0u) {
         return false;
     }
@@ -91,32 +90,24 @@ bool DoubleRange::init(const std::string& s)
     return ok;
 }
 
-bool DoubleRange::set_default(const std::string& s)
+bool DoubleRange::set_default(const string& s)
 {
-    format_ = (s.find_first_of('e') != std::string::npos) ? EXPONENT : AUTO;
+    format_ = (s.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
     bool ok = from_string_(default_, s);
-    if (ok) {
-        value_ = default_;
-    }
+    str_default_ = oskar_settings_utility_double_to_string_2(default_,
+            (format_ == AUTO ? 'g' : 'e'));
+    if (ok)
+        set_value(s);
     return ok;
 }
 
-std::string DoubleRange::get_default() const
+bool DoubleRange::set_value(const string& s)
 {
-    return oskar_settings_utility_double_to_string_2(default_,
-                                                     (format_==AUTO ? 'g' : 'e'));
-}
-
-bool DoubleRange::set_value(const std::string& s)
-{
-    format_ = (s.find_first_of('e') != std::string::npos) ? EXPONENT : AUTO;
-    return from_string_(value_, s);
-}
-
-std::string DoubleRange::get_value() const
-{
-    return oskar_settings_utility_double_to_string_2(value_,
-                                                     (format_ == AUTO ? 'g' : 'e'));
+    format_ = (s.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+    bool ok = from_string_(value_, s);
+    str_value_ = oskar_settings_utility_double_to_string_2(value_,
+            (format_ == AUTO ? 'g' : 'e'));
+    return ok;
 }
 
 bool DoubleRange::is_default() const
@@ -125,7 +116,7 @@ bool DoubleRange::is_default() const
     else return false;
 }
 
-bool DoubleRange::from_string_(double& value, const std::string& s) const
+bool DoubleRange::from_string_(double& value, const string& s) const
 {
     bool ok = true;
     double d = oskar_settings_utility_string_to_double(s, &ok);
@@ -156,4 +147,3 @@ bool DoubleRange::operator>(const DoubleRange& other) const
 }
 
 } // namespace oskar
-
