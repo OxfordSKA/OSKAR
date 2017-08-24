@@ -17,3 +17,20 @@ These examples also required the `spead2` Python library
     python spead_send.py spead_send.json oskar_sim_interferometer.ini
 
 Further information is in the Python module docstrings of each file.
+
+# Notes
+
+You may see messages from `spead2` such as this:
+
+    requested socket buffer size 524288 but only received 212992:
+    refer to documentation for details on increasing buffer size
+
+On Ubuntu Linux, the default socket buffer sizes can be changed by
+adding lines to the end of `/etc/sysctl.conf` as follows:
+
+    net.core.rmem_max = 33554432
+    net.core.rmem_default = 8388608
+    net.core.wmem_max = 524288
+    net.core.wmem_default = 524288
+
+Reboot the machine after editing the file for the changes to come into effect.
