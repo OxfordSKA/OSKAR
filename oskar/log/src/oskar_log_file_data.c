@@ -58,7 +58,7 @@ char* oskar_log_file_data(oskar_Log* log, size_t* size)
             if (*size != 0)
             {
                 size_t bytes_read = 0;
-                data = (char*) malloc(*size * sizeof(char));
+                data = (char*) calloc(10 + *size * sizeof(char), 1);
                 if (data != 0)
                 {
                     rewind(temp_handle);
