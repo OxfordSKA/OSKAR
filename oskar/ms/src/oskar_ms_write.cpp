@@ -84,14 +84,6 @@ static void oskar_ms_create_baseline_indices(oskar_MeasurementSet* p,
     }
 }
 
-static void oskar_ms_ensure_num_rows(oskar_MeasurementSet* p, unsigned int num)
-{
-    if (!p->ms) return;
-    int rows_to_add = (int)num - (int)(p->ms->nrow());
-    if (rows_to_add > 0)
-        p->ms->addRow((unsigned int)rows_to_add);
-}
-
 template <typename T>
 void oskar_ms_write_coords(oskar_MeasurementSet* p,
         unsigned int start_row, unsigned int num_baselines,

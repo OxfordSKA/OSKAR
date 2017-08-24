@@ -89,6 +89,19 @@ size_t* oskar_ms_column_shape(const oskar_MeasurementSet* p, const char* column,
 
 /**
  * @brief
+ * Ensures the specified number of rows exist in the Measurement Set.
+ *
+ * @details
+ * Ensures the specified number of rows exist in the Measurement Set,
+ * adding extra ones if necessary.
+ *
+ * @param[in] num    Total number of rows in the Measurement Set.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_ensure_num_rows(oskar_MeasurementSet* p, unsigned int num);
+
+/**
+ * @brief
  * Returns the channel separation in the Measurement Set.
  *
  * @details

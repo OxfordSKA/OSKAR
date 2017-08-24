@@ -95,6 +95,17 @@ class MeasurementSet(object):
             ref_freq_hz, freq_inc_hz, write_autocorr, write_crosscorr)
         return t
 
+    def ensure_num_rows(self, num):
+        """Ensures the specified number of rows exist in the Measurement Set.
+
+        Note that rows will not be removed if the total number is already
+        larger than the value given.
+
+        Args:
+            num (int):   Ensure at least this many rows are present.
+        """
+        _measurement_set_lib.ensure_num_rows(self._capsule, num)
+
     def get_freq_inc_hz(self):
         """Returns the frequency increment between channels."""
         return _measurement_set_lib.freq_inc_hz(self._capsule)

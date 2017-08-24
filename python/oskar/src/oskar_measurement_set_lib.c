@@ -169,6 +169,18 @@ static PyObject* create(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* ensure_num_rows(PyObject* self, PyObject* args)
+{
+    oskar_MeasurementSet* h = 0;
+    PyObject* capsule = 0;
+    int num = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &num)) return 0;
+    if (!(h = (oskar_MeasurementSet*) get_handle(capsule, name))) return 0;
+    oskar_ms_ensure_num_rows(h, (unsigned int) num);
+    return Py_BuildValue("");
+}
+
+
 static PyObject* freq_inc_hz(PyObject* self, PyObject* args)
 {
     oskar_MeasurementSet* h = 0;
@@ -568,6 +580,8 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "create(file_name, num_stations, num_channels, "
                 "num_pols, ref_freq_hz, chan_width_hz, "
                 "write_autocorr, write_crosscor)"},
+        {"ensure_num_rows", (PyCFunction)ensure_num_rows,
+                METH_VARARGS, "ensure_num_rows(num_rows)"},
         {"freq_inc_hz", (PyCFunction)freq_inc_hz,
                 METH_VARARGS, "freq_inc_hz()"},
         {"freq_start_hz", (PyCFunction)freq_start_hz,
