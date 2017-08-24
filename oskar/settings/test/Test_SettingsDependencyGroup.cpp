@@ -58,5 +58,6 @@ TEST(SettingsDependencyGroup, test1)
     ASSERT_EQ(SettingsDependencyGroup::AND, group->group_logic());
     group->add_dependency("key3", "2.0", "GT");
     ASSERT_EQ(1, group->num_dependencies());
+    delete g;
 }
 

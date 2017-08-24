@@ -111,6 +111,7 @@ SettingsItem::SettingsItem(const char* key,
 
 SettingsItem::~SettingsItem()
 {
+    if (p->root_) delete p->root_;
     delete p;
 }
 

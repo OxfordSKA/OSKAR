@@ -92,10 +92,7 @@ int IntListExt::size() const
 const int* IntListExt::values() const
 {
     if (!value_.is_singular() && value_.which() == 0)
-    {
-        vector<int> v = get<vector<int> >(value_);
-        return (v.size() > 0) ? &v[0] : 0;
-    }
+        return (size() > 0) ? &get<vector<int> >(value_)[0] : 0;
     return 0;
 }
 
