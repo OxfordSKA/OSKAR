@@ -311,7 +311,7 @@ TEST(Mem, random_gaussian_accum)
     int status = 0;
     int seed = 1;
     int blocksize = 256;
-    int rounds = 10240;
+    int rounds = 128;
 #ifdef OSKAR_HAVE_CUDA
     int location = OSKAR_GPU;
 #else
