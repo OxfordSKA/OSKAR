@@ -471,7 +471,6 @@ void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
 {
     int i;
     char* ptr;
-    size_t root_len;
     if (*status) return;
     for (i = 0; i < h->num_files; ++i)
         free(h->input_files[i]);
@@ -493,10 +492,10 @@ void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
         }
     }
     if (!filenames[0]) return;
-    ptr = strrchr(filenames[0], '.');
-    root_len = ptr ? (ptr - filenames[0]) : strlen(filenames[0]);
-    h->input_root = (char*) calloc(1 + root_len, 1);
-    memcpy(h->input_root, filenames[0], root_len);
+    h->input_root = (char*) calloc(1 + strlen(filenames[0]), 1);
+    strcpy(h->input_root, filenames[0]);
+    ptr = strrchr(h->input_root, '.');
+    if (ptr) *ptr = 0;
 }
 
 

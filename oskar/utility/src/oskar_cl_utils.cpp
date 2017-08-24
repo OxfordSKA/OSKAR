@@ -60,19 +60,33 @@ struct CLGlobal
 
     struct CLDevice
     {
+        string name;
+        string cl_version;
+        string driver_version;
 #ifdef OSKAR_HAVE_OPENCL
         cl_device_id id;
         cl_context context;
         cl_command_queue queue;
         cl_program program;
-        string name;
-        string cl_version;
-        string driver_version;
         map<string, cl_kernel> kernel;
+#endif
 
-        CLDevice() : id(0), context(0), queue(0), program(0) {}
+        CLDevice()
+        {
+            name = string();
+            cl_version = string();
+            driver_version = string();
+#ifdef OSKAR_HAVE_OPENCL
+            id = 0;
+            context = 0;
+            queue = 0;
+            program = 0;
+#endif
+        }
+
         ~CLDevice()
         {
+#ifdef OSKAR_HAVE_OPENCL
             for (map<string, cl_kernel>::iterator i = kernel.begin();
                     i != kernel.end(); ++i)
             {
@@ -81,11 +95,8 @@ struct CLGlobal
             if (queue) clReleaseCommandQueue(queue);
             if (program) clReleaseProgram(program);
             if (context) clReleaseContext(context);
-        }
-#else
-        int dummy;
-        CLDevice() : dummy(0) {}
 #endif
+        }
     };
 
     // Data stored per device.
