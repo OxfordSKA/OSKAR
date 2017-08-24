@@ -67,9 +67,27 @@ class SpeadSender(oskar.Interferometer):
     def __init__(self, log, spead_config, precision=None, oskar_settings=None):
         oskar.Interferometer.__init__(self, precision, oskar_settings)
         self._log = log
-        self._config = spead_config
         self._streams = []
         self._vis_pack = None
+
+        # Construct UDP streams and associated item groups.
+        stream_config = spead2.send.StreamConfig(
+            spead_config['stream_config']['max_packet_size'],
+            spead_config['stream_config']['rate'],
+            spead_config['stream_config']['burst_size'],
+            spead_config['stream_config']['max_heaps'])
+        for stream in spead_config['streams']:
+            threads = stream['threads'] if 'threads' in stream else 1
+            thread_pool = spead2.ThreadPool(threads=threads)
+            log.info("Creating SPEAD stream for host {} on port {} ..."
+                     .format(stream['host'], stream['port']))
+            udp_stream = spead2.send.UdpStream(thread_pool, stream['host'],
+                                               stream['port'], stream_config)
+            item_group = spead2.send.ItemGroup(
+                flavour=spead2.Flavour(4, 64, 40, 0))
+
+            # Append udp_stream and item_group to the stream list as a tuple.
+            self._streams.append((udp_stream, item_group))
 
     def finalise(self):
         """Called automatically by the base class at the end of run()."""
@@ -89,14 +107,14 @@ class SpeadSender(oskar.Interferometer):
         self.write_block(block, block_index)
 
         # Get number of streams and maximum number of channels per stream.
-        num_streams = len(self._config['streams'])
+        num_streams = len(self._streams)
         hdr = self.vis_header()
         max_channels_per_stream = (hdr.num_channels_total +
                                    num_streams - 1) // num_streams
 
-        # Initialise SPEAD streams if required.
+        # Initialise SPEAD heaps if required.
         if block_index == 0:
-            self._create_streams(block)
+            self._create_heaps(block)
 
             # Write the header information to each SPEAD stream.
             for stream_index, (_, heap) in enumerate(self._streams):
@@ -143,19 +161,12 @@ class SpeadSender(oskar.Interferometer):
                 heap['time_index'].value = block.start_time_index + t
                 stream.send_heap(heap.get_heap())
 
-    def _create_streams(self, block):
-        """Create UDP streams, item group and item descriptions.
+    def _create_heaps(self, block):
+        """Create SPEAD heap items based on content of the visibility block.
 
         Args:
             block (oskar.VisBlock): Visibility block.
         """
-        flav = spead2.Flavour(4, 64, 40, 0)
-        stream_config = spead2.send.StreamConfig(
-            self._config['stream_config']['max_packet_size'],
-            self._config['stream_config']['rate'],
-            self._config['stream_config']['burst_size'],
-            self._config['stream_config']['max_heaps'])
-
         # SPEAD heap descriptor.
         # One channel and one time per heap: num_channels is used to tell
         # the receiver how many channels it will be receiving in total.
@@ -189,18 +200,8 @@ class SpeadSender(oskar.Interferometer):
         self._vis_pack = numpy.zeros((block.num_baselines,),
                                      dtype=descriptor['vis']['dtype'])
 
-        # Construct UDP streams and associated item groups.
-        for stream in self._config['streams']:
-            threads = stream['threads'] if 'threads' in stream else 1
-            thread_pool = spead2.ThreadPool(threads=threads)
-            udp_stream = spead2.send.UdpStream(thread_pool, stream['host'],
-                                               stream['port'], stream_config)
-            item_group = spead2.send.ItemGroup(flavour=flav)
-
-            # Append udp_stream and item_group to the stream list as a tuple.
-            self._streams.append((udp_stream, item_group))
-
-            # Add items to the item group based on the heap descriptor.
+        # Add items to the item group based on the heap descriptor.
+        for stream, item_group in self._streams:
             for key, item in descriptor.items():
                 item_shape = item['shape'] if 'shape' in item else tuple()
                 item_group.add_item(
@@ -208,7 +209,7 @@ class SpeadSender(oskar.Interferometer):
                     shape=item_shape, dtype=item['dtype'])
 
             # Send the start of stream message to each stream.
-            udp_stream.send_heap(item_group.get_start())
+            stream.send_heap(item_group.get_start())
 
 
 def main():
