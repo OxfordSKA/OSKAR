@@ -483,7 +483,7 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
 
 void oskar_interferometer_run(oskar_Interferometer* h, int* status)
 {
-    int i, num_threads = 1, num_vis_blocks;
+    int num_threads = 1, num_vis_blocks;
     if (*status || !h) return;
 
     /* Check the visibilities are going somewhere. */
@@ -514,8 +514,11 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
     {
         oskar_log_section(h->log, 'M', "Initial memory usage");
 #ifdef OSKAR_HAVE_CUDA
-        for (i = 0; i < h->num_gpus; ++i)
-            oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
+        {
+            int i;
+            for (i = 0; i < h->num_gpus; ++i)
+                oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
+        }
 #endif
         system_mem_log(h->log);
         oskar_log_section(h->log, 'M', "Starting simulation...");
@@ -595,8 +598,11 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
     {
         oskar_log_section(h->log, 'M', "Final memory usage");
 #ifdef OSKAR_HAVE_CUDA
-        for (i = 0; i < h->num_gpus; ++i)
-            oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
+        {
+            int i;
+            for (i = 0; i < h->num_gpus; ++i)
+                oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
+        }
 #endif
         system_mem_log(h->log);
     }

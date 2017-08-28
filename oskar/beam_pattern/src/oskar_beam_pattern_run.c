@@ -80,7 +80,7 @@ static unsigned int disp_width(unsigned int value);
 
 void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 {
-    int i = 0, i_global = 0, num_threads = 1;
+    int i_global = 0, num_threads = 1;
     int cp = 0, tp = 0, fp = 0; /* Loop indices for previous iteration. */
     if (*status || !h) return;
 
@@ -99,6 +99,7 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
     if (h->log && !*status)
     {
 #ifdef OSKAR_HAVE_CUDA
+        int i;
         oskar_log_section(h->log, 'M', "Initial memory usage");
         for (i = 0; i < h->num_gpus; ++i)
             oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
@@ -201,6 +202,7 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
     if (h->log && !*status)
     {
 #ifdef OSKAR_HAVE_CUDA
+        int i;
         oskar_log_section(h->log, 'M', "Final memory usage");
         for (i = 0; i < h->num_gpus; ++i)
             oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);

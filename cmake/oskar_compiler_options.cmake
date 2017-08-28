@@ -7,7 +7,6 @@ endmacro()
 # Set general compiler flags.
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_C_STANDARD 99)
 if (NOT WIN32)
     if ("${CMAKE_CXX_COMPILER_ID}" MATCHES ".*Clang.*")
         # Tell Clang to use C++11, required for casacore headers.
@@ -24,6 +23,11 @@ if (NOT WIN32)
 
     if ("${CMAKE_C_COMPILER_ID}" MATCHES ".*Clang.*"
             OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+        # Specify C standard manually here.
+        # (Using CMAKE_C_STANDARD sets it to GNU version instead,
+        # which breaks strtok_r.)
+        append_flags(CMAKE_C_FLAGS -std=c99)
+
         # Treat external code as system headers.
         # This avoids a number of warning supression flags.
         append_flags(CMAKE_CXX_FLAGS

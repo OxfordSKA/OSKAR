@@ -143,6 +143,7 @@ void oskar_sky_copy_source_data(const oskar_Sky* in,
         }
         else if (oskar_sky_mem_location(in) == OSKAR_CPU)
         {
+            (void) indices;
             COPY_SOURCE_DATA
         }
         else
@@ -214,6 +215,7 @@ void oskar_sky_copy_source_data(const oskar_Sky* in,
         }
         else if (oskar_sky_mem_location(in) == OSKAR_CPU)
         {
+            (void) indices;
             COPY_SOURCE_DATA
         }
         else

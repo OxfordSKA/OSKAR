@@ -1918,12 +1918,11 @@ void cmfm1f(const int lot, const int jump, const int n, const int inc,
 void factor(const int n, int *nf, float *fac)
 {
     static const int ntryh[4] = { 4,2,3,5 };
-    int j, nl, nq, nr, ntry;
+    int j = 0, nl, nq, nr, ntry = 0;
     --fac;
 
     nl = n;
     *nf = 0;
-    j = 0;
 L101:
     ++j;
     if (j - 4 <= 0)
