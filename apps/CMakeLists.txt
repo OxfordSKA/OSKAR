@@ -8,12 +8,13 @@ add_subdirectory(test)
 include(${OSKAR_SOURCE_DIR}/cmake/oskar_build_macros.cmake)
 
 if (CUDA_FOUND)
-    oskar_app(oskar_cuda_system_info oskar_cuda_system_info_main.cpp)
+    oskar_app(
+        NAME oskar_cuda_system_info SOURCES oskar_cuda_system_info_main.cpp)
 endif()
 
 macro(declare_oskar_apps)
     foreach (name ${ARGN})
-        oskar_app(${name} ${name}_main.cpp)
+        oskar_app(NAME ${name} SOURCES ${name}_main.cpp)
     endforeach()
 endmacro()
 
@@ -38,21 +39,17 @@ set(IONOSPHERE_TESTING OFF)
 if (IONOSPHERE_TESTING)
     # BINARY: oskar_sim_tec_screen
     set(name oskar_sim_tec_screen)
-    oskar_app(${name} ${name}_main.cpp
-        EXTRA_LIBS oskar_apps
-        NO_INSTALL)
+    oskar_app(NAME ${name} SOURCES ${name}_main.cpp NO_INSTALL)
 
     # BINARY: oskar_evaluate_pierce_points
     set(name oskar_evaluate_pierce_points)
-    oskar_app(${name} ${name}_main.cpp
-        EXTRA_LIBS oskar_apps
-        NO_INSTALL)
+    oskar_app(NAME ${name} SOURCES ${name}_main.cpp NO_INSTALL)
 
     #if (PNG_FOUND)
     #    include_directories(${PNG_INCLUDE_DIRS})
     #    set(name oskar_ionosphere_to_kml)
-    #    oskar_app(${name} ${name}_main.cpp
-    #        EXTRA_LIBS ${PNG_LIBRARY} oskar_apps
+    #    oskar_app(NAME ${name} SOURCES ${name}_main.cpp
+    #        EXTRA_LIBS ${PNG_LIBRARY}
     #        NO_INSTALL
     #    )
     #endif ()

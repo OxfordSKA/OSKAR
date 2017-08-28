@@ -43,10 +43,6 @@ void oskar_device_check_error(int* status)
     if (*status) return;
 
 #ifdef OSKAR_HAVE_CUDA
-#ifndef NDEBUG
-    /* Call cudaDeviceSynchronize only in debug builds. */
-    cudaDeviceSynchronize();
-#endif
     *status = (int) cudaPeekAtLastError();
 #endif
 }

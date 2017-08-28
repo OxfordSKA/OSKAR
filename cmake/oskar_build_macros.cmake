@@ -3,36 +3,35 @@
 #
 
 #
-# A collection of cmake macros used by the oskar build system.
+# CMake macros used by the OSKAR build system.
 #
 
-include(oskar_cmake_utilities)
+include(CMakeParseArguments)
 
-# Macro to build and install oskar apps.
+# Macro to build and install OSKAR apps.
 #
 # Usage:
-#   oskar_app(name
-#         [NO_INSTALL]
-#         source1 source2 ...
+#   oskar_app(NAME name
+#         SOURCES source1 source2 ...
 #         [EXTRA_LIBS lib1 lib2 ...]
+#         [NO_INSTALL]
 #   )
 #
-# name       = Name of the app (binary name)
-# source1..N = List of sources from which to build the app
-# EXTRA_LIBS = List of additional libraries to link the app against.
-# NO_INSTALL = Do not install this app (i.e. don't add to the make install
-#              target).
+# NAME name      = Name of the app (binary name)
+# SOURCES ...    = List of sources from which to build the app
+# EXTRA_LIBS ... = List of additional libraries to link the app against.
+# NO_INSTALL     = Do not install this app (i.e. don't add to the make install
+#                  target).
 #
 # Note: Named options can appear in any order
 #
 macro(OSKAR_APP)
-    parse_arguments(APP   # prefix
-        "EXTRA_LIBS"      # arg names
-        "NO_INSTALL"      # option names
+    cmake_parse_arguments(APP     # prefix
+        "NO_INSTALL"              # boolean options
+        "NAME"                    # single-value args
+        "SOURCES;EXTRA_LIBS"      # multi-value args
         ${ARGN}
     )
-    CAR(APP_NAME ${APP_DEFAULT_ARGS})
-    CDR(APP_SOURCES ${APP_DEFAULT_ARGS})
 
     # Create a target name from the app name.
     # Note:
@@ -68,7 +67,6 @@ macro(OSKAR_APP)
     if (NOT APP_NO_INSTALL)
         install(TARGETS ${target} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
     endif()
-
 endmacro(OSKAR_APP)
 
 # Wraps an OpenCL kernel source file to stringify it.

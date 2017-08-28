@@ -44,7 +44,7 @@ static int cmpfunc(const void* a, const void* b)
 int oskar_imager_composite_nearest_even(int value, int* smaller, int *larger)
 {
     double x;
-    int i = 0, i2, i3, i5, n2, n3, n5, nt, *values, up, down;
+    int i = 0, i2, i3, i5, n2, n3, n5, nt, *values, up = 0, down = 0;
     x = (double) value;
     n2 = 1 + (int) (log(x) / log(2.0) + 1.0);
     n3 = 1 + (int) (log(x) / log(3.0) + 1.0);

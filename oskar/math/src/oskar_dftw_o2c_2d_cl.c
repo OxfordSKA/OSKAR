@@ -111,7 +111,4 @@ void oskar_dftw_o2c_2d_cl(unsigned int num_in, double wavenumber,
         *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
         return;
     }
-#ifndef NDEBUG
-    clWaitForEvents(1, &event);
-#endif
 }

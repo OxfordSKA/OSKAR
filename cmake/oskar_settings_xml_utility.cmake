@@ -17,7 +17,7 @@ macro(process_import_nodes FILENAME)
         unset(import_files_)
         string(REGEX MATCHALL "([-/A-Za-z0-9_\\.]+\\.xml)" import_files_ "${xml_}")
         list(LENGTH import_files_ n)
-    
+
         if (${n} EQUAL 0)
             set(import_nodes_remaining NO)
         else()
@@ -63,7 +63,7 @@ ${import_node_}
     # Write out the combined XML file
     get_filename_component(name_ ${FILENAME} NAME_WE)
     set(xml_file ${CMAKE_CURRENT_BINARY_DIR}/${name_}_all.xml)
-    message(STATUS "Writing combined settings XML file: ${xml_file}")
+    #message(STATUS "Writing combined settings XML file: ${xml_file}")
     file(WRITE ${xml_file} "${xml_}")
 
     # Write a C header with the combined xml as a string
@@ -76,7 +76,7 @@ ${import_node_}
 #define ${name_}_XML_STR \\
 \"${xml_h_}\"
 ")
-    message(STATUS "Writing settings XML header: ${xml_file}")
+    #message(STATUS "Writing settings XML header: ${xml_file}")
     file(WRITE ${xml_file} "${xml_h_}")
 
 endmacro()

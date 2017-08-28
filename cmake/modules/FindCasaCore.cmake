@@ -43,37 +43,29 @@ set(casacore_modules
     casa_casa
 )
 
-# Already in cache, be silent
-if (CASACORE_INCLUDE_DIR)
-    set (CASACORE_FIND_QUIETLY TRUE)
-endif (CASACORE_INCLUDE_DIR)
-
-if (CASACORE_FIND_QUIETLY OR NOT CASACORE_FIND_REQUIRED)
-  find_package(LAPACK)
-else ()
-  find_package(LAPACK REQUIRED)
-endif ()
-
 # mmm this only works by luck by the looks of things...!
+find_package(LAPACK QUIET)
 if (LAPACK_FOUND)
     set(CASACORE_LINKER_FLAGS ${LAPACK_LINKER_FLAGS})
     find_path(CASACORE_INCLUDE_DIR MeasurementSets.h
         HINTS ${CASACORE_INC_DIR}
         PATH_SUFFIXES casacore/ms ms)
-    get_filename_component(CASACORE_INCLUDE_DIR ${CASACORE_INCLUDE_DIR} DIRECTORY)
-    get_filename_component(CASACORE_INCLUDE_DIR ${CASACORE_INCLUDE_DIR} DIRECTORY)
-    foreach (module ${casacore_modules})
-        find_library(CASACORE_LIBRARY_${module} NAMES ${module}
-           HINTS ${CASACORE_LIB_DIR}
-           PATHS ENV CASACORE_LIBRARY_PATH
-           PATH_SUFFIXES lib)
-        mark_as_advanced(CASACORE_LIBRARY_${module})
-        list(APPEND CASACORE_LIBRARIES ${CASACORE_LIBRARY_${module}})
-     endforeach ()
-    list(APPEND CASACORE_LIBRARIES ${LAPACK_LIBRARIES})
-endif (LAPACK_FOUND)
+    if (CASACORE_INCLUDE_DIR)
+        get_filename_component(CASACORE_INCLUDE_DIR ${CASACORE_INCLUDE_DIR} DIRECTORY)
+        get_filename_component(CASACORE_INCLUDE_DIR ${CASACORE_INCLUDE_DIR} DIRECTORY)
+        foreach (module ${casacore_modules})
+            find_library(CASACORE_LIBRARY_${module} NAMES ${module}
+                HINTS ${CASACORE_LIB_DIR}
+                PATHS ENV CASACORE_LIBRARY_PATH
+                PATH_SUFFIXES lib)
+            mark_as_advanced(CASACORE_LIBRARY_${module})
+            list(APPEND CASACORE_LIBRARIES ${CASACORE_LIBRARY_${module}})
+        endforeach()
+        list(APPEND CASACORE_LIBRARIES ${LAPACK_LIBRARIES})
+    endif()
+endif()
 
-# handle the QUIETLY and REQUIRED arguments and set CASACORE_FOUND to TRUE if.
+# handle the QUIETLY and REQUIRED arguments and set CASACORE_FOUND to TRUE if
 # all listed variables are TRUE
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CASACORE DEFAULT_MSG
     CASACORE_LIBRARIES CASACORE_INCLUDE_DIR)

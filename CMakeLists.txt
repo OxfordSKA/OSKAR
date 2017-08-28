@@ -3,7 +3,7 @@
 #
 
 # === Set the project name and specify the required CMAKE version.
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 if (APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8" CACHE STRING "Minimum macOS version")
 endif()
@@ -54,8 +54,38 @@ include_directories(
 )
 set(GTEST_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include/gtest)
 
-# === Set dependencies and compiler options.
-include(oskar_dependencies)
+# === Automatically set the build type if not specified.
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    # Use debug mode if building in dbg or debug directory.
+    get_filename_component(dirname ${CMAKE_BINARY_DIR} NAME)
+    if (${dirname} MATCHES "dbg" OR ${dirname} MATCHES "debug")
+        set(CMAKE_BUILD_TYPE Debug)
+    else()
+        set(CMAKE_BUILD_TYPE Release)
+    endif()
+    message(STATUS "INFO: Setting CMAKE_BUILD_TYPE to ${CMAKE_BUILD_TYPE}")
+endif()
+
+# === Find dependencies and set definitions.
+if (FIND_CUDA OR NOT DEFINED FIND_CUDA)
+    find_package(CUDA 5.5)
+endif()
+if (FIND_OPENCL OR NOT DEFINED FIND_OPENCL)
+    find_package(OpenCL QUIET)
+endif()
+find_package(CasaCore)
+find_package(OpenMP)
+if (CUDA_FOUND)
+    add_definitions(-DOSKAR_HAVE_CUDA)
+endif()
+if (OpenCL_FOUND)
+    add_definitions(-DOSKAR_HAVE_OPENCL)
+endif()
+if (NOT CASACORE_FOUND)
+    add_definitions(-DOSKAR_NO_MS)
+endif()
+
+# === Set compiler options.
 include(oskar_set_version)
 include(oskar_compiler_options)
 enable_testing()
