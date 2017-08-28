@@ -60,17 +60,19 @@ if (LAPACK_FOUND)
     find_path(CASACORE_INCLUDE_DIR MeasurementSets.h
         HINTS ${CASACORE_INC_DIR}
         PATH_SUFFIXES casacore/ms ms)
-    get_filename_component(CASACORE_INCLUDE_DIR ${CASACORE_INCLUDE_DIR} DIRECTORY)
-    get_filename_component(CASACORE_INCLUDE_DIR ${CASACORE_INCLUDE_DIR} DIRECTORY)
-    foreach (module ${casacore_modules})
-        find_library(CASACORE_LIBRARY_${module} NAMES ${module}
-           HINTS ${CASACORE_LIB_DIR}
-           PATHS ENV CASACORE_LIBRARY_PATH
-           PATH_SUFFIXES lib)
-        mark_as_advanced(CASACORE_LIBRARY_${module})
-        list(APPEND CASACORE_LIBRARIES ${CASACORE_LIBRARY_${module}})
-     endforeach ()
-    list(APPEND CASACORE_LIBRARIES ${LAPACK_LIBRARIES})
+    if (CASACORE_INCLUDE_DIR)
+        get_filename_component(CASACORE_INCLUDE_DIR ${CASACORE_INCLUDE_DIR} DIRECTORY)
+        get_filename_component(CASACORE_INCLUDE_DIR ${CASACORE_INCLUDE_DIR} DIRECTORY)
+        foreach (module ${casacore_modules})
+            find_library(CASACORE_LIBRARY_${module} NAMES ${module}
+               HINTS ${CASACORE_LIB_DIR}
+               PATHS ENV CASACORE_LIBRARY_PATH
+               PATH_SUFFIXES lib)
+            mark_as_advanced(CASACORE_LIBRARY_${module})
+            list(APPEND CASACORE_LIBRARIES ${CASACORE_LIBRARY_${module}})
+         endforeach ()
+        list(APPEND CASACORE_LIBRARIES ${LAPACK_LIBRARIES})
+    endif()
 endif (LAPACK_FOUND)
 
 # handle the QUIETLY and REQUIRED arguments and set CASACORE_FOUND to TRUE if.
