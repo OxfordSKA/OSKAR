@@ -1,3 +1,5 @@
+[![GitHub release](https://img.shields.io/github/release/OxfordSKA/OSKAR.svg?style=flat-square)]()
+
 # OSKAR: A GPU accelerated simulator for the Square Kilometre Array
 
 OSKAR has been designed to produce simulated visibility data from radio
