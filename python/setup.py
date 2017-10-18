@@ -44,9 +44,10 @@ class BuildExt(build_ext):
             dir_paths (array-like, str):  List of directories to search.
         """
         for directory in dir_paths:
-            test_path = join(directory, name)
-            if isfile(test_path):
-                return test_path
+            if os.path.exists(directory):
+                test_path = join(directory, name)
+                if isfile(test_path):
+                    return test_path
         return None
 
     @staticmethod
@@ -58,10 +59,11 @@ class BuildExt(build_ext):
             dir_paths (array-like, str):  List of directories to search.
         """
         for directory in dir_paths:
-            dir_contents = os.listdir(directory)
-            for item in dir_contents:
-                if name in item:
-                    return directory
+            if os.path.exists(directory):
+                dir_contents = os.listdir(directory)
+                for item in dir_contents:
+                    if name in item:
+                        return directory
         return None
 
     @staticmethod
