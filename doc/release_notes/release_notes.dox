@@ -29,6 +29,7 @@ please refer to older revisions of this document or the
       the GUI to use Qt 5.
 - Changed GUI to only display settings for the selected application and to
       remember the last settings file used for each application.
+- Added option to change current working directory from GUI.
 - Removed oskar_settings_set, as it was unable to check whether settings
       were being set correctly. Settings files can now be updated using
       the --set command line option of the required application.
@@ -57,18 +58,19 @@ please refer to older revisions of this document or the
 - Allowed visibility data to be read from a specified column of a
       Measurement Set.
 - Allowed negative source fluxes.
-
+- Allowed FITS images to be read if they have a diagonal CD matrix
+      instead of CDELT* values.
 
 \section release_notes_roadmap Roadmap
 
-Features are expected to be implemented in future versions of OSKAR as
-listed below.
+We hope to add the following capabilities to OSKAR at some point.
+In no particular order:
 
-- Use of analytical and numerical dish patterns.
-- Swap of X and Y dipoles to match IAU polarisation axes on the sky.
-- Full 3D specification of individual element feed angles.
-- Full Stokes beam patterns.
-- A usable ionospheric model.
+- Allow use of analytical and numerical dish patterns.
+- Swap X and Y dipoles to match IAU polarisation axes on the sky.
+- Allow full 3D specification of individual element feed angles.
+- Allow full Stokes beam patterns.
+- Include a usable ionospheric model.
 
 \section known_issues Known Issues
 

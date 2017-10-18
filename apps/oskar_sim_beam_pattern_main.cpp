@@ -93,6 +93,7 @@ int main(int argc, char** argv)
     oskar_settings_log(s, log);
 
     // Set up the telescope model and beam pattern simulator.
+    const char *warning_gpu = 0;
     oskar_BeamPattern* sim = 0;
     oskar_Telescope* tel = oskar_settings_to_telescope(s, log, &status);
     if (!tel || status)
@@ -102,6 +103,12 @@ int main(int argc, char** argv)
     {
         sim = oskar_settings_to_beam_pattern(s, log, &status);
         oskar_beam_pattern_set_telescope_model(sim, tel, &status);
+        if (s->to_int("simulator/use_gpus", &status) &&
+                oskar_beam_pattern_num_gpus(sim) == 0)
+        {
+            warning_gpu = "No GPU capability available.";
+            oskar_log_warning(log, warning_gpu);
+        }
     }
     oskar_telescope_free(tel, &status);
 
@@ -117,6 +124,10 @@ int main(int argc, char** argv)
     else
         oskar_log_error(log, "Run failed with code %i: %s.", status,
                 oskar_get_error_string(status));
+
+    // Reiterate warnings.
+    if (warning_gpu)
+        oskar_log_warning(log, warning_gpu);
 
     // Free memory.
     oskar_timer_free(tmr);

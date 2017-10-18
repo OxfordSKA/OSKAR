@@ -90,12 +90,27 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
     *status = 0;
     fits_read_keys_str(fptr, "CTYPE", 1, naxis, ctype, &i, status);
     *status = 0;
-    fits_read_keys_dbl(fptr, "CDELT", 1, naxis, cdelt, &i, status);
-    *status = 0;
     fits_read_keys_dbl(fptr, "CRPIX", 1, naxis, crpix, &i, status);
     *status = 0;
     fits_read_keys_dbl(fptr, "CRVAL", 1, naxis, crval, &i, status);
     *status = 0;
+    fits_read_keys_dbl(fptr, "CDELT", 1, naxis, cdelt, &i, status);
+    if (cdelt[0] == 0.0 || cdelt[1] == 0.0)
+    {
+        double cd1_1 = 0.0, cd1_2 = 0.0, cd2_1 = 0.0, cd2_2 = 0.0;
+        *status = 0;
+        fits_read_key(fptr, TDOUBLE, "CD1_1", &cd1_1, 0, status);
+        fits_read_key(fptr, TDOUBLE, "CD1_2", &cd1_2, 0, status);
+        fits_read_key(fptr, TDOUBLE, "CD2_1", &cd2_1, 0, status);
+        fits_read_key(fptr, TDOUBLE, "CD2_2", &cd2_2, 0, status);
+        if (cd1_2 == 0.0 && cd2_1 == 0.0 && !*status)
+        {
+            /* Accept CD matrix values as long as the matrix is diagonal. */
+            cdelt[0] = cd1_1;
+            cdelt[1] = cd2_2;
+        }
+        *status = 0;
+    }
 
     /* Identify the axes. */
     for (i = 0; i < naxis; ++i)
@@ -158,6 +173,7 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
         *image_time    = crval[axis_time] + i_time * cdelt[axis_time];
 
     /* Search for beam size in header keywords first. */
+    status1 = status2 = 0;
     fits_read_key(fptr, TDOUBLE, "BMAJ", &bmaj, 0, &status1);
     fits_read_key(fptr, TDOUBLE, "BMIN", &bmin, 0, &status2);
     if (status1 || status2)
@@ -187,7 +203,7 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
     /* Get brightness units if present. */
     status1 = 0;
     fits_read_key(fptr, TSTRING, "BUNIT", card, 0, &status1);
-    i = strlen(card);
+    i = (int) strlen(card);
     if (!status1 && i > 0 && brightness_units)
     {
         *brightness_units = (char*) realloc (*brightness_units, i + 1);

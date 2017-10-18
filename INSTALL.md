@@ -1,27 +1,24 @@
 
 # 1. Introduction
 
-OSKAR can be built and installed by following the steps described below.
-The current version is available as a source code distribution,
-targeted at Linux and macOS operating systems. Partial installation under
-Microsoft Windows may be possible, but is not currently supported.
+OSKAR can be installed by following the steps described below.
+A source code archive for Linux, and binary installer packages for
+macOS and Windows platforms are available to download from:
+
+    http://oskar.oerc.ox.ac.uk/
 
 
 # 2. Dependencies
 
-Some parts of OSKAR depend on a number of other libraries.
 If GPU acceleration is required, an NVIDIA GPU with CUDA 5.5 or later
-(and associated NVIDIA driver) must be installed on the target system.
+(and associated NVIDIA CUDA driver) must be installed.
 If the graphical user interface (GUI) is required, Qt must also be installed.
 Additionally, the casacore libraries must be present if Measurement Sets
 are to be exported.
 
-Please ensure that the required dependencies are installed before proceeding
-further.
+The dependencies are:
 
-The list below summarises the main dependencies:
-
-* CMake (https://cmake.org), version >= 3.0.0
+* CMake (https://cmake.org), version >= 3.1
 * [Optional] NVIDIA CUDA (https://developer.nvidia.com/cuda-downloads), version >= 5.5
 * [Optional] Qt 5 (https://www.qt.io)
 * [Optional] casacore (https://github.com/casacore/casacore), version >= 1.5.0
@@ -29,7 +26,7 @@ The list below summarises the main dependencies:
 
 # 3. Building OSKAR
 
-OSKAR can be built by issuing the following commands:
+To build OSKAR, open a terminal and type the following:
 
     $ mkdir build
     $ cd build
@@ -46,11 +43,13 @@ OSKAR can then be installed with:
 When running the 'cmake' command a number of build options can be specified.
 These are listed below.
 
-    * -DCUDA_ARCH=<arch> (default: all)
+    * -DCUDA_ARCH="<arch>" (default: all)
         Sets the target architecture for the compilation of CUDA device code.
-        <arch> must be one of either: 1.3, 2.0, 2.1, 3.0, 3.5, 3.7,
-                                      5.0, 5.2, 6.0, 6.1 or ALL.
-        ALL is for all Fermi, Kepler, Maxwell and Pascal architectures (>= 2.0).
+        <arch> must be one of either: 1.3, 2.0, 2.1, 3.0, 3.2, 3.5, 3.7,
+                                      5.0, 5.2, 6.0, 6.1, 6.2, 7.0 or ALL.
+        ALL is for all Kepler, Maxwell and Pascal architectures (>= 3.0).
+        Multiple architectures can be specified by separating them with
+        semi-colons.
 
     * -DCMAKE_INSTALL_PREFIX=<path> (default: /usr/local/)
         Path prefix used to install OSKAR (with make install).

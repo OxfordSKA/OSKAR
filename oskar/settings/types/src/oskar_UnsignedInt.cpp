@@ -38,10 +38,14 @@ namespace oskar {
 
 UnsignedInt::UnsignedInt()
 {
-    (void) init(string());
+    (void) init(0);
 }
 
-bool UnsignedInt::init(const string& /*s*/)
+UnsignedInt::~UnsignedInt()
+{
+}
+
+bool UnsignedInt::init(const char* /*s*/)
 {
     default_ = 0;
     value_ = 0;
@@ -50,7 +54,7 @@ bool UnsignedInt::init(const string& /*s*/)
     return true;
 }
 
-bool UnsignedInt::set_default(const string& value)
+bool UnsignedInt::set_default(const char* value)
 {
     bool ok = true;
     int i = oskar_settings_utility_string_to_int(value, &ok);
@@ -61,7 +65,7 @@ bool UnsignedInt::set_default(const string& value)
     return true;
 }
 
-bool UnsignedInt::set_value(const string& value)
+bool UnsignedInt::set_value(const char* value)
 {
     bool ok = true;
     int i = oskar_settings_utility_string_to_int(value, &ok);
@@ -74,6 +78,16 @@ bool UnsignedInt::set_value(const string& value)
 bool UnsignedInt::is_default() const
 {
     return value_ == default_;
+}
+
+unsigned int UnsignedInt::value() const
+{
+    return value_;
+}
+
+unsigned int UnsignedInt::default_value() const
+{
+    return default_;
 }
 
 bool UnsignedInt::operator==(const UnsignedInt& other) const

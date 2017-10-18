@@ -68,7 +68,7 @@ int main(int argc, char** argv)
             num_points, &status);
     oskar_Mem *enu_z = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             num_points, &status);
-    oskar_convert_ecef_to_enu(num_points,
+    oskar_convert_ecef_to_enu((int)num_points,
             oskar_mem_double_const(ecef_x, &status),
             oskar_mem_double_const(ecef_y, &status),
             oskar_mem_double_const(ecef_z, &status),

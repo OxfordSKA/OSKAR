@@ -180,7 +180,7 @@ function(add_doc)
         set(DOXYFILE "${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE_OUT}")
         set(DOXYFILE_LATEX_HEADER "${DOX_LATEX_HEADER}")
         #======================================================================
-        
+
     endif(DOXYGEN_FOUND)
 
     if (DOXYGEN_FOUND AND DOXYFILE_IN_FOUND)
@@ -242,12 +242,10 @@ function(add_doc)
             endif()
         endif()
 
-        get_target_property(DOC_TARGET ${DOX_TARGET_NAME} TYPE)
-        if(NOT DOC_TARGET)
+        if(NOT TARGET ${DOX_TARGET_NAME})
             add_custom_target(${DOX_TARGET_NAME})
         endif()
-        get_target_property(DOC_ALL_TARGET doc_all TYPE)
-        if(NOT DOC_ALL_TARGET)
+        if(NOT TARGET doc_all)
             add_custom_target(doc_all)
         endif()
         add_dependencies(${DOX_TARGET_NAME} ${target_})

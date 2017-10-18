@@ -35,6 +35,16 @@ true
 \\
 \hline
 
+use\_gpus
+&
+{Use GPU devices if available.}
+&
+Bool
+&
+true
+\\
+\hline
+
 cuda\_device\_ids
 &
 {A comma-separated string containing device (GPU) IDs to use on a multi-GPU system, or `all' to use all devices.}
@@ -42,6 +52,16 @@ cuda\_device\_ids
 CSV integer list or `all'
 &
 all
+\\
+\hline
+
+num\_devices
+&
+{Number of compute devices to use. A compute device is either a local CPU core, or a GPU. Don't set this to more than the number of CPU cores in your system.}
+&
+{Integer $\geq$ 0, or `auto'}
+&
+auto
 \\
 \hline
 
@@ -148,16 +168,6 @@ max
 \\
 \hline
 
-time\_snapshots
-&
-{If true, then produce an image cube containing snapshots for each time step. If false, then use time-synthesis to stack the times in the final image.}
-&
-Bool
-&
-false
-\\
-\hline
-
 time\_min\_utc
 &
 {The minimum visibility time centroid to include in the image. This can be either a MJD value or a string with one of the following formats: 
@@ -191,7 +201,7 @@ Double (if MJD), or formatted date-time string.
 
 time\_max\_utc
 &
-{The minimum visibility time centroid to include in the image. This can be either a MJD value or a string with one of the following formats: 
+{The maximum visibility time centroid to include in the image. This can be either a MJD value or a string with one of the following formats: 
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
 \vspace{8pt}
  \item {\textbf{{\texttt{d-M-yyyy h:m:s.z}}}}
@@ -425,7 +435,9 @@ DATA
 
 root\_path
 &
-{The root filename used to save the output image. The full filename will be constructed as {\texttt{\textbf{$<$root$>$\_$<$image\_type$>$.fits }}}}
+{The root filename used to save the output image. The full filename will be constructed as {\texttt{\textbf{$<$root$>$\_$<$image\_type$>$.fits }}}
+\vspace{8pt}\par\noindent 
+\vspace{8pt}\par\noindent  If left blank when running the application, the output file name will be based on the name of the first input file.}
 &
 Path name
 &

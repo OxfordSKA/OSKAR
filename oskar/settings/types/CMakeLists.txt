@@ -12,6 +12,7 @@ set(settings_types_SRC
     types/src/oskar_DoubleRangeExt.cpp
     types/src/oskar_InputDirectory.cpp
     types/src/oskar_InputFile.cpp
+    types/src/oskar_InputFileList.cpp
     types/src/oskar_Int.cpp
     types/src/oskar_IntList.cpp
     types/src/oskar_IntListExt.cpp
@@ -19,6 +20,7 @@ set(settings_types_SRC
     types/src/oskar_IntRange.cpp
     types/src/oskar_IntRangeExt.cpp
     types/src/oskar_OptionList.cpp
+    types/src/oskar_OutputFile.cpp
     types/src/oskar_RandomSeed.cpp
     types/src/oskar_String.cpp
     types/src/oskar_StringList.cpp

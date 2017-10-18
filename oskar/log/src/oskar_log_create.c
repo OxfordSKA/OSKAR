@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "log/private_log.h"
 #include "log/oskar_log.h"
 #include "oskar_version.h"
@@ -34,6 +33,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef OSKAR_OS_WIN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,6 +49,8 @@ oskar_Log* oskar_log_create(int file_priority, int term_priority)
 {
     oskar_Log* log = 0;
     char fname1[64], fname2[64];
+    char* current_dir = 0;
+    size_t buf_len = 0;
     int time_data[10];
     int i = 0, n = 0;
 
@@ -114,21 +122,28 @@ oskar_Log* oskar_log_create(int file_priority, int term_priority)
     oskar_log_section(log, 'M', "OSKAR-%s starting at %s.",
             OSKAR_VERSION_STR, oskar_log_system_clock_string(0));
 
+    /* Get the current working directory. */
+#ifdef OSKAR_OS_WIN
+    buf_len = GetCurrentDirectory(0, NULL);
+    current_dir = (char*) calloc(buf_len, sizeof(char));
+    GetCurrentDirectory((DWORD) buf_len, current_dir);
+#else
+    do
+    {
+        buf_len += 256;
+        current_dir = (char*) realloc(current_dir, buf_len);
+    }
+    while (getcwd(current_dir, buf_len) == NULL);
+#endif
+    oskar_log_message(log, 'M', 0, "Current dir is %s", current_dir);
+    free(current_dir);
+
     /* Write a message to say if the log file was opened successfully. */
     if (log->file)
     {
-        char* current_dir;
-
-        /* Get the current working directory. */
-        current_dir = getenv("PWD");
-        if (!current_dir)
-            current_dir = getenv("CD");
-
         /* Save the file name in the structure. */
-        log->name = malloc(n + 1);
+        log->name = (char*) calloc(n + 1, sizeof(char));
         strcpy(log->name, fname2);
-        if (current_dir)
-            oskar_log_message(log, 'M', 0, "Current dir is %s", current_dir);
         oskar_log_message(log, 'M', 0, "Logging to file %s", fname2);
     }
     else

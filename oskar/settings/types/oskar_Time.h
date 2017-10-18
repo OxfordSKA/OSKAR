@@ -52,37 +52,34 @@ namespace oskar {
  *  hh:mm:ss.zzzzzz
  *  s.zzzzzzzz
  */
-
-class OSKAR_SETTINGS_EXPORT Time : public AbstractSettingsType
+class Time : public AbstractSettingsType
 {
 public:
     enum Format { UNDEF = -1, TIME_STRING, SECONDS };
-    class Value {
-     public:
-        Value() : hours(0), minutes(0), seconds(0.0), format(UNDEF) {}
-        void clear() { hours = 0; minutes = 0; seconds = 0.0; format = UNDEF;}
+    struct OSKAR_SETTINGS_EXPORT Value
+    {
         int hours, minutes;
         double seconds;
         Time::Format format;
+        Value() : hours(0), minutes(0), seconds(0.0), format(UNDEF) {}
+        void clear() { hours = 0; minutes = 0; seconds = 0.0; format = UNDEF;}
     };
 
-    Time();
-    virtual ~Time() {}
+    OSKAR_SETTINGS_EXPORT Time();
+    OSKAR_SETTINGS_EXPORT virtual ~Time();
 
-    bool init(const std::string& param);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* param);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    Value value() const { return value_; }
-    double to_seconds() const;
+    OSKAR_SETTINGS_EXPORT Value value() const;
+    OSKAR_SETTINGS_EXPORT double to_seconds() const;
 
-    bool operator==(const Time& other) const;
-    bool operator>(const Time& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator==(const Time& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const Time& other) const;
 
 private:
-    static bool from_string(const std::string& s, Value& value);
-    static std::string to_string(const Value& value);
     Value default_, value_;
 };
 

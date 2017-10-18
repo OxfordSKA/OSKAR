@@ -37,8 +37,8 @@ oskar_Vis* oskar_vis_create(int amp_type, int location, int num_channels,
         int num_times, int num_stations, int* status)
 {
     oskar_Vis* vis = 0;
-    int type;
-    size_t num_amps, num_coords, num_baselines;
+    int num_baselines, type;
+    size_t num_amps, num_coords;
 
     /* Check type. */
     if (oskar_type_is_double(amp_type))
@@ -65,8 +65,10 @@ oskar_Vis* oskar_vis_create(int amp_type, int location, int num_channels,
     vis->num_channels  = num_channels;
     vis->num_times     = num_times;
     vis->num_baselines = num_baselines;
-    num_amps   = num_channels * num_times * num_baselines;
-    num_coords = num_times * num_baselines;
+    num_coords = (size_t) num_baselines;
+    num_coords *= num_times;
+    num_amps = num_coords;
+    num_amps *= num_channels;
 
     /* Initialise meta-data. */
     vis->freq_start_hz = 0.0;

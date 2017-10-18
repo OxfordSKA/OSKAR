@@ -40,12 +40,37 @@ using ttl::var::get;
 
 namespace oskar {
 
-IntRangeExt::IntRangeExt()
+enum value_types { INT, STRING };
+
+static string to_string(const IntRangeExt::Value& value)
 {
-    (void) init(string());
+    if (value.is_singular()) return string();
+    if (value.which() == INT)
+        return oskar_settings_utility_int_to_string(get<int>(value));
+    else if (value.which() == STRING)
+        return get<string>(value);
+    return string();
 }
 
-bool IntRangeExt::init(const string& s)
+static bool compare(const IntRangeExt::Value& a, const IntRangeExt::Value& b)
+{
+    if (a.is_singular() || b.is_singular()) return false;
+    if (a.which() != b.which()) return false;
+    if (a.which() == STRING) return (get<string>(a) == get<string>(b));
+    if (a.which() == INT) return (get<int>(a) == get<int>(b));
+    return false;
+}
+
+IntRangeExt::IntRangeExt()
+{
+    (void) init("");
+}
+
+IntRangeExt::~IntRangeExt()
+{
+}
+
+bool IntRangeExt::init(const char* s)
 {
     ext_min_.clear();
     ext_max_.clear();
@@ -93,25 +118,25 @@ bool IntRangeExt::init(const string& s)
     return ok;
 }
 
-bool IntRangeExt::set_default(const string &value)
+bool IntRangeExt::set_default(const char* value)
 {
-    bool ok = from_string_(default_, value);
-    str_default_ = to_string_(default_);
+    bool ok = from_string(default_, value);
+    str_default_ = to_string(default_);
     if (ok)
         set_value(value);
     return ok;
 }
 
-bool IntRangeExt::set_value(const string& value)
+bool IntRangeExt::set_value(const char* value)
 {
-    bool ok = from_string_(value_, value);
-    str_value_ = to_string_(value_);
+    bool ok = from_string(value_, value);
+    str_value_ = to_string(value_);
     return ok;
 }
 
 bool IntRangeExt::is_default() const
 {
-    return compare_(value_, default_);
+    return compare(value_, default_);
 }
 
 int IntRangeExt::value() const
@@ -123,9 +148,29 @@ int IntRangeExt::value() const
     return get<int>(value_);
 }
 
+int IntRangeExt::min() const
+{
+    return min_;
+}
+
+int IntRangeExt::max() const
+{
+    return max_;
+}
+
+const char* IntRangeExt::ext_min() const
+{
+    return ext_min_.c_str();
+}
+
+const char* IntRangeExt::ext_max() const
+{
+    return ext_max_.c_str();
+}
+
 bool IntRangeExt::operator==(const IntRangeExt& other) const
 {
-    return compare_(value_, other.value_);
+    return compare(value_, other.value_);
 }
 
 bool IntRangeExt::operator>(const IntRangeExt& other) const
@@ -137,16 +182,7 @@ bool IntRangeExt::operator>(const IntRangeExt& other) const
     return false;
 }
 
-bool IntRangeExt::compare_(const Value& a, const Value& b)
-{
-    if (a.is_singular() || b.is_singular()) return false;
-    if (a.which() != b.which()) return false;
-    if (a.which() == STRING) return (get<string>(a) == get<string>(b));
-    if (a.which() == INT) return (get<int>(a) == get<int>(b));
-    return false;
-}
-
-bool IntRangeExt::from_string_(Value& value, const string& s) const
+bool IntRangeExt::from_string(Value& value, const char* s) const
 {
     // Catch cases where the range is being set with a special string.
     if (oskar_settings_utility_string_starts_with(ext_min_, s)) {
@@ -171,16 +207,6 @@ bool IntRangeExt::from_string_(Value& value, const string& s) const
         else if (i > max_ && !ext_max_.empty()) value = ext_max_;
     }
     return false;
-}
-
-string IntRangeExt::to_string_(const Value& value) const
-{
-    if (value.is_singular()) return string();
-    if (value.which() == INT)
-        return oskar_settings_utility_int_to_string(get<int>(value));
-    else if (value.which() == STRING)
-        return get<string>(value);
-    return string();
 }
 
 } // namespace oskar

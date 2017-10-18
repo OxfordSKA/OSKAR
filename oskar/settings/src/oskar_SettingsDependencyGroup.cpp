@@ -50,7 +50,7 @@ SettingsDependencyGroup::~SettingsDependencyGroup()
 
 int SettingsDependencyGroup::num_children() const
 {
-    return children_.size();
+    return (int) children_.size();
 }
 
 SettingsDependencyGroup* SettingsDependencyGroup::add_child(
@@ -77,7 +77,7 @@ SettingsDependencyGroup* SettingsDependencyGroup::parent()
 
 int SettingsDependencyGroup::num_dependencies() const
 {
-    return dependencies_.size();
+    return (int) dependencies_.size();
 }
 
 SettingsDependencyGroup::GroupLogic SettingsDependencyGroup::group_logic() const

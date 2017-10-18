@@ -49,24 +49,24 @@ namespace oskar {
  * @details
  */
 
-class OSKAR_SETTINGS_EXPORT Double : public AbstractSettingsType
+class Double : public AbstractSettingsType
 {
 public:
     enum Format { AUTO, EXPONENT };
 
-    Double();
-    virtual ~Double() {}
+    OSKAR_SETTINGS_EXPORT Double();
+    OSKAR_SETTINGS_EXPORT virtual ~Double();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    double value() const { return value_; }
-    double default_value() const { return default_; }
+    OSKAR_SETTINGS_EXPORT double value() const;
+    OSKAR_SETTINGS_EXPORT double default_value() const;
 
-    bool operator==(const Double& other) const;
-    bool operator>(const Double& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator==(const Double& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const Double& other) const;
 
 protected:
     Format format_;

@@ -47,7 +47,7 @@ void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
     if (*status) return;
 
     /* Filter and find peak of image. */
-    num_pixels = oskar_mem_length(data);
+    num_pixels = (int) oskar_mem_length(data);
     type = oskar_mem_precision(data);
     if (type == OSKAR_SINGLE)
     {
@@ -101,7 +101,7 @@ void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
     {
         if (beam_area_pixels == 0.0)
         {
-            fprintf(stderr, "Need beam area for maps in Jy/beam.");
+            fprintf(stderr, "Need beam area for maps in Jy/beam.\n");
             *status = OSKAR_ERR_BAD_UNITS;
         }
         else

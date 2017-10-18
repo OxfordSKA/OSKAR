@@ -48,15 +48,14 @@ namespace oskar {
  * @details
  *
  */
-
-class OSKAR_SETTINGS_EXPORT InputDirectory : public String
+class InputDirectory : public String
 {
 public:
-    InputDirectory() : String() {};
-    virtual ~InputDirectory() {};
+    OSKAR_SETTINGS_EXPORT InputDirectory();
+    OSKAR_SETTINGS_EXPORT virtual ~InputDirectory();
 
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
 };
 
 } /* namespace oskar */

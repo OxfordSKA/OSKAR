@@ -50,6 +50,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     h->tmr_init = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_read = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    h->mutex = oskar_mutex_create();
 
     /* Create scratch arrays. */
     h->imager_prec = imager_precision;
@@ -74,6 +75,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
 
     /* Set sensible defaults. */
     oskar_imager_set_gpus(h, -1, 0, status);
+    oskar_imager_set_num_devices(h, -1);
     oskar_imager_set_algorithm(h, "FFT", status);
     oskar_imager_set_image_type(h, "I", status);
     oskar_imager_set_weighting(h, "Natural", status);

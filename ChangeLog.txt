@@ -13,6 +13,8 @@
     * Changed GUI to only display settings for the selected application and to
       remember the last settings file used for each application.
 
+    * Added option to change current working directory from GUI.
+
     * Removed oskar_settings_set, as it was unable to check whether settings
       were being set correctly. Settings files can now be updated using
       the --set command line option of the required application.
@@ -55,6 +57,9 @@
       Measurement Set.
 
     * Allowed negative source fluxes.
+
+    * Allowed FITS images to be read if they have a diagonal CD matrix
+      instead of CDELT* values.
 
 2015-06-24  OSKAR-2.6.1
 

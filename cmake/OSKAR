@@ -1,0 +1,100 @@
+#!/bin/sh
+
+create_run_script()
+{
+    cat << EOF > "${RUN_SCRIPT}"
+#!/bin/sh
+exec "${THIS_DIR}/OSKAR" "\$@"
+EOF
+    chmod a+x "${RUN_SCRIPT}"
+    echo "cp -f \"${RUN_SCRIPT}\" \"${LINK}\"" >> "${LINK_SCRIPT}"
+}
+
+# Get path to this script.
+THIS_DIR="$( cd "$(dirname "$0")" || exit ; pwd -P )"
+BINARY_DIR="${THIS_DIR}/../Resources/bin"
+
+# Create a script to create the links (to run as administrator if necessary).
+LINK_SCRIPT="/tmp/make_oskar_links.sh"
+RUN_SCRIPT="/tmp/run_oskar.sh"
+cat /dev/null > "${LINK_SCRIPT}"
+chmod a+rwx "${LINK_SCRIPT}"
+
+# Check target directory for links exists, and try to create it if not.
+LINK_DIR="/usr/local/bin"
+if [ ! -d "${LINK_DIR}" ]; then
+    if ! mkdir -p \"${LINK_DIR}\"; then
+        # Add command to create this directory as an administrator.
+        echo "mkdir -p \"${LINK_DIR}\"" >> "${LINK_SCRIPT}"
+    fi
+fi
+
+# Loop over binaries to link.
+for BINARY_PATH in "${BINARY_DIR}"/*; do
+    BINARY_NAME="$(basename "${BINARY_PATH}")"
+    LINK="${LINK_DIR}/${BINARY_NAME}"
+    # For the GUI, write a script to run this one.
+    # Unfortunately a symlink doesn't do the job.
+    if [ "${BINARY_NAME}" = "oskar" ]; then
+        if [ ! -e "${LINK}" ]; then
+            create_run_script
+        elif [ -x "${LINK}" ]; then
+            # Read the first two lines from the file.
+            while read -r line1; do
+                read -r line2
+                break
+            done < "${LINK}"
+            # Check if file is a script.
+            if [ "${line1}" = "#!/bin/sh" ]; then
+                if [ "${line2}" != "exec \"${THIS_DIR}/OSKAR\" \"\$@\"" ]; then
+                    create_run_script
+                fi
+            fi
+        fi
+    else
+        # If link destination is not a file, create the link.
+        if [ ! -e "${LINK}" ]; then
+            echo "ln -s \"${BINARY_PATH}\" \"${LINK}\"" >> "${LINK_SCRIPT}"
+        # If the link already exists but is not correct, recreate it.
+        elif [ -L "${LINK}" ]; then
+            if [ "$(readlink "${LINK}")" != "${BINARY_PATH}" ]; then
+                echo "ln -sf \"${BINARY_PATH}\" \"${LINK}\"" >> "${LINK_SCRIPT}"
+            fi
+        fi
+    fi
+done
+
+# Check if there is anything to do.
+if [ -s "${LINK_SCRIPT}" ]; then
+    # Check if target directory is writable.
+    if [ -w "${LINK_DIR}" ]; then
+        /usr/bin/osascript << EOT
+            tell Application "System Events"
+                display dialog "Create/update links to OSKAR binaries\nin directory ${LINK_DIR}?" with title "Set OSKAR symlinks" with icon POSIX file "${THIS_DIR}/../Resources/OSKAR.icns" buttons {"Create links", "Not now"} default button 1
+                if button returned of result = "Create links" then
+                    do shell script "${LINK_SCRIPT}"
+                end if
+            end tell
+EOT
+    else
+        /usr/bin/osascript << EOT
+            tell Application "System Events"
+                display dialog "Create/update links to OSKAR binaries\nin directory ${LINK_DIR}?\n\nThis location requires administrator privileges." with title "Set OSKAR symlinks" with icon POSIX file "${THIS_DIR}/../Resources/OSKAR.icns" buttons {"Create links", "Not now"} default button 1
+                if button returned of result = "Create links" then
+                    do shell script "${LINK_SCRIPT}" with administrator privileges
+                end if
+            end tell
+EOT
+    fi
+fi
+
+# Clean up files in /tmp.
+rm -f "${LINK_SCRIPT}"
+if [ -e "${RUN_SCRIPT}" ]; then
+    rm -f "${RUN_SCRIPT}"
+fi
+
+# Launch the GUI.
+if [ -x "${BINARY_DIR}/oskar" ]; then
+    exec "${THIS_DIR}/oskar_gui" "$@"
+fi

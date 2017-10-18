@@ -55,20 +55,21 @@ namespace oskar {
  *  yyyy/M/d/h:m:s[.z] - CASA style
  *  yyyy-M-d h:m:s[.z] - International style
  *  yyyy-M-dTh:m:s[.z] - ISO date style
- *
- *
  */
-
-class OSKAR_SETTINGS_EXPORT DateTime : public AbstractSettingsType
+class DateTime : public AbstractSettingsType
 {
 public:
     enum Format { UNDEF = -1, BRITISH, CASA, INTERNATIONAL, ISO, MJD };
-    class Value {
-     public:
-        Value()
-     : style(DateTime::UNDEF), year(0), month(0), day(0),
-       hours(0), minutes(0), seconds(0.0) {}
-        void clear() {
+    struct OSKAR_SETTINGS_EXPORT Value
+    {
+        DateTime::Format style;
+        int year, month, day, hours, minutes;
+        double seconds;
+
+        Value() : style(DateTime::UNDEF), year(0), month(0), day(0),
+                hours(0), minutes(0), seconds(0.0) {}
+        void clear()
+        {
             style = DateTime::UNDEF;
             year = 0;
             month = 0;
@@ -77,46 +78,28 @@ public:
             minutes = 0;
             seconds = 0.0;
         }
-        DateTime::Format style;
-        int year, month, day, hours, minutes;
-        double seconds;
     };
 
  public:
-    DateTime();
-    virtual ~DateTime() {}
+    OSKAR_SETTINGS_EXPORT DateTime();
+    OSKAR_SETTINGS_EXPORT virtual ~DateTime();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    Value value() const { return value_; }
-    Value default_value() const { return default_; }
+    OSKAR_SETTINGS_EXPORT Value value() const;
+    OSKAR_SETTINGS_EXPORT Value default_value() const;
 
-    double to_mjd() const;
-    double to_mjd_2() const;
-    void from_mjd(double mjd);
-    DateTime::Format format() const { return value_.style; }
-    void set_format(DateTime::Format format) {
-        value_.style = format;
-        default_.style = format;
-    }
+    OSKAR_SETTINGS_EXPORT double to_mjd() const;
+    OSKAR_SETTINGS_EXPORT double to_mjd_2() const;
+    OSKAR_SETTINGS_EXPORT void from_mjd(double mjd);
+    OSKAR_SETTINGS_EXPORT DateTime::Format format() const;
+    OSKAR_SETTINGS_EXPORT void set_format(DateTime::Format format);
 
-    bool operator==(const DateTime& other) const;
-    bool operator>(const DateTime& other) const;
-
-    static Value from_string(const std::string& s, bool& ok);
-    static std::string to_string(const Value& val);
-    static double to_mjd(const Value& val);
-    static void from_mjd(double mjd, Value& val);
-
- private:
-    static bool parse_date_style_1(const std::string& s, Value& val);
-    static bool parse_date_style_2(const std::string& s, Value& val);
-    static bool parse_date_style_3(const std::string& s, Value& val);
-    static bool parse_date_style_4(const std::string& s, Value& val);
-    static bool parse_time(const std::string& s, Value& val);
+    OSKAR_SETTINGS_EXPORT bool operator==(const DateTime& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const DateTime& other) const;
 
  private:
     Value default_, value_;

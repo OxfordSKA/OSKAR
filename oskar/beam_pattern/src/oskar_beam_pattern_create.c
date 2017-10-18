@@ -44,6 +44,7 @@ oskar_BeamPattern* oskar_beam_pattern_create(int precision, int* status)
     h->tmr_sim   = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->mutex     = oskar_mutex_create();
+    h->barrier   = oskar_barrier_create(0);
 
     /* Set sensible defaults. */
     oskar_beam_pattern_set_gpus(h, -1, 0, status);

@@ -257,8 +257,8 @@ enum OSKAR_DIRECTION_TYPE
     #define restrict __restrict__
 #elif defined(__cplusplus) && defined(__GNUC__)
     #define restrict __restrict__
-#elif defined(__cplusplus) && defined(OSKAR_OS_WIN)
-    /*#define restrict __restrict*/
+#elif defined(__cplusplus) && defined(_MSC_VER)
+    #define restrict
 #elif !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L
     #define restrict
 #endif

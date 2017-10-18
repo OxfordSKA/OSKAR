@@ -28,11 +28,7 @@
 
 #include "apps/oskar_option_parser.h"
 #include "math/oskar_cmath.h"
-#include "mem/oskar_mem.h"
-#include "telescope/station/oskar_station.h"
-#include "telescope/station/private_station.h"
-#include "telescope/station/oskar_evaluate_array_pattern.h"
-#include "telescope/station/oskar_evaluate_array_pattern_hierarchical.h"
+#include "math/oskar_dftw.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_timer.h"
 #include "oskar_version.h"
@@ -100,7 +96,8 @@ int main(int argc, char** argv)
     int niter;
     opt.get("-n")->getInt(niter);
 
-    if (op_type == UNDEF || op_type_count != 1) {
+    if (op_type == UNDEF || op_type_count != 1)
+    {
         opt.error("Please select one of the following flags: -o2c, -c2c, -m2m");
         return EXIT_FAILURE;
     }
@@ -113,7 +110,7 @@ int main(int argc, char** argv)
         printf("- Precision: %s\n", (precision == OSKAR_SINGLE) ? "single" : "double");
         printf("- %s\n", loc == OSKAR_CPU ? "CPU" : "GPU");
         printf("- %s\n", evaluate_2d ? "2D" : "3D");
-        printf("- Evaluation type = ");
+        printf("- Operation type: ");
         if (op_type == O2C) printf("o2c\n");
         else if (op_type == C2C) printf("c2c\n");
         else if (op_type == M2M) printf("m2m\n");
@@ -126,7 +123,8 @@ int main(int argc, char** argv)
     int status = benchmark(num_elements, num_directions, op_type, loc,
             precision, evaluate_2d, niter, time_taken);
 
-    if (status) {
+    if (status)
+    {
         fprintf(stderr, "ERROR: array pattern evaluation failed with code %i: "
                 "%s\n", status, oskar_get_error_string(status));
         return EXIT_FAILURE;
@@ -137,7 +135,8 @@ int main(int argc, char** argv)
         printf("==> Time taken per iteration: %f seconds.\n", time_taken/niter);
         printf("\n");
     }
-    else {
+    else
+    {
         printf("%f\n", time_taken/niter);
     }
 
@@ -149,42 +148,23 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
         int loc, int precision, bool evaluate_2d, int niter, double& time_taken)
 {
     int status = 0;
-
-    // Create the timer.
-    oskar_Timer *tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
-
-    oskar_Station* station = oskar_station_create(precision, loc,
-            num_elements, &status);
-    if (status) return status;
-    station->array_is_3d = (evaluate_2d) ? OSKAR_FALSE : OSKAR_TRUE;
-
-    oskar_Mem *x, *y, *z, *weights = 0, *beam = 0, *signal = 0;
-    x = oskar_mem_create(precision, loc, num_directions, &status);
-    y = oskar_mem_create(precision, loc, num_directions, &status);
-    z = oskar_mem_create(precision, loc, num_directions, &status);
-    if (status) return status;
-
-    if (op_type == O2C)
+    int type = precision | OSKAR_COMPLEX;
+    oskar_Mem *beam = 0, *signal = 0, *z = 0, *z_i = 0;
+    oskar_Mem *x = oskar_mem_create(precision, loc, num_directions, &status);
+    oskar_Mem *y = oskar_mem_create(precision, loc, num_directions, &status);
+    oskar_Mem *x_i = oskar_mem_create(precision, loc, num_elements, &status);
+    oskar_Mem *y_i = oskar_mem_create(precision, loc, num_elements, &status);
+    oskar_Mem *weights = oskar_mem_create(type, loc, num_elements, &status);
+    if (!evaluate_2d)
     {
-        int type = precision | OSKAR_COMPLEX;
-        beam = oskar_mem_create(type, loc, num_directions, &status);
-        weights = oskar_mem_create(type, loc, num_elements, &status);
-        if (status) return status;
-
-        oskar_timer_start(tmr);
-        for (int i = 0; i < niter; ++i)
-        {
-            oskar_evaluate_array_pattern(beam, 2.0 * M_PI, station,
-                    num_directions, x, y, z, weights, &status);
-        }
-        time_taken = oskar_timer_elapsed(tmr);
+        z = oskar_mem_create(precision, loc, num_directions, &status);
+        z_i = oskar_mem_create(precision, loc, num_elements, &status);
     }
+    if (op_type == O2C)
+        beam = oskar_mem_create(type, loc, num_directions, &status);
     else if (op_type == C2C || op_type == M2M)
     {
-        int type = precision | OSKAR_COMPLEX;
         int num_signals = num_directions * num_elements;
-
-        weights = oskar_mem_create(type, loc, num_elements, &status);
         if (op_type == C2C)
         {
             beam = oskar_mem_create(type, loc, num_directions, &status);
@@ -196,25 +176,28 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
             beam = oskar_mem_create(type, loc, num_directions, &status);
             signal = oskar_mem_create(type, loc, num_signals, &status);
         }
-        if (status) return status;
+    }
 
+    oskar_Timer *tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    if (!status)
+    {
         oskar_timer_start(tmr);
         for (int i = 0; i < niter; ++i)
         {
-            oskar_evaluate_array_pattern_hierarchical(beam, 2.0 * M_PI, station,
-                    num_directions, x, y, z, signal, weights, &status);
+            oskar_dftw(num_elements, 2.0 * M_PI, x_i, y_i, z_i, weights,
+                    num_directions, x, y, z, signal, beam, &status);
         }
         time_taken = oskar_timer_elapsed(tmr);
     }
 
-    // Destroy the timer.
-    oskar_timer_free(tmr);
-
     // Free memory.
-    oskar_station_free(station, &status);
+    oskar_timer_free(tmr);
     oskar_mem_free(x, &status);
     oskar_mem_free(y, &status);
     oskar_mem_free(z, &status);
+    oskar_mem_free(x_i, &status);
+    oskar_mem_free(y_i, &status);
+    oskar_mem_free(z_i, &status);
     oskar_mem_free(weights, &status);
     oskar_mem_free(beam, &status);
     oskar_mem_free(signal, &status);

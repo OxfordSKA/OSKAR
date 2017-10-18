@@ -124,6 +124,10 @@ About::About(QString app_name, QString app_version, QWidget *parent)
         cursor.setBlockFormat(paragraph);
         cursor.insertText("Copyright (c) 2011-2017, The University of Oxford. "
                 "\nAll rights reserved.");
+        cursor.insertBlock();
+        cursor.insertText("Redistribution and use in source and binary forms, "
+                "with or without modification, are permitted provided that "
+                "the following conditions are met:");
         cursor.insertList(QTextListFormat::ListDecimal);
         cursor.insertText("Redistributions of source code must retain the "
                 "above copyright notice, this list of conditions and the "
@@ -181,42 +185,45 @@ About::About(QString app_name, QString app_version, QWidget *parent)
             "donated by NVIDIA UK.</p>");
     html.append("<p>OSKAR uses the following tools and libraries:</p>");
     html.append("<ul>");
-    html.append("<li>NVIDIA CUDA "
-                "(<a href=\"http://www.nvidia.com/object/cuda_home.html\">"
-                "http://www.nvidia.com/object/cuda_home.html</a>)</li>");
-    html.append("<li>LAPACK "
-                "(<a href=\"http://www.netlib.org/lapack/\">"
-                "http://www.netlib.org/lapack/</a>)</li>");
-    html.append("<li>DIERCKX for surface fitting using splines "
-                "(<a href=\"http://netlib.org/dierckx/\">"
-                "http://netlib.org/dierckx/</a>)</li>");
-    html.append("<li>The Qt cross-platform application framework "
-                "(<a href=\"https://qt.io/\">"
-                "http://qt.io/</a>)</li>");
-    html.append("<li>casacore for Measurement Set handling "
-                "(<a href=\"https://github.com/casacore/casacore/\">"
-                "https://github.com/casacore/casacore/</a>)</li>");
-    html.append("<li>CFITSIO for FITS file handling "
-                "(<a href=\"http://heasarc.gsfc.nasa.gov/fitsio/\">"
-                "http://heasarc.gsfc.nasa.gov/fitsio/</a>)</li>");
-    html.append("<li>Random123 for parallel random number generation "
-                "(<a href=\"http://www.deshawresearch.com/resources_random123.html\">"
-                "http://www.deshawresearch.com/resources_random123.html</a>)</li>");
-    html.append("<li>ezOptionParser "
-                "(<a href=\"http://sourceforge.net/projects/ezoptionparser/\">"
-                "http://sourceforge.net/projects/ezoptionparser/</a>)</li>");
-    html.append("<li>The CMake cross-platform build system "
-                "(<a href=\"https://cmake.org/\">"
-                "http://www.cmake.org/</a>)</li>");
-    html.append("<li>The Google Test unit-testing framework "
-                "(<a href=\"http://code.google.com/p/googletest/\">"
-                "http://code.google.com/p/googletest/</a>)</li>");
-    html.append("<li>Python "
-                "(<a href=\"https://www.python.org/\">"
-                "https://www.python.org/</a>)</li>");
+    html.append("<li>The NVIDIA CUDA toolkit: "
+                "<a href=\"https://developer.nvidia.com/cuda-zone\">"
+                "https://developer.nvidia.com/cuda-zone</a></li>");
+    html.append("<li>The FFTPACK 5 FFT library: "
+                "<a href=\"https://www2.cisl.ucar.edu/resources/legacy/fft5\">"
+                "https://www2.cisl.ucar.edu/resources/legacy/fft5</a></li>");
+    html.append("<li>The LAPACK linear algebra library: "
+                "<a href=\"http://www.netlib.org/lapack/\">"
+                "http://www.netlib.org/lapack/</a></li>");
+    html.append("<li>The DIERCKX spline fitting library: "
+                "<a href=\"http://netlib.org/dierckx/\">"
+                "http://netlib.org/dierckx/</a></li>");
+    html.append("<li>The Qt GUI framework: "
+                "<a href=\"https://www.qt.io/\">https://www.qt.io/</a></li>");
+    html.append("<li>The casacore Measurement Set library: "
+                "<a href=\"https://github.com/casacore/casacore/\">"
+                "https://github.com/casacore/casacore/</a></li>");
+    html.append("<li>The CFITSIO FITS file library: "
+                "<a href=\"https://heasarc.gsfc.nasa.gov/fitsio/\">"
+                "https://heasarc.gsfc.nasa.gov/fitsio/</a></li>");
+    html.append("<li>The Random123 random number generator: "
+                "<a href=\"https://www.deshawresearch.com/resources_random123.html\">"
+                "https://www.deshawresearch.com/resources_random123.html</a></li>");
+    html.append("<li>The ezOptionParser command line parser: "
+                "<a href=\"https://sourceforge.net/projects/ezoptionparser/\">"
+                "https://sourceforge.net/projects/ezoptionparser/</a></li>");
+    html.append("<li>The CMake build system: "
+                "<a href=\"https://cmake.org/\">https://cmake.org/</a></li>");
+    html.append("<li>The Google Test framework: "
+                "<a href=\"https://github.com/google/googletest/\">"
+                "https://github.com/google/googletest/</a></li>");
+    html.append("<li>Python: "
+                "<a href=\"https://www.python.org/\">"
+                "https://www.python.org/</a></li>");
     html.append("</ul>");
     html.append("<p>This research has made use of SAOImage DS9, developed "
-            "by Smithsonian Astrophysical Observatory.</p>");
+            "by Smithsonian Astrophysical Observatory. "
+            "SAOImage DS9 can be obtained from "
+            "<a href=\"http://ds9.si.edu\">http://ds9.si.edu</a></p>");
     html.append("</body></html>");
 
     // Create attribution document display.
@@ -230,9 +237,9 @@ About::About(QString app_name, QString app_version, QWidget *parent)
     QLabel* ack1 = new QLabel("If OSKAR has been helpful in your research, "
             "please give the following acknowledgement:", this);
     vLayoutAtt->addWidget(ack1);
-    QLabel* ack2 = new QLabel("<blockquote><i>\"This research has made use "
-            "of OSKAR, developed at the University of Oxford.\""
-            "</i></blockquote>", this);
+    QLabel* ack2 = new QLabel("<blockquote>This research has made use "
+            "of OSKAR, developed at the University of Oxford."
+            "</blockquote>", this);
     ack2->setTextFormat(Qt::RichText);
     vLayoutAtt->addWidget(ack2);
 

@@ -40,7 +40,7 @@ TEST(get_memory_usage, test)
     size_t size = 1000ul*1024ul*1024ul; /* Allocate 1GB of memory */
     float* mem = (float*)malloc(size);
     memset((void*)mem, 1, size);
-    printf("** Allocated %li MB ** \n", size/(1024*1024));
+    printf("** Allocated %lu MB ** \n", (unsigned long) (size/(1024*1024)));
     oskar_print_memory_info();
     free(mem);
     printf("** Released memory **\n");

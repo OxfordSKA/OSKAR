@@ -42,7 +42,7 @@ static void oskar_settings_log_private(const oskar::SettingsTree* s,
     {
         const char* label = node->label();
         const char* value = node->value();
-        const int len = strlen(value);
+        const int len = (const int) strlen(value);
         if (len == 0)
             oskar_log_message(log, 'M', depth, label);
         else if (len > 35)

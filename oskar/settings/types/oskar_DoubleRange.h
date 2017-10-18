@@ -57,27 +57,26 @@ namespace oskar {
  * By default the range is initialised to a full range of allowed double
  * values (i.e. from -DBL_MAX to DBL_MAX), with a value of 0.0
  */
-
-class OSKAR_SETTINGS_EXPORT DoubleRange : public AbstractSettingsType
+class DoubleRange : public AbstractSettingsType
 {
 public:
     enum Format { AUTO, EXPONENT };
 
-    DoubleRange();
-    virtual ~DoubleRange() {}
+    OSKAR_SETTINGS_EXPORT DoubleRange();
+    OSKAR_SETTINGS_EXPORT virtual ~DoubleRange();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& s);
-    bool set_value(const std::string& s);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* s);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    double min() const { return min_; }
-    double max() const { return max_; }
-    double value() const { return value_; }
-    double default_value() const { return default_; }
+    OSKAR_SETTINGS_EXPORT double min() const;
+    OSKAR_SETTINGS_EXPORT double max() const;
+    OSKAR_SETTINGS_EXPORT double value() const;
+    OSKAR_SETTINGS_EXPORT double default_value() const;
 
-    bool operator==(const DoubleRange& other) const;
-    bool operator>(const DoubleRange& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator==(const DoubleRange& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const DoubleRange& other) const;
 
 private:
     bool from_string_(double& value, const std::string& s) const;

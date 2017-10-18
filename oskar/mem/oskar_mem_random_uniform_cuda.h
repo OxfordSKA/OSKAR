@@ -66,7 +66,7 @@ extern "C" {
  * @param[in]     counter3     User-defined counter.
  */
 OSKAR_EXPORT
-void oskar_mem_random_uniform_cuda_f(unsigned int num_elements,
+void oskar_mem_random_uniform_cuda_f(int num_elements,
         float* d_data, unsigned int seed, unsigned int counter1,
         unsigned int counter2, unsigned int counter3);
 
@@ -97,7 +97,7 @@ void oskar_mem_random_uniform_cuda_f(unsigned int num_elements,
  * @param[in]     counter3     User-defined counter.
  */
 OSKAR_EXPORT
-void oskar_mem_random_uniform_cuda_d(unsigned int num_elements,
+void oskar_mem_random_uniform_cuda_d(int num_elements,
         double* d_data, unsigned int seed, unsigned int counter1,
         unsigned int counter2, unsigned int counter3);
 

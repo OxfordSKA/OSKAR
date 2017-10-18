@@ -51,23 +51,22 @@ namespace oskar {
  * Initialised with a CSV list of strings which are to be the set of allowed
  * options.
  */
-
-class OSKAR_SETTINGS_EXPORT OptionList : public AbstractSettingsType
+class OptionList : public AbstractSettingsType
 {
 public:
-    OptionList() {}
-    virtual ~OptionList() {}
+    OSKAR_SETTINGS_EXPORT OptionList();
+    OSKAR_SETTINGS_EXPORT  virtual ~OptionList();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& s);
-    bool set_value(const std::string& s);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* s);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    int size() const;
-    const char* option(int i) const;
+    OSKAR_SETTINGS_EXPORT int size() const;
+    OSKAR_SETTINGS_EXPORT const char* option(int i) const;
 
-    bool operator==(const OptionList& other) const;
-    bool operator>(const OptionList&) const { return false; }
+    OSKAR_SETTINGS_EXPORT bool operator==(const OptionList& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const OptionList&) const;
 
 private:
     bool from_string_(std::string& value, const std::string& s) const;

@@ -44,10 +44,14 @@ namespace oskar {
 
 DoubleRange::DoubleRange()
 {
-    init(string());
+    init("");
 }
 
-bool DoubleRange::init(const string& s)
+DoubleRange::~DoubleRange()
+{
+}
+
+bool DoubleRange::init(const char* s)
 {
     min_   = -DBL_MAX;
     max_   =  DBL_MAX;
@@ -90,10 +94,11 @@ bool DoubleRange::init(const string& s)
     return ok;
 }
 
-bool DoubleRange::set_default(const string& s)
+bool DoubleRange::set_default(const char* s)
 {
-    format_ = (s.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
-    bool ok = from_string_(default_, s);
+    string v(s);
+    format_ = (v.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+    bool ok = from_string_(default_, v);
     str_default_ = oskar_settings_utility_double_to_string_2(default_,
             (format_ == AUTO ? 'g' : 'e'));
     if (ok)
@@ -101,10 +106,11 @@ bool DoubleRange::set_default(const string& s)
     return ok;
 }
 
-bool DoubleRange::set_value(const string& s)
+bool DoubleRange::set_value(const char* s)
 {
-    format_ = (s.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
-    bool ok = from_string_(value_, s);
+    string v(s);
+    format_ = (v.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+    bool ok = from_string_(value_, v);
     str_value_ = oskar_settings_utility_double_to_string_2(value_,
             (format_ == AUTO ? 'g' : 'e'));
     return ok;
@@ -114,6 +120,26 @@ bool DoubleRange::is_default() const
 {
     if (fabs(default_ - value_) < DBL_EPSILON) return true;
     else return false;
+}
+
+double DoubleRange::min() const
+{
+    return min_;
+}
+
+double DoubleRange::max() const
+{
+    return max_;
+}
+
+double DoubleRange::value() const
+{
+    return value_;
+}
+
+double DoubleRange::default_value() const
+{
+    return default_;
 }
 
 bool DoubleRange::from_string_(double& value, const string& s) const

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #include <mem/oskar_mem.h>
 #include <telescope/oskar_telescope.h>
 #include <utility/oskar_timer.h>
-#include <utility/oskar_mutex.h>
+#include <utility/oskar_thread.h>
 
 #include <fitsio.h>
 #include <stdio.h>
@@ -104,6 +104,8 @@ struct oskar_BeamPattern
 
     /* State. */
     oskar_Mutex* mutex;
+    oskar_Barrier* barrier;
+    int i_global, status;
 
     /* Input data. */
     oskar_Mem *x, *y, *z;

@@ -84,7 +84,7 @@ int oskar_getline(char** lineptr, size_t* n, FILE* stream)
     /* Return the number of characters read, or EOF as appropriate. */
     if (c == EOF && size == 0)
         return OSKAR_ERR_EOF;
-    return size;
+    return (int) size;
 }
 
 #ifdef __cplusplus

@@ -38,9 +38,9 @@ macro(process_import_nodes FILENAME)
                 string(REGEX MATCH "(<s.*s>)" import_node_ "${new_xml_}")
                 # Create an import node string by prefixing with a comment
                 set(import_node_ "
-<!-- START IMPORT [iter:${iter},import:${iIn} __${import_name_}__XML] -->
+<!-- BEGIN [${import_name_} iter:${iter},import:${iIn}] -->
 ${import_node_}
-<!-- END IMPORT   [iter:${iter},import:${iIn} __${import_name_}__XML] -->
+<!-- END [${import_name_}] -->
 ")
 
                 # Update the xml_ string by replacing the import node.
@@ -66,15 +66,15 @@ ${import_node_}
     #message(STATUS "Writing combined settings XML file: ${xml_file}")
     file(WRITE ${xml_file} "${xml_}")
 
-    # Write a C header with the combined xml as a string
+    # Write a C header with the combined XML as a string
     get_filename_component(name_ ${FILENAME} NAME_WE)
     set(xml_file ${CMAKE_CURRENT_BINARY_DIR}/${name_}_xml_all.h)
     string(REPLACE "\"" "\\\"" xml_h_ "${xml_}")
-    string(REPLACE "\n" " \\\n" xml_h_ "${xml_h_}")
+    string(REPLACE "\n" "\"\n\"\\n" xml_h_ "${xml_h_}")
     set(xml_h_
 "
-#define ${name_}_XML_STR \\
-\"${xml_h_}\"
+static const char xml[] =
+\"${xml_h_}\";
 ")
     #message(STATUS "Writing settings XML header: ${xml_file}")
     file(WRITE ${xml_file} "${xml_h_}")

@@ -587,6 +587,21 @@ void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
 
 /**
  * @brief
+ * Sets the number of compute devices used by the imager.
+ *
+ * @details
+ * Sets the number of compute devices used by the imager, either CPU cores
+ * or GPU cards.
+ * Currently this is only used by the DFT imager.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      Number of compute devices to use.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_num_devices(oskar_Imager* h, int value);
+
+/**
+ * @brief
  * Sets the root path of output images.
  *
  * @details

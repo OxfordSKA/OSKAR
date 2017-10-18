@@ -160,7 +160,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
             ra = oskar_mem_create(type, OSKAR_CPU, 0, status);
             dec = oskar_mem_create(type, OSKAR_CPU, 0, status);
             load_coords(ra, dec, h->sky_model_file, status);
-            num_points = oskar_mem_length(ra);
+            num_points = (int) oskar_mem_length(ra);
             oskar_mem_realloc(h->x, num_points, status);
             oskar_mem_realloc(h->y, num_points, status);
             oskar_mem_realloc(h->z, num_points, status);
@@ -228,7 +228,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
     }
 
     /* Set the number of pixels. */
-    h->num_pixels = oskar_mem_length(h->x);
+    h->num_pixels = (int) oskar_mem_length(h->x);
 }
 
 static void load_coords(oskar_Mem* lon, oskar_Mem* lat,

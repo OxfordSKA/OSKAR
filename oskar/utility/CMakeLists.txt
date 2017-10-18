@@ -10,8 +10,9 @@ set(utility_SRC
     src/oskar_file_exists.c
     src/oskar_get_error_string.c
     src/oskar_get_memory_usage.c
+    src/oskar_get_num_procs.c
     src/oskar_getline.c
-    src/oskar_mutex.c
+    src/oskar_thread.c
     src/oskar_scan_binary_file.c
     src/oskar_string_to_array.c
     src/oskar_timer.c

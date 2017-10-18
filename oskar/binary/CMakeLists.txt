@@ -1,7 +1,10 @@
 #! CMake initialisation.
 cmake_minimum_required(VERSION 3.1)
 if (POLICY CMP0045)
-    cmake_policy(SET CMP0045 OLD)
+    cmake_policy(SET CMP0045 NEW)
+endif()
+if (POLICY CMP0068)
+    cmake_policy(SET CMP0068 OLD)
 endif()
 
 #! Declare the CMake project.
@@ -36,7 +39,7 @@ if (STANDALONE_BUILD)
 
     #! Compiler options for standalone mode.
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-    if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    if ("${CMAKE_C_COMPILER_ID}" MATCHES ".*Clang.*" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-show-option")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wextra")
@@ -56,13 +59,15 @@ endif(STANDALONE_BUILD)
 
 #! Declare build and install targets for the library.
 file(GLOB ${libname}_SRC src/*.c)
-add_library(${libname} STATIC ${${libname}_SRC})
+add_library(${libname} ${${libname}_SRC})
 set_target_properties(${libname} PROPERTIES
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-    INSTALL_RPATH_USE_LINK_PATH TRUE
     SOVERSION ${OSKAR_BINARY_VERSION}
     VERSION ${OSKAR_BINARY_VERSION})
-install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+install(TARGETS ${libname}
+    ARCHIVE DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
+    LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
+    RUNTIME DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime
+)
 
 #! Add unit tests / examples.
 add_subdirectory(test)

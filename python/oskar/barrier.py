@@ -39,16 +39,25 @@ from threading import Condition
 class Barrier:
     def __init__(self, num_threads):
         self.num_threads = num_threads
-        self.num_remaining = num_threads
+        self.count = num_threads
+        self.iter = 0
         self.cond = Condition()
 
     def wait(self):
         self.cond.acquire()
-        self.num_remaining -= 1
-        if self.num_remaining > 0:
-            # Release lock and block this thread until notified.
-            self.cond.wait(None)
-        else:
-            self.num_remaining = self.num_threads
+        i = self.iter
+        self.count -= 1
+        if self.count == 0:
+            self.iter += 1
+            self.count = self.num_threads
             self.cond.notify_all()
+            self.cond.release()
+            return True
+        # Release lock and block this thread until notified/woken.
+        # Allow for spurious wake-ups.
+        while 1:
+            self.cond.wait(None)
+            if i != self.iter:
+                break
         self.cond.release()
+        return False

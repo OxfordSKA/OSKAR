@@ -49,29 +49,26 @@ namespace oskar {
  *
  * @details
  * Set with a CSV list.
- * Returns a CSV string list.
+ * Returns a CSV integer list.
  */
-
-class OSKAR_SETTINGS_EXPORT IntList : public AbstractSettingsType
+class IntList : public AbstractSettingsType
 {
 public:
-    IntList();
-    virtual ~IntList() {}
+    OSKAR_SETTINGS_EXPORT IntList();
+    OSKAR_SETTINGS_EXPORT virtual ~IntList();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    int size() const;
-    const int* values() const;
+    OSKAR_SETTINGS_EXPORT int size() const;
+    OSKAR_SETTINGS_EXPORT const int* values() const;
 
-    bool operator==(const IntList& other) const;
-    bool operator>(const IntList&) const { return false; }
+    OSKAR_SETTINGS_EXPORT bool operator==(const IntList& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const IntList&) const;
 
 private:
-    bool from_string_(const std::string& s, std::vector<int>& values) const;
-    std::string to_string_(const std::vector<int>& values) const;
     std::vector<int> default_, value_;
     char delimiter_;
 };

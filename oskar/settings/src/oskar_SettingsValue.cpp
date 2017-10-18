@@ -142,14 +142,14 @@ bool SettingsValue::init(const char* type, const char* param)
     create_(id);
     AbstractSettingsType* t = get_(id);
     string par = param ? string(param) : string();
-    return t ? t->init(par) : false;
+    return t ? t->init(par.c_str()) : false;
 }
 
 bool SettingsValue::set_default(const char* value)
 {
     AbstractSettingsType* t = get_(type());
     string val = value ? string(value) : string();
-    return t ? t->set_default(val) : false;
+    return t ? t->set_default(val.c_str()) : false;
 }
 
 const char* SettingsValue::get_value() const
@@ -171,7 +171,7 @@ bool SettingsValue::set_value(const char* value)
 {
     AbstractSettingsType* t = get_(type());
     string val = value ? string(value) : string();
-    return t ? t->set_value(val) : false;
+    return t ? t->set_value(val.c_str()) : false;
 }
 
 bool SettingsValue::is_default() const

@@ -66,7 +66,7 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
         else if (mem->location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_mem_scale_real_cuda_f(num_elements, (float)value,
+            oskar_mem_scale_real_cuda_f((int)num_elements, (float)value,
                     (float*)(mem->data));
             oskar_device_check_error(status);
 #else
@@ -95,7 +95,7 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
         else if (mem->location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_mem_scale_real_cuda_d(num_elements, value,
+            oskar_mem_scale_real_cuda_d((int)num_elements, value,
                     (double*)(mem->data));
             oskar_device_check_error(status);
 #else

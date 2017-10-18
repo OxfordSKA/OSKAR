@@ -28,6 +28,7 @@
 
 #include "gui/oskar_AppLocation.h"
 
+#include <QtCore/QDir>
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QGridLayout>
@@ -69,7 +70,7 @@ void AppLocation::browseClicked()
 {
     QString name = QFileDialog::getExistingDirectory(this, "OSKAR Applications");
     if (!name.isEmpty())
-        setDir(name);
+        setDir(QDir::toNativeSeparators(name));
 }
 
 } /* namespace oskar */

@@ -89,7 +89,7 @@ TEST(crc, crc32_corrupted)
     unsigned int* d = (unsigned int*) data;
     for (size_t i = 0; i < length; ++i)
     {
-        d[i] = i;
+        d[i] = (unsigned int) i;
     }
 
     // Get CRC of original data.

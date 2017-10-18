@@ -34,14 +34,22 @@
 
 namespace oskar {
 
-bool InputFile::set_default(const std::string& value)
+InputFile::InputFile() : String()
+{
+}
+
+InputFile::~InputFile()
+{
+}
+
+bool InputFile::set_default(const char* value)
 {
     str_default_ = oskar_settings_utility_string_trim(value);
     str_value_ = str_default_;
     return true;
 }
 
-bool InputFile::set_value(const std::string& value)
+bool InputFile::set_value(const char* value)
 {
     str_value_ = oskar_settings_utility_string_trim(value);
     return true;

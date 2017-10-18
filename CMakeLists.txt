@@ -2,18 +2,21 @@
 # Top level CMakeLists.txt
 #
 
-# === Set the project name and specify the required CMAKE version.
+# === Set the project name and specify the required CMake version.
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 if (APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8" CACHE STRING "Minimum macOS version")
 endif()
 
-# Set various policies to get old behviour with cmake 3.x
+# Set policies to avoid CMake warnings.
 if (POLICY CMP0042)
-    cmake_policy(SET CMP0042 OLD)
+    cmake_policy(SET CMP0042 NEW)
 endif()
 if (POLICY CMP0045)
-    cmake_policy(SET CMP0045 OLD)
+    cmake_policy(SET CMP0045 NEW)
+endif()
+if (POLICY CMP0068)
+    cmake_policy(SET CMP0068 OLD)
 endif()
 project(OSKAR CXX C)
 
@@ -22,7 +25,7 @@ set(OSKAR_VERSION_ID "0x020700")
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 7)
 set(OSKAR_VERSION_PATCH 0)
-set(OSKAR_VERSION_SUFFIX "RC")
+set(OSKAR_VERSION_SUFFIX "RC3")
 
 # === Add local CMake module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake)
@@ -70,16 +73,30 @@ endif()
 if (FIND_CUDA OR NOT DEFINED FIND_CUDA)
     find_package(CUDA 5.5)
 endif()
-if (FIND_OPENCL OR NOT DEFINED FIND_OPENCL)
+if (FIND_OPENCL)
+    if (NOT APPLE)
+        set(OpenCL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern)
+    endif()
+    if (MSVC)
+        file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/extern)
+        file(TO_NATIVE_PATH ${PROJECT_SOURCE_DIR}/extern/CL/OpenCL.def def)
+        file(TO_NATIVE_PATH ${PROJECT_BINARY_DIR}/extern/OpenCL.lib lib)
+        execute_process(COMMAND lib /def:${def} /OUT:${lib})
+        set(OpenCL_LIBRARY ${lib})
+    endif()
     find_package(OpenCL QUIET)
 endif()
 find_package(CasaCore)
-find_package(OpenMP)
+find_package(OpenMP QUIET)
+find_package(Threads REQUIRED)
 if (CUDA_FOUND)
     add_definitions(-DOSKAR_HAVE_CUDA)
 endif()
 if (OpenCL_FOUND)
     add_definitions(-DOSKAR_HAVE_OPENCL)
+    if (NOT APPLE)
+        include_directories(${OpenCL_INCLUDE_DIRS})
+    endif()
 endif()
 if (NOT CASACORE_FOUND)
     add_definitions(-DOSKAR_NO_MS)
@@ -105,3 +122,7 @@ configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_cleanup.sh
 
 # === Include packaging script.
 include(oskar_packaging)
+
+# === Must be added last to run after all other install commands.
+add_subdirectory(${PROJECT_SOURCE_DIR}/cmake/post_install)
+

@@ -32,6 +32,10 @@
 #include "ms/oskar_measurement_set.h"
 #include "oskar_version.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,8 +45,9 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
 {
     const oskar_Mem *x_metres, *y_metres, *z_metres;
     double freq_start_hz, freq_inc_hz, ra_rad, dec_rad;
-    int amp_type, autocorr, crosscorr, dir_exists;
+    int amp_type, autocorr, crosscorr, dir_exists, len;
     unsigned int num_stations, num_pols, num_channels;
+    char *output_path = 0;
     oskar_MeasurementSet* ms = 0;
 
     /* Check if safe to proceed. */
@@ -71,19 +76,30 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     if (! (freq_inc_hz > 0.0))
         freq_inc_hz = 1.0;
 
+    /* Check and add '.MS' file extension if necessary. */
+    len = (int) strlen(ms_path);
+    output_path = (char*) calloc(6 + len, 1);
+    if ((len >= 3) && (
+            !strcmp(&(ms_path[len-3]), ".MS") ||
+            !strcmp(&(ms_path[len-3]), ".ms") ))
+        strcpy(output_path, ms_path);
+    else
+        sprintf(output_path, "%s.MS", ms_path);
+
     /* If directory doesn't exist, or if overwrite flag is set,
      * create a new one. */
-    dir_exists = oskar_dir_exists(ms_path);
+    dir_exists = oskar_dir_exists(output_path);
     if (!dir_exists || overwrite)
     {
         /* Remove any existing directory. */
         if (dir_exists && overwrite)
-            oskar_dir_remove(ms_path);
+            oskar_dir_remove(output_path);
 
         /* Create the Measurement Set. */
-        ms = oskar_ms_create(ms_path, "OSKAR " OSKAR_VERSION_STR,
+        ms = oskar_ms_create(output_path, "OSKAR " OSKAR_VERSION_STR,
                 num_stations, num_channels, num_pols,
                 freq_start_hz, freq_inc_hz, autocorr, crosscorr);
+        free(output_path);
         if (!ms)
         {
             *status = OSKAR_ERR_FILE_IO;
@@ -119,7 +135,8 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     else
     {
         /* Open the Measurement Set. */
-        ms = oskar_ms_open(ms_path);
+        ms = oskar_ms_open(output_path);
+        free(output_path);
         if (!ms)
         {
             *status = OSKAR_ERR_FILE_IO;

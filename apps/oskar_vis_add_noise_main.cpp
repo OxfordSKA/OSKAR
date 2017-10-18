@@ -67,7 +67,7 @@ int main(int argc, char** argv)
     string settings;
     opt.get("-s")->getString(settings);
     vector<string> vis_filename_in = opt.get_input_files();
-    int num_files = vis_filename_in.size();
+    int num_files = (int)vis_filename_in.size();
     bool verbose = opt.is_set("-v") ? true : false;
     bool quiet   = opt.is_set("-q") ? true : false;
 

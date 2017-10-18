@@ -40,7 +40,13 @@ void oskar_imager_rotate_vis(const oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu_in, const oskar_Mem* vv_in, const oskar_Mem* ww_in,
         oskar_Mem* amps)
 {
+#ifdef OSKAR_OS_WIN
+    int i;
+    const int num = (const int) num_vis;
+#else
     size_t i;
+    const size_t num = num_vis;
+#endif
     const double delta_l = h->delta_l;
     const double delta_m = h->delta_m;
     const double delta_n = h->delta_n;
@@ -56,7 +62,7 @@ void oskar_imager_rotate_vis(const oskar_Imager* h, size_t num_vis,
         a = (double2*)oskar_mem_void(amps);
 
 #pragma omp parallel for private(i)
-        for (i = 0; i < num_vis; ++i)
+        for (i = 0; i < num; ++i)
         {
             double arg, phase_re, phase_im, re, im;
             arg = twopi * (u[i] * delta_l + v[i] * delta_m + w[i] * delta_n);
@@ -78,7 +84,7 @@ void oskar_imager_rotate_vis(const oskar_Imager* h, size_t num_vis,
         a = (float2*)oskar_mem_void(amps);
 
 #pragma omp parallel for private(i)
-        for (i = 0; i < num_vis; ++i)
+        for (i = 0; i < num; ++i)
         {
             double arg, phase_re, phase_im, re, im;
             arg = twopi * (u[i] * delta_l + v[i] * delta_m + w[i] * delta_n);

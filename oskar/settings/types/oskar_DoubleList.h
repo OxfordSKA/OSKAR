@@ -49,29 +49,26 @@ namespace oskar {
  *
  * @details
  * Set with a CSV list.
- * Returns a CSV string list.
+ * Returns a CSV double list.
  */
-
-class OSKAR_SETTINGS_EXPORT DoubleList : public AbstractSettingsType
+class DoubleList : public AbstractSettingsType
 {
 public:
-    DoubleList();
-    virtual ~DoubleList() {}
+    OSKAR_SETTINGS_EXPORT DoubleList();
+    OSKAR_SETTINGS_EXPORT virtual ~DoubleList();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& s);
-    bool set_value(const std::string& s);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* s);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    int size() const;
-    const double* values() const;
+    OSKAR_SETTINGS_EXPORT int size() const;
+    OSKAR_SETTINGS_EXPORT const double* values() const;
 
-    bool operator==(const DoubleList& other) const;
-    bool operator>(const DoubleList&) const { return false; }
+    OSKAR_SETTINGS_EXPORT bool operator==(const DoubleList& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const DoubleList&) const;
 
 private:
-    bool from_string_(std::vector<double>& values, const std::string& s) const;
-    std::string to_string_(const std::vector<double>& values) const;
     std::vector<double> default_, value_;
     char delimiter_;
 };

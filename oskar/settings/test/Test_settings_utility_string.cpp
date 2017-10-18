@@ -66,6 +66,14 @@ TEST(oskar_settings_utility, string_get_type_params)
         ASSERT_STREQ("10,20", p[1].c_str());
         ASSERT_STREQ("3",     p[2].c_str());
     }
+    {
+        s = "\n2,\"10,20\",\n3\n";
+        p = oskar_settings_utility_string_get_type_params(s);
+        ASSERT_EQ(3u, p.size());
+        ASSERT_STREQ("2",     p[0].c_str());
+        ASSERT_STREQ("10,20", p[1].c_str());
+        ASSERT_STREQ("3",     p[2].c_str());
+    }
 }
 
 
@@ -94,20 +102,9 @@ TEST(oskar_settings_utility, string_to_int)
         ASSERT_TRUE(ok);
     }
     {
-        s = "2147483648";
-        ASSERT_EQ(0, oskar_settings_utility_string_to_int(s, &ok));
-        ASSERT_FALSE(ok);
-    }
-
-    {
         s = "-2147483647";
         ASSERT_EQ(-INT_MAX, oskar_settings_utility_string_to_int(s, &ok));
         ASSERT_TRUE(ok);
-    }
-    {
-        s = "-2147483648";
-        ASSERT_EQ(0, oskar_settings_utility_string_to_int(s, &ok));
-        ASSERT_FALSE(ok);
     }
     {
         s = "   1  ";

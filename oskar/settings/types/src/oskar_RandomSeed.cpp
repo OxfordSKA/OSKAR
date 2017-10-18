@@ -34,51 +34,7 @@
 
 namespace oskar {
 
-RandomSeed::RandomSeed()
-{
-    (void) init(std::string());
-}
-
-bool RandomSeed::init(const std::string& /*s*/)
-{
-    default_ = 1;
-    value_ = 1;
-    str_default_ = "1";
-    str_value_ = "1";
-    return true;
-}
-
-bool RandomSeed::set_default(const std::string& s)
-{
-    bool ok = from_string(s, default_);
-    str_default_ = to_string(default_);
-    if (ok)
-        set_value(s);
-    else
-        init(std::string());
-    return ok;
-}
-
-bool RandomSeed::set_value(const std::string& s)
-{
-    bool ok = from_string(s, value_);
-    str_value_ = to_string(value_);
-    return ok;
-}
-
-bool RandomSeed::is_default() const { return value_ == default_; }
-
-bool RandomSeed::operator==(const RandomSeed& other) const
-{
-    return value_ == other.value_;
-}
-
-bool RandomSeed::operator>(const RandomSeed& other) const
-{
-    return value_ > other.value_;
-}
-
-bool RandomSeed::from_string(const std::string& s, int& value)
+static bool from_string(const char* s, int& value)
 {
     if (oskar_settings_utility_string_starts_with("TIME", s, false)) {
         value = -1;
@@ -92,10 +48,68 @@ bool RandomSeed::from_string(const std::string& s, int& value)
     return true;
 }
 
-std::string RandomSeed::to_string(int value)
+static std::string to_string(int value)
 {
     if (value < 1) return "time";
     else return oskar_settings_utility_int_to_string(value);
+}
+
+RandomSeed::RandomSeed()
+{
+    (void) init(0);
+}
+
+RandomSeed::~RandomSeed()
+{
+}
+
+bool RandomSeed::init(const char* /*s*/)
+{
+    default_ = 1;
+    value_ = 1;
+    str_default_ = "1";
+    str_value_ = "1";
+    return true;
+}
+
+bool RandomSeed::set_default(const char* s)
+{
+    bool ok = from_string(s, default_);
+    str_default_ = to_string(default_);
+    if (ok)
+        set_value(s);
+    else
+        init(0);
+    return ok;
+}
+
+bool RandomSeed::set_value(const char* s)
+{
+    bool ok = from_string(s, value_);
+    str_value_ = to_string(value_);
+    return ok;
+}
+
+bool RandomSeed::is_default() const { return value_ == default_; }
+
+int RandomSeed::value() const
+{
+    return value_;
+}
+
+int RandomSeed::default_value() const
+{
+    return default_;
+}
+
+bool RandomSeed::operator==(const RandomSeed& other) const
+{
+    return value_ == other.value_;
+}
+
+bool RandomSeed::operator>(const RandomSeed& other) const
+{
+    return value_ > other.value_;
 }
 
 } // namespace oskar

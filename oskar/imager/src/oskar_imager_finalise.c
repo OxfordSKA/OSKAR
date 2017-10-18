@@ -120,7 +120,6 @@ void oskar_imager_finalise(oskar_Imager* h,
     /* Record time taken. */
     if (h->log)
     {
-        int i;
         size_t j, log_size = 0, length = 0;
         char* log_data;
         oskar_log_set_value_width(h->log, 25);
@@ -220,22 +219,29 @@ void oskar_imager_finalise_plane(oskar_Imager* h,
 
     /* Call FFT. */
 #ifdef OSKAR_HAVE_CUDA
-    if (h->fft_on_gpu)
+    if (h->fft_on_gpu && h->num_gpus > 0)
     {
         size_t work_size = 0;
-        DeviceData* d = &h->d[0];
-        oskar_device_set(h->cuda_device_ids[0], status);
+        oskar_Mem *plane_gpu = 0, *plane_ptr = 0;
+        oskar_device_set(h->gpu_ids[0], status);
         if (cufftGetSize(h->cufft_plan, &work_size) != CUFFT_SUCCESS)
             cufftPlan2d(&h->cufft_plan, size, size,
                     (h->imager_prec == OSKAR_DOUBLE) ? CUFFT_Z2Z : CUFFT_C2C);
-        oskar_mem_copy(d->plane_gpu, plane, status);
+        plane_ptr = plane;
+        if (oskar_mem_location(plane) != OSKAR_GPU)
+        {
+            plane_gpu = oskar_mem_create_copy(plane, OSKAR_GPU, status);
+            plane_ptr = plane_gpu;
+        }
         if (h->imager_prec == OSKAR_DOUBLE)
-            cufftExecZ2Z(h->cufft_plan, oskar_mem_void(d->plane_gpu),
-                    oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
+            cufftExecZ2Z(h->cufft_plan, oskar_mem_void(plane_ptr),
+                    oskar_mem_void(plane_ptr), CUFFT_FORWARD);
         else
-            cufftExecC2C(h->cufft_plan, oskar_mem_void(d->plane_gpu),
-                    oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
-        oskar_mem_copy(plane, d->plane_gpu, status);
+            cufftExecC2C(h->cufft_plan, oskar_mem_void(plane_ptr),
+                    oskar_mem_void(plane_ptr), CUFFT_FORWARD);
+        if (oskar_mem_location(plane) != OSKAR_GPU)
+            oskar_mem_copy(plane, plane_ptr, status);
+        oskar_mem_free(plane_gpu, status);
     }
     else
 #endif

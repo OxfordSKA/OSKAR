@@ -99,7 +99,7 @@ std::vector<std::string> oskar_settings_utility_string_get_type_params(
     while (getline(ss_all, p, '"')) {
         std::stringstream ss(p);
         while (getline(ss, p, ',')) {
-            p = oskar_settings_utility_string_trim(p);
+            p = oskar_settings_utility_string_trim(p, " \t\r\n");
             if (!p.empty()) params.push_back(p);
         }
         if (getline(ss_all, p, '"')) {
@@ -132,10 +132,11 @@ int oskar_settings_utility_string_to_int(const std::string& s, bool *ok)
     }
 
     // Value not in the integer range, set to 0 set fail flag.
-    if (val > INT_MAX || val < -INT_MAX) {
-        val = 0L;
-        if (ok) *ok = false;
-    }
+    // NOTE: Long int is not a 64-bit integer type - this is not reliable!
+//    if (val > INT_MAX || val < -INT_MAX) {
+//        val = 0L;
+//        if (ok) *ok = false;
+//    }
 
     return static_cast<int>(val);
 }
@@ -224,7 +225,7 @@ static std::string longlongToString(long long int l, int precision,
     bool negative = l < 0;
     std::string num_str;
     num_str = lltoa(l);
-    for (int i = num_str.length(); i < precision; ++i)
+    for (int i = (int) num_str.length(); i < precision; ++i)
         num_str.insert(0, "0");
     if (negative)
         num_str.insert(0, "-");
@@ -245,23 +246,23 @@ static std::string decimalForm(std::string& digits, int decpt,
             digits.insert(0, "0");
         decpt = 0;
     }
-    else if (decpt > static_cast<int>(digits.length())) {
-        for (int i = digits.length(); i < decpt; ++i)
+    else if (decpt > (int) digits.length()) {
+        for (int i = (int) digits.length(); i < decpt; ++i)
             digits.append("0");
     }
 
     if (pm == PMDecimalDigits) {
-        unsigned int decimal_digits = digits.length() - decpt;
+        unsigned int decimal_digits = (unsigned int) digits.length() - decpt;
         for (unsigned int i = decimal_digits; i < precision; ++i)
             digits.append("0");
     }
     else if (pm == PMSignificaintDigits) {
-        for (unsigned int i = digits.length(); i < precision; ++i)
+        for (unsigned int i = (unsigned int) digits.length(); i < precision; ++i)
             digits.append("0");
     }
     else { // pm == PMChopTrailingZeros
     }
-    if (always_show_decpt || decpt << digits.length())
+    if (always_show_decpt || decpt < (int)digits.length())
         digits.insert(decpt, ".");
     if (decpt == 0)
         digits.insert(0, "0");
@@ -276,11 +277,11 @@ static std::string exponentForm(std::string& digits, int decpt,
 {
     int exp = decpt - 1;
     if (pm == PMDecimalDigits) {
-        for (unsigned i = digits.length(); i < precision + 1; ++i)
+        for (unsigned i = (unsigned) digits.length(); i < precision + 1; ++i)
             digits.append("0");
     }
     else if (pm == PMSignificaintDigits) {
-        for (unsigned i = digits.length(); i < precision; ++i)
+        for (unsigned i = (unsigned) digits.length(); i < precision; ++i)
             digits.append("0");
     }
     else {
@@ -291,7 +292,7 @@ static std::string exponentForm(std::string& digits, int decpt,
     }
     // Chop trailing 0's
     if (digits.length() > 0) {
-        int last_nonzero_idx = digits.length() - 1;
+        int last_nonzero_idx = (int) digits.length() - 1;
         while (last_nonzero_idx > 0 && digits[last_nonzero_idx] == '0') {
             --last_nonzero_idx;
         }
@@ -342,7 +343,7 @@ static std::string doubleToString(double d, int precision, DoubleForm form,
             digits = std::string(ecvt(d, pr, &decpt, &sign));
             // Chop the trailing zeros.
             if (digits.length() > 0) {
-                int last_nonzero_idx = digits.length() - 1;
+                int last_nonzero_idx = (int) digits.length() - 1;
                 while (last_nonzero_idx > 0 && digits[last_nonzero_idx] == '0') {
                     --last_nonzero_idx;
                 }
@@ -364,7 +365,7 @@ static std::string doubleToString(double d, int precision, DoubleForm form,
                                       PMDecimalDigits, always_show_decpt);
                 // Chop the trailing zeros.
                 if (num_str.length() > 0) {
-                    int last_nonzero_idx = num_str.length() - 1;
+                    int last_nonzero_idx = (int) num_str.length() - 1;
                     while (last_nonzero_idx > 0 && num_str[last_nonzero_idx] == '0') {
                         --last_nonzero_idx;
                     }

@@ -37,11 +37,11 @@ extern "C" {
 #endif
 
 void oskar_mem_random_uniform_f(
-        const unsigned int num_elements, float* data,
+        const int num_elements, float* data,
         const unsigned int seed, const unsigned int counter1,
         const unsigned int counter2, const unsigned int counter3)
 {
-    unsigned int i, i4, n1;
+    int i, i4, n1;
 
     n1 = num_elements / 4;
 #pragma omp parallel for private(i, i4)
@@ -74,11 +74,11 @@ void oskar_mem_random_uniform_f(
 }
 
 void oskar_mem_random_uniform_d(
-        const unsigned int num_elements, double* data,
+        const int num_elements, double* data,
         const unsigned int seed, const unsigned int counter1,
         const unsigned int counter2, const unsigned int counter3)
 {
-    unsigned int i, i4, n1;
+    int i, i4, n1;
 
     n1 = num_elements / 4;
 #pragma omp parallel for private(i, i4)
@@ -133,11 +133,11 @@ void oskar_mem_random_uniform(oskar_Mem* data, unsigned int seed,
     {
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
-            oskar_mem_random_uniform_cuda_f(num_elements,
+            oskar_mem_random_uniform_cuda_f((int)num_elements,
                     oskar_mem_float(data, status), seed,
                     counter1, counter2, counter3);
         else if (type == OSKAR_DOUBLE)
-            oskar_mem_random_uniform_cuda_d(num_elements,
+            oskar_mem_random_uniform_cuda_d((int)num_elements,
                     oskar_mem_double(data, status), seed,
                     counter1, counter2, counter3);
         oskar_device_check_error(status);
@@ -148,11 +148,11 @@ void oskar_mem_random_uniform(oskar_Mem* data, unsigned int seed,
     else if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
-            oskar_mem_random_uniform_f(num_elements,
+            oskar_mem_random_uniform_f((int)num_elements,
                     oskar_mem_float(data, status), seed,
                     counter1, counter2, counter3);
         else if (type == OSKAR_DOUBLE)
-            oskar_mem_random_uniform_d(num_elements,
+            oskar_mem_random_uniform_d((int)num_elements,
                     oskar_mem_double(data, status), seed,
                     counter1, counter2, counter3);
     }

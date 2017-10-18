@@ -373,8 +373,8 @@ void cmf3kb(const int lot, const int ido, const int l1, const int na,
         float *restrict cc, const int im1, const int in1, float *restrict ch,
         const int im2, const int in2, const float *restrict wa)
 {
-    static const float taur = -.5;
-    static const float taui = .866025403784439;
+    static const float taur = -.5f;
+    static const float taui = .866025403784439f;
     int i, k, m1, m2, m1d, m2s, o1, o2, o3, i1, i2, i3;
     float ci2, ci3, cr2, cr3, di2, di3, dr2, dr3, ti2, tr2;
     wa -= 1;
@@ -481,8 +481,8 @@ void cmf3kf(const int lot, const int ido, const int l1, const int na,
         float *restrict cc, const int im1, const int in1, float *restrict ch,
         const int im2, const int in2, const float *restrict wa)
 {
-    static const float taur = -.5;
-    static const float taui = -.866025403784439;
+    static const float taur = -.5f;
+    static const float taui = -.866025403784439f;
     int i, k, m1, m2, m1d, m2s, o1, o2, o3, i1, i2, i3;
     float sn, ci2, ci3, di2, di3, cr2, cr3, dr2, dr3, ti2, tr2;
     wa -= 1;
@@ -917,10 +917,10 @@ void cmf5kb(const int lot, const int ido, const int l1, const int na,
         float *restrict cc, const int im1, const int in1, float *restrict ch,
         const int im2, const int in2, const float *restrict wa)
 {
-    static const float tr11 = .3090169943749474;
-    static const float ti11 = .9510565162951536;
-    static const float tr12 = -.8090169943749474;
-    static const float ti12 = .5877852522924731;
+    static const float tr11 = .3090169943749474f;
+    static const float ti11 = .9510565162951536f;
+    static const float tr12 = -.8090169943749474f;
+    static const float ti12 = .5877852522924731f;
     int i, k, m1, m2, m1d, m2s, o1, o2, o3, o4, o5, i1, i2, i3, i4, i5;
     float ci2, ci3, ci4, ci5;
     float di3, di4, di5, di2, cr2, cr3, cr5, cr4, ti2, ti3, ti4;
@@ -1091,10 +1091,10 @@ void cmf5kf(const int lot, const int ido, const int l1, const int na,
         float *restrict cc, const int im1, const int in1, float *restrict ch,
         const int im2, const int in2, const float *restrict wa)
 {
-    static const float tr11 = .3090169943749474;
-    static const float ti11 = -.9510565162951536;
-    static const float tr12 = -.8090169943749474;
-    static const float ti12 = -.5877852522924731;
+    static const float tr11 = .3090169943749474f;
+    static const float ti11 = -.9510565162951536f;
+    static const float tr12 = -.8090169943749474f;
+    static const float ti12 = -.5877852522924731f;
     int i, k, m1, m2, m1d, m2s, o1, o2, o3, o4, o5, i1, i2, i3, i4, i5;
     float sn, ci2, ci3, ci4, ci5;
     float di3, di4, di5, di2, cr2, cr3, cr5, cr4, ti2, ti3, ti4;

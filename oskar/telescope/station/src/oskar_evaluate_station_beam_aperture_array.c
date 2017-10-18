@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,14 +29,13 @@
 #include "telescope/station/oskar_evaluate_station_beam_aperture_array.h"
 
 #include "telescope/station/oskar_evaluate_beam_horizon_direction.h"
-#include "telescope/station/oskar_evaluate_array_pattern.h"
-#include "telescope/station/oskar_evaluate_array_pattern_hierarchical.h"
 #include "telescope/station/oskar_evaluate_element_weights.h"
 #include "telescope/station/element/oskar_element_evaluate.h"
 #include "telescope/station/oskar_blank_below_horizon.h"
 #include "telescope/station/private_station_work.h"
 
 #include "math/oskar_cmath.h"
+#include "math/oskar_dftw.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -116,9 +115,10 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
 {
     double beam_x, beam_y, beam_z, wavenumber;
     oskar_Mem *weights, *weights_error, *theta, *phi, *array;
-    int num_elements;
+    int num_elements, is_3d;
 
     num_elements  = oskar_station_num_elements(s);
+    is_3d         = oskar_station_array_is_3d(s);
     weights       = work->weights;
     weights_error = work->weights_error;
     theta         = work->theta_modified;
@@ -158,8 +158,12 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                 oskar_evaluate_element_weights(weights, weights_error,
                         wavenumber, s, beam_x, beam_y, beam_z,
                         time_index, status);
-                oskar_evaluate_array_pattern(array, wavenumber, s,
-                        num_points, x, y, z, weights, status);
+                oskar_dftw(num_elements, wavenumber,
+                        oskar_station_element_true_x_enu_metres_const(s),
+                        oskar_station_element_true_y_enu_metres_const(s),
+                        oskar_station_element_true_z_enu_metres_const(s),
+                        weights, num_points, x, y, (is_3d ? z : 0), 0, array,
+                        status);
 
                 /* Normalise array response if required. */
                 if (oskar_station_normalise_array_pattern(s))
@@ -237,9 +241,13 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                     wavenumber, s, beam_x, beam_y, beam_z,
                     time_index, status);
 
-            /* Evaluate array response using "hierarchical" beamforming. */
-            oskar_evaluate_array_pattern_hierarchical(beam, wavenumber,
-                    s, num_points, x, y, z, element_block, weights, status);
+            /* Use DFT to evaluate array response. */
+            oskar_dftw(num_elements, wavenumber,
+                    oskar_station_element_true_x_enu_metres_const(s),
+                    oskar_station_element_true_y_enu_metres_const(s),
+                    oskar_station_element_true_z_enu_metres_const(s),
+                    weights, num_points, x, y, (is_3d ? z : 0),
+                    element_block, beam, status);
 
             /* Free element alias. */
             oskar_mem_free(element, status);
@@ -313,8 +321,12 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         /* Generate beamforming weights and form beam from child stations. */
         oskar_evaluate_element_weights(weights, weights_error, wavenumber,
                 s, beam_x, beam_y, beam_z, time_index, status);
-        oskar_evaluate_array_pattern_hierarchical(beam, wavenumber, s,
-                num_points, x, y, z, signal, weights, status);
+        oskar_dftw(num_elements, wavenumber,
+                oskar_station_element_true_x_enu_metres_const(s),
+                oskar_station_element_true_y_enu_metres_const(s),
+                oskar_station_element_true_z_enu_metres_const(s),
+                weights, num_points, x, y, (is_3d ? z : 0), signal, beam,
+                status);
 
         /* Normalise array response if required. */
         if (oskar_station_normalise_array_pattern(s))

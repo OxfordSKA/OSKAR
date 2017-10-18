@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     opt.get("-o")->getString(out_path);
     vector<string> in_files = opt.get_input_files(2);
     bool verbose = opt.is_set("-q") ? false : true;
-    int num_in_files = in_files.size();
+    int num_in_files = (int)in_files.size();
 
     // Print if verbose.
     if (verbose)

@@ -54,6 +54,11 @@ const char* SettingsDependency::value() const
     return value_.c_str();
 }
 
+SettingsDependency::Logic SettingsDependency::logic() const
+{
+    return logic_;
+}
+
 bool SettingsDependency::is_valid() const
 {
     if (logic_ == UNDEF || key_.empty() || value_.empty())

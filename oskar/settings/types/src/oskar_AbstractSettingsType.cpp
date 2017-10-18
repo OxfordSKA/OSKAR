@@ -35,6 +35,14 @@ using namespace std;
 
 namespace oskar {
 
+AbstractSettingsType::AbstractSettingsType()
+{
+}
+
+AbstractSettingsType::~AbstractSettingsType()
+{
+}
+
 const char* AbstractSettingsType::get_default() const
 {
     return str_default_.c_str();

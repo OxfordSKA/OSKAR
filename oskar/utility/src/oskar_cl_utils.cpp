@@ -33,6 +33,7 @@
 
 #include "utility/oskar_cl_registrar.h"
 #include "utility/oskar_cl_utils.h"
+#include "utility/oskar_thread.h"
 
 using std::map;
 using std::string;
@@ -135,6 +136,28 @@ CLGlobal* oskar_cl_ = 0;
 // Global pointers to all thread-local objects.
 static vector<oskar::CLGlobal*> oskar_cl_all_;
 
+struct LocalMutex
+{
+    oskar_Mutex* m;
+    LocalMutex()
+    {
+        this->m = oskar_mutex_create();
+    }
+    ~LocalMutex()
+    {
+        oskar_mutex_free(this->m);
+    }
+    void lock()
+    {
+        oskar_mutex_lock(this->m);
+    }
+    void unlock()
+    {
+        oskar_mutex_unlock(this->m);
+    }
+};
+static LocalMutex mutex;
+
 void oskar_cl_ensure(int no_init)
 {
     if (!oskar_cl_)
@@ -142,10 +165,9 @@ void oskar_cl_ensure(int no_init)
         // Allocate structure and store a pointer to it so it can be
         // accessed by oskar_cl_free().
         oskar_cl_ = new oskar::CLGlobal();
-#pragma omp critical
-        {
-            oskar_cl_all_.push_back(oskar_cl_);
-        }
+        mutex.lock();
+        oskar_cl_all_.push_back(oskar_cl_);
+        mutex.unlock();
     }
     if (oskar_cl_->device.size() == 0 && !no_init)
         oskar_cl_init(NULL, NULL);
@@ -153,12 +175,11 @@ void oskar_cl_ensure(int no_init)
 
 void oskar_cl_free(void)
 {
-#pragma omp critical
-    {
-        for (size_t i = 0; i < oskar_cl_all_.size(); ++i)
-            delete oskar_cl_all_[i];
-        oskar_cl_all_.clear();
-    }
+    mutex.lock();
+    for (size_t i = 0; i < oskar_cl_all_.size(); ++i)
+        delete oskar_cl_all_[i];
+    oskar_cl_all_.clear();
+    mutex.unlock();
 }
 
 void oskar_cl_init(const char* device_type, const char* device_vendor)
@@ -210,10 +231,9 @@ void oskar_cl_init(const char* device_type, const char* device_vendor)
 
     // Get the OpenCL platform IDs.
     // The first OpenCL call doesn't seem to be thread-safe.
-#pragma omp critical
-    {
-        error = clGetPlatformIDs(0, 0, &num_platforms);
-    }
+    mutex.lock();
+    error = clGetPlatformIDs(0, 0, &num_platforms);
+    mutex.unlock();
     if (num_platforms == 0)
     {
         fprintf(stderr, "No OpenCL platforms found.\n");
@@ -336,7 +356,7 @@ void oskar_cl_init(const char* device_type, const char* device_vendor)
             for (size_t k = 0; k < sources.size(); ++k)
                 source_ptr.push_back(sources[k].c_str());
             device->program = clCreateProgramWithSource(device->context,
-                    source_ptr.size(), &source_ptr[0], 0, &error);
+                    (cl_uint) source_ptr.size(), &source_ptr[0], 0, &error);
             if (error != CL_SUCCESS)
             {
                 fprintf(stderr,
@@ -467,7 +487,7 @@ unsigned int oskar_cl_get_device(void)
 unsigned int oskar_cl_num_devices(void)
 {
     oskar_cl_ensure(0);
-    return oskar_cl_->device.size();
+    return (unsigned int) oskar_cl_->device.size();
 }
 
 void oskar_cl_set_device(unsigned int device, int* status)

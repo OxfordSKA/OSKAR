@@ -33,6 +33,7 @@
 #include <fitsio.h>
 #include <mem/oskar_mem.h>
 #include <log/oskar_log.h>
+#include <utility/oskar_thread.h>
 #include <utility/oskar_timer.h>
 
 #ifdef __cplusplus
@@ -42,9 +43,8 @@ extern "C" {
 /* Memory allocated per GPU. */
 struct DeviceData
 {
-    oskar_Mem *l, *m, *n;
-    oskar_Mem *uu, *vv, *ww, *amp, *weight;
-    oskar_Mem *block_gpu, *block_cpu, *plane_gpu;
+    oskar_Mem *uu, *vv, *ww, *amp, *weight, *l, *m, *n;
+    oskar_Mem *block_dev, *block_cpu;
 };
 typedef struct DeviceData DeviceData;
 
@@ -57,7 +57,7 @@ struct oskar_Imager
     oskar_Timer *tmr_read, *tmr_write;
 
     /* Settings parameters. */
-    int imager_prec, num_gpus, *cuda_device_ids, fft_on_gpu;
+    int imager_prec, num_devices, num_gpus, *gpu_ids, fft_on_gpu;
     int chan_snaps, im_type, num_im_channels, num_im_pols, pol_offset;
     int algorithm, image_size, use_stokes, support, oversample;
     int generate_w_kernels_on_gpu, set_cellsize, set_fov, weighting;
@@ -72,6 +72,10 @@ struct oskar_Imager
     int num_sel_freqs;
     double *im_freqs, *sel_freqs;
     double vis_freq_start_hz, freq_inc_hz;
+
+    /* State. */
+    int status, i_block;
+    oskar_Mutex* mutex;
 
     /* Scratch data. */
     oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im, *weight_im, *time_im;
@@ -92,7 +96,8 @@ struct oskar_Imager
 #endif
 
     /* W-projection imager data. */
-    int num_w_planes, conv_size_half, ww_points;
+    size_t ww_points;
+    int num_w_planes, conv_size_half;
     double w_scale, ww_min, ww_max, ww_rms;
     oskar_Mem *w_kernels, *w_support;
 

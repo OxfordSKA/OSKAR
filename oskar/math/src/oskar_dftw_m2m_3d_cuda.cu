@@ -28,45 +28,6 @@
 
 #include "math/oskar_dftw_m2m_3d_cuda.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Kernel wrappers. ======================================================== */
-
-/* Single precision. */
-void oskar_dftw_m2m_3d_cuda_f(int n_in, float wavenumber, const float* d_x_in,
-        const float* d_y_in, const float* d_z_in, const float2* d_weights_in,
-        int n_out, const float* d_x_out, const float* d_y_out,
-        const float* d_z_out, const float4c* d_data, float4c* d_output)
-{
-    int num_blocks, num_threads = 256;
-    int shared_mem, max_in_chunk = 768; /* Should be multiple of 16. */
-    num_blocks = (n_out + num_threads - 1) / num_threads;
-    shared_mem = 5 * max_in_chunk * sizeof(float);
-    oskar_dftw_m2m_3d_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (n_in, wavenumber,
-            d_x_in, d_y_in, d_z_in, d_weights_in, n_out, d_x_out, d_y_out,
-            d_z_out, max_in_chunk, d_data, d_output);
-}
-
-/* Double precision. */
-void oskar_dftw_m2m_3d_cuda_d(int n_in, double wavenumber, const double* d_x_in,
-        const double* d_y_in, const double* d_z_in, const double2* d_weights_in,
-        int n_out, const double* d_x_out, const double* d_y_out,
-        const double* d_z_out, const double4c* d_data, double4c* d_output)
-{
-    int num_blocks, num_threads = 256;
-    int shared_mem, max_in_chunk = 384; /* Should be multiple of 16. */
-    num_blocks = (n_out + num_threads - 1) / num_threads;
-    shared_mem = 5 * max_in_chunk * sizeof(double);
-    oskar_dftw_m2m_3d_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (n_in, wavenumber,
-            d_x_in, d_y_in, d_z_in, d_weights_in, n_out, d_x_out, d_y_out,
-            d_z_out, max_in_chunk, d_data, d_output);
-}
-
-
 /* Kernels. ================================================================ */
 
 /* Shared memory pointers used by the kernels. */
@@ -297,6 +258,45 @@ void oskar_dftw_m2m_3d_cudak_d(const int n_in,
     // Copy result into global memory.
     if (i_out < n_out)
         output[i_out] = out;
+}
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Kernel wrappers. ======================================================== */
+
+/* Single precision. */
+void oskar_dftw_m2m_3d_cuda_f(int n_in, float wavenumber, const float* d_x_in,
+        const float* d_y_in, const float* d_z_in, const float2* d_weights_in,
+        int n_out, const float* d_x_out, const float* d_y_out,
+        const float* d_z_out, const float4c* d_data, float4c* d_output)
+{
+    int num_blocks, num_threads = 256;
+    int shared_mem, max_in_chunk = 768; /* Should be multiple of 16. */
+    num_blocks = (n_out + num_threads - 1) / num_threads;
+    shared_mem = 5 * max_in_chunk * sizeof(float);
+    oskar_dftw_m2m_3d_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (n_in, wavenumber,
+            d_x_in, d_y_in, d_z_in, d_weights_in, n_out, d_x_out, d_y_out,
+            d_z_out, max_in_chunk, d_data, d_output);
+}
+
+/* Double precision. */
+void oskar_dftw_m2m_3d_cuda_d(int n_in, double wavenumber, const double* d_x_in,
+        const double* d_y_in, const double* d_z_in, const double2* d_weights_in,
+        int n_out, const double* d_x_out, const double* d_y_out,
+        const double* d_z_out, const double4c* d_data, double4c* d_output)
+{
+    int num_blocks, num_threads = 256;
+    int shared_mem, max_in_chunk = 384; /* Should be multiple of 16. */
+    num_blocks = (n_out + num_threads - 1) / num_threads;
+    shared_mem = 5 * max_in_chunk * sizeof(double);
+    oskar_dftw_m2m_3d_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (n_in, wavenumber,
+            d_x_in, d_y_in, d_z_in, d_weights_in, n_out, d_x_out, d_y_out,
+            d_z_out, max_in_chunk, d_data, d_output);
 }
 
 #ifdef __cplusplus

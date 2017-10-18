@@ -4,9 +4,8 @@
 
 include(oskar_settings_xml_utility)
 
-file(GLOB SettingsXML *.xml)
-
 # Copy settings XML file(s) to the build directory.
+file(GLOB SettingsXML *.xml)
 foreach (file_ ${SettingsXML})
     get_filename_component(name_ ${file_} NAME)
     set(xml_file_ ${CMAKE_CURRENT_BINARY_DIR}/${name_})

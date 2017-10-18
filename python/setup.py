@@ -14,10 +14,10 @@ except ImportError:
     from distutils.command.build_ext import build_ext
 
 # Define the version of OSKAR this is compatible with.
-oskar_compatibility_version = '2.7'
+OSKAR_COMPATIBILITY_VERSION = '2.7'
 
 # Define the extension modules to build.
-modules = [
+MODULES = [
     ('_apps_lib', 'oskar_apps_lib.cpp'),
     ('_binary_lib', 'oskar_binary_lib.c'),
     ('_imager_lib', 'oskar_imager_lib.c'),
@@ -43,8 +43,8 @@ class BuildExt(build_ext):
             name (str):                   The name of the file to find.
             dir_paths (array-like, str):  List of directories to search.
         """
-        for d in dir_paths:
-            test_path = join(d, name)
+        for directory in dir_paths:
+            test_path = join(directory, name)
             if isfile(test_path):
                 return test_path
         return None
@@ -57,18 +57,18 @@ class BuildExt(build_ext):
             name (str):                   The name fragment to search for.
             dir_paths (array-like, str):  List of directories to search.
         """
-        for d in dir_paths:
-            dir_contents = os.listdir(d)
+        for directory in dir_paths:
+            dir_contents = os.listdir(directory)
             for item in dir_contents:
                 if name in item:
-                    return d
+                    return directory
         return None
 
     @staticmethod
     def get_oskar_version(version_file):
         """Returns the version of OSKAR found on the system."""
-        with open(version_file) as f:
-            for line in f:
+        with open(version_file) as file_handle:
+            for line in file_handle:
                 if 'define OSKAR_VERSION_STR' in line:
                     return (line.split()[2]).replace('"', '')
         return None
@@ -78,38 +78,40 @@ class BuildExt(build_ext):
         Library directories and include directories are checked here, first.
         """
         # Check we can find the OSKAR library.
-        d = self.dir_contains('oskar.', self.library_dirs)
-        if not d:
+        directory = self.dir_contains('oskar.', self.library_dirs)
+        if not directory:
             raise RuntimeError(
                 "Could not find OSKAR library. "
                 "Check that OSKAR has already been installed on this system, "
                 "and set the library path to build_ext "
                 "using -L or --library-dirs")
-        self.rpath.append(d)
+        self.rpath.append(directory)
         self.libraries.append('oskar')
         self.libraries.append('oskar_apps')
+        self.libraries.append('oskar_binary')
         self.libraries.append('oskar_settings')
         if self.dir_contains('oskar_ms.', self.library_dirs):
             self.libraries.append('oskar_ms')
 
         # Check we can find the OSKAR headers.
-        h = self.find_file(join('oskar', 'oskar_version.h'), self.include_dirs)
-        if not h:
+        header = self.find_file(
+            join('oskar', 'oskar_version.h'), self.include_dirs)
+        if not header:
             raise RuntimeError(
                 "Could not find oskar/oskar_version.h. "
                 "Check that OSKAR has already been installed on this system, "
                 "and set the include path to build_ext "
                 "using -I or --include-dirs")
-        self.include_dirs.insert(0, dirname(h))
+        self.include_dirs.insert(0, dirname(header))
         self.include_dirs.insert(0, get_include())
 
         # Check the version of OSKAR is compatible.
-        version = self.get_oskar_version(h)
-        if not version.startswith(oskar_compatibility_version):
+        version = self.get_oskar_version(header)
+        if not version.startswith(OSKAR_COMPATIBILITY_VERSION):
             raise RuntimeError(
                 "The version of OSKAR found is not compatible with oskarpy. "
                 "Found OSKAR %s, but require OSKAR %s." % (
-                    version, oskar_compatibility_version)
+                    version, OSKAR_COMPATIBILITY_VERSION)
             )
         build_ext.run(self)
 
@@ -119,8 +121,8 @@ class BuildExt(build_ext):
 
         # Unfortunately things don't work as they should on the Mac...
         if platform.system() == 'Darwin':
-            for t in self.rpath:
-                ext.extra_link_args.append('-Wl,-rpath,'+t)
+            for rpath in self.rpath:
+                ext.extra_link_args.append('-Wl,-rpath,'+rpath)
 
         # Don't try to build MS extension if liboskar_ms is not found.
         if 'measurement_set' in ext.name:
@@ -132,23 +134,25 @@ class BuildExt(build_ext):
 def get_oskarpy_version():
     """Get the version of oskarpy from the version file."""
     globals_ = {}
-    with open(join(dirname(__file__), 'oskar', '_version.py')) as f:
-        code = f.read()
+    with open(join(dirname(__file__), 'oskar', '_version.py')) as file_handle:
+        code = file_handle.read()
+    # pylint: disable=exec-used
     exec(code, globals_)
     return globals_['__version__']
 
 
 # Call setup() with list of extensions to build.
-extensions = []
-for m in modules:
-    extensions.append(Extension(
-        'oskar.' + m[0], sources=[join('oskar', 'src', m[1])]))
+EXTENSIONS = []
+for module in MODULES:
+    EXTENSIONS.append(Extension(
+        'oskar.' + module[0], sources=[join('oskar', 'src', module[1])],
+        extra_compile_args=["-std=c99"]))
 setup(
     name='oskarpy',
     version=get_oskarpy_version(),
     description='Radio interferometer simulation package (Python bindings)',
     packages=['oskar'],
-    ext_modules=extensions,
+    ext_modules=EXTENSIONS,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',

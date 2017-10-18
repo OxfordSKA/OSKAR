@@ -36,11 +36,12 @@
 #include "imager/private_imager_composite_nearest_even.h"
 #include "imager/private_imager_generate_w_phase_screen.h"
 #include "imager/private_imager_init_wproj.h"
+#include "imager/oskar_grid_functions_spheroidal.h"
+#include "math/oskar_cmath.h"
 #include "math/oskar_fftpack_cfft.h"
 #include "math/oskar_fftpack_cfft_f.h"
 #include "utility/oskar_get_memory_usage.h"
-#include "imager/oskar_grid_functions_spheroidal.h"
-#include "math/oskar_cmath.h"
+#include "utility/oskar_device_utils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -132,8 +133,9 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
             OSKAR_CPU, conv_size * conv_size, status);
     screen_ptr = screen;
 #ifdef OSKAR_HAVE_CUDA
-    if (h->generate_w_kernels_on_gpu)
+    if (h->generate_w_kernels_on_gpu && h->num_gpus > 0)
     {
+        oskar_device_set(h->gpu_ids[0], status);
         screen_gpu = oskar_mem_create(prec | OSKAR_COMPLEX,
                 OSKAR_GPU, conv_size * conv_size, status);
         screen_ptr = screen_gpu;
@@ -182,7 +184,7 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         }
     }
 #ifdef OSKAR_HAVE_CUDA
-    if (h->generate_w_kernels_on_gpu)
+    if (h->generate_w_kernels_on_gpu && h->num_gpus > 0)
     {
         taper_gpu = oskar_mem_create_copy(taper, OSKAR_GPU, status);
         taper_ptr = taper_gpu;
@@ -204,7 +206,7 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 
         /* Perform the FFT to get the kernel. No shifts are required. */
 #ifdef OSKAR_HAVE_CUDA
-        if (h->generate_w_kernels_on_gpu)
+        if (h->generate_w_kernels_on_gpu && h->num_gpus > 0)
         {
             if (oskar_mem_precision(screen) == OSKAR_DOUBLE)
                 cufftExecZ2Z(cufft_plan, oskar_mem_void(screen_ptr),

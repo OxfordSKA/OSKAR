@@ -31,10 +31,7 @@
 #include "beam_pattern/private_beam_pattern_free_device_data.h"
 #include "math/oskar_cmath.h"
 #include "utility/oskar_device_utils.h"
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
+#include "utility/oskar_get_num_procs.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -42,6 +39,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+int oskar_beam_pattern_num_gpus(const oskar_BeamPattern* h)
+{
+    return h ? h->num_gpus : 0;
+}
 
 
 void oskar_beam_pattern_set_auto_power_fits(oskar_BeamPattern* h, int flag)
@@ -189,10 +192,8 @@ void oskar_beam_pattern_set_num_devices(oskar_BeamPattern* h, int value)
 {
     int status = 0;
     oskar_beam_pattern_free_device_data(h, &status);
-#ifdef _OPENMP
     if (value < 1)
-        value = (h->num_gpus == 0) ? (omp_get_num_procs() - 1) : h->num_gpus;
-#endif
+        value = (h->num_gpus == 0) ? (oskar_get_num_procs() - 1) : h->num_gpus;
     if (value < 1) value = 1;
     h->num_devices = value;
     h->d = (DeviceData*) realloc(h->d, h->num_devices * sizeof(DeviceData));
@@ -263,10 +264,11 @@ void oskar_beam_pattern_set_stokes(oskar_BeamPattern* h, const char* stokes)
 void oskar_beam_pattern_set_telescope_model(oskar_BeamPattern* h,
         const oskar_Telescope* model, int* status)
 {
+    int num_stations;
     if (*status || !h || !model) return;
 
     /* Check the model is not empty. */
-    const int num_stations = oskar_telescope_num_stations(model);
+    num_stations = oskar_telescope_num_stations(model);
     if (num_stations == 0)
     {
         oskar_log_error(h->log, "Telescope model is empty.");

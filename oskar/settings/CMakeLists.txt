@@ -20,12 +20,14 @@ list(APPEND oskar_settings_SRC ${settings_types_SRC})
 
 add_library(oskar_settings ${oskar_settings_SRC})
 set_target_properties(oskar_settings PROPERTIES
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-    INSTALL_RPATH_USE_LINK_PATH TRUE
     SOVERSION ${OSKAR_VERSION}
     VERSION ${OSKAR_VERSION})
 
 # Install target for the settings library.
-install(TARGETS oskar_settings DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+install(TARGETS oskar_settings
+    ARCHIVE DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
+    LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
+    RUNTIME DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime
+)
 
 add_subdirectory(test)

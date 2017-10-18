@@ -51,6 +51,13 @@ int main(int argc, char** argv)
     app.setApplicationName("OSKAR2");
     app.setOrganizationName("OeRC");
 
+#ifdef Q_OS_MACOS
+    // Add installed plugin search path.
+    QString app_path = QCoreApplication::applicationDirPath();
+    QString plugin_path = app_path + "/../../PlugIns/";
+    QCoreApplication::addLibraryPath(plugin_path);
+#endif
+
     // Create and show the main window.
     oskar::MainWindow main_window;
     main_window.show();

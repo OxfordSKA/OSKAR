@@ -54,44 +54,44 @@ namespace oskar {
  * Settings keys in general are a series of delimited keywords.
  */
 
-class OSKAR_SETTINGS_EXPORT SettingsKey
+class SettingsKey
 {
 public:
     /*! Default constructor */
-    SettingsKey(char separator = '/');
+    OSKAR_SETTINGS_EXPORT SettingsKey(char separator = '/');
 
     /*! Constructor */
-    SettingsKey(const char* key, char separator = '/');
+    OSKAR_SETTINGS_EXPORT SettingsKey(const char* key, char separator = '/');
 
     /*! Destructor */
-    ~SettingsKey();
+    OSKAR_SETTINGS_EXPORT ~SettingsKey();
 
     /*! Return the last element of the key. */
-    const char* back() const;
+    OSKAR_SETTINGS_EXPORT const char* back() const;
 
     /*! Return the depth of the key (depth = size - 1). */
-    int depth() const;
+    OSKAR_SETTINGS_EXPORT int depth() const;
 
     /*! Returns true if the key is empty */
-    bool empty() const;
+    OSKAR_SETTINGS_EXPORT bool empty() const;
 
     /*! Creates the key from a string. */
-    void from_string(const char* key, char separator = '/');
+    OSKAR_SETTINGS_EXPORT void from_string(const char* key, char separator = '/');
 
     /*! Return the key separator */
-    char separator() const;
+    OSKAR_SETTINGS_EXPORT char separator() const;
 
     /*! Set the key separator */
-    void set_separator(char s = '/');
+    OSKAR_SETTINGS_EXPORT void set_separator(char s = '/');
 
     /*! Equality operator */
-    bool operator==(const SettingsKey& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator==(const SettingsKey& other) const;
 
     /*! Operator to access sub-elements of the key. */
-    const char* operator[](int i) const;
+    OSKAR_SETTINGS_EXPORT const char* operator[](int i) const;
 
     /*! Implicit conversion operator. */
-    operator const char*() const;
+    OSKAR_SETTINGS_EXPORT operator const char*() const;
 
 private:
     SettingsKey(const SettingsKey&);

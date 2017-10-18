@@ -83,7 +83,7 @@ bool SettingsNode::value_or_child_set() const
 
 int SettingsNode::num_children() const
 {
-    return p->children.size();
+    return (int) p->children.size();
 }
 
 SettingsNode* SettingsNode::add_child(SettingsNode* node)

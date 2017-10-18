@@ -26,6 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utility/oskar_scan_binary_file.h"
+
 /* FIXME Remove? */
 #include "binary/private_binary.h"
 
@@ -34,8 +36,6 @@
 #include "log/oskar_log.h"
 #include "binary/oskar_binary.h"
 #include "mem/oskar_binary_read_mem.h"
-
-#include "utility/oskar_scan_binary_file.h"
 
 #include <string.h>
 #include <stdlib.h>

@@ -39,17 +39,19 @@ kernel void dftw_c2c_3d_REAL(const int num_in,
             c_z[t] = z_in[g];
         }
         barrier(CLK_LOCAL_MEM_FENCE);
-        for (int i = 0; i < chunk_size; ++i) {
-            REAL re, im;
-            const REAL phase = xo * c_xy[i].x + yo * c_xy[i].y + zo * c_z[i];
-            im = sincos(phase, &re);
-            REAL2 in, signal;
-            in = data[(j + i) * num_out + i_out];
-            signal.x = in.x * re; signal.x -= in.y * im;
-            signal.y = in.y * re; signal.y += in.x * im;
-            in = c_w[i];
-            out.x += signal.x * in.x; out.x -= signal.y * in.y;
-            out.y += signal.y * in.x; out.y += signal.x * in.y;
+        if (i_out < num_out) {
+            for (int i = 0; i < chunk_size; ++i) {
+                REAL re, im;
+                const REAL phase = xo * c_xy[i].x + yo * c_xy[i].y + zo * c_z[i];
+                im = sincos(phase, &re);
+                REAL2 in, signal;
+                in = data[(j + i) * num_out + i_out];
+                signal.x = in.x * re; signal.x -= in.y * im;
+                signal.y = in.y * re; signal.y += in.x * im;
+                in = c_w[i];
+                out.x += signal.x * in.x; out.x -= signal.y * in.y;
+                out.y += signal.y * in.x; out.y += signal.x * in.y;
+            }
         }
         barrier(CLK_LOCAL_MEM_FENCE);
     }

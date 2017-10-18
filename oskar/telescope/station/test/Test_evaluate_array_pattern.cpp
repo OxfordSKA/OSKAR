@@ -29,10 +29,9 @@
 #include <gtest/gtest.h>
 
 #include "math/oskar_cmath.h"
+#include "math/oskar_dftw.h"
 #include "convert/oskar_convert_lon_lat_to_relative_directions.h"
 #include "convert/oskar_convert_relative_directions_to_enu_directions.h"
-#include "telescope/station/oskar_evaluate_array_pattern.h"
-#include "telescope/station/oskar_evaluate_array_pattern_hierarchical.h"
 #include "telescope/station/oskar_evaluate_beam_horizon_direction.h"
 #include "telescope/station/oskar_evaluate_element_weights_dft.h"
 #include "telescope/station/oskar_station.h"
@@ -128,7 +127,7 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
     type = oskar_station_precision(station);
     location = oskar_station_mem_location(station);
     num_elements = oskar_station_num_elements(station);
-    num_points = oskar_mem_length(lon);
+    num_points = (int) oskar_mem_length(lon);
     wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
     last = gast + oskar_station_lon_rad(station);
     st_lat = oskar_station_lat_rad(station);
@@ -179,8 +178,12 @@ static void run_array_pattern(oskar_Mem* bp,
     ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
     timer = oskar_timer_create(OSKAR_TIMER_CUDA);
     oskar_timer_start(timer);
-    oskar_evaluate_array_pattern(pattern, wavenumber, station, num_pixels,
-            x, y, z, w, status);
+    oskar_dftw(oskar_station_num_elements(station), wavenumber,
+            oskar_station_element_true_x_enu_metres_const(station),
+            oskar_station_element_true_y_enu_metres_const(station),
+            oskar_station_element_true_z_enu_metres_const(station), w,
+            num_pixels, x, y, (oskar_station_array_is_3d(station) ? z : 0),
+            0, pattern, status);
     printf("%s: %.6f\n", message, oskar_timer_elapsed(timer));
     oskar_timer_free(timer);
     ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
@@ -221,8 +224,12 @@ static void run_array_pattern_hierarchical(oskar_Mem* bp,
     set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, freq_hz, status);
     timer = oskar_timer_create(OSKAR_TIMER_CUDA);
     oskar_timer_start(timer);
-    oskar_evaluate_array_pattern_hierarchical(pattern, wavenumber, station,
-            num_pixels, x, y, z, ones, w, status);
+    oskar_dftw(oskar_station_num_elements(station), wavenumber,
+            oskar_station_element_true_x_enu_metres_const(station),
+            oskar_station_element_true_y_enu_metres_const(station),
+            oskar_station_element_true_z_enu_metres_const(station), w,
+            num_pixels, x, y, (oskar_station_array_is_3d(station) ? z : 0),
+            ones, pattern, status);
     printf("%s: %.6f\n", message, oskar_timer_elapsed(timer));
     oskar_timer_free(timer);
     oskar_mem_free(w, status);

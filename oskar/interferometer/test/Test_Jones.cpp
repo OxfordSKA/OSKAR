@@ -54,7 +54,7 @@ static void check_values(const oskar_Mem* approx, const oskar_Mem* accurate)
             &max_rel_error, &avg_rel_error, &std_rel_error, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     tol = oskar_mem_is_double(approx) &&
-            oskar_mem_is_double(accurate) ? 1e-12 : 1e-5;
+            oskar_mem_is_double(accurate) ? 1e-10 : 1e-4;
     EXPECT_LT(max_rel_error, tol) << std::setprecision(5) <<
             "RELATIVE ERROR" <<
             " MIN: " << min_rel_error << " MAX: " << max_rel_error <<

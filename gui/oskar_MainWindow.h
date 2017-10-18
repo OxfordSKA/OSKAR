@@ -65,6 +65,7 @@ private slots:
     void about();
     void appChanged(QString text = QString());
     void setAppDir(bool hint = false);
+    void changeDir();
     void checkForUpdate();
     void cudaInfo();
     void helpDoc();
@@ -80,12 +81,14 @@ private:
 private:
     bool checked_update_;
     QString title_;
+    QLineEdit* current_dir_label_;
     QLineEdit* filter_;
     QComboBox* selector_;
     SettingsTree* settings_;
     SettingsView* view_;
     SettingsModel* model_;
     QHash<QString, QString> files_;
+    QString current_dir_;
     QString current_app_;
     QString current_app_version_;
     QString app_dir_;

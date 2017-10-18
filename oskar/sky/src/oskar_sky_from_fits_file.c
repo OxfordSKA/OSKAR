@@ -70,7 +70,7 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
         if (!*status && ordering != 'R')
         {
             *status = OSKAR_ERR_FILE_IO;
-            fprintf(stderr, "HEALPix data is not in RING format.");
+            fprintf(stderr, "HEALPix data is not in RING format.\n");
         }
     }
     else

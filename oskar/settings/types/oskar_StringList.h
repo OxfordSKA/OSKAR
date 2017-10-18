@@ -51,26 +51,24 @@ namespace oskar {
  * Handles CSV lists of strings.
  *
  */
-
-class OSKAR_SETTINGS_EXPORT StringList : public AbstractSettingsType
+class StringList : public AbstractSettingsType
 {
 public:
-    StringList();
-    virtual ~StringList() {}
+    OSKAR_SETTINGS_EXPORT StringList();
+    OSKAR_SETTINGS_EXPORT virtual ~StringList();
 
-    bool init(const std::string& param);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* param);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    int size() const;
-    const char* const* values() const;
+    OSKAR_SETTINGS_EXPORT int size() const;
+    OSKAR_SETTINGS_EXPORT const char* const* values() const;
 
-    bool operator==(const StringList& other) const;
-    bool operator>(const StringList&) const { return false; }
+    OSKAR_SETTINGS_EXPORT bool operator==(const StringList& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const StringList&) const;
 
 protected:
-    std::string to_string_(const std::vector<std::string>& values) const;
     std::vector<std::string> default_, value_;
     std::vector<const char*> pointers_;
     char delimiter_;

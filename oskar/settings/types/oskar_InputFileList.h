@@ -49,12 +49,11 @@ namespace oskar {
  * @details
  *
  */
-
-class OSKAR_SETTINGS_EXPORT InputFileList : public StringList
+class InputFileList : public StringList
 {
 public:
-    InputFileList() : StringList() {}
-    virtual ~InputFileList() {}
+    OSKAR_SETTINGS_EXPORT InputFileList();
+    OSKAR_SETTINGS_EXPORT virtual ~InputFileList();
 };
 
 } /* namespace oskar */

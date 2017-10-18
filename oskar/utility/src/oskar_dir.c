@@ -79,8 +79,8 @@ char* oskar_dir_get_path(const char* dir_path, const char* item_name)
 {
     char* buffer = 0;
     int buf_len = 0, dir_path_len;
-    dir_path_len = strlen(dir_path);
-    buf_len = 2 + dir_path_len + strlen(item_name);
+    dir_path_len = (int) strlen(dir_path);
+    buf_len = 2 + dir_path_len + (int) strlen(item_name);
     buffer = (char*) calloc(buf_len, sizeof(char));
     if (dir_path[dir_path_len - 1] == oskar_dir_separator())
         sprintf(buffer, "%s%s", dir_path, item_name);
@@ -276,7 +276,11 @@ int oskar_dir_remove(const char* dir_path)
     if (error) return 0;
 
     /* Remove the empty directory. */
+#ifdef OSKAR_OS_WIN
+    return RemoveDirectory(dir_path);
+#else
     return remove(dir_path) ? 0 : 1;
+#endif
 }
 
 

@@ -47,25 +47,12 @@ macro(OSKAR_APP)
         oskar_apps          # default libs
         ${APP_EXTRA_LIBS}   # extra libs
     )
-    # We do need the OpenMP flags here, otherwise programs will crash.
-    if (MSVC)
-        set_target_properties(${target} PROPERTIES
-            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-            OUTPUT_NAME   "${APP_NAME}"
-        )
-    else ()
-        set_target_properties(${target} PROPERTIES
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-            INSTALL_RPATH_USE_LINK_PATH TRUE
-            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-            LINK_FLAGS    "${OpenMP_CXX_FLAGS}"
-            OUTPUT_NAME   "${APP_NAME}"
-        )
-    endif()
+    set_target_properties(${target} PROPERTIES OUTPUT_NAME "${APP_NAME}")
 
     # Create the install target if the NO_INSTALL option isn't specified.
     if (NOT APP_NO_INSTALL)
-        install(TARGETS ${target} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
+        install(TARGETS ${target}
+            DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT applications)
     endif()
 endmacro(OSKAR_APP)
 

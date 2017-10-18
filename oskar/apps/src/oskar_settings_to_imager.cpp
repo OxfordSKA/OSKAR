@@ -47,13 +47,24 @@ oskar_Imager* oskar_settings_to_imager(oskar::SettingsTree* s,
     oskar_imager_set_log(h, log);
 
     // Set GPU IDs.
-    if (!s->starts_with("cuda_device_ids", "all", status))
+    if (!s->to_int("use_gpus", status))
+        oskar_imager_set_gpus(h, 0, 0, status);
+    else
     {
-        int size = 0;
-        const int* ids = s->to_int_list("cuda_device_ids", &size, status);
-        if (size > 0)
-            oskar_imager_set_gpus(h, size, ids, status);
+        if (s->starts_with("cuda_device_ids", "all", status))
+            oskar_imager_set_gpus(h, -1, 0, status);
+        else
+        {
+            int size = 0;
+            const int* ids = s->to_int_list("cuda_device_ids", &size, status);
+            if (size > 0)
+                oskar_imager_set_gpus(h, size, ids, status);
+        }
     }
+    if (s->starts_with("num_devices", "auto", status))
+        oskar_imager_set_num_devices(h, -1);
+    else
+        oskar_imager_set_num_devices(h, s->to_int("num_devices", status));
 
     // Set input and output files.
     int num_files = 0;

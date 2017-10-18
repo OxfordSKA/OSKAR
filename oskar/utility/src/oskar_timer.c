@@ -27,7 +27,7 @@
  */
 
 #include "utility/oskar_timer.h"
-#include "utility/oskar_mutex.h"
+#include "utility/oskar_thread.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>

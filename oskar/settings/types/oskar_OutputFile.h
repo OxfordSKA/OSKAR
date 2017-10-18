@@ -48,12 +48,13 @@ namespace oskar {
  * @details
  *
  */
-class OSKAR_SETTINGS_EXPORT OutputFile : public InputFile
+class OutputFile : public InputFile
 {
 public:
-    OutputFile() {}
-    virtual ~OutputFile() {}
+    OSKAR_SETTINGS_EXPORT OutputFile();
+    OSKAR_SETTINGS_EXPORT virtual ~OutputFile();
 };
+
 } /* namespace oskar */
 
 #endif /* OSKAR_SETTINGS_TYPE_OUTPUT_FILE_H_ */

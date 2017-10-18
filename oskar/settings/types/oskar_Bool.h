@@ -48,22 +48,21 @@ namespace oskar {
  *
  * @details
  */
-
-class OSKAR_SETTINGS_EXPORT Bool : public AbstractSettingsType
+class Bool : public AbstractSettingsType
 {
 public:
-    Bool();
-    virtual ~Bool() {}
+    OSKAR_SETTINGS_EXPORT Bool();
+    OSKAR_SETTINGS_EXPORT virtual ~Bool();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    bool value() const { return value_; }
+    OSKAR_SETTINGS_EXPORT bool value() const;
 
-    bool operator==(const Bool& other) const;
-    bool operator>(const Bool&) const { return false; }
+    OSKAR_SETTINGS_EXPORT bool operator==(const Bool& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const Bool&) const;
 
 private:
     bool default_, value_;

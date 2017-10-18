@@ -84,7 +84,7 @@ static void check_overlap(int start_component,
     double pa0 = pa_rad[start_component];
 
     // Find distances to the nearest bin centres.
-    const int num_bins = bin_ra.size();
+    const int num_bins = (const int)bin_ra.size();
     vector<double> bin_dist(num_bins);
     vector<int> bin_index(num_bins);
     for (int i = 0; i < num_bins; ++i)
@@ -99,7 +99,7 @@ static void check_overlap(int start_component,
     for (int b = 0; b < 4; ++b)
     {
         int bin = bin_index[b];
-        int num_components_to_check = bin_indices[bin].size();
+        int num_components_to_check = (int)bin_indices[bin].size();
         for (int i = 0; i < num_components_to_check; ++i)
         {
             // Get the component index.
@@ -317,7 +317,7 @@ int main(int argc, char** argv)
                 bin_ra, bin_dec, bin_indices);
         output_source_components.push_back(components);
     }
-    int num_output = output_source_components.size();
+    int num_output = (int)output_source_components.size();
     oskar_log_message(log, 'M', 1, "100%% done after %6.1f sec.",
             oskar_timer_elapsed(timer));
     oskar_timer_free(timer);
@@ -326,7 +326,7 @@ int main(int argc, char** argv)
     {
         int counter = 0;
         for (int i = 0; i < num_output; ++i)
-            counter += output_source_components[i].size();
+            counter += (int)output_source_components[i].size();
         if (num_input != counter)
         {
             oskar_log_error(log, "Inconsistent component counts: %d input, "
@@ -338,7 +338,7 @@ int main(int argc, char** argv)
         if (num_input != (int)components_removed.size())
         {
             oskar_log_error(log, "Inconsistent component counts: %d input, "
-                    "%d removed.",  num_input, components_removed.size());
+                    "%d removed.",  num_input, (int)components_removed.size());
             oskar_sky_free(sky_to_filter, &status);
             oskar_sky_free(sky_as_filter, &status);
             return EXIT_FAILURE;
@@ -355,7 +355,7 @@ int main(int argc, char** argv)
         {
             output_source_indices[i] = i;
             output_source_I[i] = 0.0;
-            int n = output_source_components[i].size();
+            int n = (int)output_source_components[i].size();
             for (int j = 0; j < n; ++j)
             {
                 int c = output_source_components[i][j];
@@ -370,7 +370,7 @@ int main(int argc, char** argv)
         {
             output_source_indices[i] = i;
             output_source_I[i] = 0.0;
-            int n = output_source_components[i].size();
+            int n = (int)output_source_components[i].size();
             for (int j = 0; j < n; ++j)
             {
                 int c = output_source_components[i][j];
@@ -396,7 +396,7 @@ int main(int argc, char** argv)
         for (i = 0; i < num_output; ++i)
         {
             int s = output_source_indices[i];
-            int num_source_components = output_source_components[s].size();
+            int num_source_components = (int)output_source_components[s].size();
             if (output_source_I[s] < threshold) break;
             components_to_remove.insert(components_to_remove.end(),
                     output_source_components[s].begin(),
@@ -417,7 +417,7 @@ int main(int argc, char** argv)
         }
         oskar_log_message(log, 'M', 0, "%d components from %d sources with "
                 "source flux greater than %.0f %s",
-                components_to_remove.size(), i, threshold,
+                (int)components_to_remove.size(), i, threshold,
                 use_integrated_flux ? "Jy" : "Jy/beam");
         oskar_log_message(log, 'M', 1, "Total integrated flux from listed "
                 "components: %.1f Jy.", total_integrated_flux);
@@ -427,7 +427,7 @@ int main(int argc, char** argv)
     // and create a new sky model from what's left.
     sort(components_to_remove.begin(),
             components_to_remove.end());
-    int num_sources_out = num_input - components_to_remove.size();
+    int num_sources_out = num_input - (int)components_to_remove.size();
     oskar_Sky* sky_out = oskar_sky_create(OSKAR_DOUBLE, OSKAR_CPU,
             num_sources_out, &status);
 

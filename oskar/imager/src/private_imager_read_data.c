@@ -155,6 +155,11 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
     oskar_mem_free(time_centroid, status);
     oskar_ms_close(ms);
 #else
+    (void) filename;
+    (void) i_file;
+    (void) num_files;
+    (void) percent_done;
+    (void) percent_next;
     oskar_log_error(h->log, "OSKAR was compiled without Measurement Set support.");
     *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 #endif

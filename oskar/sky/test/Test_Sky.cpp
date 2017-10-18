@@ -171,11 +171,11 @@ TEST(SkyModel, append)
 TEST(SkyModel, compute_relative_lmn)
 {
     int status = 0;
-    const double deg2rad = 0.0174532925199432957692;
+    const float deg2rad = 0.0174532925199432957692f;
 
     // Create some sources.
-    float ra[] = {30.0, 45.0};
-    float dec[] = {50.0, 60.0};
+    float ra[] = {30.0f, 45.0f};
+    float dec[] = {50.0f, 60.0f};
     int n = sizeof(ra) / sizeof(float);
     for (int i = 0; i < n; ++i)
     {
@@ -184,8 +184,8 @@ TEST(SkyModel, compute_relative_lmn)
     }
 
     // Define phase centre.
-    float ra0 = 30.0 * deg2rad;
-    float dec0 = 55.0 * deg2rad;
+    float ra0 = 30.0f * deg2rad;
+    float dec0 = 55.0f * deg2rad;
 
     // Construct a sky model on the GPU.
     oskar_Sky* sky1 = oskar_sky_create(OSKAR_SINGLE, device_loc, n, &status);

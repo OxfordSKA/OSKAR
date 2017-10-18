@@ -111,8 +111,8 @@ void oskar_prefix_sum(size_t num_elements, const oskar_Mem* in,
         /* Local scan. */
         oskar_prefix_sum_cuda_int((int) num_elements,
                 oskar_mem_int_const(in, status), oskar_mem_int(out, status),
-                num_blocks, block_size, oskar_mem_int(block_sums, status),
-                init_val, exclusive);
+                (int) num_blocks, (int) block_size,
+                oskar_mem_int(block_sums, status), init_val, exclusive);
 
         if (num_blocks > 1)
         {
@@ -121,9 +121,10 @@ void oskar_prefix_sum(size_t num_elements, const oskar_Mem* in,
                     init_val, 0, status);
 
             /* Add block sums to each block. */
-            oskar_prefix_sum_finalise_cuda_int(num_elements,
-                    oskar_mem_int(out, status), num_blocks, block_size,
-                    oskar_mem_int_const(block_sums, status), block_size);
+            oskar_prefix_sum_finalise_cuda_int((int) num_elements,
+                    oskar_mem_int(out, status), (int) num_blocks,
+                    (int) block_size, oskar_mem_int_const(block_sums, status),
+                    (int) block_size);
         }
 
         /* Clean up. */

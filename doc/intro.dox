@@ -10,8 +10,8 @@
 
 The OSKAR package consists of a number of open source applications for the
 simulation of astronomical radio interferometers.
-OSKAR 2.x has been designed primarily to produce simulated data from large
-aperture arrays, such as those envisaged for the SKA.
+OSKAR 2.x has been designed primarily to produce simulated data from
+telescopes that use aperture arrays, as envisaged for the SKA.
 
 \section intro_features Features
 
@@ -59,8 +59,7 @@ Below is a summary of the current features of the OSKAR package.
 
 \section intro_docs Getting Started
 
-The following documents are available, and we suggest that you read them in
-the order listed below.
+The following documents are available:
 
 - \ref install_guide "Installation Guide"<br>
   Describes how to build and install OSKAR.
@@ -103,18 +102,16 @@ oskar@oerc.ox.ac.uk and we will do our best to respond.
 
 -# <b>Which operating systems/platforms are supported?</b><br>
 OSKAR has been tested to compile and run correctly on various recent Linux
-distributions, and recent versions of macOS.
-If you encounter a problem with OSKAR while trying to compile or
-run it on a Linux or macOS system, please report it to oskar@oerc.ox.ac.uk.
+distributions, and recent versions of macOS and Windows.
+If you encounter a problem with OSKAR, please report it to oskar@oerc.ox.ac.uk.
 
 -# <b>Does OSKAR require an NVIDIA GPU to work?</b><br>
-Not any more, as CPU versions of all kernels have now been implemented.
-However, simulations will run faster if an NVIDIA GPU is available.
-AMD GPUs are not currently supported.
+No, but simulations will probably run faster if an NVIDIA GPU is available.
+Other GPUs are not currently supported.
 
 -# <b>Which GPU model should I use to run OSKAR simulations?</b><br>
 OSKAR should be able to run on an NVIDIA GPU with compute capability of 2.0
-or higher. We would recommend using a dedicated compute card which has decent
+or higher. We recommend using a dedicated compute card which has decent
 double precision floating point performance, as consumer gaming models only
 work well in single precision (the exception being the Kepler NVIDIA Titans).
 Recent OSKAR simulations have been running successfully using NVIDIA's
@@ -123,89 +120,344 @@ K20 and K40 compute cards in HPC clusters.
 -# <b>I have multiple NVIDIA GPUs in my computer.
 Can OSKAR make use of all of them to run faster?</b><br>
 Yes, normally, as the CUDA device(s) to use can be specified at
-run-time, and computational work is shared between them by splitting up the
-sky model and the number of times within a visibility block.
-Make sure you have more host CPU cores than GPU cards in your system if you
-intend to use multiple GPUs. However, see also the answer to the next question
-to check if using multiple GPUs in this way will be worthwhile for you.
+run-time, and work is shared between them by splitting up the sky model and
+the time samples within a visibility block. However, see also the answer to
+the next question to check if using multiple GPUs in this way will be
+worthwhile for you.
 
 -# <b>Why does OSKAR run at virtually the same speed regardless of whether I
 use a sky model containing 10 sources or 100 sources?</b><br>
 OSKAR was designed to run simulations efficiently for aperture-array-based
-telescopes and use large sky models containing many thousands of sources across
+telescopes using large sky models containing many thousands of sources across
 the whole sky. This is done by assigning a GPU thread for every source.
 However, as modern GPUs have thousands of processing cores, there must be
 enough work to do to keep the GPU occupied in this way. If your sky model
-contains only 100 sources, you may only be using less than 5 percent of the
+contains only 100 sources, you may be using only a few percent of the
 available hardware, so performance will be relatively poor when using small
-sky models like this.
+sky models like this. It will probably be faster to use CPU cores only for
+sky models containing fewer than 32 sources.
 
 -# <b>Is OpenCL supported?</b><br>
 No. However, depending on demand, support for OpenCL could potentially be
 added in a future release.
 
 -# <b>Are pre-built binary packages of OSKAR available?</b><br>
-No. Currently we don't have the resources to produce or support pre-built
-binaries. Please compile OSKAR for your target system using the available
-source code.
+Binary installer packages are now available for macOS and Windows systems.
+On Linux, OSKAR still needs to be compiled from source.
 
 -# <b>I found a bug!</b><br>
 Please let us know by sending an email to oskar@oerc.ox.ac.uk.
 
--# <b>I found a bug, but I managed to fix it in my copy!</b><br>
+-# <b>I found a bug, but I managed to fix it!</b><br>
 Wonderful! Please send us your patch by sending an email to
-oskar@oerc.ox.ac.uk. We'll test it and integrate it back into the main code
-base.
+oskar@oerc.ox.ac.uk. We'll test it and integrate it back into the master branch.
 
--# <b>Please could you add feature/capability X?</b><br>
-Please check first to see if it's something that's already on the list in the
-planned roadmap. We will certainly consider new features but can't guarantee
-that we can implement all of them.
+-# <b>Please could you add this feature?</b><br>
+Please get in touch - we will certainly consider new features but can't
+guarantee that we can implement all of them.
 
 \section intro_roadmap Roadmap
 
-Features are expected to be implemented in future versions of OSKAR as
-listed below.
+We hope to add the following capabilities to OSKAR at some point.
+In no particular order:
 
-- Use of analytical and numerical dish patterns.
-- Swap of X and Y dipoles to match IAU polarisation axes on the sky.
-- Full 3D specification of individual element feed angles.
-- Full Stokes beam patterns.
-- A usable ionospheric model.
+- Allow use of analytical and numerical dish patterns.
+- Swap X and Y dipoles to match IAU polarisation axes on the sky.
+- Allow full 3D specification of individual element feed angles.
+- Allow full Stokes beam patterns.
+- Include a usable ionospheric model.
 
 
 \latexonly
 \newpage
 \endlatexonly
 
+\section intro_license License
+
+OSKAR is made available under the 3-clause BSD License, as follows:
+
+Copyright (c) 2011-2017, The University of Oxford<br/>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+-# Redistributions of source code must retain the above copyright notice,
+   this list of conditions and the following disclaimer.
+-# Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+-# Neither the name of the University of Oxford nor the names of its
+   contributors may be used to endorse or promote products derived from this
+   software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+
 \section intro_ack Acknowledgements
 
-OSKAR 2 has been developed using hardware donated by NVIDIA UK.
+OSKAR has been developed using hardware donated by NVIDIA UK.
 
-OSKAR 2 directly links against or uses the following software libraries:
-- NVIDIA CUDA (http://www.nvidia.com/object/cuda_home.html)
-- LAPACK (http://www.netlib.org/lapack/)
-- DIERCKX for surface fitting using splines (http://netlib.org/dierckx/)
-- The Qt cross-platform application framework (http://qt.io/)
-- casacore for Measurement Set export (https://github.com/casacore/casacore/)
-- CFITSIO for FITS file export (http://heasarc.gsfc.nasa.gov/fitsio/)
-- Random123 for parallel random number generation <br>
-  (http://www.deshawresearch.com/resources_random123.html)
-- ezOptionParser (http://sourceforge.net/projects/ezoptionparser/)
+OSKAR uses the following tools and libraries:
+- The NVIDIA CUDA toolkit: https://developer.nvidia.com/cuda-zone
+- The FFTPACK 5 FFT library: https://www2.cisl.ucar.edu/resources/legacy/fft5
+- The LAPACK linear algebra library: http://www.netlib.org/lapack/
+- The DIERCKX spline fitting library: http://netlib.org/dierckx/
+- The Qt GUI framework: https://www.qt.io/
+- The casacore Measurement Set library: https://github.com/casacore/casacore/
+- The CFITSIO FITS file library: https://heasarc.gsfc.nasa.gov/fitsio/
+- The Random123 random number generator:<br/> https://www.deshawresearch.com/resources_random123.html
+- The ezOptionParser command line parser: https://sourceforge.net/projects/ezoptionparser/
+- The CMake build system: http://www.cmake.org/
+- The Google Test framework: https://github.com/google/googletest/
+- Python: https://www.python.org/
 
-The following tools have been used during the development of OSKAR 2:
-- The CMake cross-platform build system (http://www.cmake.org/)
-- The Google Test unit-testing framework (http://code.google.com/p/googletest/)
-- The Eclipse source-code IDE (http://www.eclipse.org/)
-- The Valgrind memory checker (http://valgrind.org/)
-- The GCC toolchain (http://gcc.gnu.org/)
-- MATLAB (http://www.mathworks.co.uk/products/matlab/)
+This research has made use of SAOImage DS9, developed by Smithsonian
+Astrophysical Observatory. SAOImage DS9 can be obtained from http://ds9.si.edu.
 
-This research has made use of SAOImage DS9, developed by
-Smithsonian Astrophysical Observatory.
+
+\section intro_third_party Third-party Licenses
+
+Third-party licenses are reproduced in this section in order to allow
+binary distributions of OSKAR.
+
+\subsection intro_cuda The NVIDIA CUDA toolkit
+
+The End-User License Agreement (EULA) that covers use of the NVIDIA CUDA
+toolkit is available at the following URL:
+
+https://docs.nvidia.com/cuda/eula/
+
+OSKAR may link to the CUDA Runtime Library and CUDA FFT Library.
+The CUDA Runtime Library and CUDA FFT Library are copyrighted by and are
+property of NVIDIA Corporation.
+
+As per the terms in Attachment A of the NVIDIA EULA, binary package
+installers may redistribute copies of the CUDA Runtime Library
+and CUDA FFT Library.
+
+
+\subsection intro_fftpack The FFTPACK 5 FFT library
+
+FFTPACK is a product of the Computational and Information Systems Laboratory
+at the National Center for Atmospheric Research (NCAR).
+
+Copyright (c) 2004 the University Corporation for Atmospheric Research ("UCAR").<br/>
+All rights reserved.
+
+Developed by NCAR's Computational and Information Systems Laboratory, UCAR, www2.cisl.ucar.edu.
+
+Redistribution and use of the Software in source and binary forms,
+with or without modification, is permitted provided that the following
+conditions are met:
+
+-# Neither the names of NCAR's Computational and Information Systems
+   Laboratory, the University Corporation for Atmospheric Research, nor the
+   names of its sponsors or contributors may be used to endorse or promote
+   products derived from this Software without specific prior written
+   permission.
+-# Redistributions of source code must retain the above copyright notices,
+   this list of conditions, and the disclaimer below.
+-# Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions, and the disclaimer below in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING, BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 
 \latexonly
-\vskip 2cm
+\newpage
+\endlatexonly
+
+\subsection intro_lapack The LAPACK linear algebra library
+
+Copyright (c) 1992-2013 The University of Tennessee and The University of Tennessee Research Foundation.<br/>
+All rights reserved.
+
+Copyright (c) 2000-2013 The University of California Berkeley.<br/>
+All rights reserved.
+
+Copyright (c) 2006-2013 The University of Colorado Denver.<br/>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+-# Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+-# Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer listed
+   in this license in the documentation and/or other materials
+   provided with the distribution.
+-# Neither the name of the copyright holders nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+The copyright holders provide no reassurances that the source code
+provided does not infringe any patent, copyright, or any other
+intellectual property rights of third parties.  The copyright holders
+disclaim any liability to any recipient for claims brought against
+recipient by any third party for infringement of that parties
+intellectual property rights.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+\subsection intro_dierckx The DIERCKX spline fitting library
+
+Copyright (c) Paul Dierckx, 1993
+
+Reference:<br/>
+Paul Dierckx, Curve and Surface Fitting with Splines, Oxford University Press, 1993
+
+
+\subsection intro_qt The Qt GUI framework
+
+Qt is available under the GNU Lesser General Public License version 3.
+
+The Qt Toolkit is Copyright (C) 2016 The Qt Company Ltd. and other contributors.<br/>
+Contact: http://www.qt.io/licensing/
+
+Reference: GNU Lesser General Public License, version 3:
+
+http://www.gnu.org/licenses/lgpl-3.0.html
+
+\latexonly
+\newpage
+\endlatexonly
+
+\subsection intro_casacore The casacore Measurement Set library
+
+Copyright (C) 1996,1997,1998,2000,2001,2002,2003<br/>
+Associated Universities, Inc. Washington DC, USA.
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+This library is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library General Public
+License for more details.
+
+Reference: GNU Lesser General Public License, version 2:
+
+http://www.gnu.org/licenses/lgpl-2.0.html
+
+
+\subsection intro_cfitsio The CFITSIO FITS file library
+
+Copyright (Unpublished-all rights reserved under the copyright laws of the United States),
+U.S. Government as represented by the Administrator of the National Aeronautics and Space Administration.<br/>
+No copyright is claimed in the United States under Title 17, U.S. Code.
+
+Permission to freely use, copy, modify, and distribute this software and its
+documentation without fee is hereby granted, provided that this copyright
+notice and disclaimer of warranty appears in all copies.
+
+DISCLAIMER:
+
+THE SOFTWARE IS PROVIDED 'AS IS' WITHOUT ANY WARRANTY OF ANY KIND, EITHER
+EXPRESSED, IMPLIED, OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, ANY
+WARRANTY THAT THE SOFTWARE WILL CONFORM TO SPECIFICATIONS, ANY IMPLIED
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND FREEDOM
+FROM INFRINGEMENT, AND ANY WARRANTY THAT THE DOCUMENTATION WILL CONFORM TO THE
+SOFTWARE, OR ANY WARRANTY THAT THE SOFTWARE WILL BE ERROR FREE. IN NO EVENT
+SHALL NASA BE LIABLE FOR ANY DAMAGES, INCLUDING, BUT NOT LIMITED TO, DIRECT,
+INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES, ARISING OUT OF, RESULTING FROM, OR
+IN ANY WAY CONNECTED WITH THIS SOFTWARE, WHETHER OR NOT BASED UPON WARRANTY,
+CONTRACT, TORT, OR OTHERWISE, WHETHER OR NOT INJURY WAS SUSTAINED BY PERSONS
+OR PROPERTY OR OTHERWISE, AND WHETHER OR NOT LOSS WAS SUSTAINED FROM, OR
+AROSE OUT OF THE RESULTS OF, OR USE OF, THE SOFTWARE OR SERVICES PROVIDED
+HEREUNDER.
+
+\latexonly
+\newpage
+\endlatexonly
+
+\subsection intro_random123 The Random123 random number generator
+
+Copyright 2010-2011, D. E. Shaw Research.<br/>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+-# Redistributions of source code must retain the above copyright notice,
+   this list of conditions, and the following disclaimer.
+-# Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions, and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+-# Neither the name of D. E. Shaw Research nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+\subsection intro_ezoptionparser The ezOptionParser command line parser
+
+Copyright (C) 2011,2012,2014 Remik Ziemlinski
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+\latexonly
+\newpage
 \endlatexonly
 
 <b>Revision History</b>
@@ -229,8 +481,9 @@ Smithsonian Astrophysical Observatory.
 <tr><td>7</td><td>2015-04-27</td>
     <td>Updated FAQ and roadmap. Added attribution for use of Random123
     library.</td></tr>
-<tr><td>8</td><td>2017-01-05</td>
-    <td>Updated FAQ.</td></tr>
+<tr><td>8</td><td>2017-10-18</td>
+    <td>Updated FAQ. Added License section and reproduced third-party
+    licenses to allow for binary distributions.</td></tr>
 </table>
 
 */

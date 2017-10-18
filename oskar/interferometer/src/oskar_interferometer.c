@@ -32,8 +32,6 @@
 #include "convert/oskar_convert_mjd_to_gast_fast.h"
 #include "correlate/oskar_auto_correlate.h"
 #include "correlate/oskar_cross_correlate.h"
-#include "utility/oskar_cuda_mem_log.h"
-#include "utility/oskar_device_utils.h"
 #include "interferometer/oskar_evaluate_jones_R.h"
 #include "interferometer/oskar_evaluate_jones_Z.h"
 #include "interferometer/oskar_evaluate_jones_E.h"
@@ -41,24 +39,27 @@
 #include "interferometer/oskar_jones.h"
 #include "interferometer/oskar_interferometer.h"
 #include "log/oskar_log.h"
-#include "utility/oskar_mutex.h"
 #include "sky/oskar_sky.h"
 #include "telescope/oskar_telescope.h"
+#include "utility/oskar_cuda_mem_log.h"
+#include "utility/oskar_device_utils.h"
+#include "utility/oskar_get_memory_usage.h"
+#include "utility/oskar_get_num_procs.h"
+#include "utility/oskar_thread.h"
 #include "utility/oskar_timer.h"
 #include "vis/oskar_vis_block.h"
 #include "vis/oskar_vis_block_write_ms.h"
 #include "vis/oskar_vis_header.h"
 #include "vis/oskar_vis_header_write_ms.h"
 
-#include "utility/oskar_get_memory_usage.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <float.h>
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
-#include <string.h>
-#include <stdlib.h>
-#include <float.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -104,12 +105,12 @@ struct oskar_Interferometer
     char correlation_type, *vis_name, *ms_name, *settings_path;
 
     /* State. */
-    int init_sky;
-    int work_unit_index;
+    int init_sky, work_unit_index, status;
     oskar_Mutex* mutex;
+    oskar_Barrier* barrier;
 
     /* Sky model and telescope model. */
-    int num_sky_chunks;
+    int num_sources_total, num_sky_chunks;
     oskar_Sky** sky_chunks;
     oskar_Telescope* tel;
 
@@ -214,6 +215,7 @@ oskar_Interferometer* oskar_interferometer_create(int precision, int* status)
     h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->temp      = oskar_mem_create(precision, OSKAR_CPU, 0, status);
     h->mutex     = oskar_mutex_create();
+    h->barrier   = oskar_barrier_create(0);
 
     /* Set sensible defaults. */
     h->max_sources_per_chunk = 16384;
@@ -312,6 +314,7 @@ void oskar_interferometer_free(oskar_Interferometer* h, int* status)
     oskar_timer_free(h->tmr_sim);
     oskar_timer_free(h->tmr_write);
     oskar_mutex_free(h->mutex);
+    oskar_barrier_free(h->barrier);
     free(h->sky_chunks);
     free(h->gpu_ids);
     free(h->vis_name);
@@ -324,13 +327,13 @@ void oskar_interferometer_free(oskar_Interferometer* h, int* status)
 
 int oskar_interferometer_num_devices(const oskar_Interferometer* h)
 {
-    return h->num_devices;
+    return h ? h->num_devices : 0;
 }
 
 
 int oskar_interferometer_num_gpus(const oskar_Interferometer* h)
 {
-    return h->num_gpus;
+    return h ? h->num_gpus : 0;
 }
 
 
@@ -379,15 +382,6 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
                 "Call oskar_interferometer_check_init() first.");
         return;
     }
-
-#ifdef _OPENMP
-    if (!h->coords_only)
-    {
-        /* Disable any nested parallelism. */
-        omp_set_num_threads(1);
-        omp_set_nested(0);
-    }
-#endif
 
     /* Set the GPU to use. (Supposed to be a very low-overhead call.) */
     if (device_id >= 0 && device_id < h->num_gpus)
@@ -481,9 +475,80 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
 }
 
 
+struct ThreadArgs
+{
+    oskar_Interferometer* h;
+    int num_threads, thread_id;
+};
+typedef struct ThreadArgs ThreadArgs;
+
+static void* run_blocks(void* arg)
+{
+    oskar_Interferometer* h;
+    int b, thread_id, device_id, num_blocks, num_threads, *status;
+
+    /* Get thread function arguments. */
+    h = ((ThreadArgs*)arg)->h;
+    num_threads = ((ThreadArgs*)arg)->num_threads;
+    thread_id = ((ThreadArgs*)arg)->thread_id;
+    device_id = thread_id - 1;
+    status = &(h->status);
+
+#ifdef _OPENMP
+    /* Disable any nested parallelism. */
+    omp_set_nested(0);
+    omp_set_num_threads(1);
+#endif
+
+    /* Loop over blocks of observation time, running simulation and file
+     * writing one block at a time. Simulation and file output are overlapped
+     * by using double buffering, and a dedicated thread is used for file
+     * output.
+     *
+     * Thread 0 is used for file writes.
+     * Threads 1 to n (mapped to compute devices) do the simulation.
+     *
+     * Note that no write is launched on the first loop counter (as no
+     * data are ready yet) and no simulation is performed for the last loop
+     * counter (which corresponds to the last block + 1) as this iteration
+     * simply writes the last block.
+     */
+    num_blocks = oskar_interferometer_num_vis_blocks(h);
+    for (b = 0; b < num_blocks + 1; ++b)
+    {
+        if ((thread_id > 0 || num_threads == 1) && b < num_blocks)
+            oskar_interferometer_run_block(h, b, device_id, status);
+        if (thread_id == 0 && b > 0)
+        {
+            oskar_VisBlock* block;
+            block = oskar_interferometer_finalise_block(h, b - 1, status);
+            oskar_interferometer_write_block(h, block, b - 1, status);
+        }
+
+        /* Barrier 1: Reset work unit index and print status. */
+        oskar_barrier_wait(h->barrier);
+        if (thread_id == 0)
+        {
+            oskar_interferometer_reset_work_unit_index(h);
+            if (b < num_blocks && h->log && !*status)
+                oskar_log_message(h->log, 'S', 0, "Block %*i/%i (%3.0f%%) "
+                        "complete. Simulation time elapsed: %.3f s",
+                        disp_width(num_blocks), b+1, num_blocks,
+                        100.0 * (b+1) / (double)num_blocks,
+                        oskar_timer_elapsed(h->tmr_sim));
+        }
+
+        /* Barrier 2: Synchronise before moving to the next block. */
+        oskar_barrier_wait(h->barrier);
+    }
+    return 0;
+}
+
 void oskar_interferometer_run(oskar_Interferometer* h, int* status)
 {
-    int num_threads = 1, num_vis_blocks;
+    int i, num_threads;
+    oskar_Thread** threads = 0;
+    ThreadArgs* args = 0;
     if (*status || !h) return;
 
     /* Check the visibilities are going somewhere. */
@@ -506,19 +571,25 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
     /* Initialise if required. */
     oskar_interferometer_check_init(h, status);
 
-    /* Get the number of visibility blocks to be processed. */
-    num_vis_blocks = oskar_interferometer_num_vis_blocks(h);
+    /* Set up worker threads. */
+    num_threads = h->num_devices + 1;
+    oskar_barrier_set_num_threads(h->barrier, num_threads);
+    threads = (oskar_Thread**) calloc(num_threads, sizeof(oskar_Thread*));
+    args = (ThreadArgs*) calloc(num_threads, sizeof(ThreadArgs));
+    for (i = 0; i < num_threads; ++i)
+    {
+        args[i].h = h;
+        args[i].num_threads = num_threads;
+        args[i].thread_id = i;
+    }
 
     /* Record memory usage. */
     if (h->log && !*status)
     {
         oskar_log_section(h->log, 'M', "Initial memory usage");
 #ifdef OSKAR_HAVE_CUDA
-        {
-            int i;
-            for (i = 0; i < h->num_gpus; ++i)
-                oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
-        }
+        for (i = 0; i < h->num_gpus; ++i)
+            oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
 #endif
         system_mem_log(h->log);
         oskar_log_section(h->log, 'M', "Starting simulation...");
@@ -527,82 +598,33 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
     /* Start simulation timer. */
     oskar_timer_start(h->tmr_sim);
 
-    /*-----------------------------------------------------------------------
-     *-- START OF MULTITHREADED SIMULATION CODE -----------------------------
-     *-----------------------------------------------------------------------*/
-    /* Loop over blocks of observation time, running simulation and file
-     * writing one block at a time. Simulation and file output are overlapped
-     * by using double buffering, and a dedicated thread is used for file
-     * output.
-     *
-     * Thread 0 is used for file writes.
-     * Threads 1 to n (mapped to compute devices) do the simulation.
-     *
-     * Note that no write is launched on the first loop counter (as no
-     * data are ready yet) and no simulation is performed for the last loop
-     * counter (which corresponds to the last block + 1) as this iteration
-     * simply writes the last block.
-     */
-#ifdef _OPENMP
-    num_threads = h->num_devices + 1;
-    omp_set_num_threads(num_threads);
-    omp_set_nested(0);
-#else
-    oskar_log_warning(h->log, "OpenMP not found: Using one compute device.");
-#endif
+    /* Set status code. */
+    h->status = *status;
 
+    /* Start the worker threads. */
     oskar_interferometer_reset_work_unit_index(h);
-#pragma omp parallel
+    for (i = 0; i < num_threads; ++i)
+        threads[i] = oskar_thread_create(run_blocks, (void*)&args[i], 0);
+
+    /* Wait for worker threads to finish. */
+    for (i = 0; i < num_threads; ++i)
     {
-        int b, thread_id = 0, device_id = 0;
-
-        /* Get host thread ID and device ID. */
-#ifdef _OPENMP
-        thread_id = omp_get_thread_num();
-        device_id = thread_id - 1;
-#endif
-
-        /* Loop over simulation time blocks (+1, for the last write). */
-        for (b = 0; b < num_vis_blocks + 1; ++b)
-        {
-            if ((thread_id > 0 || num_threads == 1) && b < num_vis_blocks)
-                oskar_interferometer_run_block(h, b, device_id, status);
-            if (thread_id == 0 && b > 0)
-            {
-                oskar_VisBlock* block;
-                block = oskar_interferometer_finalise_block(h, b - 1, status);
-                oskar_interferometer_write_block(h, block, b - 1, status);
-            }
-
-            /* Barrier 1: Reset work unit index. */
-#pragma omp barrier
-            if (thread_id == 0)
-                oskar_interferometer_reset_work_unit_index(h);
-
-            /* Barrier 2: Synchronise before moving to the next block. */
-#pragma omp barrier
-            if (thread_id == 0 && b < num_vis_blocks && h->log && !*status)
-                oskar_log_message(h->log, 'S', 0, "Block %*i/%i (%3.0f%%) "
-                        "complete. Simulation time elapsed: %.3f s",
-                        disp_width(num_vis_blocks), b+1, num_vis_blocks,
-                        100.0 * (b+1) / (double)num_vis_blocks,
-                        oskar_timer_elapsed(h->tmr_sim));
-        }
+        oskar_thread_join(threads[i]);
+        oskar_thread_free(threads[i]);
     }
-    /*-----------------------------------------------------------------------
-     *-- END OF MULTITHREADED SIMULATION CODE -------------------------------
-     *-----------------------------------------------------------------------*/
+    free(threads);
+    free(args);
+
+    /* Get status code. */
+    *status = h->status;
 
     /* Record memory usage. */
     if (h->log && !*status)
     {
         oskar_log_section(h->log, 'M', "Final memory usage");
 #ifdef OSKAR_HAVE_CUDA
-        {
-            int i;
-            for (i = 0; i < h->num_gpus; ++i)
-                oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
-        }
+        for (i = 0; i < h->num_gpus; ++i)
+            oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
 #endif
         system_mem_log(h->log);
     }
@@ -699,7 +721,7 @@ void oskar_interferometer_set_gpus(oskar_Interferometer* h, int num,
         const int* ids, int* status)
 {
     int i, num_gpus_avail;
-    if (*status) return;
+    if (*status || !h) return;
     free_device_data(h, status);
     num_gpus_avail = oskar_device_count(status);
     if (*status) return;
@@ -767,10 +789,8 @@ void oskar_interferometer_set_num_devices(oskar_Interferometer* h, int value)
 {
     int status = 0;
     free_device_data(h, &status);
-#ifdef _OPENMP
     if (value < 1)
-        value = (h->num_gpus == 0) ? (omp_get_num_procs() - 1) : h->num_gpus;
-#endif
+        value = (h->num_gpus == 0) ? (oskar_get_num_procs() - 1) : h->num_gpus;
     if (value < 1) value = 1;
     h->num_devices = value;
     h->d = (DeviceData*) realloc(h->d, h->num_devices * sizeof(DeviceData));
@@ -800,7 +820,7 @@ void oskar_interferometer_set_settings_path(oskar_Interferometer* h,
         const char* filename)
 {
     int len;
-    len = strlen(filename);
+    len = (int) strlen(filename);
     if (len == 0) return;
     free(h->settings_path);
     h->settings_path = calloc(1 + len, 1);
@@ -822,7 +842,8 @@ void oskar_interferometer_set_sky_model(oskar_Interferometer* h,
     h->num_sky_chunks = 0;
 
     /* Split up the sky model into chunks and store them. */
-    if (oskar_sky_num_sources(sky) > 0)
+    h->num_sources_total = oskar_sky_num_sources(sky);
+    if (h->num_sources_total > 0)
         oskar_sky_append_to_set(&h->num_sky_chunks, &h->sky_chunks,
                 h->max_sources_per_chunk, sky, status);
     h->init_sky = 0;
@@ -832,7 +853,7 @@ void oskar_interferometer_set_sky_model(oskar_Interferometer* h,
     {
         oskar_log_section(h->log, 'M', "Sky model summary");
         oskar_log_value(h->log, 'M', 0, "Num. sources", "%d",
-                oskar_sky_num_sources(sky));
+                h->num_sources_total);
         oskar_log_value(h->log, 'M', 0, "Num. chunks", "%d",
                 h->num_sky_chunks);
     }
@@ -867,9 +888,10 @@ void oskar_interferometer_set_output_vis_file(oskar_Interferometer* h,
         const char* filename)
 {
     int len;
-    len = strlen(filename);
-    if (len == 0) return;
+    len = (int) strlen(filename);
     free(h->vis_name);
+    h->vis_name = 0;
+    if (len == 0) return;
     h->vis_name = calloc(1 + len, 1);
     strcpy(h->vis_name, filename);
 }
@@ -879,11 +901,17 @@ void oskar_interferometer_set_output_measurement_set(oskar_Interferometer* h,
         const char* filename)
 {
     int len;
-    len = strlen(filename);
-    if (len == 0) return;
+    len = (int) strlen(filename);
     free(h->ms_name);
-    h->ms_name = calloc(1 + len, 1);
-    strcpy(h->ms_name, filename);
+    h->ms_name = 0;
+    if (len == 0) return;
+    h->ms_name = calloc(6 + len, 1);
+    if ((len >= 3) && (
+            !strcmp(&(filename[len-3]), ".MS") ||
+            !strcmp(&(filename[len-3]), ".ms") ))
+        strcpy(h->ms_name, filename);
+    else
+        sprintf(h->ms_name, "%s.MS", filename);
 }
 
 

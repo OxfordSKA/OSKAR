@@ -48,31 +48,29 @@ namespace oskar {
  * @brief
  * A list of integers or a single special string
  */
-
-class OSKAR_SETTINGS_EXPORT IntListExt : public AbstractSettingsType
+class IntListExt : public AbstractSettingsType
 {
  public:
     typedef ttl::var::variant<std::vector<int>, std::string> Value;
 
  public:
-    IntListExt();
-    virtual ~IntListExt() {}
+    OSKAR_SETTINGS_EXPORT IntListExt();
+    OSKAR_SETTINGS_EXPORT virtual ~IntListExt();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    const char* special_string() const;
-    bool is_extended() const;
-    int size() const;
-    const int* values() const;
+    OSKAR_SETTINGS_EXPORT const char* special_string() const;
+    OSKAR_SETTINGS_EXPORT bool is_extended() const;
+    OSKAR_SETTINGS_EXPORT int size() const;
+    OSKAR_SETTINGS_EXPORT const int* values() const;
 
-    bool operator==(const IntListExt& other) const;
-    bool operator>(const IntListExt&) const { return false; }
+    OSKAR_SETTINGS_EXPORT bool operator==(const IntListExt& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const IntListExt&) const;
 
  private:
-    static bool compare_(const Value& a, const Value& b);
     bool from_string_(const std::string& s, Value& val) const;
     std::string to_string_(const Value& v);
     std::string special_value_;

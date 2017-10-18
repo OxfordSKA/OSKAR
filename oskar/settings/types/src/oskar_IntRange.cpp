@@ -41,10 +41,14 @@ namespace oskar {
 
 IntRange::IntRange()
 {
-    (void) init(string());
+    (void) init("");
 }
 
-bool IntRange::init(const string& s)
+IntRange::~IntRange()
+{
+}
+
+bool IntRange::init(const char* s)
 {
     min_ = -INT_MAX;
     max_ =  INT_MAX;
@@ -84,7 +88,7 @@ bool IntRange::init(const string& s)
     return false;
 }
 
-bool IntRange::set_default(const string& value)
+bool IntRange::set_default(const char* value)
 {
     bool ok = from_string_(value, default_);
     str_default_ = oskar_settings_utility_int_to_string(default_);
@@ -93,7 +97,7 @@ bool IntRange::set_default(const string& value)
     return ok;
 }
 
-bool IntRange::set_value(const string& value)
+bool IntRange::set_value(const char* value)
 {
     bool ok = from_string_(value, value_);
     str_value_ = oskar_settings_utility_int_to_string(value_);
@@ -103,6 +107,26 @@ bool IntRange::set_value(const string& value)
 bool IntRange::is_default() const
 {
     return (value_ == default_);
+}
+
+int IntRange::value() const
+{
+    return value_;
+}
+
+int IntRange::default_value() const
+{
+    return default_;
+}
+
+int IntRange::min() const
+{
+    return min_;
+}
+
+int IntRange::max() const
+{
+    return max_;
 }
 
 bool IntRange::operator==(const IntRange& other) const

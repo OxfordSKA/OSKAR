@@ -44,27 +44,26 @@ namespace oskar {
  * @class UnsignedInt
  *
  * @brief
- * Unsigend integer value.
+ * Unsigned integer value.
  *
  * @details
  */
-
-class OSKAR_SETTINGS_EXPORT UnsignedInt : public AbstractSettingsType
+class UnsignedInt : public AbstractSettingsType
 {
 public:
-    UnsignedInt();
-    virtual ~UnsignedInt() {}
+    OSKAR_SETTINGS_EXPORT UnsignedInt();
+    OSKAR_SETTINGS_EXPORT virtual ~UnsignedInt();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    unsigned int value() const { return value_; }
-    unsigned int default_value() const { return default_; }
+    OSKAR_SETTINGS_EXPORT unsigned int value() const;
+    OSKAR_SETTINGS_EXPORT unsigned int default_value() const;
 
-    bool operator==(const UnsignedInt& other) const;
-    bool operator>(const UnsignedInt& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator==(const UnsignedInt& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const UnsignedInt& other) const;
 
 private:
     unsigned int default_, value_;

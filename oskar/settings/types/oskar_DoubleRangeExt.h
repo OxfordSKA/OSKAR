@@ -65,38 +65,35 @@ namespace oskar {
  * values (i.e. from -DBL_MAX to DBL_MAX), with a value of 0.0 and no extended
  * string values.
  */
-
-class OSKAR_SETTINGS_EXPORT DoubleRangeExt : public AbstractSettingsType
+class DoubleRangeExt : public AbstractSettingsType
 {
 public:
     typedef ttl::var::variant<double, std::string> Value;
     enum Format { AUTO, EXPONENT };
 
-    DoubleRangeExt();
-    virtual ~DoubleRangeExt() {}
+    OSKAR_SETTINGS_EXPORT DoubleRangeExt();
+    OSKAR_SETTINGS_EXPORT virtual ~DoubleRangeExt();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    double value() const;
-    double min() const { return min_; }
-    double max() const { return max_; }
-    const char* ext_min() const { return ext_min_.c_str(); }
-    const char* ext_max() const { return ext_max_.c_str(); }
+    OSKAR_SETTINGS_EXPORT double value() const;
+    OSKAR_SETTINGS_EXPORT double min() const;
+    OSKAR_SETTINGS_EXPORT double max() const;
+    OSKAR_SETTINGS_EXPORT const char* ext_min() const;
+    OSKAR_SETTINGS_EXPORT const char* ext_max() const;
 
-    bool operator==(const DoubleRangeExt& other) const;
-    bool operator>(const DoubleRangeExt& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator==(const DoubleRangeExt& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const DoubleRangeExt& other) const;
 
 private:
-    static bool compare_(const Value& a, const Value& b);
     bool from_string_(Value& value, const std::string& s) const;
     std::string to_string_(const Value& value) const;
 
     double min_, max_;
     std::string ext_min_, ext_max_;
-    enum value_types { DOUBLE, STRING };
     Format format_;
     Value default_, value_;
 };

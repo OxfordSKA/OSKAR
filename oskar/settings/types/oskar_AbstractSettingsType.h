@@ -47,29 +47,29 @@ namespace oskar {
  *
  * @brief Interface class for settings types.
  */
-
-class OSKAR_SETTINGS_EXPORT AbstractSettingsType
+class AbstractSettingsType
 {
 public:
-    virtual ~AbstractSettingsType() {}
+    OSKAR_SETTINGS_EXPORT AbstractSettingsType();
+    OSKAR_SETTINGS_EXPORT virtual ~AbstractSettingsType();
 
     /// Initialises the type from a CSV parameter string.
-    virtual bool init(const std::string& parameters) = 0;
+    OSKAR_SETTINGS_EXPORT virtual bool init(const char* parameters) = 0;
 
     /// Gets the default as a string.
-    const char* get_default() const;
+    OSKAR_SETTINGS_EXPORT const char* get_default() const;
 
     /// Gets the value as a string.
-    const char* get_value() const;
+    OSKAR_SETTINGS_EXPORT const char* get_value() const;
 
     /// Returns true if the value is the same as the default.
-    virtual bool is_default() const = 0;
+    OSKAR_SETTINGS_EXPORT virtual bool is_default() const = 0;
 
     /// Sets the default value from a string
-    virtual bool set_default(const std::string& value) = 0;
+    OSKAR_SETTINGS_EXPORT virtual bool set_default(const char* value) = 0;
 
     /// Sets the value from a string
-    virtual bool set_value(const std::string& value) = 0;
+    OSKAR_SETTINGS_EXPORT virtual bool set_value(const char* value) = 0;
 
 protected:
     std::string str_default_, str_value_;
@@ -77,4 +77,4 @@ protected:
 
 } /* namespace oskar */
 
-#endif /* OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_H_ */
+#endif /* OSKAR_ABSTRACT_SETTINGS_TYPE_H_ */

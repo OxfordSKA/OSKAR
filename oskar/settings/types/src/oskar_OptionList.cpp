@@ -34,16 +34,24 @@
 
 namespace oskar {
 
-bool OptionList::init(const std::string& s)
+OptionList::OptionList()
+{
+}
+
+OptionList::~OptionList()
+{
+}
+
+bool OptionList::init(const char* s)
 {
     options_.clear();
     options_ = oskar_settings_utility_string_get_type_params(s);
     if (options_.size() > 0)
-        set_default(options_[0]);
+        set_default(options_[0].c_str());
     return true;
 }
 
-bool OptionList::set_default(const std::string& value)
+bool OptionList::set_default(const char* value)
 {
     bool ok = from_string_(str_default_, value);
     if (ok)
@@ -51,7 +59,7 @@ bool OptionList::set_default(const std::string& value)
     return ok;
 }
 
-bool OptionList::set_value(const std::string& value)
+bool OptionList::set_value(const char* value)
 {
     return from_string_(str_value_, value);
 }
@@ -63,10 +71,12 @@ bool OptionList::operator==(const OptionList& other) const
     return str_value_ == other.str_value_;
 }
 
-int OptionList::size() const
+bool OptionList::operator>(const OptionList&) const
 {
-    return (int) options_.size();
+    return false;
 }
+
+int OptionList::size() const { return (int) options_.size(); }
 
 const char* OptionList::option(int i) const
 {

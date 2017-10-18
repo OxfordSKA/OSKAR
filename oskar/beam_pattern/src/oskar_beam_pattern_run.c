@@ -40,19 +40,20 @@
 #include "utility/oskar_get_memory_usage.h"
 #include "oskar_version.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 #include <fitsio.h>
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
-#include <stdlib.h>
-#include <string.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+static void* run_blocks(void* arg);
 static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
         int i_channel, int i_active, int device_id, int* status);
 static void write_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
@@ -78,10 +79,18 @@ static void record_timing(oskar_BeamPattern* h);
 static unsigned int disp_width(unsigned int value);
 
 
+struct ThreadArgs
+{
+    oskar_BeamPattern* h;
+    int num_threads, thread_id;
+};
+typedef struct ThreadArgs ThreadArgs;
+
 void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 {
-    int i_global = 0, num_threads = 1;
-    int cp = 0, tp = 0, fp = 0; /* Loop indices for previous iteration. */
+    int i, num_threads;
+    oskar_Thread** threads = 0;
+    ThreadArgs* args = 0;
     if (*status || !h) return;
 
     /* Check root name exists. */
@@ -95,11 +104,22 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
     /* Initialise if required. */
     oskar_beam_pattern_check_init(h, status);
 
+    /* Set up worker threads. */
+    num_threads = h->num_devices + 1;
+    oskar_barrier_set_num_threads(h->barrier, num_threads);
+    threads = (oskar_Thread**) calloc(num_threads, sizeof(oskar_Thread*));
+    args = (ThreadArgs*) calloc(num_threads, sizeof(ThreadArgs));
+    for (i = 0; i < num_threads; ++i)
+    {
+        args[i].h = h;
+        args[i].num_threads = num_threads;
+        args[i].thread_id = i;
+    }
+
     /* Record memory usage. */
     if (h->log && !*status)
     {
 #ifdef OSKAR_HAVE_CUDA
-        int i;
         oskar_log_section(h->log, 'M', "Initial memory usage");
         for (i = 0; i < h->num_gpus; ++i)
             oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
@@ -107,102 +127,32 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
         oskar_log_section(h->log, 'M', "Starting simulation...");
     }
 
+    /* Set status code. */
+    h->status = *status;
+
     /* Start simulation timer. */
     oskar_timer_start(h->tmr_sim);
 
-    /*-----------------------------------------------------------------------
-     *-- START OF MULTITHREADED SIMULATION CODE -----------------------------
-     *-----------------------------------------------------------------------*/
-    /* Loop over image pixel chunks, running simulation and file writing one
-     * chunk at a time. Simulation and file output are overlapped by using
-     * double buffering, and a dedicated thread is used for file output.
-     *
-     * Thread 0 is used for file writes.
-     * Threads 1 to n (mapped to compute devices) do the simulation.
-     */
-#ifdef _OPENMP
-    num_threads = h->num_devices + 1;
-    omp_set_num_threads(num_threads);
-    omp_set_nested(0);
-#else
-    oskar_log_warning(log, "OpenMP not found: Using one compute device.");
-#endif
+    /* Start the worker threads. */
+    for (i = 0; i < num_threads; ++i)
+        threads[i] = oskar_thread_create(run_blocks, (void*)&args[i], 0);
 
-#pragma omp parallel
+    /* Wait for worker threads to finish. */
+    for (i = 0; i < num_threads; ++i)
     {
-        int i_inner, i_outer, num_inner, num_outer, c, t, f;
-        int thread_id = 0, device_id = 0;
-
-        /* Get host thread ID and device ID. */
-#ifdef _OPENMP
-        thread_id = omp_get_thread_num();
-        device_id = thread_id - 1;
-#endif
-        if (device_id >= 0 && device_id < h->num_gpus)
-            oskar_device_set(h->gpu_ids[device_id], status);
-
-        /* Set ranges of inner and outer loops based on averaging mode. */
-        if (h->average_single_axis != 'T')
-        {
-            num_outer = h->num_time_steps;
-            num_inner = h->num_channels; /* Channel on inner loop. */
-        }
-        else
-        {
-            num_outer = h->num_channels;
-            num_inner = h->num_time_steps; /* Time on inner loop. */
-        }
-
-        /* Loop over chunks, times and channels. */
-        for (c = 0; c < h->num_chunks; c += h->num_devices)
-        {
-            for (i_outer = 0; i_outer < num_outer; ++i_outer)
-            {
-                for (i_inner = 0; i_inner < num_inner; ++i_inner)
-                {
-                    /* Set time and channel indices based on averaging mode. */
-                    if (h->average_single_axis != 'T')
-                    {
-                        t = i_outer;
-                        f = i_inner;
-                    }
-                    else
-                    {
-                        f = i_outer;
-                        t = i_inner;
-                    }
-                    if (thread_id > 0 || num_threads == 1)
-                        sim_chunks(h, c, t, f, i_global & 1, device_id, status);
-                    if (thread_id == 0 && i_global > 0)
-                        write_chunks(h, cp, tp, fp, i_global & 1, status);
-
-                    /* Barrier 1: Set indices of the previous chunk(s). */
-#pragma omp barrier
-                    if (thread_id == 0)
-                    {
-                        cp = c;
-                        tp = t;
-                        fp = f;
-                        i_global++;
-                    }
-                    /* Barrier 2: Check sim and write are done. */
-#pragma omp barrier
-                }
-            }
-        }
+        oskar_thread_join(threads[i]);
+        oskar_thread_free(threads[i]);
     }
-    /*-----------------------------------------------------------------------
-     *-- END OF MULTITHREADED SIMULATION CODE -------------------------------
-     *-----------------------------------------------------------------------*/
+    free(threads);
+    free(args);
 
-    /* Write the very last chunk(s). */
-    write_chunks(h, cp, tp, fp, i_global & 1, status);
+    /* Get status code. */
+    *status = h->status;
 
     /* Record memory usage. */
     if (h->log && !*status)
     {
 #ifdef OSKAR_HAVE_CUDA
-        int i;
         oskar_log_section(h->log, 'M', "Final memory usage");
         for (i = 0; i < h->num_gpus; ++i)
             oskar_cuda_mem_log(h->log, 0, h->gpu_ids[i]);
@@ -218,6 +168,96 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 
 
 /* Private methods. */
+
+static void* run_blocks(void* arg)
+{
+    oskar_BeamPattern* h;
+    int i_inner, i_outer, num_inner, num_outer, c, t, f;
+    int thread_id, device_id, num_threads, *status;
+
+    /* Loop indices for previous iteration (accessed only by thread 0). */
+    int cp = 0, tp = 0, fp = 0;
+
+    /* Get thread function arguments. */
+    h = ((ThreadArgs*)arg)->h;
+    num_threads = ((ThreadArgs*)arg)->num_threads;
+    thread_id = ((ThreadArgs*)arg)->thread_id;
+    device_id = thread_id - 1;
+    status = &(h->status);
+
+#ifdef _OPENMP
+    /* Disable any nested parallelism. */
+    omp_set_nested(0);
+    omp_set_num_threads(1);
+#endif
+
+    if (device_id >= 0 && device_id < h->num_gpus)
+        oskar_device_set(h->gpu_ids[device_id], status);
+
+    /* Set ranges of inner and outer loops based on averaging mode. */
+    if (h->average_single_axis != 'T')
+    {
+        num_outer = h->num_time_steps;
+        num_inner = h->num_channels; /* Channel on inner loop. */
+    }
+    else
+    {
+        num_outer = h->num_channels;
+        num_inner = h->num_time_steps; /* Time on inner loop. */
+    }
+
+    /* Loop over image pixel chunks, running simulation and file writing one
+     * chunk at a time. Simulation and file output are overlapped by using
+     * double buffering, and a dedicated thread is used for file output.
+     *
+     * Thread 0 is used for file writes.
+     * Threads 1 to n (mapped to compute devices) do the simulation.
+     */
+    for (c = 0; c < h->num_chunks; c += h->num_devices)
+    {
+        for (i_outer = 0; i_outer < num_outer; ++i_outer)
+        {
+            for (i_inner = 0; i_inner < num_inner; ++i_inner)
+            {
+                /* Set time and channel indices based on averaging mode. */
+                if (h->average_single_axis != 'T')
+                {
+                    t = i_outer;
+                    f = i_inner;
+                }
+                else
+                {
+                    f = i_outer;
+                    t = i_inner;
+                }
+                if (thread_id > 0 || num_threads == 1)
+                    sim_chunks(h, c, t, f, h->i_global & 1, device_id, status);
+                if (thread_id == 0 && h->i_global > 0)
+                    write_chunks(h, cp, tp, fp, h->i_global & 1, status);
+
+                /* Barrier 1: Set indices of the previous chunk(s). */
+                oskar_barrier_wait(h->barrier);
+                if (thread_id == 0)
+                {
+                    cp = c;
+                    tp = t;
+                    fp = f;
+                    h->i_global++;
+                }
+
+                /* Barrier 2: Check sim and write are done. */
+                oskar_barrier_wait(h->barrier);
+            }
+        }
+    }
+
+    /* Write the very last chunk(s). */
+    if (thread_id == 0)
+        write_chunks(h, cp, tp, fp, h->i_global & 1, status);
+
+    return 0;
+}
+
 
 static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
         int i_channel, int i_active, int device_id, int* status)

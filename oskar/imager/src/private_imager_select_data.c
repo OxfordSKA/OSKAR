@@ -41,7 +41,7 @@ extern "C" {
 static
 void copy_vis_pol(size_t num_rows, int num_channels, int num_pols,
         int c, int p, const oskar_Mem* vis_in, const oskar_Mem* weight_in,
-        oskar_Mem* vis_out, oskar_Mem* weight_out, int out_offset,
+        oskar_Mem* vis_out, oskar_Mem* weight_out, size_t out_offset,
         int* status);
 
 void oskar_imager_select_data(
@@ -165,7 +165,7 @@ void oskar_imager_select_data(
 
 void copy_vis_pol(size_t num_rows, int num_channels, int num_pols,
         int c, int p, const oskar_Mem* vis_in, const oskar_Mem* weight_in,
-        oskar_Mem* vis_out, oskar_Mem* weight_out, int out_offset,
+        oskar_Mem* vis_out, oskar_Mem* weight_out, size_t out_offset,
         int* status)
 {
     size_t r;

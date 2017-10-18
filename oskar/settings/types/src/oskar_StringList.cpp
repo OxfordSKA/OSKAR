@@ -38,9 +38,26 @@ using namespace std;
 
 namespace oskar {
 
-StringList::StringList() : delimiter_(',') {}
+static string to_string(const vector<string>& values, char delimiter)
+{
+    ostringstream ss;
+    for (size_t i = 0u; i < values.size(); ++i)
+    {
+        ss << values.at(i);
+        if (i < values.size() - 1) ss << delimiter;
+    }
+    return ss.str();
+}
 
-bool StringList::init(const string& /*s*/)
+StringList::StringList() : delimiter_(',')
+{
+}
+
+StringList::~StringList()
+{
+}
+
+bool StringList::init(const char* /*s*/)
 {
      // TODO(BM) allow a a different delimiter via the init method?
      value_.clear();
@@ -49,18 +66,18 @@ bool StringList::init(const string& /*s*/)
      return true;
 }
 
-bool StringList::set_default(const string& s)
+bool StringList::set_default(const char* s)
 {
     default_ = oskar_settings_utility_string_get_type_params(s);
-    str_default_ = to_string_(default_);
+    str_default_ = to_string(default_, delimiter_);
     set_value(s);
     return true;
 }
 
-bool StringList::set_value(const string& s)
+bool StringList::set_value(const char* s)
 {
     value_ = oskar_settings_utility_string_get_type_params(s);
-    str_value_ = to_string_(value_);
+    str_value_ = to_string(value_, delimiter_);
     pointers_.clear();
     for (size_t i = 0; i < value_.size(); ++i)
         pointers_.push_back(value_[i].c_str());
@@ -72,10 +89,7 @@ bool StringList::is_default() const
     return compare_vectors(value_, default_);
 }
 
-int StringList::size() const
-{
-    return (int) value_.size();
-}
+int StringList::size() const { return (int) value_.size(); }
 
 const char* const* StringList::values() const
 {
@@ -87,15 +101,9 @@ bool StringList::operator==(const StringList& other) const
     return compare_vectors(value_, other.value_);
 }
 
-string StringList::to_string_(const vector<string>& values) const
+bool StringList::operator>(const StringList&) const
 {
-    ostringstream ss;
-    for (size_t i = 0u; i < values.size(); ++i)
-    {
-        ss << values.at(i);
-        if (i < values.size() - 1) ss << delimiter_;
-    }
-    return ss.str();
+    return false;
 }
 
 } // namespace oskar

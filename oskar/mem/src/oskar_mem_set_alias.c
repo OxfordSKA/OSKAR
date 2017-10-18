@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ extern "C" {
 void oskar_mem_set_alias(oskar_Mem* mem, const oskar_Mem* src, size_t offset,
         size_t num_elements, int* status)
 {
-    size_t element_size = 0, offset_bytes = 0;
+    size_t element_size = 0;
 
     /* The destination structure must not own its memory.
      * The structure must have been created using oskar_mem_create_alias*(),
@@ -62,14 +62,31 @@ void oskar_mem_set_alias(oskar_Mem* mem, const oskar_Mem* src, size_t offset,
         return;
     }
 
-    /* Compute the offset for the new pointer. */
-    offset_bytes = offset * element_size;
-
     /* Set meta-data. */
     mem->type = src->type;
     mem->location = src->location;
     mem->num_elements = num_elements;
-    mem->data = (void*)((char*)(src->data) + offset_bytes);
+
+#ifdef OSKAR_HAVE_OPENCL
+    if (mem->location & OSKAR_CL)
+    {
+        cl_int error = 0;
+        cl_buffer_region r;
+        r.origin = element_size * offset;
+        r.size   = element_size * num_elements;
+        clReleaseMemObject(mem->buffer);
+        mem->buffer = clCreateSubBuffer(src->buffer,
+                CL_MEM_READ_WRITE, CL_BUFFER_CREATE_TYPE_REGION,
+                &r, &error);
+        if (error != CL_SUCCESS)
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    }
+    else
+#endif
+    {
+        size_t offset_bytes = offset * element_size;
+        mem->data = (void*)((char*)(src->data) + offset_bytes);
+    }
 }
 
 #ifdef __cplusplus

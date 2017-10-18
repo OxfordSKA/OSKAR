@@ -41,64 +41,7 @@ using namespace std;
 
 namespace oskar {
 
-Time::Time()
-{
-    (void) init(string());
-}
-
-bool Time::init(const string& /*s*/)
-{
-    default_.clear();
-    value_.clear();
-    str_default_ = to_string(default_);
-    str_value_ = to_string(value_);
-    return true;
-}
-
-bool Time::set_default(const string& val)
-{
-    bool ok = from_string(val, default_);
-    str_default_ = to_string(default_);
-    if (ok)
-        set_value(val);
-    else
-        init(string());
-    return ok;
-}
-
-bool Time::set_value(const string& val)
-{
-    bool ok = from_string(val, value_);
-    str_value_ = to_string(value_);
-    return ok;
-}
-
-bool Time::is_default() const
-{
-    bool answer = true;
-    answer &= (value_.hours == default_.hours);
-    answer &= (value_.minutes == default_.minutes);
-    answer &= (fabs(value_.seconds - default_.seconds) < 1e-6);
-    return answer;
-}
-
-double Time::to_seconds() const
-{
-    if (value_.seconds > 60.) return value_.seconds;
-    return (value_.hours * 3600.0) + (value_.minutes * 60.0) + value_.seconds;
-}
-
-bool Time::operator==(const Time& other) const
-{
-    return (fabs(to_seconds() - other.to_seconds()) < 1e-6);
-}
-
-bool Time::operator>(const Time& other) const
-{
-    return to_seconds() > other.to_seconds();
-}
-
-bool Time::from_string(const string& s, Value& val)
+static bool from_string(const string& s, Time::Value& val)
 {
     bool ok = true;
     if (s.empty())
@@ -113,7 +56,7 @@ bool Time::from_string(const string& s, Value& val)
         val.hours = floor(seconds / 3600.);
         val.minutes = floor((seconds - (val.hours * 3600.)) / 60.);
         val.seconds = seconds - (val.hours * 3600.) - (val.minutes * 60.);
-        val.format = SECONDS;
+        val.format = Time::SECONDS;
     }
     // hh:mm:ss.zzzzzzzzz
     else
@@ -132,19 +75,19 @@ bool Time::from_string(const string& s, Value& val)
         val.hours = hours;
         val.minutes = minutes;
         val.seconds = seconds;
-        val.format = TIME_STRING;
+        val.format = Time::TIME_STRING;
     }
     return true;
 }
 
-string Time::to_string(const Value& val)
+static string to_string(const Time::Value& val)
 {
     ostringstream ss;
-    if (val.format == UNDEF)
+    if (val.format == Time::UNDEF)
     {
         return string();
     }
-    else if (val.format == TIME_STRING)
+    else if (val.format == Time::TIME_STRING)
     {
         char sep = ':';
         ss << setfill('0') << setw(2) << val.hours << sep;
@@ -153,12 +96,78 @@ string Time::to_string(const Value& val)
             ss << 0;
         ss << oskar_settings_utility_double_to_string_2(val.seconds, 'f', 12);
     }
-    else if (val.format == SECONDS)
+    else if (val.format == Time::SECONDS)
     {
         double seconds = val.hours * 3600. + val.minutes * 60. + val.seconds;
         ss << oskar_settings_utility_double_to_string_2(seconds, 'f', 12);
     }
     return ss.str();
+}
+
+Time::Time()
+{
+    (void) init(0);
+}
+
+Time::~Time()
+{
+}
+
+bool Time::init(const char* /*s*/)
+{
+    default_.clear();
+    value_.clear();
+    str_default_ = to_string(default_);
+    str_value_ = to_string(value_);
+    return true;
+}
+
+bool Time::set_default(const char* val)
+{
+    bool ok = from_string(val, default_);
+    str_default_ = to_string(default_);
+    if (ok)
+        set_value(val);
+    else
+        init(0);
+    return ok;
+}
+
+bool Time::set_value(const char* val)
+{
+    bool ok = from_string(val, value_);
+    str_value_ = to_string(value_);
+    return ok;
+}
+
+bool Time::is_default() const
+{
+    bool answer = true;
+    answer &= (value_.hours == default_.hours);
+    answer &= (value_.minutes == default_.minutes);
+    answer &= (fabs(value_.seconds - default_.seconds) < 1e-6);
+    return answer;
+}
+
+Time::Value Time::value() const
+{
+    return value_;
+}
+
+double Time::to_seconds() const
+{
+    if (value_.seconds > 60.) return value_.seconds;
+    return (value_.hours * 3600.0) + (value_.minutes * 60.0) + value_.seconds;
+}
+
+bool Time::operator==(const Time& other) const
+{
+    return (fabs(to_seconds() - other.to_seconds()) < 1e-6);
+}
+
+bool Time::operator>(const Time& other) const
+{
+    return to_seconds() > other.to_seconds();
 }
 
 } // namespace oskar

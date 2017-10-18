@@ -269,7 +269,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         handle->payload_offset_bytes[i] = ftell(stream);
 
         /* Increment stream pointer by payload size. */
-        if (fseek(stream, handle->payload_size_bytes[i], SEEK_CUR) != 0)
+        if (fseek(stream, (long int) handle->payload_size_bytes[i], SEEK_CUR))
         {
             *status = OSKAR_ERR_BINARY_FILE_INVALID;
             break;

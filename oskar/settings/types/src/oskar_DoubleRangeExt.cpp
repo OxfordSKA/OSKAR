@@ -41,12 +41,29 @@ using ttl::var::get;
 
 namespace oskar {
 
-DoubleRangeExt::DoubleRangeExt()
+enum value_types { DOUBLE, STRING };
+
+bool compare(const DoubleRangeExt::Value& a, const DoubleRangeExt::Value& b)
 {
-    (void) init(string());
+    if (a.is_singular() || b.is_singular()) return false;
+    if (a.which() != b.which()) return false;
+    if (a.which() == DOUBLE)
+        return (fabs(get<double>(a) - get<double>(b)) < DBL_MIN);
+    if (a.which() == STRING)
+        return get<string>(a) == get<string>(b);
+    return false;
 }
 
-bool DoubleRangeExt::init(const string& s)
+DoubleRangeExt::DoubleRangeExt()
+{
+    (void) init("");
+}
+
+DoubleRangeExt::~DoubleRangeExt()
+{
+}
+
+bool DoubleRangeExt::init(const char* s)
 {
     // Reset the value.
     ext_min_.clear();
@@ -86,24 +103,31 @@ bool DoubleRangeExt::init(const string& s)
     return ok;
 }
 
-bool DoubleRangeExt::set_default(const string& value)
+bool DoubleRangeExt::set_default(const char* value)
 {
-    bool ok = from_string_(default_, value);
+    string v(value);
+    bool ok = from_string_(default_, v);
     if (default_.which() == DOUBLE)
-        format_ = (value.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+        format_ = (v.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
     str_default_ = to_string_(default_);
     if (ok)
         set_value(value);
     return ok;
 }
 
-bool DoubleRangeExt::set_value(const string& value)
+bool DoubleRangeExt::set_value(const char* value)
 {
-    bool ok = from_string_(value_, value);
+    string v(value);
+    bool ok = from_string_(value_, v);
     if (value_.which() == DOUBLE)
-        format_ = (value.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+        format_ = (v.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
     str_value_ = to_string_(value_);
     return ok;
+}
+
+bool DoubleRangeExt::is_default() const
+{
+    return compare(value_, default_);
 }
 
 double DoubleRangeExt::value() const
@@ -115,14 +139,29 @@ double DoubleRangeExt::value() const
     return get<double>(value_);
 }
 
-bool DoubleRangeExt::is_default() const
+double DoubleRangeExt::min() const
 {
-    return compare_(value_, default_);
+    return min_;
+}
+
+double DoubleRangeExt::max() const
+{
+    return max_;
+}
+
+const char* DoubleRangeExt::ext_min() const
+{
+    return ext_min_.c_str();
+}
+
+const char* DoubleRangeExt::ext_max() const
+{
+    return ext_max_.c_str();
 }
 
 bool DoubleRangeExt::operator==(const DoubleRangeExt& other) const
 {
-    return compare_(value_, other.value_);
+    return compare(value_, other.value_);
 }
 
 bool DoubleRangeExt::operator>(const DoubleRangeExt& other) const
@@ -131,17 +170,6 @@ bool DoubleRangeExt::operator>(const DoubleRangeExt& other) const
     if (value_.which() != other.value_.which()) return false;
     if (value_.which() == DOUBLE)
         return get<double>(value_) > get<double>(other.value_);
-    return false;
-}
-
-bool DoubleRangeExt::compare_(const Value& a, const Value& b)
-{
-    if (a.is_singular() || b.is_singular()) return false;
-    if (a.which() != b.which()) return false;
-    if (a.which() == DOUBLE)
-        return (fabs(get<double>(a) - get<double>(b)) < DBL_MIN);
-    if (a.which() == STRING)
-        return get<string>(a) == get<string>(b);
     return false;
 }
 

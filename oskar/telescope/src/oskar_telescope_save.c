@@ -147,7 +147,7 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
     {
         /* Get station name, and a pointer to the station to save. */
         const oskar_Station* s;
-        char station_name[12], *path;
+        char station_name[128], *path;
         sprintf(station_name, "level%1d_%03d", depth, i);
         s = (depth == 0) ? oskar_telescope_station_const(telescope, i) :
                 oskar_station_child_const(station, i);

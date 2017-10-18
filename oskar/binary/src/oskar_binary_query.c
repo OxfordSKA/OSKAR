@@ -97,8 +97,8 @@ int oskar_binary_query_ext(const oskar_Binary* handle,
     if (*status) return 0;
 
     /* Check that string lengths are within range. */
-    lgroup = 1 + strlen(name_group);
-    ltag = 1 + strlen(name_tag);
+    lgroup = 1 + (int) strlen(name_group);
+    ltag = 1 + (int) strlen(name_tag);
     if (lgroup > 255 || ltag > 255)
     {
         *status = OSKAR_ERR_BINARY_TAG_TOO_LONG;

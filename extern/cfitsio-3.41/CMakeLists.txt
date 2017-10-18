@@ -1,11 +1,11 @@
 
 set(cfitsio_SRC
-    buffers.c cfileio.c checksum.c 
-    drvrfile.c 
+    buffers.c cfileio.c checksum.c
+    drvrfile.c
     drvrmem.c
-    #drvrnet.c 
-    #drvrsmem.c 
-    #drvrgsiftp.c 
+    #drvrnet.c
+    #drvrsmem.c
+    #drvrgsiftp.c
     editcol.c edithdu.c eval_l.c
     eval_y.c eval_f.c fitscore.c getcol.c getcolb.c getcold.c getcole.c
     getcoli.c getcolj.c getcolk.c getcoll.c getcols.c getcolsb.c
@@ -45,4 +45,6 @@ set(CMAKE_C_FLAGS_MINSIZEREL ${CFITSIO_FLAGS_RELEASE})
 set(CMAKE_C_FLAGS_RELWITHDEBINFO ${CFITSIO_FLAGS_RELEASE})
 
 add_library(cfitsio STATIC ${cfitsio_SRC})
-
+if (WIN32)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -DFF_NO_UNISTD_H)
+endif()

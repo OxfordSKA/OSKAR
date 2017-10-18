@@ -37,31 +37,63 @@ using namespace std;
 
 namespace oskar {
 
-IntList::IntList()
+static bool from_string(const string& s, vector<int>& values, char delimiter)
 {
-    (void) init(string());
+    // Convert the string to a vector of ints.
+    vector<int> temp;
+    istringstream ss(s);
+    string token;
+    while (getline(ss, token, delimiter))
+    {
+        bool valid = true;
+        int v = oskar_settings_utility_string_to_int(token, &valid);
+        if (!valid) return false;
+        temp.push_back(v);
+    }
+    values = temp;
+    return true;
 }
 
-bool IntList::init(const string& /*s*/)
+static string to_string(const vector<int>& values, char delimiter)
+{
+    ostringstream ss;
+    for (size_t i = 0; i < values.size(); ++i)
+    {
+        ss << values.at(i);
+        if (i < values.size() - 1) ss << delimiter;
+    }
+    return ss.str();
+}
+
+IntList::IntList()
+{
+    (void) init(0);
+}
+
+IntList::~IntList()
+{
+}
+
+bool IntList::init(const char* /*s*/)
 {
     // TODO(BM) Could use this to set the delimiter ... ?
     delimiter_ = ',';
     return true;
 }
 
-bool IntList::set_default(const string& value)
+bool IntList::set_default(const char* value)
 {
-    bool ok = from_string_(value, default_);
-    str_default_ = to_string_(default_);
+    bool ok = from_string(value, default_, delimiter_);
+    str_default_ = to_string(default_, delimiter_);
     if (ok)
         set_value(value);
     return ok;
 }
 
-bool IntList::set_value(const string& value)
+bool IntList::set_value(const char* value)
 {
-    bool ok = from_string_(value, value_);
-    str_value_ = to_string_(value_);
+    bool ok = from_string(value, value_, delimiter_);
+    str_value_ = to_string(value_, delimiter_);
     return ok;
 }
 
@@ -85,32 +117,9 @@ bool IntList::operator==(const IntList& other) const
     return compare_vectors(value_, other.value_);
 }
 
-bool IntList::from_string_(const string& s, vector<int>& values) const
+bool IntList::operator>(const IntList&) const
 {
-    // Convert the string to a vector of ints.
-    vector<int> temp;
-    istringstream ss(s);
-    string token;
-    while (getline(ss, token, delimiter_))
-    {
-        bool valid = true;
-        int v = oskar_settings_utility_string_to_int(token, &valid);
-        if (!valid) return false;
-        temp.push_back(v);
-    }
-    values = temp;
-    return true;
-}
-
-string IntList::to_string_(const vector<int>& values) const
-{
-    ostringstream ss;
-    for (size_t i = 0; i < values.size(); ++i)
-    {
-        ss << values.at(i);
-        if (i < values.size() - 1) ss << delimiter_;
-    }
-    return ss.str();
+    return false;
 }
 
 } // namespace oskar

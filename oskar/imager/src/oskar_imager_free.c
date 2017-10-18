@@ -30,8 +30,9 @@
 
 #include "imager/oskar_imager_free.h"
 #include "imager/oskar_imager_reset_cache.h"
-#include "imager/private_imager_free_gpu_data.h"
+#include "imager/private_imager_free_device_data.h"
 #include "utility/oskar_timer.h"
+#include "utility/oskar_device_utils.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -58,14 +59,22 @@ void oskar_imager_free(oskar_Imager* h, int* status)
     oskar_timer_free(h->tmr_init);
     oskar_timer_free(h->tmr_read);
     oskar_timer_free(h->tmr_write);
+    oskar_mutex_free(h->mutex);
 
-    oskar_imager_free_gpu_data(h, status);
+    oskar_imager_free_device_data(h, status);
+    for (i = 0; i < h->num_gpus; ++i)
+    {
+        oskar_device_set(h->gpu_ids[i], status);
+        oskar_device_reset();
+    }
     for (i = 0; i < h->num_files; ++i)
         free(h->input_files[i]);
     free(h->input_files);
     free(h->input_root);
     free(h->output_root);
     free(h->ms_column);
+    free(h->gpu_ids);
+    free(h->d);
     free(h);
 }
 

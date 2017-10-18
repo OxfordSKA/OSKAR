@@ -32,6 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __msvcfeatures_dot_hpp
 #define __msvcfeatures_dot_hpp
 
+#include <intrin.h>
+
 /*
 #if _MSVC_FULL_VER <= 15
 error "We've only tested MSVC_FULL_VER==15."

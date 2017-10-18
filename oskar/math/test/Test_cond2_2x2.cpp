@@ -52,13 +52,13 @@ TEST(cond2_2x2, single_precision)
 {
     float4c in;
 
-    in.a.x = 0.8147;
-    in.a.y = 0.6324;
-    in.b.x = 0.1270;
-    in.b.y = 0.2785;
-    in.c.x = 0.9058;
-    in.c.y = 0.0975;
-    in.d.x = 0.9134;
-    in.d.y = 0.5469;
+    in.a.x = 0.8147f;
+    in.a.y = 0.6324f;
+    in.b.x = 0.1270f;
+    in.b.y = 0.2785f;
+    in.c.x = 0.9058f;
+    in.c.y = 0.0975f;
+    in.d.x = 0.9134f;
+    in.d.y = 0.5469f;
     EXPECT_NEAR(3.5239, oskar_cond2_2x2_inline_f(&in), 1e-4);
 }

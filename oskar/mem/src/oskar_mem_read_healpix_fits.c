@@ -122,7 +122,7 @@ oskar_Mem* oskar_mem_read_healpix_fits(const char* filename,
     card1[0] = 0;
     status1 = 0;
     fits_read_key(fptr, TSTRING, "TUNIT1", card1, NULL, &status1);
-    len = strlen(card1);
+    len = (int) strlen(card1);
     if (!status1 && len > 0)
     {
         *brightness_units = (char*) realloc (*brightness_units, len + 1);

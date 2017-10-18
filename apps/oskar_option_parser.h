@@ -33,7 +33,7 @@
  * @file oskar_option_parser.h
  */
 
-#include "extern/ezOptionParser-0.2.0/ezOptionParser.hpp"
+#include "extern/ezOptionParser/ezOptionParser.hpp"
 #include <vector>
 #include <string>
 #include <cstdio>
@@ -67,11 +67,11 @@ public:
     {
         this->footer =
                 "\n"
-                "" + std::string(80, '-') + "\n"
+                "" + std::string(79, '-') + "\n"
                 "OSKAR (version " + ver + ")\n"
                 "Copyright (c) 2017, The University of Oxford.\n"
                 "This program is free and without warranty.\n"
-                "" + std::string(80, '-') + "\n";
+                "" + std::string(79, '-') + "\n";
         set_version(ver, false);
         set_title(title);
         set_settings(settings);
@@ -244,7 +244,7 @@ public:
     }
     void set_description(const char* description)
     {
-        this->description = description;
+        this->overview = description;
     }
     void set_settings(const char* text)
     {
@@ -262,6 +262,7 @@ public:
     }
 
 private:
+    std::string title, version;
     std::vector<std::string> optional_;
     std::vector<std::string> optionalHelp_;
     std::vector<std::string> required_;

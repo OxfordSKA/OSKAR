@@ -36,14 +36,21 @@ using namespace std;
 
 namespace oskar {
 
-UnsignedDouble::UnsignedDouble() : Double() {}
+UnsignedDouble::UnsignedDouble() : Double()
+{
+}
 
-bool UnsignedDouble::set_default(const string& value)
+UnsignedDouble::~UnsignedDouble()
+{
+}
+
+bool UnsignedDouble::set_default(const char* value)
 {
     double v = 0.0;
     bool ok = true;
-    format_ = (value.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
-    v = oskar_settings_utility_string_to_double(value, &ok);
+    string val(value);
+    format_ = (val.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+    v = oskar_settings_utility_string_to_double(val, &ok);
     if (v < 0.0) return false;
     default_ = v;
     str_default_ = oskar_settings_utility_double_to_string_2(default_,
@@ -51,16 +58,17 @@ bool UnsignedDouble::set_default(const string& value)
     if (ok)
         set_value(value);
     else
-        (void) init(string());
+        (void) init(0);
     return ok;
 }
 
-bool UnsignedDouble::set_value(const string& value)
+bool UnsignedDouble::set_value(const char* value)
 {
     double v = 0.0;
     bool ok = true;
-    format_ = (value.find_first_of('e') == string::npos) ? AUTO : EXPONENT;
-    v = oskar_settings_utility_string_to_double(value, &ok);
+    string val(value);
+    format_ = (val.find_first_of('e') == string::npos) ? AUTO : EXPONENT;
+    v = oskar_settings_utility_string_to_double(val, &ok);
     if (v < 0.0) return false;
     value_ = v;
     str_value_ = oskar_settings_utility_double_to_string_2(value_,

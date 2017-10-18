@@ -34,37 +34,7 @@
 
 namespace oskar {
 
-IntPositive::IntPositive()
-{
-    (void) init(std::string());
-}
-
-bool IntPositive::init(const std::string& /*s*/)
-{
-    default_ = 1;
-    value_ = 1;
-    str_default_ = "1";
-    str_value_ = "1";
-    return true;
-}
-
-bool IntPositive::set_default(const std::string& value)
-{
-    bool ok = from_string_(value, default_);
-    str_default_ = oskar_settings_utility_int_to_string(default_);
-    if (ok)
-        set_value(value);
-    return ok;
-}
-
-bool IntPositive::set_value(const std::string& value)
-{
-    bool ok = from_string_(value, value_);
-    str_value_ = oskar_settings_utility_int_to_string(value_);
-    return ok;
-}
-
-bool IntPositive::from_string_(const std::string& s, int& value) const
+static bool from_string(const char* s, int& value)
 {
     bool ok = true;
     int i = oskar_settings_utility_string_to_int(s, &ok);
@@ -74,6 +44,40 @@ bool IntPositive::from_string_(const std::string& s, int& value) const
         return true;
     }
     return false;
+}
+
+IntPositive::IntPositive() : Int()
+{
+    (void) init(0);
+}
+
+IntPositive::~IntPositive()
+{
+}
+
+bool IntPositive::init(const char* /*s*/)
+{
+    default_ = 1;
+    value_ = 1;
+    str_default_ = "1";
+    str_value_ = "1";
+    return true;
+}
+
+bool IntPositive::set_default(const char* value)
+{
+    bool ok = from_string(value, default_);
+    str_default_ = oskar_settings_utility_int_to_string(default_);
+    if (ok)
+        set_value(value);
+    return ok;
+}
+
+bool IntPositive::set_value(const char* value)
+{
+    bool ok = from_string(value, value_);
+    str_value_ = oskar_settings_utility_int_to_string(value_);
+    return ok;
 }
 
 } // namespace oskar

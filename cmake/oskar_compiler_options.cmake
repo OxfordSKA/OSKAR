@@ -7,6 +7,20 @@ endmacro()
 # Set general compiler flags.
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Set OpenMP compile and link flags for all targets, if defined.
+if (OpenMP_C_FLAGS)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+endif()
+if (OpenMP_CXX_FLAGS)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    if (NOT MSVC)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
+        set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}")
+    endif()
+endif()
+
 if (NOT WIN32)
     if ("${CMAKE_CXX_COMPILER_ID}" MATCHES ".*Clang.*")
         # Tell Clang to use C++11, required for casacore headers.
@@ -64,7 +78,7 @@ if (NOT WIN32)
         # Using Intel compilers.
     endif()
 else()
-    if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+    if (MSVC)
         # Disable warning about loss of precision converting double to float.
         # Disable nonsensical warning about fopen.
         append_flags(CMAKE_C_FLAGS /wd4244 /wd4996)
@@ -105,10 +119,14 @@ else()
     endif()
 endif ()
 
-# Rpath settings for macOS
+# RPATH settings for macOS
+# See https://cmake.org/Wiki/CMake_RPATH_handling
 # ------------------------------------------------------------------------------
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if (APPLE)
     set(CMAKE_INSTALL_NAME_DIR "@rpath")
+    list(APPEND CMAKE_INSTALL_RPATH
+        "@loader_path/../${OSKAR_LIB_INSTALL_DIR}/")
 endif (APPLE)
 
 # Set CUDA releated compiler flags.
@@ -116,7 +134,11 @@ endif (APPLE)
 #                                   that nvcc encapsulates.
 # ------------------------------------------------------------------------------
 if (CUDA_FOUND)
-    set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+    if (MSVC)
+        set(CUDA_PROPAGATE_HOST_FLAGS ON)
+    else()
+        set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+    endif()
     set(CUDA_VERBOSE_BUILD OFF)
 
     # General NVCC compiler options.
@@ -242,11 +264,6 @@ if (NOT CASACORE_FOUND)
     message("-- WARNING: CASACORE not found: Unable to use Measurement Sets.")
     message("===============================================================================")
 endif()
-if (NOT OPENMP_FOUND)
-    message("===============================================================================")
-    message("-- WARNING: OpenMP not found: Unable to use multiple devices.")
-    message("===============================================================================")
-endif()
 if (BUILD_INFO)
     message("===============================================================================")
     if (CASACORE_FOUND)
@@ -283,4 +300,3 @@ if (BUILD_INFO)
     endif()
     message("===============================================================================")
 endif (BUILD_INFO)
-

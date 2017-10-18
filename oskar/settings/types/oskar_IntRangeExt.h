@@ -41,36 +41,33 @@
 
 namespace oskar {
 
-class OSKAR_SETTINGS_EXPORT IntRangeExt : public AbstractSettingsType
+class IntRangeExt : public AbstractSettingsType
 {
 public:
     typedef ttl::var::variant<int, std::string> Value;
 
-    IntRangeExt();
-    virtual ~IntRangeExt() {}
+    OSKAR_SETTINGS_EXPORT IntRangeExt();
+    OSKAR_SETTINGS_EXPORT virtual ~IntRangeExt();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string &value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    int value() const;
-    int min() const { return min_; }
-    int max() const { return max_; }
-    const char* ext_min() const { return ext_min_.c_str(); }
-    const char* ext_max() const { return ext_max_.c_str(); }
+    OSKAR_SETTINGS_EXPORT int value() const;
+    OSKAR_SETTINGS_EXPORT int min() const;
+    OSKAR_SETTINGS_EXPORT int max() const;
+    OSKAR_SETTINGS_EXPORT const char* ext_min() const;
+    OSKAR_SETTINGS_EXPORT const char* ext_max() const;
 
-    bool operator==(const IntRangeExt& other) const;
-    bool operator>(const IntRangeExt& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator==(const IntRangeExt& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const IntRangeExt& other) const;
 
 private:
-    static bool compare_(const Value& a, const Value& b);
-    bool from_string_(Value& value, const std::string& s) const;
-    std::string to_string_(const Value& value) const;
+    bool from_string(Value& value, const char* s) const;
 
     int min_, max_;
     std::string ext_min_, ext_max_;
-    enum value_types { INT, STRING };
     Value default_, value_;
 };
 

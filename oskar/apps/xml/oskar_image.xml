@@ -6,10 +6,20 @@
         <type name="bool" default="true"/>
         <desc>Determines whether double precision arithmetic is used.</desc>
     </s>
+    <s k="use_gpus" priority="1"><label>Use GPUs</label>
+        <type name="bool" default="true"/>
+        <desc>Use GPU devices if available.</desc>
+    </s>
     <s k="cuda_device_ids"><label>CUDA device IDs to use</label>
         <type name="IntListExt" default="all">all</type>
         <desc>A comma-separated string containing device (GPU) IDs to use on
             a multi-GPU system, or 'all' to use all devices.</desc>
+    </s>
+    <s k="num_devices" priority="1"><label>Number of compute devices</label>
+        <type name="IntRangeExt" default="auto">0,MAX,auto</type>
+        <desc>Number of compute devices to use.
+        A compute device is either a local CPU core, or a GPU. Don't set
+        this to more than the number of CPU cores in your system.</desc>
     </s>
     <s k="specify_cellsize"><label>Specify cellsize</label>
         <type name="bool" default="false"/>
@@ -126,6 +136,7 @@
         <s k="use_gpu"><label>Use GPU for FFT</label>
             <type name="bool" default="false"/>
             <desc>If true, use the GPU to perform the FFT.</desc>
+            <depends k="image/use_gpus" v="true"/>
         </s>
         <s k="kernel_type"><label>Convolution kernel type</label>
         <type name="OptionList" default="Spheroidal">Spheroidal,Pillbox</type>
@@ -152,6 +163,7 @@
             <label>Use GPU to generate W-kernels</label>
             <type name="bool" default="true"/>
             <desc>If true, use the GPU to generate the W-kernels.</desc>
+            <depends k="image/use_gpus" v="true"/>
         </s>
         <s k="num_w_planes"><label>Number of W-planes</label>
             <type name="int" default="0"/>

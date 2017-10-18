@@ -20,7 +20,7 @@
                 HEALPix RING scheme. This option can be used to load
                 a GSM data file produced from software written
                 by Angelica de Oliveira-Costa, available at
-                http://space.mit.edu/~angelica/gsm/index.html</desc>
+                http://space.mit.edu/angelica/gsm/</desc>
         </s>
         <s k="freq_hz"><label>Frequency [Hz]</label>
             <type name="UnsignedDouble" default="408e6"/>

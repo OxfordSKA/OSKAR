@@ -144,6 +144,11 @@ void oskar_imager_read_coords_ms(oskar_Imager* h, const char* filename,
     oskar_mem_free(time_centroid, status);
     oskar_ms_close(ms);
 #else
+    (void) filename;
+    (void) i_file;
+    (void) num_files;
+    (void) percent_done;
+    (void) percent_next;
     oskar_log_error(h->log, "OSKAR was compiled without Measurement Set support.");
     *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 #endif
@@ -158,7 +163,7 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
     oskar_VisHeader* header;
     oskar_Mem *uu, *vv, *ww, *weight, *time_centroid, *time_slice;
     int coord_prec, max_times_per_block, tags_per_block, i_block, num_blocks;
-    int num_times, num_channels, num_stations, num_baselines, num_pols;
+    int num_times_total, num_stations, num_baselines, num_pols;
     double time_start_mjd, time_inc_sec;
     if (*status) return;
 
@@ -174,12 +179,11 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
     coord_prec = oskar_vis_header_coord_precision(header);
     max_times_per_block = oskar_vis_header_max_times_per_block(header);
     tags_per_block = oskar_vis_header_num_tags_per_block(header);
-    num_times = oskar_vis_header_num_times_total(header);
-    num_channels = oskar_vis_header_num_channels_total(header);
+    num_times_total = oskar_vis_header_num_times_total(header);
     num_stations = oskar_vis_header_num_stations(header);
     num_baselines = num_stations * (num_stations - 1) / 2;
     num_pols = oskar_type_is_matrix(oskar_vis_header_amp_type(header)) ? 4 : 1;
-    num_blocks = (num_times + max_times_per_block - 1) /
+    num_blocks = (num_times_total + max_times_per_block - 1) /
             max_times_per_block;
     time_start_mjd = oskar_vis_header_time_start_mjd_utc(header) * 86400.0;
     time_inc_sec = oskar_vis_header_time_inc_sec(header);
@@ -187,7 +191,8 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
     /* Set visibility meta-data. */
     oskar_imager_set_vis_frequency(h,
             oskar_vis_header_freq_start_hz(header),
-            oskar_vis_header_freq_inc_hz(header), num_channels);
+            oskar_vis_header_freq_inc_hz(header),
+            oskar_vis_header_num_channels_total(header));
     oskar_imager_set_vis_phase_centre(h,
             oskar_vis_header_phase_centre_ra_deg(header),
             oskar_vis_header_phase_centre_dec_deg(header));

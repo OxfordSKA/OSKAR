@@ -214,7 +214,8 @@ size_t oskar_get_memory_usage(void)
     return t_info.resident_size;
 #elif defined(OSKAR_OS_WIN)
     PROCESS_MEMORY_COUNTERS_EX pmc;
-    GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
+    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc,
+            sizeof(pmc));
     SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
     return (size_t)physMemUsedByMe;
 #else
@@ -230,12 +231,14 @@ void oskar_print_memory_info(void)
     totalSwapMem = oskar_get_total_swap_memory();
     freeSwapMem = oskar_get_free_swap_memory();
     usedMem = oskar_get_memory_usage();
-    printf("Memory used by current process: %ld MB\n",
-           usedMem/(1024*1024));
-    printf("Free physical memory: %ld MB (of %ld MB)\n",
-            freePhysMem/(1024*1024), totalPhysMem/(1024*1024));
-    printf("Free swap memory: %ld MB (of %ld MB)\n",
-            freeSwapMem/(1024*1024), totalSwapMem/(1024*1024));
+    printf("Memory used by current process: %lu MB\n",
+           (unsigned long) (usedMem/(1024*1024)));
+    printf("Free physical memory: %lu MB (of %lu MB)\n",
+            (unsigned long) (freePhysMem/(1024*1024)),
+            (unsigned long) (totalPhysMem/(1024*1024)));
+    printf("Free swap memory: %lu MB (of %lu MB)\n",
+            (unsigned long) (freeSwapMem/(1024*1024)),
+            (unsigned long) (totalSwapMem/(1024*1024)));
 }
 
 #ifdef __cplusplus

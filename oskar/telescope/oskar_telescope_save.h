@@ -51,7 +51,7 @@ extern "C" {
  * @param[in]  dir_path   Path to a telescope model directory structure.
  * @param[in,out] status  Status return code.
  */
-OSKAR_APPS_EXPORT
+OSKAR_EXPORT
 void oskar_telescope_save(const oskar_Telescope* telescope,
         const char* dir_path, int* status);
 

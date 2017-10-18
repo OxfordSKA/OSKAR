@@ -25,11 +25,13 @@ if (CASACORE_FOUND)
         COMPILE_FLAGS "-Wno-cast-qual -fvisibility=default")
     target_link_libraries(oskar_ms ${CASACORE_LIBRARIES})
     set_target_properties(oskar_ms PROPERTIES
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-        INSTALL_RPATH_USE_LINK_PATH TRUE
         SOVERSION ${OSKAR_VERSION}
         VERSION ${OSKAR_VERSION})
-    install(TARGETS oskar_ms DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+    install(TARGETS oskar_ms
+        ARCHIVE DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
+        LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
+        RUNTIME DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime
+    )
 
     # ==== Recurse into test subdirectory.
     add_subdirectory(test)

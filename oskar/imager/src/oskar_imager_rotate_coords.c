@@ -37,7 +37,13 @@ void oskar_imager_rotate_coords(const oskar_Imager* h, size_t num_coords,
         const oskar_Mem* uu_in, const oskar_Mem* vv_in, const oskar_Mem* ww_in,
         oskar_Mem* uu_out, oskar_Mem* vv_out, oskar_Mem* ww_out)
 {
+#ifdef OSKAR_OS_WIN
+    int i;
+    const int num = (const int) num_coords;
+#else
     size_t i;
+    const size_t num = num_coords;
+#endif
     const double *M = h->M;
     if (oskar_mem_precision(uu_in) == OSKAR_SINGLE)
     {
@@ -51,7 +57,7 @@ void oskar_imager_rotate_coords(const oskar_Imager* h, size_t num_coords,
         ww_o = (float*)oskar_mem_void(ww_out);
 
 #pragma omp parallel for private(i)
-        for (i = 0; i < num_coords; ++i)
+        for (i = 0; i < num; ++i)
         {
             double s0, s1, s2, t0, t1, t2;
             s0 = uu_i[i]; s1 = vv_i[i]; s2 = ww_i[i];
@@ -73,7 +79,7 @@ void oskar_imager_rotate_coords(const oskar_Imager* h, size_t num_coords,
         ww_o = (double*)oskar_mem_void(ww_out);
 
 #pragma omp parallel for private(i)
-        for (i = 0; i < num_coords; ++i)
+        for (i = 0; i < num; ++i)
         {
             double s0, s1, s2, t0, t1, t2;
             s0 = uu_i[i]; s1 = vv_i[i]; s2 = ww_i[i];

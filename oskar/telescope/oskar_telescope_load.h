@@ -53,7 +53,7 @@ extern "C" {
  * @param[in,out] log        Pointer to log.
  * @param[in,out] status     Status return code.
  */
-OSKAR_APPS_EXPORT
+OSKAR_EXPORT
 void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
         oskar_Log* log, int* status);
 

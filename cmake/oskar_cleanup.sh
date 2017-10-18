@@ -23,11 +23,13 @@ rm -f  CTest*
 rm -f  Makefile
 rm -f  cmake_install.cmake
 rm -rf Testing
+rm -f  Info.plist
 rm -f  install_manifest.txt
 rm -rf _CPack_Packages
 
 # Remove OSKAR source module folders
 rm -rf apps
+rm -rf cmake
 rm -rf doc
 rm -rf extern
 rm -rf gui

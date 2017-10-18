@@ -34,14 +34,22 @@
 
 namespace oskar {
 
-bool InputDirectory::set_default(const std::string& value)
+InputDirectory::InputDirectory() : String()
+{
+}
+
+InputDirectory::~InputDirectory()
+{
+}
+
+bool InputDirectory::set_default(const char* value)
 {
     str_default_ = oskar_settings_utility_string_trim(value);
     str_value_ = str_default_;
     return true;
 }
 
-bool InputDirectory::set_value(const std::string& value)
+bool InputDirectory::set_value(const char* value)
 {
     str_value_ = oskar_settings_utility_string_trim(value);
     return true;

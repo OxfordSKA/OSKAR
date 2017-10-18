@@ -24,7 +24,7 @@ set(imager_SRC
     src/private_imager_create_fits_files.c
     src/private_imager_filter_time.c
     src/private_imager_filter_uv.c
-    src/private_imager_free_gpu_data.c
+    src/private_imager_free_device_data.c
     src/private_imager_generate_w_phase_screen.c
     src/private_imager_init_dft.c
     src/private_imager_init_fft.c

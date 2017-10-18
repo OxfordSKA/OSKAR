@@ -39,56 +39,13 @@ using namespace std;
 
 namespace oskar {
 
-DoubleList::DoubleList()
-{
-    (void) init(string());
-}
-
-bool DoubleList::init(const string& /*s*/)
-{
-    // TODO(BM) Set the delimiter from an initialisation string.
-    delimiter_ = ',';
-    return true;
-}
-
-bool DoubleList::set_default(const string& s)
-{
-    bool ok = from_string_(default_, s);
-    str_default_ = to_string_(default_);
-    if (ok)
-        set_value(s);
-    return ok;
-}
-
-bool DoubleList::set_value(const string& s)
-{
-    bool ok = from_string_(value_, s);
-    str_value_ = to_string_(value_);
-    return ok;
-}
-
-bool DoubleList::is_default() const
-{
-    return compare_vectors(value_, default_);
-}
-
-int DoubleList::size() const
-{
-    return value_.size();
-}
-
-const double* DoubleList::values() const
-{
-    return value_.size() > 0 ? &value_[0] : 0;
-}
-
-bool DoubleList::from_string_(vector<double>& values, const string& s) const
+static bool from_string(vector<double>& values, const string& s, char delimiter)
 {
     // Convert the string to a vector of doubles.
     vector<double> temp;
     istringstream ss(s);
     string token;
-    while (getline(ss, token, delimiter_))
+    while (getline(ss, token, delimiter))
     {
         bool valid = true;
         double v = oskar_settings_utility_string_to_double(token, &valid);
@@ -99,20 +56,72 @@ bool DoubleList::from_string_(vector<double>& values, const string& s) const
     return true;
 }
 
-bool DoubleList::operator==(const DoubleList& other) const
-{
-    return compare_vectors(value_, other.value_);
-}
-
-string DoubleList::to_string_(const vector<double>& values) const
+static string to_string(const vector<double>& values, char delimiter)
 {
     ostringstream ss;
     for (size_t i = 0; i < values.size(); ++i)
     {
         ss << oskar_settings_utility_double_to_string_2(values[i], 'g');
-        if (i < values.size() - 1) ss << delimiter_;
+        if (i < values.size() - 1) ss << delimiter;
     }
     return ss.str();
+}
+
+DoubleList::DoubleList()
+{
+    (void) init(0);
+}
+
+DoubleList::~DoubleList()
+{
+}
+
+bool DoubleList::init(const char* /*s*/)
+{
+    // TODO(BM) Set the delimiter from an initialisation string.
+    delimiter_ = ',';
+    return true;
+}
+
+bool DoubleList::set_default(const char* s)
+{
+    bool ok = from_string(default_, s, delimiter_);
+    str_default_ = to_string(default_, delimiter_);
+    if (ok)
+        set_value(s);
+    return ok;
+}
+
+bool DoubleList::set_value(const char* s)
+{
+    bool ok = from_string(value_, s, delimiter_);
+    str_value_ = to_string(value_, delimiter_);
+    return ok;
+}
+
+bool DoubleList::is_default() const
+{
+    return compare_vectors(value_, default_);
+}
+
+int DoubleList::size() const
+{
+    return (int) value_.size();
+}
+
+const double* DoubleList::values() const
+{
+    return value_.size() > 0 ? &value_[0] : 0;
+}
+
+bool DoubleList::operator==(const DoubleList& other) const
+{
+    return compare_vectors(value_, other.value_);
+}
+
+bool DoubleList::operator>(const DoubleList&) const
+{
+    return false;
 }
 
 } // namespace oskar

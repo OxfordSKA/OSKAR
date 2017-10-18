@@ -57,55 +57,57 @@ namespace oskar {
  */
 
 /* Dependency tree node. */
-class OSKAR_SETTINGS_EXPORT SettingsDependencyGroup
+class SettingsDependencyGroup
 {
- public:
+public:
     /*! Enum defining logic with which to combine dependencies in the group */
     enum GroupLogic { UNDEF = -1, AND, OR };
 
     /*! Constructor */
-    SettingsDependencyGroup(const char* group_logic,
-                            SettingsDependencyGroup* parent = 0);
+    OSKAR_SETTINGS_EXPORT SettingsDependencyGroup(const char* group_logic,
+            SettingsDependencyGroup* parent = 0);
 
     /*! Destructor */
-    ~SettingsDependencyGroup();
+    OSKAR_SETTINGS_EXPORT ~SettingsDependencyGroup();
 
     /*! Return the number of child groups. */
-    int num_children() const;
+    OSKAR_SETTINGS_EXPORT int num_children() const;
 
     /*! Add a child group. */
-    SettingsDependencyGroup* add_child(const char* logic = 0);
+    OSKAR_SETTINGS_EXPORT SettingsDependencyGroup* add_child(
+            const char* logic = 0);
 
     /*! Return a pointer to the child group with index @p i */
-    SettingsDependencyGroup* get_child(int i);
+    OSKAR_SETTINGS_EXPORT SettingsDependencyGroup* get_child(int i);
 
     /*! Return a const pointer to the child group with index @p i */
-    const SettingsDependencyGroup* get_child(int i) const;
+    OSKAR_SETTINGS_EXPORT const SettingsDependencyGroup* get_child(int i) const;
 
     /*! Return group's parent node. */
-    SettingsDependencyGroup* parent();
+    OSKAR_SETTINGS_EXPORT SettingsDependencyGroup* parent();
 
     /*! Return the number of dependencies in the group */
-    int num_dependencies() const;
+    OSKAR_SETTINGS_EXPORT int num_dependencies() const;
 
     /*! Return the group logic enumerator */
-    GroupLogic group_logic() const;
+    OSKAR_SETTINGS_EXPORT GroupLogic group_logic() const;
 
     /*! Add a dependency to the group */
-    void add_dependency(const char* key, const char* value,
-                        const char* logic = 0);
+    OSKAR_SETTINGS_EXPORT void add_dependency(const char* key,
+            const char* value, const char* logic = 0);
 
     /*! Add a dependency to the group */
-    void add_dependency(const SettingsDependency& dep);
+    OSKAR_SETTINGS_EXPORT void add_dependency(const SettingsDependency& dep);
 
     /*! Get the group dependency with index @p i */
-    const SettingsDependency* get_dependency(unsigned int i) const;
+    OSKAR_SETTINGS_EXPORT const SettingsDependency* get_dependency(
+            unsigned int i) const;
 
     /*! Convert a group logic string a group logic enum value. */
-    static SettingsDependencyGroup::GroupLogic string_to_group_logic(
+    OSKAR_SETTINGS_EXPORT static SettingsDependencyGroup::GroupLogic string_to_group_logic(
                     const char* s);
 
- private:
+private:
     SettingsDependencyGroup* parent_;
     std::vector<SettingsDependencyGroup*> children_;
 

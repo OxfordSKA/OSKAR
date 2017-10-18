@@ -65,7 +65,7 @@ int main(int argc, char** argv)
             num_points, &status);
     oskar_Mem *z = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             num_points, &status);
-    oskar_convert_geodetic_spherical_to_ecef(num_points,
+    oskar_convert_geodetic_spherical_to_ecef((int)num_points,
             oskar_mem_double_const(lon, &status),
             oskar_mem_double_const(lat, &status),
             oskar_mem_double_const(alt, &status),

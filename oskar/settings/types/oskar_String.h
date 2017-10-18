@@ -48,20 +48,19 @@ namespace oskar {
  *
  * @details
  */
-
-class OSKAR_SETTINGS_EXPORT String : public AbstractSettingsType
+class String : public AbstractSettingsType
 {
 public:
-    String() {}
-    virtual ~String() {}
+    OSKAR_SETTINGS_EXPORT String();
+    OSKAR_SETTINGS_EXPORT virtual ~String();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    bool operator==(const String& other) const;
-    bool operator>(const String&) const { return false; }
+    OSKAR_SETTINGS_EXPORT bool operator==(const String& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const String&) const;
 };
 
 } /* namespace oskar */

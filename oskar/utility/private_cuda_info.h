@@ -29,6 +29,8 @@
 #ifndef OSKAR_PRIVATE_CUDA_INFO_H_
 #define OSKAR_PRIVATE_CUDA_INFO_H_
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,15 +46,15 @@ struct oskar_CudaDeviceInfo
         int version[2];
     } compute;
     int supports_double;       /* True if device supports double precision. */
-    int global_memory_size;    /* Total size in kiB. */
-    int free_memory;           /* Free memory in kiB. */
+    size_t global_memory_size; /* Total size in kiB. */
+    size_t free_memory;        /* Free memory in kiB. */
     int num_multiprocessors;   /* Number of multiprocessors. */
     int num_cores;             /* Number of CUDA cores. */
     int gpu_clock;             /* GPU clock speed in kHz. */
     int memory_clock;          /* Memory clock speed in kHz. */
     int memory_bus_width;      /* Memory bus width in bits. */
     int level_2_cache_size;    /* Cache size in bytes. */
-    int shared_memory_size;    /* Shared memory per block in bytes. */
+    size_t shared_memory_size; /* Shared memory per block in bytes. */
     int num_registers;         /* Number of registers per block. */
     int warp_size;             /* Warp size. */
     int max_threads_per_block; /* Maximum number of threads per block. */

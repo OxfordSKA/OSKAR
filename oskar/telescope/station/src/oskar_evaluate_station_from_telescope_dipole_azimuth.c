@@ -58,7 +58,7 @@ float oskar_evaluate_station_from_telescope_dipole_azimuth_f(
     initial_bearing = atan2f(sin_delta * cos_telescope,
             cos_station * sin_telescope -
             sin_station * cos_telescope * cos_delta);
-    initial_bearing = fmodf(initial_bearing, 2.0f * M_PI);
+    initial_bearing = fmodf(initial_bearing, 2.0f * (float) M_PI);
     if (initial_bearing < 0.0f)
         initial_bearing += 2.0f * (float) M_PI;
 
@@ -66,7 +66,7 @@ float oskar_evaluate_station_from_telescope_dipole_azimuth_f(
     final_bearing = atan2f(sin_delta * cos_station,
             cos_telescope * sin_station -
             sin_telescope * cos_station * cos_delta);
-    final_bearing = M_PI - fmodf(final_bearing, 2.0f * M_PI);
+    final_bearing = ((float) M_PI) - fmodf(final_bearing, 2.0f * (float) M_PI);
     if (final_bearing < 0.0f)
         final_bearing += 2.0f * (float) M_PI;
 

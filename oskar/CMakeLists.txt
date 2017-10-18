@@ -51,9 +51,11 @@ else()
 endif()
 
 # Link libraries.
-target_link_libraries(${libname}
-    cfitsio
-    oskar_binary)
+target_link_libraries(${libname} cfitsio oskar_binary Threads::Threads)
+if (WIN32)
+    add_definitions(-DPSAPI_VERSION=1 -D_CRT_SECURE_NO_WARNINGS)
+    target_link_libraries(${libname} Psapi)
+endif()
 
 # Link with oskar_ms if we have casacore.
 if (CASACORE_FOUND)
@@ -68,23 +70,23 @@ endif()
 # Link with cuFFT if we have CUDA.
 if (CUDA_FOUND)
     target_link_libraries(${libname} ${CUDA_CUFFT_LIBRARIES})
+    if (WIN32)
+        file(GLOB lib_cudart_ "${CUDA_TOOLKIT_ROOT_DIR}/bin/cudart64*")
+        file(GLOB lib_cufft_ "${CUDA_TOOLKIT_ROOT_DIR}/bin/cufft64*")
+        install(FILES ${lib_cudart_} ${lib_cufft_}
+            DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
+    endif()
 endif()
 
-if (MSVC)
-    set_target_properties(${libname} PROPERTIES
-        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        SOVERSION ${OSKAR_VERSION})
-else ()
-    set_target_properties(${libname} PROPERTIES
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-        SOVERSION ${OSKAR_VERSION}
-        VERSION ${OSKAR_VERSION})
-endif()
+set_target_properties(${libname} PROPERTIES
+    SOVERSION ${OSKAR_VERSION}
+    VERSION ${OSKAR_VERSION})
 
-install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+install(TARGETS ${libname}
+    ARCHIVE DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
+    LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
+    RUNTIME DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime
+)
 
 if (CUDA_FOUND)
     cuda_build_clean_target()
@@ -109,6 +111,7 @@ endif ()
 # and give subdirectories control over which headers are installed.
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/oskar"
     DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+    COMPONENT headers
     FILES_MATCHING REGEX "(oskar.*h)|(.*hpp)"
     PATTERN ${install_include_dir} EXCLUDE
     PATTERN private* EXCLUDE
@@ -119,4 +122,6 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/oskar"
     PATTERN xml EXCLUDE
     PATTERN .git EXCLUDE)
 install(FILES ${PROJECT_BINARY_DIR}/oskar/oskar_version.h
-    DESTINATION "${OSKAR_INCLUDE_INSTALL_DIR}/oskar")
+    DESTINATION "${OSKAR_INCLUDE_INSTALL_DIR}/oskar"
+    COMPONENT headers
+)

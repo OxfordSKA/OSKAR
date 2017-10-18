@@ -61,6 +61,28 @@ oskar_MeasurementSet* oskar_ms_open(const char* filename)
         return 0;
     }
 
+    // Refuse to open if there is more than one spectral window.
+    if (p->ms->spectralWindow().nrow() != 1)
+    {
+        fprintf(stderr, "OSKAR can read Measurement Sets with one spectral "
+                "window only. Use 'split' or 'mstransform' in CASA to select "
+                "the spectral window first.\n");
+        fflush(stderr);
+        oskar_ms_close(p);
+        return 0;
+    }
+
+    // Refuse to open if there is more than one field.
+    if (p->ms->field().nrow() != 1)
+    {
+        fprintf(stderr, "OSKAR can read Measurement Sets with one target "
+                "field only. Use 'split' or 'mstransform' in CASA to select "
+                "the target field first.\n");
+        fflush(stderr);
+        oskar_ms_close(p);
+        return 0;
+    }
+
     // Get the data dimensions.
     p->num_pols = 0;
     p->num_channels = 0;

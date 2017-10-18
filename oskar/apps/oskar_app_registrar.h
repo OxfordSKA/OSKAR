@@ -29,10 +29,6 @@
 #ifndef OSKAR_APP_REGISTRAR_H_
 #define OSKAR_APP_REGISTRAR_H_
 
-/**
- * @file oskar_app_registrar.h
- */
-
 #include <string>
 #include <map>
 

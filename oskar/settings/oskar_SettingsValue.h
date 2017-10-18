@@ -41,7 +41,7 @@
 
 namespace oskar {
 
-class OSKAR_SETTINGS_EXPORT SettingsValue
+class SettingsValue
 {
 public:
     enum TypeId {
@@ -98,46 +98,48 @@ public:
             > value_t;
 
 public:
-    SettingsValue();
-    virtual ~SettingsValue();
+    OSKAR_SETTINGS_EXPORT SettingsValue();
+    OSKAR_SETTINGS_EXPORT virtual ~SettingsValue();
 
 public:
-    void operator=(const value_t& other);
-    void operator=(const SettingsValue& other);
+    OSKAR_SETTINGS_EXPORT void operator=(const value_t& other);
+    OSKAR_SETTINGS_EXPORT void operator=(const SettingsValue& other);
 
 public:
-    SettingsValue::TypeId type() const;
-    static SettingsValue::TypeId type_id(const char* type_name);
-    static const char* type_name(SettingsValue::TypeId type);
-    const char* type_name() const;
+    OSKAR_SETTINGS_EXPORT SettingsValue::TypeId type() const;
+    OSKAR_SETTINGS_EXPORT static SettingsValue::TypeId type_id(const char* type_name);
+    OSKAR_SETTINGS_EXPORT static const char* type_name(SettingsValue::TypeId type);
+    OSKAR_SETTINGS_EXPORT const char* type_name() const;
 
     template <typename T> T& get();
     template <typename T> const T& get() const;
 
     /* Basic string methods for interfacing with the type. */
-    bool init(const char* type, const char* param);
-    bool set_default(const char* value);
-    bool set_value(const char* value);
-    const char* get_value() const;
-    const char* get_default() const;
-    bool is_default() const;
-    bool is_set() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* type, const char* param);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT const char* get_value() const;
+    OSKAR_SETTINGS_EXPORT const char* get_default() const;
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool is_set() const;
 
     /* Conversions to intrinsic types */
-    double to_double(bool& ok) const;
-    int to_int(bool& ok) const;
-    unsigned int to_unsigned(bool& ok) const;
-    const char* to_string() const;
-    const char* const* to_string_list(int* size, bool& ok) const;
-    const int* to_int_list(int* size, bool& ok) const;
-    const double* to_double_list(int* size, bool& ok) const;
+    OSKAR_SETTINGS_EXPORT double to_double(bool& ok) const;
+    OSKAR_SETTINGS_EXPORT int to_int(bool& ok) const;
+    OSKAR_SETTINGS_EXPORT unsigned int to_unsigned(bool& ok) const;
+    OSKAR_SETTINGS_EXPORT const char* to_string() const;
+    OSKAR_SETTINGS_EXPORT const char* const* to_string_list(int* size,
+            bool& ok) const;
+    OSKAR_SETTINGS_EXPORT const int* to_int_list(int* size, bool& ok) const;
+    OSKAR_SETTINGS_EXPORT const double* to_double_list(int* size,
+            bool& ok) const;
 
-    bool operator==(const SettingsValue& other) const;
-    bool operator!=(const SettingsValue& other) const;
-    bool operator>(const SettingsValue& other) const;
-    bool operator>=(const SettingsValue& other) const;
-    bool operator<(const SettingsValue& other) const;
-    bool operator<=(const SettingsValue& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator==(const SettingsValue& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator!=(const SettingsValue& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const SettingsValue& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>=(const SettingsValue& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator<(const SettingsValue& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator<=(const SettingsValue& other) const;
 
 private:
     void create_(SettingsValue::TypeId type);

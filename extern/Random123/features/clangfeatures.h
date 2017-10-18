@@ -32,8 +32,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __clangfeatures_dot_hpp
 #define __clangfeatures_dot_hpp
 
+#ifndef R123_X86_64
+#ifdef __x86_64__
+#define R123_X86_64 1
+#else
+#define R123_X86_64 0
+#endif
+#endif
+
+#ifndef R123_I386
+#ifdef __i386__
+#define R123_I386 1
+#else
+#define R123_I386 0
+#endif
+#endif
+
 #ifndef R123_USE_X86INTRIN_H
-#define R123_USE_X86INTRIN_H ((defined(__x86_64__)||defined(__i386__)))
+#define R123_USE_X86INTRIN_H ((R123_X86_64 || R123_I386))
 #endif
 
 #ifndef R123_USE_CXX11_UNRESTRICTED_UNIONS

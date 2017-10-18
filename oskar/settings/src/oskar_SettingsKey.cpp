@@ -49,7 +49,7 @@ SettingsKey::~SettingsKey()
 
 const char* SettingsKey::back() const { return tokens_.back().c_str(); }
 
-int SettingsKey::depth() const { return tokens_.size() - 1; }
+int SettingsKey::depth() const { return (int) tokens_.size() - 1; }
 
 bool SettingsKey::empty() const { return key_.empty(); }
 

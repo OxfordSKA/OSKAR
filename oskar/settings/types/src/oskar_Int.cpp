@@ -36,10 +36,14 @@ namespace oskar {
 
 Int::Int()
 {
-    (void) init(std::string());
+    (void) init(0);
 }
 
-bool Int::init(const std::string& /*s*/)
+Int::~Int()
+{
+}
+
+bool Int::init(const char* /*s*/)
 {
     default_ = 0;
     value_ = 0;
@@ -48,7 +52,7 @@ bool Int::init(const std::string& /*s*/)
     return true;
 }
 
-bool Int::set_default(const std::string& value)
+bool Int::set_default(const char* value)
 {
     bool ok = true;
     int i = oskar_settings_utility_string_to_int(value, &ok);
@@ -59,7 +63,7 @@ bool Int::set_default(const std::string& value)
     return true;
 }
 
-bool Int::set_value(const std::string& value)
+bool Int::set_value(const char* value)
 {
     bool ok = true;
     int i = oskar_settings_utility_string_to_int(value, &ok);
@@ -72,6 +76,16 @@ bool Int::set_value(const std::string& value)
 bool Int::is_default() const
 {
     return value_ == default_;
+}
+
+int Int::value() const
+{
+    return value_;
+}
+
+int Int::default_value() const
+{
+    return default_;
 }
 
 bool Int::operator==(const Int& other) const

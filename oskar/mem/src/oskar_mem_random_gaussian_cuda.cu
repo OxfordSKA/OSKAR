@@ -35,13 +35,13 @@ extern "C" {
 
 __global__
 void oskar_mem_random_gaussian_cudak_f(
-        const unsigned int num_elements, float* data,
+        const int num_elements, float* data,
         const unsigned int seed, const unsigned int counter1,
         const unsigned int counter2, const unsigned int counter3,
         const float std)
 {
-    const unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
-    const unsigned int i4 = i * 4;
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    const int i4 = i * 4;
     if (i4 >= num_elements) return;
 
     OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
@@ -75,13 +75,13 @@ void oskar_mem_random_gaussian_cudak_f(
 
 __global__
 void oskar_mem_random_gaussian_cudak_d(
-        const unsigned int num_elements, double* data,
+        const int num_elements, double* data,
         const unsigned int seed, const unsigned int counter1,
         const unsigned int counter2, const unsigned int counter3,
         const double std)
 {
-    const unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
-    const unsigned int i4 = i * 4;
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    const int i4 = i * 4;
     if (i4 >= num_elements) return;
 
     OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
@@ -113,21 +113,21 @@ void oskar_mem_random_gaussian_cudak_d(
     }
 }
 
-void oskar_mem_random_gaussian_cuda_f(unsigned int num_elements,
+void oskar_mem_random_gaussian_cuda_f(int num_elements,
         float* d_data, unsigned int seed, unsigned int counter1,
         unsigned int counter2, unsigned int counter3, float std)
 {
-    unsigned int num_blocks, num_threads = 256;
+    int num_blocks, num_threads = 256;
     num_blocks = (((num_elements + 3) / 4) + num_threads - 1) / num_threads;
     oskar_mem_random_gaussian_cudak_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
             (num_elements, d_data, seed, counter1, counter2, counter3, std);
 }
 
-void oskar_mem_random_gaussian_cuda_d(unsigned int num_elements,
+void oskar_mem_random_gaussian_cuda_d(int num_elements,
         double* d_data, unsigned int seed, unsigned int counter1,
         unsigned int counter2, unsigned int counter3, double std)
 {
-    unsigned int num_blocks, num_threads = 256;
+    int num_blocks, num_threads = 256;
     num_blocks = (((num_elements + 3) / 4) + num_threads - 1) / num_threads;
     oskar_mem_random_gaussian_cudak_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
             (num_elements, d_data, seed, counter1, counter2, counter3, std);

@@ -48,15 +48,14 @@ namespace oskar {
  *
  * @details
  */
-
-class OSKAR_SETTINGS_EXPORT UnsignedDouble : public Double
+class UnsignedDouble : public Double
 {
 public:
-    UnsignedDouble();
-    virtual ~UnsignedDouble() {}
+    OSKAR_SETTINGS_EXPORT UnsignedDouble();
+    OSKAR_SETTINGS_EXPORT virtual ~UnsignedDouble();
 
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
 };
 
 } /* namespace oskar */

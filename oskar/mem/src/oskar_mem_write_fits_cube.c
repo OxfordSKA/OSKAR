@@ -180,11 +180,11 @@ void oskar_mem_write_fits_cube(oskar_Mem* data, const char* root_name,
                 !strcmp(&(root_name[len-5]), ".fits") ||
                 !strcmp(&(root_name[len-5]), ".FITS") ))
         {
-            SNPRINTF(fname, buf_len, "%s.fits", root_name);
+            SNPRINTF(fname, buf_len, "%s", root_name);
         }
         else
         {
-            SNPRINTF(fname, buf_len, "%s", root_name);
+            SNPRINTF(fname, buf_len, "%s.fits", root_name);
         }
         write_pixels(ptr, fname, width, height, num_planes, i_plane, status);
     }

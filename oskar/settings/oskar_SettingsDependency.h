@@ -58,37 +58,38 @@ namespace oskar {
  * of the setting to be check, the required value and value logic.
  */
 
-class OSKAR_SETTINGS_EXPORT SettingsDependency
+class SettingsDependency
 {
 public:
     /*! Value logic enum. */
     enum Logic { UNDEF, EQ, NE, GT, GE, LT, LE };
 
     /*! Constructor. */
-    SettingsDependency(const char* key,
+    OSKAR_SETTINGS_EXPORT SettingsDependency(const char* key,
             const char* value,
             const char* logic = 0);
 
     /*! Return the dependency key */
-    const char* key() const;
+    OSKAR_SETTINGS_EXPORT const char* key() const;
 
     /*! Return the dependency value */
-    const char* value() const;
+    OSKAR_SETTINGS_EXPORT const char* value() const;
 
     /*! Return the dependency value logic */
-    SettingsDependency::Logic logic() const { return logic_; }
+    OSKAR_SETTINGS_EXPORT SettingsDependency::Logic logic() const;
 
     /*! Return the dependency value logic string */
-    const char* logic_string() const;
+    OSKAR_SETTINGS_EXPORT const char* logic_string() const;
 
     /*! Returns true if the dependency has valid key, logic and value. */
-    bool is_valid() const;
+    OSKAR_SETTINGS_EXPORT bool is_valid() const;
 
     /*! Static method to convert logic enum to a string. */
-    static const char* logic_to_string(const SettingsDependency::Logic&);
+    OSKAR_SETTINGS_EXPORT static const char* logic_to_string(
+            const SettingsDependency::Logic&);
 
     /*! Static method to convert logic string to logic enum. */
-    static SettingsDependency::Logic string_to_logic(const char*);
+    OSKAR_SETTINGS_EXPORT static SettingsDependency::Logic string_to_logic(const char*);
 
 private:
     std::string key_, value_;

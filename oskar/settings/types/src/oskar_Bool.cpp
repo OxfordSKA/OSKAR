@@ -36,10 +36,14 @@ namespace oskar {
 
 Bool::Bool()
 {
-    (void) init(std::string());
+    (void) init(0);
 }
 
-bool Bool::init(const std::string& /*s*/)
+Bool::~Bool()
+{
+}
+
+bool Bool::init(const char* /*s*/)
 {
     default_ = false;
     value_ = false;
@@ -48,7 +52,7 @@ bool Bool::init(const std::string& /*s*/)
     return true;
 }
 
-bool Bool::set_default(const std::string& s)
+bool Bool::set_default(const char* s)
 {
     default_ = oskar_settings_utility_string_starts_with(s, "TRUE", false);
     str_default_ = default_ ? "true" : "false";
@@ -56,18 +60,31 @@ bool Bool::set_default(const std::string& s)
     return true;
 }
 
-bool Bool::set_value(const std::string& s)
+bool Bool::set_value(const char* s)
 {
     value_ = oskar_settings_utility_string_starts_with(s, "TRUE", false);
     str_value_ = value_ ? "true" : "false";
     return true;
 }
 
-bool Bool::is_default() const { return value_ == default_; }
+bool Bool::is_default() const
+{
+    return value_ == default_;
+}
+
+bool Bool::value() const
+{
+    return value_;
+}
 
 bool Bool::operator==(const Bool& other) const
 {
     return value_ == other.value_;
+}
+
+bool Bool::operator>(const Bool&) const
+{
+    return false;
 }
 
 } // namespace oskar

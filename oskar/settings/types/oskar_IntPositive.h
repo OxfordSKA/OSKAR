@@ -40,18 +40,15 @@
 
 namespace oskar {
 
-class OSKAR_SETTINGS_EXPORT IntPositive : public Int
+class IntPositive : public Int
 {
 public:
-    IntPositive();
-    virtual ~IntPositive() {}
+    OSKAR_SETTINGS_EXPORT IntPositive();
+    OSKAR_SETTINGS_EXPORT virtual ~IntPositive();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-
-private:
-    bool from_string_(const std::string& s, int& value) const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
 };
 
 } /* namespace oskar */

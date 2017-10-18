@@ -142,27 +142,27 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
         switch (type)
         {
         case OSKAR_DOUBLE:
-            oskar_mem_set_value_real_cuda_r_d(n,
+            oskar_mem_set_value_real_cuda_r_d((int)n,
                     (double*)(mem->data) + offset, val);
             break;
         case OSKAR_DOUBLE_COMPLEX:
-            oskar_mem_set_value_real_cuda_c_d(n,
+            oskar_mem_set_value_real_cuda_c_d((int)n,
                     (double2*)(mem->data) + offset, val);
             break;
         case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            oskar_mem_set_value_real_cuda_m_d(n,
+            oskar_mem_set_value_real_cuda_m_d((int)n,
                     (double4c*)(mem->data) + offset, val);
             break;
         case OSKAR_SINGLE:
-            oskar_mem_set_value_real_cuda_r_f(n,
+            oskar_mem_set_value_real_cuda_r_f((int)n,
                     (float*)(mem->data) + offset, (float)val);
             break;
         case OSKAR_SINGLE_COMPLEX:
-            oskar_mem_set_value_real_cuda_c_f(n,
+            oskar_mem_set_value_real_cuda_c_f((int)n,
                     (float2*)(mem->data) + offset, (float)val);
             break;
         case OSKAR_SINGLE_COMPLEX_MATRIX:
-            oskar_mem_set_value_real_cuda_m_f(n,
+            oskar_mem_set_value_real_cuda_m_f((int)n,
                     (float4c*)(mem->data) + offset, (float)val);
             break;
         default:

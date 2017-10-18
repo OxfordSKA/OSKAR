@@ -84,8 +84,9 @@ void oskar_evaluate_cross_power_omp_f(const int num_sources,
  *                           (length \p num_sources).
  */
 OSKAR_EXPORT
-void oskar_evaluate_cross_power_scalar_omp_f(int num_sources,
-        int num_stations, const float2* jones, float2* out);
+void oskar_evaluate_cross_power_scalar_omp_f(const int num_sources,
+        const int num_stations, const float2* restrict jones,
+        float2* restrict out);
 
 /**
  * @brief
@@ -131,8 +132,9 @@ void oskar_evaluate_cross_power_omp_d(const int num_sources,
  *                           (length \p num_sources).
  */
 OSKAR_EXPORT
-void oskar_evaluate_cross_power_scalar_omp_d(int num_sources,
-        int num_stations, const double2* jones, double2* out);
+void oskar_evaluate_cross_power_scalar_omp_d(const int num_sources,
+        const int num_stations, const double2* restrict jones,
+        double2* restrict out);
 
 #ifdef __cplusplus
 }

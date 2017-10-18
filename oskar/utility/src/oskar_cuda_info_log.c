@@ -72,10 +72,10 @@ void oskar_cuda_info_log(oskar_Log* log, const oskar_CudaInfo* info)
                 info->device[i].memory_clock / 1000.0);
         oskar_log_value(log, p, 1, "Memory bus width", "%d-bit",
                 info->device[i].memory_bus_width);
-        oskar_log_value(log, p, 1, "Level-2 cache size (kiB)", "%d",
-                info->device[i].level_2_cache_size / 1024);
-        oskar_log_value(log, p, 1, "Shared memory size (kiB)", "%d",
-                info->device[i].shared_memory_size / 1024);
+        oskar_log_value(log, p, 1, "Level-2 cache size (kiB)", "%.0f",
+                info->device[i].level_2_cache_size / 1024.0);
+        oskar_log_value(log, p, 1, "Shared memory size (kiB)", "%.0f",
+                info->device[i].shared_memory_size / 1024.0);
         oskar_log_value(log, p, 1, "Registers per block", "%d",
                 info->device[i].num_registers);
         oskar_log_value(log, p, 1, "Warp size", "%d",

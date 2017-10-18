@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     QSortFilterProxyModel* modelProxy_ = new SettingsModelFilter(this);
     modelProxy_->setSourceModel(model_);
 
-    // Create application selector and search box.
+    // Create application selector, current directory view and search box.
     QLabel* label1 = new QLabel("Application", widget);
     selector_ = new QComboBox(widget);
     selector_->addItem("oskar_sim_interferometer");
@@ -94,13 +94,28 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     selector_->setSizePolicy(policy);
     QPushButton* runner = new QPushButton(widget);
     runner->setText("Run");
+    runner->setToolTip("Run the selected application "
+            "with the current settings.");
+    QLabel* label2 = new QLabel("Current Dir", widget);
+    current_dir_label_ = new QLineEdit(widget);
+    current_dir_label_->setReadOnly(true);
+    current_dir_label_->setToolTip("The current working directory. "
+            "All paths specified in the settings below must be relative "
+            "to this location.");
+    QPushButton* change_dir = new QPushButton(widget);
+    change_dir->setText("Change...");
+    change_dir->setToolTip("Change the current working directory.");
     filter_ = new QLineEdit(widget);
     filter_->setPlaceholderText("Search Filter");
     gridLayout->addWidget(label1, 0, 0);
     gridLayout->addWidget(selector_, 0, 1);
     gridLayout->addWidget(runner, 0, 2);
-    gridLayout->addWidget(filter_, 1, 0, 1, 3);
+    gridLayout->addWidget(label2, 1, 0);
+    gridLayout->addWidget(current_dir_label_, 1, 1);
+    gridLayout->addWidget(change_dir, 1, 2);
+    gridLayout->addWidget(filter_, 2, 0, 1, 3);
     connect(runner, SIGNAL(clicked()), SLOT(runButton()));
+    connect(change_dir, SIGNAL(clicked()), SLOT(changeDir()));
     connect(selector_, SIGNAL(currentIndexChanged(QString)),
             SLOT(appChanged(QString)));
     connect(filter_, SIGNAL(textChanged(QString)),
@@ -128,6 +143,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     QAction* actDisplayKeys = new QAction("Display &Keys", this);
     QAction* actDisplayLabels = new QAction("Display &Labels", this);
     QAction* actHelpDoc = new QAction("Documentation...", this);
+    QAction* actAboutQt = new QAction("&Qt Info...", this);
     QAction* actCudaInfo = new QAction("CUDA System Info...", this);
     QAction* actAbout = new QAction("&About OSKAR...", this);
     connect(actOpen, SIGNAL(triggered()), this, SLOT(open()));
@@ -143,6 +159,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     connect(actExpandAll, SIGNAL(triggered()), view_, SLOT(expandSettingsTree()));
     connect(actCollapseAll, SIGNAL(triggered()), view_, SLOT(collapseAll()));
     connect(actAbout, SIGNAL(triggered()), this, SLOT(about()));
+    connect(actAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
     connect(actCudaInfo, SIGNAL(triggered()), this, SLOT(cudaInfo()));
     connect(actHelpDoc, SIGNAL(triggered()), this, SLOT(helpDoc()));
 
@@ -172,6 +189,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     menuView->addAction(actDisplayLabels);
     menuHelp->addAction(actHelpDoc);
     menuHelp->addSeparator();
+    menuHelp->addAction(actAboutQt);
     menuHelp->addAction(actCudaInfo);
     menuHelp->addAction(actAbout);
 
@@ -186,7 +204,23 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     restoreGeometry(settings.value("main_window/geometry").toByteArray());
     restoreState(settings.value("main_window/state").toByteArray());
     app_dir_ = settings.value("app_dir", "").toString();
+#ifndef Q_OS_WIN
+    if (app_dir_.isEmpty())
+        app_dir_ = QApplication::applicationDirPath();
+#endif
     current_app_ = settings.value("current_app").toString();
+    current_dir_ = settings.value("current_dir").toString();
+    QDir d(current_dir_);
+    if (QCoreApplication::arguments().length() > 1)
+        current_dir_ = QDir::toNativeSeparators(QDir::currentPath());
+    else if (current_dir_.isEmpty() || !d.exists())
+    {
+        current_dir_ = QDir::toNativeSeparators(QDir::homePath());
+        QDir::setCurrent(current_dir_);
+    }
+    else
+        QDir::setCurrent(current_dir_);
+    current_dir_label_->setText(current_dir_);
     if (current_app_.isEmpty())
         current_app_ = selector_->itemText(0);
     settings.beginGroup("files");
@@ -265,7 +299,7 @@ void MainWindow::open(QString filename)
     else
     {
         QFileInfo fi(filename);
-        filename = fi.canonicalFilePath();
+        filename = QDir::toNativeSeparators(fi.canonicalFilePath());
     }
 
     // Open the file by selecting the application.
@@ -350,6 +384,7 @@ void MainWindow::save(QString filename)
     }
 
     // Try to open the file for writing.
+    filename = QDir::toNativeSeparators(filename);
     QFile file(filename);
     bool result = file.open(QFile::ReadWrite);
     file.close();
@@ -378,6 +413,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
     settings.setValue("main_window/state", saveState());
     settings.setValue("app_dir", app_dir_);
     settings.setValue("current_app", current_app_);
+    settings.setValue("current_dir", current_dir_);
     settings.beginGroup("files");
     QHash<QString, QString>::const_iterator i = files_.constBegin();
     while (i != files_.constEnd())
@@ -450,7 +486,10 @@ void MainWindow::appChanged(QString text)
     // Check that the selected application exists.
     QString app = text;
     if (!app_dir_.isEmpty())
-        app.prepend(app_dir_ + QDir::separator());
+    {
+        QDir dir(app_dir_);
+        app = QDir::cleanPath(dir.filePath(app));
+    }
     QProcess process;
     process.start(app, QStringList() << "--version");
     if (!process.waitForStarted())
@@ -529,6 +568,18 @@ void MainWindow::setAppDir(bool hint)
     {
         app_dir_ = dialog.dir();
         setApp(current_app_);
+    }
+}
+
+void MainWindow::changeDir()
+{
+    QString dir = QFileDialog::getExistingDirectory(this,
+            "Set work directory", QString(), QFileDialog::ShowDirsOnly);
+    if (!dir.isEmpty())
+    {
+        current_dir_ = QDir::toNativeSeparators(dir);
+        current_dir_label_->setText(current_dir_);
+        QDir::setCurrent(current_dir_);
     }
 }
 
@@ -628,9 +679,15 @@ void MainWindow::runButton()
     if (fi.isRoot())
     {
         QFileInfo fi(files_[current_app_]);
-        QDir::setCurrent(fi.path());
+        current_dir_ = QDir::toNativeSeparators(fi.path());
+        current_dir_label_->setText(current_dir_);
+        QDir::setCurrent(current_dir_);
     }
-    run(current_app_, QStringList() << files_[current_app_]);
+
+    // Run with relative path of settings file.
+    QDir d(current_dir_);
+    QString relative_path = d.relativeFilePath(files_[current_app_]);
+    run(current_app_, QStringList() << relative_path);
 }
 
 // =========================================================  Private methods.
@@ -654,14 +711,18 @@ void MainWindow::run(QString app, const QStringList& args,
         bool allow_auto_close)
 {
     if (!app_dir_.isEmpty())
-        app.prepend(app_dir_ + QDir::separator());
+    {
+        QDir dir(app_dir_);
+        app = QDir::cleanPath(dir.filePath(app));
+    }
     QProcess process;
-    process.start(app);
+    process.start(app, QStringList() << "--version");
     if (!process.waitForStarted())
     {
         notFound(app);
         return;
     }
+    process.waitForFinished();
     RunDialog dialog(app, this);
     dialog.setAllowAutoClose(allow_auto_close);
     dialog.start(args);

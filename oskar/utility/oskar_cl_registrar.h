@@ -26,8 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_CL_REGISTRAR_H_
+#define OSKAR_CL_REGISTRAR_H_
+
 #include <vector>
-#include <boost/preprocessor/cat.hpp>
 
 namespace oskar {
 
@@ -43,5 +45,10 @@ struct CLRegistrar
 
 }
 
+#define M_CONC(A, B) M_CONC_(A, B)
+#define M_CONC_(A, B) A##B
+
 #define OSKAR_CL_SRC(src) \
-static oskar::CLRegistrar BOOST_PP_CAT(r_##src, __LINE__)(src);
+    static oskar::CLRegistrar M_CONC(r_, __LINE__)(src);
+
+#endif /* OSKAR_CL_REGISTRAR_H_ */

@@ -139,7 +139,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
                 /* Loop over stations. */
                 for (i = 0; i < (size_t)telescope->num_stations; ++i)
                 {
-                    set_coords(oskar_telescope_station(telescope, i), 0, 0,
+                    set_coords(oskar_telescope_station(telescope, (int)i), 0, 0,
                             num_ids - 1, sub_id, coordsys, lon, lat, status);
                 }
             }
@@ -188,7 +188,7 @@ static void set_coords(oskar_Station* station, int set_recursive,
             num_elements = (size_t)oskar_station_num_elements(station);
             for (i = 0; i < num_elements; ++i)
             {
-                set_coords(oskar_station_child(station, i), 1,
+                set_coords(oskar_station_child(station, (int)i), 1,
                         current_depth + 1, num_sub_ids, sub_ids,
                         coord_type, lon, lat, status);
             }
@@ -221,7 +221,7 @@ static void set_coords(oskar_Station* station, int set_recursive,
                 num_elements = (size_t)oskar_station_num_elements(station);
                 for (i = 0; i < num_elements; ++i)
                 {
-                    set_coords(oskar_station_child(station, i), 0,
+                    set_coords(oskar_station_child(station, (int)i), 0,
                             current_depth + 1, num_sub_ids, sub_ids,
                             coord_type, lon, lat, status);
                 }

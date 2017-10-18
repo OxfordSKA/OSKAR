@@ -31,6 +31,7 @@
 
 #include "settings/oskar_settings_utility_string.h"
 #include "settings/types/oskar_IntListExt.h"
+#include <cstring>
 #include <sstream>
 #include <iostream>
 
@@ -39,20 +40,40 @@ using ttl::var::get;
 
 namespace oskar {
 
+bool compare(const IntListExt::Value& a, const IntListExt::Value& b)
+{
+    if (a.is_singular() || b.is_singular()) return false;
+    if (a.which() != b.which()) return false;
+    if (a.which() != 0)
+        return get<string>(a) == get<string>(b);
+    else
+    {
+        const vector<int>& v = get<vector<int> >(a);
+        const vector<int>& d = get<vector<int> >(b);
+        if (v.size() != d.size()) return false;
+        for (size_t i = 0; i < v.size(); ++i) if (v[i] != d[i]) return false;
+    }
+    return true;
+}
+
 IntListExt::IntListExt() : delimiter_(',')
 {
 }
 
-bool IntListExt::init(const string& s)
+IntListExt::~IntListExt()
 {
-    if (s.empty()) return false;
+}
+
+bool IntListExt::init(const char* s)
+{
+    if (!s || strlen(s) == 0) return false;
     special_value_ = string(s);
     default_ = special_value_;
     value_ = special_value_;
     return true;
 }
 
-bool IntListExt::set_default(const string& value)
+bool IntListExt::set_default(const char* value)
 {
     bool ok = from_string_(value, default_);
     str_default_ = to_string_(default_);
@@ -61,7 +82,7 @@ bool IntListExt::set_default(const string& value)
     return ok;
 }
 
-bool IntListExt::set_value(const string& value)
+bool IntListExt::set_value(const char* value)
 {
     bool ok = from_string_(value, value_);
     str_value_ = to_string_(value_);
@@ -70,7 +91,7 @@ bool IntListExt::set_value(const string& value)
 
 bool IntListExt::is_default() const
 {
-    return compare_(value_, default_);
+    return compare(value_, default_);
 }
 
 const char* IntListExt::special_string() const
@@ -86,7 +107,7 @@ bool IntListExt::is_extended() const
 int IntListExt::size() const
 {
     if (value_.is_singular()) return 0;
-    return (value_.which() == 0) ? get<vector<int> >(value_).size() : 1;
+    return (value_.which() == 0) ? (int) get<vector<int> >(value_).size() : 1;
 }
 
 const int* IntListExt::values() const
@@ -98,23 +119,12 @@ const int* IntListExt::values() const
 
 bool IntListExt::operator==(const IntListExt& other) const
 {
-    return compare_(value_, other.value_);
+    return compare(value_, other.value_);
 }
 
-bool IntListExt::compare_(const Value& a, const Value& b)
+bool IntListExt::operator>(const IntListExt&) const
 {
-    if (a.is_singular() || b.is_singular()) return false;
-    if (a.which() != b.which()) return false;
-    if (a.which() != 0)
-        return get<string>(a) == get<string>(b);
-    else
-    {
-        const vector<int>& v = get<vector<int> >(a);
-        const vector<int>& d = get<vector<int> >(b);
-        if (v.size() != d.size()) return false;
-        for (size_t i = 0; i < v.size(); ++i) if (v[i] != d[i]) return false;
-    }
-    return true;
+    return false;
 }
 
 bool IntListExt::from_string_(const string& s, Value& val) const

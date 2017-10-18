@@ -24,22 +24,13 @@ target_link_libraries(oskar_apps
     oskar
     oskar_settings)
 
-if (MSVC)
-    set_target_properties(oskar_apps PROPERTIES
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        SOVERSION ${OSKAR_VERSION}
-        VERSION ${OSKAR_VERSION})
-else ()
-    set_target_properties(oskar_apps PROPERTIES
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-        SOVERSION ${OSKAR_VERSION}
-        VERSION ${OSKAR_VERSION})
-endif()
+set_target_properties(oskar_apps PROPERTIES
+    SOVERSION ${OSKAR_VERSION}
+    VERSION ${OSKAR_VERSION})
 
 # Install target for the apps library.
-install(TARGETS oskar_apps DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+install(TARGETS oskar_apps
+    ARCHIVE DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
+    LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
+    RUNTIME DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime
+)

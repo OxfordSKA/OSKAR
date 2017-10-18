@@ -41,26 +41,24 @@
 namespace oskar {
 
 // TODO(BM) inherit IntRangeExt?
-class OSKAR_SETTINGS_EXPORT RandomSeed : public AbstractSettingsType
+class RandomSeed : public AbstractSettingsType
 {
 public:
-    RandomSeed();
-    virtual ~RandomSeed() {}
+    OSKAR_SETTINGS_EXPORT RandomSeed();
+    OSKAR_SETTINGS_EXPORT virtual ~RandomSeed();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    int value() const { return value_; }
-    int default_value() const { return default_; }
+    OSKAR_SETTINGS_EXPORT int value() const;
+    OSKAR_SETTINGS_EXPORT int default_value() const;
 
-    bool operator==(const RandomSeed& other) const;
-    bool operator>(const RandomSeed& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator==(const RandomSeed& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const RandomSeed& other) const;
 
 private:
-    static bool from_string(const std::string& s, int& value);
-    static std::string to_string(int value);
     int default_, value_;
 };
 

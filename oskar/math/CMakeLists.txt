@@ -7,12 +7,14 @@ set(math_SRC
     src/oskar_bearing_angle.c
     src/oskar_dft_c2r_2d_omp.c
     src/oskar_dft_c2r_3d_omp.c
+    src/oskar_dft_c2r.c
     src/oskar_dftw_c2c_2d_omp.c
     src/oskar_dftw_c2c_3d_omp.c
     src/oskar_dftw_m2m_2d_omp.c
     src/oskar_dftw_m2m_3d_omp.c
     src/oskar_dftw_o2c_2d_omp.c
     src/oskar_dftw_o2c_3d_omp.c
+    src/oskar_dftw.c
     src/oskar_ellipse_radius.c
     src/oskar_evaluate_image_lon_lat_grid.c
     src/oskar_evaluate_image_lm_grid.c
@@ -55,13 +57,13 @@ endif()
 
 if (OpenCL_FOUND)
     list(APPEND math_SRC
-        src/oskar_dftw_c2c_2d_cl.c
+        src/oskar_dft_c2r_2d.cl
+        src/oskar_dft_c2r_3d.cl
         src/oskar_dftw_c2c_2d.cl
-        src/oskar_dftw_c2c_3d_cl.c
         src/oskar_dftw_c2c_3d.cl
-        src/oskar_dftw_o2c_2d_cl.c
+        src/oskar_dftw_m2m_2d.cl
+        src/oskar_dftw_m2m_3d.cl
         src/oskar_dftw_o2c_2d.cl
-        src/oskar_dftw_o2c_3d_cl.c
         src/oskar_dftw_o2c_3d.cl
         src/oskar_gaussian_circular.cl
     )

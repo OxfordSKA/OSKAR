@@ -58,29 +58,27 @@ namespace oskar {
  * By default the range is initialised to a full range of allowed integer
  * values (i.e. from -INT_MAX to INT_MAX), with a value of 0.
  */
-
-class OSKAR_SETTINGS_EXPORT IntRange : public AbstractSettingsType
+class IntRange : public AbstractSettingsType
 {
 public:
-    IntRange();
-    virtual ~IntRange() {}
+    OSKAR_SETTINGS_EXPORT IntRange();
+    OSKAR_SETTINGS_EXPORT virtual ~IntRange();
 
-    bool init(const std::string& s);
-    bool set_default(const std::string& value);
-    bool set_value(const std::string& value);
-    bool is_default() const;
+    OSKAR_SETTINGS_EXPORT bool init(const char* s);
+    OSKAR_SETTINGS_EXPORT bool set_default(const char* value);
+    OSKAR_SETTINGS_EXPORT bool set_value(const char* value);
+    OSKAR_SETTINGS_EXPORT bool is_default() const;
 
-    int value() const { return value_; }
-    int default_value() const { return default_; }
-    int min() const { return min_; }
-    int max() const { return max_; }
+    OSKAR_SETTINGS_EXPORT int value() const;
+    OSKAR_SETTINGS_EXPORT int default_value() const;
+    OSKAR_SETTINGS_EXPORT int min() const;
+    OSKAR_SETTINGS_EXPORT int max() const;
 
-    bool operator==(const IntRange& other) const;
-    bool operator>(const IntRange& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator==(const IntRange& other) const;
+    OSKAR_SETTINGS_EXPORT bool operator>(const IntRange& other) const;
 
 private:
     bool from_string_(const std::string& s, int& value) const;
-
     int min_, max_, default_, value_;
 };
 

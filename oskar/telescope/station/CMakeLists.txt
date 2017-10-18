@@ -4,8 +4,6 @@
 
 set(station_SRC
     src/oskar_blank_below_horizon.c
-    src/oskar_evaluate_array_pattern.c
-    src/oskar_evaluate_array_pattern_hierarchical.c
     src/oskar_evaluate_beam_horizon_direction.c
     src/oskar_evaluate_pierce_points.c
     src/oskar_evaluate_element_weights_dft.c

@@ -68,7 +68,7 @@ extern "C" {
  * @param[in]     std          Standard deviation of distribution.
  */
 OSKAR_EXPORT
-void oskar_mem_random_gaussian_cuda_f(unsigned int num_elements,
+void oskar_mem_random_gaussian_cuda_f(int num_elements,
         float* d_data, unsigned int seed, unsigned int counter1,
         unsigned int counter2, unsigned int counter3, float std);
 
@@ -101,7 +101,7 @@ void oskar_mem_random_gaussian_cuda_f(unsigned int num_elements,
  * @param[in]     std          Standard deviation of distribution.
  */
 OSKAR_EXPORT
-void oskar_mem_random_gaussian_cuda_d(unsigned int num_elements,
+void oskar_mem_random_gaussian_cuda_d(int num_elements,
         double* d_data, unsigned int seed, unsigned int counter1,
         unsigned int counter2, unsigned int counter3, double std);
 

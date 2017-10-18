@@ -10,8 +10,7 @@ add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar_binary)
 
 # Add the oskar_binary_test target to the 'tests' target.
-get_target_property(BUILD_TESTS_TARGET tests TYPE)
-if (NOT BUILD_TESTS_TARGET)
+if (NOT TARGET tests)
     add_custom_target(tests)
 endif()
 add_dependencies(tests ${name})

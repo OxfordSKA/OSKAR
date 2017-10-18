@@ -35,49 +35,43 @@ if (Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Network_FOUND)
     qt5_add_resources(gui_SRC icons/icons.qrc)
     set(target "oskar_app")
     if (APPLE)
-        set(MACOSX_BUNDLE_BUNDLE_NAME "OSKAR")
-        set(MACOSX_BUNDLE_GUI_IDENTIFIER "OSKAR")
-        set(MACOSX_BUNDLE_ICON_FILE oskar.icns)
-        set(MACOSX_BUNDLE_INFO_STRING
-            "OSKAR ${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
-        set(MACOSX_BUNDLE_SHORT_VERSION_STRING
-            "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}")
-        set(MACOSX_BUNDLE_LONG_VERSION_STRING
-            "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
-        set(MACOSX_BUNDLE_BUNDLE_VERSION
-            "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
-        set(MACOSX_BUNDLE_COPYRIGHT "(C) 2012-2017 The University of Oxford")
-        set(gui_ICON icons/oskar.icns)
-        set_source_files_properties(${gui_ICON} PROPERTIES
-            MACOSX_PACKAGE_LOCATION "Resources")
-        add_executable(${target} MACOSX_BUNDLE ${gui_ICON} ${gui_SRC})
-        set_target_properties(${target} PROPERTIES OUTPUT_NAME OSKAR)
-    else (APPLE)
         add_executable(${target} ${gui_SRC})
         set_target_properties(${target} PROPERTIES OUTPUT_NAME oskar)
-    endif (APPLE)
+    elseif (WIN32)
+        set(gui_ICON icons/oskar.rc)
+        add_executable(${target} WIN32 ${gui_ICON} ${gui_SRC})
+        set_target_properties(${target} PROPERTIES OUTPUT_NAME oskar)
+    else ()
+        add_executable(${target} ${gui_SRC})
+        set_target_properties(${target} PROPERTIES OUTPUT_NAME oskar)
+    endif ()
     target_link_libraries(${target}
             oskar_settings
             Qt5::Core
             Qt5::Widgets
             Qt5::Network
     )
-    install(TARGETS ${target} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
+    install(TARGETS ${target}
+        DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT applications)
     if (APPLE)
-        # For convenience, add a BASH script to run the binary inside
-        # the .app bundle. Unfortunately a symlink doesn't do the job.
-        configure_file(oskar ${CMAKE_CURRENT_BINARY_DIR}/oskar @ONLY)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/oskar
-            DESTINATION "${OSKAR_BIN_INSTALL_DIR}"
-            PERMISSIONS
-                OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                GROUP_READ GROUP_EXECUTE
-                WORLD_READ WORLD_EXECUTE
-            )
-        # Create a standalone .app bundle.
-        # set(BU_CHMOD_BUNDLE_ITEMS ON)
-        # include(BundleUtilities)
-    endif (APPLE)
+        get_target_property(QtMac_location Qt5::QCocoaIntegrationPlugin LOCATION)
+        set(QtMac_location ${QtMac_location} CACHE INTERNAL "plugin location")
+    elseif (WIN32)
+        get_target_property(QtCore_location Qt5::Core LOCATION)
+        get_target_property(QtGui_location Qt5::Gui LOCATION)
+        get_target_property(QtWidgets_location Qt5::Widgets LOCATION)
+        get_target_property(QtNetwork_location Qt5::Network LOCATION)
+        install(FILES ${QtCore_location} ${QtGui_location}
+            ${QtWidgets_location} ${QtNetwork_location}
+            DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
+        get_target_property(QtWin_location Qt5::QWindowsIntegrationPlugin LOCATION)
+        install(FILES ${QtWin_location}
+            DESTINATION ${OSKAR_BIN_INSTALL_DIR}/platforms COMPONENT runtime)
+        #foreach (plugin ${Qt5Gui_PLUGINS})
+        #    get_target_property(_loc ${plugin} LOCATION)
+        #    message("${plugin} is at ${_loc}")
+        #endforeach()
+    endif ()
 else()
     message("===============================================================================")
     message("-- WARNING: Qt 5 not found: Unable to build OSKAR GUI.")

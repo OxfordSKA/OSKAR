@@ -44,7 +44,7 @@ TEST(SettingsValue, test1)
     Bool b;
     ASSERT_TRUE(b.set_default("false"));
 
-    v = Bool();
+    ASSERT_TRUE(v.init("Bool", ""));
     ASSERT_EQ(SettingsValue::BOOL, v.type());
     ASSERT_TRUE(v.is_default());
     ASSERT_TRUE(v.set_default("false"));

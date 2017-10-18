@@ -67,7 +67,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_mem_random_uniform_f(
-        const unsigned int num_elements, float* data,
+        const int num_elements, float* data,
         const unsigned int seed, const unsigned int counter1,
         const unsigned int counter2, const unsigned int counter3);
 
@@ -99,7 +99,7 @@ void oskar_mem_random_uniform_f(
  */
 OSKAR_EXPORT
 void oskar_mem_random_uniform_d(
-        const unsigned int num_elements, double* data,
+        const int num_elements, double* data,
         const unsigned int seed, const unsigned int counter1,
         const unsigned int counter2, const unsigned int counter3);
 

@@ -8,14 +8,13 @@ Square Kilometre Array.
 
 Please see INSTALL.md for a quick installation guide.
 
-Full documentation and software can be found at http://oskar.oerc.ox.ac.uk
+A source code archive for Linux, and binary installer packages for
+macOS and Windows platforms are available to download from:
 
-Please do not expect code in any development branch (including master)
-to work as expected.
-Only use the tagged versions at https://github.com/OxfordSKA/OSKAR/releases/
+    http://oskar.oerc.ox.ac.uk/
 
 Please email oskar@oerc.ox.ac.uk if you encounter problems using OSKAR.
 
-OSKAR is licensed under the terms of the Modified BSD License.
+OSKAR is licensed under the terms of the 3-clause BSD License.
 Please see LICENSE for details.
 

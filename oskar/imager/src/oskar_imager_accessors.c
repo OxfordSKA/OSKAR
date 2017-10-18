@@ -32,10 +32,11 @@
 #include "convert/oskar_convert_fov_to_cellsize.h"
 #include "imager/oskar_imager.h"
 #include "imager/private_imager_composite_nearest_even.h"
-#include "imager/private_imager_free_gpu_data.h"
+#include "imager/private_imager_free_device_data.h"
 #include "imager/private_imager_set_num_planes.h"
 #include "math/oskar_cmath.h"
 #include "utility/oskar_device_utils.h"
+#include "utility/oskar_get_num_procs.h"
 
 #include <float.h>
 #include <stdio.h>
@@ -352,15 +353,15 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
 {
     int i, num_gpus_avail;
     if (*status) return;
-    oskar_imager_free_gpu_data(h, status);
+    oskar_imager_free_device_data(h, status);
     num_gpus_avail = oskar_device_count(status);
     if (*status) return;
     if (num < 0)
     {
         h->num_gpus = num_gpus_avail;
-        h->cuda_device_ids = (int*) calloc(h->num_gpus, sizeof(int));
+        h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
-            h->cuda_device_ids[i] = i;
+            h->gpu_ids[i] = i;
     }
     else if (num > 0)
     {
@@ -370,32 +371,20 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
             return;
         }
         h->num_gpus = num;
-        h->cuda_device_ids = (int*) calloc(h->num_gpus, sizeof(int));
+        h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
-            h->cuda_device_ids[i] = ids[i];
+            h->gpu_ids[i] = ids[i];
     }
-    else return;
-    h->d = (DeviceData*) calloc(h->num_gpus, sizeof(DeviceData));
+    else /* num == 0 */
+    {
+        free(h->gpu_ids);
+        h->gpu_ids = 0;
+        h->num_gpus = 0;
+    }
     for (i = 0; i < h->num_gpus; ++i)
     {
-        oskar_device_set(h->cuda_device_ids[i], status);
+        oskar_device_set(h->gpu_ids[i], status);
         if (*status) return;
-        h->d[i].uu = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
-        h->d[i].vv = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
-        h->d[i].ww = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
-        h->d[i].weight = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
-        h->d[i].amp = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
-                OSKAR_GPU, 0, status);
-        h->d[i].l = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
-        h->d[i].m = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
-        h->d[i].n = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
-        h->d[i].block_gpu = oskar_mem_create(h->imager_prec,
-                OSKAR_GPU, 0, status);
-        h->d[i].block_cpu = oskar_mem_create(h->imager_prec,
-                OSKAR_CPU, 0, status);
-        h->d[i].plane_gpu = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
-                OSKAR_GPU, 0, status);
-        oskar_device_synchronize();
     }
 }
 
@@ -484,7 +473,7 @@ void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
     for (i = 0; i < num_files; ++i)
     {
         int len = 0;
-        if (filenames[i]) len = strlen(filenames[i]);
+        if (filenames[i]) len = (int) strlen(filenames[i]);
         if (len > 0)
         {
             h->input_files[i] = (char*) calloc(1 + len, sizeof(char));
@@ -510,11 +499,24 @@ void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
 {
     int len = 0;
     if (*status) return;
-    len = strlen(column);
+    len = (int) strlen(column);
     if (len == 0) { *status = OSKAR_ERR_INVALID_ARGUMENT; return; }
     free(h->ms_column);
     h->ms_column = calloc(1 + len, 1);
     strcpy(h->ms_column, column);
+}
+
+
+void oskar_imager_set_num_devices(oskar_Imager* h, int value)
+{
+    int status = 0;
+    oskar_imager_free_device_data(h, &status);
+    if (value < 1)
+        value = (h->num_gpus == 0) ? oskar_get_num_procs() : h->num_gpus;
+    if (value < 1) value = 1;
+    h->num_devices = value;
+    h->d = (DeviceData*) realloc(h->d, h->num_devices * sizeof(DeviceData));
+    memset(h->d, 0, h->num_devices * sizeof(DeviceData));
 }
 
 
@@ -523,7 +525,7 @@ void oskar_imager_set_output_root(oskar_Imager* h, const char* filename)
     int len = 0;
     free(h->output_root);
     h->output_root = 0;
-    if (filename) len = strlen(filename);
+    if (filename) len = (int) strlen(filename);
     if (len > 0)
     {
         h->output_root = calloc(1 + len, 1);

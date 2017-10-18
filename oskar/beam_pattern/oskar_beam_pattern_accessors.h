@@ -42,6 +42,9 @@ extern "C" {
 #endif
 
 OSKAR_EXPORT
+int oskar_beam_pattern_num_gpus(const oskar_BeamPattern* h);
+
+OSKAR_EXPORT
 void oskar_beam_pattern_set_auto_power_fits(oskar_BeamPattern* h, int flag);
 
 OSKAR_EXPORT

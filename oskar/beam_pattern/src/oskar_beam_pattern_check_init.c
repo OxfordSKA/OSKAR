@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -330,7 +330,7 @@ static fitsfile* create_fits_file(const char* filename, int precision,
     write_axis(f, 3, "FREQ", "Frequency",
             start_freq_hz, delta_freq_hz, 1.0, status);
     write_axis(f, 4, "UTC", "Time",
-            start_time_mjd, delta_time_sec, 1.0, status);
+            start_time_mjd * 86400.0, delta_time_sec, 1.0, status);
 
     /* Write other headers. */
     fits_write_key_str(f, "TIMESYS", "UTC", NULL, status);
@@ -407,7 +407,7 @@ static char* construct_filename(oskar_BeamPattern* h, int data_product_type,
     char* name = 0;
 
     /* Construct the filename. */
-    buflen = strlen(h->root_path) + 100;
+    buflen = (int) strlen(h->root_path) + 100;
     name = calloc(buflen, 1);
     start += SNPRINTF(name + start, buflen - start, "%s", h->root_path);
     if (i_station >= 0)
