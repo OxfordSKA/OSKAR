@@ -34,7 +34,8 @@
 void oskar_ms_close(oskar_MeasurementSet* p)
 {
     if (!p) return;
-    oskar_ms_set_time_range(p);
+    if (p->data_written)
+        oskar_ms_set_time_range(p);
     if (p->msmc)
         delete p->msmc;
     if (p->msc)

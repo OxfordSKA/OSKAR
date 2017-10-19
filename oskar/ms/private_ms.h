@@ -36,6 +36,7 @@ struct oskar_MeasurementSet
     char* app_name;
     unsigned int *a1, *a2;
     unsigned int num_pols, num_channels, num_stations, num_receptors;
+    int data_written;
     double freq_start_hz, freq_inc_hz;
     double phase_centre_ra, phase_centre_dec;
     double start_time, end_time, time_inc_sec;

@@ -138,6 +138,7 @@ void oskar_ms_write_coords(oskar_MeasurementSet* p,
     if (time_stamp > p->end_time)
         p->end_time = time_stamp + interval_sec/2.0;
     p->time_inc_sec = interval_sec;
+    p->data_written = 1;
 }
 
 void oskar_ms_write_coords_d(oskar_MeasurementSet* p,
@@ -202,6 +203,7 @@ void oskar_ms_write_vis(oskar_MeasurementSet* p,
     // Write visibilities to DATA column.
     ArrayColumn<Complex>& col_data = msmc->data();
     col_data.putColumnRange(row_range, array_section, vis_data);
+    p->data_written = 1;
 }
 
 void oskar_ms_write_vis_d(oskar_MeasurementSet* p,
