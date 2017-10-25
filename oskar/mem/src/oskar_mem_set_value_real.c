@@ -176,89 +176,81 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
     else if (location & OSKAR_CL)
     {
 #ifdef OSKAR_HAVE_OPENCL
-        cl_int error = 0;
-        size_t element_size, offset_bytes, size_bytes;
-        element_size = oskar_mem_element_size(type);
-        offset_bytes = offset * element_size;
-        size_bytes = n * element_size;
+        cl_device_type dev_type;
+        cl_event event;
+        cl_kernel k = 0;
+        cl_int is_gpu, error, n_in, off;
+        cl_uint arg = 0;
+
+        /* Get the appropriate kernel. */
+        /*
+         * NOTE: Don't use clEnqueueFillBuffer(),
+         * as this is currently broken on macOS.
+         */
+        clGetDeviceInfo(oskar_cl_device_id(),
+                CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_type, NULL);
+        is_gpu = dev_type & CL_DEVICE_TYPE_GPU;
+        const size_t local_size = is_gpu ? 256 : 128;
         switch (type)
         {
         case OSKAR_DOUBLE:
-        {
-            cl_double c_val = (cl_double) val;
-            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
-                    mem->buffer, &c_val, sizeof(cl_double),
-                    offset_bytes, size_bytes, 0, NULL, NULL);
+            k = oskar_cl_kernel("mem_set_value_real_r_double");
             break;
-        }
         case OSKAR_DOUBLE_COMPLEX:
-        {
-            cl_double2 c_val;
-            c_val.s[0] = (cl_double) val;
-            c_val.s[1] = 0.0;
-            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
-                    mem->buffer, &c_val, sizeof(cl_double2),
-                    offset_bytes, size_bytes, 0, NULL, NULL);
+            k = oskar_cl_kernel("mem_set_value_real_c_double");
             break;
-        }
         case OSKAR_DOUBLE_COMPLEX_MATRIX:
-        {
-            cl_double8 c_val;
-            c_val.s[0] = (cl_double) val;
-            c_val.s[1] = 0.0;
-            c_val.s[2] = 0.0;
-            c_val.s[3] = 0.0;
-            c_val.s[4] = 0.0;
-            c_val.s[5] = 0.0;
-            c_val.s[6] = (cl_double) val;
-            c_val.s[7] = 0.0;
-            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
-                    mem->buffer, &c_val, sizeof(cl_double8),
-                    offset_bytes, size_bytes, 0, NULL, NULL);
+            k = oskar_cl_kernel("mem_set_value_real_m_double");
             break;
-        }
         case OSKAR_SINGLE:
-        {
-            cl_float c_val = (cl_float) val;
-            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
-                    mem->buffer, &c_val, sizeof(cl_float),
-                    offset_bytes, size_bytes, 0, NULL, NULL);
+            k = oskar_cl_kernel("mem_set_value_real_r_float");
             break;
-        }
         case OSKAR_SINGLE_COMPLEX:
-        {
-            cl_float2 c_val;
-            c_val.s[0] = (cl_float) val;
-            c_val.s[1] = 0.0f;
-            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
-                    mem->buffer, &c_val, sizeof(cl_float2),
-                    offset_bytes, size_bytes, 0, NULL, NULL);
+            k = oskar_cl_kernel("mem_set_value_real_c_float");
             break;
-        }
         case OSKAR_SINGLE_COMPLEX_MATRIX:
-        {
-            cl_float8 c_val;
-            c_val.s[0] = (cl_float) val;
-            c_val.s[1] = 0.0f;
-            c_val.s[2] = 0.0f;
-            c_val.s[3] = 0.0f;
-            c_val.s[4] = 0.0f;
-            c_val.s[5] = 0.0f;
-            c_val.s[6] = (cl_float) val;
-            c_val.s[7] = 0.0f;
-            error = clEnqueueFillBuffer(oskar_cl_command_queue(),
-                    mem->buffer, &c_val, sizeof(cl_float8),
-                    offset_bytes, size_bytes, 0, NULL, NULL);
+            k = oskar_cl_kernel("mem_set_value_real_m_float");
             break;
-        }
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             break;
         }
-        if (error != CL_SUCCESS)
+
+        /* Set kernel arguments. */
+        if (k)
         {
-            fprintf(stderr, "clEnqueueFillBuffer() error (%d)\n", error);
-            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            n_in = (cl_int) (mem->num_elements);
+            off = (cl_int) offset;
+            error = clSetKernelArg(k, arg++, sizeof(cl_int), &n_in);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                    oskar_mem_cl_buffer_const(mem, status));
+            error |= clSetKernelArg(k, arg++, sizeof(cl_int), &off);
+            if (oskar_mem_precision(mem) == OSKAR_SINGLE)
+            {
+                cl_float v = (cl_float) val;
+                error |= clSetKernelArg(k, arg++, sizeof(cl_float), &v);
+            }
+            else
+            {
+                cl_double v = (cl_double) val;
+                error |= clSetKernelArg(k, arg++, sizeof(cl_double), &v);
+            }
+            if (!*status && error != CL_SUCCESS)
+                *status = OSKAR_ERR_INVALID_ARGUMENT;
+            if (!*status)
+            {
+                /* Launch kernel on current command queue. */
+                const size_t global_size = ((n + local_size - 1) /
+                        local_size) * local_size;
+                error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1,
+                        NULL, &global_size, &local_size, 0, NULL, &event);
+                if (error != CL_SUCCESS)
+                    *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
+            }
+        }
+        else
+        {
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
         }
 #else
         *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;

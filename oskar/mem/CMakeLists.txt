@@ -59,6 +59,7 @@ if (OpenCL_FOUND)
         src/oskar_mem_multiply.cl
         src/oskar_mem_random.cl
         src/oskar_mem_scale_real.cl
+        src/oskar_mem_set_value_real.cl
         src/oskar_random_generators.cl
     )
 endif()

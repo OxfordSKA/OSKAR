@@ -1702,7 +1702,7 @@ LATEX_HEADER           = @DOXYFILE_LATEX_HEADER@
 # Note: Only use a user-defined footer if you know what you are doing!
 # This tag requires that the tag GENERATE_LATEX is set to YES.
 
-LATEX_FOOTER           =
+LATEX_FOOTER           = @DOXYFILE_LATEX_FOOTER@
 
 # The LATEX_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the LATEX_OUTPUT output

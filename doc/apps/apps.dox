@@ -112,6 +112,10 @@ application, described above. If required, settings files can be modified
 via the command line using the --set option, with the key and new value given
 after the path to the settings file.
 
+\latexonly
+\newpage
+\endlatexonly
+
 \subsection apps_oskar_sim_beam_pattern    oskar_sim_beam_pattern
 
 This is a command line application for simulating station beam patterns, which

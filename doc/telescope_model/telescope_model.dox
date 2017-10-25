@@ -639,10 +639,6 @@ values in the list separated by a new line. As with all of the other
 OSKAR plain text format configuration files, lines starting with a hash '#'
 character are treated as comments, and empty lines are ignored.
 
-\latexonly
-\newpage
-\endlatexonly
-
 \subsubsection telescope_noise_examples Examples
 
 <b><tt>noise_frequencies.txt</tt></b>

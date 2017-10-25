@@ -82,11 +82,11 @@ static void run_test(int type, int loc, int num_baselines,
 
 TEST(dft, c2r)
 {
-    int side = 64, status = 0;
+    int side = 500, status = 0;
     int type = OSKAR_SINGLE;
     size_t num_pixels = side * side;
     size_t num_baselines = 1000;
-    double fov = 1.0 * M_PI / 180.0;
+    double fov = 4.0 * M_PI / 180.0;
     oskar_Mem *l = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
     oskar_Mem *m = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
     oskar_Mem *n = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
@@ -103,9 +103,11 @@ TEST(dft, c2r)
 
     /* Run on devices. */
 #ifdef OSKAR_HAVE_OPENCL
+    oskar_cl_init("GPU", "NVIDIA|AMD");
     printf("Using %s\n", oskar_cl_device_name());
     run_test(type, OSKAR_CL, (int) num_baselines, u, v, w,
             side, l, m, n, "test_dft_cl", &status);
+    oskar_cl_free();
 #endif
 #ifdef OSKAR_HAVE_CUDA
     run_test(type, OSKAR_GPU, (int) num_baselines, u, v, w,

@@ -35,7 +35,8 @@ add_doc(
     DOC_DIRS     ${USER_DOC_DIRS}
     DOC_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/intro.dox
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Intro
 add_doc(
@@ -44,7 +45,8 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/intro.dox
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Release Notes
 add_doc(
@@ -53,7 +55,8 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/release_notes
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Apps
 add_doc(
@@ -62,7 +65,8 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/apps
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Binary file
 add_doc(
@@ -71,7 +75,8 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/binary_file
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Example
 add_doc(
@@ -80,7 +85,8 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/example
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Install
 add_doc(
@@ -89,7 +95,8 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/install
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # MATLAB
 #add_doc(
@@ -98,7 +105,8 @@ add_doc(
 #    TARGET_NAME  doc_single
 #    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/matlab
 #    TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-#    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+#    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+#    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Pointing file
 add_doc(
@@ -107,7 +115,8 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/pointing_file
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Settings
 add_doc(
@@ -116,7 +125,8 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/settings
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Sky model
 add_doc(
@@ -125,7 +135,8 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/sky_model
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Telescope model
 add_doc(
@@ -134,7 +145,8 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/telescope_model
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Theory
 add_doc(
@@ -143,7 +155,8 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/theory
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
+    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 
 

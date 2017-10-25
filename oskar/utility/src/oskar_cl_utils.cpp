@@ -88,6 +88,11 @@ struct CLGlobal
         ~CLDevice()
         {
 #ifdef OSKAR_HAVE_OPENCL
+            if (queue)
+            {
+                clFlush(queue);
+                clFinish(queue);
+            }
             for (map<string, cl_kernel>::iterator i = kernel.begin();
                     i != kernel.end(); ++i)
             {

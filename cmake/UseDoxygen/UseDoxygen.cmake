@@ -77,6 +77,7 @@ endmacro()
 #     a. DOXYFILE_OUTPUT_DIR    - from DOC_NAME
 #     b. DOXYFILE_INPUTS        - from DOC_INPUTS
 #     c. DOXYFILE_LATEX_HEADER  - from LATEX_HEADER
+#     d. DOXYFILE_LATEX_FOOTER  - from LATEX_FOOTER
 # 2. Creates a target for the documentaton based on the value of the
 #    DOC_NAME and appends this target to the specified TARGET_NAME
 # 3. It provides and interface for spcifying per target doxygen build
@@ -90,6 +91,7 @@ endmacro()
 #     DOC_INPUTS   ${DOXYFILE_INPUTS}
 #     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
 #     LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header.tex
+#     LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex
 #     NO_LATEX
 #     VERBOSE)
 #
@@ -97,6 +99,7 @@ endmacro()
 #   - DOXYFILE_OUTPUT_DIR
 #   - DOXYFILE_INPUTS
 #   - DOXYFILE_LATEX_HEADER
+#   - DOXYFILE_LATEX_FOOTER
 #
 # These are used for substitution in the Doxyfile.in template.
 #
@@ -111,7 +114,7 @@ function(add_doc)
     if (DOXYGEN_FOUND)
         # http://www.cmake.org/cmake/help/v2.8.3/cmake.html#module:CMakeParseArguments
         set(options NO_LATEX VERBOSE)
-        set(oneValueArgs DOC_NAME PDF_NAME TARGET_NAME TEMPLATE LATEX_HEADER)
+        set(oneValueArgs DOC_NAME PDF_NAME TARGET_NAME TEMPLATE LATEX_HEADER LATEX_FOOTER)
         set(multiValueArgs DOC_DIRS DOC_FILES)
         cmake_parse_arguments(DOX
             "${options}"
@@ -179,6 +182,7 @@ function(add_doc)
         set(DOXYFILE_OUT "Doxyfile_${DOX_DOC_NAME}")
         set(DOXYFILE "${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE_OUT}")
         set(DOXYFILE_LATEX_HEADER "${DOX_LATEX_HEADER}")
+        set(DOXYFILE_LATEX_FOOTER "${DOX_LATEX_FOOTER}")
         #======================================================================
 
     endif(DOXYGEN_FOUND)
@@ -193,6 +197,7 @@ function(add_doc)
             message("  >> INPUTS       : ${DOX_DOC_INPUTS}")
             message("  >> TEMPALTE     : ${DOX_TEMPLATE}")
             message("  >> LATEX_HEADER : ${DOX_LATEX_HEADER}")
+            message("  >> LATEX_FOOTER : ${DOX_LATEX_FOOTER}")
             message("  >> TARGET       : ${DOX_TARGET_NAME}")
             message("  >> NO LATEX     : ${DOX_NO_LATEX}")
             message("-----------------------------------------")
@@ -205,6 +210,7 @@ function(add_doc)
             message("  -- DOXYFILE_PROJECT_NAME   : ${DOXYFILE_PROJECT_NAME}")
             message("  -- DOXYFILE_PROJECT_NUMBER : ${DOXYFILE_PROJECT_NUMBER}")
             message("  -- DOXYFILE_LATEX_HEADER   : ${DOXYFILE_LATEX_HEADER}")
+            message("  -- DOXYFILE_LATEX_FOOTER   : ${DOXYFILE_LATEX_FOOTER}")
             message("  -- DOXYFILE_IMAGE_PATH     : ${DOXYFILE_IMAGE_PATH}")
             message("  -- DOXYFILE_EXAMPLE_PATH   : ${DOXYFILE_EXAMPLE_PATH}")
             message("-----------------------------------------")
