@@ -12,7 +12,6 @@
 #   0. Global variables                                                       #
 #       - current_oskar_version                                               #
 #       - oskar_app_path                                                      #
-#       - oskar_url                                                           #
 #   1. General utility functions                                              #
 #       - console_log                                                         #
 #       - set_value                                                           #
@@ -20,8 +19,6 @@
 #   2. Functions for working with OSKAR example data.                         #
 #       - example_data_script_usage                                           #
 #       - get_example_data_version                                            #
-#       - download_example_data                                               #
-#       - set_oskar_binaries                                                  #
 #   3. Functions for working with OSKAR.                                      #
 #       - set_setting                                                         #
 #       - get_setting                                                         #
@@ -42,7 +39,7 @@
 ###############################################################################
 export current_oskar_version="@OSKAR_VERSION_STR@"
 oskar_app_path="@PROJECT_BINARY_DIR@/apps"
-oskar_url="http://oerc.ox.ac.uk/~ska/oskar"
+example_data_dir="@PROJECT_BINARY_DIR@/apps/test/data"
 
 ###############################################################################
 #                                                                             #
@@ -118,10 +115,10 @@ function example_data_script_usage() {
 #   current OSKAR binary version.
 #
 # Usage:
-#   getExampleVersion [Array of command line arguments]
+#   get_example_data_version [Array of command line arguments]
 #
 # Example:
-#   getExampleVersion $@
+#   get_example_data_version $@
 #
 function get_example_data_version() {
     local default_example_version="@OSKAR_VERSION_MAJOR@.@OSKAR_VERSION_MINOR@"
@@ -137,57 +134,6 @@ function get_example_data_version() {
     fi
 }
 
-# Description:
-#   Downloads the OSKAR example data for the specified version.
-#   Also sets the variables:
-#       $example_data_url : The URL to the example data being used.
-#       $example_data_dir : The directory of the example data downloaded
-#
-# Usage:
-#   downloadExampleData [version]
-#
-# Example:
-#   downloadExampleData $version
-#   downloadExampleData 2.5
-#
-function download_example_data() {
-    # Set variables to the example data path, file, and url
-    example_data_dir="OSKAR-${1}-Example-Data"
-    local file="${example_data_dir}.zip"
-    example_data_url="${oskar_url}/${1}/data/${file}"
-    example_data_url="https://www.dropbox.com/s/w05katzwp4cai30/OSKAR-2.6-Example-Data.zip"
-    # Download and unpack the example data, removing any existing data first.
-    if [ -f "$file" ]; then
-        rm -f "$file"
-    fi
-    if [ -d "$example_data_dir" ]; then
-        rm -rf "$example_data_dir"
-    fi
-    # wget -q "$example_data_url"
-    cmd="wget --tries=2 --timeout=2 --quiet $example_data_url"
-    (${cmd})
-    if (( $? == 4 )); then
-        printf '%s\n' 'Error: Failed to download example data. network error.'
-        exit_ 1
-    fi
-    if [ ! -f "$file" ]; then
-        echo "Error: Failed to download example data from:"
-        echo "  '$example_data_url'"
-        echo ""
-        echo "Please check the example data for OSKAR version '${version}' exists!"
-        example_data_script_usage
-        exit_ 1
-    fi
-    unzip -q "${file}"
-    if [ ! -d "$example_data_dir" ]; then
-        echo "ERROR: Failed to unpack example data. ${file}"
-        exit_ 1
-    fi
-    # Remove the zip file.
-    if [ -f "$file" ]; then
-        rm -f "$file"
-    fi
-}
 
 ###############################################################################
 #                                                                             #

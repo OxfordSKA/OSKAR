@@ -10,8 +10,6 @@ function run_example() {
     fi
 }
 
-get_example_data_version "$@"
-
 # Examples
 run_example run_example_beam_pattern_equatorial
 run_example run_example_interferometry

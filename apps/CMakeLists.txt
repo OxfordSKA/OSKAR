@@ -56,8 +56,10 @@ if (IONOSPHERE_TESTING)
 endif()
 
 # Install python scripts to the installation binary directory
-include(oskar_copy_files)
-copy_files(${CMAKE_CURRENT_SOURCE_DIR} *.py ${CMAKE_CURRENT_BINARY_DIR})
+file(GLOB app_scripts *.py)
+foreach (script ${app_scripts})
+    file(COPY ${script} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endforeach()
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
     DESTINATION "${OSKAR_BIN_INSTALL_DIR}"
     FILES_MATCHING PATTERN "*.py"

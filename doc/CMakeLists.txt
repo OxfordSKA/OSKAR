@@ -2,17 +2,10 @@
 # doc/CMakeLists.txt
 #
 
-include(UseDoxygen/UseDoxygen)
 set(OSKAR_PDF_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}")
-
 set(DOXYFILE_PROJECT_NAME "OSKAR User Documentation")
 set(DOXYFILE_LATEX_EXTRA_FILES "${CMAKE_SOURCE_DIR}/doc/oskar_latex.sty")
-
-#if(DOXYGEN_FOUND) # Needed for older versions of doxygen?
-#    include(oskar_copy_files)
-#    copy_file(${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex.sty
-#        ${CMAKE_CURRENT_BINARY_DIR}/oskar_latex.sty)
-#endif()
+include(UseDoxygen/UseDoxygen)
 
 # User documentation
 set(USER_DOC_DIRS

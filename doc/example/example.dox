@@ -58,10 +58,13 @@ application, which can be downloaded from http://ds9.si.edu
 
 \section example_sims Example Simulations
 
+This example will run a beam pattern simulation, then an interferometer
+simulation, and then the OSKAR imager to inspect the results.
+
 \subsection oskar_gui The OSKAR GUI
 
-The OSKAR GUI provides an interface for configuring and running the OSKAR
-command line applications. Start the OSKAR GUI by running the <tt>oskar</tt>
+The OSKAR GUI provides a convenient way to configure and run the OSKAR
+command line applications. Start the GUI by running the <tt>oskar</tt>
 binary. The first time you run it, you may be prompted for the location of
 the OSKAR command line applications, as shown in
 \ref fig_apps "Figure 1".
@@ -70,23 +73,30 @@ the OSKAR command line applications, as shown in
 \image html oskar_gui_0.png "Setting the path to OSKAR command line applications"
 \image latex oskar_gui_0.png "Setting the path to OSKAR command line applications" width=8cm
 
-The applications can be found in the <tt>build/apps</tt> directory
-after compiling the OSKAR package, and in the <tt>\<install prefix\>/bin</tt>
+The command line applications can be found in the <tt>build/apps</tt> directory
+after compiling OSKAR, and in the <tt>\<install prefix\>/bin</tt>
 directory after installing OSKAR using the <tt>make install</tt> command
 (for example, <tt>/usr/local/bin</tt>).
 
 The main window is shown in \ref fig_gui "Figure 2".
-Settings for an application will be displayed in here by selecting the
-application using the application selector (the drop-down menu)
-at the very top of the window.
+Settings for an application will be displayed here after selecting it using
+the application selector (the drop-down menu) at the very top of the window.
 
-Edited settings are saved to a settings file which is read by the command
-line application when it starts.
-<i>Since OSKAR 2.7, applications must not share settings files, as the settings
-for each application are different: If a settings file contains settings
-unknown to an application, those settings will be removed if the file is
-updated using the GUI.</i> For convenience, the GUI will remember the settings
-file last used for each application, and automatically switch to it when that
+Most settings have a _default value_, which is indicated by black text in the
+settings tree. Options _set by the user_ appear as blue text.
+Options which are _required_ to run the application, and have not yet been
+assigned, have their description and value backgrounds coloured blue and red
+respectively.
+
+\subsubsection example_settings_files Settings Files
+
+Edited settings will be saved to a settings file, which is read by the
+application when it starts.
+<i>Since OSKAR 2.7, applications must not share settings files, as most
+settings for each application are different: If a settings file contains
+settings unknown to an application, those settings will be removed if the file
+is updated using the GUI.</i> For convenience, the GUI will remember the
+settings file last used for each application, and switch back to it when that
 application is re-selected.
 
 A settings file can be loaded into the GUI by specifying the settings file
@@ -95,24 +105,27 @@ or using the **Open...** action in the **File** menu once the GUI has started.
 
 To unload a settings file and set all defaults for the application, choose
 the **Clear (Unload)** action in the **File** menu. Note that this does not
-clear the settings file itself, which will remain on the disk.
-
-Most settings have a _default value_, which is indicated by black text in the
-settings tree. Options _set by the user_, which have been defined in the
-settings file, appear as blue text. Options which are _required_ to run the
-simulator, and have not yet been assigned, have their description and value
-backgrounds coloured blue and red respectively.
+clear the settings file itself.
 
 Note that a settings file is updated automatically whenever any setting is
 modified, so you will not need to save the file explicitly, unless you want
 to save a copy (using the **Save As...** menu action) under a new file name.
 
-This example will run a beam pattern simulation, then an interferometer
-simulation, and then the OSKAR imager to inspect the results.
+\subsubsection example_cwd The Current Working Directory
 
-\latexonly
-\newpage
-\endlatexonly
+The current working directory is displayed in the text field under the
+application selector. The selected application will be run from this
+location, so any relative file paths that appear in the settings file must
+be specified relative to the current working directory.
+
+If a settings file is specified on the command line when launching the GUI,
+the working directory will be inherited from the one in the terminal.
+Otherwise, the previous working directory is used. If the previous directory
+no longer exists or is not set, the default behaviour is to use the
+user's home directory.
+
+The current working directory can be changed at any time using
+the **Change...** button next to the text field.
 
 \anchor fig_gui
 \image html oskar_gui_1.png "OSKAR GUI with default settings for the oskar_sim_interferometer application."
@@ -391,6 +404,6 @@ is \ref example_fit_beam_pattern "shown below".
 | 9        | 2014-07-22 | Updated for new element pattern fitting procedure in OSKAR 2.5.0.
 | 10       | 2014-09-09 | Updated figures for revised default settings in OSKAR 2.5.1.
 | 11       | 2015-04-27 | Updated for revised settings in OSKAR 2.6.0.
-| 12       | 2017-05-30 | Updated for revised settings and GUI in OSKAR 2.7.0.
+| 12       | 2017-10-26 | Updated for revised settings and GUI in OSKAR 2.7.0. Added subsection to describe how the current working directory should be used.
 
 */

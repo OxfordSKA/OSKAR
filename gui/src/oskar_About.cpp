@@ -209,8 +209,14 @@ About::About(QString app_name, QString app_version, QWidget *parent)
                 "<a href=\"https://www.deshawresearch.com/resources_random123.html\">"
                 "https://www.deshawresearch.com/resources_random123.html</a></li>");
     html.append("<li>The ezOptionParser command line parser: "
-                "<a href=\"https://sourceforge.net/projects/ezoptionparser/\">"
-                "https://sourceforge.net/projects/ezoptionparser/</a></li>");
+                "<a href=\"http://ezoptionparser.sourceforge.net/\">"
+                "http://ezoptionparser.sourceforge.net/</a></li>");
+    html.append("<li>The Tiny Template Library: "
+                "<a href=\"http://tinytl.sourceforge.net/\">"
+                "http://tinytl.sourceforge.net/</a></li>");
+    html.append("<li>The RapidXML XML parser: "
+                "<a href=\"http://rapidxml.sourceforge.net/\">"
+                "http://rapidxml.sourceforge.net/</a></li>");
     html.append("<li>The CMake build system: "
                 "<a href=\"https://cmake.org/\">https://cmake.org/</a></li>");
     html.append("<li>The Google Test framework: "

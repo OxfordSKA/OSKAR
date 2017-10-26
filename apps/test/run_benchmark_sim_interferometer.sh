@@ -1,9 +1,6 @@
 #!/bin/bash
 source @OSKAR_BINARY_DIR@/apps/test/test_utility.sh
 
-get_example_data_version "$@"
-download_example_data "$version"
-
 # Optional --verbose option to not hide the oskar run log.
 if [ "$2" == "--verbose" ]; then
     verbose=''
@@ -13,9 +10,6 @@ fi
 
 echo "Running OSKAR example: Interferometry benchmark simulation."
 echo ""
-echo "  * OSKAR version          = $current_oskar_version"
-echo "  * Example data version   = $version"
-echo "  * Example data URL       = $example_data_url"
 echo "  * Example data directory = $example_data_dir"
 echo ""
 
@@ -76,6 +70,6 @@ for log in ${oskar_logs[*]}; do
 done
 echo ""
 echo "Which can be found in the output directory:"
-echo "  ${PWD}/${example_data_dir}"
+echo "  ${example_data_dir}"
 echo "-------------------------------------------------------------------------"
 echo ""

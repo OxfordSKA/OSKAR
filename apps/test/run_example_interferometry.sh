@@ -1,15 +1,8 @@
 #!/bin/bash
 . @OSKAR_BINARY_DIR@/apps/test/test_utility.sh
 
-run_dir=$PWD
-get_example_data_version "$@"
-download_example_data "$version"
-
 echo "Running OSKAR example: Interferometry simulation and imaging."
 echo ""
-echo "  * OSKAR version          = $current_oskar_version"
-echo "  * Example data version   = $version"
-echo "  * Example data URL       = $example_data_url"
 echo "  * Example data directory = $example_data_dir"
 echo ""
 
@@ -43,6 +36,6 @@ echo "-------------------------------------------------------------------------"
 echo "Run complete!"
 echo ""
 echo "Results can be found in the directory: "
-echo "  '$run_dir/$example_data_dir'"
+echo "  '$example_data_dir'"
 echo "-------------------------------------------------------------------------"
 echo ""
