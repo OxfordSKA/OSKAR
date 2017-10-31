@@ -51,16 +51,13 @@ Docs::Docs(QWidget *parent) : QDialog(parent)
             "<html><head></head><body>\n");
     html.append("<p>");
     html.append("For the current release of OSKAR and all related "
-            "documentation, please point your web browser at:");
+            "documentation, please visit:");
     html.append(QString("<ul><li><a href=\"%1\">%2</a></li></ul>").
             arg(root_url).arg(root_url));
     html.append("</p>");
     html.append("<p>");
-    html.append("Please send all bug reports, feature requests, and general "
-            "OSKAR correspondence to the following email address:");
-    html.append("<ul><li><a href=\"mailto:oskar@oerc.ox.ac.uk\">"
-            "oskar@oerc.ox.ac.uk</a></li></ul>");
-
+    html.append("Please email <a href=\"mailto:oskar@oerc.ox.ac.uk\">"
+            "oskar@oerc.ox.ac.uk</a> for general OSKAR queries.");
     html.append("</p>");
     html.append("<p>The following PDF documents are available:</p>");
     html.append("<ol>");
@@ -130,7 +127,7 @@ void Docs::add_doc(QString& html, const char* doc_name, const char* title,
 {
     html.append("<p>");
     html.append("<li>&nbsp;");
-    html.append(QString("<a href=\"%1/sites/default/files/oskar_docs/%2\">%3</a>").
+    html.append(QString("<a href=\"%1/sites/default/files/%2\">%3</a>").
             arg(root_url).arg(doc_name).arg(title));
     html.append("<ul>");
     html.append(QString("<li>%1.</li>").arg(desc));

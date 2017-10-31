@@ -18,7 +18,7 @@ please refer to older revisions of this document or the
 
 \subsection version_2_7_0 Version 2.7.0
 
-2017-XX-YY  OSKAR-2.7.0
+2017-10-31  OSKAR-2.7.0
 
 - Removed telescope longitude, latitude and altitude from settings file.
       These are now specified using "position.txt" in the telescope model.

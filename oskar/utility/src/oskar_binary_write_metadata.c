@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2017, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,13 +34,20 @@
 #include <string.h>
 #include <time.h>
 
+#ifdef OSKAR_OS_WIN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void oskar_binary_write_metadata(oskar_Binary* handle, int* status)
 {
-    const char* str;
+    char* str;
     size_t len;
     static char time_str[80];
     time_t unix_time;
@@ -65,8 +72,20 @@ void oskar_binary_write_metadata(oskar_Binary* handle, int* status)
             0, len, OSKAR_VERSION_STR, status);
 
     /* Write the current working directory. */
-    str = getenv("PWD");
-    if (!str) str = getenv("CD");
+    str = 0;
+    len = 0;
+#ifdef OSKAR_OS_WIN
+    len = GetCurrentDirectory(0, NULL);
+    str = (char*) calloc(len, sizeof(char));
+    GetCurrentDirectory((DWORD) len, str);
+#else
+    do
+    {
+        len += 256;
+        str = (char*) realloc(str, len);
+    }
+    while (getcwd(str, len) == NULL);
+#endif
     if (str)
     {
         len = 1 + strlen(str);
@@ -74,6 +93,7 @@ void oskar_binary_write_metadata(oskar_Binary* handle, int* status)
                 OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_CWD,
                 0, len, str, status);
     }
+    free(str);
 
     /* Write the username. */
     str = getenv("USERNAME");

@@ -82,7 +82,7 @@ static void run_test(int type, int loc, int num_baselines,
 
 TEST(dft, c2r)
 {
-    int side = 500, status = 0;
+    int side = 128, status = 0;
     int type = OSKAR_SINGLE;
     size_t num_pixels = side * side;
     size_t num_baselines = 1000;

@@ -13,6 +13,69 @@ A source code archive for Linux, and binary installer packages for
 macOS and Windows platforms are available to download from:<br/>
 http://oskar.oerc.ox.ac.uk/
 
+\subsection install_linux Linux
+
+\subsubsection install_linux_install Installation
+
+To install the OSKAR package on a Linux system, you will need to compile it
+from source. Ensure the dependencies have been installed as described
+in \ref install_deps "Dependencies" (below).
+Then download the archive and follow the short steps
+in \ref install_build "Building OSKAR".
+
+If using a GPU on Linux, also be sure to install the latest NVIDIA
+driver from your distribution's repository, or from
+https://www.geforce.com/drivers
+
+\subsubsection install_linux_uninstall Uninstallation
+
+To remove the OSKAR package on Linux, delete the applications, libraries and
+headers installed by the <code>make install</code> step.
+By default, these will be placed in:
+
+- Applications: <code>/usr/local/bin/oskar*</code>
+- Libraries: <code>/usr/local/lib/liboskar*</code>
+- Headers: <code>/usr/local/include/oskar/</code>
+
+\subsection install_macos macOS
+
+\subsubsection install_macos_install Installation
+
+To install the OSKAR package on macOS, download and open the disk image (DMG)
+file and drag the OSKAR.app bundle to your /Applications folder.
+After installation, double-click the OSKAR.app bundle to launch the GUI and
+set symbolic links to the applications in /usr/local/bin.
+
+If using a GPU on macOS, also be sure to install the latest NVIDIA CUDA
+driver from http://www.nvidia.com/object/mac-driver-archive.html
+
+\subsubsection install_macos_uninstall Uninstallation
+
+To remove the OSKAR package on macOS, delete the OSKAR.app bundle from
+your /Applications folder, and delete symbolic links to the applications
+by typing <code>rm -f /usr/local/bin/oskar*</code> from a terminal prompt.
+
+\latexonly
+\newpage
+\endlatexonly
+
+\subsection install_windows Windows
+
+\subsubsection install_windows_install Installation
+
+To install the OSKAR package on 64-bit Windows, download and run the
+installer executable and follow the on-screen instructions.
+After installation, the GUI can be launched using the shortcut on the
+Desktop or Start Menu.
+
+If using a GPU on Windows, also be sure to install the latest NVIDIA
+driver from<br/> https://www.geforce.com/drivers
+
+\subsubsection install_windows_uninstall Uninstallation
+
+To remove the OSKAR package on Windows, uninstall it from the list of
+software in Control Panel in the usual way.
+
 \section install_deps Dependencies
 
 If GPU acceleration is required, an NVIDIA GPU with CUDA 5.5 or later
@@ -36,7 +99,7 @@ To build OSKAR, open a terminal and give the following commands:
 $ mkdir build
 $ cd build
 $ cmake [OPTIONS] ../top/level/source/folder
-$ make
+$ make -j8
 \endcode
 
 OSKAR can then be installed with:
@@ -149,13 +212,14 @@ behaves as expected.
 <tr><td>7</td><td>2015-02-28</td>
     <td>Removed explicit CFITSIO and CBLAS dependencies.
     Clarified dependency requirements. Removed MATLAB references.</td></tr>
-<tr><td>8</td><td>2017-09-28</td>
+<tr><td>8</td><td>2017-10-30</td>
     <td>Removed LAPACK dependencies.
     Marked CUDA and Qt dependencies as optional.
     Added note describing how to set a non-standard path for Qt 5.
     Added options to not find (or link against) CUDA.
     Added note to describe how to compile for multiple CUDA architectures.
     Updated required CMake version to 3.1.
+    Added platform-specific guidelines.
     </td></tr>
 </table>
 

@@ -74,7 +74,12 @@ RunDialog::RunDialog(const QString& app, QWidget *parent) : QDialog(parent)
     terminalFont.setPointSize(10);
     terminalFont.setStyleHint(QFont::TypeWriter);
     display_->setFont(terminalFont);
-    display_->setMinimumSize(600, 300);
+
+    // Set the display size based on the font.
+    QFontMetrics metric(terminalFont);
+    int displayWidth = 75 * metric.width('A');
+    int displayHeight = 25 * metric.lineSpacing() + metric.ascent() - 2;
+    display_->setMinimumSize(displayWidth, displayHeight);
 
     // Create check box.
     autoClose_ = new QCheckBox(this);
