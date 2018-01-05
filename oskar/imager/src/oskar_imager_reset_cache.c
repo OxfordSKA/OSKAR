@@ -71,6 +71,8 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     oskar_mem_free(h->conv_func, status); h->conv_func = 0;
     oskar_mem_free(h->w_kernels, status); h->w_kernels = 0;
     oskar_mem_free(h->w_support, status); h->w_support = 0;
+    oskar_mem_free(h->w_kernels_compact, status); h->w_kernels_compact = 0;
+    oskar_mem_free(h->w_kernel_start, status); h->w_kernel_start = 0;
 
     /* Free the image planes. */
     if (h->planes)
