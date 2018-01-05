@@ -91,7 +91,7 @@ void oskar_convert_station_uvw_to_baseline_uvw(const oskar_Mem* u,
             oskar_mem_location(vv) != location ||
             oskar_mem_location(ww) != location)
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
 
