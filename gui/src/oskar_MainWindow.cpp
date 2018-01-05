@@ -589,6 +589,7 @@ void MainWindow::checkForUpdate()
     request.setUrl(QUrl(version_url_));
     request.setRawHeader("User-Agent", "OSKAR");
     net_->get(request);
+    checked_update_ = true;
 }
 
 void MainWindow::cudaInfo()
@@ -614,6 +615,9 @@ void MainWindow::processNetworkReply(QNetworkReply* reply)
             return;
         currentVerString = QString(data);
     }
+
+    // Mark the reply for deletion.
+    reply->deleteLater();
 
     // Split version strings into components.
     QRegExp rx("\\.|-");
@@ -652,16 +656,12 @@ void MainWindow::processNetworkReply(QNetworkReply* reply)
         msgBox.setIcon(QMessageBox::Information);
         msgBox.setTextFormat(Qt::RichText);
         msgBox.setText(QString("A newer version of OSKAR (%1) is "
+                "available to download at <br/>"
                 "<a href=\"http://oskar.oerc.ox.ac.uk/\">"
-                "available for download</a>.").arg(currentVerString));
-        msgBox.setInformativeText("Please update your installed version "
-                "as soon as possible.");
+                "http://oskar.oerc.ox.ac.uk</a>.").arg(currentVerString));
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.exec();
     }
-
-    // Mark the reply for deletion.
-    reply->deleteLater();
 }
 
 void MainWindow::runButton()

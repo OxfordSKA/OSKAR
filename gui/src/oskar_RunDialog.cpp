@@ -66,12 +66,16 @@ RunDialog::RunDialog(const QString& app, QWidget *parent) : QDialog(parent)
     display_ = new QTextEdit(this);
     display_->setReadOnly(true);
     QFont terminalFont;
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
     terminalFont.setFamily("Lucida Console");
+    terminalFont.setPointSize(10);
+#elif defined(Q_OS_MAC)
+    terminalFont.setFamily("Menlo");
+    terminalFont.setPointSize(11);
 #else
     terminalFont.setFamily("DejaVu Sans Mono");
-#endif
     terminalFont.setPointSize(10);
+#endif
     terminalFont.setStyleHint(QFont::TypeWriter);
     display_->setFont(terminalFont);
 
