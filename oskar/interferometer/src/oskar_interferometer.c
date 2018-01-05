@@ -1191,13 +1191,15 @@ static void set_up_device_data(oskar_Interferometer* h, int* status)
         /* Timers. */
         if (!d->tmr_compute)
         {
-            d->tmr_compute   = oskar_timer_create(OSKAR_TIMER_NATIVE);
-            d->tmr_copy      = oskar_timer_create(OSKAR_TIMER_NATIVE);
-            d->tmr_clip      = oskar_timer_create(OSKAR_TIMER_NATIVE);
-            d->tmr_E         = oskar_timer_create(OSKAR_TIMER_NATIVE);
-            d->tmr_K         = oskar_timer_create(OSKAR_TIMER_NATIVE);
-            d->tmr_join      = oskar_timer_create(OSKAR_TIMER_NATIVE);
-            d->tmr_correlate = oskar_timer_create(OSKAR_TIMER_NATIVE);
+            const int timer_type = (dev_loc == OSKAR_GPU) ?
+                    OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE;
+            d->tmr_compute   = oskar_timer_create(timer_type);
+            d->tmr_copy      = oskar_timer_create(timer_type);
+            d->tmr_clip      = oskar_timer_create(timer_type);
+            d->tmr_E         = oskar_timer_create(timer_type);
+            d->tmr_K         = oskar_timer_create(timer_type);
+            d->tmr_join      = oskar_timer_create(timer_type);
+            d->tmr_correlate = oskar_timer_create(timer_type);
         }
 
         /* Visibility blocks. */
