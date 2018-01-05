@@ -45,6 +45,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,6 +55,51 @@ extern "C" {
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
 #define SAVE_KERNELS 0
+
+#if SAVE_KERNELS
+#include <fitsio.h>
+
+static void write_kernel_metadata(oskar_Imager* h,
+        const char* fname, int* status)
+{
+    fitsfile* f = 0;
+    char *ttype[] = {"SUPPORT"};
+    char *tform[] = {"1J"}; /* 32-bit integer. */
+    char *tunit[] = {"\0"};
+    char extname[] = "W_KERNELS";
+    double fov_rad;
+    int grid_size;
+    fits_open_file(&f, fname, READWRITE, status);
+
+    /* Write relevant imaging parameters as primary header keywords. */
+    fov_rad = h->fov_deg * M_PI / 180.0;
+    grid_size = oskar_imager_plane_size(h);
+    fits_write_key(f, TINT, "OVERSAMP", &h->oversample,
+            "kernel oversample parameter", status);
+    fits_write_key(f, TINT, "GRIDSIZE", &grid_size,
+            "grid side length", status);
+    fits_write_key(f, TINT, "IMSIZE", &h->image_size,
+            "final image side length, in pixels", status);
+    fits_write_key(f, TDOUBLE, "FOV", &fov_rad,
+            "final image field of view, in radians", status);
+    fits_write_key(f, TDOUBLE, "CELLSIZE", &h->cellsize_rad,
+            "final image cell size, in radians", status);
+    fits_write_key(f, TDOUBLE, "W_SCALE", &h->w_scale,
+            "w_scale parameter", status);
+
+    /* Write kernel support sizes as a binary table extension. */
+    fits_create_tbl(f, BINARY_TBL, h->num_w_planes,
+            1, ttype, tform, tunit, extname, status);
+    fits_write_col(f, TINT, 1, 1, 1, h->num_w_planes,
+            oskar_mem_int(h->w_support, status), status);
+    fits_close_file(f, status);
+}
+#endif
+
+static void compact_kernels(const int num_w_planes, const int* support,
+        const int oversample, const int conv_size_half,
+        const oskar_Mem* kernels_in, oskar_Mem* kernels_out,
+        int* compacted_kernel_start, int* status);
 
 /*
  * W-kernel generation is based on CASA implementation
@@ -113,11 +159,17 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     /* Allocate kernels and support array. */
     oskar_mem_free(h->w_kernels, status);
     oskar_mem_free(h->w_support, status);
+    oskar_mem_free(h->w_kernels_compact, status);
+    oskar_mem_free(h->w_kernel_start, status);
     h->w_support = oskar_mem_create(OSKAR_INT, OSKAR_CPU,
+            h->num_w_planes, status);
+    h->w_kernel_start = oskar_mem_create(OSKAR_INT, OSKAR_CPU,
             h->num_w_planes, status);
     h->w_kernels = oskar_mem_create(prec | OSKAR_COMPLEX, OSKAR_CPU,
             ((size_t) h->num_w_planes) * ((size_t) conv_size_half) *
             ((size_t) conv_size_half), status);
+    h->w_kernels_compact = oskar_mem_create(prec | OSKAR_COMPLEX, OSKAR_CPU,
+            0, status);
     supp = oskar_mem_int(h->w_support, status);
     element_size = oskar_mem_element_size(oskar_mem_type(h->w_kernels));
     if (*status) return;
@@ -386,14 +438,145 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     oskar_mem_scale_real(h->w_kernels, 1.0 / sum, status);
 
 #if SAVE_KERNELS
+    /* Save kernels to a FITS file if necessary. */
     fname = (char*) calloc(20 + (h->input_root ? strlen(h->input_root) : 0), 1);
     sprintf(fname, "%s_KERNELS", h->input_root ? h->input_root : "");
     oskar_mem_write_fits_cube(h->w_kernels, fname,
             conv_size_half, conv_size_half, h->num_w_planes, -1, status);
+    
+    /* Write kernel metadata. */
+    sprintf(fname, "%s_KERNELS_REAL.fits", h->input_root ? h->input_root : "");
+    write_kernel_metadata(h, fname, status);
+    sprintf(fname, "%s_KERNELS_IMAG.fits", h->input_root ? h->input_root : "");
+    write_kernel_metadata(h, fname, status);
 #endif
     free(fname);
+    
+    /* Compact and rearrange the kernels. */
+    compact_kernels(h->num_w_planes, supp, oversample, conv_size_half,
+            h->w_kernels, h->w_kernels_compact,
+            oskar_mem_int(h->w_kernel_start, status), status);
 }
 
+static void compact_kernels(const int num_w_planes, const int* support,
+        const int oversample, const int conv_size_half,
+        const oskar_Mem* kernels_in, oskar_Mem* kernels_out,
+        int* compacted_kernel_start, int* status)
+{
+    int compacted_size = 0, w, j, k, off_u, off_v;
+    float2*  out_f;
+    double2* out_d;
+    const float2*  in_f = (const float2*)  oskar_mem_void_const(kernels_in);
+    const double2* in_d = (const double2*) oskar_mem_void_const(kernels_in);
+    const int oversample_h = oversample / 2;
+    const int prec = oskar_mem_precision(kernels_in);
+
+    /* Inside each kernel, we only access elements at locations
+     *     id = abs(off + i * oversample)
+     * where
+     *     off \in [-oversample/2, oversample/2]
+     * and
+     *     i = -w_support, ..., -1, 0, 1, ..., w_support
+     *
+     * This means we access locations between
+     *     id = 0    and    id = oversample/2 + w_support * oversample
+     *
+     * The size of each compacted convolution kernel is therefore
+     *     (oversample/2 + w_support * oversample + 1)^2
+     *
+     * Allocate enough memory for the compacted kernels. */
+    for (w = 0; w < num_w_planes; w++)
+    {
+        int size = oversample_h + support[w] * oversample + 1;
+        size = size * size;
+        compacted_kernel_start[w] = compacted_size;
+        compacted_size += size;
+    }
+    oskar_mem_realloc(kernels_out, (size_t) compacted_size, status);
+    out_f = (float2*)  oskar_mem_void(kernels_out);
+    out_d = (double2*) oskar_mem_void(kernels_out);
+
+    for (w = 0; w < num_w_planes; w++)
+    {
+        const int w_support = support[w];
+        const int start_in = w * conv_size_half * conv_size_half;
+        const int start_out = compacted_kernel_start[w];
+        const int size = oversample_h + w_support * oversample + 1;
+
+        for (off_v = -oversample_h + 1; off_v <= oversample_h; off_v++)
+        {
+            for (j = 0; j <= w_support; j++)
+            {
+                /* Use the original layout in V/Y dimension. */
+                const int iy = abs(off_v + j * oversample);
+                for (off_u = -oversample_h + 1; off_u <= oversample_h; off_u++)
+                {
+                    for (k = 0; k <= w_support; k++)
+                    {
+                        int abs_off_u, i_in, i_out, my_k, my_idx, off;
+                        const int ix = abs(off_u + k * oversample);
+
+                        /* We want linear stride in the kernel's U direction.
+                         * We do this as follows ( idx(x) = (x ? 1 : 0) below)
+                         *
+                         * If off_u = -oversample/2
+                         *     idx = w_support - k + ind(k >= 1)
+                         * If 0 >= off_u > -oversample/2
+                         *     idx = w_support - k
+                         * If off_u > 0
+                         *     idx = idx(-k) - symmetry in k
+                         *
+                         * We now need to decide how to store these things.
+                         * For 0 > off_u > -oversample/2
+                         *     store the row at |off_u - 1| * row_length = |off_u - 1| * (2w_support + 1)
+                         * For off_u = 0
+                         *     store the row at (oversample/2 - 1) * prev_row_lengths = (oversample/2 - 1) * (2w_support + 1)
+                         * For off_u = -oversample/2
+                         *     store the row at the end of the data for off_u
+                         *     = (oversample/2 - 1) * (2w_support + 1) + (w_support + 1)
+                         */
+                        abs_off_u = abs(off_u);
+                        if (abs_off_u == 0) abs_off_u = oversample_h;
+
+                        off = (abs_off_u - 1) * (2 * w_support + 1);
+                        if (abs(off_u) == oversample_h) off += w_support + 1;
+
+                        my_k = (off_u <= 0) ? k : -k;
+                        if (off_u == 0)
+                            my_idx = w_support - abs(k);
+                        else if (abs_off_u == oversample_h)
+                            my_idx = w_support - abs(k) + (my_k >= 1 ? 1 : 0);
+                        else
+                            my_idx = w_support + my_k;
+
+                        i_in = start_in + iy * conv_size_half + ix;
+                        i_out = start_out + iy * size + (off + my_idx);
+                        if (prec == OSKAR_SINGLE)
+                            out_f[i_out] = in_f[i_in];
+                        else
+                            out_d[i_out] = in_d[i_in];
+                    }
+                }
+            }
+        }
+#if 0
+        if (w == 0)
+        {
+            oskar_Mem* alias = oskar_mem_create_alias(kernels_out,
+                    start_out, size * size, status);
+            oskar_mem_write_fits_cube(alias, "kernel_compacted",
+                    size, size, 1, 0, status);
+            printf("At w = %d, w_support = %d\n", w, w_support);
+        }
+#endif
+    }
+#if 0
+    FILE* fhan = fopen("compacted_kernels.txt", "w");
+    oskar_mem_save_ascii(fhan, 1, compacted_size, status, kernels_out);
+    fclose(fhan);
+#endif
+}
+    
 #ifdef __cplusplus
 }
 #endif
