@@ -325,6 +325,12 @@ const int* SettingsValue::to_int_list(int* size, bool& ok) const
             if (*size > 0)
                 return ttl::var::get<IntList>(value_).values();
             break;
+        case INT_LIST_EXT:
+            ok = true;
+            *size = ttl::var::get<IntListExt>(value_).size();
+            if (*size > 0)
+                return ttl::var::get<IntListExt>(value_).values();
+            break;
         default:
             break;
     };

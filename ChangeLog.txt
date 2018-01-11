@@ -1,3 +1,9 @@
+2018-01-XX  OSKAR-2.7.1
+
+    * Fixed crash when manually specifying which CUDA device to use.
+
+    * Fixed display of timing information when using GPU devices.
+
 2017-10-31  OSKAR-2.7.0
 
     * Removed telescope longitude, latitude and altitude from settings file.
