@@ -10,9 +10,7 @@ if (CASACORE_FOUND)
     set(ms_SRC
         src/oskar_ms_accessors.cpp
         src/oskar_ms_add_history.cpp
-        src/oskar_ms_add_scratch_columns.cpp
         src/oskar_ms_close.cpp
-        src/oskar_ms_copy_data_column.cpp
         src/oskar_ms_create.cpp
         src/oskar_ms_open.cpp
         src/oskar_ms_read.cpp

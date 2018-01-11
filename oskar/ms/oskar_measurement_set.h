@@ -76,9 +76,7 @@ enum OSKAR_MS_TYPES
 
 #include <ms/oskar_ms_accessors.h>
 #include <ms/oskar_ms_add_history.h>
-#include <ms/oskar_ms_add_scratch_columns.h>
 #include <ms/oskar_ms_close.h>
-#include <ms/oskar_ms_copy_data_column.h>
 #include <ms/oskar_ms_create.h>
 #include <ms/oskar_ms_open.h>
 #include <ms/oskar_ms_read.h>
