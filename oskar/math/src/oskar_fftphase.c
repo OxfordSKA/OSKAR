@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include "math/oskar_fftphase.h"
+#include "math/oskar_fftphase_cuda.h"
 #include <stddef.h>
 
 #ifdef __cplusplus
@@ -50,21 +51,6 @@ void oskar_fftphase_cf(const int num_x, const int num_y, float* complex_data)
     }
 }
 
-void oskar_fftphase_f(const int num_x, const int num_y, float* data)
-{
-    int ix, iy;
-    for (iy = 0; iy < num_y; ++iy)
-    {
-        size_t i1 = iy;
-        i1 *= num_x;
-        for (ix = 0; ix < num_x; ++ix)
-        {
-            const size_t i = i1 + ix;
-            data[i] *= (1 - (((ix + iy) & 1) << 1));
-        }
-    }
-}
-
 void oskar_fftphase_cd(const int num_x, const int num_y, double* complex_data)
 {
     int ix, iy;
@@ -82,19 +68,46 @@ void oskar_fftphase_cd(const int num_x, const int num_y, double* complex_data)
     }
 }
 
-void oskar_fftphase_d(const int num_x, const int num_y, double* data)
+void oskar_fftphase(const int num_x, const int num_y,
+        oskar_Mem* complex_data, int* status)
 {
-    int ix, iy;
-    for (iy = 0; iy < num_y; ++iy)
+    int type, location;
+    if (*status) return;
+    if (!oskar_mem_is_complex(complex_data))
     {
-        size_t i1 = iy;
-        i1 *= num_x;
-        for (ix = 0; ix < num_x; ++ix)
-        {
-            const size_t i = i1 + ix;
-            data[i] *= (1 - (((ix + iy) & 1) << 1));
-        }
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
     }
+    type = oskar_mem_precision(complex_data);
+    location = oskar_mem_location(complex_data);
+    if (location == OSKAR_CPU)
+    {
+        if (type == OSKAR_SINGLE)
+            oskar_fftphase_cf(num_x, num_y,
+                    oskar_mem_float(complex_data, status));
+        else if (type == OSKAR_DOUBLE)
+            oskar_fftphase_cd(num_x, num_y,
+                    oskar_mem_double(complex_data, status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+    }
+    else if (location == OSKAR_GPU)
+    {
+#ifdef OSKAR_HAVE_CUDA
+        if (type == OSKAR_SINGLE)
+            oskar_fftphase_cuda_cf(num_x, num_y,
+                    oskar_mem_float(complex_data, status));
+        else if (type == OSKAR_DOUBLE)
+            oskar_fftphase_cuda_cd(num_x, num_y,
+                    oskar_mem_double(complex_data, status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+    }
+    else
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

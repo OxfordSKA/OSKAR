@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018, The University of Oxford
+ * Copyright (c) 2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FFTPHASE_H_
-#define OSKAR_FFTPHASE_H_
+#ifndef OSKAR_FFTPHASE_CUDA_H_
+#define OSKAR_FFTPHASE_CUDA_H_
 
 /**
- * @file oskar_fftphase.h
+ * @file oskar_fftphase_cuda.h
  */
 
 #include <oskar_global.h>
-#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,12 +48,13 @@ extern "C" {
  * The data are multiplied by a checker-board pattern to achieve the same
  * result as fftshift(), without actually moving memory around.
  *
- * @param[in] num_x             Grid side length in x.
- * @param[in] num_y             Grid side length in y.
- * @param[in,out] complex_data  Pointer to complex grid.
+ * @param[in] num_x               Grid side length in x.
+ * @param[in] num_y               Grid side length in y.
+ * @param[in,out] d_complex_data  Pointer to complex grid.
  */
 OSKAR_EXPORT
-void oskar_fftphase_cf(const int num_x, const int num_y, float* complex_data);
+void oskar_fftphase_cuda_cf(const int num_x, const int num_y,
+        float* d_complex_data);
 
 /**
  * @brief
@@ -65,32 +65,16 @@ void oskar_fftphase_cf(const int num_x, const int num_y, float* complex_data);
  * The data are multiplied by a checker-board pattern to achieve the same
  * result as fftshift(), without actually moving memory around.
  *
- * @param[in] num_x             Grid side length in x.
- * @param[in] num_y             Grid side length in y.
- * @param[in,out] complex_data  Pointer to complex grid.
+ * @param[in] num_x               Grid side length in x.
+ * @param[in] num_y               Grid side length in y.
+ * @param[in,out] d_complex_data  Pointer to complex grid.
  */
 OSKAR_EXPORT
-void oskar_fftphase_cd(const int num_x, const int num_y, double* complex_data);
-
-/**
- * @brief
- * Provide fftshift() behaviour for complex gridded data.
- *
- * @details
- * Provide fftshift() behaviour for complex gridded data.
- * The data are multiplied by a checker-board pattern to achieve the same
- * result as fftshift(), without actually moving memory around.
- *
- * @param[in] num_x             Grid side length in x.
- * @param[in] num_y             Grid side length in y.
- * @param[in,out] complex_data  Pointer to complex grid.
- */
-OSKAR_EXPORT
-void oskar_fftphase(const int num_x, const int num_y,
-        oskar_Mem* complex_data, int* status);
+void oskar_fftphase_cuda_cd(const int num_x, const int num_y,
+        double* d_complex_data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_FFTPHASE_H_ */
+#endif /* OSKAR_FFTPHASE_CUDA_H_ */

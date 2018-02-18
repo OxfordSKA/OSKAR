@@ -50,6 +50,7 @@ if (CUDA_FOUND)
         #src/oskar_dftw_m2m_3d_indexed_input_cuda.cu
         src/oskar_dftw_o2c_2d_cuda.cu
         src/oskar_dftw_o2c_3d_cuda.cu
+        src/oskar_fftphase_cuda.cu
         src/oskar_prefix_sum_cuda.cu
         src/oskar_gaussian_circular_cuda.cu
     )
