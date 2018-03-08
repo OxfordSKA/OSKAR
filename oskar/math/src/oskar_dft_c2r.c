@@ -73,7 +73,6 @@ void oskar_dft_c2r(
     is_dbl = type & OSKAR_DOUBLE;
     is_3d = (z_in != NULL && z_out != NULL && oskar_mem_length(z_out) > 0);
     if (!oskar_mem_is_complex(data_in) ||
-            oskar_mem_precision(data_in) != type ||
             oskar_mem_is_complex(output) ||
             oskar_mem_is_complex(weights_in) ||
             oskar_mem_is_matrix(weights_in))
@@ -92,7 +91,8 @@ void oskar_dft_c2r(
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-    if (oskar_mem_precision(weights_in) != type ||
+    if (oskar_mem_precision(data_in) != type ||
+            oskar_mem_precision(weights_in) != type ||
             oskar_mem_type(x_in) != type ||
             oskar_mem_type(y_in) != type ||
             oskar_mem_type(x_out) != type ||

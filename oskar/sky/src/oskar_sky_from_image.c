@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,19 @@ oskar_Sky* oskar_sky_from_image(int precision, const oskar_Mem* image,
 {
     int i, type, x, y;
     double crval[2], cdelt[2], val;
-    oskar_Sky* sky;
+    oskar_Sky* sky = 0;
 
     /* Check if safe to proceed. */
     if (*status) return 0;
+
+    /* Check pixel size has been defined. */
+    if (image_cellsize_deg == 0.0)
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        fprintf(stderr, "Unknown image pixel size. "
+                "(Ensure all WCS headers are present.)\n");
+        return 0;
+    }
 
     /* Get reference pixels and reference values in radians. */
     crval[0] = image_crval_deg[0] * M_PI / 180.0;

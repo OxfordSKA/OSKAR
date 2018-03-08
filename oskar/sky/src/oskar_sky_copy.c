@@ -43,7 +43,7 @@ void oskar_sky_copy(oskar_Sky* dst, const oskar_Sky* src, int* status)
 
     if (oskar_sky_precision(dst) != oskar_sky_precision(src))
     {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
     if (oskar_sky_capacity(dst) < oskar_sky_capacity(src))

@@ -46,8 +46,8 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
     char *reported_map_units = 0, ordering = 0, coordsys = 0;
     int naxis = 0, nside = 0;
     int image_size[2];
-    oskar_Sky* t;
-    oskar_Mem* data;
+    oskar_Sky* t = 0;
+    oskar_Mem* data = 0;
     fitsfile* fptr;
 
     /* Determine whether this is a regular FITS image or HEALPix data. */
@@ -81,12 +81,6 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
                 &image_cellsize_deg, 0, &image_freq_hz, &beam_area_pixels,
                 &reported_map_units, status);
         pixel_area_sr = pow(image_cellsize_deg * M_PI / 180.0, 2.0);
-    }
-    if (*status)
-    {
-        free(reported_map_units);
-        oskar_mem_free(data, status);
-        return 0;
     }
 
     /* Make sure pixels are in Jy. */
