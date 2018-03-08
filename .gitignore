@@ -3,6 +3,7 @@
 
 # Eclipse project files
 /.project
+/.pydevproject
 /.cproject
 /.settings/
 

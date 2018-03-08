@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Installs the OSKAR Python bindings."""
 
-from os.path import join, isfile, dirname
+from os.path import join, isfile, dirname, splitext
 import os
 import platform
 from numpy import get_include
@@ -146,9 +146,13 @@ def get_oskarpy_version():
 # Call setup() with list of extensions to build.
 EXTENSIONS = []
 for module in MODULES:
+    _, src_ext = splitext(module[1])
+    extra_compile_args = []
+    if src_ext == ".c":
+        extra_compile_args = ["-std=c99"]
     EXTENSIONS.append(Extension(
         'oskar.' + module[0], sources=[join('oskar', 'src', module[1])],
-        extra_compile_args=["-std=c99"]))
+        extra_compile_args=extra_compile_args))
 setup(
     name='oskarpy',
     version=get_oskarpy_version(),
