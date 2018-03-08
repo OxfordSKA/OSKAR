@@ -42,20 +42,20 @@ extern "C" {
 #endif
 
 OSKAR_EXPORT
-void oskar_blank_below_horizon_matrix_f(float4c* jones, int num_sources,
-        const float* mask);
+void oskar_blank_below_horizon_matrix_f(const int num_sources,
+        const float* restrict mask, float4c* restrict jones);
 
 OSKAR_EXPORT
-void oskar_blank_below_horizon_scalar_f(float2* jones, int num_sources,
-        const float* mask);
+void oskar_blank_below_horizon_scalar_f(const int num_sources,
+        const float* restrict mask, float2* restrict jones);
 
 OSKAR_EXPORT
-void oskar_blank_below_horizon_matrix_d(double4c* jones, int num_sources,
-        const double* mask);
+void oskar_blank_below_horizon_matrix_d(const int num_sources,
+        const double* restrict mask, double4c* restrict jones);
 
 OSKAR_EXPORT
-void oskar_blank_below_horizon_scalar_d(double2* jones, int num_sources,
-        const double* mask);
+void oskar_blank_below_horizon_scalar_d(const int num_sources,
+        const double* restrict mask, double2* restrict jones);
 
 /**
  * @brief
@@ -68,14 +68,14 @@ void oskar_blank_below_horizon_scalar_d(double2* jones, int num_sources,
  * For sources where the mask value is negative, the corresponding element
  * of the Jones data array is set to zero.
  *
- * @param[in,out] data    Array of Jones matrices or scalars per source.
- * @param[in] mask        Array of mask values.
  * @param[in] num_sources Number of sources in arrays.
+ * @param[in] mask        Array of mask values.
+ * @param[in,out] data    Array of Jones matrices or scalars per source.
  * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
-        int num_sources, int* status);
+void oskar_blank_below_horizon(int num_sources, const oskar_Mem* mask,
+        oskar_Mem* data, int* status);
 
 #ifdef __cplusplus
 }

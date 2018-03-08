@@ -258,7 +258,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         }
 
         /* Blank (set to zero) points below the horizon. */
-        oskar_blank_below_horizon(beam, z, num_points, status);
+        oskar_blank_below_horizon(num_points, z, beam, status);
     }
 
     /* If there are child stations, must first evaluate the beam for each. */

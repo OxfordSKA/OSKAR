@@ -53,13 +53,13 @@ extern "C" {
  *
  * Note that all pointers refer to device memory.
  *
- * @param[in,out] d_jones    Array of Jones scalars.
  * @param[in] num_sources    Number of source positions.
  * @param[in] d_mask         Array of source mask values.
+ * @param[in,out] d_jones    Array of Jones scalars.
  */
 OSKAR_EXPORT
-void oskar_blank_below_horizon_scalar_cuda_f(float2* d_jones,
-        int num_sources, const float* d_mask);
+void oskar_blank_below_horizon_scalar_cuda_f(
+        int num_sources, const float* d_mask, float2* d_jones);
 
 /**
  * @brief
@@ -74,13 +74,13 @@ void oskar_blank_below_horizon_scalar_cuda_f(float2* d_jones,
  *
  * Note that all pointers refer to device memory.
  *
- * @param[in,out] d_jones    Array of Jones matrices.
  * @param[in] num_sources    Number of source positions.
  * @param[in] d_mask         Array of source mask values.
+ * @param[in,out] d_jones    Array of Jones matrices.
  */
 OSKAR_EXPORT
-void oskar_blank_below_horizon_matrix_cuda_f(float4c* d_jones,
-        int num_sources, const float* d_mask);
+void oskar_blank_below_horizon_matrix_cuda_f(
+        int num_sources, const float* d_mask, float4c* d_jones);
 
 /**
  * @brief
@@ -95,13 +95,13 @@ void oskar_blank_below_horizon_matrix_cuda_f(float4c* d_jones,
  *
  * Note that all pointers refer to device memory.
  *
- * @param[in,out] d_jones    Array of Jones scalars.
  * @param[in] num_sources    Number of source positions.
  * @param[in] d_mask         Array of source mask values.
+ * @param[in,out] d_jones    Array of Jones scalars.
  */
 OSKAR_EXPORT
-void oskar_blank_below_horizon_scalar_cuda_d(double2* d_jones,
-        int num_sources, const double* d_mask);
+void oskar_blank_below_horizon_scalar_cuda_d(
+        int num_sources, const double* d_mask, double2* d_jones);
 
 /**
  * @brief
@@ -116,35 +116,13 @@ void oskar_blank_below_horizon_scalar_cuda_d(double2* d_jones,
  *
  * Note that all pointers refer to device memory.
  *
- * @param[in,out] d_jones    Array of Jones matrices.
  * @param[in] num_sources    Number of source positions.
  * @param[in] d_mask         Array of source mask values.
+ * @param[in,out] d_jones    Array of Jones matrices.
  */
 OSKAR_EXPORT
-void oskar_blank_below_horizon_matrix_cuda_d(double4c* d_jones,
-        int num_sources, const double* d_mask);
-
-#ifdef __CUDACC__
-
-/* Kernels. */
-
-__global__
-void oskar_blank_below_horizon_scalar_cudak_f(float2* jones,
-        const int num_sources, const float* mask);
-
-__global__
-void oskar_blank_below_horizon_matrix_cudak_f(float4c* jones,
-        const int num_sources, const float* mask);
-
-__global__
-void oskar_blank_below_horizon_scalar_cudak_d(double2* jones,
-        const int num_sources, const double* mask);
-
-__global__
-void oskar_blank_below_horizon_matrix_cudak_d(double4c* jones,
-        const int num_sources, const double* mask);
-
-#endif /* __CUDACC__ */
+void oskar_blank_below_horizon_matrix_cuda_d(
+        int num_sources, const double* d_mask, double4c* d_jones);
 
 #ifdef __cplusplus
 }

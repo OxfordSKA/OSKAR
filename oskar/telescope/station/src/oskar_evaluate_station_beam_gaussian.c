@@ -57,7 +57,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
     oskar_gaussian_circular(num_points, l, m, std, beam, status);
 
     /* Blank (zero) sources below the horizon. */
-    oskar_blank_below_horizon(beam, horizon_mask, num_points, status);
+    oskar_blank_below_horizon(num_points, horizon_mask, beam, status);
 }
 
 #ifdef __cplusplus

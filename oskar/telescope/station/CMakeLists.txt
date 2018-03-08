@@ -62,6 +62,12 @@ if (CUDA_FOUND)
     )
 endif()
 
+if (OpenCL_FOUND)
+    list(APPEND station_SRC
+        src/oskar_blank_below_horizon.cl
+    )
+endif()
+
 # Add contents of station element subdirectory.
 add_subdirectory(element)
 foreach (file ${element_SRC})

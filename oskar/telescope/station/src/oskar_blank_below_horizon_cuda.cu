@@ -32,68 +32,25 @@
 extern "C" {
 #endif
 
-/* Kernel wrappers. ======================================================== */
-
-void oskar_blank_below_horizon_scalar_cuda_f(float2* d_jones,
-        int num_sources, const float* d_mask)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_blank_below_horizon_scalar_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, d_mask);
-}
-
-void oskar_blank_below_horizon_matrix_cuda_f(float4c* d_jones,
-        int num_sources, const float* d_mask)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_blank_below_horizon_matrix_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, d_mask);
-}
-
-void oskar_blank_below_horizon_scalar_cuda_d(double2* d_jones,
-        int num_sources, const double* d_mask)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_blank_below_horizon_scalar_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, d_mask);
-}
-
-void oskar_blank_below_horizon_matrix_cuda_d(double4c* d_jones,
-        int num_sources, const double* d_mask)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_blank_below_horizon_matrix_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, d_mask);
-}
-
-
 /* Kernels. ================================================================ */
 
 /* Single precision. */
 __global__
-void oskar_blank_below_horizon_scalar_cudak_f(float2* jones,
-        const int num_sources, const float* mask)
+void oskar_blank_below_horizon_scalar_cudak_f(const int num_sources,
+        const float* restrict mask, float2* restrict jones)
 {
-    /* Source index being processed by thread. */
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
-
     if (mask[i] < 0.0f)
         jones[i] = make_float2(0.0f, 0.0f);
 }
 
 __global__
-void oskar_blank_below_horizon_matrix_cudak_f(float4c* jones,
-        const int num_sources, const float* mask)
+void oskar_blank_below_horizon_matrix_cudak_f(const int num_sources,
+        const float* restrict mask, float4c* restrict jones)
 {
-    /* Source index being processed by thread. */
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
-
     if (mask[i] < 0.0f)
     {
         jones[i].a = make_float2(0.0f, 0.0f);
@@ -105,25 +62,21 @@ void oskar_blank_below_horizon_matrix_cudak_f(float4c* jones,
 
 /* Double precision. */
 __global__
-void oskar_blank_below_horizon_scalar_cudak_d(double2* jones,
-        const int num_sources, const double* mask)
+void oskar_blank_below_horizon_scalar_cudak_d(const int num_sources,
+        const double* restrict mask, double2* restrict jones)
 {
-    /* Source index being processed by thread. */
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
-
     if (mask[i] < 0.0)
         jones[i] = make_double2(0.0, 0.0);
 }
 
 __global__
-void oskar_blank_below_horizon_matrix_cudak_d(double4c* jones,
-        const int num_sources, const double* mask)
+void oskar_blank_below_horizon_matrix_cudak_d(const int num_sources,
+        const double* restrict mask, double4c* restrict jones)
 {
-    /* Source index being processed by thread. */
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
-
     if (mask[i] < 0.0)
     {
         jones[i].a = make_double2(0.0, 0.0);
@@ -131,6 +84,44 @@ void oskar_blank_below_horizon_matrix_cudak_d(double4c* jones,
         jones[i].c = make_double2(0.0, 0.0);
         jones[i].d = make_double2(0.0, 0.0);
     }
+}
+
+/* Kernel wrappers. ======================================================== */
+
+void oskar_blank_below_horizon_scalar_cuda_f(
+        int num_sources, const float* d_mask, float2* d_jones)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_sources + num_threads - 1) / num_threads;
+    oskar_blank_below_horizon_scalar_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources, d_mask, d_jones);
+}
+
+void oskar_blank_below_horizon_matrix_cuda_f(
+        int num_sources, const float* d_mask, float4c* d_jones)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_sources + num_threads - 1) / num_threads;
+    oskar_blank_below_horizon_matrix_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources, d_mask, d_jones);
+}
+
+void oskar_blank_below_horizon_scalar_cuda_d(
+        int num_sources, const double* d_mask, double2* d_jones)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_sources + num_threads - 1) / num_threads;
+    oskar_blank_below_horizon_scalar_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources, d_mask, d_jones);
+}
+
+void oskar_blank_below_horizon_matrix_cuda_d(
+        int num_sources, const double* d_mask, double4c* d_jones)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_sources + num_threads - 1) / num_threads;
+    oskar_blank_below_horizon_matrix_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources, d_mask, d_jones);
 }
 
 #ifdef __cplusplus
