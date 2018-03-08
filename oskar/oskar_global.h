@@ -146,7 +146,7 @@ enum OSKAR_DIRECTION_TYPE
     #define OSKAR_HAVE_CUDA
     #define OSKAR_HAVE_OPENCL
     #define __CUDACC__
-    #define __CUDA_ARCH__ 200
+    #define __CUDA_ARCH__ 300
     #define _OPENMP
     #define OSKAR_VERSION_STR "OSKAR_VERSION_ERROR"
     #define OSKAR_VERSION 0x999999
