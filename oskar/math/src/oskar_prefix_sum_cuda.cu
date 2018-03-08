@@ -31,7 +31,7 @@
 template <typename T>
 __global__ void oskar_prefix_sum_cudak(const int num_elements,
         const T* in, T* out, T* block_sums, const T init_val,
-        const int exclusive, const int block_size)
+        const int exclusive)
 {
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     int pos = threadIdx.x;
@@ -39,7 +39,7 @@ __global__ void oskar_prefix_sum_cudak(const int num_elements,
     // Copy input data to local memory.
     extern __shared__ T scratch[];
     scratch[pos] = 0;
-    pos += block_size;
+    pos += blockDim.x;
     scratch[pos] = 0;
     if (i < num_elements)
     {
@@ -55,7 +55,7 @@ __global__ void oskar_prefix_sum_cudak(const int num_elements,
     }
 
     // Prefix sum.
-    for (int j = 1; j < block_size; j <<= 1)
+    for (int j = 1; j < blockDim.x; j <<= 1)
     {
         __syncthreads();
         const T x = scratch[pos - j];
@@ -67,7 +67,7 @@ __global__ void oskar_prefix_sum_cudak(const int num_elements,
     if (i < num_elements) out[i] = scratch[pos];
 
     // Store sum for the block.
-    if (threadIdx.x == block_size - 1)
+    if (threadIdx.x == blockDim.x - 1)
     {
         const T x = (i < num_elements) ? in[i] : 0;
         block_sums[blockIdx.x] = exclusive ?
@@ -95,7 +95,7 @@ void oskar_prefix_sum_cuda_int(int num_elements, const int* d_in, int* d_out,
     oskar_prefix_sum_cudak
     OSKAR_CUDAK_CONF(num_blocks, block_size, shared_mem) (
             num_elements, d_in, d_out, d_block_sums, init_val,
-            exclusive, block_size);
+            exclusive);
 }
 
 void oskar_prefix_sum_finalise_cuda_int(int num_elements, int* d_out,

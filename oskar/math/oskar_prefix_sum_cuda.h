@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SCAN_CUDA_H_
-#define OSKAR_SCAN_CUDA_H_
+#ifndef OSKAR_PREFIX_SUM_CUDA_H_
+#define OSKAR_PREFIX_SUM_CUDA_H_
 
 #include <oskar_global.h>
 
@@ -48,4 +48,4 @@ void oskar_prefix_sum_finalise_cuda_int(int num_elements, int* d_out,
 }
 #endif
 
-#endif /* OSKAR_SCAN_CUDA_H_ */
+#endif /* OSKAR_PREFIX_SUM_CUDA_H_ */
