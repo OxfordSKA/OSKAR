@@ -130,23 +130,14 @@ void oskar_gaussian_circular(int num_points,
         const oskar_Mem* l, const oskar_Mem* m, double std,
         oskar_Mem* out, int* status)
 {
-    int is_scalar, type, location;
-#ifdef OSKAR_HAVE_OPENCL
-    cl_kernel k = 0;
-#endif
+    int type, location;
+    if (*status) return;
 
     /* Get type and check consistency. */
-    if (*status) return;
     type = oskar_mem_precision(out);
-    is_scalar = oskar_mem_is_scalar(out);
     if (type != oskar_mem_type(l) || type != oskar_mem_type(m))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
-    }
-    if (!oskar_mem_is_complex(out))
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
 
@@ -172,152 +163,156 @@ void oskar_gaussian_circular(int num_points,
         oskar_mem_realloc(out, num_points, status);
     if (*status) return;
 
-    if (type == OSKAR_DOUBLE)
+    if (location == OSKAR_CPU)
     {
-        const double *l_, *m_;
-        l_ = oskar_mem_double_const(l, status);
-        m_ = oskar_mem_double_const(m, status);
-
-        if (location == OSKAR_CPU)
+        switch (oskar_mem_type(out))
         {
-            if (is_scalar)
-                oskar_gaussian_circular_complex_d(num_points, l_, m_, std,
-                        oskar_mem_double2(out, status));
-            else
-                oskar_gaussian_circular_matrix_d(num_points, l_, m_, std,
-                        oskar_mem_double4c(out, status));
+        case OSKAR_SINGLE_COMPLEX:
+            oskar_gaussian_circular_complex_f(num_points,
+                    oskar_mem_float_const(l, status),
+                    oskar_mem_float_const(m, status), std,
+                    oskar_mem_float2(out, status));
+            break;
+        case OSKAR_DOUBLE_COMPLEX:
+            oskar_gaussian_circular_complex_d(num_points,
+                    oskar_mem_double_const(l, status),
+                    oskar_mem_double_const(m, status), std,
+                    oskar_mem_double2(out, status));
+            break;
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            oskar_gaussian_circular_matrix_f(num_points,
+                    oskar_mem_float_const(l, status),
+                    oskar_mem_float_const(m, status), std,
+                    oskar_mem_float4c(out, status));
+            break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            oskar_gaussian_circular_matrix_d(num_points,
+                    oskar_mem_double_const(l, status),
+                    oskar_mem_double_const(m, status), std,
+                    oskar_mem_double4c(out, status));
+            break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            break;
         }
-        else if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            if (is_scalar)
-                oskar_gaussian_circular_cuda_complex_d(num_points, l_, m_, std,
-                        oskar_mem_double2(out, status));
-            else
-                oskar_gaussian_circular_cuda_matrix_d(num_points, l_, m_, std,
-                        oskar_mem_double4c(out, status));
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location & OSKAR_CL)
-        {
-#ifdef OSKAR_HAVE_OPENCL
-            k = is_scalar ?
-                    oskar_cl_kernel("gaussian_circular_complex_double") :
-                    oskar_cl_kernel("gaussian_circular_matrix_double");
-#else
-            *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
-#endif
-        }
-        else
-            *status = OSKAR_ERR_BAD_LOCATION;
     }
-    else if (type == OSKAR_SINGLE)
+    else if (location == OSKAR_GPU)
     {
-        const float *l_, *m_;
-        l_ = oskar_mem_float_const(l, status);
-        m_ = oskar_mem_float_const(m, status);
-
-        if (location == OSKAR_CPU)
-        {
-            if (is_scalar)
-                oskar_gaussian_circular_complex_f(num_points, l_, m_,
-                        (float)std, oskar_mem_float2(out, status));
-            else
-                oskar_gaussian_circular_matrix_f(num_points, l_, m_,
-                        (float)std, oskar_mem_float4c(out, status));
-        }
-        else if (location == OSKAR_GPU)
-        {
 #ifdef OSKAR_HAVE_CUDA
-            if (is_scalar)
-                oskar_gaussian_circular_cuda_complex_f(num_points, l_, m_,
-                        (float)std, oskar_mem_float2(out, status));
-            else
-                oskar_gaussian_circular_cuda_matrix_f(num_points, l_, m_,
-                        (float)std, oskar_mem_float4c(out, status));
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location & OSKAR_CL)
+        switch (oskar_mem_type(out))
         {
-#ifdef OSKAR_HAVE_OPENCL
-            k = is_scalar ?
-                    oskar_cl_kernel("gaussian_circular_complex_float") :
-                    oskar_cl_kernel("gaussian_circular_matrix_float");
-#else
-            *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
-#endif
+        case OSKAR_SINGLE_COMPLEX:
+            oskar_gaussian_circular_cuda_complex_f(num_points,
+                    oskar_mem_float_const(l, status),
+                    oskar_mem_float_const(m, status), std,
+                    oskar_mem_float2(out, status));
+            break;
+        case OSKAR_DOUBLE_COMPLEX:
+            oskar_gaussian_circular_cuda_complex_d(num_points,
+                    oskar_mem_double_const(l, status),
+                    oskar_mem_double_const(m, status), std,
+                    oskar_mem_double2(out, status));
+            break;
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            oskar_gaussian_circular_cuda_matrix_f(num_points,
+                    oskar_mem_float_const(l, status),
+                    oskar_mem_float_const(m, status), std,
+                    oskar_mem_float4c(out, status));
+            break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            oskar_gaussian_circular_cuda_matrix_d(num_points,
+                    oskar_mem_double_const(l, status),
+                    oskar_mem_double_const(m, status), std,
+                    oskar_mem_double4c(out, status));
+            break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            break;
         }
-        else
-            *status = OSKAR_ERR_BAD_LOCATION;
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
-    else
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-
-#ifdef OSKAR_HAVE_OPENCL
-    /* Call OpenCL kernel if required. */
-    if ((location & OSKAR_CL) && !*status)
+    else if (location & OSKAR_CL)
     {
-        if (k)
+#ifdef OSKAR_HAVE_OPENCL
+        cl_kernel k = 0;
+        cl_device_type dev_type;
+        cl_int error, gpu, n;
+        size_t global_size, local_size;
+        double inv_2_var;
+
+        switch (oskar_mem_type(out))
         {
-            cl_device_type dev_type;
-            cl_int error, gpu, n;
-            size_t global_size, local_size;
-            double inv_2_var;
-
-            /* Set kernel arguments. */
-            clGetDeviceInfo(oskar_cl_device_id(),
-                    CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_type, NULL);
-            gpu = dev_type & CL_DEVICE_TYPE_GPU;
-            n = (cl_int) num_points;
-            error = clSetKernelArg(k, 0, sizeof(cl_int), &n);
-            error |= clSetKernelArg(k, 1, sizeof(cl_mem),
-                    oskar_mem_cl_buffer_const(l, status));
-            error |= clSetKernelArg(k, 2, sizeof(cl_mem),
-                    oskar_mem_cl_buffer_const(m, status));
-            inv_2_var = 1.0 / (2.0 * std * std);
-            if (type == OSKAR_SINGLE)
-            {
-                cl_float w = (cl_float) inv_2_var;
-                error |= clSetKernelArg(k, 3, sizeof(cl_float), &w);
-            }
-            else
-            {
-                cl_double w = (cl_double) inv_2_var;
-                error |= clSetKernelArg(k, 3, sizeof(cl_double), &w);
-            }
-            error |= clSetKernelArg(k, 4, sizeof(cl_mem),
-                    oskar_mem_cl_buffer(out, status));
-            if (*status) return;
-            if (error != CL_SUCCESS)
-            {
-                *status = OSKAR_ERR_INVALID_ARGUMENT;
-                return;
-            }
-
-            /* Launch kernel on current command queue. */
-            local_size = gpu ? 256 : 128;
-            global_size = ((num_points + local_size - 1) / local_size) *
-                    local_size;
-            error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
-                        &global_size, &local_size, 0, NULL, NULL);
-            if (error != CL_SUCCESS)
-            {
-                *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
-                return;
-            }
+        case OSKAR_SINGLE_COMPLEX:
+            k = oskar_cl_kernel("gaussian_circular_complex_float");
+            break;
+        case OSKAR_DOUBLE_COMPLEX:
+            k = oskar_cl_kernel("gaussian_circular_complex_double");
+            break;
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            k = oskar_cl_kernel("gaussian_circular_matrix_float");
+            break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            k = oskar_cl_kernel("gaussian_circular_matrix_double");
+            break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
-        else
+        if (!k)
         {
             *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            return;
         }
-    }
+
+        /* Set kernel arguments. */
+        clGetDeviceInfo(oskar_cl_device_id(),
+                CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_type, NULL);
+        gpu = dev_type & CL_DEVICE_TYPE_GPU;
+        n = (cl_int) num_points;
+        error = clSetKernelArg(k, 0, sizeof(cl_int), &n);
+        error |= clSetKernelArg(k, 1, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(l, status));
+        error |= clSetKernelArg(k, 2, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(m, status));
+        inv_2_var = 1.0 / (2.0 * std * std);
+        if (type == OSKAR_SINGLE)
+        {
+            cl_float w = (cl_float) inv_2_var;
+            error |= clSetKernelArg(k, 3, sizeof(cl_float), &w);
+        }
+        else
+        {
+            cl_double w = (cl_double) inv_2_var;
+            error |= clSetKernelArg(k, 3, sizeof(cl_double), &w);
+        }
+        error |= clSetKernelArg(k, 4, sizeof(cl_mem),
+                oskar_mem_cl_buffer(out, status));
+        if (*status) return;
+        if (error != CL_SUCCESS)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            return;
+        }
+
+        /* Launch kernel on current command queue. */
+        local_size = gpu ? 256 : 128;
+        global_size = ((num_points + local_size - 1) / local_size) *
+                local_size;
+        error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
+                    &global_size, &local_size, 0, NULL, NULL);
+        if (error != CL_SUCCESS)
+        {
+            *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
+            return;
+        }
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
+    }
+    else
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

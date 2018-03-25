@@ -171,24 +171,18 @@ void oskar_dft_c2r(
         for (start = 0; start < num_out; start += max_out_size)
         {
             cl_event event;
-            cl_int error, n_in, n_out;
+            cl_int error, n_in, n_out, out_offset;
             cl_uint arg = 0;
-            oskar_Mem *x_chunk, *y_chunk, *z_chunk, *o_chunk;
             if (*status) break;
 
             /* Get the chunk size. */
             out_size = num_out - start;
             if (out_size > max_out_size) out_size = max_out_size;
 
-            /* Create sub-buffers for the chunk. */
-            x_chunk = oskar_mem_create_alias(x_out, start, out_size, status);
-            y_chunk = oskar_mem_create_alias(y_out, start, out_size, status);
-            z_chunk = oskar_mem_create_alias(z_out, start, out_size, status);
-            o_chunk = oskar_mem_create_alias(output, start, out_size, status);
-
             /* Set kernel arguments. */
             n_in = (cl_int) num_in;
-            n_out = (cl_int) out_size;
+            n_out = (cl_int) num_out;
+            out_offset = (cl_int) start;
             error = clSetKernelArg(k, arg++, sizeof(cl_int), &n_in);
             if (is_dbl)
             {
@@ -212,15 +206,16 @@ void oskar_dft_c2r(
             error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
                     oskar_mem_cl_buffer_const(weights_in, status));
             error |= clSetKernelArg(k, arg++, sizeof(cl_int), &n_out);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_int), &out_offset);
             error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
-                    oskar_mem_cl_buffer_const(x_chunk, status));
+                    oskar_mem_cl_buffer_const(x_out, status));
             error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
-                    oskar_mem_cl_buffer_const(y_chunk, status));
+                    oskar_mem_cl_buffer_const(y_out, status));
             if (is_3d)
                 error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
-                        oskar_mem_cl_buffer_const(z_chunk, status));
+                        oskar_mem_cl_buffer_const(z_out, status));
             error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
-                    oskar_mem_cl_buffer(o_chunk, status));
+                    oskar_mem_cl_buffer(output, status));
             if (is_gpu)
             {
                 /* max_in_chunk must be multiple of 16. */
@@ -246,12 +241,6 @@ void oskar_dft_c2r(
                 if (error != CL_SUCCESS)
                     *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
             }
-
-            /* Free sub-buffers. */
-            oskar_mem_free(x_chunk, status);
-            oskar_mem_free(y_chunk, status);
-            oskar_mem_free(z_chunk, status);
-            oskar_mem_free(o_chunk, status);
         }
 #else
         *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;

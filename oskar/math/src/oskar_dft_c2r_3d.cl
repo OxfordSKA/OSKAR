@@ -8,6 +8,7 @@ kernel void dft_c2r_3d_REAL(const int num_in,
         global const REAL2* restrict data_in,
         global const REAL* restrict weight_in,
         const int num_out,
+        const int out_offset,
         global const REAL* restrict x_out,
         global const REAL* restrict y_out,
         global const REAL* restrict z_out,
@@ -19,7 +20,7 @@ kernel void dft_c2r_3d_REAL(const int num_in,
 {
     const int block_dim = get_local_size(0);
     const int thread_idx = get_local_id(0);
-    const int i_out = get_global_id(0);
+    const int i_out = get_global_id(0) + out_offset;
     REAL out = (REAL) 0.;
     REAL xo = (REAL) 0., yo = (REAL) 0., zo = (REAL) 0.;
     if (i_out < num_out) {
@@ -60,12 +61,13 @@ kernel void dft_c2r_3d_cpu_REAL(const int num_in,
         global const REAL2* restrict data_in,
         global const REAL* restrict weight_in,
         const int num_out,
+        const int out_offset,
         global const REAL* restrict x_out,
         global const REAL* restrict y_out,
         global const REAL* restrict z_out,
         global REAL* restrict output)
 {
-    const int i_out = get_global_id(0);
+    const int i_out = get_global_id(0) + out_offset;
     if (i_out >= num_out) return;
     const REAL xo = wavenumber * x_out[i_out];
     const REAL yo = wavenumber * y_out[i_out];
