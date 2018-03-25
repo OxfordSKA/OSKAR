@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,131 +28,111 @@
 
 #include "telescope/station/element/oskar_apply_element_taper_cosine_cuda.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Kernel wrappers. ======================================================== */
-
-void oskar_apply_element_taper_cosine_scalar_cuda_f(float2* d_jones,
-        int num_sources, float cos_power, const float* d_theta)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_apply_element_taper_cosine_scalar_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, cos_power,
-            d_theta);
-}
-
-void oskar_apply_element_taper_cosine_matrix_cuda_f(float4c* d_jones,
-        int num_sources, float cos_power, const float* d_theta)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_apply_element_taper_cosine_matrix_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, cos_power,
-            d_theta);
-}
-
-void oskar_apply_element_taper_cosine_scalar_cuda_d(double2* d_jones,
-        int num_sources, double cos_power, const double* d_theta)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_apply_element_taper_cosine_scalar_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, cos_power,
-            d_theta);
-}
-
-void oskar_apply_element_taper_cosine_matrix_cuda_d(double4c* d_jones,
-        int num_sources, double cos_power, const double* d_theta)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_apply_element_taper_cosine_matrix_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, cos_power,
-            d_theta);
-}
-
 
 /* Kernels. ================================================================ */
 
 /* Single precision. */
 __global__
-void oskar_apply_element_taper_cosine_scalar_cudak_f(float2* jones,
-        const int num_sources, const float cos_power, const float* theta)
+void oskar_apply_element_taper_cosine_scalar_cudak_f(const int num_sources,
+        const float cos_power, const float* theta, float2* jones)
 {
-    float factor;
-
-    /* Source index being processed by thread. */
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
-
-    /* Compute and apply tapering factor. */
-    factor = powf(cosf(theta[i]), cos_power);
-    jones[i].x *= factor;
-    jones[i].y *= factor;
+    const float f = powf(cosf(theta[i]), cos_power);
+    jones[i].x *= f;
+    jones[i].y *= f;
 }
 
 __global__
-void oskar_apply_element_taper_cosine_matrix_cudak_f(float4c* jones,
-        const int num_sources, const float cos_power, const float* theta)
+void oskar_apply_element_taper_cosine_matrix_cudak_f(const int num_sources,
+        const float cos_power, const float* theta, float4c* jones)
 {
-    float factor;
-
-    /* Source index being processed by thread. */
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
-
-    /* Compute and apply tapering factor. */
-    factor = powf(cosf(theta[i]), cos_power);
-    jones[i].a.x *= factor;
-    jones[i].a.y *= factor;
-    jones[i].b.x *= factor;
-    jones[i].b.y *= factor;
-    jones[i].c.x *= factor;
-    jones[i].c.y *= factor;
-    jones[i].d.x *= factor;
-    jones[i].d.y *= factor;
+    const float f = powf(cosf(theta[i]), cos_power);
+    jones[i].a.x *= f;
+    jones[i].a.y *= f;
+    jones[i].b.x *= f;
+    jones[i].b.y *= f;
+    jones[i].c.x *= f;
+    jones[i].c.y *= f;
+    jones[i].d.x *= f;
+    jones[i].d.y *= f;
 }
 
 /* Double precision. */
 __global__
-void oskar_apply_element_taper_cosine_scalar_cudak_d(double2* jones,
-        const int num_sources, const double cos_power, const double* theta)
+void oskar_apply_element_taper_cosine_scalar_cudak_d(const int num_sources,
+        const double cos_power, const double* theta, double2* jones)
 {
-    double factor;
-
-    /* Source index being processed by thread. */
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
-
-    /* Compute and apply tapering factor. */
-    factor = pow(cos(theta[i]), cos_power);
-    jones[i].x *= factor;
-    jones[i].y *= factor;
+    const double f = pow(cos(theta[i]), cos_power);
+    jones[i].x *= f;
+    jones[i].y *= f;
 }
 
 __global__
-void oskar_apply_element_taper_cosine_matrix_cudak_d(double4c* jones,
-        const int num_sources, const double cos_power, const double* theta)
+void oskar_apply_element_taper_cosine_matrix_cudak_d(const int num_sources,
+        const double cos_power, const double* theta, double4c* jones)
 {
-    double factor;
-
-    /* Source index being processed by thread. */
     const int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
+    const double f = pow(cos(theta[i]), cos_power);
+    jones[i].a.x *= f;
+    jones[i].a.y *= f;
+    jones[i].b.x *= f;
+    jones[i].b.y *= f;
+    jones[i].c.x *= f;
+    jones[i].c.y *= f;
+    jones[i].d.x *= f;
+    jones[i].d.y *= f;
+}
 
-    /* Compute and apply tapering factor. */
-    factor = pow(cos(theta[i]), cos_power);
-    jones[i].a.x *= factor;
-    jones[i].a.y *= factor;
-    jones[i].b.x *= factor;
-    jones[i].b.y *= factor;
-    jones[i].c.x *= factor;
-    jones[i].c.y *= factor;
-    jones[i].d.x *= factor;
-    jones[i].d.y *= factor;
+/* Kernel wrappers. ======================================================== */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void oskar_apply_element_taper_cosine_scalar_cuda_f(int num_sources,
+        float cos_power, const float* d_theta, float2* d_jones)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_sources + num_threads - 1) / num_threads;
+    oskar_apply_element_taper_cosine_scalar_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num_sources, cos_power, d_theta, d_jones);
+}
+
+void oskar_apply_element_taper_cosine_matrix_cuda_f(int num_sources,
+        float cos_power, const float* d_theta, float4c* d_jones)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_sources + num_threads - 1) / num_threads;
+    oskar_apply_element_taper_cosine_matrix_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num_sources, cos_power, d_theta, d_jones);
+}
+
+void oskar_apply_element_taper_cosine_scalar_cuda_d(int num_sources,
+        double cos_power, const double* d_theta, double2* d_jones)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_sources + num_threads - 1) / num_threads;
+    oskar_apply_element_taper_cosine_scalar_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num_sources, cos_power, d_theta, d_jones);
+}
+
+void oskar_apply_element_taper_cosine_matrix_cuda_d(int num_sources,
+        double cos_power, const double* d_theta, double4c* d_jones)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_sources + num_threads - 1) / num_threads;
+    oskar_apply_element_taper_cosine_matrix_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num_sources, cos_power, d_theta, d_jones);
 }
 
 #ifdef __cplusplus

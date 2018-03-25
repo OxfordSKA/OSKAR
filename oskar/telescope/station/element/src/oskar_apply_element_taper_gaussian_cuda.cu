@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,74 @@
 
 #include "telescope/station/element/oskar_apply_element_taper_gaussian_cuda.h"
 
-#define M_4LN2f 2.77258872223978123767f
-#define M_4LN2  2.77258872223978123767
+
+/* Kernels. ================================================================ */
+
+/* Single precision. */
+__global__
+void oskar_apply_element_taper_gaussian_scalar_cudak_f(const int num_sources,
+        const float inv_2sigma_sq, const float* theta, float2* jones)
+{
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= num_sources) return;
+    float theta_sq = theta[i];
+    theta_sq *= theta_sq;
+    const float f = expf(-theta_sq * inv_2sigma_sq);
+    jones[i].x *= f;
+    jones[i].y *= f;
+}
+
+__global__
+void oskar_apply_element_taper_gaussian_matrix_cudak_f(const int num_sources,
+        const float inv_2sigma_sq, const float* theta, float4c* jones)
+{
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= num_sources) return;
+    float theta_sq = theta[i];
+    theta_sq *= theta_sq;
+    const float f = expf(-theta_sq * inv_2sigma_sq);
+    jones[i].a.x *= f;
+    jones[i].a.y *= f;
+    jones[i].b.x *= f;
+    jones[i].b.y *= f;
+    jones[i].c.x *= f;
+    jones[i].c.y *= f;
+    jones[i].d.x *= f;
+    jones[i].d.y *= f;
+}
+
+/* Double precision. */
+__global__
+void oskar_apply_element_taper_gaussian_scalar_cudak_d(const int num_sources,
+        const double inv_2sigma_sq, const double* theta, double2* jones)
+{
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= num_sources) return;
+    double theta_sq = theta[i];
+    theta_sq *= theta_sq;
+    const double f = exp(-theta_sq * inv_2sigma_sq);
+    jones[i].x *= f;
+    jones[i].y *= f;
+}
+
+__global__
+void oskar_apply_element_taper_gaussian_matrix_cudak_d(const int num_sources,
+        const double inv_2sigma_sq, const double* theta, double4c* jones)
+{
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= num_sources) return;
+    double theta_sq = theta[i];
+    theta_sq *= theta_sq;
+    const double f = exp(-theta_sq * inv_2sigma_sq);
+    jones[i].a.x *= f;
+    jones[i].a.y *= f;
+    jones[i].b.x *= f;
+    jones[i].b.y *= f;
+    jones[i].c.x *= f;
+    jones[i].c.y *= f;
+    jones[i].d.x *= f;
+    jones[i].d.y *= f;
+}
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,137 +103,44 @@ extern "C" {
 
 /* Kernel wrappers. ======================================================== */
 
-void oskar_apply_element_taper_gaussian_scalar_cuda_f(float2* d_jones,
-        int num_sources, float fwhm, const float* d_theta)
+void oskar_apply_element_taper_gaussian_scalar_cuda_f(int num_sources,
+        float inv_2sigma_sq, const float* d_theta, float2* d_jones)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
     oskar_apply_element_taper_gaussian_scalar_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, fwhm,
-            d_theta);
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num_sources, inv_2sigma_sq, d_theta, d_jones);
 }
 
-void oskar_apply_element_taper_gaussian_matrix_cuda_f(float4c* d_jones,
-        int num_sources, float fwhm, const float* d_theta)
+void oskar_apply_element_taper_gaussian_matrix_cuda_f(int num_sources,
+        float inv_2sigma_sq, const float* d_theta, float4c* d_jones)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
     oskar_apply_element_taper_gaussian_matrix_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, fwhm,
-            d_theta);
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num_sources, inv_2sigma_sq, d_theta, d_jones);
 }
 
-void oskar_apply_element_taper_gaussian_scalar_cuda_d(double2* d_jones,
-        int num_sources, double fwhm, const double* d_theta)
+void oskar_apply_element_taper_gaussian_scalar_cuda_d(int num_sources,
+        double inv_2sigma_sq, const double* d_theta, double2* d_jones)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
     oskar_apply_element_taper_gaussian_scalar_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, fwhm,
-            d_theta);
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num_sources, inv_2sigma_sq, d_theta, d_jones);
 }
 
-void oskar_apply_element_taper_gaussian_matrix_cuda_d(double4c* d_jones,
-        int num_sources, double fwhm, const double* d_theta)
+void oskar_apply_element_taper_gaussian_matrix_cuda_d(int num_sources,
+        double inv_2sigma_sq, const double* d_theta, double4c* d_jones)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
     oskar_apply_element_taper_gaussian_matrix_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_jones, num_sources, fwhm,
-            d_theta);
-}
-
-
-/* Kernels. ================================================================ */
-
-/* Single precision. */
-__global__
-void oskar_apply_element_taper_gaussian_scalar_cudak_f(float2* jones,
-        const int num_sources, const float fwhm, const float* theta)
-{
-    float factor, theta_sq, inv_2sigma_sq;
-
-    /* Source index being processed by thread. */
-    const int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= num_sources) return;
-
-    /* Compute and apply tapering factor. */
-    theta_sq = theta[i];
-    theta_sq *= theta_sq;
-    inv_2sigma_sq = M_4LN2f / (fwhm * fwhm);
-    factor = expf(-theta_sq * inv_2sigma_sq);
-    jones[i].x *= factor;
-    jones[i].y *= factor;
-}
-
-__global__
-void oskar_apply_element_taper_gaussian_matrix_cudak_f(float4c* jones,
-        const int num_sources, const float fwhm, const float* theta)
-{
-    float factor, theta_sq, inv_2sigma_sq;
-
-    /* Source index being processed by thread. */
-    const int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= num_sources) return;
-
-    /* Compute and apply tapering factor. */
-    theta_sq = theta[i];
-    theta_sq *= theta_sq;
-    inv_2sigma_sq = M_4LN2f / (fwhm * fwhm);
-    factor = expf(-theta_sq * inv_2sigma_sq);
-    jones[i].a.x *= factor;
-    jones[i].a.y *= factor;
-    jones[i].b.x *= factor;
-    jones[i].b.y *= factor;
-    jones[i].c.x *= factor;
-    jones[i].c.y *= factor;
-    jones[i].d.x *= factor;
-    jones[i].d.y *= factor;
-}
-
-/* Double precision. */
-__global__
-void oskar_apply_element_taper_gaussian_scalar_cudak_d(double2* jones,
-        const int num_sources, const double fwhm, const double* theta)
-{
-    double factor, theta_sq, inv_2sigma_sq;
-
-    /* Source index being processed by thread. */
-    const int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= num_sources) return;
-
-    /* Compute and apply tapering factor. */
-    theta_sq = theta[i];
-    theta_sq *= theta_sq;
-    inv_2sigma_sq = M_4LN2 / (fwhm * fwhm);
-    factor = exp(-theta_sq * inv_2sigma_sq);
-    jones[i].x *= factor;
-    jones[i].y *= factor;
-}
-
-__global__
-void oskar_apply_element_taper_gaussian_matrix_cudak_d(double4c* jones,
-        const int num_sources, const double fwhm, const double* theta)
-{
-    double factor, theta_sq, inv_2sigma_sq;
-
-    /* Source index being processed by thread. */
-    const int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i >= num_sources) return;
-
-    /* Compute and apply tapering factor. */
-    theta_sq = theta[i];
-    theta_sq *= theta_sq;
-    inv_2sigma_sq = M_4LN2 / (fwhm * fwhm);
-    factor = exp(-theta_sq * inv_2sigma_sq);
-    jones[i].a.x *= factor;
-    jones[i].a.y *= factor;
-    jones[i].b.x *= factor;
-    jones[i].b.y *= factor;
-    jones[i].c.x *= factor;
-    jones[i].c.y *= factor;
-    jones[i].d.x *= factor;
-    jones[i].d.y *= factor;
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num_sources, inv_2sigma_sq, d_theta, d_jones);
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,14 +50,14 @@ extern "C" {
  * This function multiplies the scalar response of the element by a
  * cosine taper. The multiplication is performed in-place.
  *
- * @param[in,out] jones    Array of Jones scalars.
  * @param[in] num_sources  Number of source positions.
  * @param[in] cos_power    Power of cosine(theta) function.
  * @param[in] theta        Array of source theta values, in radians.
+ * @param[in,out] jones    Array of Jones scalars.
  */
 OSKAR_EXPORT
-void oskar_apply_element_taper_cosine_scalar_f(float2* jones,
-        int num_sources, float cos_power, const float* theta);
+void oskar_apply_element_taper_cosine_scalar_f(int num_sources,
+        float cos_power, const float* theta, float2* jones);
 
 /**
  * @brief
@@ -68,14 +68,14 @@ void oskar_apply_element_taper_cosine_scalar_f(float2* jones,
  * This function multiplies the matrix response of the element by a
  * cosine taper. The multiplication is performed in-place.
  *
- * @param[in,out] jones    Array of Jones matrices.
  * @param[in] num_sources  Number of source positions.
  * @param[in] cos_power    Power of cosine(theta) function.
  * @param[in] theta        Array of source theta values, in radians.
+ * @param[in,out] jones    Array of Jones matrices.
  */
 OSKAR_EXPORT
-void oskar_apply_element_taper_cosine_matrix_f(float4c* jones,
-        int num_sources, float cos_power, const float* theta);
+void oskar_apply_element_taper_cosine_matrix_f(int num_sources,
+        float cos_power, const float* theta, float4c* jones);
 
 /**
  * @brief
@@ -86,14 +86,14 @@ void oskar_apply_element_taper_cosine_matrix_f(float4c* jones,
  * This function multiplies the scalar response of the element by a
  * cosine taper. The multiplication is performed in-place.
  *
- * @param[in,out] jones    Array of Jones scalars.
  * @param[in] num_sources  Number of source positions.
  * @param[in] cos_power    Power of cosine(theta) function.
  * @param[in] theta        Array of source theta values, in radians.
+ * @param[in,out] jones    Array of Jones scalars.
  */
 OSKAR_EXPORT
-void oskar_apply_element_taper_cosine_scalar_d(double2* jones,
-        int num_sources, double cos_power, const double* theta);
+void oskar_apply_element_taper_cosine_scalar_d(int num_sources,
+        double cos_power, const double* theta, double2* jones);
 
 /**
  * @brief
@@ -104,14 +104,14 @@ void oskar_apply_element_taper_cosine_scalar_d(double2* jones,
  * This function multiplies the matrix response of the element by a
  * cosine taper. The multiplication is performed in-place.
  *
- * @param[in,out] jones    Array of Jones matrices.
  * @param[in] num_sources  Number of source positions.
  * @param[in] cos_power    Power of cosine(theta) function.
  * @param[in] theta        Array of source theta values, in radians.
+ * @param[in,out] jones    Array of Jones matrices.
  */
 OSKAR_EXPORT
-void oskar_apply_element_taper_cosine_matrix_d(double4c* jones,
-        int num_sources, double cos_power, const double* theta);
+void oskar_apply_element_taper_cosine_matrix_d(int num_sources,
+        double cos_power, const double* theta, double4c* jones);
 
 /**
  * @brief
@@ -121,10 +121,10 @@ void oskar_apply_element_taper_cosine_matrix_d(double4c* jones,
  * This function multiplies the response of the element by a
  * cosine taper. The multiplication is performed in-place.
  *
- * @param[in,out] jones    Array of Jones matrices.
  * @param[in] num_sources  Number of source positions.
  * @param[in] cos_power    Power of cosine(theta) function.
  * @param[in] theta        Array of source theta values, in radians.
+ * @param[in,out] jones    Array of Jones matrices.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT

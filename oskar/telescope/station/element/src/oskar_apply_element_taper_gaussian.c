@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,10 +28,10 @@
 
 #include "telescope/station/element/oskar_apply_element_taper_gaussian.h"
 #include "telescope/station/element/oskar_apply_element_taper_gaussian_cuda.h"
+#include "utility/oskar_cl_utils.h"
 #include "utility/oskar_device_utils.h"
 #include <math.h>
 
-#define M_4LN2f 2.77258872223978123767f
 #define M_4LN2  2.77258872223978123767
 
 #ifdef __cplusplus
@@ -39,88 +39,76 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_apply_element_taper_gaussian_scalar_f(float2* jones,
-        const int num_sources, const float fwhm, const float* theta)
+void oskar_apply_element_taper_gaussian_scalar_f(const int num_sources,
+        const float inv_2sigma_sq, const float* theta, float2* jones)
 {
     int i;
-    float factor, theta_sq, inv_2sigma_sq;
-
     for (i = 0; i < num_sources; ++i)
     {
-        /* Compute and apply tapering factor. */
+        float f, theta_sq;
         theta_sq = theta[i];
         theta_sq *= theta_sq;
-        inv_2sigma_sq = M_4LN2f / (fwhm * fwhm);
-        factor = expf(-theta_sq * inv_2sigma_sq);
-        jones[i].x *= factor;
-        jones[i].y *= factor;
+        f = expf(-theta_sq * inv_2sigma_sq);
+        jones[i].x *= f;
+        jones[i].y *= f;
     }
 }
 
-void oskar_apply_element_taper_gaussian_matrix_f(float4c* jones,
-        const int num_sources, const float fwhm, const float* theta)
+void oskar_apply_element_taper_gaussian_matrix_f(const int num_sources,
+        const float inv_2sigma_sq, const float* theta, float4c* jones)
 {
     int i;
-    float factor, theta_sq, inv_2sigma_sq;
-
     for (i = 0; i < num_sources; ++i)
     {
-        /* Compute and apply tapering factor. */
+        float f, theta_sq;
         theta_sq = theta[i];
         theta_sq *= theta_sq;
-        inv_2sigma_sq = M_4LN2f / (fwhm * fwhm);
-        factor = expf(-theta_sq * inv_2sigma_sq);
-        jones[i].a.x *= factor;
-        jones[i].a.y *= factor;
-        jones[i].b.x *= factor;
-        jones[i].b.y *= factor;
-        jones[i].c.x *= factor;
-        jones[i].c.y *= factor;
-        jones[i].d.x *= factor;
-        jones[i].d.y *= factor;
+        f = expf(-theta_sq * inv_2sigma_sq);
+        jones[i].a.x *= f;
+        jones[i].a.y *= f;
+        jones[i].b.x *= f;
+        jones[i].b.y *= f;
+        jones[i].c.x *= f;
+        jones[i].c.y *= f;
+        jones[i].d.x *= f;
+        jones[i].d.y *= f;
     }
 }
 
 /* Double precision. */
-void oskar_apply_element_taper_gaussian_scalar_d(double2* jones,
-        const int num_sources, const double fwhm, const double* theta)
+void oskar_apply_element_taper_gaussian_scalar_d(const int num_sources,
+        const double inv_2sigma_sq, const double* theta, double2* jones)
 {
     int i;
-    double factor, theta_sq, inv_2sigma_sq;
-
     for (i = 0; i < num_sources; ++i)
     {
-        /* Compute and apply tapering factor. */
+        double f, theta_sq;
         theta_sq = theta[i];
         theta_sq *= theta_sq;
-        inv_2sigma_sq = M_4LN2 / (fwhm * fwhm);
-        factor = exp(-theta_sq * inv_2sigma_sq);
-        jones[i].x *= factor;
-        jones[i].y *= factor;
+        f = exp(-theta_sq * inv_2sigma_sq);
+        jones[i].x *= f;
+        jones[i].y *= f;
     }
 }
 
-void oskar_apply_element_taper_gaussian_matrix_d(double4c* jones,
-        const int num_sources, const double fwhm, const double* theta)
+void oskar_apply_element_taper_gaussian_matrix_d(const int num_sources,
+        const double inv_2sigma_sq, const double* theta, double4c* jones)
 {
     int i;
-    double factor, theta_sq, inv_2sigma_sq;
-
     for (i = 0; i < num_sources; ++i)
     {
-        /* Compute and apply tapering factor. */
+        double f, theta_sq;
         theta_sq = theta[i];
         theta_sq *= theta_sq;
-        inv_2sigma_sq = M_4LN2 / (fwhm * fwhm);
-        factor = exp(-theta_sq * inv_2sigma_sq);
-        jones[i].a.x *= factor;
-        jones[i].a.y *= factor;
-        jones[i].b.x *= factor;
-        jones[i].b.y *= factor;
-        jones[i].c.x *= factor;
-        jones[i].c.y *= factor;
-        jones[i].d.x *= factor;
-        jones[i].d.y *= factor;
+        f = exp(-theta_sq * inv_2sigma_sq);
+        jones[i].a.x *= f;
+        jones[i].a.y *= f;
+        jones[i].b.x *= f;
+        jones[i].b.y *= f;
+        jones[i].c.x *= f;
+        jones[i].c.y *= f;
+        jones[i].d.x *= f;
+        jones[i].d.y *= f;
     }
 }
 
@@ -128,17 +116,10 @@ void oskar_apply_element_taper_gaussian_matrix_d(double4c* jones,
 void oskar_apply_element_taper_gaussian(oskar_Mem* jones, int num_sources,
         double fwhm, const oskar_Mem* theta, int* status)
 {
-    int precision, type, location;
-
-    /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Get the meta-data. */
-    precision = oskar_mem_precision(jones);
-    type = oskar_mem_type(jones);
-    location = oskar_mem_location(jones);
-
     /* Check arrays are co-located. */
+    const int location = oskar_mem_location(jones);
     if (oskar_mem_location(theta) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
@@ -146,107 +127,149 @@ void oskar_apply_element_taper_gaussian(oskar_Mem* jones, int num_sources,
     }
 
     /* Check types for consistency. */
-    if (oskar_mem_type(theta) != precision)
+    if (oskar_mem_type(theta) != oskar_mem_precision(jones))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
 
-    /* Check precision. */
-    if (precision == OSKAR_SINGLE)
+    /* Apply taper. */
+    const double inv_2sigma_sq = M_4LN2 / (fwhm * fwhm);
+    if (location == OSKAR_CPU)
     {
-        const float* theta_;
-        theta_ = oskar_mem_float_const(theta, status);
-
-        if (location == OSKAR_GPU)
+        switch (oskar_mem_type(jones))
         {
-#ifdef OSKAR_HAVE_CUDA
-            if (type == OSKAR_SINGLE_COMPLEX)
-            {
-                oskar_apply_element_taper_gaussian_scalar_cuda_f(
-                        oskar_mem_float2(jones, status), num_sources,
-                        (float)fwhm, theta_);
-            }
-            else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-            {
-                oskar_apply_element_taper_gaussian_matrix_cuda_f(
-                        oskar_mem_float4c(jones, status), num_sources,
-                        (float)fwhm, theta_);
-            }
-            else
-                *status = OSKAR_ERR_BAD_DATA_TYPE;
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
+        case OSKAR_SINGLE_COMPLEX:
+            oskar_apply_element_taper_gaussian_scalar_f(num_sources,
+                    (float)inv_2sigma_sq, oskar_mem_float_const(theta, status),
+                    oskar_mem_float2(jones, status));
+            break;
+        case OSKAR_DOUBLE_COMPLEX:
+            oskar_apply_element_taper_gaussian_scalar_d(num_sources,
+                    inv_2sigma_sq, oskar_mem_double_const(theta, status),
+                    oskar_mem_double2(jones, status));
+            break;
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            oskar_apply_element_taper_gaussian_matrix_f(num_sources,
+                    (float)inv_2sigma_sq, oskar_mem_float_const(theta, status),
+                    oskar_mem_float4c(jones, status));
+            break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            oskar_apply_element_taper_gaussian_matrix_d(num_sources,
+                    inv_2sigma_sq, oskar_mem_double_const(theta, status),
+                    oskar_mem_double4c(jones, status));
+            break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            break;
         }
-        else if (location == OSKAR_CPU)
+    }
+    else if (location == OSKAR_GPU)
+    {
+#ifdef OSKAR_HAVE_CUDA
+        switch (oskar_mem_type(jones))
         {
-            if (type == OSKAR_SINGLE_COMPLEX)
-            {
-                oskar_apply_element_taper_gaussian_scalar_f(
-                        oskar_mem_float2(jones, status), num_sources,
-                        (float)fwhm, theta_);
-            }
-            else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-            {
-                oskar_apply_element_taper_gaussian_matrix_f(
-                        oskar_mem_float4c(jones, status), num_sources,
-                        (float)fwhm, theta_);
-            }
-            else
-                *status = OSKAR_ERR_BAD_DATA_TYPE;
+        case OSKAR_SINGLE_COMPLEX:
+            oskar_apply_element_taper_gaussian_scalar_cuda_f(num_sources,
+                    (float)inv_2sigma_sq, oskar_mem_float_const(theta, status),
+                    oskar_mem_float2(jones, status));
+            break;
+        case OSKAR_DOUBLE_COMPLEX:
+            oskar_apply_element_taper_gaussian_scalar_cuda_d(num_sources,
+                    inv_2sigma_sq, oskar_mem_double_const(theta, status),
+                    oskar_mem_double2(jones, status));
+            break;
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            oskar_apply_element_taper_gaussian_matrix_cuda_f(num_sources,
+                    (float)inv_2sigma_sq, oskar_mem_float_const(theta, status),
+                    oskar_mem_float4c(jones, status));
+            break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            oskar_apply_element_taper_gaussian_matrix_cuda_d(num_sources,
+                    inv_2sigma_sq, oskar_mem_double_const(theta, status),
+                    oskar_mem_double4c(jones, status));
+            break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            break;
+        }
+        oskar_device_check_error(status);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+    }
+    else if (location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        cl_device_type dev_type;
+        cl_event event;
+        cl_kernel k = 0;
+        cl_int is_gpu, error, num;
+        cl_uint arg = 0;
+        size_t global_size, local_size;
+        clGetDeviceInfo(oskar_cl_device_id(),
+                CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_type, NULL);
+        is_gpu = dev_type & CL_DEVICE_TYPE_GPU;
+        switch (oskar_mem_type(jones))
+        {
+        case OSKAR_SINGLE_COMPLEX:
+            k = oskar_cl_kernel("apply_element_taper_gaussian_scalar_float");
+            break;
+        case OSKAR_DOUBLE_COMPLEX:
+            k = oskar_cl_kernel("apply_element_taper_gaussian_scalar_double");
+            break;
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            k = oskar_cl_kernel("apply_element_taper_gaussian_matrix_float");
+            break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            k = oskar_cl_kernel("apply_element_taper_gaussian_matrix_double");
+            break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        if (!k)
+        {
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            return;
+        }
+
+        /* Set kernel arguments. */
+        num = (cl_int) num_sources;
+        error = clSetKernelArg(k, arg++, sizeof(cl_int), &num);
+        if (oskar_mem_precision(jones) == OSKAR_SINGLE)
+        {
+            cl_float w = (cl_float) inv_2sigma_sq;
+            error = clSetKernelArg(k, arg++, sizeof(cl_float), &w);
         }
         else
-            *status = OSKAR_ERR_BAD_LOCATION;
-    }
-    else if (precision == OSKAR_DOUBLE)
-    {
-        const double* theta_;
-        theta_ = oskar_mem_double_const(theta, status);
+        {
+            cl_double w = (cl_double) inv_2sigma_sq;
+            error = clSetKernelArg(k, arg++, sizeof(cl_double), &w);
+        }
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(theta, status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer(jones, status));
+        if (error != CL_SUCCESS)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            return;
+        }
 
-        if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            if (type == OSKAR_DOUBLE_COMPLEX)
-            {
-                oskar_apply_element_taper_gaussian_scalar_cuda_d(
-                        oskar_mem_double2(jones, status), num_sources,
-                        fwhm, theta_);
-            }
-            else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-            {
-                oskar_apply_element_taper_gaussian_matrix_cuda_d(
-                        oskar_mem_double4c(jones, status), num_sources,
-                        fwhm, theta_);
-            }
-            else
-                *status = OSKAR_ERR_BAD_DATA_TYPE;
-            oskar_device_check_error(status);
+        /* Launch kernel on current command queue. */
+        local_size = is_gpu ? 256 : 128;
+        global_size = ((num + local_size - 1) / local_size) * local_size;
+        error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
+                &global_size, &local_size, 0, NULL, &event);
+        if (error != CL_SUCCESS)
+            *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
 #else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
-        }
-        else if (location == OSKAR_CPU)
-        {
-            if (type == OSKAR_DOUBLE_COMPLEX)
-            {
-                oskar_apply_element_taper_gaussian_scalar_d(
-                        oskar_mem_double2(jones, status), num_sources,
-                        fwhm, theta_);
-            }
-            else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-            {
-                oskar_apply_element_taper_gaussian_matrix_d(
-                        oskar_mem_double4c(jones, status), num_sources,
-                        fwhm, theta_);
-            }
-            else
-                *status = OSKAR_ERR_BAD_DATA_TYPE;
-        }
-        else
-            *status = OSKAR_ERR_BAD_LOCATION;
     }
+    else
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

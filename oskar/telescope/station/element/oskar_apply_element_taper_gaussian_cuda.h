@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,14 +51,14 @@ extern "C" {
  *
  * Note that all pointers refer to device memory.
  *
- * @param[in,out] d_jones    Array of Jones scalars.
- * @param[in] num_sources    Number of source positions.
- * @param[in] fwhm           Full-width half-max of Gaussian, in radians.
- * @param[in] d_theta        Array of source theta values, in radians.
+ * @param[in] num_sources   Number of source positions.
+ * @param[in] inv_2sigma_sq The value 1 / (2 sigma^2) of Gaussian, in radians.
+ * @param[in] d_theta       Array of source theta values, in radians.
+ * @param[in,out] d_jones   Array of Jones scalars.
  */
 OSKAR_EXPORT
-void oskar_apply_element_taper_gaussian_scalar_cuda_f(float2* d_jones,
-        int num_sources, float fwhm, const float* d_theta);
+void oskar_apply_element_taper_gaussian_scalar_cuda_f(int num_sources,
+        float inv_2sigma_sq, const float* d_theta, float2* d_jones);
 
 /**
  * @brief
@@ -71,14 +71,14 @@ void oskar_apply_element_taper_gaussian_scalar_cuda_f(float2* d_jones,
  *
  * Note that all pointers refer to device memory.
  *
- * @param[in,out] d_jones    Array of Jones matrices.
- * @param[in] num_sources    Number of source positions.
- * @param[in] fwhm           Full-width half-max of Gaussian, in radians.
- * @param[in] d_theta        Array of source theta values, in radians.
+ * @param[in] num_sources   Number of source positions.
+ * @param[in] inv_2sigma_sq The value 1 / (2 sigma^2) of Gaussian, in radians.
+ * @param[in] d_theta       Array of source theta values, in radians.
+ * @param[in,out] d_jones   Array of Jones matrices.
  */
 OSKAR_EXPORT
-void oskar_apply_element_taper_gaussian_matrix_cuda_f(float4c* d_jones,
-        int num_sources, float fwhm, const float* d_theta);
+void oskar_apply_element_taper_gaussian_matrix_cuda_f(int num_sources,
+        float inv_2sigma_sq, const float* d_theta, float4c* d_jones);
 
 /**
  * @brief
@@ -91,14 +91,14 @@ void oskar_apply_element_taper_gaussian_matrix_cuda_f(float4c* d_jones,
  *
  * Note that all pointers refer to device memory.
  *
- * @param[in,out] d_jones    Array of Jones scalars.
- * @param[in] num_sources    Number of source positions.
- * @param[in] fwhm           Full-width half-max of Gaussian, in radians.
- * @param[in] d_theta        Array of source theta values, in radians.
+ * @param[in] num_sources   Number of source positions.
+ * @param[in] inv_2sigma_sq The value 1 / (2 sigma^2) of Gaussian, in radians.
+ * @param[in] d_theta       Array of source theta values, in radians.
+ * @param[in,out] d_jones   Array of Jones scalars.
  */
 OSKAR_EXPORT
-void oskar_apply_element_taper_gaussian_scalar_cuda_d(double2* d_jones,
-        int num_sources, double fwhm, const double* d_theta);
+void oskar_apply_element_taper_gaussian_scalar_cuda_d(int num_sources,
+        double inv_2sigma_sq, const double* d_theta, double2* d_jones);
 
 /**
  * @brief
@@ -111,36 +111,14 @@ void oskar_apply_element_taper_gaussian_scalar_cuda_d(double2* d_jones,
  *
  * Note that all pointers refer to device memory.
  *
- * @param[in,out] d_jones    Array of Jones matrices.
- * @param[in] num_sources    Number of source positions.
- * @param[in] fwhm           Full-width half-max of Gaussian, in radians.
- * @param[in] d_theta        Array of source theta values, in radians.
+ * @param[in] num_sources   Number of source positions.
+ * @param[in] inv_2sigma_sq The value 1 / (2 sigma^2) of Gaussian, in radians.
+ * @param[in] d_theta       Array of source theta values, in radians.
+ * @param[in,out] d_jones   Array of Jones matrices.
  */
 OSKAR_EXPORT
-void oskar_apply_element_taper_gaussian_matrix_cuda_d(double4c* d_jones,
-        int num_sources, double fwhm, const double* d_theta);
-
-#ifdef __CUDACC__
-
-/* Kernels. */
-
-__global__
-void oskar_apply_element_taper_gaussian_scalar_cudak_f(float2* jones,
-        const int num_sources, const float fwhm, const float* theta);
-
-__global__
-void oskar_apply_element_taper_gaussian_matrix_cudak_f(float4c* jones,
-        const int num_sources, const float fwhm, const float* theta);
-
-__global__
-void oskar_apply_element_taper_gaussian_scalar_cudak_d(double2* jones,
-        const int num_sources, const double fwhm, const double* theta);
-
-__global__
-void oskar_apply_element_taper_gaussian_matrix_cudak_d(double4c* jones,
-        const int num_sources, const double fwhm, const double* theta);
-
-#endif /* __CUDACC__ */
+void oskar_apply_element_taper_gaussian_matrix_cuda_d(int num_sources,
+        double inv_2sigma_sq, const double* d_theta, double4c* d_jones);
 
 #ifdef __cplusplus
 }
