@@ -50,22 +50,6 @@ void oskar_evaluate_element_weights_errors_cuda_d(int num_elements,
         const double* amp_gain, const double* amp_error,
         const double* phase_offset, const double* phase_error, double2* errors);
 
-#ifdef __CUDACC__
-
-__global__
-void oskar_evaluate_element_weights_errors_cudak_f(int num_elements,
-        const float* restrict amp_gain, const float* restrict amp_error,
-        const float* restrict phase_offset, const float* restrict phase_error,
-        float2* errors);
-
-__global__
-void oskar_evaluate_element_weights_errors_cudak_d(int num_elements,
-        const double* restrict amp_gain, const double* restrict amp_error,
-        const double* restrict phase_offset, const double* restrict phase_error,
-        double2* errors);
-
-#endif /* __CUDACC__ */
-
 #ifdef __cplusplus
 }
 #endif

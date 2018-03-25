@@ -52,11 +52,11 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
         oskar_mem_realloc(weights_error, num_elements, status);
 
     /* Generate DFT weights. */
-    oskar_evaluate_element_weights_dft(weights, num_elements, wavenumber,
+    oskar_evaluate_element_weights_dft(num_elements,
             oskar_station_element_measured_x_enu_metres_const(station),
             oskar_station_element_measured_y_enu_metres_const(station),
             oskar_station_element_measured_z_enu_metres_const(station),
-            x_beam, y_beam, z_beam, status);
+            wavenumber, x_beam, y_beam, z_beam, weights, status);
 
     /* Apply time-variable errors. */
     if (oskar_station_apply_element_errors(station))

@@ -56,8 +56,8 @@ set(station_SRC
 if (CUDA_FOUND)
     list(APPEND station_SRC
         src/oskar_blank_below_horizon_cuda.cu
-        src/oskar_evaluate_element_weights_errors_cuda.cu
         src/oskar_evaluate_element_weights_dft_cuda.cu
+        src/oskar_evaluate_element_weights_errors_cuda.cu
         src/oskar_evaluate_vla_beam_pbcor_cuda.cu
     )
 endif()
@@ -65,6 +65,8 @@ endif()
 if (OpenCL_FOUND)
     list(APPEND station_SRC
         src/oskar_blank_below_horizon.cl
+        src/oskar_evaluate_element_weights_dft.cl
+        src/oskar_evaluate_element_weights_errors.cl
     )
 endif()
 

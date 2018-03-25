@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include "telescope/station/oskar_evaluate_element_weights_dft.h"
 #include "telescope/station/oskar_evaluate_element_weights_dft_cuda.h"
+#include "utility/oskar_cl_utils.h"
 #include "utility/oskar_device_utils.h"
 #include <math.h>
 
@@ -36,72 +37,46 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_evaluate_element_weights_dft_f(float2* weights,
-        const int num_elements, const float wavenumber, const float* x,
-        const float* y, const float* z, const float x_beam,
-        const float y_beam, const float z_beam)
+void oskar_evaluate_element_weights_dft_f(const int num_elements,
+        const float* x, const float* y, const float* z,
+        const float wavenumber, const float x_beam, const float y_beam,
+        const float z_beam, float2* weights)
 {
     int i;
-
-    /* Loop over elements. */
     for (i = 0; i < num_elements; ++i)
     {
-        float cxi, cyi, czi, phase;
+        float phase;
         float2 weight;
-
-        /* Cache input data. */
-        cxi = wavenumber * x[i];
-        cyi = wavenumber * y[i];
-        czi = wavenumber * z[i];
-
-        /* Compute the geometric phase of the output direction. */
-        phase =  cxi * x_beam;
-        phase += cyi * y_beam;
-        phase += czi * z_beam;
+        phase = wavenumber * (x[i] * x_beam + y[i] * y_beam + z[i] * z_beam);
         weight.x = cosf(-phase);
         weight.y = sinf(-phase);
-
-        /* Store result. */
         weights[i] = weight;
     }
 }
 
 /* Double precision. */
-void oskar_evaluate_element_weights_dft_d(double2* weights,
-        const int num_elements, const double wavenumber, const double* x,
-        const double* y, const double* z, const double x_beam,
-        const double y_beam, const double z_beam)
+void oskar_evaluate_element_weights_dft_d(const int num_elements,
+        const double* x, const double* y, const double* z,
+        const double wavenumber, const double x_beam, const double y_beam,
+        const double z_beam, double2* weights)
 {
     int i;
-
-    /* Loop over elements. */
     for (i = 0; i < num_elements; ++i)
     {
-        double cxi, cyi, czi, phase;
+        double phase;
         double2 weight;
-
-        /* Cache input data. */
-        cxi = wavenumber * x[i];
-        cyi = wavenumber * y[i];
-        czi = wavenumber * z[i];
-
-        /* Compute the geometric phase of the output direction. */
-        phase =  cxi * x_beam;
-        phase += cyi * y_beam;
-        phase += czi * z_beam;
+        phase = wavenumber * (x[i] * x_beam + y[i] * y_beam + z[i] * z_beam);
         weight.x = cos(-phase);
         weight.y = sin(-phase);
-
-        /* Store result. */
         weights[i] = weight;
     }
 }
 
 /* Wrapper. */
-void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
-        double wavenumber, const oskar_Mem* x, const oskar_Mem* y,
-        const oskar_Mem* z, double x_beam, double y_beam, double z_beam,
-        int* status)
+void oskar_evaluate_element_weights_dft(int num_elements,
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        double wavenumber, double x_beam, double y_beam, double z_beam,
+        oskar_Mem* weights, int* status)
 {
     int type, location;
 
@@ -142,63 +117,129 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
         return;
     }
 
-    /* Generate DFT weights: switch on type and location. */
-    if (type == OSKAR_DOUBLE)
+    /* Generate DFT weights. */
+    if (location == OSKAR_CPU)
     {
-        const double *x_, *y_, *z_;
-        double2* weights_;
-        x_ = oskar_mem_double_const(x, status);
-        y_ = oskar_mem_double_const(y, status);
-        z_ = oskar_mem_double_const(z, status);
-        weights_ = oskar_mem_double2(weights, status);
-
-        if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_element_weights_dft_cuda_d(weights_, num_elements,
-                    wavenumber, x_, y_, z_, x_beam, y_beam, z_beam);
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location == OSKAR_CPU)
-        {
-            oskar_evaluate_element_weights_dft_d(weights_, num_elements,
-                    wavenumber, x_, y_, z_, x_beam, y_beam, z_beam);
-        }
+        if (type == OSKAR_DOUBLE)
+            oskar_evaluate_element_weights_dft_d(num_elements,
+                    oskar_mem_double_const(x, status),
+                    oskar_mem_double_const(y, status),
+                    oskar_mem_double_const(z, status),
+                    wavenumber, x_beam, y_beam, z_beam,
+                    oskar_mem_double2(weights, status));
+        else if (type == OSKAR_SINGLE)
+            oskar_evaluate_element_weights_dft_f(num_elements,
+                    oskar_mem_float_const(x, status),
+                    oskar_mem_float_const(y, status),
+                    oskar_mem_float_const(z, status),
+                    wavenumber, x_beam, y_beam, z_beam,
+                    oskar_mem_float2(weights, status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-    else if (type == OSKAR_SINGLE)
+    else if (location == OSKAR_GPU)
     {
-        const float *x_, *y_, *z_;
-        float2* weights_;
-        x_ = oskar_mem_float_const(x, status);
-        y_ = oskar_mem_float_const(y, status);
-        z_ = oskar_mem_float_const(z, status);
-        weights_ = oskar_mem_float2(weights, status);
-
-        if (location == OSKAR_GPU)
-        {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_element_weights_dft_cuda_f(weights_, num_elements,
-                    (float)wavenumber, x_, y_, z_, (float)x_beam,
-                    (float)y_beam, (float)z_beam);
-            oskar_device_check_error(status);
+        if (type == OSKAR_DOUBLE)
+            oskar_evaluate_element_weights_dft_cuda_d(num_elements,
+                    oskar_mem_double_const(x, status),
+                    oskar_mem_double_const(y, status),
+                    oskar_mem_double_const(z, status),
+                    wavenumber, x_beam, y_beam, z_beam,
+                    oskar_mem_double2(weights, status));
+        else if (type == OSKAR_SINGLE)
+            oskar_evaluate_element_weights_dft_cuda_f(num_elements,
+                    oskar_mem_float_const(x, status),
+                    oskar_mem_float_const(y, status),
+                    oskar_mem_float_const(z, status),
+                    wavenumber, x_beam, y_beam, z_beam,
+                    oskar_mem_float2(weights, status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        oskar_device_check_error(status);
 #else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
-        }
-        else if (location == OSKAR_CPU)
+    }
+    else if (location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        cl_device_type dev_type;
+        cl_event event;
+        cl_kernel k = 0;
+        cl_int is_gpu, error, num;
+        cl_uint arg = 0;
+        size_t global_size, local_size;
+        clGetDeviceInfo(oskar_cl_device_id(),
+                CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_type, NULL);
+        is_gpu = dev_type & CL_DEVICE_TYPE_GPU;
+        if (type == OSKAR_DOUBLE)
+            k = oskar_cl_kernel("evaluate_element_weights_dft_double");
+        else if (type == OSKAR_SINGLE)
+            k = oskar_cl_kernel("evaluate_element_weights_dft_float");
+        else
         {
-            oskar_evaluate_element_weights_dft_f(weights_, num_elements,
-                    (float)wavenumber, x_, y_, z_, (float)x_beam,
-                    (float)y_beam, (float)z_beam);
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
+        if (!k)
+        {
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            return;
+        }
+
+        /* Set kernel arguments. */
+        num = (cl_int) num_elements;
+        error = clSetKernelArg(k, arg++, sizeof(cl_int), &num);
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(x, status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(y, status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(z, status));
+        if (type == OSKAR_SINGLE)
+        {
+            const cl_float w = (cl_float) wavenumber;
+            const cl_float x1 = (cl_float) x_beam;
+            const cl_float y1 = (cl_float) y_beam;
+            const cl_float z1 = (cl_float) z_beam;
+            error |= clSetKernelArg(k, arg++, sizeof(cl_float), &w);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_float), &x1);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_float), &y1);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_float), &z1);
+        }
+        else if (type == OSKAR_DOUBLE)
+        {
+            const cl_double w = (cl_double) wavenumber;
+            const cl_double x1 = (cl_double) x_beam;
+            const cl_double y1 = (cl_double) y_beam;
+            const cl_double z1 = (cl_double) z_beam;
+            error |= clSetKernelArg(k, arg++, sizeof(cl_double), &w);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_double), &x1);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_double), &y1);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_double), &z1);
+        }
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer(weights, status));
+        if (error != CL_SUCCESS)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            return;
+        }
+
+        /* Launch kernel on current command queue. */
+        local_size = is_gpu ? 256 : 128;
+        global_size = ((num + local_size - 1) / local_size) * local_size;
+        error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
+                &global_size, &local_size, 0, NULL, &event);
+        if (error != CL_SUCCESS)
+            *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+#endif
     }
     else
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-    }
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

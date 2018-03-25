@@ -145,11 +145,11 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
             lon, lat, 0.0, 0.0, l, m, n, status);
     oskar_convert_relative_directions_to_enu_directions(
             *x, *y, *z, num_points, l, m, n, last, 0.0, st_lat, status);
-    oskar_evaluate_element_weights_dft(*weights, num_elements, wavenumber,
+    oskar_evaluate_element_weights_dft(num_elements,
             oskar_station_element_measured_x_enu_metres_const(station),
             oskar_station_element_measured_y_enu_metres_const(station),
             oskar_station_element_measured_z_enu_metres_const(station),
-            beam_x, beam_y, beam_z, status);
+            wavenumber, beam_x, beam_y, beam_z, *weights, status);
     oskar_mem_free(l, status);
     oskar_mem_free(m, status);
     oskar_mem_free(n, status);

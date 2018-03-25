@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,8 @@
 
 #include "telescope/station/oskar_evaluate_element_weights_errors.h"
 #include "telescope/station/oskar_evaluate_element_weights_errors_cuda.h"
+#include "utility/oskar_cl_utils.h"
+#include "utility/oskar_device_utils.h"
 #include <math.h>
 
 #ifdef __cplusplus
@@ -145,61 +147,109 @@ void oskar_evaluate_element_weights_errors(int num_elements,
     oskar_mem_random_gaussian(errors, random_seed, time_index,
             station_id, 0x12345678, 1.0, status);
 
-    /* Generate weights errors: switch on type and location. */
-    if (type == OSKAR_DOUBLE)
+    /* Generate weights errors. */
+    if (location == OSKAR_CPU)
     {
-        const double *gain_, *gain_error_, *phase_, *phase_error_;
-        double2* errors_;
-        gain_ = oskar_mem_double_const(gain, status);
-        gain_error_ = oskar_mem_double_const(gain_error, status);
-        phase_ = oskar_mem_double_const(phase, status);
-        phase_error_ = oskar_mem_double_const(phase_error, status);
-        errors_ = oskar_mem_double2(errors, status);
-
-        if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_element_weights_errors_cuda_d(num_elements,
-                    gain_, gain_error_, phase_, phase_error_, errors_);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location == OSKAR_CPU)
-        {
+        if (type == OSKAR_DOUBLE)
             oskar_evaluate_element_weights_errors_d(num_elements,
-                    gain_, gain_error_, phase_, phase_error_, errors_);
-        }
-    }
-    else if (type == OSKAR_SINGLE)
-    {
-        const float *gain_, *gain_error_, *phase_, *phase_error_;
-        float2* errors_;
-        gain_ = oskar_mem_float_const(gain, status);
-        gain_error_ = oskar_mem_float_const(gain_error, status);
-        phase_ = oskar_mem_float_const(phase, status);
-        phase_error_ = oskar_mem_float_const(phase_error, status);
-        errors_ = oskar_mem_float2(errors, status);
-
-        if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_element_weights_errors_cuda_f(num_elements,
-                    gain_, gain_error_, phase_, phase_error_, errors_);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location == OSKAR_CPU)
-        {
+                    oskar_mem_double_const(gain, status),
+                    oskar_mem_double_const(gain_error, status),
+                    oskar_mem_double_const(phase, status),
+                    oskar_mem_double_const(phase_error, status),
+                    oskar_mem_double2(errors, status));
+        else if (type == OSKAR_SINGLE)
             oskar_evaluate_element_weights_errors_f(num_elements,
-                    gain_, gain_error_, phase_, phase_error_, errors_);
+                    oskar_mem_float_const(gain, status),
+                    oskar_mem_float_const(gain_error, status),
+                    oskar_mem_float_const(phase, status),
+                    oskar_mem_float_const(phase_error, status),
+                    oskar_mem_float2(errors, status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+    }
+    else if (location == OSKAR_GPU)
+    {
+#ifdef OSKAR_HAVE_CUDA
+        if (type == OSKAR_DOUBLE)
+            oskar_evaluate_element_weights_errors_cuda_d(num_elements,
+                    oskar_mem_double_const(gain, status),
+                    oskar_mem_double_const(gain_error, status),
+                    oskar_mem_double_const(phase, status),
+                    oskar_mem_double_const(phase_error, status),
+                    oskar_mem_double2(errors, status));
+        else if (type == OSKAR_SINGLE)
+            oskar_evaluate_element_weights_errors_cuda_f(num_elements,
+                    oskar_mem_float_const(gain, status),
+                    oskar_mem_float_const(gain_error, status),
+                    oskar_mem_float_const(phase, status),
+                    oskar_mem_float_const(phase_error, status),
+                    oskar_mem_float2(errors, status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        oskar_device_check_error(status);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+    }
+    else if (location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        cl_device_type dev_type;
+        cl_event event;
+        cl_kernel k = 0;
+        cl_int is_gpu, error, num;
+        cl_uint arg = 0;
+        size_t global_size, local_size;
+        clGetDeviceInfo(oskar_cl_device_id(),
+                CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_type, NULL);
+        is_gpu = dev_type & CL_DEVICE_TYPE_GPU;
+        if (type == OSKAR_DOUBLE)
+            k = oskar_cl_kernel("evaluate_element_weights_errors_double");
+        else if (type == OSKAR_SINGLE)
+            k = oskar_cl_kernel("evaluate_element_weights_errors_float");
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
+        if (!k)
+        {
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            return;
+        }
+
+        /* Set kernel arguments. */
+        num = (cl_int) num_elements;
+        error = clSetKernelArg(k, arg++, sizeof(cl_int), &num);
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(gain, status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(gain_error, status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(phase, status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(phase_error, status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer(errors, status));
+        if (error != CL_SUCCESS)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            return;
+        }
+
+        /* Launch kernel on current command queue. */
+        local_size = is_gpu ? 256 : 128;
+        global_size = ((num + local_size - 1) / local_size) * local_size;
+        error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
+                &global_size, &local_size, 0, NULL, &event);
+        if (error != CL_SUCCESS)
+            *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+#endif
     }
     else
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-    }
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus
