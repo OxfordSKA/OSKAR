@@ -27,7 +27,7 @@
  */
 
 #include "math/oskar_dft_c2r_3d_cuda.h"
-
+#include <cuda_runtime.h>
 
 /* Kernels. ================================================================ */
 

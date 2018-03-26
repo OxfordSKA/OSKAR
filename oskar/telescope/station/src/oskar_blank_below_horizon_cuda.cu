@@ -27,6 +27,7 @@
  */
 
 #include "telescope/station/oskar_blank_below_horizon_cuda.h"
+#include <cuda_runtime.h>
 
 #ifdef __cplusplus
 extern "C" {

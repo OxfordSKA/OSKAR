@@ -29,6 +29,7 @@
 #include "correlate/oskar_cross_correlate_point_scalar_cuda.h"
 #include "correlate/private_correlate_functions_inline.h"
 #include "math/oskar_add_inline.h"
+#include <cuda_runtime.h>
 
 /* Kernels. ================================================================ */
 

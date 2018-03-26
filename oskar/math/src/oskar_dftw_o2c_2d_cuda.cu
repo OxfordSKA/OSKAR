@@ -27,6 +27,7 @@
  */
 
 #include "math/oskar_dftw_o2c_2d_cuda.h"
+#include <cuda_runtime.h>
 
 /* Kernels. ================================================================ */
 

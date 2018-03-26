@@ -27,7 +27,7 @@
  */
 
 #include "telescope/station/element/oskar_apply_element_taper_cosine_cuda.h"
-
+#include <cuda_runtime.h>
 
 /* Kernels. ================================================================ */
 

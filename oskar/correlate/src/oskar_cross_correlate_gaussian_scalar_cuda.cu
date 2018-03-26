@@ -28,6 +28,7 @@
 
 #include "correlate/oskar_cross_correlate_gaussian_scalar_cuda.h"
 #include "correlate/private_correlate_functions_inline.h"
+#include <cuda_runtime.h>
 
 /* Kernels. ================================================================ */
 

@@ -27,6 +27,7 @@
  */
 
 #include "math/oskar_prefix_sum_cuda.h"
+#include <cuda_runtime.h>
 
 template <typename T>
 __global__ void oskar_prefix_sum_cudak(const int num_elements,

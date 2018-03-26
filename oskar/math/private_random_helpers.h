@@ -32,6 +32,9 @@
 #include <oskar_global.h>
 #include <math/oskar_cmath.h>
 #include <math/private_random_generators.h>
+#ifdef __CUDACC__
+#include <cuda_runtime.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

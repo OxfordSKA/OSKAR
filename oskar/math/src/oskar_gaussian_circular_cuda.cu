@@ -27,6 +27,7 @@
  */
 
 #include "math/oskar_gaussian_circular_cuda.h"
+#include <cuda_runtime.h>
 
 /* Kernels. ================================================================ */
 

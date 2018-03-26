@@ -28,6 +28,7 @@
 
 #include "mem/oskar_mem_random_uniform_cuda.h"
 #include "math/private_random_helpers.h"
+#include <cuda_runtime.h>
 
 #ifdef __cplusplus
 extern "C" {

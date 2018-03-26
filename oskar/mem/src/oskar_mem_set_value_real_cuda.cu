@@ -27,6 +27,7 @@
  */
 
 #include "mem/oskar_mem_set_value_real_cuda.h"
+#include <cuda_runtime.h>
 
 /* Kernels. ================================================================ */
 
