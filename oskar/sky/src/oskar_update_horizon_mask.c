@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017, The University of Oxford
+ * Copyright (c) 2013-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,8 @@
 
 #include "sky/oskar_update_horizon_mask.h"
 #include "sky/oskar_update_horizon_mask_cuda.h"
+#include "utility/oskar_cl_utils.h"
+#include "utility/oskar_device_utils.h"
 #include <math.h>
 
 #ifdef __cplusplus
@@ -54,64 +56,126 @@ void oskar_update_horizon_mask(int num_sources, const oskar_Mem* l,
     ll = cos_lat * sin(ha0_rad);
     mm = sin_lat * cos_dec0 - cos_lat * cos_ha0 * sin_dec0;
     nn = sin_lat * sin_dec0 + cos_lat * cos_ha0 * cos_dec0;
-    switch (type)
+    if (location == OSKAR_CPU)
     {
-    case OSKAR_SINGLE:
-    {
-        float ll_, mm_, nn_;
-        const float *l_, *m_, *n_;
-        l_ = oskar_mem_float_const(l, status);
-        m_ = oskar_mem_float_const(m, status);
-        n_ = oskar_mem_float_const(n, status);
-        ll_ = (float) ll;
-        mm_ = (float) mm;
-        nn_ = (float) nn;
-        if (location == OSKAR_GPU)
+        if (type == OSKAR_SINGLE)
         {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_update_horizon_mask_cuda_f(num_sources, l_, m_, n_,
-                    ll_, mm_, nn_, mask_);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location == OSKAR_CPU)
-        {
+            float ll_, mm_, nn_;
+            const float *l_, *m_, *n_;
+            l_ = oskar_mem_float_const(l, status);
+            m_ = oskar_mem_float_const(m, status);
+            n_ = oskar_mem_float_const(n, status);
+            ll_ = (float) ll;
+            mm_ = (float) mm;
+            nn_ = (float) nn;
             for (i = 0; i < num_sources; ++i)
-                mask_[i] |= ((l_[i] * ll_ + m_[i] * mm_ + n_[i] * nn_) > 0.);
+                mask_[i] |= ((l_[i] * ll_ + m_[i] * mm_ + n_[i] * nn_) > 0.f);
         }
-        else
-            *status = OSKAR_ERR_BAD_LOCATION;
-        break;
-    }
-    case OSKAR_DOUBLE:
-    {
-        const double *l_, *m_, *n_;
-        l_ = oskar_mem_double_const(l, status);
-        m_ = oskar_mem_double_const(m, status);
-        n_ = oskar_mem_double_const(n, status);
-        if (location == OSKAR_GPU)
+        else if (type == OSKAR_DOUBLE)
         {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_update_horizon_mask_cuda_d(num_sources, l_, m_, n_,
-                    ll, mm, nn, mask_);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location == OSKAR_CPU)
-        {
+            const double *l_, *m_, *n_;
+            l_ = oskar_mem_double_const(l, status);
+            m_ = oskar_mem_double_const(m, status);
+            n_ = oskar_mem_double_const(n, status);
             for (i = 0; i < num_sources; ++i)
                 mask_[i] |= ((l_[i] * ll + m_[i] * mm + n_[i] * nn) > 0.);
         }
         else
-            *status = OSKAR_ERR_BAD_LOCATION;
-        break;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-    default:
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        break;
+    else if (location == OSKAR_GPU)
+    {
+#ifdef OSKAR_HAVE_CUDA
+        if (type == OSKAR_SINGLE)
+            oskar_update_horizon_mask_cuda_f(num_sources,
+                    oskar_mem_float_const(l, status),
+                    oskar_mem_float_const(m, status),
+                    oskar_mem_float_const(n, status),
+                    (float) ll, (float) mm, (float) nn, mask_);
+        else if (type == OSKAR_DOUBLE)
+            oskar_update_horizon_mask_cuda_d(num_sources,
+                    oskar_mem_double_const(l, status),
+                    oskar_mem_double_const(m, status),
+                    oskar_mem_double_const(n, status),
+                    ll, mm, nn, mask_);
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        oskar_device_check_error(status);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
+    else if (location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        cl_event event;
+        cl_kernel k = 0;
+        cl_int error, num;
+        cl_uint arg = 0;
+        size_t global_size, local_size;
+        if (type == OSKAR_DOUBLE)
+            k = oskar_cl_kernel("update_horizon_mask_double");
+        else if (type == OSKAR_SINGLE)
+            k = oskar_cl_kernel("update_horizon_mask_float");
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        if (!k)
+        {
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            return;
+        }
+
+        /* Set kernel arguments. */
+        num = (cl_int) num_sources;
+        error = clSetKernelArg(k, arg++, sizeof(cl_int), &num);
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(l, status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(m, status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(n, status));
+        if (type == OSKAR_SINGLE)
+        {
+            const cl_float ll_ = (cl_float) ll;
+            const cl_float mm_ = (cl_float) mm;
+            const cl_float nn_ = (cl_float) nn;
+            error |= clSetKernelArg(k, arg++, sizeof(cl_float), &ll_);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_float), &mm_);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_float), &nn_);
+        }
+        else if (type == OSKAR_DOUBLE)
+        {
+            const cl_double ll_ = (cl_double) ll;
+            const cl_double mm_ = (cl_double) mm;
+            const cl_double nn_ = (cl_double) nn;
+            error |= clSetKernelArg(k, arg++, sizeof(cl_double), &ll_);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_double), &mm_);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_double), &nn_);
+        }
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer(mask, status));
+        if (error != CL_SUCCESS)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            return;
+        }
+
+        /* Launch kernel on current command queue. */
+        local_size = oskar_cl_is_gpu() ? 256 : 128;
+        global_size = ((num + local_size - 1) / local_size) * local_size;
+        error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
+                &global_size, &local_size, 0, NULL, &event);
+        if (error != CL_SUCCESS)
+            *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+#endif
+    }
+    else
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

@@ -98,6 +98,9 @@ OSKAR_EXPORT
 void oskar_cl_init(const char* device_type, const char* device_vendor);
 
 OSKAR_EXPORT
+int oskar_cl_is_gpu(void);
+
+OSKAR_EXPORT
 unsigned int oskar_cl_num_devices(void);
 
 OSKAR_EXPORT

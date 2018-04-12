@@ -5,7 +5,6 @@
 set(sky_SRC
     src/oskar_evaluate_tec_tid.c
     src/oskar_generate_random_coordinate.c
-    src/oskar_scale_flux_with_frequency.c
     src/oskar_sky_accessors.c
     src/oskar_sky_append_to_set.c
     src/oskar_sky_append.c
@@ -41,10 +40,18 @@ set(sky_SRC
 
 if (CUDA_FOUND)
     list(APPEND sky_SRC
-        src/oskar_scale_flux_with_frequency_cuda.cu
         #src/oskar_rebin_sky_cuda.cu # Doesn't work on compute 1.3 architectures.
         src/oskar_sky_copy_source_data_cuda.cu
+        src/oskar_sky_scale_flux_with_frequency_cuda.cu
         src/oskar_update_horizon_mask_cuda.cu
+    )
+endif()
+
+if (OpenCL_FOUND)
+    list(APPEND sky_SRC
+        src/oskar_sky_copy_source_data.cl
+        src/oskar_sky_scale_flux_with_frequency.cl
+        src/oskar_update_horizon_mask.cl
     )
 endif()
 

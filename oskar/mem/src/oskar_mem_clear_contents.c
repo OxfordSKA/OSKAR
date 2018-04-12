@@ -67,10 +67,12 @@ void oskar_mem_clear_contents(oskar_Mem* mem, int* status)
     else if (mem->location & OSKAR_CL)
     {
 #ifdef OSKAR_HAVE_OPENCL
+        cl_event event;
         cl_int error;
         char zero = '\0';
         error = clEnqueueFillBuffer(oskar_cl_command_queue(),
-                mem->buffer, &zero, sizeof(char), 0, size, 0, NULL, NULL);
+                mem->buffer, &zero, sizeof(char), 0, size, 0, NULL, &event);
+        clWaitForEvents(1, &event); /* This is required. */
         if (error != CL_SUCCESS)
         {
             fprintf(stderr, "clEnqueueFillBuffer() error (%d)\n", error);

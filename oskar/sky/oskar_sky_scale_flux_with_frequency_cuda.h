@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SCALE_FLUX_WITH_FREQUENCY_H_
-#define OSKAR_SCALE_FLUX_WITH_FREQUENCY_H_
+#ifndef OSKAR_SKY_SCALE_FLUX_WITH_FREQUENCY_CUDA_H_
+#define OSKAR_SKY_SCALE_FLUX_WITH_FREQUENCY_CUDA_H_
 
 /**
- * @file oskar_scale_flux_with_frequency.h
+ * @file oskar_sky_scale_flux_with_frequency_cuda.h
  */
 
 #include <oskar_global.h>
@@ -41,13 +41,14 @@ extern "C" {
 
 /**
  * @brief
- * Function to scale source fluxes by spectral index values
+ * CUDA function to scale source fluxes by spectral index values
  * (single precision).
  *
  * @details
  * This function evaluates all fluxes (all Stokes parameters) at the specified
- * frequency using the spectral index of each source. The reference frequency
- * of each source is also updated to the specified frequency.
+ * frequency using the spectral index and rotation measure of each source.
+ * The reference frequency of each source is also updated to the specified
+ * frequency.
  *
  * Frequency scaling is performed using the expression:
  *
@@ -58,30 +59,34 @@ extern "C" {
  * where \f$F\f$ is the flux, \f$\nu\f$ is the new frequency, \f$\nu_0\f$ is
  * the reference frequency, and \f$\alpha\f$ is the spectral index value.
  *
+ * Note that all pointers are device pointers, and must not be dereferenced
+ * in host code.
+ *
  * @param[in] num_sources    The number of sources in the input arrays.
  * @param[in] frequency      The frequency at which to evaluate fluxes, in Hz.
- * @param[in,out] I          Source Stokes I values.
- * @param[in,out] Q          Source Stokes Q values.
- * @param[in,out] U          Source Stokes U values.
- * @param[in,out] V          Source Stokes V values.
- * @param[in,out] ref_freq   Source reference frequency values, in Hz.
- * @param[in] sp_index       Source spectral index values.
- * @param[in] rm             Source rotation measure values, in rad/m^2.
+ * @param[in,out] d_I        Source Stokes I values.
+ * @param[in,out] d_Q        Source Stokes Q values.
+ * @param[in,out] d_U        Source Stokes U values.
+ * @param[in,out] d_V        Source Stokes V values.
+ * @param[in,out] d_ref_freq Source reference frequency values, in Hz.
+ * @param[in] d_sp_index     Source spectral index values.
+ * @param[in] d_rm           Source rotation measure values, in rad/m^2.
  */
 OSKAR_EXPORT
-void oskar_scale_flux_with_frequency_f(int num_sources, float frequency,
-        float* I, float* Q, float* U, float* V, float* ref_freq,
-        const float* sp_index, const float* rm);
+void oskar_sky_scale_flux_with_frequency_cuda_f(int num_sources,
+        float frequency, float* d_I, float* d_Q, float* d_U, float* d_V,
+        float* d_ref_freq, const float* d_sp_index, const float* d_rm);
 
 /**
  * @brief
- * Function to scale source fluxes by spectral index values
+ * CUDA function to scale source fluxes by spectral index values
  * (double precision).
  *
  * @details
  * This function evaluates all fluxes (all Stokes parameters) at the specified
- * frequency using the spectral index of each source. The reference frequency
- * of each source is also updated to the specified frequency.
+ * frequency using the spectral index and rotation measure of each source.
+ * The reference frequency of each source is also updated to the specified
+ * frequency.
  *
  * Frequency scaling is performed using the expression:
  *
@@ -92,23 +97,26 @@ void oskar_scale_flux_with_frequency_f(int num_sources, float frequency,
  * where \f$F\f$ is the flux, \f$\nu\f$ is the new frequency, \f$\nu_0\f$ is
  * the reference frequency, and \f$\alpha\f$ is the spectral index value.
  *
+ * Note that all pointers are device pointers, and must not be dereferenced
+ * in host code.
+ *
  * @param[in] num_sources    The number of sources in the input arrays.
  * @param[in] frequency      The frequency at which to evaluate fluxes, in Hz.
- * @param[in,out] I          Source Stokes I values.
- * @param[in,out] Q          Source Stokes Q values.
- * @param[in,out] U          Source Stokes U values.
- * @param[in,out] V          Source Stokes V values.
- * @param[in,out] ref_freq   Source reference frequency values, in Hz.
- * @param[in] sp_index       Source spectral index values.
- * @param[in] rm             Source rotation measure values, in rad/m^2.
+ * @param[in,out] d_I        Source Stokes I values.
+ * @param[in,out] d_Q        Source Stokes Q values.
+ * @param[in,out] d_U        Source Stokes U values.
+ * @param[in,out] d_V        Source Stokes V values.
+ * @param[in,out] d_ref_freq Source reference frequency values, in Hz.
+ * @param[in] d_sp_index     Source spectral index values.
+ * @param[in] d_rm           Source rotation measure values, in rad/m^2.
  */
 OSKAR_EXPORT
-void oskar_scale_flux_with_frequency_d(int num_sources, double frequency,
-        double* I, double* Q, double* U, double* V, double* ref_freq,
-        const double* sp_index, const double* rm);
+void oskar_sky_scale_flux_with_frequency_cuda_d(int num_sources,
+        double frequency, double* d_I, double* d_Q, double* d_U, double* d_V,
+        double* d_ref_freq, const double* d_sp_index, const double* d_rm);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SCALE_FLUX_WITH_FREQUENCY_H_ */
+#endif /* OSKAR_SKY_SCALE_FLUX_WITH_FREQUENCY_CUDA_H_ */

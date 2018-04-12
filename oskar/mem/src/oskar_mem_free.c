@@ -53,7 +53,10 @@ void oskar_mem_free(oskar_Mem* mem, int* status)
     /* This should also be OK for aliases (sub-buffers) as they are
      * reference-counted. */
     if (mem->location & OSKAR_CL)
-        clReleaseMemObject(mem->buffer);
+    {
+        if (mem->buffer)
+            clReleaseMemObject(mem->buffer);
+    }
 
     /* For bare pointers, free the memory if the structure actually owns it. */
     else

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,6 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
 #ifdef OSKAR_HAVE_CUDA
         /* Allocate and initialise a new block of memory. */
         int cuda_error = 0;
-        size_t copy_size;
         void* mem_new = NULL;
         if (new_size > 0)
         {
@@ -114,16 +113,13 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         }
 
         /* Copy contents of old block to new block. */
-        copy_size = (old_size > new_size) ? new_size : old_size;
+        const size_t copy_size = (old_size > new_size) ? new_size : old_size;
         if (copy_size > 0)
         {
             cuda_error = cudaMemcpy(mem_new, mem->data, copy_size,
                     cudaMemcpyDeviceToDevice);
-        }
-        if (cuda_error)
-        {
-            *status = cuda_error;
-            return;
+            if (cuda_error)
+                *status = cuda_error;
         }
 
         /* Free the old block. */
@@ -141,8 +137,8 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
     {
 #ifdef OSKAR_HAVE_OPENCL
         /* Allocate and initialise a new block of memory. */
+        cl_event event;
         cl_int error = 0;
-        size_t copy_size;
         cl_mem mem_new;
         mem_new = clCreateBuffer(oskar_cl_context(),
                 CL_MEM_READ_WRITE, new_size, NULL, &error);
@@ -153,20 +149,18 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         }
 
         /* Copy contents of old block to new block. */
-        copy_size = (old_size > new_size) ? new_size : old_size;
+        const size_t copy_size = (old_size > new_size) ? new_size : old_size;
         if (copy_size > 0)
         {
             error = clEnqueueCopyBuffer(oskar_cl_command_queue(), mem->buffer,
-                    mem_new, 0, 0, copy_size, 0, NULL, NULL);
+                    mem_new, 0, 0, copy_size, 0, NULL, &event);
             if (error != CL_SUCCESS)
-            {
-                fprintf(stderr, "%s:%d\n", __FILE__, __LINE__);
                 *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
-            }
         }
 
         /* Free the old buffer. */
-        clReleaseMemObject(mem->buffer);
+        if (mem->buffer)
+            clReleaseMemObject(mem->buffer);
 
         /* Set the new meta-data. */
         mem->buffer = mem_new;

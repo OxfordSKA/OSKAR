@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include "math/oskar_prefix_sum.h"
 #include "math/oskar_prefix_sum_cuda.h"
+#include "utility/oskar_cl_utils.h"
 
 static size_t get_block_size(size_t num_elements)
 {
@@ -131,6 +132,127 @@ void oskar_prefix_sum(size_t num_elements, const oskar_Mem* in,
         oskar_mem_free(block_sums, status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+    }
+    else if (location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        cl_event event;
+        cl_kernel k = 0;
+        cl_int error;
+        cl_uint arg = 0;
+        size_t block_size, global_size, num_blocks = 1;
+        const cl_int num = (cl_int) num_elements;
+        const cl_int init = (cl_int) init_val;
+        const cl_int excl = (cl_int) exclusive;
+        if (oskar_cl_is_gpu())
+        {
+            oskar_Mem* block_sums;
+            block_size = get_block_size(num_elements);
+            num_blocks = (num_elements + block_size - 1) / block_size;
+            global_size = num_blocks * block_size;
+
+            /* Allocate memory to hold a sum per block. */
+            block_sums = oskar_mem_create(type, OSKAR_CL, num_blocks, status);
+
+            /* Local scan. */
+            if (!(k = oskar_cl_kernel("prefix_sum_int")))
+            {
+                *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                return;
+            }
+            error = clSetKernelArg(k, arg++, sizeof(cl_int), &num);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                    oskar_mem_cl_buffer_const(in, status));
+            error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                    oskar_mem_cl_buffer(out, status));
+            error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                    oskar_mem_cl_buffer(block_sums, status));
+            error |= clSetKernelArg(k, arg++,
+                    2 * block_size * sizeof(cl_int), 0);
+            error = clSetKernelArg(k, arg++, sizeof(cl_int), &init);
+            error = clSetKernelArg(k, arg++, sizeof(cl_int), &excl);
+            if (error != CL_SUCCESS)
+            {
+                *status = OSKAR_ERR_INVALID_ARGUMENT;
+                return;
+            }
+            error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k,
+                    1, NULL, &global_size, &block_size, 0, NULL, &event);
+            if (error != CL_SUCCESS)
+            {
+                *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
+                return;
+            }
+
+            if (num_blocks > 1)
+            {
+                /* Inclusive scan block sums. */
+                oskar_prefix_sum(num_blocks, block_sums, block_sums,
+                        init_val, 0, status);
+
+                /* Add block sums to each block. */
+                if (!(k = oskar_cl_kernel("prefix_sum_finalise_int")))
+                {
+                    *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                    return;
+                }
+                arg = 0;
+                const cl_int offset = (cl_int) block_size;
+                error = clSetKernelArg(k, arg++, sizeof(cl_int), &num);
+                error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                        oskar_mem_cl_buffer(out, status));
+                error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                        oskar_mem_cl_buffer_const(block_sums, status));
+                error |= clSetKernelArg(k, arg++, sizeof(cl_int), &offset);
+                if (error != CL_SUCCESS)
+                {
+                    *status = OSKAR_ERR_INVALID_ARGUMENT;
+                    return;
+                }
+                error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k,
+                        1, NULL, &global_size, &block_size, 0, NULL, &event);
+                if (error != CL_SUCCESS)
+                {
+                    *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
+                    return;
+                }
+            }
+
+            /* Clean up. */
+            oskar_mem_free(block_sums, status);
+        }
+        else
+        {
+            if (!(k = oskar_cl_kernel("prefix_sum_cpu_int")))
+            {
+                *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                return;
+            }
+            error = clSetKernelArg(k, arg++, sizeof(cl_int), &num);
+            error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                    oskar_mem_cl_buffer_const(in, status));
+            error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                    oskar_mem_cl_buffer(out, status));
+            error = clSetKernelArg(k, arg++, sizeof(cl_int), &init);
+            error = clSetKernelArg(k, arg++, sizeof(cl_int), &excl);
+            if (error != CL_SUCCESS)
+            {
+                *status = OSKAR_ERR_INVALID_ARGUMENT;
+                return;
+            }
+            block_size = 32;
+            global_size = num_blocks * block_size;
+            error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k,
+                    1, NULL, &global_size, &block_size, 0, NULL, &event);
+            if (error != CL_SUCCESS)
+            {
+                *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
+                return;
+            }
+        }
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
     }
     else

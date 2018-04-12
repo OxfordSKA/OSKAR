@@ -48,7 +48,7 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
     size_t element_size, bytes;
 
     /* Create the structure. */
-    mem = (oskar_Mem*) malloc(sizeof(oskar_Mem));
+    mem = (oskar_Mem*) calloc(1, sizeof(oskar_Mem));
     if (!mem)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;

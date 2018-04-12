@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,7 @@ struct CLGlobal
         string name;
         string cl_version;
         string driver_version;
+        int is_gpu;
 #ifdef OSKAR_HAVE_OPENCL
         cl_device_id id;
         cl_context context;
@@ -77,6 +78,7 @@ struct CLGlobal
             name = string();
             cl_version = string();
             driver_version = string();
+            is_gpu = 0;
 #ifdef OSKAR_HAVE_OPENCL
             id = 0;
             context = 0;
@@ -267,6 +269,7 @@ void oskar_cl_init(const char* device_type, const char* device_vendor)
         {
             char* t = 0;
             size_t len = 0;
+            cl_device_type d_type;
 
             // Get device vendor name.
             clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, 0, 0, &len);
@@ -306,6 +309,10 @@ void oskar_cl_init(const char* device_type, const char* device_vendor)
             t = (char*) realloc(t, len);
             clGetDeviceInfo(devices[j], CL_DRIVER_VERSION, len, t, 0);
             device->driver_version = string(t);
+            clGetDeviceInfo(devices[j], CL_DEVICE_TYPE,
+                    sizeof(cl_device_type), &d_type, 0);
+            device->is_gpu =
+                    ((d_type & CL_DEVICE_TYPE_GPU) == CL_DEVICE_TYPE_GPU);
 
             // Create an OpenCL context for the device.
             cl_context_properties props[] =
@@ -487,6 +494,13 @@ unsigned int oskar_cl_get_device(void)
 {
     oskar_cl_ensure(0);
     return oskar_cl_->current_device;
+}
+
+int oskar_cl_is_gpu(void)
+{
+    oskar_cl_ensure(0);
+    unsigned int i = oskar_cl_->current_device;
+    return i < oskar_cl_->device.size() ? oskar_cl_->device[i]->is_gpu : 0;
 }
 
 unsigned int oskar_cl_num_devices(void)

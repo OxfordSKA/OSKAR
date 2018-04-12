@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,15 +27,43 @@
  */
 
 #include "sky/oskar_sky.h"
-#include "sky/oskar_scale_flux_with_frequency_cuda.h"
-#include "sky/oskar_scale_flux_with_frequency.h"
+#include "sky/oskar_sky_scale_flux_with_frequency_cuda.h"
+#include "sky/private_sky_scale_flux_with_frequency_inline.h"
+#include "utility/oskar_cl_utils.h"
 #include "utility/oskar_device_utils.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_sky_scale_flux_with_frequency(oskar_Sky* model, double frequency,
+/* Single precision. */
+void oskar_sky_scale_flux_with_frequency_f(int num_sources, float frequency,
+        float* I, float* Q, float* U, float* V, float* ref_freq,
+        const float* sp_index, const float* rm)
+{
+    int i;
+    for (i = 0; i < num_sources; ++i)
+    {
+        oskar_scale_flux_with_frequency_inline_f(frequency,
+                &I[i], &Q[i], &U[i], &V[i], &ref_freq[i], sp_index[i], rm[i]);
+    }
+}
+
+/* Double precision. */
+void oskar_sky_scale_flux_with_frequency_d(int num_sources, double frequency,
+        double* I, double* Q, double* U, double* V, double* ref_freq,
+        const double* sp_index, const double* rm)
+{
+    int i;
+    for (i = 0; i < num_sources; ++i)
+    {
+        oskar_scale_flux_with_frequency_inline_d(frequency,
+                &I[i], &Q[i], &U[i], &V[i], &ref_freq[i], sp_index[i], rm[i]);
+    }
+}
+
+/* Wrapper. */
+void oskar_sky_scale_flux_with_frequency(oskar_Sky* sky, double frequency,
         int* status)
 {
     int type, location, num_sources;
@@ -44,71 +72,139 @@ void oskar_sky_scale_flux_with_frequency(oskar_Sky* model, double frequency,
     if (*status) return;
 
     /* Get the type, location and dimensions. */
-    type = oskar_sky_precision(model);
-    location = oskar_sky_mem_location(model);
-    num_sources = oskar_sky_num_sources(model);
+    type = oskar_sky_precision(sky);
+    location = oskar_sky_mem_location(sky);
+    num_sources = oskar_sky_num_sources(sky);
 
     /* Scale the flux values. */
-    if (type == OSKAR_SINGLE)
+    if (location == OSKAR_CPU)
     {
-        float *I, *Q, *U, *V, *ref;
-        const float *spix, *rm;
-        I    = oskar_mem_float(oskar_sky_I(model), status);
-        Q    = oskar_mem_float(oskar_sky_Q(model), status);
-        U    = oskar_mem_float(oskar_sky_U(model), status);
-        V    = oskar_mem_float(oskar_sky_V(model), status);
-        ref  = oskar_mem_float(oskar_sky_reference_freq_hz(model), status);
-        spix = oskar_mem_float_const(
-                oskar_sky_spectral_index_const(model), status);
-        rm   = oskar_mem_float_const(
-                oskar_sky_rotation_measure_rad_const(model), status);
-
-        if (location == OSKAR_GPU)
-        {
+        if (type == OSKAR_SINGLE)
+            oskar_sky_scale_flux_with_frequency_f(num_sources, frequency,
+                    oskar_mem_float(oskar_sky_I(sky), status),
+                    oskar_mem_float(oskar_sky_Q(sky), status),
+                    oskar_mem_float(oskar_sky_U(sky), status),
+                    oskar_mem_float(oskar_sky_V(sky), status),
+                    oskar_mem_float(oskar_sky_reference_freq_hz(sky), status),
+                    oskar_mem_float_const(
+                            oskar_sky_spectral_index_const(sky), status),
+                    oskar_mem_float_const(
+                            oskar_sky_rotation_measure_rad_const(sky), status));
+        else if (type == OSKAR_DOUBLE)
+            oskar_sky_scale_flux_with_frequency_d(num_sources, frequency,
+                    oskar_mem_double(oskar_sky_I(sky), status),
+                    oskar_mem_double(oskar_sky_Q(sky), status),
+                    oskar_mem_double(oskar_sky_U(sky), status),
+                    oskar_mem_double(oskar_sky_V(sky), status),
+                    oskar_mem_double(oskar_sky_reference_freq_hz(sky), status),
+                    oskar_mem_double_const(
+                            oskar_sky_spectral_index_const(sky), status),
+                    oskar_mem_double_const(
+                            oskar_sky_rotation_measure_rad_const(sky), status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+    }
+    else if (location == OSKAR_GPU)
+    {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_scale_flux_with_frequency_cuda_f(num_sources, frequency,
-                    I, Q, U, V, ref, spix, rm);
-            oskar_device_check_error(status);
+        if (type == OSKAR_SINGLE)
+            oskar_sky_scale_flux_with_frequency_cuda_f(num_sources, frequency,
+                    oskar_mem_float(oskar_sky_I(sky), status),
+                    oskar_mem_float(oskar_sky_Q(sky), status),
+                    oskar_mem_float(oskar_sky_U(sky), status),
+                    oskar_mem_float(oskar_sky_V(sky), status),
+                    oskar_mem_float(oskar_sky_reference_freq_hz(sky), status),
+                    oskar_mem_float_const(
+                            oskar_sky_spectral_index_const(sky), status),
+                    oskar_mem_float_const(
+                            oskar_sky_rotation_measure_rad_const(sky), status));
+        else if (type == OSKAR_DOUBLE)
+            oskar_sky_scale_flux_with_frequency_cuda_d(num_sources, frequency,
+                    oskar_mem_double(oskar_sky_I(sky), status),
+                    oskar_mem_double(oskar_sky_Q(sky), status),
+                    oskar_mem_double(oskar_sky_U(sky), status),
+                    oskar_mem_double(oskar_sky_V(sky), status),
+                    oskar_mem_double(oskar_sky_reference_freq_hz(sky), status),
+                    oskar_mem_double_const(
+                            oskar_sky_spectral_index_const(sky), status),
+                    oskar_mem_double_const(
+                            oskar_sky_rotation_measure_rad_const(sky), status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        oskar_device_check_error(status);
 #else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
-        }
+    }
+    else if (location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        cl_event event;
+        cl_kernel k = 0;
+        cl_int error, num;
+        cl_uint arg = 0;
+        size_t global_size, local_size;
+        if (type == OSKAR_DOUBLE)
+            k = oskar_cl_kernel("scale_flux_with_frequency_double");
+        else if (type == OSKAR_SINGLE)
+            k = oskar_cl_kernel("scale_flux_with_frequency_float");
         else
         {
-            oskar_scale_flux_with_frequency_f(num_sources, frequency,
-                    I, Q, U, V, ref, spix, rm);
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
-    }
-    else if (type == OSKAR_DOUBLE)
-    {
-        double *I, *Q, *U, *V, *ref;
-        const double *spix, *rm;
-        I    = oskar_mem_double(oskar_sky_I(model), status);
-        Q    = oskar_mem_double(oskar_sky_Q(model), status);
-        U    = oskar_mem_double(oskar_sky_U(model), status);
-        V    = oskar_mem_double(oskar_sky_V(model), status);
-        ref  = oskar_mem_double(oskar_sky_reference_freq_hz(model), status);
-        spix = oskar_mem_double_const(
-                oskar_sky_spectral_index_const(model), status);
-        rm   = oskar_mem_double_const(
-                oskar_sky_rotation_measure_rad_const(model), status);
+        if (!k)
+        {
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            return;
+        }
 
-        if (location == OSKAR_GPU)
+        /* Set kernel arguments. */
+        num = (cl_int) num_sources;
+        error = clSetKernelArg(k, arg++, sizeof(cl_int), &num);
+        if (type == OSKAR_SINGLE)
         {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_scale_flux_with_frequency_cuda_d(num_sources, frequency,
-                    I, Q, U, V, ref, spix, rm);
-            oskar_device_check_error(status);
+            const cl_float freq = (cl_float) frequency;
+            error |= clSetKernelArg(k, arg++, sizeof(cl_float), &freq);
+        }
+        else if (type == OSKAR_DOUBLE)
+        {
+            const cl_double freq = (cl_double) frequency;
+            error |= clSetKernelArg(k, arg++, sizeof(cl_double), &freq);
+        }
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer(oskar_sky_I(sky), status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer(oskar_sky_Q(sky), status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer(oskar_sky_U(sky), status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer(oskar_sky_V(sky), status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer(oskar_sky_reference_freq_hz(sky), status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(oskar_sky_spectral_index_const(sky), status));
+        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
+                oskar_mem_cl_buffer_const(oskar_sky_rotation_measure_rad_const(sky), status));
+        if (error != CL_SUCCESS)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            return;
+        }
+
+        /* Launch kernel on current command queue. */
+        local_size = oskar_cl_is_gpu() ? 256 : 128;
+        global_size = ((num + local_size - 1) / local_size) * local_size;
+        error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
+                &global_size, &local_size, 0, NULL, &event);
+        if (error != CL_SUCCESS)
+            *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
 #else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
-        }
-        else
-        {
-            oskar_scale_flux_with_frequency_d(num_sources, frequency,
-                    I, Q, U, V, ref, spix, rm);
-        }
     }
+    else
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus
