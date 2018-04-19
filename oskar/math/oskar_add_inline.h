@@ -40,6 +40,14 @@
 #endif
 #include <utility/oskar_vector_types.h>
 
+/* M_OUT += M */
+#define OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(M_OUT, M) {                      \
+        M_OUT.a.x += M.a.x; M_OUT.a.y += M.a.y;                            \
+        M_OUT.b.x += M.b.x; M_OUT.b.y += M.b.y;                            \
+        M_OUT.c.x += M.c.x; M_OUT.c.y += M.c.y;                            \
+        M_OUT.d.x += M.d.x; M_OUT.d.y += M.d.y; }
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

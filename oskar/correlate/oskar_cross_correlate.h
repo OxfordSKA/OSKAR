@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ extern "C" {
  *
  * @param[out] vis          Output visibility amplitudes.
  * @param[in]  n_sources    Number of sources to use.
- * @param[in]  J            Set of Jones matrices.
+ * @param[in]  jones        Set of Jones matrices.
  * @param[in]  sky          Sky model.
  * @param[in]  tel          Telescope model.
  * @param[in]  u            Station u coordinates, in metres.
@@ -67,10 +67,10 @@ extern "C" {
  * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_cross_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
-        const oskar_Sky* sky, const oskar_Telescope* tel, const oskar_Mem* u,
-        const oskar_Mem* v, const oskar_Mem* w, double gast,
-        double frequency_hz, int* status);
+void oskar_cross_correlate(oskar_Mem* vis, int n_sources,
+        const oskar_Jones* jones, const oskar_Sky* sky,
+        const oskar_Telescope* tel, const oskar_Mem* u, const oskar_Mem* v,
+        const oskar_Mem* w, double gast, double frequency_hz, int* status);
 
 #ifdef __cplusplus
 }

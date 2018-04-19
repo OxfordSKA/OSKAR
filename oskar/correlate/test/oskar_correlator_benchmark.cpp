@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,9 +44,10 @@
 #include <cstdio>
 #include <vector>
 
-int benchmark(int num_stations, int num_sources, int type,
-        int jones_type, int loc, int use_extended, int use_time_ave, int niter,
-        std::vector<double>& times);
+static int benchmark(int num_stations, int num_sources, int type,
+        int jones_type, int loc, int use_extended,
+        int use_bandwidth_smearing, int use_time_smearing,
+        int niter, std::vector<double>& times);
 
 int main(int argc, char** argv)
 {
@@ -58,8 +59,8 @@ int main(int argc, char** argv)
     opt.add_flag("-g", "Run on the GPU");
     opt.add_flag("-c", "Run on the CPU");
     opt.add_flag("-e", "Use Gaussian sources (default: point sources).");
-    opt.add_flag("-t", "Use analytical time averaging (default: no time "
-            "averaging).");
+    opt.add_flag("-b", "Use bandwidth smearing (default: no bandwidth smearing).");
+    opt.add_flag("-t", "Use time smearing (default: no time smearing).");
     opt.add_flag("-r", "Dump raw iteration data to this file.", 1);
     opt.add_flag("-std", "Discard values greater than this number of standard "
             "deviations from the mean.", 1);
@@ -78,7 +79,8 @@ int main(int argc, char** argv)
         jones_type |= OSKAR_MATRIX;
     opt.get("-n")->getInt(niter);
     int use_extended = opt.is_set("-e") ? OSKAR_TRUE : OSKAR_FALSE;
-    int use_time_ave = opt.is_set("-t") ? OSKAR_TRUE : OSKAR_FALSE;
+    int use_bandwidth_smearing = opt.is_set("-b") ? OSKAR_TRUE : OSKAR_FALSE;
+    int use_time_smearing = opt.is_set("-t") ? OSKAR_TRUE : OSKAR_FALSE;
     std::string raw_file;
     if (opt.is_set("-r"))
         opt.get("-r")->getString(raw_file);
@@ -104,7 +106,10 @@ int main(int argc, char** argv)
         printf("- Precision: %s\n", (type == OSKAR_SINGLE) ? "single" : "double");
         printf("- Jones type: %s\n", (opt.is_set("-s")) ? "scalar" : "matrix");
         printf("- Extended sources: %s\n", (use_extended) ? "true" : "false");
-        printf("- Analytical time smearing: %s\n", (use_time_ave) ? "true" : "false");
+        printf("- Bandwidth smearing: %s\n", (use_bandwidth_smearing) ?
+                "true" : "false");
+        printf("- Time smearing: %s\n", (use_time_smearing) ?
+                "true" : "false");
         printf("- Number of iterations: %i\n", niter);
         if (max_std_dev > 0.0)
             printf("- Max standard deviations: %f\n", max_std_dev);
@@ -117,7 +122,8 @@ int main(int argc, char** argv)
     double time_taken_sec = 0.0, average_time_sec = 0.0;
     std::vector<double> times;
     int status = benchmark(num_stations, num_sources, type, jones_type,
-            loc, use_extended, use_time_ave, niter, times);
+            loc, use_extended, use_bandwidth_smearing, use_time_smearing,
+            niter, times);
 
     // Compute total time taken.
     for (int i = 0; i < niter; ++i)
@@ -203,8 +209,9 @@ int main(int argc, char** argv)
 }
 
 int benchmark(int num_stations, int num_sources, int type,
-        int jones_type, int loc, int use_extended, int use_time_ave, int niter,
-        std::vector<double>& times)
+        int jones_type, int loc, int use_extended,
+        int use_bandwidth_smearing, int use_time_smearing,
+        int niter, std::vector<double>& times)
 {
     int status = 0;
 
@@ -219,8 +226,8 @@ int benchmark(int num_stations, int num_sources, int type,
     oskar_Jones* J = oskar_jones_create(jones_type, loc, num_stations,
             num_sources, &status);
 
-    oskar_telescope_set_channel_bandwidth(tel, 1e6);
-    oskar_telescope_set_time_average(tel, (double) use_time_ave);
+    oskar_telescope_set_channel_bandwidth(tel, 100e3 * use_bandwidth_smearing);
+    oskar_telescope_set_time_average(tel, (double) use_time_smearing);
     oskar_sky_set_use_extended(sky, use_extended);
 
     // Memory for visibility coordinates and output visibility slice.
@@ -236,8 +243,8 @@ int benchmark(int num_stations, int num_sources, int type,
     for (int i = 0; i < niter; ++i)
     {
         oskar_timer_start(timer);
-        oskar_cross_correlate(vis, oskar_sky_num_sources(sky), J, sky, tel, u, v, w,
-                0.0, 100e6, &status);
+        oskar_cross_correlate(vis, oskar_sky_num_sources(sky), J, sky, tel,
+                u, v, w, 0.0, 100e6, &status);
         times[i] = oskar_timer_elapsed(timer);
     }
 

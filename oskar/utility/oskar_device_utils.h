@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2012-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,6 @@ extern "C" {
  *
  * @details
  * This function checks to see if a device error occurred.
- * In debug builds, a call to cudaDeviceSynchronize() is made before the check.
  *
  * @param[out] status  Status return code.
  */
@@ -53,11 +52,21 @@ OSKAR_EXPORT
 void oskar_device_check_error(int* status);
 
 /**
+ * @brief Returns the CUDA compute capability of the current device.
+ *
+ * @details
+ * The returned value is calculated as (10 * major_version + minor_version).
+ * If CUDA is not available, this will be 0.
+ */
+OSKAR_EXPORT
+int oskar_device_compute_capability(void);
+
+/**
  * @brief
  * Returns the number of devices on the system.
  *
  * @details
- * This simply calls cudaDeviceReset() if CUDA is available.
+ * This simply calls cudaGetDeviceCount() if CUDA is available.
  */
 OSKAR_EXPORT
 int oskar_device_count(int* status);

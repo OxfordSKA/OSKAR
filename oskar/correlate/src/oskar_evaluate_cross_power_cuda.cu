@@ -48,28 +48,28 @@ void oskar_evaluate_cross_power_cudak_f(const int num_sources,
 
     /* Calculate cross-power product at the source. */
     p = &smem_4f[threadIdx.x];
-    oskar_clear_complex_matrix_f(&val1);
+    OSKAR_CLEAR_COMPLEX_MATRIX(float, val1)
     for (int SP = 0; SP < num_stations; ++SP)
     {
         /* Load data for first station into shared memory. */
-        OSKAR_LOAD_MATRIX(smem_4f[threadIdx.x], jones, SP * num_sources + i);
-        oskar_clear_complex_matrix_f(&val2);
+        OSKAR_LOAD_MATRIX(smem_4f[threadIdx.x], jones[SP * num_sources + i]);
+        OSKAR_CLEAR_COMPLEX_MATRIX(float, val2)
 
         /* Cross-correlate. */
         for (int SQ = SP + 1; SQ < num_stations; ++SQ)
         {
             /* Load data for second station into registers. */
-            OSKAR_LOAD_MATRIX(q, jones, SQ * num_sources + i);
+            OSKAR_LOAD_MATRIX(q, jones[SQ * num_sources + i]);
 
             /* Multiply-add: val += p * conj(q). */
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val2.a, p->a, q.a);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val2.a, p->b, q.b);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val2.b, p->a, q.c);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val2.b, p->b, q.d);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val2.c, p->c, q.a);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val2.c, p->d, q.b);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val2.d, p->c, q.c);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val2.d, p->d, q.d);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val2.a, p->a, q.a);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val2.a, p->b, q.b);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val2.b, p->a, q.c);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val2.b, p->b, q.d);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val2.c, p->c, q.a);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val2.c, p->d, q.b);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val2.d, p->c, q.c);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val2.d, p->d, q.d);
         }
 
         /* Accumulate partial sum (try to preserve numerical precision). */
@@ -124,7 +124,7 @@ void oskar_evaluate_cross_power_scalar_cudak_f(
             q = jones[SQ * num_sources + i];
 
             /* Multiply-add: val += p * conj(q). */
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val2, smem_2f[threadIdx.x], q);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val2, smem_2f[threadIdx.x], q);
         }
 
         /* Accumulate partial sum (try to preserve numerical precision). */
@@ -168,7 +168,7 @@ void oskar_evaluate_cross_power_scalar_cudak_d(
             q = jones[SQ * num_sources + i];
 
             /* Multiply-add: val += p * conj(q). */
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val1, smem_2d[threadIdx.x], q);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val1, smem_2d[threadIdx.x], q);
         }
 
         /* Accumulate partial sum (try to preserve numerical precision). */
@@ -195,27 +195,27 @@ void oskar_evaluate_cross_power_cudak_d(const int num_sources,
 
     /* Calculate cross-power product at the source. */
     p = &smem_4d[threadIdx.x];
-    oskar_clear_complex_matrix_d(&val);
+    OSKAR_CLEAR_COMPLEX_MATRIX(double, val)
     for (int SP = 0; SP < num_stations; ++SP)
     {
         /* Load data for first station into shared memory. */
-        OSKAR_LOAD_MATRIX(smem_4d[threadIdx.x], jones, SP * num_sources + i);
+        OSKAR_LOAD_MATRIX(smem_4d[threadIdx.x], jones[SP * num_sources + i]);
 
         /* Cross-correlate. */
         for (int SQ = SP + 1; SQ < num_stations; ++SQ)
         {
             /* Load data for second station into registers. */
-            OSKAR_LOAD_MATRIX(q, jones, SQ * num_sources + i);
+            OSKAR_LOAD_MATRIX(q, jones[SQ * num_sources + i]);
 
             /* Multiply-add: val += p * conj(q). */
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val.a, p->a, q.a);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val.a, p->b, q.b);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val.b, p->a, q.c);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val.b, p->b, q.d);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val.c, p->c, q.a);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val.c, p->d, q.b);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val.d, p->c, q.c);
-            OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val.d, p->d, q.d);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val.a, p->a, q.a);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val.a, p->b, q.b);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val.b, p->a, q.c);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val.b, p->b, q.d);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val.c, p->c, q.a);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val.c, p->d, q.b);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val.d, p->c, q.c);
+            OSKAR_MUL_ADD_COMPLEX_CONJUGATE(val.d, p->d, q.d);
         }
     }
 

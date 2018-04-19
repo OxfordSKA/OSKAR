@@ -44,7 +44,7 @@ void oskar_evaluate_auto_power_f(const int num_sources,
         float4c val1, val2;
 
         /* Calculate auto-power product at the source. */
-        OSKAR_LOAD_MATRIX(val1, jones, i);
+        OSKAR_LOAD_MATRIX(val1, jones[i]);
         val2 = val1;
         oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(
                 &val1, &val2);
@@ -84,7 +84,7 @@ void oskar_evaluate_auto_power_d(const int num_sources,
         double4c val1, val2;
 
         /* Calculate auto-power product at the source. */
-        OSKAR_LOAD_MATRIX(val1, jones, i);
+        OSKAR_LOAD_MATRIX(val1, jones[i]);
         val2 = val1;
         oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(
                 &val1, &val2);

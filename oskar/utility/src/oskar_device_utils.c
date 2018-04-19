@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2012-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,20 @@ void oskar_device_check_error(int* status)
 #ifdef OSKAR_HAVE_CUDA
     *status = (int) cudaPeekAtLastError();
 #endif
+}
+
+
+int oskar_device_compute_capability(void)
+{
+    int version = 0;
+#ifdef OSKAR_HAVE_CUDA
+    int major = 0, minor = 0, device = 0;
+    cudaGetDevice(&device);
+    cudaDeviceGetAttribute(&major, cudaDevAttrComputeCapabilityMajor, device);
+    cudaDeviceGetAttribute(&minor, cudaDevAttrComputeCapabilityMinor, device);
+    version = 10 * major + minor;
+#endif
+    return version;
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,426 +35,117 @@
 #include <math/oskar_kahan_sum.h>
 
 #define OMEGA_EARTH  7.272205217e-5  /* radians/sec */
-#define OMEGA_EARTHf 7.272205217e-5f /* radians/sec */
+
+#ifdef __cplusplus
+
+/**
+ * @brief
+ * Function to evaluate sinc(x).
+ *
+ * @details
+ * This function evaluates sinc(x) = sin(x) / x.
+ *
+ * @param[in] x Function argument.
+ */
+template <typename T>
+OSKAR_INLINE
+T oskar_sinc(const T x);
+
+template <>
+double oskar_sinc<double>(const double x)
+{
+    return (x == 0.0) ? 1.0 : sin(x) / x;
+}
+
+template <>
+float oskar_sinc<float>(const float x)
+{
+    return (x == 0.0f) ? 1.0f : sinf(x) / x;
+}
+
+#if defined __CUDA_ARCH__ && __CUDA_ARCH__ >= 300
+    #if CUDART_VERSION >= 9000
+        #define WARP_SHUFFLE_XOR(VAR, LANEMASK) __shfl_xor_sync(0xFFFFFFFF, VAR, LANEMASK)
+    #else
+        #define WARP_SHUFFLE_XOR(VAR, LANEMASK) __shfl_xor(VAR, LANEMASK)
+    #endif
+#else
+    #define WARP_SHUFFLE_XOR(VAR, LANEMASK) 0
+#endif
+
+#define OSKAR_WARP_REDUCE(A) {                                             \
+        (A) += WARP_SHUFFLE_XOR((A), 1);                                   \
+        (A) += WARP_SHUFFLE_XOR((A), 2);                                   \
+        (A) += WARP_SHUFFLE_XOR((A), 4);                                   \
+        (A) += WARP_SHUFFLE_XOR((A), 8);                                   \
+        (A) += WARP_SHUFFLE_XOR((A), 16); }
+
+#endif /* __cplusplus */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Construct source brightness matrix (ignoring c, as it's Hermitian). */
-#define OSKAR_CONSTRUCT_B_FLOAT(B, I, Q, U, V, S) { \
-        float s_I, s_Q; s_I = I[S]; s_Q = Q[S]; \
-        B.b.x = U[S]; \
-        B.b.y = V[S]; \
-        B.a.x = s_I + s_Q; \
-        B.d.x = s_I - s_Q; }
+/* Evaluates sine and cosine of x. */
+#ifdef __CUDACC__
+#define OSKAR_SINCOS(REAL, X, S, C) sincos((REAL)X, &S, &C)
+#else
+#define OSKAR_SINCOS(REAL, X, S, C) S = sin((REAL)X); C = cos((REAL)X)
+#endif
+
+#define OSKAR_ADD_TO_VIS_POL(V, M)                                         \
+        V->a.x += M.a.x; V->a.y += M.a.y;                                  \
+        V->b.x += M.b.x; V->b.y += M.b.y;                                  \
+        V->c.x += M.c.x; V->c.y += M.c.y;                                  \
+        V->d.x += M.d.x; V->d.y += M.d.y;
+
+/* Evaluate various per-baseline terms. */
+#define OSKAR_BASELINE_TERMS(REAL, S_UP, S_UQ, S_VP, S_VQ, S_WP, S_WQ, UU, VV, WW, UU2, VV2, UUVV, UV_LEN) { \
+        UU   = (S_UP - S_UQ) * inv_wavelength;                             \
+        VV   = (S_VP - S_VQ) * inv_wavelength;                             \
+        WW   = (S_WP - S_WQ) * inv_wavelength;                             \
+        UU2  = UU * UU; VV2  = VV * VV;                                    \
+        UV_LEN = sqrt((REAL) (UU2 + VV2));                                 \
+        UUVV = 2 * UU * VV;                                                \
+        const REAL f = ((REAL) M_PI) * frac_bandwidth;                     \
+        UU *= f; VV *= f; WW *= f; }
+
+/* Evaluate baseline deltas for time-average smearing. */
+#define OSKAR_BASELINE_DELTAS(REAL, S_XP, S_XQ, S_YP, S_YQ, DU, DV, DW) {  \
+        REAL xx, yy, rot_angle, temp, sin_HA, cos_HA, sin_Dec, cos_Dec;    \
+        OSKAR_SINCOS(REAL, gha0_rad, sin_HA, cos_HA);                      \
+        OSKAR_SINCOS(REAL, dec0_rad, sin_Dec, cos_Dec);                    \
+        temp = ((REAL) M_PI) * inv_wavelength;                             \
+        xx = (S_XP - S_XQ) * temp;                                         \
+        yy = (S_YP - S_YQ) * temp;                                         \
+        rot_angle = ((REAL) OMEGA_EARTH) * time_int_sec;                   \
+        temp = (xx * sin_HA + yy * cos_HA) * rot_angle;                    \
+        DU = (xx * cos_HA - yy * sin_HA) * rot_angle;                      \
+        DV = temp * sin_Dec;                                               \
+        DW = -temp * cos_Dec; }
+
+/* Clears a complex matrix. */
+#define OSKAR_CLEAR_COMPLEX_MATRIX(REAL, M) {                              \
+        M.a.x = M.a.y = M.b.x = M.b.y = (REAL)0;                           \
+        M.c.x = M.c.y = M.d.x = M.d.y = (REAL)0; }
 
 /* Construct source brightness matrix (ignoring c, as it's Hermitian). */
-#define OSKAR_CONSTRUCT_B_DOUBLE(B, I, Q, U, V, S) { \
-        double s_I, s_Q; s_I = I[S]; s_Q = Q[S]; \
-        B.b.x = U[S]; \
-        B.b.y = V[S]; \
-        B.a.x = s_I + s_Q; \
-        B.d.x = s_I - s_Q; }
-
-#define OSKAR_ADD_TO_VIS_POL_SMEAR(V, M, F) \
-        V->a.x += M.a.x * F; \
-        V->a.y += M.a.y * F; \
-        V->b.x += M.b.x * F; \
-        V->b.y += M.b.y * F; \
-        V->c.x += M.c.x * F; \
-        V->c.y += M.c.y * F; \
-        V->d.x += M.d.x * F; \
-        V->d.y += M.d.y * F;
-
-#define OSKAR_ADD_TO_VIS_POL(V, M) \
-        V->a.x += M.a.x; \
-        V->a.y += M.a.y; \
-        V->b.x += M.b.x; \
-        V->b.y += M.b.y; \
-        V->c.x += M.c.x; \
-        V->c.y += M.c.y; \
-        V->d.x += M.d.x; \
-        V->d.y += M.d.y;
+#define OSKAR_CONSTRUCT_B(REAL, B, SRC_I, SRC_Q, SRC_U, SRC_V) {           \
+        REAL s_I__, s_Q__; s_I__ = SRC_I; s_Q__ = SRC_Q;                   \
+        B.b.x = SRC_U; B.b.y = SRC_V;                                      \
+        B.a.x = s_I__ + s_Q__; B.d.x = s_I__ - s_Q__; }
 
 #if defined(__CUDACC__) && __CUDA_ARCH__ >= 350
 /* Uses __ldg() instruction for global load via texture cache. */
 /* Available only from CUDA architecture 3.5. */
-#define OSKAR_LOAD_MATRIX(M, J, IDX) \
-        M.a = __ldg(&(J[IDX].a)); \
-        M.b = __ldg(&(J[IDX].b)); \
-        M.c = __ldg(&(J[IDX].c)); \
-        M.d = __ldg(&(J[IDX].d));
+#define OSKAR_LOAD_MATRIX(M, IND8) {                                       \
+        M.a = __ldg(&(IND8.a));                                            \
+        M.b = __ldg(&(IND8.b));                                            \
+        M.c = __ldg(&(IND8.c));                                            \
+        M.d = __ldg(&(IND8.d)); }
 #else
-#define OSKAR_LOAD_MATRIX(M, J, IDX) M = J[IDX];
+#define OSKAR_LOAD_MATRIX(M, IND8) M = IND8;
 #endif
-
-/**
- * @brief
- * Function to evaluate sinc(x) (single precision).
- *
- * @details
- * This function evaluates sinc(x) = sin(x) / x.
- *
- * @param[in] x Function argument.
- */
-OSKAR_INLINE
-float oskar_sinc_f(const float a)
-{
-    return (a == 0.0f) ? 1.0f : sinf(a) / a;
-}
-
-/**
- * @brief
- * Function to evaluate sinc(x) (double precision).
- *
- * @details
- * This function evaluates sinc(x) = sin(x) / x.
- *
- * @param[in] x Function argument.
- */
-OSKAR_INLINE
-double oskar_sinc_d(const double a)
-{
-    return (a == 0.0) ? 1.0 : sin(a) / a;
-}
-
-/**
- * @brief
- * Accumulates the visibility response on one baseline due to a single source
- * (single precision).
- *
- * @details
- * This function evaluates the visibility response for a single source on a
- * single baseline between stations p and q, accumulating the result with
- * the existing baseline visibility. It requires the final (collapsed)
- * Jones matrices for the source for stations p and q, and the unmodified
- * Stokes parameters of the source.
- *
- * The output visibility is updated according to:
- *
- * V_pq = V_pq + J_p * B * J_q^H
- *
- * where the brightness matrix B is assembled as:
- *
- * B = [ I + Q    U + iV ]
- *     [ U - iV    I - Q ]
- *
- * Visibilities are updated for a single source, even though array pointers are
- * passed to this function. The source is specified using the \p source_id
- * index parameter.
- *
- * @param[in,out] V_pq  Running total of source visibilities.
- * @param[in] source_id Index of source in all arrays.
- * @param[in] I         Array of source Stokes I values, in Jy.
- * @param[in] Q         Array of source Stokes Q values, in Jy.
- * @param[in] U         Array of source Stokes U values, in Jy.
- * @param[in] V         Array of source Stokes V values, in Jy.
- * @param[in] J_p       Array of source Jones matrices for station p.
- * @param[in] J_q       Array of source Jones matrices for station q.
- * @param[in] smear     Smearing factor by which to modify source visibility.
- * @param[in,out] guard Updated guard value used in Kahan summation.
- */
-OSKAR_INLINE
-void oskar_accumulate_baseline_visibility_for_source_inline_f(
-        float4c* restrict V_pq, const int source_id,
-        const float* restrict I, const float* restrict Q,
-        const float* restrict U, const float* restrict V,
-        const float4c* restrict J_p, const float4c* restrict J_q,
-        const float smear
-#ifndef __CUDACC__
-        , float4c* restrict guard
-#endif
-        )
-{
-    float4c m1, m2;
-
-    /* Construct source brightness matrix. */
-    OSKAR_CONSTRUCT_B_FLOAT(m2, I, Q, U, V, source_id)
-
-    /* Multiply first Jones matrix with source brightness matrix. */
-    OSKAR_LOAD_MATRIX(m1, J_p, source_id)
-    oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
-
-    /* Multiply result with second (Hermitian transposed) Jones matrix. */
-    OSKAR_LOAD_MATRIX(m2, J_q, source_id)
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
-
-#ifdef __CUDACC__
-    /* Multiply result by smearing term and accumulate. */
-    OSKAR_ADD_TO_VIS_POL_SMEAR(V_pq, m1, smear)
-#else
-    oskar_kahan_sum_multiply_complex_matrix_f(V_pq, m1, smear, guard);
-#endif /* __CUDACC__ */
-}
-
-/**
- * @brief
- * Accumulates the visibility response on one baseline due to a single source
- * (single precision).
- *
- * @details
- * This function evaluates the visibility response for a single source on a
- * single baseline between stations p and q, accumulating the result with
- * the existing baseline visibility. It requires the final (collapsed)
- * Jones matrices for the source for stations p and q.
- *
- * The output visibility is updated according to:
- *
- * V_pq = V_pq + J_p * J_q^H
- *
- * Visibilities are updated for a single source, even though array pointers are
- * passed to this function. The source is specified using the \p source_id
- * index parameter.
- *
- * @param[in,out] V_pq  Running total of source visibilities.
- * @param[in] source_id Index of source in all arrays.
- * @param[in] J_p       Array of source Jones matrices for station p.
- * @param[in] J_q       Array of source Jones matrices for station q.
- * @param[in] smear     Smearing factor by which to modify source visibility.
- * @param[in,out] guard Updated guard value used in Kahan summation.
- */
-OSKAR_INLINE
-void oskar_accumulate_baseline_visibility_for_source_inline_new_f(
-        float4c* restrict V_pq, const int source_id,
-        const float4c* restrict J_p, const float4c* restrict J_q,
-        const float smear
-#ifndef __CUDACC__
-        , float4c* restrict guard
-#endif
-        )
-{
-    float4c m1, m2;
-
-    /* Get Jones matrices. */
-    OSKAR_LOAD_MATRIX(m1, J_p, source_id)
-    OSKAR_LOAD_MATRIX(m2, J_q, source_id)
-
-    /* Multiply Jones matrices. */
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
-
-#ifdef __CUDACC__
-    /* Multiply result by smearing term and accumulate. */
-    OSKAR_ADD_TO_VIS_POL_SMEAR(V_pq, m1, smear)
-#else
-    oskar_kahan_sum_multiply_complex_matrix_f(V_pq, m1, smear, guard);
-#endif /* __CUDACC__ */
-}
-
-/**
- * @brief
- * Accumulates the visibility response on one baseline due to a single source
- * (double precision).
- *
- * @details
- * This function evaluates the visibility response for a single source on a
- * single baseline between stations p and q, accumulating the result with
- * the existing baseline visibility. It requires the final (collapsed)
- * Jones matrices for the source for stations p and q, and the unmodified
- * Stokes parameters of the source.
- *
- * The output visibility is updated according to:
- *
- * V_pq = V_pq + J_p * B * J_q^H
- *
- * where the brightness matrix B is assembled as:
- *
- * B = [ I + Q    U + iV ]
- *     [ U - iV    I - Q ]
- *
- * Visibilities are updated for a single source, even though array pointers are
- * passed to this function. The source is specified using the \p source_id
- * index parameter.
- *
- * @param[in,out] V_pq  Running total of source visibilities.
- * @param[in] source_id Index of source in all arrays.
- * @param[in] I         Array of source Stokes I values, in Jy.
- * @param[in] Q         Array of source Stokes Q values, in Jy.
- * @param[in] U         Array of source Stokes U values, in Jy.
- * @param[in] V         Array of source Stokes V values, in Jy.
- * @param[in] J_p       Array of source Jones matrices for station p.
- * @param[in] J_q       Array of source Jones matrices for station q.
- * @param[in] smear     Smearing factor by which to modify source visibility.
- */
-OSKAR_INLINE
-void oskar_accumulate_baseline_visibility_for_source_inline_d(
-        double4c* restrict V_pq, const int source_id,
-        const double* restrict I, const double* restrict Q,
-        const double* restrict U, const double* restrict V,
-        const double4c* restrict J_p, const double4c* restrict J_q,
-        const double smear)
-{
-    double4c m1, m2;
-
-    /* Construct source brightness matrix. */
-    OSKAR_CONSTRUCT_B_DOUBLE(m2, I, Q, U, V, source_id)
-
-    /* Multiply first Jones matrix with source brightness matrix. */
-    OSKAR_LOAD_MATRIX(m1, J_p, source_id)
-    oskar_multiply_complex_matrix_hermitian_in_place_d(&m1, &m2);
-
-    /* Multiply result with second (Hermitian transposed) Jones matrix. */
-    OSKAR_LOAD_MATRIX(m2, J_q, source_id)
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&m1, &m2);
-
-    /* Multiply result by smearing term and accumulate. */
-    OSKAR_ADD_TO_VIS_POL_SMEAR(V_pq, m1, smear)
-}
-
-/**
- * @brief
- * Accumulates the visibility response on one baseline due to a single source
- * (double precision).
- *
- * @details
- * This function evaluates the visibility response for a single source on a
- * single baseline between stations p and q, accumulating the result with
- * the existing baseline visibility. It requires the final (collapsed)
- * Jones matrices for the source for stations p and q.
- *
- * The output visibility is updated according to:
- *
- * V_pq = V_pq + J_p * J_q^H
- *
- * Visibilities are updated for a single source, even though array pointers are
- * passed to this function. The source is specified using the \p source_id
- * index parameter.
- *
- * @param[in,out] V_pq  Running total of source visibilities.
- * @param[in] source_id Index of source in all arrays.
- * @param[in] J_p       Array of source Jones matrices for station p.
- * @param[in] J_q       Array of source Jones matrices for station q.
- * @param[in] smear     Smearing factor by which to modify source visibility.
- */
-OSKAR_INLINE
-void oskar_accumulate_baseline_visibility_for_source_inline_new_d(
-        double4c* restrict V_pq, const int source_id,
-        const double4c* restrict J_p, const double4c* restrict J_q,
-        const double smear)
-{
-    double4c m1, m2;
-
-    /* Get Jones matrices. */
-    OSKAR_LOAD_MATRIX(m1, J_p, source_id)
-    OSKAR_LOAD_MATRIX(m2, J_q, source_id)
-
-    /* Multiply Jones matrices. */
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&m1, &m2);
-
-    /* Multiply result by smearing term and accumulate. */
-    OSKAR_ADD_TO_VIS_POL_SMEAR(V_pq, m1, smear)
-}
-
-/**
- * @brief
- * Accumulates the visibility response on one baseline due to a single source
- * (scalar, single precision).
- *
- * @details
- * This function evaluates the visibility response for a single source on a
- * single baseline between stations p and q, accumulating the result with
- * the existing baseline visibility. It requires the final (collapsed)
- * Jones scalars for the source for stations p and q, and the unmodified
- * Stokes I value of the source.
- *
- * The output visibility is updated according to:
- *
- * V_pq = V_pq + J_p * I * J_q^H
- *
- * Visibilities are updated for a single source, even though array pointers are
- * passed to this function. The source is specified using the \p source_id
- * index parameter.
- *
- * @param[in,out] V_pq  Running total of source visibilities.
- * @param[in] source_id Index of source in all arrays.
- * @param[in] I         Array of source Stokes I values, in Jy.
- * @param[in] J_p       Array of source Jones matrices for station p.
- * @param[in] J_q       Array of source Jones matrices for station q.
- * @param[in] smear     Smearing factor by which to modify source visibility.
- * @param[in,out] guard Updated guard value used in Kahan summation.
- */
-OSKAR_INLINE
-void oskar_accumulate_baseline_visibility_for_source_scalar_inline_f(
-        float2* restrict V_pq, const int source_id, const float* restrict I,
-        const float2* restrict J_p, const float2* restrict J_q,
-        const float smear
-#ifndef __CUDACC__
-        , float2* restrict guard
-#endif
-        )
-{
-    float2 t1, t2;
-    float I_;
-
-    /* Multiply first Jones scalar with Stokes I value. */
-    I_ = I[source_id];
-    t1 = J_p[source_id];
-    t1.x *= I_;
-    t1.y *= I_;
-
-    /* Multiply result with second (conjugated) Jones scalar. */
-    t2 = J_q[source_id];
-    oskar_multiply_complex_conjugate_in_place_f(&t1, &t2);
-
-    /* Multiply result by smearing term and accumulate. */
-#ifdef __CUDACC__
-    V_pq->x += t1.x * smear;
-    V_pq->y += t1.y * smear;
-#else
-    oskar_kahan_sum_multiply_complex_f(V_pq, t1, smear, guard);
-#endif /* __CUDACC__ */
-}
-
-/**
- * @brief
- * Accumulates the visibility response on one baseline due to a single source
- * (scalar, double precision).
- *
- * @details
- * This function evaluates the visibility response for a single source on a
- * single baseline between stations p and q, accumulating the result with
- * the existing baseline visibility. It requires the final (collapsed)
- * Jones scalars for the source for stations p and q, and the unmodified
- * Stokes I value of the source.
- *
- * The output visibility is updated according to:
- *
- * V_pq = V_pq + J_p * I * J_q^H
- *
- * Visibilities are updated for a single source, even though array pointers are
- * passed to this function. The source is specified using the \p source_id
- * index parameter.
- *
- * @param[in,out] V_pq  Running total of source visibilities.
- * @param[in] source_id Index of source in all arrays.
- * @param[in] I         Array of source Stokes I values, in Jy.
- * @param[in] J_p       Array of source Jones matrices for station p.
- * @param[in] J_q       Array of source Jones matrices for station q.
- * @param[in] smear     Smearing factor by which to modify source visibility.
- */
-OSKAR_INLINE
-void oskar_accumulate_baseline_visibility_for_source_scalar_inline_d(
-        double2* restrict V_pq, const int source_id, const double* restrict I,
-        const double2* restrict J_p, const double2* restrict J_q,
-        const double smear)
-{
-    double2 t1, t2;
-    double I_;
-
-    /* Multiply first Jones scalar with Stokes I value. */
-    I_ = I[source_id];
-    t1 = J_p[source_id];
-    t1.x *= I_;
-    t1.y *= I_;
-
-    /* Multiply result with second (conjugated) Jones scalar. */
-    t2 = J_q[source_id];
-    oskar_multiply_complex_conjugate_in_place_d(&t1, &t2);
-
-    /* Multiply result by smearing term and accumulate. */
-    V_pq->x += t1.x * smear;
-    V_pq->y += t1.y * smear;
-}
 
 /**
  * @brief
@@ -503,14 +194,14 @@ void oskar_accumulate_station_visibility_for_source_inline_f(
     float4c m1, m2;
 
     /* Construct source brightness matrix. */
-    OSKAR_CONSTRUCT_B_FLOAT(m2, I, Q, U, V, source_id)
+    OSKAR_CONSTRUCT_B(float, m2, I[source_id], Q[source_id], U[source_id], V[source_id])
 
     /* Multiply first Jones matrix with source brightness matrix. */
-    OSKAR_LOAD_MATRIX(m1, J, source_id)
+    OSKAR_LOAD_MATRIX(m1, J[source_id])
     oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
 
     /* Multiply result with second (Hermitian transposed) Jones matrix. */
-    OSKAR_LOAD_MATRIX(m2, J, source_id)
+    OSKAR_LOAD_MATRIX(m2, J[source_id])
     oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
 
 #ifdef __CUDACC__
@@ -617,14 +308,14 @@ void oskar_accumulate_station_visibility_for_source_inline_d(
     double4c m1, m2;
 
     /* Construct source brightness matrix. */
-    OSKAR_CONSTRUCT_B_DOUBLE(m2, I, Q, U, V, source_id)
+    OSKAR_CONSTRUCT_B(double, m2, I[source_id], Q[source_id], U[source_id], V[source_id])
 
     /* Multiply first Jones matrix with source brightness matrix. */
-    OSKAR_LOAD_MATRIX(m1, J, source_id)
+    OSKAR_LOAD_MATRIX(m1, J[source_id])
     oskar_multiply_complex_matrix_hermitian_in_place_d(&m1, &m2);
 
     /* Multiply result with second (Hermitian transposed) Jones matrix. */
-    OSKAR_LOAD_MATRIX(m2, J, source_id)
+    OSKAR_LOAD_MATRIX(m2, J[source_id])
     oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&m1, &m2);
 
     /* Accumulate. */
@@ -678,240 +369,6 @@ void oskar_accumulate_station_visibility_for_source_scalar_inline_d(
 
 /**
  * @brief
- * Evaluates the change in baseline coordinates over time
- * (single precision).
- *
- * @details
- * This function evaluates the change in baseline coordinates
- * over time, due to Earth rotation.
- *
- * @param[in] station_xp     Offset ECEF x-coordinate of station p, in metres.
- * @param[in] station_xq     Offset ECEF x-coordinate of station q, in metres.
- * @param[in] station_yp     Offset ECEF y-coordinate of station p, in metres.
- * @param[in] station_yq     Offset ECEF y-coordinate of station q, in metres.
- * @param[in] inv_wavelength Inverse of the wavelength, in metres.
- * @param[in] time_int_sec   Time averaging interval, in seconds.
- * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
- * @param[in] dec0_rad       Declination of phase centre, in radians.
- * @param[out] du            Change of baseline u over interval, in wavelengths.
- * @param[out] dv            Change of baseline v over interval, in wavelengths.
- * @param[out] dw            Change of baseline w over interval, in wavelengths.
- */
-OSKAR_INLINE
-void oskar_evaluate_baseline_deltas_inline_f(const float station_xp,
-        const float station_xq, const float station_yp,
-        const float station_yq, const float inv_wavelength,
-        const float time_int_sec, const float gha0_rad,
-        const float dec0_rad, float* du, float* dv, float* dw)
-{
-    float xx, yy, rot_angle, temp, sin_HA, cos_HA, sin_Dec, cos_Dec;
-#ifdef __CUDACC__
-    sincosf(gha0_rad, &sin_HA, &cos_HA);
-    sincosf(dec0_rad, &sin_Dec, &cos_Dec);
-#else
-    sin_HA = sinf(gha0_rad);
-    cos_HA = cosf(gha0_rad);
-    sin_Dec = sinf(dec0_rad);
-    cos_Dec = cosf(dec0_rad);
-#endif
-    temp = M_PIf * inv_wavelength;
-    xx = (station_xp - station_xq) * temp;
-    yy = (station_yp - station_yq) * temp;
-    rot_angle = OMEGA_EARTHf * time_int_sec;
-    temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
-    *du = (xx * cos_HA - yy * sin_HA) * rot_angle;
-    *dv = temp * sin_Dec;
-    *dw = -temp * cos_Dec;
-}
-
-/**
- * @brief
- * Evaluates the change in baseline coordinates over time
- * (double precision).
- *
- * @details
- * This function evaluates the change in baseline coordinates
- * over time, due to Earth rotation.
- *
- * @param[in] station_xp     Offset ECEF x-coordinate of station p, in metres.
- * @param[in] station_xq     Offset ECEF x-coordinate of station q, in metres.
- * @param[in] station_yp     Offset ECEF y-coordinate of station p, in metres.
- * @param[in] station_yq     Offset ECEF y-coordinate of station q, in metres.
- * @param[in] inv_wavelength Inverse of the wavelength, in metres.
- * @param[in] time_int_sec   Time averaging interval, in seconds.
- * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
- * @param[in] dec0_rad       Declination of phase centre, in radians.
- * @param[out] du            Change of baseline u over interval, in wavelengths.
- * @param[out] dv            Change of baseline v over interval, in wavelengths.
- * @param[out] dw            Change of baseline w over interval, in wavelengths.
- */
-OSKAR_INLINE
-void oskar_evaluate_baseline_deltas_inline_d(const double station_xp,
-        const double station_xq, const double station_yp,
-        const double station_yq, const double inv_wavelength,
-        const double time_int_sec, const double gha0_rad,
-        const double dec0_rad, double* du, double* dv, double* dw)
-{
-    double xx, yy, rot_angle, temp, sin_HA, cos_HA, sin_Dec, cos_Dec;
-#ifdef __CUDACC__
-    sincos(gha0_rad, &sin_HA, &cos_HA);
-    sincos(dec0_rad, &sin_Dec, &cos_Dec);
-#else
-    sin_HA = sin(gha0_rad);
-    cos_HA = cos(gha0_rad);
-    sin_Dec = sin(dec0_rad);
-    cos_Dec = cos(dec0_rad);
-#endif
-    temp = M_PI * inv_wavelength;
-    xx = (station_xp - station_xq) * temp;
-    yy = (station_yp - station_yq) * temp;
-    rot_angle = OMEGA_EARTH * time_int_sec;
-    temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
-    *du = (xx * cos_HA - yy * sin_HA) * rot_angle;
-    *dv = temp * sin_Dec;
-    *dw = -temp * cos_Dec;
-}
-
-/**
- * @brief
- * Evaluates various per-baseline terms (single precision).
- *
- * @details
- * This function evaluates various per-baseline terms.
- * These values are used for the baseline filter and to simulate bandwidth
- * smearing.
- *
- * @param[in] station_up     Station u-coordinate of station p, in metres.
- * @param[in] station_uq     Station u-coordinate of station q, in metres.
- * @param[in] station_vp     Station v-coordinate of station p, in metres.
- * @param[in] station_vq     Station v-coordinate of station q, in metres.
- * @param[in] station_wp     Station w-coordinate of station p, in metres.
- * @param[in] station_wq     Station w-coordinate of station q, in metres.
- * @param[in] inv_wavelength Inverse of the wavelength, in metres.
- * @param[in] frac_bandwidth Bandwidth divided by frequency.
- * @param[out] uv_len        The uv distance, in wavelengths.
- * @param[out] uu            Modified baseline u-coordinate.
- * @param[out] vv            Modified baseline v-coordinate.
- * @param[out] ww            Modified baseline w-coordinate.
- * @param[out] uu2           Baseline length of u, in wavelengths, squared.
- * @param[out] vv2           Baseline length of v, in wavelengths, squared.
- * @param[out] uuvv          2.0 * u * v, with u and v in wavelengths.
- */
-OSKAR_INLINE
-void oskar_evaluate_baseline_terms_inline_f(const float station_up,
-        const float station_uq, const float station_vp,
-        const float station_vq, const float station_wp,
-        const float station_wq, const float inv_wavelength,
-        const float frac_bandwidth, float* uv_len, float* uu, float* vv,
-        float* ww, float* uu2, float* vv2, float* uuvv)
-{
-    float f;
-
-    /* Baseline distance, in wavelengths. */
-    *uu   = (station_up - station_uq) * inv_wavelength;
-    *vv   = (station_vp - station_vq) * inv_wavelength;
-    *ww   = (station_wp - station_wq) * inv_wavelength;
-
-    /* Quantities needed for evaluating response to a Gaussian source. */
-    *uu2  = *uu * *uu;
-    *vv2  = *vv * *vv;
-    *uv_len = sqrtf(*uu2 + *vv2);
-    *uuvv = 2.0f * *uu * *vv;
-
-    /* Modify the baseline distance to include the common components
-     * of the bandwidth smearing term. */
-    f = M_PIf * frac_bandwidth;
-    *uu *= f;
-    *vv *= f;
-    *ww *= f;
-}
-
-/**
- * @brief
- * Evaluates various per-baseline terms (double precision).
- *
- * @details
- * This function evaluates various per-baseline terms.
- * These values are used for the baseline filter and to simulate bandwidth
- * smearing.
- *
- * @param[in] station_up     Station u-coordinate of station p, in metres.
- * @param[in] station_uq     Station u-coordinate of station q, in metres.
- * @param[in] station_vp     Station v-coordinate of station p, in metres.
- * @param[in] station_vq     Station v-coordinate of station q, in metres.
- * @param[in] station_wp     Station w-coordinate of station p, in metres.
- * @param[in] station_wq     Station w-coordinate of station q, in metres.
- * @param[in] inv_wavelength Inverse of the wavelength, in metres.
- * @param[in] frac_bandwidth Bandwidth divided by frequency.
- * @param[out] uv_len        The uv distance, in wavelengths.
- * @param[out] uu            Modified baseline u-coordinate.
- * @param[out] vv            Modified baseline v-coordinate.
- * @param[out] ww            Modified baseline w-coordinate.
- * @param[out] uu2           Baseline length of u, in wavelengths, squared.
- * @param[out] vv2           Baseline length of v, in wavelengths, squared.
- * @param[out] uuvv          2.0 * u * v, with u and v in wavelengths.
- */
-OSKAR_INLINE
-void oskar_evaluate_baseline_terms_inline_d(const double station_up,
-        const double station_uq, const double station_vp,
-        const double station_vq, const double station_wp,
-        const double station_wq, const double inv_wavelength,
-        const double frac_bandwidth, double* uv_len, double* uu, double* vv,
-        double* ww, double* uu2, double* vv2, double* uuvv)
-{
-    double f;
-
-    /* Baseline distance, in wavelengths. */
-    *uu   = (station_up - station_uq) * inv_wavelength;
-    *vv   = (station_vp - station_vq) * inv_wavelength;
-    *ww   = (station_wp - station_wq) * inv_wavelength;
-
-    /* Quantities needed for evaluating response to a Gaussian source. */
-    *uu2  = *uu * *uu;
-    *vv2  = *vv * *vv;
-    *uv_len = sqrt(*uu2 + *vv2);
-    *uuvv = 2.0 * *uu * *vv;
-
-    /* Modify the baseline distance to include the common components
-     * of the bandwidth smearing term. */
-    f = M_PI * frac_bandwidth;
-    *uu *= f;
-    *vv *= f;
-    *ww *= f;
-}
-
-/**
- * @brief
- * Evaluates the time-smearing term (single precision).
- *
- * @brief
- * This function evaluates the time-smearing term, given the baseline
- * coordinates deltas, and the source direction cosines.
- */
-OSKAR_INLINE
-float oskar_evaluate_time_smearing_f(const float du, const float dv,
-        const float dw, const float l, const float m, const float n)
-{
-    return oskar_sinc_f(du * l + dv * m + dw * (n - 1.0f));
-}
-
-/**
- * @brief
- * Evaluates the time-smearing term (double precision).
- *
- * @brief
- * This function evaluates the time-smearing term, given the baseline
- * coordinates deltas, and the source direction cosines.
- */
-OSKAR_INLINE
-double oskar_evaluate_time_smearing_d(const double du, const double dv,
-        const double dw, const double l, const double m, const double n)
-{
-    return oskar_sinc_d(du * l + dv * m + dw * (n - 1.0));
-}
-
-/**
- * @brief
  * Evaluates the baseline index for the station pair.
  *
  * @details
@@ -927,50 +384,6 @@ int oskar_evaluate_baseline_index_inline(const int num_stations,
         const int p, const int q)
 {
     return q * (num_stations - 1) - (q - 1) * q / 2 + p - q - 1;
-}
-
-/**
- * @brief
- * Clears a complex matrix (single precision).
- *
- * @details
- * This function clears a complex matrix by setting all its elements to zero.
- *
- * @param[in] m The matrix to clear.
- */
-OSKAR_INLINE
-void oskar_clear_complex_matrix_f(float4c* m)
-{
-    m->a.x = 0.0f;
-    m->a.y = 0.0f;
-    m->b.x = 0.0f;
-    m->b.y = 0.0f;
-    m->c.x = 0.0f;
-    m->c.y = 0.0f;
-    m->d.x = 0.0f;
-    m->d.y = 0.0f;
-}
-
-/**
- * @brief
- * Clears a complex matrix (double precision).
- *
- * @details
- * This function clears a complex matrix by setting all its elements to zero.
- *
- * @param[in] m The matrix to clear.
- */
-OSKAR_INLINE
-void oskar_clear_complex_matrix_d(double4c* m)
-{
-    m->a.x = 0.0;
-    m->a.y = 0.0;
-    m->b.x = 0.0;
-    m->b.y = 0.0;
-    m->c.x = 0.0;
-    m->c.y = 0.0;
-    m->d.x = 0.0;
-    m->d.y = 0.0;
 }
 
 #ifdef __cplusplus

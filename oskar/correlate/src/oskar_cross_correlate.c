@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,22 +27,10 @@
  */
 
 #include "correlate/oskar_cross_correlate.h"
-#include "correlate/oskar_cross_correlate_gaussian_cuda.h"
-#include "correlate/oskar_cross_correlate_gaussian_omp.h"
-#include "correlate/oskar_cross_correlate_gaussian_time_smearing_cuda.h"
-#include "correlate/oskar_cross_correlate_gaussian_time_smearing_omp.h"
-#include "correlate/oskar_cross_correlate_point_cuda.h"
-#include "correlate/oskar_cross_correlate_point_omp.h"
-#include "correlate/oskar_cross_correlate_point_time_smearing_cuda.h"
-#include "correlate/oskar_cross_correlate_point_time_smearing_omp.h"
-#include "correlate/oskar_cross_correlate_gaussian_scalar_cuda.h"
-#include "correlate/oskar_cross_correlate_gaussian_scalar_omp.h"
-#include "correlate/oskar_cross_correlate_gaussian_time_smearing_scalar_cuda.h"
-#include "correlate/oskar_cross_correlate_gaussian_time_smearing_scalar_omp.h"
-#include "correlate/oskar_cross_correlate_point_scalar_cuda.h"
-#include "correlate/oskar_cross_correlate_point_scalar_omp.h"
-#include "correlate/oskar_cross_correlate_point_time_smearing_scalar_cuda.h"
-#include "correlate/oskar_cross_correlate_point_time_smearing_scalar_omp.h"
+#include "correlate/oskar_cross_correlate_cuda.h"
+#include "correlate/oskar_cross_correlate_omp.h"
+#include "correlate/oskar_cross_correlate_scalar_cuda.h"
+#include "correlate/oskar_cross_correlate_scalar_omp.h"
 #include "utility/oskar_device_utils.h"
 
 #include <float.h>
@@ -52,15 +40,16 @@
 extern "C" {
 #endif
 
-void oskar_cross_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
-        const oskar_Sky* sky, const oskar_Telescope* tel, const oskar_Mem* u,
-        const oskar_Mem* v, const oskar_Mem* w, double gast,
-        double frequency_hz, int* status)
+void oskar_cross_correlate(oskar_Mem* vis, int n_sources,
+        const oskar_Jones* jones, const oskar_Sky* sky,
+        const oskar_Telescope* tel, const oskar_Mem* u, const oskar_Mem* v,
+        const oskar_Mem* w, double gast, double frequency_hz, int* status)
 {
     int jones_type, base_type, location, matrix_type, n_stations;
     int use_extended;
     double inv_wavelength, frac_bandwidth, time_avg, gha0, dec0;
     double uv_filter_max, uv_filter_min;
+    const oskar_Mem *J, *a, *b, *c, *l, *m, *n, *I, *Q, *U, *V, *x, *y;
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -93,7 +82,7 @@ void oskar_cross_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
     /* Check data locations. */
     location = oskar_sky_mem_location(sky);
     if (oskar_telescope_mem_location(tel) != location ||
-            oskar_jones_mem_location(J) != location ||
+            oskar_jones_mem_location(jones) != location ||
             oskar_mem_location(vis) != location ||
             oskar_mem_location(u) != location ||
             oskar_mem_location(v) != location ||
@@ -104,7 +93,7 @@ void oskar_cross_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
     }
 
     /* Check for consistent data types. */
-    jones_type = oskar_jones_type(J);
+    jones_type = oskar_jones_type(jones);
     base_type = oskar_sky_precision(sky);
     matrix_type = oskar_type_is_matrix(jones_type) &&
             oskar_mem_is_matrix(vis);
@@ -130,7 +119,7 @@ void oskar_cross_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
     }
 
     /* Check the input dimensions. */
-    if (oskar_jones_num_sources(J) < n_sources ||
+    if (oskar_jones_num_sources(jones) < n_sources ||
             (int)oskar_mem_length(u) != n_stations ||
             (int)oskar_mem_length(v) != n_stations ||
             (int)oskar_mem_length(w) != n_stations)
@@ -146,429 +135,391 @@ void oskar_cross_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
         return;
     }
 
+    /* Get handles to arrays. */
+    J = oskar_jones_mem_const(jones);
+    I = oskar_sky_I_const(sky);
+    Q = oskar_sky_Q_const(sky);
+    U = oskar_sky_U_const(sky);
+    V = oskar_sky_V_const(sky);
+    l = oskar_sky_l_const(sky);
+    m = oskar_sky_m_const(sky);
+    n = oskar_sky_n_const(sky);
+    a = oskar_sky_gaussian_a_const(sky);
+    b = oskar_sky_gaussian_b_const(sky);
+    c = oskar_sky_gaussian_c_const(sky);
+    x = oskar_telescope_station_true_x_offset_ecef_metres_const(tel);
+    y = oskar_telescope_station_true_y_offset_ecef_metres_const(tel);
+
     /* Select kernel. */
-    if (base_type == OSKAR_DOUBLE)
+    if (location == OSKAR_CPU)
     {
-        const double *I_, *Q_, *U_, *V_, *l_, *m_, *n_, *a_, *b_, *c_;
-        const double *u_, *v_, *w_, *x_, *y_;
-        I_ = oskar_mem_double_const(oskar_sky_I_const(sky), status);
-        Q_ = oskar_mem_double_const(oskar_sky_Q_const(sky), status);
-        U_ = oskar_mem_double_const(oskar_sky_U_const(sky), status);
-        V_ = oskar_mem_double_const(oskar_sky_V_const(sky), status);
-        l_ = oskar_mem_double_const(oskar_sky_l_const(sky), status);
-        m_ = oskar_mem_double_const(oskar_sky_m_const(sky), status);
-        n_ = oskar_mem_double_const(oskar_sky_n_const(sky), status);
-        a_ = oskar_mem_double_const(oskar_sky_gaussian_a_const(sky), status);
-        b_ = oskar_mem_double_const(oskar_sky_gaussian_b_const(sky), status);
-        c_ = oskar_mem_double_const(oskar_sky_gaussian_c_const(sky), status);
-        u_ = oskar_mem_double_const(u, status);
-        v_ = oskar_mem_double_const(v, status);
-        w_ = oskar_mem_double_const(w, status);
-        x_ = oskar_mem_double_const(
-                oskar_telescope_station_true_x_offset_ecef_metres_const(tel),
-                status);
-        y_ = oskar_mem_double_const(
-                oskar_telescope_station_true_y_offset_ecef_metres_const(tel),
-                status);
-
-        if (matrix_type)
+        if (use_extended)
         {
-            double4c *vis_;
-            const double4c *J_;
-            vis_ = oskar_mem_double4c(vis, status);
-            J_   = oskar_jones_double4c_const(J, status);
-
-            if (location == OSKAR_GPU)
+            switch (oskar_mem_type(vis))
             {
-#ifdef OSKAR_HAVE_CUDA
-                if (time_avg > 0.0)
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_time_smearing_cuda_d
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_time_smearing_cuda_d
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                }
-                else /* Non-time-smearing. */
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_cuda_d
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_cuda_d
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, w_, uv_filter_min, uv_filter_max,
-                                inv_wavelength, frac_bandwidth, vis_);
-                    }
-                }
-                oskar_device_check_error(status);
-#else
-                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-            }
-            else /* CPU */
-            {
-                if (time_avg > 0.0)
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_time_smearing_omp_d
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_time_smearing_omp_d
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                }
-                else /* Non-time-smearing. */
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_omp_d
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_omp_d
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, w_, uv_filter_min, uv_filter_max,
-                                inv_wavelength, frac_bandwidth, vis_);
-                    }
-                }
+            case OSKAR_SINGLE_COMPLEX_MATRIX:
+                oskar_cross_correlate_gaussian_omp_f(
+                        n_sources, n_stations,
+                        oskar_mem_float4c_const(J, status),
+                        oskar_mem_float_const(I, status),
+                        oskar_mem_float_const(Q, status),
+                        oskar_mem_float_const(U, status),
+                        oskar_mem_float_const(V, status),
+                        oskar_mem_float_const(l, status),
+                        oskar_mem_float_const(m, status),
+                        oskar_mem_float_const(n, status),
+                        oskar_mem_float_const(a, status),
+                        oskar_mem_float_const(b, status),
+                        oskar_mem_float_const(c, status),
+                        oskar_mem_float_const(u, status),
+                        oskar_mem_float_const(v, status),
+                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(x, status),
+                        oskar_mem_float_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_float4c(vis, status));
+                break;
+            case OSKAR_DOUBLE_COMPLEX_MATRIX:
+                oskar_cross_correlate_gaussian_omp_d(
+                        n_sources, n_stations,
+                        oskar_mem_double4c_const(J, status),
+                        oskar_mem_double_const(I, status),
+                        oskar_mem_double_const(Q, status),
+                        oskar_mem_double_const(U, status),
+                        oskar_mem_double_const(V, status),
+                        oskar_mem_double_const(l, status),
+                        oskar_mem_double_const(m, status),
+                        oskar_mem_double_const(n, status),
+                        oskar_mem_double_const(a, status),
+                        oskar_mem_double_const(b, status),
+                        oskar_mem_double_const(c, status),
+                        oskar_mem_double_const(u, status),
+                        oskar_mem_double_const(v, status),
+                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(x, status),
+                        oskar_mem_double_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_double4c(vis, status));
+                break;
+            case OSKAR_SINGLE_COMPLEX:
+                oskar_cross_correlate_scalar_gaussian_omp_f(
+                        n_sources, n_stations,
+                        oskar_mem_float2_const(J, status),
+                        oskar_mem_float_const(I, status),
+                        oskar_mem_float_const(l, status),
+                        oskar_mem_float_const(m, status),
+                        oskar_mem_float_const(n, status),
+                        oskar_mem_float_const(a, status),
+                        oskar_mem_float_const(b, status),
+                        oskar_mem_float_const(c, status),
+                        oskar_mem_float_const(u, status),
+                        oskar_mem_float_const(v, status),
+                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(x, status),
+                        oskar_mem_float_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_float2(vis, status));
+                break;
+            case OSKAR_DOUBLE_COMPLEX:
+                oskar_cross_correlate_scalar_gaussian_omp_d(
+                        n_sources, n_stations,
+                        oskar_mem_double2_const(J, status),
+                        oskar_mem_double_const(I, status),
+                        oskar_mem_double_const(l, status),
+                        oskar_mem_double_const(m, status),
+                        oskar_mem_double_const(n, status),
+                        oskar_mem_double_const(a, status),
+                        oskar_mem_double_const(b, status),
+                        oskar_mem_double_const(c, status),
+                        oskar_mem_double_const(u, status),
+                        oskar_mem_double_const(v, status),
+                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(x, status),
+                        oskar_mem_double_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_double2(vis, status));
+                break;
+            default:
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+                return;
             }
         }
-        else /* Scalar version. */
+        else
         {
-            double2 *vis_;
-            const double2 *J_;
-            vis_ = oskar_mem_double2(vis, status);
-            J_   = oskar_jones_double2_const(J, status);
-
-            if (location == OSKAR_GPU)
+            switch (oskar_mem_type(vis))
             {
-#ifdef OSKAR_HAVE_CUDA
-                if (time_avg > 0.0)
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_time_smearing_scalar_cuda_d
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_time_smearing_scalar_cuda_d
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                }
-                else /* Non-time-smearing. */
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_scalar_cuda_d
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_scalar_cuda_d
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                u_, v_, w_, uv_filter_min, uv_filter_max,
-                                inv_wavelength, frac_bandwidth, vis_);
-                    }
-                }
-                oskar_device_check_error(status);
-#else
-                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-            }
-            else /* CPU */
-            {
-                if (time_avg > 0.0)
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_time_smearing_scalar_omp_d
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_time_smearing_scalar_omp_d
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                }
-                else /* Non-time-smearing. */
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_scalar_omp_d
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_scalar_omp_d
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                u_, v_, w_, uv_filter_min, uv_filter_max,
-                                inv_wavelength, frac_bandwidth, vis_);
-                    }
-                }
+            case OSKAR_SINGLE_COMPLEX_MATRIX:
+                oskar_cross_correlate_point_omp_f(
+                        n_sources, n_stations,
+                        oskar_mem_float4c_const(J, status),
+                        oskar_mem_float_const(I, status),
+                        oskar_mem_float_const(Q, status),
+                        oskar_mem_float_const(U, status),
+                        oskar_mem_float_const(V, status),
+                        oskar_mem_float_const(l, status),
+                        oskar_mem_float_const(m, status),
+                        oskar_mem_float_const(n, status),
+                        oskar_mem_float_const(u, status),
+                        oskar_mem_float_const(v, status),
+                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(x, status),
+                        oskar_mem_float_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_float4c(vis, status));
+                break;
+            case OSKAR_DOUBLE_COMPLEX_MATRIX:
+                oskar_cross_correlate_point_omp_d(
+                        n_sources, n_stations,
+                        oskar_mem_double4c_const(J, status),
+                        oskar_mem_double_const(I, status),
+                        oskar_mem_double_const(Q, status),
+                        oskar_mem_double_const(U, status),
+                        oskar_mem_double_const(V, status),
+                        oskar_mem_double_const(l, status),
+                        oskar_mem_double_const(m, status),
+                        oskar_mem_double_const(n, status),
+                        oskar_mem_double_const(u, status),
+                        oskar_mem_double_const(v, status),
+                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(x, status),
+                        oskar_mem_double_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_double4c(vis, status));
+                break;
+            case OSKAR_SINGLE_COMPLEX:
+                oskar_cross_correlate_scalar_point_omp_f(
+                        n_sources, n_stations,
+                        oskar_mem_float2_const(J, status),
+                        oskar_mem_float_const(I, status),
+                        oskar_mem_float_const(l, status),
+                        oskar_mem_float_const(m, status),
+                        oskar_mem_float_const(n, status),
+                        oskar_mem_float_const(u, status),
+                        oskar_mem_float_const(v, status),
+                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(x, status),
+                        oskar_mem_float_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_float2(vis, status));
+                break;
+            case OSKAR_DOUBLE_COMPLEX:
+                oskar_cross_correlate_scalar_point_omp_d(
+                        n_sources, n_stations,
+                        oskar_mem_double2_const(J, status),
+                        oskar_mem_double_const(I, status),
+                        oskar_mem_double_const(l, status),
+                        oskar_mem_double_const(m, status),
+                        oskar_mem_double_const(n, status),
+                        oskar_mem_double_const(u, status),
+                        oskar_mem_double_const(v, status),
+                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(x, status),
+                        oskar_mem_double_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_double2(vis, status));
+                break;
+            default:
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+                return;
             }
         }
     }
-    else /* Single precision. */
+    else if (location == OSKAR_GPU)
     {
-        const float *I_, *Q_, *U_, *V_, *l_, *m_, *n_, *a_, *b_, *c_;
-        const float *u_, *v_, *w_, *x_, *y_;
-        I_ = oskar_mem_float_const(oskar_sky_I_const(sky), status);
-        Q_ = oskar_mem_float_const(oskar_sky_Q_const(sky), status);
-        U_ = oskar_mem_float_const(oskar_sky_U_const(sky), status);
-        V_ = oskar_mem_float_const(oskar_sky_V_const(sky), status);
-        l_ = oskar_mem_float_const(oskar_sky_l_const(sky), status);
-        m_ = oskar_mem_float_const(oskar_sky_m_const(sky), status);
-        n_ = oskar_mem_float_const(oskar_sky_n_const(sky), status);
-        a_ = oskar_mem_float_const(oskar_sky_gaussian_a_const(sky), status);
-        b_ = oskar_mem_float_const(oskar_sky_gaussian_b_const(sky), status);
-        c_ = oskar_mem_float_const(oskar_sky_gaussian_c_const(sky), status);
-        u_ = oskar_mem_float_const(u, status);
-        v_ = oskar_mem_float_const(v, status);
-        w_ = oskar_mem_float_const(w, status);
-        x_ = oskar_mem_float_const(
-                oskar_telescope_station_true_x_offset_ecef_metres_const(tel),
-                status);
-        y_ = oskar_mem_float_const(
-                oskar_telescope_station_true_y_offset_ecef_metres_const(tel),
-                status);
-
-        if (matrix_type)
-        {
-            float4c *vis_;
-            const float4c *J_;
-            vis_ = oskar_mem_float4c(vis, status);
-            J_   = oskar_jones_float4c_const(J, status);
-
-            if (location == OSKAR_GPU)
-            {
 #ifdef OSKAR_HAVE_CUDA
-                if (time_avg > 0.0)
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_time_smearing_cuda_f
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength,
-                                frac_bandwidth, time_avg, gha0, dec0, vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_time_smearing_cuda_f
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                }
-                else /* Non-time-smearing. */
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_cuda_f
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_cuda_f
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, w_, uv_filter_min, uv_filter_max,
-                                inv_wavelength, frac_bandwidth, vis_);
-                    }
-                }
-                oskar_device_check_error(status);
-#else
-                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-            }
-            else /* CPU */
+        if (use_extended)
+        {
+            switch (oskar_mem_type(vis))
             {
-                if (time_avg > 0.0)
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_time_smearing_omp_f
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_time_smearing_omp_f
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                }
-                else /* Non-time-smearing. */
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_omp_f
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_omp_f
-                        (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, w_, uv_filter_min, uv_filter_max,
-                                inv_wavelength, frac_bandwidth, vis_);
-                    }
-                }
+            case OSKAR_SINGLE_COMPLEX_MATRIX:
+                oskar_cross_correlate_gaussian_cuda_f(
+                        n_sources, n_stations,
+                        oskar_mem_float4c_const(J, status),
+                        oskar_mem_float_const(I, status),
+                        oskar_mem_float_const(Q, status),
+                        oskar_mem_float_const(U, status),
+                        oskar_mem_float_const(V, status),
+                        oskar_mem_float_const(l, status),
+                        oskar_mem_float_const(m, status),
+                        oskar_mem_float_const(n, status),
+                        oskar_mem_float_const(a, status),
+                        oskar_mem_float_const(b, status),
+                        oskar_mem_float_const(c, status),
+                        oskar_mem_float_const(u, status),
+                        oskar_mem_float_const(v, status),
+                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(x, status),
+                        oskar_mem_float_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_float4c(vis, status));
+                break;
+            case OSKAR_DOUBLE_COMPLEX_MATRIX:
+                oskar_cross_correlate_gaussian_cuda_d(
+                        n_sources, n_stations,
+                        oskar_mem_double4c_const(J, status),
+                        oskar_mem_double_const(I, status),
+                        oskar_mem_double_const(Q, status),
+                        oskar_mem_double_const(U, status),
+                        oskar_mem_double_const(V, status),
+                        oskar_mem_double_const(l, status),
+                        oskar_mem_double_const(m, status),
+                        oskar_mem_double_const(n, status),
+                        oskar_mem_double_const(a, status),
+                        oskar_mem_double_const(b, status),
+                        oskar_mem_double_const(c, status),
+                        oskar_mem_double_const(u, status),
+                        oskar_mem_double_const(v, status),
+                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(x, status),
+                        oskar_mem_double_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_double4c(vis, status));
+                break;
+            case OSKAR_SINGLE_COMPLEX:
+                oskar_cross_correlate_scalar_gaussian_cuda_f(
+                        n_sources, n_stations,
+                        oskar_mem_float2_const(J, status),
+                        oskar_mem_float_const(I, status),
+                        oskar_mem_float_const(l, status),
+                        oskar_mem_float_const(m, status),
+                        oskar_mem_float_const(n, status),
+                        oskar_mem_float_const(a, status),
+                        oskar_mem_float_const(b, status),
+                        oskar_mem_float_const(c, status),
+                        oskar_mem_float_const(u, status),
+                        oskar_mem_float_const(v, status),
+                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(x, status),
+                        oskar_mem_float_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_float2(vis, status));
+                break;
+            case OSKAR_DOUBLE_COMPLEX:
+                oskar_cross_correlate_scalar_gaussian_cuda_d(
+                        n_sources, n_stations,
+                        oskar_mem_double2_const(J, status),
+                        oskar_mem_double_const(I, status),
+                        oskar_mem_double_const(l, status),
+                        oskar_mem_double_const(m, status),
+                        oskar_mem_double_const(n, status),
+                        oskar_mem_double_const(a, status),
+                        oskar_mem_double_const(b, status),
+                        oskar_mem_double_const(c, status),
+                        oskar_mem_double_const(u, status),
+                        oskar_mem_double_const(v, status),
+                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(x, status),
+                        oskar_mem_double_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_double2(vis, status));
+                break;
+            default:
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+                return;
             }
         }
-        else /* Scalar version. */
+        else
         {
-            float2 *vis_;
-            const float2 *J_;
-            vis_ = oskar_mem_float2(vis, status);
-            J_   = oskar_jones_float2_const(J, status);
-
-            if (location == OSKAR_GPU)
+            switch (oskar_mem_type(vis))
             {
-#ifdef OSKAR_HAVE_CUDA
-                if (time_avg > 0.0)
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_time_smearing_scalar_cuda_f
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_time_smearing_scalar_cuda_f
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                }
-                else /* Non-time-smearing. */
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_scalar_cuda_f
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, uv_filter_min,
-                                uv_filter_max, inv_wavelength,
-                                frac_bandwidth, vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_scalar_cuda_f
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                u_, v_, w_, uv_filter_min, uv_filter_max,
-                                inv_wavelength, frac_bandwidth, vis_);
-                    }
-                }
-                oskar_device_check_error(status);
-#else
-                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-            }
-            else /* CPU */
-            {
-                if (time_avg > 0.0)
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_time_smearing_scalar_omp_f
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength,
-                                frac_bandwidth, time_avg, gha0, dec0, vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_time_smearing_scalar_omp_f
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                u_, v_, w_, x_, y_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                time_avg, gha0, dec0, vis_);
-                    }
-                }
-                else /* Non-time-smearing. */
-                {
-                    if (use_extended)
-                    {
-                        oskar_cross_correlate_gaussian_scalar_omp_f
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, w_, uv_filter_min,
-                                uv_filter_max, inv_wavelength, frac_bandwidth,
-                                vis_);
-                    }
-                    else
-                    {
-                        oskar_cross_correlate_point_scalar_omp_f
-                        (n_sources, n_stations, J_, I_, l_, m_, n_,
-                                u_, v_, w_, uv_filter_min, uv_filter_max,
-                                inv_wavelength, frac_bandwidth, vis_);
-                    }
-                }
+            case OSKAR_SINGLE_COMPLEX_MATRIX:
+                oskar_cross_correlate_point_cuda_f(
+                        n_sources, n_stations,
+                        oskar_mem_float4c_const(J, status),
+                        oskar_mem_float_const(I, status),
+                        oskar_mem_float_const(Q, status),
+                        oskar_mem_float_const(U, status),
+                        oskar_mem_float_const(V, status),
+                        oskar_mem_float_const(l, status),
+                        oskar_mem_float_const(m, status),
+                        oskar_mem_float_const(n, status),
+                        oskar_mem_float_const(u, status),
+                        oskar_mem_float_const(v, status),
+                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(x, status),
+                        oskar_mem_float_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_float4c(vis, status));
+                break;
+            case OSKAR_DOUBLE_COMPLEX_MATRIX:
+                oskar_cross_correlate_point_cuda_d(
+                        n_sources, n_stations,
+                        oskar_mem_double4c_const(J, status),
+                        oskar_mem_double_const(I, status),
+                        oskar_mem_double_const(Q, status),
+                        oskar_mem_double_const(U, status),
+                        oskar_mem_double_const(V, status),
+                        oskar_mem_double_const(l, status),
+                        oskar_mem_double_const(m, status),
+                        oskar_mem_double_const(n, status),
+                        oskar_mem_double_const(u, status),
+                        oskar_mem_double_const(v, status),
+                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(x, status),
+                        oskar_mem_double_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_double4c(vis, status));
+                break;
+            case OSKAR_SINGLE_COMPLEX:
+                oskar_cross_correlate_scalar_point_cuda_f(
+                        n_sources, n_stations,
+                        oskar_mem_float2_const(J, status),
+                        oskar_mem_float_const(I, status),
+                        oskar_mem_float_const(l, status),
+                        oskar_mem_float_const(m, status),
+                        oskar_mem_float_const(n, status),
+                        oskar_mem_float_const(u, status),
+                        oskar_mem_float_const(v, status),
+                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(x, status),
+                        oskar_mem_float_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_float2(vis, status));
+                break;
+            case OSKAR_DOUBLE_COMPLEX:
+                oskar_cross_correlate_scalar_point_cuda_d(
+                        n_sources, n_stations,
+                        oskar_mem_double2_const(J, status),
+                        oskar_mem_double_const(I, status),
+                        oskar_mem_double_const(l, status),
+                        oskar_mem_double_const(m, status),
+                        oskar_mem_double_const(n, status),
+                        oskar_mem_double_const(u, status),
+                        oskar_mem_double_const(v, status),
+                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(x, status),
+                        oskar_mem_double_const(y, status),
+                        uv_filter_min, uv_filter_max, inv_wavelength,
+                        frac_bandwidth, time_avg, gha0, dec0,
+                        oskar_mem_double2(vis, status));
+                break;
+            default:
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+                return;
             }
         }
+        oskar_device_check_error(status);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
+    else
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

@@ -4,6 +4,8 @@
 
     * Fixed display of timing information when using GPU devices.
 
+    * Added optimised versions of cross-correlation kernels.
+
     * Refuse to load FITS images with an unknown pixel size.
 
 2017-10-31  OSKAR-2.7.0

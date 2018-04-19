@@ -44,7 +44,7 @@ void oskar_auto_correlate_cudak_f(const int num_sources,
         const float* restrict source_U, const float* restrict source_V,
         float4c* restrict vis)
 {
-    float4c sum;
+    float4c sum; /* Partial sum per thread. */
     int i;
 
     /* Get station index. */
@@ -54,7 +54,7 @@ void oskar_auto_correlate_cudak_f(const int num_sources,
     const float4c* restrict jones_station = &jones[num_sources * s];
 
     /* Each thread loops over a subset of the sources. */
-    oskar_clear_complex_matrix_f(&sum); /* Partial sum per thread. */
+    OSKAR_CLEAR_COMPLEX_MATRIX(float, sum)
     for (i = threadIdx.x; i < num_sources; i += blockDim.x)
         oskar_accumulate_station_visibility_for_source_inline_f(&sum, i,
                 source_I, source_Q, source_U, source_V, jones_station);
@@ -86,7 +86,7 @@ void oskar_auto_correlate_cudak_d(const int num_sources,
         const double* restrict source_U, const double* restrict source_V,
         double4c* restrict vis)
 {
-    double4c sum;
+    double4c sum; /* Partial sum per thread. */
     int i;
 
     /* Get station index. */
@@ -96,7 +96,7 @@ void oskar_auto_correlate_cudak_d(const int num_sources,
     const double4c* restrict jones_station = &jones[num_sources * s];
 
     /* Each thread loops over a subset of the sources. */
-    oskar_clear_complex_matrix_d(&sum); /* Partial sum per thread. */
+    OSKAR_CLEAR_COMPLEX_MATRIX(double, sum)
     for (i = threadIdx.x; i < num_sources; i += blockDim.x)
         oskar_accumulate_station_visibility_for_source_inline_d(&sum, i,
                 source_I, source_Q, source_U, source_V, jones_station);

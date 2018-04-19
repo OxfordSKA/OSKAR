@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,94 @@
 
 #include <oskar_global.h>
 #include <utility/oskar_vector_types.h>
+
+/**
+ * @brief
+ * Performs Kahan summation.
+ *
+ * @details
+ * Performs Kahan summation to avoid loss of precision.
+ *
+ * @param[in]     REAL    Either 'float' or 'double'.
+ * @param[in,out] SUM     Updated sum.
+ * @param[in]     VAL     Value to add to sum.
+ * @param[in,out] GUARD   Guard value (initially 0; preserve between calls).
+ */
+#define OSKAR_KAHAN_SUM(REAL, SUM, VAL, GUARD) {                          \
+        const REAL y__ = VAL - GUARD;                                     \
+        const REAL t__ = SUM + y__;                                       \
+        GUARD = (t__ - SUM) - y__;                                        \
+        SUM = t__; }
+
+/**
+ * @brief
+ * Performs Kahan summation of a complex number.
+ *
+ * @details
+ * Performs Kahan summation to avoid loss of precision.
+ *
+ * @param[in]     REAL    Either 'float' or 'double'.
+ * @param[in,out] SUM     Updated sum.
+ * @param[in]     VAL     Value to add to sum.
+ * @param[in,out] GUARD   Guard value (initially 0; preserve between calls).
+ */
+#define OSKAR_KAHAN_SUM_COMPLEX(REAL, SUM, VAL, GUARD) {                  \
+        OSKAR_KAHAN_SUM(REAL, SUM.x, VAL.x, GUARD.x);                     \
+        OSKAR_KAHAN_SUM(REAL, SUM.y, VAL.y, GUARD.y); }
+
+/**
+ * @brief
+ * Performs Kahan multiply-add of a complex number.
+ *
+ * @details
+ * Performs Kahan summation to avoid loss of precision.
+ *
+ * @param[in]     REAL    Either 'float' or 'double'.
+ * @param[in,out] SUM     Updated sum.
+ * @param[in]     VAL     Value to add to sum.
+ * @param[in]     F       Factor by which to multiply input value before summation.
+ * @param[in,out] GUARD   Guard value (initially 0; preserve between calls).
+ */
+#define OSKAR_KAHAN_SUM_MULTIPLY_COMPLEX(REAL, SUM, VAL, F, GUARD) {      \
+        OSKAR_KAHAN_SUM(REAL, SUM.x, (VAL.x * F), GUARD.x);               \
+        OSKAR_KAHAN_SUM(REAL, SUM.y, (VAL.y * F), GUARD.y); }
+
+/**
+ * @brief
+ * Performs Kahan multiply-add of a complex matrix.
+ *
+ * @details
+ * Performs Kahan summation to avoid loss of precision.
+ *
+ * @param[in]     REAL    Either 'float' or 'double'.
+ * @param[in,out] SUM     Updated sum.
+ * @param[in]     VAL     Value to add to sum.
+ * @param[in,out] GUARD   Guard value (initially 0; preserve between calls).
+ */
+#define OSKAR_KAHAN_SUM_COMPLEX_MATRIX(REAL, SUM, VAL, GUARD) {           \
+        OSKAR_KAHAN_SUM_COMPLEX(REAL, SUM.a, VAL.a, GUARD.a);             \
+        OSKAR_KAHAN_SUM_COMPLEX(REAL, SUM.b, VAL.b, GUARD.b);             \
+        OSKAR_KAHAN_SUM_COMPLEX(REAL, SUM.c, VAL.c, GUARD.c);             \
+        OSKAR_KAHAN_SUM_COMPLEX(REAL, SUM.d, VAL.d, GUARD.d); }
+
+/**
+ * @brief
+ * Performs Kahan multiply-add of a complex matrix.
+ *
+ * @details
+ * Performs Kahan summation to avoid loss of precision.
+ *
+ * @param[in]     REAL    Either 'float' or 'double'.
+ * @param[in,out] SUM     Updated sum.
+ * @param[in]     VAL     Value to add to sum.
+ * @param[in]     F       Factor by which to multiply input value before summation.
+ * @param[in,out] GUARD   Guard value (initially 0; preserve between calls).
+ */
+#define OSKAR_KAHAN_SUM_MULTIPLY_COMPLEX_MATRIX(REAL, SUM, VAL, F, GUARD) {\
+        OSKAR_KAHAN_SUM_MULTIPLY_COMPLEX(REAL, SUM.a, VAL.a, F, GUARD.a); \
+        OSKAR_KAHAN_SUM_MULTIPLY_COMPLEX(REAL, SUM.b, VAL.b, F, GUARD.b); \
+        OSKAR_KAHAN_SUM_MULTIPLY_COMPLEX(REAL, SUM.c, VAL.c, F, GUARD.c); \
+        OSKAR_KAHAN_SUM_MULTIPLY_COMPLEX(REAL, SUM.d, VAL.d, F, GUARD.d); }
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,26 +169,6 @@ void oskar_kahan_sum_complex_f(float2* sum, const float2 val, float2* c)
 
 /**
  * @brief
- * Performs Kahan multiply-add of a complex scalar (single precision).
- *
- * @details
- * Performs Kahan summation to avoid loss of precision.
- *
- * @param[in,out] sum Updated sum.
- * @param[in]     val Value to add to sum.
- * @param[in]     f   Factor by which to multiply input value before summation.
- * @param[in,out] c   Guard value (initially 0.0; must preserve between calls).
- */
-OSKAR_INLINE
-void oskar_kahan_sum_multiply_complex_f(float2* sum, const float2 val,
-        const float f, float2* c)
-{
-    oskar_kahan_sum_f(&sum->x, val.x * f, &c->x);
-    oskar_kahan_sum_f(&sum->y, val.y * f, &c->y);
-}
-
-/**
- * @brief
  * Performs Kahan summation of a complex matrix (single precision).
  *
  * @details
@@ -118,130 +186,6 @@ void oskar_kahan_sum_complex_matrix_f(float4c* sum, const float4c val,
     oskar_kahan_sum_complex_f(&sum->b, val.b, &c->b);
     oskar_kahan_sum_complex_f(&sum->c, val.c, &c->c);
     oskar_kahan_sum_complex_f(&sum->d, val.d, &c->d);
-}
-
-/**
- * @brief
- * Performs Kahan multiply-add of a complex matrix (single precision).
- *
- * @details
- * Performs Kahan summation to avoid loss of precision.
- *
- * @param[in,out] sum Updated sum.
- * @param[in]     val Value to add to sum.
- * @param[in]     f   Factor by which to multiply input value before summation.
- * @param[in,out] c   Guard value (initially 0.0; must preserve between calls).
- */
-OSKAR_INLINE
-void oskar_kahan_sum_multiply_complex_matrix_f(float4c* sum,
-        const float4c val, const float f, float4c* c)
-{
-    oskar_kahan_sum_multiply_complex_f(&sum->a, val.a, f, &c->a);
-    oskar_kahan_sum_multiply_complex_f(&sum->b, val.b, f, &c->b);
-    oskar_kahan_sum_multiply_complex_f(&sum->c, val.c, f, &c->c);
-    oskar_kahan_sum_multiply_complex_f(&sum->d, val.d, f, &c->d);
-}
-
-/**
- * @brief
- * Performs Kahan summation (double precision).
- *
- * @details
- * Performs Kahan summation to avoid loss of precision.
- *
- * @param[in,out] sum Updated sum.
- * @param[in]     val Value to add to sum.
- * @param[in,out] c   Guard value (initially 0.0; must preserve between calls).
- */
-OSKAR_INLINE
-void oskar_kahan_sum_d(double* sum, const double val, double* c)
-{
-    double y, t;
-    y = val - *c;
-    t = *sum + y;
-    *c = (t - *sum) - y;
-    *sum = t;
-}
-
-/**
- * @brief
- * Performs Kahan summation of a complex scalar (double precision).
- *
- * @details
- * Performs Kahan summation to avoid loss of precision.
- *
- * @param[in,out] sum Updated sum.
- * @param[in]     val Value to add to sum.
- * @param[in,out] c   Guard value (initially 0.0; must preserve between calls).
- */
-OSKAR_INLINE
-void oskar_kahan_sum_complex_d(double2* sum, const double2 val, double2* c)
-{
-    oskar_kahan_sum_d(&sum->x, val.x, &c->x);
-    oskar_kahan_sum_d(&sum->y, val.y, &c->y);
-}
-
-/**
- * @brief
- * Performs Kahan multiply-add of a complex scalar (double precision).
- *
- * @details
- * Performs Kahan summation to avoid loss of precision.
- *
- * @param[in,out] sum Updated sum.
- * @param[in]     val Value to add to sum.
- * @param[in]     f   Factor by which to multiply input value before summation.
- * @param[in,out] c   Guard value (initially 0.0; must preserve between calls).
- */
-OSKAR_INLINE
-void oskar_kahan_sum_multiply_complex_d(double2* sum, const double2 val,
-        const double f, double2* c)
-{
-    oskar_kahan_sum_d(&sum->x, val.x * f, &c->x);
-    oskar_kahan_sum_d(&sum->y, val.y * f, &c->y);
-}
-
-/**
- * @brief
- * Performs Kahan summation of a complex matrix (double precision).
- *
- * @details
- * Performs Kahan summation to avoid loss of precision.
- *
- * @param[in,out] sum Updated sum.
- * @param[in]     val Value to add to sum.
- * @param[in,out] c   Guard value (initially 0.0; must preserve between calls).
- */
-OSKAR_INLINE
-void oskar_kahan_sum_complex_matrix_d(double4c* sum, const double4c val,
-        double4c* c)
-{
-    oskar_kahan_sum_complex_d(&sum->a, val.a, &c->a);
-    oskar_kahan_sum_complex_d(&sum->b, val.b, &c->b);
-    oskar_kahan_sum_complex_d(&sum->c, val.c, &c->c);
-    oskar_kahan_sum_complex_d(&sum->d, val.d, &c->d);
-}
-
-/**
- * @brief
- * Performs Kahan multiply-add of a complex matrix (double precision).
- *
- * @details
- * Performs Kahan summation to avoid loss of precision.
- *
- * @param[in,out] sum Updated sum.
- * @param[in]     val Value to add to sum.
- * @param[in]     f   Factor by which to multiply input value before summation.
- * @param[in,out] c   Guard value (initially 0.0; must preserve between calls).
- */
-OSKAR_INLINE
-void oskar_kahan_sum_multiply_complex_matrix_d(double4c* sum,
-        const double4c val, const double f, double4c* c)
-{
-    oskar_kahan_sum_multiply_complex_d(&sum->a, val.a, f, &c->a);
-    oskar_kahan_sum_multiply_complex_d(&sum->b, val.b, f, &c->b);
-    oskar_kahan_sum_multiply_complex_d(&sum->c, val.c, f, &c->c);
-    oskar_kahan_sum_multiply_complex_d(&sum->d, val.d, f, &c->d);
 }
 
 #ifdef __cplusplus
