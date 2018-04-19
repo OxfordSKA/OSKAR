@@ -45,8 +45,7 @@ void oskar_cross_correlate(oskar_Mem* vis, int n_sources,
         const oskar_Telescope* tel, const oskar_Mem* u, const oskar_Mem* v,
         const oskar_Mem* w, double gast, double frequency_hz, int* status)
 {
-    int jones_type, base_type, location, matrix_type, n_stations;
-    int use_extended;
+    int jones_type, base_type, location, n_stations, use_extended;
     double inv_wavelength, frac_bandwidth, time_avg, gha0, dec0;
     double uv_filter_max, uv_filter_min;
     const oskar_Mem *J, *a, *b, *c, *l, *m, *n, *I, *Q, *U, *V, *x, *y;
@@ -95,8 +94,6 @@ void oskar_cross_correlate(oskar_Mem* vis, int n_sources,
     /* Check for consistent data types. */
     jones_type = oskar_jones_type(jones);
     base_type = oskar_sky_precision(sky);
-    matrix_type = oskar_type_is_matrix(jones_type) &&
-            oskar_mem_is_matrix(vis);
     if (oskar_mem_precision(vis) != base_type ||
             oskar_type_precision(jones_type) != base_type ||
             oskar_mem_type(u) != base_type || oskar_mem_type(v) != base_type ||
