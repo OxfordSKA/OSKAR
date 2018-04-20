@@ -217,7 +217,7 @@ int benchmark(int num_stations, int num_sources, int type,
 
     oskar_Timer* timer;
     timer = oskar_timer_create(loc == OSKAR_GPU ?
-            OSKAR_TIMER_CUDA : OSKAR_TIMER_OMP);
+            OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
 
     // Set up a test sky model, telescope model and Jones matrices.
     oskar_Telescope* tel = oskar_telescope_create(type, loc,

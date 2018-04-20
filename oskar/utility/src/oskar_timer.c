@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,6 @@
 #include <unistd.h>
 #else
 #include <windows.h>
-#endif
-
-#ifdef _OPENMP
-#include <omp.h>
 #endif
 
 #ifdef OSKAR_HAVE_CUDA
@@ -173,13 +169,9 @@ double oskar_timer_elapsed(oskar_Timer* timer)
         return timer->elapsed;
     }
 #endif
-    oskar_mutex_lock(timer->mutex);
-#ifdef _OPENMP
-    /* OpenMP timer. */
-    if (timer->type == OSKAR_TIMER_OMP)
-        now = omp_get_wtime();
-#endif
+
     /* Native timer. */
+    oskar_mutex_lock(timer->mutex);
     if (timer->type == OSKAR_TIMER_NATIVE)
         now = oskar_get_wtime(timer);
 
@@ -216,14 +208,7 @@ void oskar_timer_restart(oskar_Timer* timer)
         return;
     }
 #endif
-#ifdef _OPENMP
-    /* OpenMP timer. */
-    if (timer->type == OSKAR_TIMER_OMP)
-    {
-        timer->start = omp_get_wtime();
-        return;
-    }
-#endif
+
     /* Native timer. */
     timer->start = oskar_get_wtime(timer);
 }

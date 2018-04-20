@@ -39,7 +39,6 @@ TEST(Timer, test_consistency)
     oskar_Timer *t_cuda, *t_omp, *t_native;
     t_native = oskar_timer_create(OSKAR_TIMER_NATIVE);
     t_cuda = oskar_timer_create(OSKAR_TIMER_CUDA);
-    t_omp = oskar_timer_create(OSKAR_TIMER_OMP);
 
     // Time a sleep(1).
     oskar_timer_resume(t_native);
@@ -105,7 +104,6 @@ TEST(Timer, test_performance)
     time_timer(OSKAR_TIMER_CUDA,   "  CUDA");
 #endif
 #ifdef _OPENMP
-    time_timer(OSKAR_TIMER_OMP,    "OpenMP");
 #endif
     time_timer(OSKAR_TIMER_NATIVE, "Native");
 }

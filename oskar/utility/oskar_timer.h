@@ -48,8 +48,7 @@ typedef struct oskar_Timer oskar_Timer;
 enum OSKAR_TIMER_TYPE
 {
     OSKAR_TIMER_NATIVE,
-    OSKAR_TIMER_CUDA,
-    OSKAR_TIMER_OMP
+    OSKAR_TIMER_CUDA
 };
 
 /**
@@ -61,7 +60,6 @@ enum OSKAR_TIMER_TYPE
  * The \p type parameter may take the values:
  *
  * - OSKAR_TIMER_CUDA
- * - OSKAR_TIMER_OMP
  * - OSKAR_TIMER_NATIVE
  *
  * These timers are the ones provided by, respectively, CUDA, OpenMP or the
