@@ -8,13 +8,19 @@ macOS and Windows platforms are available to download from:
     http://oskar.oerc.ox.ac.uk/
 
 
-# 2. Dependencies
+# 2. Building OSKAR
+
+This section describes the steps needed to build and install OSKAR
+from source.
+
+## 2.1. Dependencies
 
 If GPU acceleration is required, an NVIDIA GPU with CUDA 5.5 or later
 (and associated NVIDIA CUDA driver) must be installed.
 If the graphical user interface (GUI) is required, Qt must also be installed.
 Additionally, the casacore libraries must be present if Measurement Sets
-are to be exported.
+are to be exported. Note that these dependencies are required only if
+building from source, not if using a pre-built package.
 
 The dependencies are:
 
@@ -23,10 +29,10 @@ The dependencies are:
 * [Optional] Qt 5 (https://www.qt.io)
 * [Optional] casacore (https://github.com/casacore/casacore), version >= 1.5.0
 
+## 2.2. Build Commands
 
-# 3. Building OSKAR
-
-To build OSKAR, open a terminal and type the following:
+To build OSKAR, ensure the required dependencies are installed,
+open a terminal and give the following commands:
 
     $ mkdir build
     $ cd build
@@ -38,7 +44,7 @@ OSKAR can then be installed with:
     $ make install
 
 
-## 3.1. Build Options
+## 2.3. Build Options
 
 When running the 'cmake' command a number of build options can be specified.
 These are listed below.
@@ -95,15 +101,15 @@ Advanced Build Options:
         If ON enables the display of diagnostic build information when
         running CMake.
 
-## 3.2. Custom (Non-System) Qt Installations
+## 2.4. Custom (Non-System) Qt Installations
 
 If Qt 5 cannot be found from the default system paths, make sure to set
 CMAKE_PREFIX_PATH as described above.
 
 
-# 4. Testing the Installation
+# 3. Testing the Installation
 
-## 4.1 Unit Tests
+## 3.1 Unit Tests
 
 The unit test binaries can be run by typing the following command from the
 build directory:
@@ -117,7 +123,7 @@ OSKAR, to the following email address:
 
     oskar@oerc.ox.ac.uk
 
-## 4.2 Running the Example Simulation
+## 3.2 Running the Example Simulation
 
 With any fresh install of OSKAR, we recommend running the
 example simulation described in the documentation found at
