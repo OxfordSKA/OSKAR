@@ -1119,13 +1119,16 @@ int correlate_version()
     if (ver_ == 0)
     {
         const char* v = getenv("OSKAR_CORRELATE");
-        if (!strcmp(v, "OLD") || !strcmp(v, "old"))
-            ver_ = VER_OLD;
-        else if (!strcmp(v, "SM") || !strcmp(v, "sm"))
-            ver_ = VER_SM;
-        else if (strstr(v, "NO") || strstr(v, "no"))
-            ver_ = VER_NON_SM;
-        else
+        if (v)
+        {
+            if (!strcmp(v, "OLD") || !strcmp(v, "old"))
+                ver_ = VER_OLD;
+            else if (!strcmp(v, "SM") || !strcmp(v, "sm"))
+                ver_ = VER_SM;
+            else if (strstr(v, "NO") || strstr(v, "no"))
+                ver_ = VER_NON_SM;
+        }
+        if (ver_ == 0)
         {
             const int compute = oskar_device_compute_capability();
             if (compute >= 70)

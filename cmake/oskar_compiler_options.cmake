@@ -144,7 +144,7 @@ if (CUDA_FOUND)
     # General NVCC compiler options.
     set(CUDA_NVCC_FLAGS_RELEASE "-O3")
     set(CUDA_NVCC_FLAGS_DEBUG "-O0 -g --generate-line-info")
-    set(CUDA_NVCC_FLAGS_RELWIDTHDEBINFO "-03 -g --generate-line-info")
+    set(CUDA_NVCC_FLAGS_RELWITHDEBINFO "-03 -g --generate-line-info")
     set(CUDA_NVCC_FLAGS_MINSIZEREL "-01")
     if (DEFINED NVCC_COMPILER_BINDIR)
         append_flags(CUDA_NVCC_FLAGS -ccbin ${NVCC_COMPILER_BINDIR})

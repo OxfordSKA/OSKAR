@@ -44,10 +44,11 @@
 #include <cstdio>
 #include <vector>
 
-static int benchmark(int num_stations, int num_sources, int type,
-        int jones_type, int loc, int use_extended,
+static void benchmark(int num_stations, int num_sources, int type,
+        int jones_type, int location, int use_extended,
         int use_bandwidth_smearing, int use_time_smearing,
-        int niter, std::vector<double>& times);
+        int niter, std::vector<double>& times, const std::string& ascii_file,
+        int* status);
 
 int main(int argc, char** argv)
 {
@@ -62,6 +63,7 @@ int main(int argc, char** argv)
     opt.add_flag("-b", "Use bandwidth smearing (default: no bandwidth smearing).");
     opt.add_flag("-t", "Use time smearing (default: no time smearing).");
     opt.add_flag("-r", "Dump raw iteration data to this file.", 1);
+    opt.add_flag("-a", "Dump ASCII visibility data to this file.", 1);
     opt.add_flag("-std", "Discard values greater than this number of standard "
             "deviations from the mean.", 1);
     opt.add_flag("-n", "Number of iterations", 1, "1", false);
@@ -69,7 +71,7 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
 
-    int num_stations, num_sources, niter;
+    int location, niter, num_stations, num_sources, status = 0;
     double max_std_dev = 0.0;
     opt.get("-nst")->getInt(num_stations);
     opt.get("-nsrc")->getInt(num_sources);
@@ -81,17 +83,17 @@ int main(int argc, char** argv)
     int use_extended = opt.is_set("-e") ? OSKAR_TRUE : OSKAR_FALSE;
     int use_bandwidth_smearing = opt.is_set("-b") ? OSKAR_TRUE : OSKAR_FALSE;
     int use_time_smearing = opt.is_set("-t") ? OSKAR_TRUE : OSKAR_FALSE;
-    std::string raw_file;
+    std::string raw_file, ascii_file;
     if (opt.is_set("-r"))
         opt.get("-r")->getString(raw_file);
+    if (opt.is_set("-a"))
+        opt.get("-a")->getString(ascii_file);
     if (opt.is_set("-std"))
         opt.get("-std")->getDouble(max_std_dev);
-
-    int loc;
     if (opt.is_set("-g"))
-        loc = OSKAR_GPU;
+        location = OSKAR_GPU;
     if (opt.is_set("-c"))
-        loc = OSKAR_CPU;
+        location = OSKAR_CPU;
     if (!(opt.is_set("-c") ^ opt.is_set("-g")))
     {
         opt.error("Please select one of -g or -c");
@@ -121,9 +123,9 @@ int main(int argc, char** argv)
     // Run benchmarks.
     double time_taken_sec = 0.0, average_time_sec = 0.0;
     std::vector<double> times;
-    int status = benchmark(num_stations, num_sources, type, jones_type,
-            loc, use_extended, use_bandwidth_smearing, use_time_smearing,
-            niter, times);
+    benchmark(num_stations, num_sources, type, jones_type, location,
+            use_extended, use_bandwidth_smearing, use_time_smearing,
+            niter, times, ascii_file, &status);
 
     // Compute total time taken.
     for (int i = 0; i < niter; ++i)
@@ -208,54 +210,90 @@ int main(int argc, char** argv)
     return EXIT_SUCCESS;
 }
 
-int benchmark(int num_stations, int num_sources, int type,
-        int jones_type, int loc, int use_extended,
-        int use_bandwidth_smearing, int use_time_smearing,
-        int niter, std::vector<double>& times)
-{
-    int status = 0;
 
-    oskar_Timer* timer;
-    timer = oskar_timer_create(loc == OSKAR_GPU ?
+void benchmark(int num_stations, int num_sources, int type,
+        int jones_type, int location, int use_extended,
+        int use_bandwidth_smearing, int use_time_smearing,
+        int niter, std::vector<double>& times, const std::string& ascii_file,
+        int* status)
+{
+    oskar_Timer* timer = oskar_timer_create(location == OSKAR_GPU ?
             OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
 
-    // Set up a test sky model, telescope model and Jones matrices.
-    oskar_Telescope* tel = oskar_telescope_create(type, loc,
-            num_stations, &status);
-    oskar_Sky* sky = oskar_sky_create(type, loc, num_sources, &status);
-    oskar_Jones* J = oskar_jones_create(jones_type, loc, num_stations,
-            num_sources, &status);
+    // Create a sky model, telescope model and Jones matrices.
+    oskar_Telescope* tel = oskar_telescope_create(type, location,
+            num_stations, status);
+    oskar_Sky* sky = oskar_sky_create(type, location, num_sources, status);
+    oskar_Jones* J = oskar_jones_create(jones_type, location, num_stations,
+            num_sources, status);
 
+    // Allocate memory for visibility coordinates and output visibility slice.
+    oskar_Mem* vis = oskar_mem_create(jones_type, location,
+            oskar_telescope_num_baselines(tel), status);
+    oskar_Mem* u = oskar_mem_create(type, location, num_stations, status);
+    oskar_Mem* v = oskar_mem_create(type, location, num_stations, status);
+    oskar_Mem* w = oskar_mem_create(type, location, num_stations, status);
+
+    // Fill data structures with random data in sensible ranges.
+    srand(2);
+    oskar_mem_random_range(oskar_jones_mem(J), 1.0, 5.0, status);
+    oskar_mem_random_range(u, 1.0, 5.0, status);
+    oskar_mem_random_range(v, 1.0, 5.0, status);
+    oskar_mem_random_range(w, 1.0, 5.0, status);
+    oskar_mem_random_range(
+            oskar_telescope_station_true_x_offset_ecef_metres(tel),
+            0.1, 1000.0, status);
+    oskar_mem_random_range(
+            oskar_telescope_station_true_y_offset_ecef_metres(tel),
+            0.1, 1000.0, status);
+    oskar_mem_random_range(
+            oskar_telescope_station_true_z_offset_ecef_metres(tel),
+            0.1, 1000.0, status);
+    oskar_mem_random_range(oskar_sky_I(sky), 1.0, 2.0, status);
+    oskar_mem_random_range(oskar_sky_Q(sky), 0.1, 1.0, status);
+    oskar_mem_random_range(oskar_sky_U(sky), 0.1, 0.5, status);
+    oskar_mem_random_range(oskar_sky_V(sky), 0.1, 0.2, status);
+    oskar_mem_random_range(oskar_sky_l(sky), 0.1, 0.9, status);
+    oskar_mem_random_range(oskar_sky_m(sky), 0.1, 0.9, status);
+    oskar_mem_random_range(oskar_sky_n(sky), 0.1, 0.9, status);
+    oskar_mem_random_range(oskar_sky_gaussian_a(sky), 0.1e-6, 0.2e-6, status);
+    oskar_mem_random_range(oskar_sky_gaussian_b(sky), 0.1e-6, 0.2e-6, status);
+    oskar_mem_random_range(oskar_sky_gaussian_c(sky), 0.1e-6, 0.2e-6, status);
+
+    // Set options for bandwidth smearing, time smearing, extended sources.
     oskar_telescope_set_channel_bandwidth(tel, 100e3 * use_bandwidth_smearing);
     oskar_telescope_set_time_average(tel, (double) use_time_smearing);
     oskar_sky_set_use_extended(sky, use_extended);
-
-    // Memory for visibility coordinates and output visibility slice.
-    oskar_Mem *vis, *u, *v, *w;
-    vis = oskar_mem_create(jones_type, loc, oskar_telescope_num_baselines(tel),
-            &status);
-    u = oskar_mem_create(type, loc, num_stations, &status);
-    v = oskar_mem_create(type, loc, num_stations, &status);
-    w = oskar_mem_create(type, loc, num_stations, &status);
 
     // Run benchmark.
     times.resize(niter);
     for (int i = 0; i < niter; ++i)
     {
+        oskar_mem_clear_contents(vis, status);
         oskar_timer_start(timer);
         oskar_cross_correlate(vis, oskar_sky_num_sources(sky), J, sky, tel,
-                u, v, w, 0.0, 100e6, &status);
+                u, v, w, 0.0, 100e6, status);
         times[i] = oskar_timer_elapsed(timer);
     }
 
+    // Save visibility data if required.
+    if (!*status && !ascii_file.empty())
+    {
+        FILE* fhan = fopen(ascii_file.c_str(), "w");
+        if (fhan)
+        {
+            oskar_mem_save_ascii(fhan, 1, oskar_mem_length(vis), status, vis);
+            fclose(fhan);
+        }
+    }
+
     // Free memory.
-    oskar_mem_free(u, &status);
-    oskar_mem_free(v, &status);
-    oskar_mem_free(w, &status);
-    oskar_mem_free(vis, &status);
-    oskar_jones_free(J, &status);
-    oskar_telescope_free(tel, &status);
-    oskar_sky_free(sky, &status);
+    oskar_mem_free(u, status);
+    oskar_mem_free(v, status);
+    oskar_mem_free(w, status);
+    oskar_mem_free(vis, status);
+    oskar_jones_free(J, status);
+    oskar_telescope_free(tel, status);
+    oskar_sky_free(sky, status);
     oskar_timer_free(timer);
-    return status;
 }
