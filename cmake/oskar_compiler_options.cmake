@@ -42,19 +42,6 @@ if (NOT WIN32)
         # which breaks strtok_r.)
         append_flags(CMAKE_C_FLAGS -std=c99)
 
-        # Treat external code as system headers.
-        # This avoids a number of warning supression flags.
-        append_flags(CMAKE_CXX_FLAGS
-            -isystem ${GTEST_INCLUDE_DIR}
-            -isystem ${GTEST_INCLUDE_DIR}/internal
-        )
-        if (CASACORE_FOUND)
-            append_flags(CMAKE_CXX_FLAGS -isystem ${CASACORE_INCLUDE_DIR}/casacore)
-        endif()
-        if (CUDA_FOUND)
-            append_flags(CMAKE_C_FLAGS -isystem ${CUDA_INCLUDE_DIRS})
-            append_flags(CMAKE_CXX_FLAGS -isystem ${CUDA_INCLUDE_DIRS})
-        endif()
         # Note: long-long is required for cfitsio
         append_flags(CMAKE_CXX_FLAGS
             -Wall -Wextra -pedantic -Wcast-qual -Wcast-align -Wno-long-long
@@ -144,8 +131,8 @@ if (CUDA_FOUND)
     # General NVCC compiler options.
     set(CUDA_NVCC_FLAGS_RELEASE "-O3")
     set(CUDA_NVCC_FLAGS_DEBUG "-O0 -g --generate-line-info")
-    set(CUDA_NVCC_FLAGS_RELWITHDEBINFO "-03 -g --generate-line-info")
-    set(CUDA_NVCC_FLAGS_MINSIZEREL "-01")
+    set(CUDA_NVCC_FLAGS_RELWITHDEBINFO "-O3 -g --generate-line-info")
+    set(CUDA_NVCC_FLAGS_MINSIZEREL "-O1")
     if (DEFINED NVCC_COMPILER_BINDIR)
         append_flags(CUDA_NVCC_FLAGS -ccbin ${NVCC_COMPILER_BINDIR})
     endif()

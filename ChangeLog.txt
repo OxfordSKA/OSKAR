@@ -8,6 +8,8 @@
 
     * Refuse to load FITS images with an unknown pixel size.
 
+    * Fixed compilation on Ubuntu 18.04.
+
 2017-10-31  OSKAR-2.7.0
 
     * Removed telescope longitude, latitude and altitude from settings file.
