@@ -45,15 +45,15 @@ if (NOT WIN32)
         # Treat external code as system headers.
         # This avoids a number of warning supression flags.
         append_flags(CMAKE_CXX_FLAGS
-            -isystem ${GTEST_INCLUDE_DIR}
-            -isystem ${GTEST_INCLUDE_DIR}/internal
+            -I${GTEST_INCLUDE_DIR}
+            -I${GTEST_INCLUDE_DIR}/internal
         )
         if (CASACORE_FOUND)
-            append_flags(CMAKE_CXX_FLAGS -isystem ${CASACORE_INCLUDE_DIR}/casacore)
+            append_flags(CMAKE_CXX_FLAGS -I${CASACORE_INCLUDE_DIR}/casacore)
         endif()
         if (CUDA_FOUND)
-            append_flags(CMAKE_C_FLAGS -isystem ${CUDA_INCLUDE_DIRS})
-            append_flags(CMAKE_CXX_FLAGS -isystem ${CUDA_INCLUDE_DIRS})
+            append_flags(CMAKE_C_FLAGS -I${CUDA_INCLUDE_DIRS})
+            append_flags(CMAKE_CXX_FLAGS -I${CUDA_INCLUDE_DIRS})
         endif()
         # Note: long-long is required for cfitsio
         append_flags(CMAKE_CXX_FLAGS
