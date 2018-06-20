@@ -43,9 +43,10 @@ OSKAR_INLINE
 float oskar_cond2_2x2_inline_f(const float4c* restrict in)
 {
     float sum, diff, t1, t2, a, b;
-    float4c p;
+    float4c p, q;
     p = *in;
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&p, in);
+    q = p;
+    OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(float2, p, q)
     sum = p.a.x + p.d.x;
     t1  = p.a.x - p.d.x;
     t1  = t1 * t1;
@@ -60,9 +61,10 @@ OSKAR_INLINE
 double oskar_cond2_2x2_inline_d(const double4c* restrict in)
 {
     double sum, diff, t1, t2, a, b;
-    double4c p;
+    double4c p, q;
     p = *in;
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&p, in);
+    q = p;
+    OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(double2, p, q)
     sum = p.a.x + p.d.x;
     t1  = p.a.x - p.d.x;
     t1  = t1 * t1;

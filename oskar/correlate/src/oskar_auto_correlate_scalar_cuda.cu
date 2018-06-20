@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,122 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "correlate/private_correlate_functions_inline.h"
-#include "correlate/oskar_auto_correlate_cuda.h"
-#include "math/oskar_add_inline.h"
+#include "correlate/oskar_auto_correlate_scalar_cuda.h"
 #include <cuda_runtime.h>
 
-/* Kernels. ================================================================ */
-
-extern __shared__ float2  smem_f[];
-extern __shared__ double2 smem_d[];
-
-/* Single precision. */
+template <typename REAL, typename REAL2>
 __global__
-void oskar_auto_correlate_scalar_cudak_f(const int num_sources,
-        const int num_stations, const float2* restrict jones,
-        const float* restrict source_I, float2* restrict vis)
+void oskar_acorr_scalar_cudak(
+        const int                   num_sources,
+        const int                   num_stations,
+        const REAL2* const restrict jones,
+        const REAL*  const restrict source_I,
+        REAL2*             restrict vis)
 {
-    float2 sum;
-    int i;
-
-    /* Get station index. */
-    const int s = blockDim.y * blockIdx.y + threadIdx.y;
-
-    /* Get pointer to Jones matrix vector for station. */
-    const float2* restrict jones_station = &jones[num_sources * s];
-
-    /* Each thread loops over a subset of the sources. */
-    sum.x = 0.0f;
-    sum.y = 0.0f;
-    for (i = threadIdx.x; i < num_sources; i += blockDim.x)
-        oskar_accumulate_station_visibility_for_source_scalar_inline_f(
-                &sum, i, source_I, jones_station);
-
-    /* Store partial sum for the thread in shared memory and synchronise. */
-    smem_f[threadIdx.x] = sum;
+    extern __shared__ __align__(sizeof(double)) unsigned char my_smem[];
+    REAL* smem = reinterpret_cast<REAL*>(my_smem); // Allows template.
+    const int s = blockIdx.y; // Station index.
+    const REAL2* const restrict jones_station = &jones[num_sources * s];
+    REAL sum = (REAL) 0;
+    for (int i = threadIdx.x; i < num_sources; i += blockDim.x)
+    {
+        const REAL2 t = jones_station[i];
+        sum += (t.x * t.x + t.y * t.y) * source_I[i];
+    }
+    smem[threadIdx.x] = sum;
     __syncthreads();
-
-    /* Accumulate contents of shared memory. */
     if (threadIdx.x == 0)
     {
-        /* Sum over all sources. We only need the real part. */
-        for (i = 1; i < blockDim.x; ++i)
-            sum.x += smem_f[i].x;
-
-        /* Add result of this thread block to the visibility. */
-        vis[s].x += sum.x;
+        for (int i = 1; i < blockDim.x; ++i) sum += smem[i];
+        vis[s].x += sum;
     }
 }
 
-/* Double precision. */
-__global__
-void oskar_auto_correlate_scalar_cudak_d(const int num_sources,
-        const int num_stations, const double2* restrict jones,
-        const double* restrict source_I, double2* restrict vis)
-{
-    double2 sum;
-    int i;
-
-    /* Get station index. */
-    const int s = blockDim.y * blockIdx.y + threadIdx.y;
-
-    /* Get pointer to Jones matrix vector for station. */
-    const double2* restrict jones_station = &jones[num_sources * s];
-
-    /* Each thread loops over a subset of the sources. */
-    sum.x = 0.0;
-    sum.y = 0.0;
-    for (i = threadIdx.x; i < num_sources; i += blockDim.x)
-        oskar_accumulate_station_visibility_for_source_scalar_inline_d(
-                &sum, i, source_I, jones_station);
-
-    /* Store partial sum for the thread in shared memory and synchronise. */
-    smem_d[threadIdx.x] = sum;
-    __syncthreads();
-
-    /* Accumulate contents of shared memory. */
-    if (threadIdx.x == 0)
-    {
-        /* Sum over all sources. We only need the real part. */
-        for (i = 1; i < blockDim.x; ++i)
-            sum.x += smem_d[i].x;
-
-        /* Add result of this thread block to the visibility. */
-        vis[s].x += sum.x;
-    }
-}
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Kernel wrappers. ======================================================== */
-
-/* Single precision. */
 void oskar_auto_correlate_scalar_cuda_f(int num_sources, int num_stations,
         const float2* d_jones, const float* d_source_I, float2* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(1, num_stations);
-    size_t shared_mem = num_threads.x * sizeof(float2);
-    oskar_auto_correlate_scalar_cudak_f
+    size_t shared_mem = num_threads.x * sizeof(float);
+    oskar_acorr_scalar_cudak<float, float2>
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_vis);
 }
 
-/* Double precision. */
 void oskar_auto_correlate_scalar_cuda_d(int num_sources, int num_stations,
         const double2* d_jones, const double* d_source_I, double2* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(1, num_stations);
-    size_t shared_mem = num_threads.x * sizeof(double2);
-    oskar_auto_correlate_scalar_cudak_d
+    size_t shared_mem = num_threads.x * sizeof(double);
+    oskar_acorr_scalar_cudak<double, double2>
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_vis);
 }
-
-#ifdef __cplusplus
-}
-#endif

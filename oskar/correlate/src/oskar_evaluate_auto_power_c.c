@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,19 +37,13 @@ extern "C" {
 void oskar_evaluate_auto_power_f(const int num_sources,
         const float4c* restrict jones, float4c* restrict out)
 {
-    int i = 0;
-
+    int i;
     for (i = 0; i < num_sources; ++i)
     {
         float4c val1, val2;
-
-        /* Calculate auto-power product at the source. */
         OSKAR_LOAD_MATRIX(val1, jones[i]);
-        val2 = val1;
-        oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(
-                &val1, &val2);
-
-        /* Store result. */
+        val2 = val1; /* Auto-power product. */
+        OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(float2, val1, val2)
         out[i] = val1;
     }
 }
@@ -57,19 +51,13 @@ void oskar_evaluate_auto_power_f(const int num_sources,
 void oskar_evaluate_auto_power_scalar_f(const int num_sources,
         const float2* restrict jones, float2* restrict out)
 {
-    int i = 0;
-
+    int i;
     for (i = 0; i < num_sources; ++i)
     {
-        float2 val1, val2;
-
-        /* Calculate auto-power product at the source. */
-        val1 = jones[i];
-        val2 = val1;
-        oskar_multiply_complex_conjugate_in_place_f(&val1, &val2);
-
-        /* Store result. */
-        out[i] = val1;
+        float2 val = jones[i];
+        val.x = val.x * val.x + val.y * val.y; /* Auto-power product. */
+        val.y = 0.0f;
+        out[i] = val;
     }
 }
 
@@ -77,19 +65,13 @@ void oskar_evaluate_auto_power_scalar_f(const int num_sources,
 void oskar_evaluate_auto_power_d(const int num_sources,
         const double4c* restrict jones, double4c* restrict out)
 {
-    int i = 0;
-
+    int i;
     for (i = 0; i < num_sources; ++i)
     {
         double4c val1, val2;
-
-        /* Calculate auto-power product at the source. */
         OSKAR_LOAD_MATRIX(val1, jones[i]);
-        val2 = val1;
-        oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(
-                &val1, &val2);
-
-        /* Store result. */
+        val2 = val1; /* Auto-power product. */
+        OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(double2, val1, val2)
         out[i] = val1;
     }
 }
@@ -97,19 +79,13 @@ void oskar_evaluate_auto_power_d(const int num_sources,
 void oskar_evaluate_auto_power_scalar_d(const int num_sources,
         const double2* restrict jones, double2* restrict out)
 {
-    int i = 0;
-
+    int i;
     for (i = 0; i < num_sources; ++i)
     {
-        double2 val1, val2;
-
-        /* Calculate auto-power product at the source. */
-        val1 = jones[i];
-        val2 = val1;
-        oskar_multiply_complex_conjugate_in_place_d(&val1, &val2);
-
-        /* Store result. */
-        out[i] = val1;
+        double2 val = jones[i];
+        val.x = val.x * val.x + val.y * val.y; /* Auto-power product. */
+        val.y = 0.0;
+        out[i] = val;
     }
 }
 

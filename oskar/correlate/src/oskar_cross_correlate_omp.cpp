@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cmath>
 #include "correlate/private_correlate_functions_inline.h"
 #include "correlate/oskar_cross_correlate_omp.h"
 #include "math/oskar_add_inline.h"
+#include "math/oskar_kahan_sum.h"
 
 template<typename T1, typename T2>
 struct is_same
@@ -172,6 +172,24 @@ void oskar_xcorr_omp(
     }
 }
 
+#define XCORR_KERNEL(BS, TS, GAUSSIAN, REAL, REAL2, REAL8)                  \
+        oskar_xcorr_omp<BS, TS, GAUSSIAN, REAL, REAL2, REAL8>               \
+        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V,            \
+                d_l, d_m, d_n, d_a, d_b, d_c,                               \
+                d_station_u, d_station_v, d_station_w,                      \
+                d_station_x, d_station_y, uv_min_lambda, uv_max_lambda,     \
+                inv_wavelength, frac_bandwidth, time_int_sec,               \
+                gha0_rad, dec0_rad, d_vis);
+
+#define XCORR_SELECT(GAUSSIAN, REAL, REAL2, REAL8)                          \
+        if (frac_bandwidth == (REAL)0 && time_int_sec == (REAL)0)           \
+            XCORR_KERNEL(false, false, GAUSSIAN, REAL, REAL2, REAL8)        \
+        else if (frac_bandwidth != (REAL)0 && time_int_sec == (REAL)0)      \
+            XCORR_KERNEL(true, false, GAUSSIAN, REAL, REAL2, REAL8)         \
+        else if (frac_bandwidth == (REAL)0 && time_int_sec != (REAL)0)      \
+            XCORR_KERNEL(false, true, GAUSSIAN, REAL, REAL2, REAL8)         \
+        else if (frac_bandwidth != (REAL)0 && time_int_sec != (REAL)0)      \
+            XCORR_KERNEL(true, true, GAUSSIAN, REAL, REAL2, REAL8)
 
 void oskar_cross_correlate_point_omp_f(
         int num_sources, int num_stations, const float4c* d_jones,
@@ -185,30 +203,8 @@ void oskar_cross_correlate_point_omp_f(
         float frac_bandwidth, float time_int_sec, float gha0_rad,
         float dec0_rad, float4c* d_vis)
 {
-    if (frac_bandwidth == 0.0f && time_int_sec == 0.0f)
-        oskar_xcorr_omp<false, false, false, float, float2, float4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth != 0.0f && time_int_sec == 0.0f)
-        oskar_xcorr_omp<true, false, false, float, float2, float4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth == 0.0f && time_int_sec != 0.0f)
-        oskar_xcorr_omp<false, true, false, float, float2, float4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth != 0.0f && time_int_sec != 0.0f)
-        oskar_xcorr_omp<true, true, false, float, float2, float4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+    const float *d_a = 0, *d_b = 0, *d_c = 0;
+    XCORR_SELECT(false, float, float2, float4c)
 }
 
 void oskar_cross_correlate_point_omp_d(
@@ -223,30 +219,8 @@ void oskar_cross_correlate_point_omp_d(
         double frac_bandwidth, double time_int_sec, double gha0_rad,
         double dec0_rad, double4c* d_vis)
 {
-    if (frac_bandwidth == 0.0 && time_int_sec == 0.0)
-        oskar_xcorr_omp<false, false, false, double, double2, double4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth != 0.0 && time_int_sec == 0.0)
-        oskar_xcorr_omp<true, false, false, double, double2, double4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth == 0.0 && time_int_sec != 0.0)
-        oskar_xcorr_omp<false, true, false, double, double2, double4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth != 0.0 && time_int_sec != 0.0)
-        oskar_xcorr_omp<true, true, false, double, double2, double4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+    const double *d_a = 0, *d_b = 0, *d_c = 0;
+    XCORR_SELECT(false, double, double2, double4c)
 }
 
 void oskar_cross_correlate_gaussian_omp_f(
@@ -261,30 +235,7 @@ void oskar_cross_correlate_gaussian_omp_f(
         float inv_wavelength, float frac_bandwidth, float time_int_sec,
         float gha0_rad, float dec0_rad, float4c* d_vis)
 {
-    if (frac_bandwidth == 0.0f && time_int_sec == 0.0f)
-        oskar_xcorr_omp<false, false, true, float, float2, float4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth != 0.0f && time_int_sec == 0.0f)
-        oskar_xcorr_omp<true, false, true, float, float2, float4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth == 0.0f && time_int_sec != 0.0f)
-        oskar_xcorr_omp<false, true, true, float, float2, float4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth != 0.0f && time_int_sec != 0.0f)
-        oskar_xcorr_omp<true, true, true, float, float2, float4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+    XCORR_SELECT(true, float, float2, float4c)
 }
 
 void oskar_cross_correlate_gaussian_omp_d(
@@ -299,28 +250,5 @@ void oskar_cross_correlate_gaussian_omp_d(
         double inv_wavelength, double frac_bandwidth, double time_int_sec,
         double gha0_rad, double dec0_rad, double4c* d_vis)
 {
-    if (frac_bandwidth == 0.0 && time_int_sec == 0.0)
-        oskar_xcorr_omp<false, false, true, double, double2, double4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth != 0.0 && time_int_sec == 0.0)
-        oskar_xcorr_omp<true, false, true, double, double2, double4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth == 0.0 && time_int_sec != 0.0)
-        oskar_xcorr_omp<false, true, true, double, double2, double4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-    else if (frac_bandwidth != 0.0 && time_int_sec != 0.0)
-        oskar_xcorr_omp<true, true, true, double, double2, double4c>
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                uv_min_lambda, uv_max_lambda, inv_wavelength,
-                frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+    XCORR_SELECT(true, double, double2, double4c)
 }

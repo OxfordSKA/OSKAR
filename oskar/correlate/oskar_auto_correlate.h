@@ -52,13 +52,13 @@ extern "C" {
  *
  * @param[out] vis          Output visibilities.
  * @param[in]  n_sources    Number of sources to use.
- * @param[in]  J            Set of Jones matrices.
+ * @param[in]  jones        Set of Jones matrices.
  * @param[in]  sky          Sky model.
  * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_auto_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
-        const oskar_Sky* sky, int* status);
+void oskar_auto_correlate(oskar_Mem* vis, int n_sources,
+        const oskar_Jones* jones, const oskar_Sky* sky, int* status);
 
 #ifdef __cplusplus
 }

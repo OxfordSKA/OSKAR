@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,91 +59,68 @@ void oskar_evaluate_auto_power(int num_sources, const oskar_Mem* jones,
     }
 
     /* Switch on type and location combination. */
-    if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+    if (location == OSKAR_CPU)
     {
-        if (location == OSKAR_GPU)
+        switch (type)
         {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_auto_power_cuda_f(num_sources,
-                    oskar_mem_float4c_const(jones, status),
-                    oskar_mem_float4c(out, status));
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location == OSKAR_CPU)
-        {
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
             oskar_evaluate_auto_power_f(num_sources,
                     oskar_mem_float4c_const(jones, status),
                     oskar_mem_float4c(out, status));
-        }
-    }
-    else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-    {
-        if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_auto_power_cuda_d(num_sources,
-                    oskar_mem_double4c_const(jones, status),
-                    oskar_mem_double4c(out, status));
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location == OSKAR_CPU)
-        {
+            break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
             oskar_evaluate_auto_power_d(num_sources,
                     oskar_mem_double4c_const(jones, status),
                     oskar_mem_double4c(out, status));
-        }
-    }
-
-    /* Scalar versions. */
-    else if (type == OSKAR_SINGLE_COMPLEX)
-    {
-        if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_auto_power_scalar_cuda_f(num_sources,
-                    oskar_mem_float2_const(jones, status),
-                    oskar_mem_float2(out, status));
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location == OSKAR_CPU)
-        {
+            break;
+        case OSKAR_SINGLE_COMPLEX:
             oskar_evaluate_auto_power_scalar_f(num_sources,
                     oskar_mem_float2_const(jones, status),
                     oskar_mem_float2(out, status));
-        }
-    }
-    else if (type == OSKAR_DOUBLE_COMPLEX)
-    {
-        if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_auto_power_scalar_cuda_d(num_sources,
-                    oskar_mem_double2_const(jones, status),
-                    oskar_mem_double2(out, status));
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location == OSKAR_CPU)
-        {
+            break;
+        case OSKAR_DOUBLE_COMPLEX:
             oskar_evaluate_auto_power_scalar_d(num_sources,
                     oskar_mem_double2_const(jones, status),
                     oskar_mem_double2(out, status));
+            break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
     }
-    else
+    else if (location == OSKAR_GPU)
     {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
+#ifdef OSKAR_HAVE_CUDA
+        switch (type)
+        {
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            oskar_evaluate_auto_power_cuda_f(num_sources,
+                    oskar_mem_float4c_const(jones, status),
+                    oskar_mem_float4c(out, status));
+            break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            oskar_evaluate_auto_power_cuda_d(num_sources,
+                    oskar_mem_double4c_const(jones, status),
+                    oskar_mem_double4c(out, status));
+            break;
+        case OSKAR_SINGLE_COMPLEX:
+            oskar_evaluate_auto_power_scalar_cuda_f(num_sources,
+                    oskar_mem_float2_const(jones, status),
+                    oskar_mem_float2(out, status));
+            break;
+        case OSKAR_DOUBLE_COMPLEX:
+            oskar_evaluate_auto_power_scalar_cuda_d(num_sources,
+                    oskar_mem_double2_const(jones, status),
+                    oskar_mem_double2(out, status));
+            break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        oskar_device_check_error(status);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
 }
 

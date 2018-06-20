@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,102 +31,54 @@
 #include "math/oskar_add_inline.h"
 #include <cuda_runtime.h>
 
-/* Kernels. ================================================================ */
-
-extern __shared__ float4c  smem_f[];
-extern __shared__ double4c smem_d[];
-
-/* Single precision. */
+template <typename REAL, typename REAL2, typename REAL8>
 __global__
-void oskar_auto_correlate_cudak_f(const int num_sources,
-        const int num_stations, const float4c* restrict jones,
-        const float* restrict source_I, const float* restrict source_Q,
-        const float* restrict source_U, const float* restrict source_V,
-        float4c* restrict vis)
+void oskar_acorr_cudak(
+        const int                   num_sources,
+        const int                   num_stations,
+        const REAL8* const restrict jones,
+        const REAL*  const restrict source_I,
+        const REAL*  const restrict source_Q,
+        const REAL*  const restrict source_U,
+        const REAL*  const restrict source_V,
+        REAL8*             restrict vis)
 {
-    float4c sum; /* Partial sum per thread. */
-    int i;
+    extern __shared__ __align__(sizeof(double4c)) unsigned char my_smem[];
+    REAL8* smem = reinterpret_cast<REAL8*>(my_smem); // Allows template.
+    const int s = blockIdx.y; // Station index.
+    const REAL8* const restrict jones_station = &jones[num_sources * s];
+    REAL8 m1, m2, sum;
+    OSKAR_CLEAR_COMPLEX_MATRIX(REAL, sum)
+    for (int i = threadIdx.x; i < num_sources; i += blockDim.x)
+    {
+        // Construct source brightness matrix.
+        OSKAR_CONSTRUCT_B(REAL, m2,
+                source_I[i], source_Q[i], source_U[i], source_V[i])
 
-    /* Get station index. */
-    const int s = blockDim.y * blockIdx.y + threadIdx.y;
+        // Multiply first Jones matrix with source brightness matrix.
+        OSKAR_LOAD_MATRIX(m1, jones_station[i])
+        OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(REAL2, m1, m2);
 
-    /* Get pointer to Jones matrix vector for station. */
-    const float4c* restrict jones_station = &jones[num_sources * s];
+        // Multiply result with second (Hermitian transposed) Jones matrix.
+        OSKAR_LOAD_MATRIX(m2, jones_station[i])
+        OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(REAL2, m1, m2);
 
-    /* Each thread loops over a subset of the sources. */
-    OSKAR_CLEAR_COMPLEX_MATRIX(float, sum)
-    for (i = threadIdx.x; i < num_sources; i += blockDim.x)
-        oskar_accumulate_station_visibility_for_source_inline_f(&sum, i,
-                source_I, source_Q, source_U, source_V, jones_station);
-
-    /* Store partial sum for the thread in shared memory and synchronise. */
-    smem_f[threadIdx.x] = sum;
+        // Accumulate.
+        OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(sum, m1)
+    }
+    smem[threadIdx.x] = sum;
     __syncthreads();
-
-    /* Accumulate contents of shared memory. */
     if (threadIdx.x == 0)
     {
-        /* Sum over all sources. */
-        for (i = 1; i < blockDim.x; ++i)
-            oskar_add_complex_matrix_in_place_f(&sum, &smem_f[i]);
+        for (int i = 1; i < blockDim.x; ++i)
+            OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(sum, smem[i])
 
-        /* Add result of this thread block to the visibility. */
-        /* Blank non-Hermitian values. */
-        sum.a.y = 0.0f;
-        sum.d.y = 0.0f;
-        oskar_add_complex_matrix_in_place_f(&vis[s], &sum);
+        // Blank non-Hermitian values.
+        sum.a.y = (REAL)0; sum.d.y = (REAL)0;
+        OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(vis[s], sum);
     }
 }
 
-/* Double precision. */
-__global__
-void oskar_auto_correlate_cudak_d(const int num_sources,
-        const int num_stations, const double4c* restrict jones,
-        const double* restrict source_I, const double* restrict source_Q,
-        const double* restrict source_U, const double* restrict source_V,
-        double4c* restrict vis)
-{
-    double4c sum; /* Partial sum per thread. */
-    int i;
-
-    /* Get station index. */
-    const int s = blockDim.y * blockIdx.y + threadIdx.y;
-
-    /* Get pointer to Jones matrix vector for station. */
-    const double4c* restrict jones_station = &jones[num_sources * s];
-
-    /* Each thread loops over a subset of the sources. */
-    OSKAR_CLEAR_COMPLEX_MATRIX(double, sum)
-    for (i = threadIdx.x; i < num_sources; i += blockDim.x)
-        oskar_accumulate_station_visibility_for_source_inline_d(&sum, i,
-                source_I, source_Q, source_U, source_V, jones_station);
-
-    /* Store partial sum for the thread in shared memory and synchronise. */
-    smem_d[threadIdx.x] = sum;
-    __syncthreads();
-
-    /* Accumulate contents of shared memory. */
-    if (threadIdx.x == 0)
-    {
-        /* Sum over all sources. */
-        for (i = 1; i < blockDim.x; ++i)
-            oskar_add_complex_matrix_in_place_d(&sum, &smem_d[i]);
-
-        /* Add result of this thread block to the visibility. */
-        /* Blank non-Hermitian values. */
-        sum.a.y = 0.0;
-        sum.d.y = 0.0;
-        oskar_add_complex_matrix_in_place_d(&vis[s], &sum);
-    }
-}
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Kernel wrappers. ======================================================== */
-
-/* Single precision. */
 void oskar_auto_correlate_cuda_f(int num_sources, int num_stations,
         const float4c* d_jones, const float* d_source_I,
         const float* d_source_Q, const float* d_source_U,
@@ -135,13 +87,12 @@ void oskar_auto_correlate_cuda_f(int num_sources, int num_stations,
     dim3 num_threads(128, 1);
     dim3 num_blocks(1, num_stations);
     size_t shared_mem = num_threads.x * sizeof(float4c);
-    oskar_auto_correlate_cudak_f
+    oskar_acorr_cudak<float, float2, float4c>
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_vis);
 }
 
-/* Double precision. */
 void oskar_auto_correlate_cuda_d(int num_sources, int num_stations,
         const double4c* d_jones, const double* d_source_I,
         const double* d_source_Q, const double* d_source_U,
@@ -150,12 +101,8 @@ void oskar_auto_correlate_cuda_d(int num_sources, int num_stations,
     dim3 num_threads(128, 1);
     dim3 num_blocks(1, num_stations);
     size_t shared_mem = num_threads.x * sizeof(double4c);
-    oskar_auto_correlate_cudak_d
+    oskar_acorr_cudak<double, double2, double4c>
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_vis);
 }
-
-#ifdef __cplusplus
-}
-#endif

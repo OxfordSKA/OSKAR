@@ -29,9 +29,9 @@
 #include "math/oskar_fftphase_cuda.h"
 #include <vector_types.h>
 
-template <typename FP>
+template <typename REAL>
 __global__
-void oskar_fftphase_cudak(const int num_x, const int num_y, FP* complex_data)
+void oskar_fftphase_cudak(const int num_x, const int num_y, REAL* complex_data)
 {
     const int ix = blockDim.x * blockIdx.x + threadIdx.x;
     const int iy = blockDim.y * blockIdx.y + threadIdx.y;

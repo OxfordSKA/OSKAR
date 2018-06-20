@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,91 +29,43 @@
 #include "correlate/oskar_evaluate_auto_power_cuda.h"
 #include "correlate/private_correlate_functions_inline.h"
 
-/* Kernels. ================================================================ */
-
-/* Single precision. */
+template<typename REAL2, typename REAL8>
 __global__
-void oskar_evaluate_auto_power_cudak_f(const int num_sources,
-        const float4c* restrict jones, float4c* restrict out)
+void oskar_evaluate_auto_power_cudak(
+        const int                   num_sources,
+        const REAL8* const restrict jones,
+        REAL8*             restrict out)
 {
-    float4c val1, val2;
+    REAL8 val1, val2;
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_sources) return;
-
-    /* Calculate auto-power product at the source. */
     OSKAR_LOAD_MATRIX(val1, jones[i]);
-    val2 = val1;
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&val1, &val2);
-
-    /* Store result. */
+    val2 = val1; // Auto-power product.
+    OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(REAL2, val1, val2)
     out[i] = val1;
 }
 
+template<typename REAL2>
 __global__
-void oskar_evaluate_auto_power_scalar_cudak_f(const int num_sources,
-        const float2* restrict jones, float2* restrict out)
+void oskar_evaluate_auto_power_scalar_cudak(
+        const int                   num_sources,
+        const REAL2* const restrict jones,
+        REAL2*             restrict out)
 {
-    float2 val1, val2;
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_sources) return;
-
-    /* Calculate auto-power product at the source. */
-    val1 = jones[i];
-    val2 = val1;
-    oskar_multiply_complex_conjugate_in_place_f(&val1, &val2);
-
-    /* Store result. */
-    out[i] = val1;
+    REAL2 val = jones[i];
+    val.x = val.x * val.x + val.y * val.y; // Auto-power product.
+    val.y = 0;
+    out[i] = val;
 }
 
-/* Double precision. */
-__global__
-void oskar_evaluate_auto_power_cudak_d(const int num_sources,
-        const double4c* restrict jones, double4c* restrict out)
-{
-    double4c val1, val2;
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num_sources) return;
-
-    /* Calculate auto-power product at the source. */
-    OSKAR_LOAD_MATRIX(val1, jones[i]);
-    val2 = val1;
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&val1, &val2);
-
-    /* Store result. */
-    out[i] = val1;
-}
-
-__global__
-void oskar_evaluate_auto_power_scalar_cudak_d(const int num_sources,
-        const double2* restrict jones, double2* restrict out)
-{
-    double2 val1, val2;
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num_sources) return;
-
-    /* Calculate auto-power product at the source. */
-    val1 = jones[i];
-    val2 = val1;
-    oskar_multiply_complex_conjugate_in_place_d(&val1, &val2);
-
-    /* Store result. */
-    out[i] = val1;
-}
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Kernel wrappers. ======================================================== */
-
-/* Single precision. */
 void oskar_evaluate_auto_power_cuda_f(int num_sources,
         const float4c* d_jones, float4c* d_out)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_evaluate_auto_power_cudak_f
+    oskar_evaluate_auto_power_cudak<float2, float4c>
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources, d_jones, d_out);
 }
 
@@ -122,17 +74,16 @@ void oskar_evaluate_auto_power_scalar_cuda_f(int num_sources,
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_evaluate_auto_power_scalar_cudak_f
+    oskar_evaluate_auto_power_scalar_cudak<float2>
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources, d_jones, d_out);
 }
 
-/* Double precision. */
 void oskar_evaluate_auto_power_cuda_d(int num_sources,
         const double4c* d_jones, double4c* d_out)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_evaluate_auto_power_cudak_d
+    oskar_evaluate_auto_power_cudak<double2, double4c>
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources, d_jones, d_out);
 }
 
@@ -141,10 +92,6 @@ void oskar_evaluate_auto_power_scalar_cuda_d(int num_sources,
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
-    oskar_evaluate_auto_power_scalar_cudak_d
+    oskar_evaluate_auto_power_scalar_cudak<double2>
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources, d_jones, d_out);
 }
-
-#ifdef __cplusplus
-}
-#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <math.h>
-#include "correlate/private_correlate_functions_inline.h"
 #include "correlate/oskar_auto_correlate_scalar_omp.h"
-#include "math/oskar_add_inline.h"
+#include "math/oskar_kahan_sum.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,31 +38,19 @@ void oskar_auto_correlate_scalar_omp_f(const int num_sources,
         const int num_stations, const float2* jones, const float* source_I,
         float2* vis)
 {
-    int s;
-
-    /* Loop over stations. */
-#pragma omp parallel for private(s)
+    int i, s;
+#pragma omp parallel for private(i, s)
     for (s = 0; s < num_stations; ++s)
     {
-        int i;
-        const float2 *station;
-        float2 sum, guard;
-
-        sum.x = 0.0f;
-        sum.y = 0.0f;
-        guard.x = 0.0f;
-        guard.y = 0.0f;
-
-        /* Pointer to source vector for station. */
-        station = &jones[s * num_sources];
-
-        /* Accumulate visibility response for source. */
+        float sum = 0.0f, guard = 0.0f;
+        const float2 *const jones_station = &jones[s * num_sources];
         for (i = 0; i < num_sources; ++i)
-            oskar_accumulate_station_visibility_for_source_scalar_inline_f(
-                    &sum, i, source_I, station, &guard);
-
-        /* Add result to the station visibility. We only need the real part. */
-        vis[s].x += sum.x;
+        {
+            const float2 t = jones_station[i];
+            const float val = (t.x * t.x + t.y * t.y) * source_I[i];
+            OSKAR_KAHAN_SUM(float, sum, val, guard)
+        }
+        vis[s].x += sum;
     }
 }
 
@@ -73,29 +59,18 @@ void oskar_auto_correlate_scalar_omp_d(const int num_sources,
         const int num_stations, const double2* jones, const double* source_I,
         double2* vis)
 {
-    int s;
-
-    /* Loop over stations. */
-#pragma omp parallel for private(s)
+    int i, s;
+#pragma omp parallel for private(i, s)
     for (s = 0; s < num_stations; ++s)
     {
-        int i;
-        const double2 *station;
-        double2 sum;
-
-        sum.x = 0.0;
-        sum.y = 0.0;
-
-        /* Pointer to source vector for station. */
-        station = &jones[s * num_sources];
-
-        /* Accumulate visibility response for source. */
+        double sum = 0.0;
+        const double2 *const jones_station = &jones[s * num_sources];
         for (i = 0; i < num_sources; ++i)
-            oskar_accumulate_station_visibility_for_source_scalar_inline_d(
-                    &sum, i, source_I, station);
-
-        /* Add result to the station visibility. We only need the real part. */
-        vis[s].x += sum.x;
+        {
+            const double2 t = jones_station[i];
+            sum += (t.x * t.x + t.y * t.y) * source_I[i];
+        }
+        vis[s].x += sum;
     }
 }
 

@@ -647,6 +647,25 @@ void oskar_xcorr_SM_cudak(
     }
 }
 
+#define XCORR_KERNEL(NAME, BS, TS, GAUSSIAN, REAL, REAL2, REAL8)            \
+        NAME<BS, TS, GAUSSIAN, REAL, REAL2, REAL8>                          \
+        OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)               \
+        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V,            \
+                d_l, d_m, d_n, d_a, d_b, d_c,                               \
+                d_station_u, d_station_v, d_station_w,                      \
+                d_station_x, d_station_y, uv_min_lambda, uv_max_lambda,     \
+                inv_wavelength, frac_bandwidth, time_int_sec,               \
+                gha0_rad, dec0_rad, d_vis);
+
+#define XCORR_SELECT(NAME, GAUSSIAN, REAL, REAL2, REAL8)                    \
+        if (frac_bandwidth == (REAL)0 && time_int_sec == (REAL)0)           \
+            XCORR_KERNEL(NAME, false, false, GAUSSIAN, REAL, REAL2, REAL8)  \
+        else if (frac_bandwidth != (REAL)0 && time_int_sec == (REAL)0)      \
+            XCORR_KERNEL(NAME, true, false, GAUSSIAN, REAL, REAL2, REAL8)   \
+        else if (frac_bandwidth == (REAL)0 && time_int_sec != (REAL)0)      \
+            XCORR_KERNEL(NAME, false, true, GAUSSIAN, REAL, REAL2, REAL8)   \
+        else if (frac_bandwidth != (REAL)0 && time_int_sec != (REAL)0)      \
+            XCORR_KERNEL(NAME, true, true, GAUSSIAN, REAL, REAL2, REAL8)
 
 void oskar_cross_correlate_point_cuda_f(
         int num_sources, int num_stations, const float4c* d_jones,
@@ -660,107 +679,25 @@ void oskar_cross_correlate_point_cuda_f(
         float frac_bandwidth, float time_int_sec, float gha0_rad,
         float dec0_rad, float4c* d_vis)
 {
+    const dim3 num_threads(128, 1);
+    const float *d_a = 0, *d_b = 0, *d_c = 0;
     if (correlate_version() == VER_NON_SM)
     {
-        dim3 num_threads(128, 1);
         dim3 num_blocks(num_stations, (num_stations + OKN_BPK - 1) / OKN_BPK);
         const size_t shared_mem = 0;
-        if (frac_bandwidth == 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_NON_SM_cudak<false, false, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_NON_SM_cudak<true, false, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_NON_SM_cudak<false, true, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_NON_SM_cudak<true, true, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_NON_SM_cudak, false, float, float2, float4c)
     }
     else if (correlate_version() == VER_SM)
     {
-        dim3 num_threads(128, 1);
         dim3 num_blocks(num_stations, (num_stations + OKN_BPK - 1) / OKN_BPK);
         const size_t shared_mem = 0;
-        if (frac_bandwidth == 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_SM_cudak<false, false, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_SM_cudak<true, false, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_SM_cudak<false, true, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_SM_cudak<true, true, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_SM_cudak, false, float, float2, float4c)
     }
     else
     {
-        dim3 num_threads(128, 1);
         dim3 num_blocks(num_stations, num_stations);
         const size_t shared_mem = num_threads.x * sizeof(float4c);
-        if (frac_bandwidth == 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_cudak<false, false, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_cudak<true, false, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_cudak<false, true, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_cudak<true, true, false, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_cudak, false, float, float2, float4c)
     }
 }
 
@@ -776,73 +713,20 @@ void oskar_cross_correlate_point_cuda_d(
         double frac_bandwidth, double time_int_sec, double gha0_rad,
         double dec0_rad, double4c* d_vis)
 {
+    const double *d_a = 0, *d_b = 0, *d_c = 0;
     if (correlate_version() == VER_NON_SM)
     {
         dim3 num_threads(128, 1);
         dim3 num_blocks(num_stations, (num_stations + OKN_BPK - 1) / OKN_BPK);
         const size_t shared_mem = 0;
-        if (frac_bandwidth == 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_NON_SM_cudak<false, false, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_NON_SM_cudak<true, false, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_NON_SM_cudak<false, true, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_NON_SM_cudak<true, true, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_NON_SM_cudak, false, double, double2, double4c)
     }
     else if (correlate_version() == VER_SM)
     {
         dim3 num_threads(128, 1);
         dim3 num_blocks(num_stations, (num_stations + OKN_BPK - 1) / OKN_BPK);
         const size_t shared_mem = 0;
-        if (frac_bandwidth == 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_SM_cudak<false, false, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_SM_cudak<true, false, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_SM_cudak<false, true, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_SM_cudak<true, true, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_SM_cudak, false, double, double2, double4c)
     }
     else
     {
@@ -850,34 +734,7 @@ void oskar_cross_correlate_point_cuda_d(
         dim3 num_blocks(num_stations, num_stations);
         if (time_int_sec != 0.0) num_threads.x = 64;
         const size_t shared_mem = num_threads.x * sizeof(double4c);
-        if (frac_bandwidth == 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_cudak<false, false, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_cudak<true, false, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_cudak<false, true, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_cudak<true, true, false, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, 0, 0, 0,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_cudak, false, double, double2, double4c)
     }
 }
 
@@ -893,107 +750,24 @@ void oskar_cross_correlate_gaussian_cuda_f(
         float inv_wavelength, float frac_bandwidth, float time_int_sec,
         float gha0_rad, float dec0_rad, float4c* d_vis)
 {
+    const dim3 num_threads(128, 1);
     if (correlate_version() == VER_NON_SM)
     {
-        dim3 num_threads(128, 1);
         dim3 num_blocks(num_stations, (num_stations + OKN_BPK - 1) / OKN_BPK);
         const size_t shared_mem = 0;
-        if (frac_bandwidth == 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_NON_SM_cudak<false, false, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_NON_SM_cudak<true, false, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_NON_SM_cudak<false, true, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_NON_SM_cudak<true, true, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_NON_SM_cudak, true, float, float2, float4c)
     }
     else if (correlate_version() == VER_SM)
     {
-        dim3 num_threads(128, 1);
         dim3 num_blocks(num_stations, (num_stations + OKN_BPK - 1) / OKN_BPK);
         const size_t shared_mem = 0;
-        if (frac_bandwidth == 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_SM_cudak<false, false, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_SM_cudak<true, false, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_SM_cudak<false, true, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_SM_cudak<true, true, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_SM_cudak, true, float, float2, float4c)
     }
     else
     {
-        dim3 num_threads(128, 1);
         dim3 num_blocks(num_stations, num_stations);
         const size_t shared_mem = num_threads.x * sizeof(float4c);
-        if (frac_bandwidth == 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_cudak<false, false, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec == 0.0f)
-            oskar_xcorr_cudak<true, false, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_cudak<false, true, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0f && time_int_sec != 0.0f)
-            oskar_xcorr_cudak<true, true, true, float, float2, float4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_cudak, true, float, float2, float4c)
     }
 }
 
@@ -1014,68 +788,14 @@ void oskar_cross_correlate_gaussian_cuda_d(
         dim3 num_threads(128, 1);
         dim3 num_blocks(num_stations, (num_stations + OKN_BPK - 1) / OKN_BPK);
         const size_t shared_mem = 0;
-        if (frac_bandwidth == 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_NON_SM_cudak<false, false, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_NON_SM_cudak<true, false, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_NON_SM_cudak<false, true, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_NON_SM_cudak<true, true, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_NON_SM_cudak, true, double, double2, double4c)
     }
     else if (correlate_version() == VER_SM)
     {
         dim3 num_threads(128, 1);
         dim3 num_blocks(num_stations, (num_stations + OKN_BPK - 1) / OKN_BPK);
         const size_t shared_mem = 0;
-        if (frac_bandwidth == 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_SM_cudak<false, false, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_SM_cudak<true, false, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_SM_cudak<false, true, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_SM_cudak<true, true, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_SM_cudak, true, double, double2, double4c)
     }
     else
     {
@@ -1083,34 +803,7 @@ void oskar_cross_correlate_gaussian_cuda_d(
         dim3 num_blocks(num_stations, num_stations);
         if (time_int_sec != 0.0) num_threads.x = 64;
         const size_t shared_mem = num_threads.x * sizeof(double4c);
-        if (frac_bandwidth == 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_cudak<false, false, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec == 0.0)
-            oskar_xcorr_cudak<true, false, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth == 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_cudak<false, true, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
-        else if (frac_bandwidth != 0.0 && time_int_sec != 0.0)
-            oskar_xcorr_cudak<true, true, true, double, double2, double4c>
-            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-            (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,
-                    d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
-                    uv_min_lambda, uv_max_lambda, inv_wavelength,
-                    frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+        XCORR_SELECT(oskar_xcorr_cudak, true, double, double2, double4c)
     }
 }
 

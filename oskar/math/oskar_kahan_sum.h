@@ -89,7 +89,7 @@
 
 /**
  * @brief
- * Performs Kahan multiply-add of a complex matrix.
+ * Performs Kahan summation of a complex matrix.
  *
  * @details
  * Performs Kahan summation to avoid loss of precision.
@@ -123,73 +123,5 @@
         OSKAR_KAHAN_SUM_MULTIPLY_COMPLEX(REAL, SUM.b, VAL.b, F, GUARD.b); \
         OSKAR_KAHAN_SUM_MULTIPLY_COMPLEX(REAL, SUM.c, VAL.c, F, GUARD.c); \
         OSKAR_KAHAN_SUM_MULTIPLY_COMPLEX(REAL, SUM.d, VAL.d, F, GUARD.d); }
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Performs Kahan summation (single precision).
- *
- * @details
- * Performs Kahan summation to avoid loss of precision.
- *
- * @param[in,out] sum Updated sum.
- * @param[in]     val Value to add to sum.
- * @param[in,out] c   Guard value (initially 0.0; must preserve between calls).
- */
-OSKAR_INLINE
-void oskar_kahan_sum_f(float* sum, const float val, float* c)
-{
-    float y, t;
-    y = val - *c;
-    t = *sum + y;
-    *c = (t - *sum) - y;
-    *sum = t;
-}
-
-/**
- * @brief
- * Performs Kahan summation of a complex scalar (single precision).
- *
- * @details
- * Performs Kahan summation to avoid loss of precision.
- *
- * @param[in,out] sum Updated sum.
- * @param[in]     val Value to add to sum.
- * @param[in,out] c   Guard value (initially 0.0; must preserve between calls).
- */
-OSKAR_INLINE
-void oskar_kahan_sum_complex_f(float2* sum, const float2 val, float2* c)
-{
-    oskar_kahan_sum_f(&sum->x, val.x, &c->x);
-    oskar_kahan_sum_f(&sum->y, val.y, &c->y);
-}
-
-/**
- * @brief
- * Performs Kahan summation of a complex matrix (single precision).
- *
- * @details
- * Performs Kahan summation to avoid loss of precision.
- *
- * @param[in,out] sum Updated sum.
- * @param[in]     val Value to add to sum.
- * @param[in,out] c   Guard value (initially 0.0; must preserve between calls).
- */
-OSKAR_INLINE
-void oskar_kahan_sum_complex_matrix_f(float4c* sum, const float4c val,
-        float4c* c)
-{
-    oskar_kahan_sum_complex_f(&sum->a, val.a, &c->a);
-    oskar_kahan_sum_complex_f(&sum->b, val.b, &c->b);
-    oskar_kahan_sum_complex_f(&sum->c, val.c, &c->c);
-    oskar_kahan_sum_complex_f(&sum->d, val.d, &c->d);
-}
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* OSKAR_KAHAN_SUM_H_ */

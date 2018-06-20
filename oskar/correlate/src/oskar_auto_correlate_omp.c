@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <math.h>
 #include "correlate/private_correlate_functions_inline.h"
 #include "correlate/oskar_auto_correlate_omp.h"
 #include "math/oskar_add_inline.h"
+#include "math/oskar_kahan_sum.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,31 +41,35 @@ void oskar_auto_correlate_omp_f(const int num_sources, const int num_stations,
         const float* source_U, const float* source_V, float4c* vis)
 {
     int s;
-
-    /* Loop over stations. */
 #pragma omp parallel for private(s)
     for (s = 0; s < num_stations; ++s)
     {
         int i;
-        const float4c *station;
-        float4c sum, guard;
+        float4c m1, m2, sum, guard;
+        const float4c *const jones_station = &jones[s * num_sources];
         OSKAR_CLEAR_COMPLEX_MATRIX(float, sum)
         OSKAR_CLEAR_COMPLEX_MATRIX(float, guard)
-
-        /* Pointer to source vector for station. */
-        station = &jones[s * num_sources];
-
-        /* Accumulate visibility response for source. */
         for (i = 0; i < num_sources; ++i)
-            oskar_accumulate_station_visibility_for_source_inline_f(&sum,
-                    i, source_I, source_Q, source_U, source_V, station,
-                    &guard);
+        {
+            /* Construct source brightness matrix. */
+            OSKAR_CONSTRUCT_B(float, m2,
+                    source_I[i], source_Q[i], source_U[i], source_V[i])
 
-        /* Add result to the station visibility. */
+            /* Multiply first Jones matrix with source brightness matrix. */
+            OSKAR_LOAD_MATRIX(m1, jones_station[i])
+            OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(float2, m1, m2);
+
+            /* Multiply result with second (Hermitian transposed) Jones matrix. */
+            OSKAR_LOAD_MATRIX(m2, jones_station[i])
+            OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(float2, m1, m2);
+
+            /* Accumulate. */
+            OSKAR_KAHAN_SUM_COMPLEX_MATRIX(float, sum, m1, guard)
+        }
+
         /* Blank non-Hermitian values. */
-        sum.a.y = 0.0f;
-        sum.d.y = 0.0f;
-        oskar_add_complex_matrix_in_place_f(&vis[s], &sum);
+        sum.a.y = 0.0f; sum.d.y = 0.0f;
+        OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(vis[s], sum);
     }
 }
 
@@ -75,29 +79,34 @@ void oskar_auto_correlate_omp_d(const int num_sources, const int num_stations,
         const double* source_U, const double* source_V, double4c* vis)
 {
     int s;
-
-    /* Loop over stations. */
 #pragma omp parallel for private(s)
     for (s = 0; s < num_stations; ++s)
     {
         int i;
-        const double4c *station;
-        double4c sum;
+        double4c m1, m2, sum;
+        const double4c *const jones_station = &jones[s * num_sources];
         OSKAR_CLEAR_COMPLEX_MATRIX(double, sum)
-
-        /* Pointer to source vector for station. */
-        station = &jones[s * num_sources];
-
-        /* Accumulate visibility response for source. */
         for (i = 0; i < num_sources; ++i)
-            oskar_accumulate_station_visibility_for_source_inline_d(&sum,
-                    i, source_I, source_Q, source_U, source_V, station);
+        {
+            /* Construct source brightness matrix. */
+            OSKAR_CONSTRUCT_B(double, m2,
+                    source_I[i], source_Q[i], source_U[i], source_V[i])
 
-        /* Add result to the station visibility. */
+            /* Multiply first Jones matrix with source brightness matrix. */
+            OSKAR_LOAD_MATRIX(m1, jones_station[i])
+            OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(double2, m1, m2);
+
+            /* Multiply result with second (Hermitian transposed) Jones matrix. */
+            OSKAR_LOAD_MATRIX(m2, jones_station[i])
+            OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(double2, m1, m2);
+
+            /* Accumulate. */
+            OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(sum, m1)
+        }
+
         /* Blank non-Hermitian values. */
-        sum.a.y = 0.0;
-        sum.d.y = 0.0;
-        oskar_add_complex_matrix_in_place_d(&vis[s], &sum);
+        sum.a.y = 0.0; sum.d.y = 0.0;
+        OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(vis[s], sum);
     }
 }
 

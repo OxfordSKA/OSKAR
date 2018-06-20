@@ -32,21 +32,12 @@
 #include <oskar_global.h>
 #include <math/oskar_cmath.h>
 #include <math/oskar_multiply_inline.h>
-#include <math/oskar_kahan_sum.h>
 
 #define OMEGA_EARTH  7.272205217e-5  /* radians/sec */
 
 #ifdef __cplusplus
 
-/**
- * @brief
- * Function to evaluate sinc(x).
- *
- * @details
- * This function evaluates sinc(x) = sin(x) / x.
- *
- * @param[in] x Function argument.
- */
+/* Evaluates sinc(x) = sin(x) / x. */
 template <typename T>
 OSKAR_INLINE
 T oskar_sinc(const T x);
@@ -82,22 +73,12 @@ float oskar_sinc<float>(const float x)
 
 #endif /* __cplusplus */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* Evaluates sine and cosine of x. */
 #ifdef __CUDACC__
 #define OSKAR_SINCOS(REAL, X, S, C) sincos((REAL)X, &S, &C)
 #else
 #define OSKAR_SINCOS(REAL, X, S, C) S = sin((REAL)X); C = cos((REAL)X)
 #endif
-
-#define OSKAR_ADD_TO_VIS_POL(V, M)                                         \
-        V->a.x += M.a.x; V->a.y += M.a.y;                                  \
-        V->b.x += M.b.x; V->b.y += M.b.y;                                  \
-        V->c.x += M.c.x; V->c.y += M.c.y;                                  \
-        V->d.x += M.d.x; V->d.y += M.d.y;
 
 /* Evaluate various per-baseline terms. */
 #define OSKAR_BASELINE_TERMS(REAL, S_UP, S_UQ, S_VP, S_VQ, S_WP, S_WQ, UU, VV, WW, UU2, VV2, UUVV, UV_LEN) { \
@@ -147,247 +128,12 @@ extern "C" {
 #define OSKAR_LOAD_MATRIX(M, IND8) M = IND8;
 #endif
 
-/**
- * @brief
- * Accumulates the visibility response at one station due to a single source
- * (single precision).
- *
- * @details
- * This function evaluates the visibility response for a single source at a
- * single station, accumulating the result with the existing station
- * visibility. It requires the final (collapsed) Jones matrices for the
- * source and station, and the unmodified Stokes parameters of the source.
- *
- * The output visibility is updated according to:
- *
- * V = V + J * B * J^H
- *
- * where the brightness matrix B is assembled as:
- *
- * B = [ I + Q    U + iV ]
- *     [ U - iV    I - Q ]
- *
- * Visibilities are updated for a single source, even though array pointers are
- * passed to this function. The source is specified using the \p source_id
- * index parameter.
- *
- * @param[in,out] vis   Running total of source visibilities.
- * @param[in] source_id Index of source in all arrays.
- * @param[in] I         Array of source Stokes I values, in Jy.
- * @param[in] Q         Array of source Stokes Q values, in Jy.
- * @param[in] U         Array of source Stokes U values, in Jy.
- * @param[in] V         Array of source Stokes V values, in Jy.
- * @param[in] J         Array of source Jones matrices for station.
- * @param[in,out] guard Updated guard value used in Kahan summation.
- */
-OSKAR_INLINE
-void oskar_accumulate_station_visibility_for_source_inline_f(
-        float4c* restrict vis, const int source_id,
-        const float* restrict I, const float* restrict Q,
-        const float* restrict U, const float* restrict V,
-        const float4c* restrict J
-#ifndef __CUDACC__
-        , float4c* restrict guard
-#endif
-        )
-{
-    float4c m1, m2;
-
-    /* Construct source brightness matrix. */
-    OSKAR_CONSTRUCT_B(float, m2, I[source_id], Q[source_id], U[source_id], V[source_id])
-
-    /* Multiply first Jones matrix with source brightness matrix. */
-    OSKAR_LOAD_MATRIX(m1, J[source_id])
-    oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
-
-    /* Multiply result with second (Hermitian transposed) Jones matrix. */
-    OSKAR_LOAD_MATRIX(m2, J[source_id])
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
-
-#ifdef __CUDACC__
-    /* Accumulate. */
-    OSKAR_ADD_TO_VIS_POL(vis, m1)
-#else
-    oskar_kahan_sum_complex_matrix_f(vis, m1, guard);
-#endif /* __CUDACC__ */
-}
-
-/**
- * @brief
- * Accumulates the visibility response for one station due to a single source
- * (scalar, single precision).
- *
- * @details
- * This function evaluates the visibility response for a single source at one
- * station, accumulating the result with the existing visibility.
- * It requires the final (collapsed) Jones scalars for the source, and the
- * unmodified Stokes I value of the source.
- *
- * The output visibility is updated according to:
- *
- * V = V + J * I * J^H
- *
- * Visibilities are updated for a single source, even though array pointers are
- * passed to this function. The source is specified using the \p source_id
- * index parameter.
- *
- * @param[in,out] vis   Running total of source visibilities.
- * @param[in] source_id Index of source in all arrays.
- * @param[in] I         Array of source Stokes I values, in Jy.
- * @param[in] J         Array of source Jones matrices for station p.
- * @param[in,out] guard Updated guard value used in Kahan summation.
- */
-OSKAR_INLINE
-void oskar_accumulate_station_visibility_for_source_scalar_inline_f(
-        float2* restrict vis, const int source_id, const float* restrict I,
-        const float2* restrict J
-#ifndef __CUDACC__
-        , float2* restrict guard
-#endif
-        )
-{
-    float2 t1, t2;
-    float I_;
-
-    /* Multiply. */
-    I_ = I[source_id];
-    t1 = J[source_id];
-    t2 = t1;
-    oskar_multiply_complex_conjugate_in_place_f(&t1, &t2);
-    t1.x *= I_;
-    t1.y *= I_;
-
-    /* Accumulate. */
-#ifdef __CUDACC__
-    vis->x += t1.x;
-    vis->y += t1.y;
-#else
-    oskar_kahan_sum_complex_f(vis, t1, guard);
-#endif /* __CUDACC__ */
-}
-
-/**
- * @brief
- * Accumulates the visibility response at one station due to a single source
- * (double precision).
- *
- * @details
- * This function evaluates the visibility response for a single source at a
- * single station, accumulating the result with the existing station
- * visibility. It requires the final (collapsed) Jones matrices for the
- * source and station, and the unmodified Stokes parameters of the source.
- *
- * The output visibility is updated according to:
- *
- * V = V + J * B * J^H
- *
- * where the brightness matrix B is assembled as:
- *
- * B = [ I + Q    U + iV ]
- *     [ U - iV    I - Q ]
- *
- * Visibilities are updated for a single source, even though array pointers are
- * passed to this function. The source is specified using the \p source_id
- * index parameter.
- *
- * @param[in,out] vis   Running total of source visibilities.
- * @param[in] source_id Index of source in all arrays.
- * @param[in] I         Array of source Stokes I values, in Jy.
- * @param[in] Q         Array of source Stokes Q values, in Jy.
- * @param[in] U         Array of source Stokes U values, in Jy.
- * @param[in] V         Array of source Stokes V values, in Jy.
- * @param[in] J         Array of source Jones matrices for station.
- */
-OSKAR_INLINE
-void oskar_accumulate_station_visibility_for_source_inline_d(
-        double4c* restrict vis, const int source_id,
-        const double* restrict I, const double* restrict Q,
-        const double* restrict U, const double* restrict V,
-        const double4c* restrict J)
-{
-    double4c m1, m2;
-
-    /* Construct source brightness matrix. */
-    OSKAR_CONSTRUCT_B(double, m2, I[source_id], Q[source_id], U[source_id], V[source_id])
-
-    /* Multiply first Jones matrix with source brightness matrix. */
-    OSKAR_LOAD_MATRIX(m1, J[source_id])
-    oskar_multiply_complex_matrix_hermitian_in_place_d(&m1, &m2);
-
-    /* Multiply result with second (Hermitian transposed) Jones matrix. */
-    OSKAR_LOAD_MATRIX(m2, J[source_id])
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&m1, &m2);
-
-    /* Accumulate. */
-    OSKAR_ADD_TO_VIS_POL(vis, m1)
-}
-
-/**
- * @brief
- * Accumulates the visibility response for one station due to a single source
- * (scalar, double precision).
- *
- * @details
- * This function evaluates the visibility response for a single source at one
- * station, accumulating the result with the existing visibility.
- * It requires the final (collapsed) Jones scalars for the source, and the
- * unmodified Stokes I value of the source.
- *
- * The output visibility is updated according to:
- *
- * V = V + J * I * J^H
- *
- * Visibilities are updated for a single source, even though array pointers are
- * passed to this function. The source is specified using the \p source_id
- * index parameter.
- *
- * @param[in,out] vis   Running total of source visibilities.
- * @param[in] source_id Index of source in all arrays.
- * @param[in] I         Array of source Stokes I values, in Jy.
- * @param[in] J         Array of source Jones matrices for station p.
- */
-OSKAR_INLINE
-void oskar_accumulate_station_visibility_for_source_scalar_inline_d(
-        double2* restrict vis, const int source_id, const double* restrict I,
-        const double2* restrict J)
-{
-    double2 t1, t2;
-    double I_;
-
-    /* Multiply. */
-    I_ = I[source_id];
-    t1 = J[source_id];
-    t2 = t1;
-    oskar_multiply_complex_conjugate_in_place_d(&t1, &t2);
-    t1.x *= I_;
-    t1.y *= I_;
-
-    /* Accumulate. */
-    vis->x += t1.x;
-    vis->y += t1.y;
-}
-
-/**
- * @brief
- * Evaluates the baseline index for the station pair.
- *
- * @details
- * This function evaluates the baseline index, given the indices of the two
- * stations, and the number of stations.
- *
- * @param[in] num_stations  The number of stations.
- * @param[in] p             Index of station p.
- * @param[in] q             Index of station q.
- */
+/* Evaluates a 1D linear baseline index for stations p and q. */
 OSKAR_INLINE
 int oskar_evaluate_baseline_index_inline(const int num_stations,
         const int p, const int q)
 {
     return q * (num_stations - 1) - (q - 1) * q / 2 + p - q - 1;
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* OSKAR_PRIVATE_CORRELATE_FUNCTIONS_INLINE_H_ */
