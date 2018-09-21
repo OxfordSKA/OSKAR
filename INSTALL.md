@@ -52,7 +52,7 @@ These are listed below.
     * -DCUDA_ARCH="<arch>" (default: all)
         Sets the target architecture for the compilation of CUDA device code.
         <arch> must be one of either: 1.3, 2.0, 2.1, 3.0, 3.2, 3.5, 3.7,
-                                      5.0, 5.2, 6.0, 6.1, 6.2, 7.0 or ALL.
+                                      5.0, 5.2, 6.0, 6.1, 6.2, 7.0, 7.2, 7.5 or ALL.
         ALL is for all Kepler, Maxwell and Pascal architectures (>= 3.0).
         Multiple architectures can be specified by separating them with
         semi-colons.
@@ -66,7 +66,7 @@ Advanced Build Options:
         Specifies a custom path in which to look for the CasaCore libraries
         (libcasa_ms.so and others).
         Note: This should only be used if the CasaCore library in the system
-        library path can't be used to build OSKAR..
+        library path can't be used to build OSKAR.
 
     * -DCASACORE_INC_DIR=<path> (default: searches the system include paths)
         Specifies a custom path in which to look for the CasaCore library
