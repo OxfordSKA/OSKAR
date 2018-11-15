@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 #include <cstdio>
 #include <ctime>
 
-using namespace casa;
+using namespace casacore;
 
 static void oskar_ms_add_band(oskar_MeasurementSet* p, int pol_id,
         unsigned int num_channels, double ref_freq,

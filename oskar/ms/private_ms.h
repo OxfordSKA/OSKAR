@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,9 @@
 
 struct oskar_MeasurementSet
 {
-    casa::MeasurementSet* ms;   // Pointer to the Measurement Set.
-    casa::MSColumns* msc;       // Pointer to the sub-tables.
-    casa::MSMainColumns* msmc;  // Pointer to the main columns.
+    casacore::MeasurementSet* ms;   // Pointer to the Measurement Set.
+    casacore::MSColumns* msc;       // Pointer to the sub-tables.
+    casacore::MSMainColumns* msmc;  // Pointer to the main columns.
     char* app_name;
     unsigned int *a1, *a2;
     unsigned int num_pols, num_channels, num_stations, num_receptors;

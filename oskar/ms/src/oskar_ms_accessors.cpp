@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 #include <tables/Tables.h>
 #include <casa/Arrays/Vector.h>
 
-using namespace casa;
+using namespace casacore;
 
 size_t oskar_ms_column_element_size(const oskar_MeasurementSet* p,
         const char* column)

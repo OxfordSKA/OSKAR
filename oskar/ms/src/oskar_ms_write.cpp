@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 #include <tables/Tables.h>
 #include <casa/Arrays/Vector.h>
 
-using namespace casa;
+using namespace casacore;
 
 static void oskar_ms_create_baseline_indices(oskar_MeasurementSet* p,
         unsigned int num_baselines)

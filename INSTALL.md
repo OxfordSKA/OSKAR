@@ -27,7 +27,7 @@ The dependencies are:
 * CMake (https://cmake.org), version >= 3.1
 * [Optional] NVIDIA CUDA (https://developer.nvidia.com/cuda-downloads), version >= 5.5
 * [Optional] Qt 5 (https://www.qt.io)
-* [Optional] casacore (https://github.com/casacore/casacore), version >= 1.5.0
+* [Optional] casacore (https://github.com/casacore/casacore), version >= 2.0.0
 
 ## 2.2. Build Commands
 

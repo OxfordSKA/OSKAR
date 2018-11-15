@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2018, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/Matrix.h>
 
-using namespace casa;
+using namespace casacore;
 
 template<typename T>
 void copy_array(const oskar_MeasurementSet* p, const char* column,
