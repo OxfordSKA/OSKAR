@@ -35,6 +35,8 @@
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
+#include <iomanip>
+#include <sstream>
 
 using namespace casacore;
 
@@ -205,8 +207,13 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
     Vector<Double> pos(3, 0.0);
     for (unsigned int a = 0; a < num_stations; ++a)
     {
+        std::ostringstream output;
+        output << "s" << std::setw(4) << std::setfill('0') << a;
+        String label(output.str());
         p->msc->antenna().position().put(a, pos);
         p->msc->antenna().mount().put(a, "FIXED");
+        p->msc->antenna().name().put(a, label);
+        p->msc->antenna().station().put(a, label);
         p->msc->antenna().dishDiameter().put(a, 1);
         p->msc->antenna().flagRow().put(a, false);
     }
