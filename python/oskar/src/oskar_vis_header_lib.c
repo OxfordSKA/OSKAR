@@ -267,6 +267,70 @@ static PyObject* time_average_sec(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* station_coords(PyObject* self, PyObject* args)
+{
+    oskar_VisHeader* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
+    
+    const oskar_Mem *x_metres, *y_metres, *z_metres;
+    const double *x, *y, *z;
+    const float *xf, *yf, *zf;
+    int num_stations;
+    int *status = NULL;
+
+    num_stations = oskar_vis_header_num_stations(h);
+    if (num_stations == 0) {
+        return PyList_New(0);
+    }
+
+    PyObject *my_list = PyList_New(0);
+
+    x_metres = oskar_vis_header_station_x_offset_ecef_metres(h);
+    y_metres = oskar_vis_header_station_y_offset_ecef_metres(h);
+    z_metres = oskar_vis_header_station_z_offset_ecef_metres(h);
+    
+    if (oskar_mem_type(x_metres) == OSKAR_DOUBLE) {
+        x = oskar_mem_double_const(x_metres, status);
+        y = oskar_mem_double_const(y_metres, status);
+        z = oskar_mem_double_const(z_metres, status);
+    }
+    else
+    {
+        xf = oskar_mem_float_const(x_metres, status);
+        yf = oskar_mem_float_const(y_metres, status);
+        zf = oskar_mem_float_const(z_metres, status);
+    }
+
+    if (my_list == NULL) {
+        return PyErr_NoMemory();
+    }
+
+    for (int i = 0; i < num_stations; ++i) {
+        PyObject *the_tuple = PyTuple_New(3);
+     
+        if (oskar_mem_type(x_metres) == OSKAR_DOUBLE) {
+            PyTuple_SET_ITEM(the_tuple, 0, PyFloat_FromDouble(x[i]));
+            PyTuple_SET_ITEM(the_tuple, 1, PyFloat_FromDouble(y[i]));
+            PyTuple_SET_ITEM(the_tuple, 2, PyFloat_FromDouble(z[i]));
+        }
+        else
+        {
+            PyTuple_SET_ITEM(the_tuple, 0, PyFloat_FromDouble(xf[i]));
+            PyTuple_SET_ITEM(the_tuple, 1, PyFloat_FromDouble(yf[i]));
+            PyTuple_SET_ITEM(the_tuple, 2, PyFloat_FromDouble(zf[i]));
+        }
+
+	if (PyList_Append(my_list, the_tuple) == -1) {
+            return PyErr_NoMemory();
+        }
+    }
+    return my_list;
+}
+
+
+
 /* Method table. */
 static PyMethodDef methods[] =
 {
@@ -305,6 +369,8 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "time_inc_sec()"},
         {"time_average_sec", (PyCFunction)time_average_sec,
                 METH_VARARGS, "time_average_sec()"},
+        {"station_coords", (PyCFunction)station_coords,
+                METH_VARARGS, "station_coords()"},
         {NULL, NULL, 0, NULL}
 };
 
