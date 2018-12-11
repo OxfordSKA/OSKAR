@@ -141,19 +141,24 @@ static PyObject* column_element_type(PyObject* self, PyObject* args)
 static PyObject* create(PyObject* self, PyObject* args)
 {
     oskar_MeasurementSet* h = 0;
-    PyObject *capsule = 0;
+    PyObject *capsule = 0, *use_adios2 = 0;
     int num_pols = 0, num_channels = 0, num_stations = 0;
     int write_autocorr = 0, write_crosscor = 0;
     double freq_start_hz = 0.0, freq_inc_hz = 0.0;
     const char* file_name = 0;
-    if (!PyArg_ParseTuple(args, "siiiddii", &file_name, &num_stations,
+    if (!PyArg_ParseTuple(args, "siiiddiiO", &file_name, &num_stations,
             &num_channels, &num_pols, &freq_start_hz, &freq_inc_hz,
-            &write_autocorr, &write_crosscor)) return 0;
+            &write_autocorr, &write_crosscor, &use_adios2)) return 0;
 
     /* Create the Measurement Set. */
-    h = oskar_ms_create(file_name, "Python script", num_stations, num_channels,
-            num_pols, freq_start_hz, freq_inc_hz, write_autocorr,
-            write_crosscor);
+	 if (PyObject_IsTrue(use_adios2))
+        h = oskar_adios2_ms_create(file_name, "Python script", num_stations,
+                num_channels, num_pols, freq_start_hz, freq_inc_hz,
+                write_autocorr, write_crosscor);
+    else
+        h = oskar_ms_create(file_name, "Python script", num_stations,
+                num_channels, num_pols, freq_start_hz, freq_inc_hz,
+                write_autocorr, write_crosscor);
 
     /* Check for errors. */
     if (!h)

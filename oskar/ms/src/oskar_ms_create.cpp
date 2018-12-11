@@ -29,8 +29,9 @@
 #include "ms/oskar_measurement_set.h"
 #include "ms/private_ms.h"
 
-#include <tables/Tables.h>
 #include <casa/Arrays/Vector.h>
+#include <tables/Tables.h>
+#include <tables/DataMan/Adios2StMan.h>
 
 #include <cstdlib>
 #include <cstdio>
@@ -45,11 +46,37 @@ static void oskar_ms_add_band(oskar_MeasurementSet* p, int pol_id,
         const Vector<double>& chan_freqs,
         const Vector<double>& chan_widths);
 static void oskar_ms_add_pol(oskar_MeasurementSet* p, unsigned int num_pols);
+static oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
+        const char* app_name, unsigned int num_stations,
+        unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
+        double freq_inc_hz, int write_autocorr, int write_crosscorr,
+        bool use_adios2);
 
 oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
         double freq_inc_hz, int write_autocorr, int write_crosscorr)
+{
+    return oskar_ms_create_impl(file_name, app_name, num_stations, num_channels,
+        num_pols, freq_start_hz, freq_inc_hz, write_autocorr, write_crosscorr,
+        false);
+}
+
+oskar_MeasurementSet* oskar_adios2_ms_create(const char* file_name,
+        const char* app_name, unsigned int num_stations,
+        unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
+        double freq_inc_hz, int write_autocorr, int write_crosscorr)
+{
+    return oskar_ms_create_impl(file_name, app_name, num_stations, num_channels,
+        num_pols, freq_start_hz, freq_inc_hz, write_autocorr, write_crosscorr,
+        true);
+}
+
+oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
+        const char* app_name, unsigned int num_stations,
+        unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
+        double freq_inc_hz, int write_autocorr, int write_crosscorr,
+        bool use_adios2)
 {
     oskar_MeasurementSet* p = (oskar_MeasurementSet*)
             calloc(1, sizeof(oskar_MeasurementSet));
@@ -115,9 +142,18 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         tab.bindColumn(MS::columnName(MS::SIGMA), sigmaStorageManager);
 
         // Create tiled column storage managers for DATA and FLAG columns.
-        IPosition dataTileShape(3, num_pols, num_channels, 2 * num_baselines);
-        TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
-        tab.bindColumn(MS::columnName(MS::DATA), dataStorageManager);
+        if (use_adios2)
+        {
+            // This needs access to the Adios2StMan header, which is tricky
+            Adios2StMan adiosStMan;
+            tab.bindColumn(MS::columnName(MS::DATA), adiosStMan);
+        }
+        else
+        {
+            IPosition dataTileShape(3, num_pols, num_channels, 2 * num_baselines);
+            TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
+            tab.bindColumn(MS::columnName(MS::DATA), dataStorageManager);
+        }
         IPosition flagTileShape(3, num_pols, num_channels, 16 * num_baselines);
         TiledColumnStMan flagStorageManager("TiledFlag", flagTileShape);
         tab.bindColumn(MS::columnName(MS::FLAG), flagStorageManager);

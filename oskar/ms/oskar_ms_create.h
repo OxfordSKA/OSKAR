@@ -61,6 +61,29 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
         double freq_inc_hz, int write_autocorr, int write_crosscorr);
 
+/**
+ * @brief Creates a new Measurement Set using the ADIOS2 storage manager.
+ *
+ * @details
+ * Creates a new, empty Measurement Set with the given name. The DATA column
+ * of the Measurement Set will be stored using the ADIOS2 storage manager.
+ *
+ * @param[in] file_name       The file name to use.
+ * @param[in] app_name        The name of the application creating the MS.
+ * @param[in] num_stations    The number of antennas/stations.
+ * @param[in] num_channels    The number of channels in the band.
+ * @param[in] num_pols        The number of polarisations (1, 2 or 4).
+ * @param[in] freq_start_hz   The frequency at the centre of channel 0, in Hz.
+ * @param[in] freq_inc_hz     The channel separation, in Hz.
+ * @param[in] write_autocorr  If set, write auto-correlation data.
+ * @param[in] write_crosscorr If set, write cross-correlation data.
+ */
+OSKAR_MS_EXPORT
+oskar_MeasurementSet* oskar_adios2_ms_create(const char* file_name,
+        const char* app_name, unsigned int num_stations,
+        unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
+        double freq_inc_hz, int write_autocorr, int write_crosscorr);
+
 #ifdef __cplusplus
 }
 #endif
