@@ -152,6 +152,11 @@ class VisHeader(object):
         self.capsule_ensure()
         return _vis_header_lib.time_average_sec(self._capsule)
 
+    def get_station_coords(self):
+        """Returns Antenna location list."""
+        self.capsule_ensure()
+        return _vis_header_lib.station_coords(self._capsule)
+
     # Properties
     amp_type = property(get_amp_type)
     capsule = property(capsule_get, capsule_set)

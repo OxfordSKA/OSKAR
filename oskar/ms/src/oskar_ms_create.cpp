@@ -49,33 +49,37 @@ static void oskar_ms_add_pol(oskar_MeasurementSet* p, unsigned int num_pols);
 static oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
-        double freq_inc_hz, int write_autocorr, int write_crosscorr,
+        double freq_inc_hz, const struct baseline_mapping* baseline_map,
+        int write_autocorr, int write_crosscorr,
         bool use_adios2);
 
 oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
-        double freq_inc_hz, int write_autocorr, int write_crosscorr)
+        double freq_inc_hz, const struct baseline_mapping* baseline_map,
+        int write_autocorr, int write_crosscorr)
 {
     return oskar_ms_create_impl(file_name, app_name, num_stations, num_channels,
-        num_pols, freq_start_hz, freq_inc_hz, write_autocorr, write_crosscorr,
+        num_pols, freq_start_hz, freq_inc_hz, baseline_map, write_autocorr, write_crosscorr,
         false);
 }
 
 oskar_MeasurementSet* oskar_adios2_ms_create(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
-        double freq_inc_hz, int write_autocorr, int write_crosscorr)
+        double freq_inc_hz, const struct baseline_mapping* baseline_map,
+        int write_autocorr, int write_crosscorr)
 {
     return oskar_ms_create_impl(file_name, app_name, num_stations, num_channels,
-        num_pols, freq_start_hz, freq_inc_hz, write_autocorr, write_crosscorr,
+        num_pols, freq_start_hz, freq_inc_hz, baseline_map, write_autocorr, write_crosscorr,
         true);
 }
 
 oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
-        double freq_inc_hz, int write_autocorr, int write_crosscorr,
+        double freq_inc_hz, const struct baseline_mapping* baseline_map,
+        int write_autocorr, int write_crosscorr,
         bool use_adios2)
 {
     oskar_MeasurementSet* p = (oskar_MeasurementSet*)
@@ -106,8 +110,20 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
     try
     {
         unsigned int num_baselines = 0;
+        //if baselines is set then override baseline calculation
+        if (baseline_map != NULL) {
+            num_baselines = baseline_map->num_baselines;
+            p->num_stations = num_baselines;
+            size_t size_bytes = num_baselines * sizeof(unsigned int);
+            p->a1 = (unsigned int*) realloc(p->a1, size_bytes);
+            p->a2 = (unsigned int*) realloc(p->a2, size_bytes);
 
-        if (write_autocorr && write_crosscorr)
+            for (unsigned int i = 0; i < num_baselines; ++i) {
+                p->a1[i] = baseline_map->antennas[i].a1;
+                p->a2[i] = baseline_map->antennas[i].a2;
+            }
+        }
+        else if (write_autocorr && write_crosscorr)
             num_baselines = num_stations * (num_stations + 1) / 2;
         else if (!write_autocorr && write_crosscorr)
             num_baselines = num_stations * (num_stations - 1) / 2;

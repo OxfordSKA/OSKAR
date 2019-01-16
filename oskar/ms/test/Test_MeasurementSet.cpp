@@ -40,7 +40,7 @@ TEST(MeasurementSet, test_create_simple)
     double ay[] = {0, 0, 0};
     double az[] = {0, 0, 0};
     int na = sizeof(ax) / sizeof(double);
-    ms = oskar_ms_create("simple.ms", "test", na, 1, 1, 400e6, 1.0, 0, 1);
+    ms = oskar_ms_create("simple.ms", "test", na, 1, 1, 400e6, 1.0, NULL, 0, 1);
     ASSERT_TRUE(ms);
     oskar_ms_set_phase_centre(ms, 0, 0.0, 1.570796);
     oskar_ms_set_station_coords_d(ms, na, ax, ay, az);
@@ -78,7 +78,7 @@ TEST(MeasurementSet, test_multi_channel)
 
     // Create the Measurement Set.
     oskar_MeasurementSet* ms = oskar_ms_create(filename, "test",
-            n_ant, n_chan, n_pol, freq, chan_width, 0, 1);
+            n_ant, n_chan, n_pol, freq, chan_width, NULL, 0, 1);
     ASSERT_TRUE(ms);
     oskar_ms_set_phase_centre(ms, 0, ra, dec);
 

@@ -142,23 +142,79 @@ static PyObject* create(PyObject* self, PyObject* args)
 {
     oskar_MeasurementSet* h = 0;
     PyObject *capsule = 0, *use_adios2 = 0;
+    struct baseline_mapping* mapping = 0;
+    PyObject *py_baselines = 0;
+
     int num_pols = 0, num_channels = 0, num_stations = 0;
     int write_autocorr = 0, write_crosscor = 0;
     double freq_start_hz = 0.0, freq_inc_hz = 0.0;
     const char* file_name = 0;
-    if (!PyArg_ParseTuple(args, "siiiddiiO", &file_name, &num_stations,
+
+    if (!PyArg_ParseTuple(args, "siiiddOiiO", &file_name, &num_stations,
             &num_channels, &num_pols, &freq_start_hz, &freq_inc_hz,
-            &write_autocorr, &write_crosscor, &use_adios2)) return 0;
+            &py_baselines, &write_autocorr, &write_crosscor, &use_adios2)) return 0;
+
+    if (py_baselines != Py_None) {
+        PyObject *iter = PyObject_GetIter(py_baselines);
+        if (!iter) {
+            PyErr_SetString(PyExc_TypeError, "baseline_map is not iterable.");
+            return NULL;
+        }
+        Py_DECREF(iter);
+
+        size_t py_num_baselines = PyList_Size(py_baselines);
+        mapping = malloc(sizeof(struct baseline_mapping));
+        mapping->antennas = malloc(sizeof(struct antenna_pair)*py_num_baselines);
+        mapping->num_baselines = py_num_baselines;
+
+        for (size_t i = 0; i < py_num_baselines; i++) {
+            PyObject* py_baseline_item = PyList_GetItem(py_baselines, i);
+            if (!PyTuple_Check(py_baseline_item)) {
+                PyErr_SetString(PyExc_TypeError, "baseline item must be tuple.");
+                goto error;
+            }
+
+            PyObject* py_a1 = PyTuple_GetItem(py_baseline_item, 0);
+            if (py_a1 == NULL) {
+                goto error;
+            }
+
+            PyObject* py_a2 = PyTuple_GetItem(py_baseline_item, 1);
+            if (py_a2 == NULL) {
+                goto error;
+            }
+
+            long a1 = PyInt_AsLong(py_a1);
+            if (PyErr_Occurred()) {
+                PyErr_SetString(PyExc_TypeError, "tuple item not int.");
+                goto error;
+            }
+
+            long a2 = PyInt_AsLong(py_a2);
+            if (PyErr_Occurred()) {
+                PyErr_SetString(PyExc_TypeError, "tuple item not int.");
+                goto error;
+            }
+
+            mapping->antennas[i].a1 = a1;
+            mapping->antennas[i].a2 = a2;
+        }
+    }
 
     /* Create the Measurement Set. */
 	 if (PyObject_IsTrue(use_adios2))
         h = oskar_adios2_ms_create(file_name, "Python script", num_stations,
                 num_channels, num_pols, freq_start_hz, freq_inc_hz,
-                write_autocorr, write_crosscor);
+                mapping, write_autocorr, write_crosscor);
     else
         h = oskar_ms_create(file_name, "Python script", num_stations,
                 num_channels, num_pols, freq_start_hz, freq_inc_hz,
-                write_autocorr, write_crosscor);
+                mapping, write_autocorr, write_crosscor);
+
+    if (mapping != NULL) {
+        free(mapping->antennas);
+        free(mapping);
+    }
 
     /* Check for errors. */
     if (!h)
@@ -171,6 +227,13 @@ static PyObject* create(PyObject* self, PyObject* args)
     /* Store the pointer in a capsule and return it. */
     capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)ms_free);
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+
+error:
+    if (mapping != NULL) {
+        free(mapping->antennas);
+        free(mapping);
+    }
+    return NULL;
 }
 
 
@@ -583,7 +646,7 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "column_element_size(column)"},
         {"create", (PyCFunction)create,
                 METH_VARARGS, "create(file_name, num_stations, num_channels, "
-                "num_pols, ref_freq_hz, chan_width_hz, "
+                "num_pols, ref_freq_hz, chan_width_hz, baseline_map, "
                 "write_autocorr, write_crosscor)"},
         {"ensure_num_rows", (PyCFunction)ensure_num_rows,
                 METH_VARARGS, "ensure_num_rows(num_rows)"},
