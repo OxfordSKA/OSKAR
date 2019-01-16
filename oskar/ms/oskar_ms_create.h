@@ -35,9 +35,20 @@
 
 #include <oskar_global.h>
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct antenna_pair {
+    unsigned int a1;
+    unsigned int a2;
+};
+
+struct baseline_mapping {
+    struct antenna_pair* antennas;
+    size_t num_baselines;
+};
 
 /**
  * @brief Creates a new Measurement Set.
@@ -59,7 +70,8 @@ OSKAR_MS_EXPORT
 oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
-        double freq_inc_hz, int write_autocorr, int write_crosscorr);
+        double freq_inc_hz, const struct baseline_mapping* baseline_map,
+        int write_autocorr, int write_crosscorr);
 
 #ifdef __cplusplus
 }

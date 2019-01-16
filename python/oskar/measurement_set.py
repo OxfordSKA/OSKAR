@@ -68,8 +68,8 @@ class MeasurementSet(object):
 
     @classmethod
     def create(cls, file_name, num_stations, num_channels, num_pols,
-               ref_freq_hz, freq_inc_hz, write_autocorr=False,
-               write_crosscorr=True):
+               ref_freq_hz, freq_inc_hz, baseline_map=None,
+               write_autocorr=False, write_crosscorr=True):
         """Creates a new, empty Measurement Set with the given name.
 
         Args:
@@ -92,7 +92,8 @@ class MeasurementSet(object):
         t = MeasurementSet()
         t.capsule = _measurement_set_lib.create(
             file_name, num_stations, num_channels, num_pols,
-            ref_freq_hz, freq_inc_hz, write_autocorr, write_crosscorr)
+            ref_freq_hz, freq_inc_hz, baseline_map,
+            write_autocorr, write_crosscorr)
         return t
 
     def ensure_num_rows(self, num):

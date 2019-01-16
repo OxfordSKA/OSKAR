@@ -98,7 +98,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         /* Create the Measurement Set. */
         ms = oskar_ms_create(output_path, "OSKAR " OSKAR_VERSION_STR,
                 num_stations, num_channels, num_pols,
-                freq_start_hz, freq_inc_hz, autocorr, crosscorr);
+                freq_start_hz, freq_inc_hz, NULL, autocorr, crosscorr);
         free(output_path);
         if (!ms)
         {
