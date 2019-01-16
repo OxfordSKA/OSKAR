@@ -35,6 +35,10 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
+#if PY_MAJOR_VERSION < 3
+#define PyLong_AsLongLong PyInt_AsLong
+#endif
+
 static const char module_doc[] =
         "This module provides an interface to the OSKAR Measurement Set wrapper.";
 static const char name[] = "oskar_MeasurementSet";
@@ -184,13 +188,13 @@ static PyObject* create(PyObject* self, PyObject* args)
                 goto error;
             }
 
-            long a1 = PyInt_AsLong(py_a1);
+            long a1 = PyLong_AsLong(py_a1);
             if (PyErr_Occurred()) {
                 PyErr_SetString(PyExc_TypeError, "tuple item not int.");
                 goto error;
             }
 
-            long a2 = PyInt_AsLong(py_a2);
+            long a2 = PyLong_AsLong(py_a2);
             if (PyErr_Occurred()) {
                 PyErr_SetString(PyExc_TypeError, "tuple item not int.");
                 goto error;
