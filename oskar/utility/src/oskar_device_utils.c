@@ -67,8 +67,8 @@ int oskar_device_count(int *status)
     int num = 0;
     if (*status) return 0;
 #ifdef OSKAR_HAVE_CUDA
-    if (cudaGetDeviceCount(&num) != cudaSuccess)
-        num = 0;
+    *status = cudaGetDeviceCount(&num);
+    if (*status) return 0;
 #endif
     return num;
 }
