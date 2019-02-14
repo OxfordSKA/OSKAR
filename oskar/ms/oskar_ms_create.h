@@ -33,6 +33,10 @@
  * @file oskar_ms_create.h
  */
 
+#ifdef OSKAR_HAVE_MPI
+#include <mpi.h>
+#endif // OSKAR_HAVE_MPI
+
 #include <oskar_global.h>
 
 
@@ -74,6 +78,7 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         double freq_inc_hz, const struct baseline_mapping* baseline_map,
         int write_autocorr, int write_crosscorr);
 
+#ifdef OSKAR_HAVE_MPI
 /**
  * @brief Creates a new Measurement Set using the ADIOS2 storage manager.
  *
@@ -97,6 +102,7 @@ oskar_MeasurementSet* oskar_adios2_ms_create(const char* file_name,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
         double freq_inc_hz, const struct baseline_mapping *baseline_map,
         int write_autocorr, int write_crosscorr);
+#endif // OSKAR_HAVE_MPI
 
 #ifdef __cplusplus
 }
