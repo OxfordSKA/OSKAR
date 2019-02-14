@@ -50,8 +50,11 @@ static oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
         double freq_inc_hz, const struct baseline_mapping* baseline_map,
-        int write_autocorr, int write_crosscorr,
-        bool use_adios2);
+        int write_autocorr, int write_crosscorr, bool use_adios2
+#ifdef OSKAR_HAVE_MPI
+        , MPI_Comm *mpi_comm
+#endif // OSKAR_HAVE_MPI
+        );
 
 oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         const char* app_name, unsigned int num_stations,
@@ -61,26 +64,36 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
 {
     return oskar_ms_create_impl(file_name, app_name, num_stations, num_channels,
         num_pols, freq_start_hz, freq_inc_hz, baseline_map, write_autocorr, write_crosscorr,
-        false);
+        false
+#ifdef OSKAR_HAVE_MPI
+        , NULL
+#endif // OSKAR_HAVE_MPI
+        );
 }
 
-oskar_MeasurementSet* oskar_adios2_ms_create(const char* file_name,
+#ifdef OSKAR_HAVE_MPI
+oskar_MeasurementSet* oskar_ms_create_adios2(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
         double freq_inc_hz, const struct baseline_mapping* baseline_map,
-        int write_autocorr, int write_crosscorr)
+        int write_autocorr, int write_crosscorr, MPI_Comm mpi_comm)
 {
     return oskar_ms_create_impl(file_name, app_name, num_stations, num_channels,
         num_pols, freq_start_hz, freq_inc_hz, baseline_map, write_autocorr, write_crosscorr,
-        true);
+        true, &mpi_comm);
 }
+#endif // OSKAR_HAVE_MPI
+
 
 oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
         double freq_inc_hz, const struct baseline_mapping* baseline_map,
-        int write_autocorr, int write_crosscorr,
-        bool use_adios2)
+        int write_autocorr, int write_crosscorr, bool use_adios2
+#ifdef OSKAR_HAVE_MPI
+        , MPI_Comm *mpi_comm
+#endif // OSKAR_HAVE_MPI
+        )
 {
     oskar_MeasurementSet* p = (oskar_MeasurementSet*)
             calloc(1, sizeof(oskar_MeasurementSet));
@@ -158,13 +171,14 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         tab.bindColumn(MS::columnName(MS::SIGMA), sigmaStorageManager);
 
         // Create tiled column storage managers for DATA and FLAG columns.
+#ifdef OSKAR_HAVE_MPI
         if (use_adios2)
         {
-            // This needs access to the Adios2StMan header, which is tricky
-            Adios2StMan adiosStMan;
+            Adios2StMan adiosStMan(*mpi_comm);
             tab.bindColumn(MS::columnName(MS::DATA), adiosStMan);
         }
         else
+#endif // OSKAR_HAVE_MPI
         {
             IPosition dataTileShape(3, num_pols, num_channels, 2 * num_baselines);
             TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
@@ -175,7 +189,11 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         tab.bindColumn(MS::columnName(MS::FLAG), flagStorageManager);
 
         // Create the Measurement Set.
+#ifdef OSKAR_HAVE_MPI
+        p->ms = new MeasurementSet(*mpi_comm, tab, TableLock(TableLock::PermanentLocking));
+#else
         p->ms = new MeasurementSet(tab, TableLock(TableLock::PermanentLocking));
+#endif // OSKAR_HAVE_MPI
 
         // Create SOURCE sub-table.
         TableDesc descSource = MSSource::requiredTableDesc();

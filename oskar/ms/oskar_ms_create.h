@@ -93,15 +93,17 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
  * @param[in] num_pols        The number of polarisations (1, 2 or 4).
  * @param[in] freq_start_hz   The frequency at the centre of channel 0, in Hz.
  * @param[in] freq_inc_hz     The channel separation, in Hz.
+ * @param[in] baseline_map    A map indicating the antennas on each baseline
  * @param[in] write_autocorr  If set, write auto-correlation data.
  * @param[in] write_crosscorr If set, write cross-correlation data.
+ * @param[in] mpi_comm        The MPI communicator to use with casacore
  */
 OSKAR_MS_EXPORT
-oskar_MeasurementSet* oskar_adios2_ms_create(const char* file_name,
+oskar_MeasurementSet* oskar_ms_create_adios2(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
-        double freq_inc_hz, const struct baseline_mapping *baseline_map,
-        int write_autocorr, int write_crosscorr);
+        double freq_inc_hz, const struct baseline_mapping* baseline_map,
+        int write_autocorr, int write_crosscorr, MPI_Comm mpi_comm);
 #endif // OSKAR_HAVE_MPI
 
 #ifdef __cplusplus
