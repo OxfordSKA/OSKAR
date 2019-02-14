@@ -89,6 +89,7 @@ endif()
 find_package(CasaCore)
 find_package(OpenMP QUIET)
 find_package(Threads REQUIRED)
+find_package(MPI COMPONENTS C)
 if (CUDA_FOUND)
     add_definitions(-DOSKAR_HAVE_CUDA)
 endif()
@@ -100,6 +101,15 @@ if (OpenCL_FOUND)
 endif()
 if (NOT CASACORE_FOUND)
     add_definitions(-DOSKAR_NO_MS)
+endif()
+if (MPI_FOUND)
+    add_definitions(-DOSKAR_HAVE_MPI)
+	 include_directories(${MPI_C_INCLUDE_PATH})
+    # casacore's way of saying *it* has MPI support
+    add_definitions(-DHAVE_MPI)
+    # Avoid linking against MPI cxx libraries that would otherwise occur
+	 # Other macro definitions might be needed by other MPI libraries
+    add_definitions(-DOMPI_SKIP_MPICXX -DMPICH_SKIP_MPICXX)
 endif()
 
 # === Set compiler options.
