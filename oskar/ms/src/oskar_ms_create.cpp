@@ -196,9 +196,15 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         p->app_name = (char*) realloc(p->app_name, strlen(app_name) + 1);
         strcpy(p->app_name, app_name);
     }
+    catch (const std::exception &e)
+    {
+        fprintf(stderr, "Error creating Measurement Set: %s\n", e.what());
+        oskar_ms_close(p);
+        return 0;
+    }
     catch (...)
     {
-        fprintf(stderr, "Error creating Measurement Set!\n");
+        fprintf(stderr, "Unknown error creating Measurement Set!\n");
         oskar_ms_close(p);
         return 0;
     }
