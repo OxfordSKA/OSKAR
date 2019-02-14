@@ -63,6 +63,7 @@ struct baseline_mapping {
  * @param[in] num_pols        The number of polarisations (1, 2 or 4).
  * @param[in] freq_start_hz   The frequency at the centre of channel 0, in Hz.
  * @param[in] freq_inc_hz     The channel separation, in Hz.
+ * @param[in] baseline_map    A map indicating the antennas on each baseline
  * @param[in] write_autocorr  If set, write auto-correlation data.
  * @param[in] write_crosscorr If set, write cross-correlation data.
  */
