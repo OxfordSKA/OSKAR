@@ -13,6 +13,11 @@ except ImportError:
     from distutils.core import setup, Extension
     from distutils.command.build_ext import build_ext
 
+try:
+    import mpi4py
+except:
+    mpi4py = None
+
 # Define the version of OSKAR this is compatible with.
 OSKAR_COMPATIBILITY_VERSION = '2.7'
 
@@ -106,6 +111,11 @@ class BuildExt(build_ext):
                 "using -I or --include-dirs")
         self.include_dirs.insert(0, dirname(header))
         self.include_dirs.insert(0, get_include())
+
+        # Optionally include mpi4py support
+        if mpi4py:
+            self.define = [('OSKAR_HAVE_MPI4PY', 1), ('OSKAR_HAVE_MPI', 1)]
+            self.include_dirs.insert(0, mpi4py.get_include())
 
         # Check the version of OSKAR is compatible.
         version = self.get_oskar_version(header)
