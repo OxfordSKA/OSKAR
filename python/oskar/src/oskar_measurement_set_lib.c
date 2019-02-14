@@ -35,6 +35,10 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
+#ifdef OSKAR_HAVE_MPI4PY
+#include <mpi4py/mpi4py.h>
+#endif // OSKAR_HAVE_MPI4PY
+
 #if PY_MAJOR_VERSION < 3
 #define PyLong_AsLongLong PyInt_AsLong
 #endif
@@ -148,15 +152,47 @@ static PyObject* create(PyObject* self, PyObject* args)
     PyObject *capsule = 0, *use_adios2 = 0;
     struct baseline_mapping* mapping = 0;
     PyObject *py_baselines = 0;
+#if OSKAR_HAVE_MPI4PY
+     PyObject *py_mpi_comm = NULL;
+     MPI_Comm *mpi_comm = NULL;
+#endif // OSKAR_HAVE_MPI4PY
 
     int num_pols = 0, num_channels = 0, num_stations = 0;
     int write_autocorr = 0, write_crosscor = 0;
     double freq_start_hz = 0.0, freq_inc_hz = 0.0;
     const char* file_name = 0;
 
-    if (!PyArg_ParseTuple(args, "siiiddOiiO", &file_name, &num_stations,
+    const char *argspec = "siiiddOiiO"
+#ifdef OSKAR_HAVE_MPI4PY
+                          "|0"
+#endif // OSKAR_HAVE_MPI4PY
+    ;
+
+    if (!PyArg_ParseTuple(args, argspec, &file_name, &num_stations,
             &num_channels, &num_pols, &freq_start_hz, &freq_inc_hz,
-            &py_baselines, &write_autocorr, &write_crosscor, &use_adios2)) return 0;
+            &py_baselines, &write_autocorr, &write_crosscor, &use_adios2
+#ifdef OSKAR_HAVE_MPI4PY
+            , &py_mpi_comm
+#endif // OSKAR_HAVE_MPI4PY
+       )) {
+        return 0;
+    }
+
+#ifdef OSKAR_HAVE_MPI4PY
+    if (py_mpi_comm != Py_None) {
+        mpi_comm = PyMPIComm_Get(py_mpi_comm);
+        if (mpi_comm == NULL) return NULL;
+    }
+    else {
+        *mpi_comm = MPI_COMM_WORLD;
+    }
+#else
+    if (PyObject_IsTrue(use_adios2)) {
+        PyErr_SetString(PyExc_RuntimeError,
+            "ADIOS2 support requested but OSKAR was compiled without MPI support.");
+        return NULL;
+    }
+#endif // OSKAR_HAVE_MPI4PY
 
     if (py_baselines != Py_None) {
         PyObject *iter = PyObject_GetIter(py_baselines);
@@ -206,11 +242,13 @@ static PyObject* create(PyObject* self, PyObject* args)
     }
 
     /* Create the Measurement Set. */
-	 if (PyObject_IsTrue(use_adios2))
-        h = oskar_adios2_ms_create(file_name, "Python script", num_stations,
+#ifdef OSKAR_HAVE_MPI4PY
+    if (PyObject_IsTrue(use_adios2))
+        h = oskar_ms_create_adios2(file_name, "Python script", num_stations,
                 num_channels, num_pols, freq_start_hz, freq_inc_hz,
-                mapping, write_autocorr, write_crosscor);
+                mapping, write_autocorr, write_crosscor, *mpi_comm);
     else
+#endif // OSKAR_HAVE_MPI4PY
         h = oskar_ms_create(file_name, "Python script", num_stations,
                 num_channels, num_pols, freq_start_hz, freq_inc_hz,
                 mapping, write_autocorr, write_crosscor);
@@ -719,6 +757,9 @@ static PyObject* moduleinit(void)
 PyMODINIT_FUNC PyInit__measurement_set_lib(void)
 {
     import_array();
+#if OSKAR_HAVE_MPI4PY
+    import_mpi4py();
+#endif // OSKAR_HAVE_MPI4PY
     return moduleinit();
 }
 #else
@@ -727,6 +768,9 @@ PyMODINIT_FUNC PyInit__measurement_set_lib(void)
 PyMODINIT_FUNC init_measurement_set_lib(void)
 {
     import_array();
+#if OSKAR_HAVE_MPI4PY
+    import_mpi4py();
+#endif // OSKAR_HAVE_MPI4PY
     moduleinit();
     return;
 }
