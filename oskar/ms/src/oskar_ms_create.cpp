@@ -201,11 +201,20 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         MSSource::addColumnToDesc(descSource, MSSource::POSITION);
         SetupNewTable sourceSetup(p->ms->sourceTableName(),
                 descSource, Table::New);
+#ifdef OSKAR_HAVE_MPI
+        Table sourceTable(*mpi_comm, sourceSetup);
+#else
+        Table sourceTable(sourceSetup);
+#endif // OSKAR_HAVE_MPI
         p->ms->rwKeywordSet().defineTable(MS::keywordName(MS::SOURCE),
-                Table(sourceSetup));
+                sourceTable);
 
         // Create all required default subtables.
+#ifdef OSKAR_HAVE_MPI
+        p->ms->createDefaultSubtables(*mpi_comm, Table::New);
+#else
         p->ms->createDefaultSubtables(Table::New);
+#endif // OSKAR_HAVE_MPI
 
         // Create the MSMainColumns and MSColumns objects for accessing data
         // in the main table and subtables.
