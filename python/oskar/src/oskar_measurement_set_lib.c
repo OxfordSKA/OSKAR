@@ -152,7 +152,7 @@ static PyObject* create(PyObject* self, PyObject* args)
     PyObject *capsule = 0, *use_adios2 = 0;
     struct baseline_mapping* mapping = 0;
     PyObject *py_baselines = 0;
-#if OSKAR_HAVE_MPI4PY
+#ifdef OSKAR_HAVE_MPI4PY
      PyObject *py_mpi_comm = NULL;
      MPI_Comm *mpi_comm = NULL;
 #endif // OSKAR_HAVE_MPI4PY
@@ -164,7 +164,7 @@ static PyObject* create(PyObject* self, PyObject* args)
 
     const char *argspec = "siiiddOiiO"
 #ifdef OSKAR_HAVE_MPI4PY
-                          "|0"
+                          "|O"
 #endif // OSKAR_HAVE_MPI4PY
     ;
 
