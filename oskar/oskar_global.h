@@ -171,7 +171,7 @@ enum OSKAR_DIRECTION_TYPE
     #if TARGET_OS_MAC
         #define OSKAR_OS_MAC
     #endif
-#elif __linux
+#elif (defined(__linux) || defined(__linux__))
     #define OSKAR_OS_LINUX
 #elif __unix /* for all unixes not caught above */
     /* Unix */
