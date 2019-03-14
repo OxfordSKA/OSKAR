@@ -190,10 +190,15 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
 
         // Create the Measurement Set.
 #ifdef OSKAR_HAVE_MPI
-        p->ms = new MeasurementSet(*mpi_comm, tab, TableLock(TableLock::PermanentLocking));
-#else
-        p->ms = new MeasurementSet(tab, TableLock(TableLock::PermanentLocking));
+        if (use_adios2)
+        {
+            p->ms = new MeasurementSet(*mpi_comm, tab, TableLock(TableLock::PermanentLocking));
+        }
+        else
 #endif // OSKAR_HAVE_MPI
+        {
+            p->ms = new MeasurementSet(tab, TableLock(TableLock::PermanentLocking));
+        }
 
         // Create SOURCE sub-table.
         TableDesc descSource = MSSource::requiredTableDesc();
@@ -202,19 +207,30 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         SetupNewTable sourceSetup(p->ms->sourceTableName(),
                 descSource, Table::New);
 #ifdef OSKAR_HAVE_MPI
-        Table sourceTable(*mpi_comm, sourceSetup);
-#else
-        Table sourceTable(sourceSetup);
+        Table sourceTable;
+        if (use_adios2)
+        {
+            sourceTable = Table(*mpi_comm, sourceSetup);
+        }
+        else
 #endif // OSKAR_HAVE_MPI
+        {
+            sourceTable = Table(sourceSetup);
+        }
         p->ms->rwKeywordSet().defineTable(MS::keywordName(MS::SOURCE),
                 sourceTable);
 
         // Create all required default subtables.
 #ifdef OSKAR_HAVE_MPI
-        p->ms->createDefaultSubtables(*mpi_comm, Table::New);
-#else
-        p->ms->createDefaultSubtables(Table::New);
+	if (use_adios2)
+        {
+            p->ms->createDefaultSubtables(*mpi_comm, Table::New);
+	}
+	else
 #endif // OSKAR_HAVE_MPI
+        {
+            p->ms->createDefaultSubtables(Table::New);
+        }
 
         // Create the MSMainColumns and MSColumns objects for accessing data
         // in the main table and subtables.
