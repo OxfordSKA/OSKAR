@@ -155,6 +155,7 @@ static PyObject* create(PyObject* self, PyObject* args)
 #ifdef OSKAR_HAVE_MPI4PY
      PyObject *py_mpi_comm = NULL;
      MPI_Comm *mpi_comm = NULL;
+     MPI_Comm world = MPI_COMM_WORLD;
 #endif // OSKAR_HAVE_MPI4PY
 
     int num_pols = 0, num_channels = 0, num_stations = 0;
@@ -178,21 +179,21 @@ static PyObject* create(PyObject* self, PyObject* args)
         return 0;
     }
 
-#ifdef OSKAR_HAVE_MPI4PY
-    if (py_mpi_comm != Py_None) {
-        mpi_comm = PyMPIComm_Get(py_mpi_comm);
-        if (mpi_comm == NULL) return NULL;
-    }
-    else {
-        *mpi_comm = MPI_COMM_WORLD;
-    }
-#else
     if (PyObject_IsTrue(use_adios2)) {
+#ifdef OSKAR_HAVE_MPI4PY
+        if (py_mpi_comm != Py_None) {
+            mpi_comm = PyMPIComm_Get(py_mpi_comm);
+            if (mpi_comm == NULL) return NULL;
+        }
+        else {
+            mpi_comm = &world;
+        }
+#else
         PyErr_SetString(PyExc_RuntimeError,
             "ADIOS2 support requested but OSKAR was compiled without MPI support.");
         return NULL;
-    }
 #endif // OSKAR_HAVE_MPI4PY
+    }
 
     if (py_baselines != Py_None) {
         PyObject *iter = PyObject_GetIter(py_baselines);
