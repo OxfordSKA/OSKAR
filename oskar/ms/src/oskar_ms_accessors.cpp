@@ -113,9 +113,9 @@ size_t* oskar_ms_column_shape(const oskar_MeasurementSet* p, const char* column,
 void oskar_ms_ensure_num_rows(oskar_MeasurementSet* p, unsigned int num)
 {
     if (!p->ms) return;
-    int rows_to_add = (int)num - (int)(p->ms->nrow());
-    if (rows_to_add > 0)
-        p->ms->addRow((unsigned int)rows_to_add);
+    unsigned int curr_rows = p->ms->nrow();
+    if (num > curr_rows)
+        p->ms->addRow(num - curr_rows);
 }
 
 double oskar_ms_freq_inc_hz(const oskar_MeasurementSet* p)
