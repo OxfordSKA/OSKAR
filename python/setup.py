@@ -114,7 +114,8 @@ class BuildExt(build_ext):
 
         # Optionally include mpi4py support
         if mpi4py:
-            self.define = [('OSKAR_HAVE_MPI4PY', 1), ('OSKAR_HAVE_MPI', 1)]
+            self.define = [('OSKAR_HAVE_MPI4PY', 1), ('OSKAR_HAVE_MPI', 1),
+                           ('OMPI_SKIP_MPICXX', 1), ('MPICH_SKIP_MPICXX', 1)]
             self.include_dirs.insert(0, mpi4py.get_include())
 
         # Check the version of OSKAR is compatible.
