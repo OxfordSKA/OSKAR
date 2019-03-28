@@ -104,11 +104,11 @@ if (NOT CASACORE_FOUND)
 endif()
 if (MPI_FOUND)
     add_definitions(-DOSKAR_HAVE_MPI)
-	 include_directories(${MPI_C_INCLUDE_PATH})
+    include_directories(${MPI_C_INCLUDE_PATH})
     # casacore's way of saying *it* has MPI support
     add_definitions(-DHAVE_MPI)
     # Avoid linking against MPI cxx libraries that would otherwise occur
-	 # Other macro definitions might be needed by other MPI libraries
+    # Other macro definitions might be needed by other MPI libraries
     add_definitions(-DOMPI_SKIP_MPICXX -DMPICH_SKIP_MPICXX)
 endif()
 
