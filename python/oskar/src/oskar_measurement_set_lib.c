@@ -152,29 +152,22 @@ static PyObject* create(PyObject* self, PyObject* args)
     PyObject *capsule = 0, *use_adios2 = 0;
     struct baseline_mapping* mapping = 0;
     PyObject *py_baselines = 0;
+    PyObject *py_mpi_comm = NULL;
 #ifdef OSKAR_HAVE_MPI4PY
-     PyObject *py_mpi_comm = NULL;
-     MPI_Comm *mpi_comm = NULL;
-     MPI_Comm world = MPI_COMM_WORLD;
+    MPI_Comm *mpi_comm = NULL;
+    MPI_Comm world = MPI_COMM_WORLD;
 #endif // OSKAR_HAVE_MPI4PY
 
     int num_pols = 0, num_channels = 0, num_stations = 0;
     int write_autocorr = 0, write_crosscor = 0;
     double freq_start_hz = 0.0, freq_inc_hz = 0.0;
     const char* file_name = 0;
-
-    const char *argspec = "siiiddOiiO"
-#ifdef OSKAR_HAVE_MPI4PY
-                          "|O"
-#endif // OSKAR_HAVE_MPI4PY
-    ;
+    const char *argspec = "siiiddOiiOO";
 
     if (!PyArg_ParseTuple(args, argspec, &file_name, &num_stations,
             &num_channels, &num_pols, &freq_start_hz, &freq_inc_hz,
-            &py_baselines, &write_autocorr, &write_crosscor, &use_adios2
-#ifdef OSKAR_HAVE_MPI4PY
-            , &py_mpi_comm
-#endif // OSKAR_HAVE_MPI4PY
+            &py_baselines, &write_autocorr, &write_crosscor, &use_adios2,
+            &py_mpi_comm
        )) {
         return 0;
     }
