@@ -219,7 +219,7 @@ oskar_Interferometer* oskar_interferometer_create(int precision, int* status)
 
     /* Set sensible defaults. */
     h->max_sources_per_chunk = 16384;
-    oskar_interferometer_set_gpus(h, -1, 0, status);
+    oskar_interferometer_set_gpus(h, 0, 0, status);
     oskar_interferometer_set_num_devices(h, -1);
     oskar_interferometer_set_correlation_type(h, "Cross-correlations", status);
     oskar_interferometer_set_horizon_clip(h, 1);
@@ -723,7 +723,8 @@ void oskar_interferometer_set_gpus(oskar_Interferometer* h, int num,
     int i, num_gpus_avail;
     if (*status || !h) return;
     free_device_data(h, status);
-    num_gpus_avail = oskar_device_count(status);
+    if (num != 0)
+        num_gpus_avail = oskar_device_count(status);
     if (*status) return;
     if (num < 0)
     {
