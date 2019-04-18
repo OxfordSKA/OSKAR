@@ -120,10 +120,10 @@ static PyObject* iterate_dict(PyObject* dict,
         {
             char *k, *v, *parent = 0, *full_key = 0, *key_ptr = 0;
 #if PY_MAJOR_VERSION >= 3
-            k = PyUnicode_AsUTF8(key);
-            v = PyUnicode_AsUTF8(value);
+            k = const_cast<char*>(PyUnicode_AsUTF8(key));
+            v = const_cast<char*>(PyUnicode_AsUTF8(value));
             if (parent_key)
-                parent = PyUnicode_AsUTF8(parent_key);
+                parent = const_cast<char*>(PyUnicode_AsUTF8(parent_key));
 #else
             k = PyString_AsString(key);
             v = PyString_AsString(value);
