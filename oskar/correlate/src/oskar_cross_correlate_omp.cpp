@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "correlate/private_correlate_functions_inline.h"
+#include "correlate/define_correlate_utils.h"
 #include "correlate/oskar_cross_correlate_omp.h"
-#include "math/oskar_add_inline.h"
+#include "math/define_multiply.h"
 #include "math/oskar_kahan_sum.h"
+#include "utility/oskar_kernel_macros.h"
+#include "utility/oskar_vector_types.h"
 
 template<typename T1, typename T2>
 struct is_same
@@ -49,53 +51,55 @@ template
 <
 // Compile-time parameters.
 bool BANDWIDTH_SMEARING, bool TIME_SMEARING, bool GAUSSIAN,
-typename REAL, typename REAL2, typename REAL8
+typename REAL, typename REAL2, typename REAL4c
 >
 void oskar_xcorr_omp(
-        const int                   num_sources,
-        const int                   num_stations,
-        const REAL8* const restrict jones,
-        const REAL*  const restrict source_I,
-        const REAL*  const restrict source_Q,
-        const REAL*  const restrict source_U,
-        const REAL*  const restrict source_V,
-        const REAL*  const restrict source_l,
-        const REAL*  const restrict source_m,
-        const REAL*  const restrict source_n,
-        const REAL*  const restrict source_a,
-        const REAL*  const restrict source_b,
-        const REAL*  const restrict source_c,
-        const REAL*  const restrict station_u,
-        const REAL*  const restrict station_v,
-        const REAL*  const restrict station_w,
-        const REAL*  const restrict station_x,
-        const REAL*  const restrict station_y,
-        const REAL                  uv_min_lambda,
-        const REAL                  uv_max_lambda,
-        const REAL                  inv_wavelength,
-        const REAL                  frac_bandwidth,
-        const REAL                  time_int_sec,
-        const REAL                  gha0_rad,
-        const REAL                  dec0_rad,
-        REAL8*             restrict vis)
+        const int                    num_sources,
+        const int                    num_stations,
+        const int                    offset_out,
+        const REAL4c* const RESTRICT jones,
+        const REAL*   const RESTRICT source_I,
+        const REAL*   const RESTRICT source_Q,
+        const REAL*   const RESTRICT source_U,
+        const REAL*   const RESTRICT source_V,
+        const REAL*   const RESTRICT source_l,
+        const REAL*   const RESTRICT source_m,
+        const REAL*   const RESTRICT source_n,
+        const REAL*   const RESTRICT source_a,
+        const REAL*   const RESTRICT source_b,
+        const REAL*   const RESTRICT source_c,
+        const REAL*   const RESTRICT station_u,
+        const REAL*   const RESTRICT station_v,
+        const REAL*   const RESTRICT station_w,
+        const REAL*   const RESTRICT station_x,
+        const REAL*   const RESTRICT station_y,
+        const REAL                   uv_min_lambda,
+        const REAL                   uv_max_lambda,
+        const REAL                   inv_wavelength,
+        const REAL                   frac_bandwidth,
+        const REAL                   time_int_sec,
+        const REAL                   gha0_rad,
+        const REAL                   dec0_rad,
+        REAL4c*             RESTRICT vis)
 {
     // Loop over stations.
 #pragma omp parallel for schedule(dynamic, 1)
     for (int SQ = 0; SQ < num_stations; ++SQ)
     {
         // Pointer to source vector for station q.
-        const REAL8* const station_q = &jones[SQ * num_sources];
+        const REAL4c* const station_q = &jones[SQ * num_sources];
 
         // Loop over baselines for this station.
         for (int SP = SQ + 1; SP < num_stations; ++SP)
         {
             REAL uv_len, uu, vv, ww, uu2, vv2, uuvv, du, dv, dw;
-            REAL8 m1, m2, sum, guard;
+            REAL4c m1, m2, sum, guard;
             OSKAR_CLEAR_COMPLEX_MATRIX(REAL, sum)
-            OSKAR_CLEAR_COMPLEX_MATRIX(REAL, guard)
+            if (is_same<REAL, float>::value)
+                OSKAR_CLEAR_COMPLEX_MATRIX(REAL, guard)
 
             // Pointer to source vector for station p.
-            const REAL8* const station_p = &jones[SP * num_sources];
+            const REAL4c* const station_p = &jones[SP * num_sources];
 
             // Get common baseline values.
             OSKAR_BASELINE_TERMS(REAL, station_u[SP], station_u[SQ],
@@ -120,10 +124,7 @@ void oskar_xcorr_omp(
                             source_c[i] * vv2;
                     smearing = exp((REAL) -t);
                 }
-                else
-                {
-                    smearing = (REAL) 1;
-                }
+                else smearing = (REAL) 1;
                 if (BANDWIDTH_SMEARING || TIME_SMEARING)
                 {
                     const REAL l = source_l[i];
@@ -132,12 +133,12 @@ void oskar_xcorr_omp(
                     if (BANDWIDTH_SMEARING)
                     {
                         const REAL t = uu * l + vv * m + ww * n;
-                        smearing *= oskar_sinc<REAL>(t);
+                        smearing *= OSKAR_SINC(REAL, t);
                     }
                     if (TIME_SMEARING)
                     {
                         const REAL t = du * l + dv * m + dw * n;
-                        smearing *= oskar_sinc<REAL>(t);
+                        smearing *= OSKAR_SINC(REAL, t);
                     }
                 }
 
@@ -166,34 +167,34 @@ void oskar_xcorr_omp(
             }
 
             // Add result to the baseline visibility.
-            int i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
+            int i = OSKAR_BASELINE_INDEX(num_stations, SP, SQ) + offset_out;
             OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(vis[i], sum);
         }
     }
 }
 
-#define XCORR_KERNEL(BS, TS, GAUSSIAN, REAL, REAL2, REAL8)                  \
-        oskar_xcorr_omp<BS, TS, GAUSSIAN, REAL, REAL2, REAL8>               \
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V,            \
-                d_l, d_m, d_n, d_a, d_b, d_c,                               \
+#define XCORR_KERNEL(BS, TS, GAUSSIAN, REAL, REAL2, REAL4c)                 \
+        oskar_xcorr_omp<BS, TS, GAUSSIAN, REAL, REAL2, REAL4c>              \
+        (num_sources, num_stations, offset_out, d_jones,                    \
+                d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,           \
                 d_station_u, d_station_v, d_station_w,                      \
                 d_station_x, d_station_y, uv_min_lambda, uv_max_lambda,     \
                 inv_wavelength, frac_bandwidth, time_int_sec,               \
                 gha0_rad, dec0_rad, d_vis);
 
-#define XCORR_SELECT(GAUSSIAN, REAL, REAL2, REAL8)                          \
+#define XCORR_SELECT(GAUSSIAN, REAL, REAL2, REAL4c)                         \
         if (frac_bandwidth == (REAL)0 && time_int_sec == (REAL)0)           \
-            XCORR_KERNEL(false, false, GAUSSIAN, REAL, REAL2, REAL8)        \
+            XCORR_KERNEL(false, false, GAUSSIAN, REAL, REAL2, REAL4c)       \
         else if (frac_bandwidth != (REAL)0 && time_int_sec == (REAL)0)      \
-            XCORR_KERNEL(true, false, GAUSSIAN, REAL, REAL2, REAL8)         \
+            XCORR_KERNEL(true, false, GAUSSIAN, REAL, REAL2, REAL4c)        \
         else if (frac_bandwidth == (REAL)0 && time_int_sec != (REAL)0)      \
-            XCORR_KERNEL(false, true, GAUSSIAN, REAL, REAL2, REAL8)         \
+            XCORR_KERNEL(false, true, GAUSSIAN, REAL, REAL2, REAL4c)        \
         else if (frac_bandwidth != (REAL)0 && time_int_sec != (REAL)0)      \
-            XCORR_KERNEL(true, true, GAUSSIAN, REAL, REAL2, REAL8)
+            XCORR_KERNEL(true, true, GAUSSIAN, REAL, REAL2, REAL4c)
 
 void oskar_cross_correlate_point_omp_f(
-        int num_sources, int num_stations, const float4c* d_jones,
-        const float* d_I, const float* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const float4c* d_jones, const float* d_I, const float* d_Q,
         const float* d_U, const float* d_V,
         const float* d_l, const float* d_m, const float* d_n,
         const float* d_station_u, const float* d_station_v,
@@ -208,8 +209,8 @@ void oskar_cross_correlate_point_omp_f(
 }
 
 void oskar_cross_correlate_point_omp_d(
-        int num_sources, int num_stations, const double4c* d_jones,
-        const double* d_I, const double* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const double4c* d_jones, const double* d_I, const double* d_Q,
         const double* d_U, const double* d_V,
         const double* d_l, const double* d_m, const double* d_n,
         const double* d_station_u, const double* d_station_v,
@@ -224,8 +225,8 @@ void oskar_cross_correlate_point_omp_d(
 }
 
 void oskar_cross_correlate_gaussian_omp_f(
-        int num_sources, int num_stations, const float4c* d_jones,
-        const float* d_I, const float* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const float4c* d_jones, const float* d_I, const float* d_Q,
         const float* d_U, const float* d_V,
         const float* d_l, const float* d_m, const float* d_n,
         const float* d_a, const float* d_b, const float* d_c,
@@ -239,8 +240,8 @@ void oskar_cross_correlate_gaussian_omp_f(
 }
 
 void oskar_cross_correlate_gaussian_omp_d(
-        int num_sources, int num_stations, const double4c* d_jones,
-        const double* d_I, const double* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const double4c* d_jones, const double* d_I, const double* d_Q,
         const double* d_U, const double* d_V,
         const double* d_l, const double* d_m, const double* d_n,
         const double* d_a, const double* d_b, const double* d_c,

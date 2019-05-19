@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,8 +103,8 @@ TEST(coordinate_conversions, ra_dec_to_directions)
             l_1, m_1, ra0, dec0, ra, dec);
 
     // Check reverse direction.
-    oskar_convert_lon_lat_to_relative_directions_d(num_points,
-            ra, dec, ra0, dec0, l_2, m_2, n_2);
+    oskar_convert_lon_lat_to_relative_directions_3d_d(num_points,
+            ra, dec, ra0, cos(dec0), sin(dec0), l_2, m_2, n_2);
 
     for (int i = 0; i < num_points; ++i)
     {
@@ -155,8 +155,8 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Set RA and Dec of point.
-        oskar_mem_set_value_real(ra,  40 * D2R, 0, 0, &status);
-        oskar_mem_set_value_real(dec, 65 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(ra,  40 * D2R, 0, num, &status);
+        oskar_mem_set_value_real(dec, 65 * D2R, 0, num, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
@@ -165,8 +165,9 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
-        oskar_convert_cirs_relative_directions_to_enu_directions(num, l, m, n,
-                ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0, x, y, z, &status);
+        oskar_convert_cirs_relative_directions_to_enu_directions(0, 0, 0,
+                num, l, m, n, ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0,
+                0, x, y, z, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
@@ -200,8 +201,8 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Set RA and Dec of point.
-        oskar_mem_set_value_real(ra,  40 * D2R, 0, 0, &status);
-        oskar_mem_set_value_real(dec, 65 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(ra,  40 * D2R, 0, num, &status);
+        oskar_mem_set_value_real(dec, 65 * D2R, 0, num, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
@@ -210,9 +211,9 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
-        oskar_convert_cirs_relative_directions_to_enu_directions(num, l, m, n,
-                ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0, x_gpu, y_gpu, z_gpu,
-                &status);
+        oskar_convert_cirs_relative_directions_to_enu_directions(0, 0, 0,
+                num, l, m, n, ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0,
+                0, x_gpu, y_gpu, z_gpu, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
@@ -264,8 +265,8 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Set RA and Dec of point.
-        oskar_mem_set_value_real(ra,  40 * D2R, 0, 0, &status);
-        oskar_mem_set_value_real(dec, 65 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(ra,  40 * D2R, 0, num, &status);
+        oskar_mem_set_value_real(dec, 65 * D2R, 0, num, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
@@ -274,8 +275,9 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
-        oskar_convert_cirs_relative_directions_to_enu_directions(num, l, m, n,
-                ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0, x, y, z, &status);
+        oskar_convert_cirs_relative_directions_to_enu_directions(0, 0, 0,
+                num, l, m, n, ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0,
+                0, x, y, z, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
@@ -309,8 +311,8 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Set RA and Dec of point.
-        oskar_mem_set_value_real(ra,  40 * D2R, 0, 0, &status);
-        oskar_mem_set_value_real(dec, 65 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(ra,  40 * D2R, 0, num, &status);
+        oskar_mem_set_value_real(dec, 65 * D2R, 0, num, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
@@ -319,9 +321,9 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
-        oskar_convert_cirs_relative_directions_to_enu_directions(num, l, m, n,
-                ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0, x_gpu, y_gpu, z_gpu,
-                &status);
+        oskar_convert_cirs_relative_directions_to_enu_directions(0, 0, 0,
+                num, l, m, n, ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0,
+                0, x_gpu, y_gpu, z_gpu, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.

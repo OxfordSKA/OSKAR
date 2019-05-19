@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
+#include "settings/oskar_option_parser.h"
 #include "math/oskar_cmath.h"
 #include "math/oskar_dftw.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_timer.h"
+#include "utility/oskar_device.h"
 #include "oskar_version.h"
 
 #include <cstdlib>
@@ -50,6 +51,7 @@ int main(int argc, char** argv)
     opt.add_flag("-sp", "Use single precision (default: double precision)");
     opt.add_flag("-g", "Run on the GPU");
     opt.add_flag("-c", "Run on the CPU");
+    opt.add_flag("-cl", "Run using OpenCL");
     opt.add_flag("-o2c", "Single level beam pattern, phase only (real to complex DFT)");
     opt.add_flag("-c2c", "Beam pattern using complex inputs (complex to complex DFT)");
     opt.add_flag("-m2m", "Beam pattern using complex, polarised inputs (complex matrix to matrix DFT)");
@@ -80,21 +82,22 @@ int main(int argc, char** argv)
         op_type_count++;
     }
 
-    int loc;
+    int location = -1;
     if (opt.is_set("-g"))
-        loc = OSKAR_GPU;
+        location = OSKAR_GPU;
     if (opt.is_set("-c"))
-        loc = OSKAR_CPU;
-    if (!(opt.is_set("-c") ^ opt.is_set("-g")))
+        location = OSKAR_CPU;
+    if (opt.is_set("-cl"))
+        location = OSKAR_CL;
+    if (location < 0)
     {
-        opt.error("Please select one of -g or -c");
+        opt.error("Please select one of -g, -c or -cl");
         return EXIT_FAILURE;
     }
 
     int precision = opt.is_set("-sp") ? OSKAR_SINGLE : OSKAR_DOUBLE;
     bool evaluate_2d = opt.is_set("-2d") ? true : false;
-    int niter;
-    opt.get("-n")->getInt(niter);
+    int niter = opt.get_int("-n");
 
     if (op_type == UNDEF || op_type_count != 1)
     {
@@ -108,7 +111,6 @@ int main(int argc, char** argv)
         printf("- Number of elements: %i\n", num_elements);
         printf("- Number of directions: %i\n", num_directions);
         printf("- Precision: %s\n", (precision == OSKAR_SINGLE) ? "single" : "double");
-        printf("- %s\n", loc == OSKAR_CPU ? "CPU" : "GPU");
         printf("- %s\n", evaluate_2d ? "2D" : "3D");
         printf("- Operation type: ");
         if (op_type == O2C) printf("o2c\n");
@@ -120,7 +122,8 @@ int main(int argc, char** argv)
     }
 
     double time_taken = 0.0;
-    int status = benchmark(num_elements, num_directions, op_type, loc,
+    oskar_device_set_require_double_precision(precision == OSKAR_DOUBLE);
+    int status = benchmark(num_elements, num_directions, op_type, location,
             precision, evaluate_2d, niter, time_taken);
 
     if (status)
@@ -178,15 +181,16 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
         }
     }
 
-    oskar_Timer *tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    oskar_Timer *tmr = oskar_timer_create(loc);
     if (!status)
     {
+        char* device_name = oskar_device_name(loc, 0);
+        printf("Using device '%s'\n", device_name);
+        free(device_name);
         oskar_timer_start(tmr);
         for (int i = 0; i < niter; ++i)
-        {
-            oskar_dftw(num_elements, 2.0 * M_PI, x_i, y_i, z_i, weights,
-                    num_directions, x, y, z, signal, beam, &status);
-        }
+            oskar_dftw(0, num_elements, 2.0 * M_PI, weights, x_i, y_i, z_i,
+                    0, num_directions, x, y, z, signal, 0, beam, &status);
         time_taken = oskar_timer_elapsed(tmr);
     }
 

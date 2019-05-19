@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,48 +35,20 @@ extern "C" {
 
 oskar_Element* oskar_element_create(int precision, int location, int* status)
 {
-    oskar_Element* data = 0;
-
-    /* Allocate and initialise the structure. */
-    data = (oskar_Element*) malloc(sizeof(oskar_Element));
+    oskar_Element* data = (oskar_Element*) calloc(1, sizeof(oskar_Element));
     if (!data)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
         return 0;
     }
-
-    /* Initialise variables. */
     data->precision = precision;
     data->mem_location = location;
     data->element_type = OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE;
     data->taper_type = OSKAR_ELEMENT_TAPER_NONE;
     data->dipole_length = 0.5;
     data->dipole_length_units = OSKAR_WAVELENGTHS;
-    data->cosine_power = 0.0;
-    data->gaussian_fwhm_rad = 0.0;
-
-    /* Check type. */
     if (precision != OSKAR_SINGLE && precision != OSKAR_DOUBLE)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
-
-    /* Initialise arrays (to zero length). */
-    data->num_freq = 0;
-    data->freqs_hz = 0;
-    data->filename_x = 0;
-    data->filename_y = 0;
-    data->filename_scalar = 0;
-    data->x_h_re = 0;
-    data->x_h_im = 0;
-    data->x_v_re = 0;
-    data->x_v_im = 0;
-    data->y_h_re = 0;
-    data->y_h_im = 0;
-    data->y_v_re = 0;
-    data->y_v_im = 0;
-    data->scalar_re = 0;
-    data->scalar_im = 0;
-
-    /* Return pointer to the structure. */
     return data;
 }
 

@@ -45,7 +45,7 @@ struct oskar_StationWork
     oskar_Mem* weights;          /* Complex scalar. */
     oskar_Mem* weights_error;    /* Complex scalar. */
     oskar_Mem* array_pattern;    /* Complex scalar. */
-    oskar_Mem* normalised_beam;  /* For beam normalisation. */
+    oskar_Mem* beam_out_scratch; /* Output scratch array. */
 
     int num_depths;
     oskar_Mem** beam;            /* For hierarchical stations. */

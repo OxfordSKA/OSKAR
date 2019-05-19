@@ -75,22 +75,22 @@ void oskar_element_read(oskar_Element* data, const char* filename,
     /* Get pointers to surface data based on port number and frequency index. */
     if (port == 0)
     {
-        scalar_re = oskar_element_scalar_re(data, i);
-        scalar_im = oskar_element_scalar_im(data, i);
+        scalar_re = data->scalar_re[i];
+        scalar_im = data->scalar_im[i];
     }
     else if (port == 1)
     {
-        h_re = oskar_element_x_h_re(data, i);
-        h_im = oskar_element_x_h_im(data, i);
-        v_re = oskar_element_x_v_re(data, i);
-        v_im = oskar_element_x_v_im(data, i);
+        h_re = data->x_h_re[i];
+        h_im = data->x_h_im[i];
+        v_re = data->x_v_re[i];
+        v_im = data->x_v_im[i];
     }
     else if (port == 2)
     {
-        h_re = oskar_element_y_h_re(data, i);
-        h_im = oskar_element_y_h_im(data, i);
-        v_re = oskar_element_y_v_re(data, i);
-        v_im = oskar_element_y_v_im(data, i);
+        h_re = data->y_h_re[i];
+        h_im = data->y_h_im[i];
+        v_re = data->y_v_re[i];
+        v_im = data->y_v_im[i];
     }
     else
     {

@@ -78,9 +78,6 @@ void oskar_work_jones_z_resize(oskar_WorkJonesZ* work, int n, int* status);
 OSKAR_EXPORT
 void oskar_work_jones_z_free(oskar_WorkJonesZ* work, int* status);
 
-OSKAR_EXPORT
-int oskar_work_jones_z_type(oskar_WorkJonesZ* work);
-
 #ifdef __cplusplus
 }
 #endif

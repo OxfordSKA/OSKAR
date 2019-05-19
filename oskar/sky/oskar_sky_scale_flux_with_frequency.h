@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2018, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,80 +41,22 @@ extern "C" {
 
 /**
  * @brief
- * Function to scale source fluxes by spectral index values
- * (single precision).
- *
- * @details
- * This function evaluates all fluxes (all Stokes parameters) at the specified
- * frequency using the spectral index of each source. The reference frequency
- * of each source is also updated to the specified frequency.
- *
- * Frequency scaling is performed using the expression:
- *
- * \f[
- * F = F * (\nu / \nu_0)^\alpha
- * \f]
- *
- * where \f$F\f$ is the flux, \f$\nu\f$ is the new frequency, \f$\nu_0\f$ is
- * the reference frequency, and \f$\alpha\f$ is the spectral index value.
- *
- * @param[in] num_sources    The number of sources in the input arrays.
- * @param[in] frequency      The frequency at which to evaluate fluxes, in Hz.
- * @param[in,out] I          Source Stokes I values.
- * @param[in,out] Q          Source Stokes Q values.
- * @param[in,out] U          Source Stokes U values.
- * @param[in,out] V          Source Stokes V values.
- * @param[in,out] ref_freq   Source reference frequency values, in Hz.
- * @param[in] sp_index       Source spectral index values.
- * @param[in] rm             Source rotation measure values, in rad/m^2.
- */
-OSKAR_EXPORT
-void oskar_sky_scale_flux_with_frequency_f(int num_sources, float frequency,
-        float* I, float* Q, float* U, float* V, float* ref_freq,
-        const float* sp_index, const float* rm);
-
-/**
- * @brief
- * Function to scale source fluxes by spectral index values
- * (double precision).
- *
- * @details
- * This function evaluates all fluxes (all Stokes parameters) at the specified
- * frequency using the spectral index of each source. The reference frequency
- * of each source is also updated to the specified frequency.
- *
- * Frequency scaling is performed using the expression:
- *
- * \f[
- * F = F * (\nu / \nu_0)^\alpha
- * \f]
- *
- * where \f$F\f$ is the flux, \f$\nu\f$ is the new frequency, \f$\nu_0\f$ is
- * the reference frequency, and \f$\alpha\f$ is the spectral index value.
- *
- * @param[in] num_sources    The number of sources in the input arrays.
- * @param[in] frequency      The frequency at which to evaluate fluxes, in Hz.
- * @param[in,out] I          Source Stokes I values.
- * @param[in,out] Q          Source Stokes Q values.
- * @param[in,out] U          Source Stokes U values.
- * @param[in,out] V          Source Stokes V values.
- * @param[in,out] ref_freq   Source reference frequency values, in Hz.
- * @param[in] sp_index       Source spectral index values.
- * @param[in] rm             Source rotation measure values, in rad/m^2.
- */
-OSKAR_EXPORT
-void oskar_sky_scale_flux_with_frequency_d(int num_sources, double frequency,
-        double* I, double* Q, double* U, double* V, double* ref_freq,
-        const double* sp_index, const double* rm);
-
-/**
- * @brief
  * Scales all current source brightnesses according to the spectral index for
  * the given frequency.
  *
  * @details
- * This function scales all the existing source brightnesses using the spectral
- * index and the given frequency.
+ * This function evaluates all fluxes (all Stokes parameters) at the specified
+ * frequency using the spectral index of each source. The reference frequency
+ * of each source is also updated to the specified frequency.
+ *
+ * Frequency scaling is performed using the expression:
+ *
+ * \f[
+ * F = F * (\nu / \nu_0)^\alpha
+ * \f]
+ *
+ * where \f$F\f$ is the flux, \f$\nu\f$ is the new frequency, \f$\nu_0\f$ is
+ * the reference frequency, and \f$\alpha\f$ is the spectral index value.
  *
  * @param[in,out] sky The sky model to re-scale.
  * @param[in] frequency The required frequency, in Hz.

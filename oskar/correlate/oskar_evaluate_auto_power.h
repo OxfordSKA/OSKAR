@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,14 +47,17 @@ extern "C" {
  * @details
  * This function evaluates the auto-power product for the supplied sources.
  *
- * @param[in] num_sources    The number of sources in the input arrays.
- * @param[in] jones          Pointer to Jones matrix list.
+ * @param[in] num_sources    The number of sources to evaluate.
+ * @param[in] offset_in      Start offset of input data.
+ * @param[in] jones          Pointer to input Jones data array.
+ * @param[in] offset_out     Start offset of output data.
  * @param[out] out           Pointer to output auto-power product.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_auto_power(int num_sources, const oskar_Mem* jones,
-        oskar_Mem* out, int *status);
+void oskar_evaluate_auto_power(int num_sources,
+        int offset_in, const oskar_Mem* jones,
+        int offset_out, oskar_Mem* out, int *status);
 
 #ifdef __cplusplus
 }

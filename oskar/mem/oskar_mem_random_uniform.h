@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,70 +41,6 @@ extern "C" {
 
 /**
  * @brief
- * Generates uniform random numbers in the interval 0 to 1
- * (single precision, CPU version).
- *
- * @details
- * Generates single-precision uniform random numbers in the interval 0 to 1.
- *
- * This function uses the counter-based stateless "Philox" random number
- * generator from the Random123 library for high performance
- * and crush-resistance.
- *
- * See John K. Salmon et al. "Parallel random numbers: as easy as 1, 2, 3"
- * (doi:10.1145/2063384.2063405)
- *
- * Together, the seed and the counter values completely define the
- * generated data. It is the caller's responsibility to increment the counter
- * value(s) between calls.
- *
- * @param[in]     num_elements Number of elements to fill.
- * @param[in,out] data         Pointer to memory block to fill.
- * @param[in]     seed         Random seed.
- * @param[in]     counter1     User-defined counter.
- * @param[in]     counter2     User-defined counter.
- * @param[in]     counter3     User-defined counter.
- */
-OSKAR_EXPORT
-void oskar_mem_random_uniform_f(
-        const int num_elements, float* data,
-        const unsigned int seed, const unsigned int counter1,
-        const unsigned int counter2, const unsigned int counter3);
-
-/**
- * @brief
- * Generates uniform random numbers in the interval 0 to 1
- * (double precision, CPU version).
- *
- * @details
- * Generates double-precision uniform random numbers in the interval 0 to 1.
- *
- * This function uses the counter-based stateless "Philox" random number
- * generator from the Random123 library for high performance
- * and crush-resistance.
- *
- * See John K. Salmon et al. "Parallel random numbers: as easy as 1, 2, 3"
- * (doi:10.1145/2063384.2063405)
- *
- * Together, the seed and the counter values completely define the
- * generated data. It is the caller's responsibility to increment the counter
- * value(s) between calls.
- *
- * @param[in]     num_elements Number of elements to fill.
- * @param[in,out] data         Pointer to memory block to fill.
- * @param[in]     seed         Random seed.
- * @param[in]     counter1     User-defined counter.
- * @param[in]     counter2     User-defined counter.
- * @param[in]     counter3     User-defined counter.
- */
-OSKAR_EXPORT
-void oskar_mem_random_uniform_d(
-        const int num_elements, double* data,
-        const unsigned int seed, const unsigned int counter1,
-        const unsigned int counter2, const unsigned int counter3);
-
-/**
- * @brief
  * Generates uniform random numbers in the interval 0 to 1.
  *
  * @details
@@ -122,8 +58,6 @@ void oskar_mem_random_uniform_d(
  * value(s) between calls.
  *
  * The array may be either in CPU or GPU memory.
- * A CUDA version of the algorithm is used if the memory is on the GPU to
- * eliminate data transfer overheads.
  *
  * @param[in]     num_elements Number of elements to fill.
  * @param[in,out] data         Pointer to memory block to fill.

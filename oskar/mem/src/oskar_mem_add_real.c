@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,70 +35,47 @@ extern "C" {
 
 void oskar_mem_add_real(oskar_Mem* mem, double val, int* status)
 {
-    int precision, location;
     size_t i, num_elements;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Get meta-data. */
-    precision = oskar_mem_precision(mem);
-    location = oskar_mem_location(mem);
-
-    /* Check for empty array. */
+    const int precision = oskar_mem_precision(mem);
+    const int location = oskar_mem_location(mem);
     num_elements = oskar_mem_length(mem);
-    if (num_elements == 0)
-        return;
-
-    /* Check location. */
+    if (num_elements == 0) return;
     if (location != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
-
-    /* Get total number of elements to add. */
-    if (oskar_mem_is_matrix(mem))
-        num_elements *= 4;
-
-    /* Switch on type and location. */
+    if (oskar_mem_is_matrix(mem)) num_elements *= 4;
     if (oskar_mem_is_complex(mem))
     {
         if (precision == OSKAR_DOUBLE)
         {
-            double2 *t;
-            t = oskar_mem_double2(mem, status);
+            double2 *t = oskar_mem_double2(mem, status);
             for (i = 0; i < num_elements; ++i) t[i].x += val;
         }
         else if (precision == OSKAR_SINGLE)
         {
-            float2 *t;
-            t = oskar_mem_float2(mem, status);
+            float2 *t = oskar_mem_float2(mem, status);
             for (i = 0; i < num_elements; ++i) t[i].x += val;
         }
         else
-        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
-        }
     }
     else
     {
         if (precision == OSKAR_DOUBLE)
         {
-            double *t;
-            t = oskar_mem_double(mem, status);
+            double *t = oskar_mem_double(mem, status);
             for (i = 0; i < num_elements; ++i) t[i] += val;
         }
         else if (precision == OSKAR_SINGLE)
         {
-            float *t;
-            t = oskar_mem_float(mem, status);
+            float *t = oskar_mem_float(mem, status);
             for (i = 0; i < num_elements; ++i) t[i] += val;
         }
         else
-        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
-        }
     }
 }
 

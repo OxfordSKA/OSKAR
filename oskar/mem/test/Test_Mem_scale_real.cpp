@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ TEST(Mem, scale_real_single)
     }
 
     // Scale and check contents.
-    oskar_mem_scale_real(mem_cpu, 2.0, &status);
+    oskar_mem_scale_real(mem_cpu, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
@@ -63,7 +63,7 @@ TEST(Mem, scale_real_single)
     // Copy to device and scale again.
     temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(temp, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
@@ -100,7 +100,7 @@ TEST(Mem, scale_real_single_complex)
     }
 
     // Scale and check contents.
-    oskar_mem_scale_real(mem_cpu, 2.0, &status);
+    oskar_mem_scale_real(mem_cpu, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
@@ -112,7 +112,7 @@ TEST(Mem, scale_real_single_complex)
     // Copy to device and scale again.
     temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(temp, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
@@ -157,7 +157,7 @@ TEST(Mem, scale_real_single_complex_matrix)
     }
 
     // Scale and check contents.
-    oskar_mem_scale_real(mem_cpu, 2.0, &status);
+    oskar_mem_scale_real(mem_cpu, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
@@ -175,7 +175,7 @@ TEST(Mem, scale_real_single_complex_matrix)
     // Copy to device and scale again.
     temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(temp, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
@@ -218,7 +218,7 @@ TEST(Mem, scale_real_double)
     }
 
     // Scale and check contents.
-    oskar_mem_scale_real(mem_cpu, 2.0, &status);
+    oskar_mem_scale_real(mem_cpu, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
@@ -228,7 +228,7 @@ TEST(Mem, scale_real_double)
     // Copy to device and scale again.
     temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(temp, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
@@ -265,7 +265,7 @@ TEST(Mem, scale_real_double_complex)
     }
 
     // Scale and check contents.
-    oskar_mem_scale_real(mem_cpu, 2.0, &status);
+    oskar_mem_scale_real(mem_cpu, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
@@ -277,7 +277,7 @@ TEST(Mem, scale_real_double_complex)
     // Copy to device and scale again.
     temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(temp, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
@@ -322,7 +322,7 @@ TEST(Mem, scale_real_double_complex_matrix)
     }
 
     // Scale and check contents.
-    oskar_mem_scale_real(mem_cpu, 2.0, &status);
+    oskar_mem_scale_real(mem_cpu, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
@@ -340,7 +340,7 @@ TEST(Mem, scale_real_double_complex_matrix)
     // Copy to device and scale again.
     temp = oskar_mem_create_copy(mem_cpu, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_scale_real(temp, 2.0, &status);
+    oskar_mem_scale_real(temp, 2.0, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,10 @@ struct AppRegistrar
 
 }
 
-#define M_CONC(A, B) M_CONC_(A, B)
-#define M_CONC_(A, B) A##B
+#define M_CAT(A, B) M_CAT_(A, B)
+#define M_CAT_(A, B) A##B
 
 #define OSKAR_APP_SETTINGS(app, settings) \
-    static oskar::AppRegistrar M_CONC(r_, __LINE__)(#app, settings);
+    static oskar::AppRegistrar M_CAT(r_, __LINE__)(#app, settings);
 
 #endif /* OSKAR_APP_REGISTRAR_H_ */

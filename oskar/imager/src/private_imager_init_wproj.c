@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OSKAR_HAVE_CUDA
-#include <cufft.h>
-#endif
-
 #include "imager/private_imager.h"
 #include "imager/oskar_imager.h"
 
@@ -38,10 +34,9 @@
 #include "imager/private_imager_init_wproj.h"
 #include "imager/oskar_grid_functions_spheroidal.h"
 #include "math/oskar_cmath.h"
-#include "math/oskar_fftpack_cfft.h"
-#include "math/oskar_fftpack_cfft_f.h"
+#include "math/oskar_fft.h"
 #include "utility/oskar_get_memory_usage.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -96,10 +91,10 @@ static void write_kernel_metadata(oskar_Imager* h,
 }
 #endif
 
-static void compact_kernels(const int num_w_planes, const int* support,
+static void rearrange_kernels(const int num_w_planes, const int* support,
         const int oversample, const int conv_size_half,
         const oskar_Mem* kernels_in, oskar_Mem* kernels_out,
-        int* compacted_kernel_start, int* status);
+        int* rearranged_kernel_start, int* status);
 
 /*
  * W-kernel generation is based on CASA implementation
@@ -107,30 +102,24 @@ static void compact_kernels(const int num_w_planes, const int* support,
  */
 void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 {
-    size_t max_mem_bytes, max_bytes_per_plane, element_size, copy_len;
-    int i, iw, ix, iy, *supp, new_conv_size, oversample, prec;
-    int conv_size, conv_size_half, inner, nearest;
-    double l_max, max_conv_size, max_uvw, max_val, sampling, sum;
-    double *maxes;
-#ifdef OSKAR_HAVE_CUDA
-    cufftHandle cufft_plan = 0;
-#endif
+    size_t max_mem_bytes;
+    int i, iw, ix, iy, *supp;
+    double *maxes, max_uvw, max_val, sampling, sum;
+    oskar_FFT* fft = 0;
     oskar_Mem *screen = 0, *screen_gpu = 0, *screen_ptr = 0;
     oskar_Mem *taper = 0, *taper_gpu = 0, *taper_ptr = 0;
-    oskar_Mem *wsave = 0, *work = 0;
     char *ptr_out, *ptr_in, *fname = 0;
     if (*status) return;
 
     /* Get GCF padding oversample factor and imager precision. */
-    oversample = h->oversample;
-    prec = h->imager_prec;
+    const int oversample = h->oversample;
+    const int prec = h->imager_prec;
 
     /* Calculate required number of w-planes if not set. */
     if (h->ww_max > 0.0)
     {
-        double ww_mid;
+        const double ww_mid = 0.5 * (h->ww_min + h->ww_max);
         max_uvw = 1.05 * h->ww_max;
-        ww_mid = 0.5 * (h->ww_min + h->ww_max);
         if (h->ww_rms > ww_mid)
             max_uvw *= h->ww_rms / ww_mid;
     }
@@ -146,14 +135,14 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 
     /* Calculate convolution kernel size. */
     h->w_scale = pow(h->num_w_planes - 1, 2.0) / max_uvw;
+    const size_t max_bytes_per_plane = 64 * 1024 * 1024; /* 64 MB/plane */
     max_mem_bytes = oskar_get_total_physical_memory();
-    max_bytes_per_plane = 64 * 1024 * 1024; /* 64 MB per plane */
     max_mem_bytes = MIN(max_mem_bytes, max_bytes_per_plane * h->num_w_planes);
-    max_conv_size = sqrt(max_mem_bytes / (16.0 * h->num_w_planes));
-    nearest = oskar_imager_composite_nearest_even(
+    const double max_conv_size = sqrt(max_mem_bytes / (16. * h->num_w_planes));
+    const int nearest = oskar_imager_composite_nearest_even(
             2 * (int)(max_conv_size / 2.0), 0, 0);
-    conv_size = MIN((int)(h->image_size * h->image_padding), nearest);
-    conv_size_half = conv_size / 2 - 1;
+    const int conv_size = MIN((int)(h->image_size * h->image_padding),nearest);
+    const int conv_size_half = conv_size / 2 - 1;
     h->conv_size_half = conv_size_half;
 
     /* Allocate kernels and support array. */
@@ -171,12 +160,12 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     h->w_kernels_compact = oskar_mem_create(prec | OSKAR_COMPLEX, OSKAR_CPU,
             0, status);
     supp = oskar_mem_int(h->w_support, status);
-    element_size = oskar_mem_element_size(oskar_mem_type(h->w_kernels));
+    const size_t element_size = oskar_mem_element_size(prec | OSKAR_COMPLEX);
     if (*status) return;
 
     /* Get size of inner region of kernel and padded grid size. */
-    inner = conv_size / oversample;
-    l_max = sin(0.5 * h->fov_deg * M_PI/180.0);
+    const int inner = conv_size / oversample;
+    const double l_max = sin(0.5 * h->fov_deg * M_PI/180.0);
     sampling = (2.0 * l_max * oversample) / h->image_size;
     sampling *= ((double) oskar_imager_plane_size(h)) / ((double) conv_size);
 
@@ -184,33 +173,17 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     screen = oskar_mem_create(prec | OSKAR_COMPLEX,
             OSKAR_CPU, conv_size * conv_size, status);
     screen_ptr = screen;
-#ifdef OSKAR_HAVE_CUDA
-    if (h->generate_w_kernels_on_gpu && h->num_gpus > 0)
+    const int fft_loc = (h->generate_w_kernels_on_gpu && h->num_gpus > 0) ?
+            OSKAR_GPU : OSKAR_CPU;
+    if (fft_loc != OSKAR_CPU)
     {
-        oskar_device_set(h->gpu_ids[0], status);
+        oskar_device_set(h->dev_loc, h->gpu_ids[0], status);
         screen_gpu = oskar_mem_create(prec | OSKAR_COMPLEX,
-                OSKAR_GPU, conv_size * conv_size, status);
+                h->dev_loc, conv_size * conv_size, status);
         screen_ptr = screen_gpu;
-        if (prec == OSKAR_DOUBLE)
-            cufftPlan2d(&cufft_plan, conv_size, conv_size, CUFFT_Z2Z);
-        else
-            cufftPlan2d(&cufft_plan, conv_size, conv_size, CUFFT_C2C);
     }
-    else
-#endif
-    {
-        int len_save = 4 * conv_size +
-                2 * (int)(log((double)conv_size) / log(2.0)) + 8;
-        wsave = oskar_mem_create(prec, OSKAR_CPU, len_save, status);
-        work = oskar_mem_create(prec, OSKAR_CPU,
-                2 * conv_size * conv_size, status);
-        if (prec == OSKAR_DOUBLE)
-            oskar_fftpack_cfft2i(conv_size, conv_size,
-                    oskar_mem_double(wsave, status));
-        else
-            oskar_fftpack_cfft2i_f(conv_size, conv_size,
-                    oskar_mem_float(wsave, status));
-    }
+    fft = oskar_fft_create(h->imager_prec, fft_loc, 2, conv_size, 0, status);
+    oskar_fft_set_ensure_consistent_norm(fft, 0);
 
     /* Generate 1D spheroidal tapering function to cover the inner region. */
     taper = oskar_mem_create(prec, OSKAR_CPU, inner, status);
@@ -220,8 +193,7 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         double* t = oskar_mem_double(taper, status);
         for (i = 0; i < inner; ++i)
         {
-            double nu;
-            nu = (i - (inner / 2)) / ((double)(inner / 2));
+            const double nu = (i - (inner / 2)) / ((double)(inner / 2));
             t[i] = oskar_grid_function_spheroidal(fabs(nu));
         }
     }
@@ -230,22 +202,21 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         float* t = oskar_mem_float(taper, status);
         for (i = 0; i < inner; ++i)
         {
-            double nu;
-            nu = (i - (inner / 2)) / ((double)(inner / 2));
+            const double nu = (i - (inner / 2)) / ((double)(inner / 2));
             t[i] = oskar_grid_function_spheroidal(fabs(nu));
         }
     }
 #ifdef OSKAR_HAVE_CUDA
     if (h->generate_w_kernels_on_gpu && h->num_gpus > 0)
     {
-        taper_gpu = oskar_mem_create_copy(taper, OSKAR_GPU, status);
+        taper_gpu = oskar_mem_create_copy(taper, h->dev_loc, status);
         taper_ptr = taper_gpu;
     }
 #endif
 
     /* Evaluate kernels. */
-    ptr_in   = oskar_mem_char(screen);
-    copy_len = element_size * conv_size_half;
+    ptr_in = oskar_mem_char(screen);
+    const size_t copy_len = element_size * conv_size_half;
     maxes = (double*) calloc(h->num_w_planes, sizeof(double));
     for (iw = 0; iw < h->num_w_planes; ++iw)
     {
@@ -257,31 +228,9 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         if (*status) break;
 
         /* Perform the FFT to get the kernel. No shifts are required. */
-#ifdef OSKAR_HAVE_CUDA
-        if (h->generate_w_kernels_on_gpu && h->num_gpus > 0)
-        {
-            if (oskar_mem_precision(screen) == OSKAR_DOUBLE)
-                cufftExecZ2Z(cufft_plan, oskar_mem_void(screen_ptr),
-                        oskar_mem_void(screen_ptr), CUFFT_FORWARD);
-            else
-                cufftExecC2C(cufft_plan, oskar_mem_void(screen_ptr),
-                        oskar_mem_void(screen_ptr), CUFFT_FORWARD);
+        oskar_fft_exec(fft, screen_ptr, status);
+        if (screen_ptr != screen)
             oskar_mem_copy(screen, screen_ptr, status);
-        }
-        else
-#endif
-        {
-            if (oskar_mem_precision(screen_ptr) == OSKAR_DOUBLE)
-                oskar_fftpack_cfft2f(conv_size, conv_size, conv_size,
-                        oskar_mem_double(screen_ptr, status),
-                        oskar_mem_double(wsave, status),
-                        oskar_mem_double(work, status));
-            else
-                oskar_fftpack_cfft2f_f(conv_size, conv_size, conv_size,
-                        oskar_mem_float(screen_ptr, status),
-                        oskar_mem_float(wsave, status),
-                        oskar_mem_float(work, status));
-        }
         if (*status) break;
 
         /* Get the maximum (from the first element). */
@@ -308,40 +257,36 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     }
 
     /* Clean up. */
-#ifdef OSKAR_HAVE_CUDA
-    cufftDestroy(cufft_plan);
-#endif
+    oskar_fft_free(fft);
     oskar_mem_free(screen, status);
     oskar_mem_free(screen_gpu, status);
     oskar_mem_free(taper, status);
     oskar_mem_free(taper_gpu, status);
-    oskar_mem_free(wsave, status);
-    oskar_mem_free(work, status);
 
     /* Normalise each plane by the maximum. */
     if (*status) return;
     max_val = -INT_MAX;
     for (iw = 0; iw < h->num_w_planes; ++iw) max_val = MAX(max_val, maxes[iw]);
-    oskar_mem_scale_real(h->w_kernels, 1.0 / max_val, status);
+    oskar_mem_scale_real(h->w_kernels, 1.0 / max_val,
+            0, oskar_mem_length(h->w_kernels), status);
     free(maxes);
 
     /* Find the support size of each kernel by stepping in from the edge. */
     for (iw = 0; iw < h->num_w_planes; ++iw)
     {
-        int trial = 0, found = 0, plane_offset, ind1, ind2;
-        double v1, v2;
+        int trial = 0, found = 0;
         if (*status) break;
-        plane_offset = conv_size_half * conv_size_half * iw;
+        const int plane_offset = conv_size_half * conv_size_half * iw;
         if (oskar_mem_precision(h->w_kernels) == OSKAR_DOUBLE)
         {
-            const double *restrict p = oskar_mem_double_const(
+            const double *RESTRICT p = oskar_mem_double_const(
                     h->w_kernels, status);
             for (trial = conv_size_half - 1; trial > 0; trial--)
             {
-                ind1 = 2 * (trial * conv_size_half + plane_offset);
-                ind2 = 2 * (trial + plane_offset);
-                v1 = sqrt(p[ind1]*p[ind1] + p[ind1+1]*p[ind1+1]);
-                v2 = sqrt(p[ind2]*p[ind2] + p[ind2+1]*p[ind2+1]);
+                const int i1 = 2 * (trial * conv_size_half + plane_offset);
+                const int i2 = 2 * (trial + plane_offset);
+                const double v1 = sqrt(p[i1]*p[i1] + p[i1+1]*p[i1+1]);
+                const double v2 = sqrt(p[i2]*p[i2] + p[i2+1]*p[i2+1]);
                 if ((v1 > 1e-3) || (v2 > 1e-3))
                 {
                     found = 1;
@@ -351,14 +296,14 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         }
         else
         {
-            const float *restrict p = oskar_mem_float_const(
+            const float *RESTRICT p = oskar_mem_float_const(
                     h->w_kernels, status);
             for (trial = conv_size_half - 1; trial > 0; trial--)
             {
-                ind1 = 2 * (trial * conv_size_half + plane_offset);
-                ind2 = 2 * (trial + plane_offset);
-                v1 = sqrt(p[ind1]*p[ind1] + p[ind1+1]*p[ind1+1]);
-                v2 = sqrt(p[ind2]*p[ind2] + p[ind2+1]*p[ind2+1]);
+                const int i1 = 2 * (trial * conv_size_half + plane_offset);
+                const int i2 = 2 * (trial + plane_offset);
+                const double v1 = sqrt(p[i1]*p[i1] + p[i1+1]*p[i1+1]);
+                const double v2 = sqrt(p[i2]*p[i2] + p[i2+1]*p[i2+1]);
                 if ((v1 > 1e-3) || (v2 > 1e-3))
                 {
                     found = 1;
@@ -378,16 +323,13 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     /* Compact the kernels if we can. */
     max_val = -INT_MAX;
     for (iw = 0; iw < h->num_w_planes; ++iw) max_val = MAX(max_val, supp[iw]);
-    new_conv_size = 2 * (max_val + 2) * oversample;
+    const int new_conv_size = 2 * (max_val + 2) * oversample;
     if (new_conv_size < conv_size)
     {
-        char *ptr;
-        int new_conv_size_half;
         size_t in = 0, out = 0;
-        ptr = oskar_mem_char(h->w_kernels);
-        new_conv_size_half = new_conv_size / 2 - 2;
-        copy_len = element_size * new_conv_size_half;
-
+        char *ptr = oskar_mem_char(h->w_kernels);
+        const int new_conv_size_half = new_conv_size / 2 - 2;
+        const size_t copy_len = element_size * new_conv_size_half;
         for (iw = 0; iw < h->num_w_planes; ++iw)
         {
             in = iw * conv_size_half * conv_size_half * element_size;
@@ -399,8 +341,7 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
                 out += copy_len;
             }
         }
-        conv_size = new_conv_size;
-        h->conv_size_half = conv_size_half = new_conv_size_half;
+        h->conv_size_half = new_conv_size_half;
         oskar_mem_realloc(h->w_kernels,
                 ((size_t) h->num_w_planes) * ((size_t) new_conv_size_half) *
                 ((size_t) new_conv_size_half), status);
@@ -421,29 +362,30 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     sum = 0.0; /* Real part only. */
     if (oskar_mem_precision(h->w_kernels) == OSKAR_DOUBLE)
     {
-        const double *restrict p = oskar_mem_double_const(h->w_kernels, status);
+        const double *RESTRICT p = oskar_mem_double_const(h->w_kernels, status);
         for (iy = -supp[0]; iy <= supp[0]; ++iy)
             for (ix = -supp[0]; ix <= supp[0]; ++ix)
                 sum += p[2 * (abs(ix) * oversample +
-                        conv_size_half * (abs(iy) * oversample))];
+                        h->conv_size_half * (abs(iy) * oversample))];
     }
     else
     {
-        const float *restrict p = oskar_mem_float_const(h->w_kernels, status);
+        const float *RESTRICT p = oskar_mem_float_const(h->w_kernels, status);
         for (iy = -supp[0]; iy <= supp[0]; ++iy)
             for (ix = -supp[0]; ix <= supp[0]; ++ix)
                 sum += p[2 * (abs(ix) * oversample +
-                        conv_size_half * (abs(iy) * oversample))];
+                        h->conv_size_half * (abs(iy) * oversample))];
     }
-    oskar_mem_scale_real(h->w_kernels, 1.0 / sum, status);
+    oskar_mem_scale_real(h->w_kernels, 1.0 / sum,
+            0, oskar_mem_length(h->w_kernels), status);
 
 #if SAVE_KERNELS
     /* Save kernels to a FITS file if necessary. */
     fname = (char*) calloc(20 + (h->input_root ? strlen(h->input_root) : 0), 1);
     sprintf(fname, "%s_KERNELS", h->input_root ? h->input_root : "");
     oskar_mem_write_fits_cube(h->w_kernels, fname,
-            conv_size_half, conv_size_half, h->num_w_planes, -1, status);
-    
+            h->conv_size_half, h->conv_size_half, h->num_w_planes, -1, status);
+
     /* Write kernel metadata. */
     sprintf(fname, "%s_KERNELS_REAL.fits", h->input_root ? h->input_root : "");
     write_kernel_metadata(h, fname, status);
@@ -451,110 +393,100 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     write_kernel_metadata(h, fname, status);
 #endif
     free(fname);
-    
-    /* Compact and rearrange the kernels. */
-    compact_kernels(h->num_w_planes, supp, oversample, conv_size_half,
+
+    /* Rearrange the kernels. */
+    rearrange_kernels(h->num_w_planes, supp, oversample, h->conv_size_half,
             h->w_kernels, h->w_kernels_compact,
             oskar_mem_int(h->w_kernel_start, status), status);
+
+    /* Initialise device memory if required. */
+    if (h->num_gpus > 0)
+    {
+        if (h->num_devices < h->num_gpus)
+            oskar_imager_set_num_devices(h, h->num_gpus);
+        for (i = 0; i < h->num_gpus; ++i)
+        {
+            DeviceData* d = &h->d[i];
+            oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
+            if (*status) break;
+            oskar_mem_free(d->w_kernels_compact, status);
+            oskar_mem_free(d->w_kernel_start, status);
+            oskar_mem_free(d->w_support, status);
+            d->w_kernels_compact = oskar_mem_create_copy(
+                    h->w_kernels_compact, h->dev_loc, status);
+            d->w_kernel_start = oskar_mem_create_copy(
+                    h->w_kernel_start, h->dev_loc, status);
+            d->w_support = oskar_mem_create_copy(
+                    h->w_support, h->dev_loc, status);
+        }
+    }
 }
 
-static void compact_kernels(const int num_w_planes, const int* support,
+static void rearrange_kernels(const int num_w_planes, const int* support,
         const int oversample, const int conv_size_half,
         const oskar_Mem* kernels_in, oskar_Mem* kernels_out,
-        int* compacted_kernel_start, int* status)
+        int* rearranged_kernel_start, int* status)
 {
-    int compacted_size = 0, w, j, k, off_u, off_v;
+    int w, j, k, off_u, off_v, rearranged_size = 0;
     float2*  out_f;
     double2* out_d;
     const float2*  in_f = (const float2*)  oskar_mem_void_const(kernels_in);
     const double2* in_d = (const double2*) oskar_mem_void_const(kernels_in);
     const int oversample_h = oversample / 2;
     const int prec = oskar_mem_precision(kernels_in);
+    const int height = oversample_h + 1;
 
-    /* Inside each kernel, we only access elements at locations
-     *     id = abs(off + i * oversample)
-     * where
-     *     off \in [-oversample/2, oversample/2]
-     * and
-     *     i = -w_support, ..., -1, 0, 1, ..., w_support
-     *
-     * This means we access locations between
-     *     id = 0    and    id = oversample/2 + w_support * oversample
-     *
-     * The size of each compacted convolution kernel is therefore
-     *     (oversample/2 + w_support * oversample + 1)^2
-     *
-     * Allocate enough memory for the compacted kernels. */
+    /* Allocate enough memory for the rearranged kernels. */
     for (w = 0; w < num_w_planes; w++)
     {
-        int size = oversample_h + support[w] * oversample + 1;
-        size = size * size;
-        compacted_kernel_start[w] = compacted_size;
-        compacted_size += size;
+        const int conv_len = 2 * support[w] + 1;
+        const int width = (oversample_h * conv_len + 1) * conv_len;
+        rearranged_kernel_start[w] = rearranged_size;
+        rearranged_size += (width * height);
     }
-    oskar_mem_realloc(kernels_out, (size_t) compacted_size, status);
+    oskar_mem_realloc(kernels_out, (size_t) rearranged_size, status);
+    /* oskar_mem_set_value_real(kernels_out, 1e9, 0, 0, status); */
     out_f = (float2*)  oskar_mem_void(kernels_out);
     out_d = (double2*) oskar_mem_void(kernels_out);
 
     for (w = 0; w < num_w_planes; w++)
     {
         const int w_support = support[w];
-        const int start_in = w * conv_size_half * conv_size_half;
-        const int start_out = compacted_kernel_start[w];
-        const int size = oversample_h + w_support * oversample + 1;
+        const int conv_len = 2 * support[w] + 1;
+        const int width = (oversample_h * conv_len + 1) * conv_len;
+        const int c_in = w * conv_size_half * conv_size_half;
+        const int c_out = rearranged_kernel_start[w];
 
-        for (off_v = -oversample_h + 1; off_v <= oversample_h; off_v++)
+        /* Within each kernel, off_u is slowest varying, so if the
+         * rearranged kernel is viewed as a very squashed image, the
+         * row index to use for off_u is given by width * abs(off_u).
+         *
+         * "Reverse" rows and rearrange elements in U dimension
+         * for reasonable cache utilisation.
+         * For idx_v = abs(off_v + j * oversample), the offset from the
+         * start of the row is given by width-1 - (idx_v * conv_len).
+         * Stride is +1 for positive or zero values of off_u;
+         * stride is -1 for negative values of off_u.
+         */
+        for (off_u = -oversample_h; off_u <= oversample_h; off_u++)
         {
-            for (j = 0; j <= w_support; j++)
+            const int mid = c_out + (abs(off_u) + 1) * width - 1 - w_support;
+            const int stride = (off_u >= 0) ? 1 : -1;
+            for (off_v = -oversample_h; off_v <= oversample_h; off_v++)
             {
-                /* Use the original layout in V/Y dimension. */
-                const int iy = abs(off_v + j * oversample);
-                for (off_u = -oversample_h + 1; off_u <= oversample_h; off_u++)
+                for (j = 0; j <= w_support; j++)
                 {
-                    for (k = 0; k <= w_support; k++)
+                    const int idx_v = abs(off_v + j * oversample);
+                    const int p = mid - idx_v * conv_len;
+                    for (k = -w_support; k <= w_support; k++)
                     {
-                        int abs_off_u, i_in, i_out, my_k, my_idx, off;
-                        const int ix = abs(off_u + k * oversample);
-
-                        /* We want linear stride in the kernel's U direction.
-                         * We do this as follows ( idx(x) = (x ? 1 : 0) below)
-                         *
-                         * If off_u = -oversample/2
-                         *     idx = w_support - k + ind(k >= 1)
-                         * If 0 >= off_u > -oversample/2
-                         *     idx = w_support - k
-                         * If off_u > 0
-                         *     idx = idx(-k) - symmetry in k
-                         *
-                         * We now need to decide how to store these things.
-                         * For 0 > off_u > -oversample/2
-                         *     store the row at |off_u - 1| * row_length = |off_u - 1| * (2w_support + 1)
-                         * For off_u = 0
-                         *     store the row at (oversample/2 - 1) * prev_row_lengths = (oversample/2 - 1) * (2w_support + 1)
-                         * For off_u = -oversample/2
-                         *     store the row at the end of the data for off_u
-                         *     = (oversample/2 - 1) * (2w_support + 1) + (w_support + 1)
-                         */
-                        abs_off_u = abs(off_u);
-                        if (abs_off_u == 0) abs_off_u = oversample_h;
-
-                        off = (abs_off_u - 1) * (2 * w_support + 1);
-                        if (abs(off_u) == oversample_h) off += w_support + 1;
-
-                        my_k = (off_u <= 0) ? k : -k;
-                        if (off_u == 0)
-                            my_idx = w_support - abs(k);
-                        else if (abs_off_u == oversample_h)
-                            my_idx = w_support - abs(k) + (my_k >= 1 ? 1 : 0);
-                        else
-                            my_idx = w_support + my_k;
-
-                        i_in = start_in + iy * conv_size_half + ix;
-                        i_out = start_out + iy * size + (off + my_idx);
+                        const int idx_u = abs(off_u + k * oversample);
+                        const int a = c_in + idx_v * conv_size_half + idx_u;
+                        const int b = p + stride * k;
                         if (prec == OSKAR_SINGLE)
-                            out_f[i_out] = in_f[i_in];
+                            out_f[b] = in_f[a];
                         else
-                            out_d[i_out] = in_d[i_in];
+                            out_d[b] = in_d[a];
                     }
                 }
             }
@@ -562,21 +494,30 @@ static void compact_kernels(const int num_w_planes, const int* support,
 #if 0
         if (w == 0)
         {
-            oskar_Mem* alias = oskar_mem_create_alias(kernels_out,
-                    start_out, size * size, status);
-            oskar_mem_write_fits_cube(alias, "kernel_compacted",
-                    size, size, 1, 0, status);
+            oskar_Mem* a1 = oskar_mem_create_alias(kernels_out, c_out,
+                    width * height, status);
+            oskar_Mem* a2 = oskar_mem_create_alias(kernels_in, c_in,
+                    conv_size_half * conv_size_half, status);
+            oskar_mem_write_fits_cube(a1, "kernel_rearranged",
+                    (int) width, (int) height, 1, 0, status);
+            oskar_mem_write_fits_cube(a2, "kernel_orig",
+                    conv_size_half, conv_size_half, 1, 0, status);
+            oskar_mem_free(a1, status);
+            oskar_mem_free(a2, status);
             printf("At w = %d, w_support = %d\n", w, w_support);
+            printf("Original size: %lu. Rearranged size: %lu\n",
+                    (unsigned long) oskar_mem_length(kernels_in),
+                    (unsigned long) oskar_mem_length(kernels_out));
         }
 #endif
     }
 #if 0
-    FILE* fhan = fopen("compacted_kernels.txt", "w");
-    oskar_mem_save_ascii(fhan, 1, compacted_size, status, kernels_out);
+    FILE* fhan = fopen("rearranged_kernels.txt", "w");
+    oskar_mem_save_ascii(fhan, 1, rearranged_size, status, kernels_out);
     fclose(fhan);
 #endif
 }
-    
+
 #ifdef __cplusplus
 }
 #endif

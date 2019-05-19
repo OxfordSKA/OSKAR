@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,7 @@ extern "C" {
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] jones          Matrix of Jones matrices to correlate.
  * @param[in] I              Source Stokes I values, in Jy.
  * @param[in] Q              Source Stokes Q values, in Jy.
@@ -76,12 +77,12 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_point_omp_f(
-        int num_sources, int num_stations, const float4c* jones,
-        const float* I, const float* Q,
+        int num_sources, int num_stations, int offset_out,
+        const float4c* jones, const float* I, const float* Q,
         const float* U, const float* V,
-        const float* l, const float* m,
-        const float* n, const float* station_u,
-        const float* station_v, const float* station_w,
+        const float* l, const float* m, const float* n,
+        const float* station_u, const float* station_v,
+        const float* station_w,
         const float* station_x, const float* station_y,
         float uv_min_lambda, float uv_max_lambda, float inv_wavelength,
         float frac_bandwidth, float time_int_sec, float gha0_rad,
@@ -99,6 +100,7 @@ void oskar_cross_correlate_point_omp_f(
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] jones          Matrix of Jones matrices to correlate.
  * @param[in] I              Source Stokes I values, in Jy.
  * @param[in] Q              Source Stokes Q values, in Jy.
@@ -123,12 +125,12 @@ void oskar_cross_correlate_point_omp_f(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_point_omp_d(
-        int num_sources, int num_stations, const double4c* jones,
-        const double* I, const double* Q,
+        int num_sources, int num_stations, int offset_out,
+        const double4c* jones, const double* I, const double* Q,
         const double* U, const double* V,
-        const double* l, const double* m,
-        const double* n, const double* station_u,
-        const double* station_v, const double* station_w,
+        const double* l, const double* m, const double* n,
+        const double* station_u, const double* station_v,
+        const double* station_w,
         const double* station_x, const double* station_y,
         double uv_min_lambda, double uv_max_lambda, double inv_wavelength,
         double frac_bandwidth, double time_int_sec, double gha0_rad,
@@ -149,6 +151,7 @@ void oskar_cross_correlate_point_omp_d(
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] jones          Matrix of Jones matrices to correlate.
  * @param[in] I              Source Stokes I values, in Jy.
  * @param[in] Q              Source Stokes Q values, in Jy.
@@ -176,12 +179,11 @@ void oskar_cross_correlate_point_omp_d(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_gaussian_omp_f(
-        int num_sources, int num_stations, const float4c* jones,
-        const float* I, const float* Q,
+        int num_sources, int num_stations, int offset_out,
+        const float4c* jones, const float* I, const float* Q,
         const float* U, const float* V,
-        const float* l, const float* m,
-        const float* n, const float* a,
-        const float* b, const float* c,
+        const float* l, const float* m, const float* n,
+        const float* a, const float* b, const float* c,
         const float* station_u, const float* station_v,
         const float* station_w, const float* station_x,
         const float* station_y, float uv_min_lambda, float uv_max_lambda,
@@ -203,6 +205,7 @@ void oskar_cross_correlate_gaussian_omp_f(
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] jones          Matrix of Jones matrices to correlate.
  * @param[in] I              Source Stokes I values, in Jy.
  * @param[in] Q              Source Stokes Q values, in Jy.
@@ -230,12 +233,11 @@ void oskar_cross_correlate_gaussian_omp_f(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_gaussian_omp_d(
-        int num_sources, int num_stations, const double4c* jones,
-        const double* I, const double* Q,
+        int num_sources, int num_stations, int offset_out,
+        const double4c* jones, const double* I, const double* Q,
         const double* U, const double* V,
-        const double* l, const double* m,
-        const double* n, const double* a,
-        const double* b, const double* c,
+        const double* l, const double* m, const double* n,
+        const double* a, const double* b, const double* c,
         const double* station_u, const double* station_v,
         const double* station_w, const double* station_x,
         const double* station_y, double uv_min_lambda, double uv_max_lambda,

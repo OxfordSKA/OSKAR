@@ -103,7 +103,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
                     *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
                     break;
                 }
-                id = t;
+                id = (int*) t;
                 ++size_id;
             }
 

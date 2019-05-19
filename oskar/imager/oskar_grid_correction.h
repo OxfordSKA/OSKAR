@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +42,7 @@ extern "C" {
 
 /**
  * @brief
- * Applies grid correction to an image (double precision).
+ * Applies grid correction to an image.
  *
  * @details
  * Applies grid correction to an image, given the correction function to use.
@@ -51,27 +52,11 @@ extern "C" {
  * @param[in] image_size        Side length of image.
  * @param[in] corr_func         Correction function, length \p image_size.
  * @param[in,out] complex_image Complex image array.
+ * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-void oskar_grid_correction_d(const int image_size,
-        const double* corr_func, double* complex_image);
-
-/**
- * @brief
- * Applies grid correction to an image (single precision).
- *
- * @details
- * Applies grid correction to an image, given the correction function to use.
- * This correction should be applied to the complex image,
- * immediately after taking the FFT.
- *
- * @param[in] image_size        Side length of image.
- * @param[in] corr_func         Correction function, length \p image_size.
- * @param[in,out] complex_image Complex image array.
- */
-OSKAR_EXPORT
-void oskar_grid_correction_f(const int image_size,
-        const double* corr_func, float* complex_image);
+void oskar_grid_correction(const int image_size,
+        const oskar_Mem* corr_func, oskar_Mem* complex_image, int* status);
 
 #ifdef __cplusplus
 }

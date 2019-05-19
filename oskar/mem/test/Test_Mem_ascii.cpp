@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -469,19 +469,19 @@ TEST(Mem, save_ascii)
     mem8 = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, location, length, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    oskar_mem_set_value_real(mem1, 1.0, 0, 0, &status);
-    oskar_mem_set_value_real(mem2, 2.0, 0, 0, &status);
-    oskar_mem_set_value_real(mem3, 3.0, 0, 0, &status);
-    oskar_mem_set_value_real(mem4, 4.0, 0, 0, &status);
-    oskar_mem_set_value_real(mem5, 5.0, 0, 0, &status);
-    oskar_mem_set_value_real(mem6, 6.0, 0, 0, &status);
-    oskar_mem_set_value_real(mem7, 7.0, 0, 0, &status);
-    oskar_mem_set_value_real(mem8, 8.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem1, 1.0, 0, length, &status);
+    oskar_mem_set_value_real(mem2, 2.0, 0, length, &status);
+    oskar_mem_set_value_real(mem3, 3.0, 0, length, &status);
+    oskar_mem_set_value_real(mem4, 4.0, 0, length, &status);
+    oskar_mem_set_value_real(mem5, 5.0, 0, length, &status);
+    oskar_mem_set_value_real(mem6, 6.0, 0, length, &status);
+    oskar_mem_set_value_real(mem7, 7.0, 0, length, &status);
+    oskar_mem_set_value_real(mem8, 8.0, 0, length, &status);
 
     const char* fname = "temp_test_save_ascii.txt";
     FILE* f = fopen(fname, "w");
     ASSERT_TRUE(f != NULL);
-    oskar_mem_save_ascii(f, 8, length, &status,
+    oskar_mem_save_ascii(f, 8, 0, length, &status,
             mem1, mem2, mem3, mem4, mem5, mem6, mem7, mem8);
     fclose(f);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);

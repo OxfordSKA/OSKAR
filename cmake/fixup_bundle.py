@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017, The University of Oxford
+# Copyright (c) 2017-2019, The University of Oxford
 # All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -89,80 +89,62 @@ def get_dependencies(file_name):
                 path = data[(offset - cmd_header.size):]
                 path = path[:path.find(b'\x00')]
                 rpath.append(path.decode('utf-8'))
-        return {'deps': deps, 'rpath': rpath}
+        return {'deps': deps, 'rpaths': rpath}
 
 
-def fixup(bundle_name, file_path, parent_path=None, parent_rpath=None,
-          old_install_name=None, depth=0):
-    """Copies external dependencies into the bundle and fixes install names."""
-    if 'include' in file_path:
-        return
-    file_path = os.path.normpath(file_path)
-    # print("    "*depth + "Checking item %s" % file_path)
-    output_dir = os.path.join(bundle_name, 'Contents', 'Frameworks')
-    if not os.path.isdir(output_dir):
-        os.makedirs(output_dir)
-    bundle_path = file_path
-
-    # Get the path we would need to copy from (allowing for frameworks).
+def get_copy_path(file_path):
+    """Returns the path we would need to copy from, allowing for frameworks."""
     copy_path = file_path
     ext = '.framework'
     if ext in copy_path:
         copy_path = copy_path[:copy_path.find(ext)] + ext
+    return copy_path
+
+
+def fixup(bundle_info, bundle_root, file_path, output_dir=None, depth=""):
+    """Copies dependencies into the bundle, fixing install names and RPATHs."""
+    if 'include' in file_path:
+        return
+    file_path = os.path.normpath(file_path)
+    # print(depth + "Checking item %s" % file_path)
+    if not output_dir:
+        output_dir = os.path.join(bundle_root, 'Contents', 'Frameworks')
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+    local_path = file_path
 
     # Check if item is not in the bundle.
-    if bundle_name not in file_path:
+    if bundle_root not in file_path:
         # Copy the item into the bundle if it isn't already there.
-        bundle_path = file_path.replace(os.path.dirname(copy_path), output_dir)
-        if not os.path.exists(bundle_path):
-            print("    "*depth + "Copying %s to %s" % (copy_path, output_dir))
+        copy_path = get_copy_path(file_path)
+        local_path = file_path.replace(os.path.dirname(copy_path), output_dir)
+        if not os.path.exists(local_path):
+            print(depth + "Bundling %s" % copy_path)
             if os.path.isdir(copy_path):
                 shutil.copytree(
                     copy_path,
                     os.path.join(output_dir, os.path.basename(copy_path)),
-                    symlinks=True, ignore=shutil.ignore_patterns('Headers'))
+                    symlinks=True,
+                    ignore=shutil.ignore_patterns('Headers', '*_debug*'))
             else:
                 shutil.copy(copy_path, output_dir)
-            os.chmod(bundle_path,
+            os.chmod(local_path,
                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
-    # Update the parent item's RPATH so it can find its dependency.
-    if parent_path:
-        rel_path = os.path.relpath(output_dir,
-                                   os.path.dirname(parent_path))
-        rel_path = '' if rel_path == '.' else os.path.join(rel_path, '')
-        rpath = '@loader_path/' + rel_path
-        if rpath not in parent_rpath:
-            print("    "*depth + "Adding %s to RPATH of %s" %
-                  (rpath, parent_path))
-            subprocess.call(['install_name_tool', '-add_rpath',
-                             rpath, parent_path])
-            parent_rpath.append(rpath)
-
-        # Update parent item's install_name for this item.
-        new_install_name = file_path.replace(
-            os.path.dirname(copy_path), '@rpath')
-        if new_install_name != old_install_name:
-            print("    "*depth +
-                  "Changing install name %s to %s inside %s" %
-                  (old_install_name, new_install_name, parent_path))
-            subprocess.call(['install_name_tool', '-change',
-                             old_install_name, new_install_name,
-                             parent_path])
-
     # Get dependencies of the item.
-    deps = get_dependencies(file_path)
-    if deps is None:
+    if local_path not in bundle_info:
+        bundle_info[local_path] = get_dependencies(file_path)
+    if bundle_info[local_path] is None:
         return
 
     # Iterate dependencies of the item.
     loader_path = os.path.dirname(file_path)
-    for dep in deps['deps']:
+    for dep in bundle_info[local_path]['deps']:
         # Get the full path of the dependency.
         dep_path = dep
-        if dep_path.startswith('@rpath'):
-            for rpath in deps['rpath']:
-                dep_path = os.path.join(rpath, os.path.basename(dep))
+        if dep.startswith('@rpath'):
+            for rpath in bundle_info[local_path]['rpaths']:
+                dep_path = dep.replace('@rpath', rpath)
                 dep_path = dep_path.replace('@loader_path', loader_path)
                 dep_path = dep_path.replace('@executable_path', loader_path)
                 if os.path.exists(dep_path):
@@ -170,19 +152,43 @@ def fixup(bundle_name, file_path, parent_path=None, parent_rpath=None,
         dep_path = dep_path.replace('@loader_path', loader_path)
         dep_path = dep_path.replace('@executable_path', loader_path)
 
-        # Recursive call.
-        fixup(bundle_name, dep_path, bundle_path, deps['rpath'], dep, depth+1)
+        # Update the item's RPATH so it can find its dependency.
+        rel_path = os.path.relpath(output_dir, os.path.dirname(local_path))
+        rel_path = '' if rel_path == '.' else os.path.join(rel_path, '')
+        rpath = '@loader_path/' + rel_path
+        if rpath not in bundle_info[local_path]['rpaths']:
+            bundle_info[local_path]['rpaths'].append(rpath)
+            print(depth + "In %s, adding %s to RPATH" %
+                  (os.path.basename(local_path), rpath))
+            subprocess.call(['install_name_tool', '-add_rpath',
+                             rpath, local_path])
 
-    if 'libcudart' not in bundle_path:
-        # Delete /usr/local or @executable_path RPATHs from the bundled item.
-        for rpath in deps['rpath']:
-            if rpath.startswith('/usr/local') or \
-                    rpath.startswith('@executable_path'):
-                print("    "*depth + "Removing %s from RPATH of %s" %
-                      (rpath, bundle_path))
-                subprocess.call(['install_name_tool', '-delete_rpath',
-                                 rpath, bundle_path])
-                deps['rpath'].remove(rpath)
+        # Update the install_name for this item if necessary.
+        if not dep.startswith('@rpath'):
+            new_name = dep_path.replace(
+                os.path.dirname(get_copy_path(dep_path)), '@rpath')
+            if new_name not in bundle_info[local_path]['deps']:
+                bundle_info[local_path]['deps'][:] = [
+                    new_name if d == dep else d
+                    for d in bundle_info[local_path]['deps']]
+                print(depth + "In %s, changing install name %s to %s" %
+                      (os.path.basename(local_path), dep, new_name))
+                subprocess.call(['install_name_tool', '-change',
+                                 dep, new_name, local_path])
+
+        # Recursive call.
+        fixup(bundle_info, bundle_root, dep_path, depth=depth+"    ")
+
+    # Delete /usr/local or @executable_path RPATHs from the bundled item.
+    for rpath in bundle_info[local_path]['rpaths']:
+        if 'libcudart' not in local_path and (
+                rpath.startswith('/usr/local') or
+                rpath.startswith('@executable_path')):
+            bundle_info[local_path]['rpaths'].remove(rpath)
+            print(depth + "In %s, removing %s from RPATH" %
+                  (os.path.basename(local_path), rpath))
+            subprocess.call(['install_name_tool', '-delete_rpath',
+                             rpath, local_path])
 
 
 def main():
@@ -191,34 +197,36 @@ def main():
     if len(sys.argv) < 2:
         raise RuntimeError('Usage: python fixup_bundle.py <bundle.app>')
 
-    # Get the bundle name.
-    bundle_name = sys.argv[1]
+    # Create empty dictionary to store information about items in the bundle.
+    bundle_info = {}
 
-    # Copy Qt platform plugin if set.
-    if len(sys.argv) > 2:
-        plugin_dir = os.path.join(
-            bundle_name, 'Contents', 'PlugIns', 'platforms')
-        if not os.path.isdir(plugin_dir):
-            os.makedirs(plugin_dir)
-        print("Platform plugin: " + sys.argv[2])
-        shutil.copy(sys.argv[2], plugin_dir)
-
-        # Create symbolic link to GUI.
-        link_dir = os.path.join(bundle_name, 'Contents', 'MacOS')
-        if not os.path.isdir(link_dir):
-            os.makedirs(link_dir)
-        os.symlink(
-            "../Resources/bin/oskar", os.path.join(link_dir, 'oskar_gui'))
+    # Get the bundle root path.
+    bundle_root = sys.argv[1]
 
     # Get list of items in the bundle.
     items = []
-    for root, _, files in os.walk(bundle_name):
+    for root, _, files in os.walk(bundle_root):
         for name in files:
             items.append(os.path.join(root, name))
 
     # Fix-up each item in the list.
     for item in items:
-        fixup(bundle_name, item)
+        fixup(bundle_info, bundle_root, item)
+
+    # Create symbolic link to GUI.
+    link_dir = os.path.join(bundle_root, 'Contents', 'MacOS')
+    if not os.path.isdir(link_dir):
+        os.makedirs(link_dir)
+    os.symlink("../Resources/bin/oskar", os.path.join(link_dir, 'oskar_gui'))
+
+    # Bundle and fix up Qt plugins.
+    plugin_dir = os.path.join(bundle_root, 'Contents', 'PlugIns')
+    if len(sys.argv) > 2:
+        fixup(bundle_info, bundle_root, sys.argv[2],
+              os.path.join(plugin_dir, 'platforms'))
+    if len(sys.argv) > 3:
+        fixup(bundle_info, bundle_root, sys.argv[3],
+              os.path.join(plugin_dir, 'styles'))
 
 
 if __name__ == '__main__':

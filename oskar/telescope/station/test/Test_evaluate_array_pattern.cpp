@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,17 +120,16 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
         oskar_Mem** z, const oskar_Station* station, const oskar_Mem* lon,
         const oskar_Mem* lat, double gast, double freq_hz, int* status)
 {
-    double beam_x, beam_y, beam_z, st_lat, last, wavenumber;
-    int type, location, num_elements, num_points;
+    double beam_x, beam_y, beam_z;
     oskar_Mem *l, *m, *n;
 
-    type = oskar_station_precision(station);
-    location = oskar_station_mem_location(station);
-    num_elements = oskar_station_num_elements(station);
-    num_points = (int) oskar_mem_length(lon);
-    wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
-    last = gast + oskar_station_lon_rad(station);
-    st_lat = oskar_station_lat_rad(station);
+    const int type = oskar_station_precision(station);
+    const int location = oskar_station_mem_location(station);
+    const int num_elements = oskar_station_num_elements(station);
+    const int num_points = (int) oskar_mem_length(lon);
+    const double wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
+    const double last = gast + oskar_station_lon_rad(station);
+    const double st_lat = oskar_station_lat_rad(station);
     *weights = oskar_mem_create(type | OSKAR_COMPLEX, location, num_elements,
             status);
     *x = oskar_mem_create(type, location, num_points, status);
@@ -144,7 +143,8 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
     oskar_convert_lon_lat_to_relative_directions(num_points,
             lon, lat, 0.0, 0.0, l, m, n, status);
     oskar_convert_relative_directions_to_enu_directions(
-            *x, *y, *z, num_points, l, m, n, last, 0.0, st_lat, status);
+            0, 0, 0, num_points, l, m, n, last, 0.0, st_lat, 0, *x, *y, *z,
+            status);
     oskar_evaluate_element_weights_dft(num_elements,
             oskar_station_element_measured_x_enu_metres_const(station),
             oskar_station_element_measured_y_enu_metres_const(station),
@@ -161,14 +161,12 @@ static void run_array_pattern(oskar_Mem* bp,
         const char* message, int* status)
 {
     oskar_Mem *w, *x, *y, *z, *pattern;
-    int num_pixels, location;
-    double wavenumber;
     oskar_Timer* timer;
 
     /* Get the meta-data. */
-    num_pixels = (int)oskar_mem_length(lon);
-    location = oskar_station_mem_location(station);
-    wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
+    const int num_pixels = (int)oskar_mem_length(lon);
+    const int location = oskar_station_mem_location(station);
+    const double wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
 
     /* Initialise temporary arrays. */
     pattern = oskar_mem_create(oskar_mem_type(bp), location,
@@ -178,12 +176,12 @@ static void run_array_pattern(oskar_Mem* bp,
     ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
     timer = oskar_timer_create(OSKAR_TIMER_CUDA);
     oskar_timer_start(timer);
-    oskar_dftw(oskar_station_num_elements(station), wavenumber,
+    oskar_dftw(0, oskar_station_num_elements(station), wavenumber, w,
             oskar_station_element_true_x_enu_metres_const(station),
             oskar_station_element_true_y_enu_metres_const(station),
-            oskar_station_element_true_z_enu_metres_const(station), w,
-            num_pixels, x, y, (oskar_station_array_is_3d(station) ? z : 0),
-            0, pattern, status);
+            oskar_station_element_true_z_enu_metres_const(station),
+            0, num_pixels, x, y, (oskar_station_array_is_3d(station) ? z : 0),
+            0, 0, pattern, status);
     printf("%s: %.6f\n", message, oskar_timer_elapsed(timer));
     oskar_timer_free(timer);
     ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
@@ -204,32 +202,30 @@ static void run_array_pattern_hierarchical(oskar_Mem* bp,
         const char* message, int* status)
 {
     oskar_Mem *w, *x, *y, *z, *ones, *pattern;
-    int num_pixels, location;
-    double wavenumber;
     oskar_Timer* timer;
 
     /* Get the meta-data. */
-    num_pixels = (int)oskar_mem_length(lon);
-    location = oskar_station_mem_location(station);
-    wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
+    const int num_pixels = (int)oskar_mem_length(lon);
+    const int location = oskar_station_mem_location(station);
+    const double wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
 
     /* Initialise temporary array. */
     pattern = oskar_mem_create(oskar_mem_type(bp), location,
             num_pixels, status);
 
     /* Create a fake complex "signal" vector of ones. */
-    ones = oskar_mem_create(oskar_mem_type(bp), location,
-            num_pixels * oskar_station_num_elements(station), status);
-    oskar_mem_set_value_real(ones, 1.0, 0, 0, status);
+    const int num_signals = num_pixels * oskar_station_num_elements(station);
+    ones = oskar_mem_create(oskar_mem_type(bp), location, num_signals, status);
+    oskar_mem_set_value_real(ones, 1.0, 0, num_signals, status);
     set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, freq_hz, status);
     timer = oskar_timer_create(OSKAR_TIMER_CUDA);
     oskar_timer_start(timer);
-    oskar_dftw(oskar_station_num_elements(station), wavenumber,
+    oskar_dftw(0, oskar_station_num_elements(station), wavenumber, w,
             oskar_station_element_true_x_enu_metres_const(station),
             oskar_station_element_true_y_enu_metres_const(station),
-            oskar_station_element_true_z_enu_metres_const(station), w,
-            num_pixels, x, y, (oskar_station_array_is_3d(station) ? z : 0),
-            ones, pattern, status);
+            oskar_station_element_true_z_enu_metres_const(station),
+            0, num_pixels, x, y, (oskar_station_array_is_3d(station) ? z : 0),
+            ones, 0, pattern, status);
     printf("%s: %.6f\n", message, oskar_timer_elapsed(timer));
     oskar_timer_free(timer);
     oskar_mem_free(w, status);
@@ -334,14 +330,14 @@ TEST(evaluate_array_pattern, test)
     type = OSKAR_SINGLE;
     lon_cpu_f = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
     lat_cpu_f = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
-    oskar_evaluate_image_lon_lat_grid(lon_cpu_f, lat_cpu_f, image_side,
-            image_side, fov_rad, fov_rad, ra_rad, dec_rad, &status);
+    oskar_evaluate_image_lon_lat_grid(image_side, image_side, fov_rad, fov_rad,
+            ra_rad, dec_rad, lon_cpu_f, lat_cpu_f, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     type = OSKAR_DOUBLE;
     lon_cpu_d = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
     lat_cpu_d = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
-    oskar_evaluate_image_lon_lat_grid(lon_cpu_d, lat_cpu_d, image_side,
-            image_side, fov_rad, fov_rad, ra_rad, dec_rad, &status);
+    oskar_evaluate_image_lon_lat_grid(image_side, image_side, fov_rad, fov_rad,
+            ra_rad, dec_rad, lon_cpu_d, lat_cpu_d, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     lon_gpu_f = oskar_mem_create_copy(lon_cpu_f, device_loc, &status);
     lon_gpu_d = oskar_mem_create_copy(lon_cpu_d, device_loc, &status);
@@ -428,11 +424,13 @@ TEST(evaluate_array_pattern, test)
     double xyz[] = {0., 0., 1.};
     oskar_station_set_element_coords(station_cpu_f, 0, xyz, xyz, &status);
     oskar_station_set_element_coords(station_gpu_f, 0, xyz, xyz, &status);
-    oskar_station_set_element_coords(station_cpu_f, 0, xyz, xyz, &status);
-    oskar_station_set_element_coords(station_gpu_f, 0, xyz, xyz, &status);
+    oskar_station_set_element_coords(station_cpu_d, 0, xyz, xyz, &status);
+    oskar_station_set_element_coords(station_gpu_d, 0, xyz, xyz, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ(1, oskar_station_array_is_3d(station_cpu_f));
     ASSERT_EQ(1, oskar_station_array_is_3d(station_gpu_f));
+    ASSERT_EQ(1, oskar_station_array_is_3d(station_cpu_d));
+    ASSERT_EQ(1, oskar_station_array_is_3d(station_gpu_d));
     run_array_pattern(bp_o2c_2d_cpu_f, station_cpu_f, lon_cpu_f, lat_cpu_f,
             gast, freq_hz, "Single, o2c, CPU, 3D", &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,8 +71,8 @@ int main(void)
     /* Write the file. */
     {
         /* Create some test data. */
-        data_double = calloc(num_elements_double, sizeof(double));
-        data_int = calloc(num_elements_int, sizeof(int));
+        data_double = (double*) calloc(num_elements_double, sizeof(double));
+        data_int = (int*) calloc(num_elements_int, sizeof(int));
 
         /* Write data. */
         oskar_binary_write_int(h, 0, 0, 12345, a1, &status);
@@ -132,8 +132,8 @@ int main(void)
 
     /* Read the arrays back and check values. */
     {
-        data_double = calloc(num_elements_double, sizeof(double));
-        data_int = calloc(num_elements_int, sizeof(int));
+        data_double = (double*) calloc(num_elements_double, sizeof(double));
+        data_int = (int*) calloc(num_elements_int, sizeof(int));
         oskar_binary_read(h, OSKAR_INT,
                 2, 20, 1, size_int, &data_int[0], &status);
         ASSERT_INT_EQ(0, status);
@@ -148,8 +148,8 @@ int main(void)
         free(data_int);
     }
     {
-        data_double = calloc(num_elements_double, sizeof(double));
-        data_int = calloc(num_elements_int, sizeof(int));
+        data_double = (double*) calloc(num_elements_double, sizeof(double));
+        data_int = (int*) calloc(num_elements_int, sizeof(int));
         oskar_binary_read(h, OSKAR_INT,
                 14, 5, 6, size_int, &data_int[0], &status);
         ASSERT_INT_EQ(0, status);

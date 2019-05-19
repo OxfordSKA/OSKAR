@@ -26,11 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "telescope/station/element/private_element.h"
-#include "telescope/station/element/oskar_element.h"
+#include "binary/oskar_binary.h"
+#include "log/oskar_log.h"
 #include "math/oskar_find_closest_match.h"
 #include "mem/oskar_binary_write_mem.h"
-#include "binary/oskar_binary.h"
+#include "telescope/station/element/private_element.h"
+#include "telescope/station/element/oskar_element.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,7 +40,7 @@ extern "C" {
 static void write_splines(oskar_Binary* h, const oskar_Splines* splines,
         int index, int* status);
 
-void oskar_element_write(const oskar_Element* data, oskar_Log* log,
+void oskar_element_write(const oskar_Element* data,
         const char* filename, int port, double freq_hz, int* status)
 {
     const oskar_Splines *h_re = 0, *h_im = 0, *v_re = 0, *v_im = 0;
@@ -60,22 +61,22 @@ void oskar_element_write(const oskar_Element* data, oskar_Log* log,
     /* Get pointers to surface data based on port number and frequency index. */
     if (port == 0)
     {
-        scalar_re = oskar_element_scalar_re_const(data, freq_id);
-        scalar_im = oskar_element_scalar_im_const(data, freq_id);
+        scalar_re = data->scalar_re[freq_id];
+        scalar_im = data->scalar_im[freq_id];
     }
     else if (port == 1)
     {
-        h_re = oskar_element_x_h_re_const(data, freq_id);
-        h_im = oskar_element_x_h_im_const(data, freq_id);
-        v_re = oskar_element_x_v_re_const(data, freq_id);
-        v_im = oskar_element_x_v_im_const(data, freq_id);
+        h_re = data->x_h_re[freq_id];
+        h_im = data->x_h_im[freq_id];
+        v_re = data->x_v_re[freq_id];
+        v_im = data->x_v_im[freq_id];
     }
     else if (port == 2)
     {
-        h_re = oskar_element_y_h_re_const(data, freq_id);
-        h_im = oskar_element_y_h_im_const(data, freq_id);
-        v_re = oskar_element_y_v_re_const(data, freq_id);
-        v_im = oskar_element_y_v_im_const(data, freq_id);
+        h_re = data->y_h_re[freq_id];
+        h_im = data->y_h_im[freq_id];
+        v_re = data->y_v_re[freq_id];
+        v_im = data->y_v_im[freq_id];
     }
     else
     {
@@ -92,7 +93,7 @@ void oskar_element_write(const oskar_Element* data, oskar_Log* log,
     }
 
     /* If log exists, then write it out. */
-    log_data = oskar_log_file_data(log, &log_size);
+    log_data = oskar_log_file_data(&log_size);
     if (log_data)
     {
         oskar_binary_write(h, OSKAR_CHAR,

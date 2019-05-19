@@ -26,12 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
 #include "apps/oskar_settings_log.h"
 #include "apps/oskar_settings_to_telescope.h"
 #include "apps/oskar_sim_tec_screen.h"
 #include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
+#include "settings/oskar_option_parser.h"
 #include "utility/oskar_version_string.h"
 #include "utility/oskar_get_error_string.h"
 
@@ -64,13 +64,13 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
 
-    oskar_Log* log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_STATUS);
-    oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
+    oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_STATUS);
+    oskar_log_message('M', 0, "Running binary %s", argv[0]);
 
     const char* settings_file = opt.get_arg(0);
     oskar_Settings_old settings;
-    oskar_settings_old_load(&settings, log, settings_file, &error);
-    oskar_log_set_keep_file(log, settings.sim.keep_log_file);
+    oskar_settings_old_load(&settings, 0, settings_file, &error);
+    oskar_log_set_keep_file(settings.sim.keep_log_file);
 
     // Get settings.
     const oskar_SettingsIonosphere* MIM = &settings.ionosphere;
@@ -84,13 +84,13 @@ int main(int argc, char** argv)
     double tinc = settings.obs.dt_dump_days * 86400.0;
     if (!fname)
     {
-        oskar_log_error(log, "No output file!");
+        oskar_log_error("No output file!");
         return EXIT_FAILURE;
     }
 
     // Run simulation.
     double pp_coord[2];
-    oskar_Telescope* tel = oskar_settings_to_telescope(&settings, log, &error);
+    oskar_Telescope* tel = oskar_settings_to_telescope(&settings, 0, &error);
     oskar_Mem* TEC_screen = oskar_sim_tec_screen(&settings, tel,
             &pp_coord[0], &pp_coord[1], &error);
     pp_coord[0] *= 180. / M_PI;
@@ -111,8 +111,8 @@ int main(int argc, char** argv)
 
     // Check for errors.
     if (error)
-        oskar_log_error(log, "Run failed: %s.", oskar_get_error_string(error));
-    oskar_log_free(log);
+        oskar_log_error("Run failed: %s.", oskar_get_error_string(error));
+    oskar_log_free();
 
     return error;
 }

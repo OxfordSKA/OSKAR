@@ -3,6 +3,10 @@
 #
 
 set(station_SRC
+    define_blank_below_horizon.h
+    define_evaluate_element_weights_dft.h
+    define_evaluate_element_weights_errors.h
+    define_evaluate_vla_beam_pbcor.h
     src/oskar_blank_below_horizon.c
     src/oskar_evaluate_beam_horizon_direction.c
     src/oskar_evaluate_pierce_points.c
@@ -51,23 +55,11 @@ set(station_SRC
     src/oskar_station_set_element_type.c
     src/oskar_station_set_element_weight.c
     src/oskar_station_work.c
+    src/oskar_station.cl
 )
 
 if (CUDA_FOUND)
-    list(APPEND station_SRC
-        src/oskar_blank_below_horizon_cuda.cu
-        src/oskar_evaluate_element_weights_dft_cuda.cu
-        src/oskar_evaluate_element_weights_errors_cuda.cu
-        src/oskar_evaluate_vla_beam_pbcor_cuda.cu
-    )
-endif()
-
-if (OpenCL_FOUND)
-    list(APPEND station_SRC
-        src/oskar_blank_below_horizon.cl
-        src/oskar_evaluate_element_weights_dft.cl
-        src/oskar_evaluate_element_weights_errors.cl
-    )
+    list(APPEND station_SRC src/oskar_station.cu)
 endif()
 
 # Add contents of station element subdirectory.

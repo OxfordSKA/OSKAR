@@ -34,7 +34,6 @@
  */
 
 #include <oskar_global.h>
-#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,7 +64,6 @@ extern "C" {
  * on loading.
  *
  * @param[in,out] data         Pointer to element model data structure to fill.
- * @param[in,out] log          Pointer to log structure to use.
  * @param[in]  port            Port number: 1 for X dipole, 2 for Y dipole.
  * @param[in]  freq_hz         Frequency at which element data applies, in Hz.
  * @param[in]  filename        Data file name.
@@ -76,7 +74,7 @@ extern "C" {
  * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
+void oskar_element_load_cst(oskar_Element* data,
         int port, double freq_hz, const char* filename,
         double closeness, double closeness_inc, int ignore_at_poles,
         int ignore_below_horizon, int* status);

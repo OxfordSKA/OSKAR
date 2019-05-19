@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,17 +44,6 @@
 
 #include <oskar_global.h>
 
-#ifdef OSKAR_HAVE_OPENCL
-
-#define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#ifdef __APPLE__
-#include <OpenCL/opencl.h>
-#else
-#include <CL/cl.h>
-#endif
-
-#endif
-
 /* Public interface. */
 
 #ifdef __cplusplus
@@ -95,15 +84,18 @@ enum OSKAR_MEM_LOCATION
 #include <mem/oskar_mem_data_type_string.h>
 #include <mem/oskar_mem_different.h>
 #include <mem/oskar_mem_element_size.h>
+#include <mem/oskar_mem_ensure.h>
 #include <mem/oskar_mem_evaluate_relative_error.h>
 #include <mem/oskar_mem_free.h>
 #include <mem/oskar_mem_get_element.h>
 #include <mem/oskar_mem_load_ascii.h>
 #include <mem/oskar_mem_multiply.h>
+#include <mem/oskar_mem_normalise.h>
 #include <mem/oskar_mem_random_gaussian.h>
 #include <mem/oskar_mem_random_range.h>
 #include <mem/oskar_mem_random_uniform.h>
 #include <mem/oskar_mem_read_binary_raw.h>
+#include <mem/oskar_mem_read_element.h>
 #include <mem/oskar_mem_read_fits_image_plane.h>
 #include <mem/oskar_mem_read_healpix_fits.h>
 #include <mem/oskar_mem_realloc.h>

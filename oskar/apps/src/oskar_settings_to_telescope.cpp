@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@
 
 #include "telescope/oskar_telescope.h"
 #include "utility/oskar_get_error_string.h"
-#include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
 
 #include <limits.h>
@@ -81,7 +80,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     if (num_stations < 1)
     {
         *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-        oskar_log_error(log, "Telescope model is empty.");
+        oskar_log_error("Telescope model is empty.");
         return t;
     }
 

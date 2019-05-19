@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 #include "beam_pattern/private_beam_pattern.h"
 #include "beam_pattern/private_beam_pattern_free_device_data.h"
 #include "math/oskar_cmath.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 #include "utility/oskar_get_num_procs.h"
 
 #include <string.h>
@@ -121,23 +121,22 @@ void oskar_beam_pattern_set_cross_power_raw_text(oskar_BeamPattern* h,
 void oskar_beam_pattern_set_gpus(oskar_BeamPattern* h, int num,
         const int* ids, int* status)
 {
-    int i, num_gpus_avail;
+    int i;
     if (*status) return;
     oskar_beam_pattern_free_device_data(h, status);
-    num_gpus_avail = oskar_device_count(status);
     if (*status) return;
     if (num < 0)
     {
-        h->num_gpus = num_gpus_avail;
+        h->num_gpus = h->num_gpus_avail;
         h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
             h->gpu_ids[i] = i;
     }
     else if (num > 0)
     {
-        if (num > num_gpus_avail)
+        if (num > h->num_gpus_avail)
         {
-            oskar_log_error(h->log, "More GPUs were requested than found.");
+            oskar_log_error("More GPUs were requested than found.");
             *status = OSKAR_ERR_COMPUTE_DEVICES;
             return;
         }
@@ -154,7 +153,7 @@ void oskar_beam_pattern_set_gpus(oskar_BeamPattern* h, int num,
     }
     for (i = 0; i < h->num_gpus; ++i)
     {
-        oskar_device_set(h->gpu_ids[i], status);
+        oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
         if (*status) return;
     }
 }
@@ -173,12 +172,6 @@ void oskar_beam_pattern_set_image_fov(oskar_BeamPattern* h,
 {
     h->fov_deg[0] = width_deg;
     h->fov_deg[1] = height_deg;
-}
-
-
-void oskar_beam_pattern_set_log(oskar_BeamPattern* h, oskar_Log* log)
-{
-    h->log = log;
 }
 
 
@@ -271,7 +264,7 @@ void oskar_beam_pattern_set_telescope_model(oskar_BeamPattern* h,
     num_stations = oskar_telescope_num_stations(model);
     if (num_stations == 0)
     {
-        oskar_log_error(h->log, "Telescope model is empty.");
+        oskar_log_error("Telescope model is empty.");
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
     }
@@ -295,8 +288,7 @@ void oskar_beam_pattern_set_telescope_model(oskar_BeamPattern* h,
 
     /* Analyse the telescope model. */
     oskar_telescope_analyse(h->tel, status);
-    if (h->log)
-        oskar_telescope_log_summary(h->tel, h->log, status);
+    oskar_telescope_log_summary(h->tel, status);
 }
 
 

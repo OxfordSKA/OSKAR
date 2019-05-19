@@ -81,6 +81,10 @@ else()
         append_flags(CMAKE_C_FLAGS /wd4244 /wd4996)
         append_flags(CMAKE_CXX_FLAGS /wd4244 /wd4996)
 
+        # Compile all files as C++.
+        append_flags(CMAKE_C_FLAGS /TP)
+        append_flags(CMAKE_CXX_FLAGS /TP)
+
         # Default to dynamically-linked runtime.
         if ("${MSVC_RUNTIME}" STREQUAL "")
             set (MSVC_RUNTIME "dynamic")
@@ -262,7 +266,7 @@ message("-- NOTE: These paths can be changed using: '-DCMAKE_INSTALL_PREFIX=<pat
 message("===============================================================================")
 if (NOT CUDA_FOUND)
     message("===============================================================================")
-    message("-- WARNING: CUDA toolkit not found: Unable to use any GPUs.")
+    message("-- WARNING: CUDA toolkit not found.")
     message("===============================================================================")
 endif()
 if (NOT CASACORE_FOUND)

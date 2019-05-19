@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -148,6 +148,7 @@ enum OSKAR_DIRECTION_TYPE
     #define __CUDACC__
     #define __CUDA_ARCH__ 300
     #define _OPENMP
+    #define OSKAR_CUDA_KERNEL(NAME)
     #define OSKAR_VERSION_STR "OSKAR_VERSION_ERROR"
     #define OSKAR_VERSION 0x999999
 #else
@@ -171,12 +172,10 @@ enum OSKAR_DIRECTION_TYPE
     #if TARGET_OS_MAC
         #define OSKAR_OS_MAC
     #endif
-#elif __linux
+#elif (defined(__linux__) || defined(__linux))
     #define OSKAR_OS_LINUX
-#elif __unix /* for all unixes not caught above */
-    /* Unix */
-#elif __posix
-    /* POSIX */
+#elif (defined(__unix__) || defined(__unix))
+    #define OSKAR_OS_UNIX
 #else
     #error Unknown OS type detected!
 #endif
@@ -231,17 +230,7 @@ enum OSKAR_DIRECTION_TYPE
 #endif
 
 
-/**
- * @def OSKAR_INLINE
- *
- * @brief
- * Macro used to define an inline function.
- *
- * @details
- * This macro expands to compiler directives to indicate that a function
- * should be inlined. In CUDA code, this is "__device__ __forceinline__", in
- * C99 and C++ code, this is "static inline", otherwise this is "static".
- */
+/* OSKAR_INLINE macro. */
 #ifdef __CUDA_ARCH__
     #define OSKAR_INLINE __device__ __forceinline__
 #elif __STDC_VERSION__ >= 199901L || defined(__cplusplus)
@@ -251,16 +240,15 @@ enum OSKAR_DIRECTION_TYPE
 #endif
 
 
-/* Redefine restrict keyword to __restrict__ for CUDA code, and define
- * restrict keyword for pre-C99 compilers. */
-#ifdef __CUDACC__
-    #define restrict __restrict__
-#elif defined(__cplusplus) && defined(__GNUC__)
-    #define restrict __restrict__
-#elif defined(__cplusplus) && defined(_MSC_VER)
-    #define restrict
+/* RESTRICT macro. */
+#if defined(__cplusplus) && defined(__GNUC__)
+    #define RESTRICT __restrict__
+#elif defined(_MSC_VER)
+    #define RESTRICT __restrict
 #elif !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L
-    #define restrict
+    #define RESTRICT
+#else
+    #define RESTRICT restrict
 #endif
 
 

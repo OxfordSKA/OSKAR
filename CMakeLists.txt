@@ -5,7 +5,7 @@
 # === Set the project name and specify the required CMake version.
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 if (APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8" CACHE STRING "Minimum macOS version")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum macOS version")
 endif()
 
 # Set policies to avoid CMake warnings.
@@ -21,10 +21,10 @@ endif()
 project(OSKAR CXX C)
 
 # === Project version.
-set(OSKAR_VERSION_ID "0x020701")
+set(OSKAR_VERSION_ID "0x020704")
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 7)
-set(OSKAR_VERSION_PATCH 1)
+set(OSKAR_VERSION_PATCH 4)
 set(OSKAR_VERSION_SUFFIX "dev")
 
 # === Add local CMake module path.
@@ -71,7 +71,7 @@ endif()
 
 # === Find dependencies and set definitions.
 if (FIND_CUDA OR NOT DEFINED FIND_CUDA)
-    find_package(CUDA 5.5)
+    find_package(CUDA 7.0)
 endif()
 if (FIND_OPENCL)
     if (NOT APPLE)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2018, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 
 #include <oskar_global.h>
 #include <mem/oskar_mem.h>
-#include <utility/oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,79 +42,7 @@ extern "C" {
 
 /**
  * @brief
- * Function to apply a cosine taper to the scalar element response
- * (single precision).
- *
- * @details
- * This function multiplies the scalar response of the element by a
- * cosine taper. The multiplication is performed in-place.
- *
- * @param[in] num_sources  Number of source positions.
- * @param[in] cos_power    Power of cosine(theta) function.
- * @param[in] theta        Array of source theta values, in radians.
- * @param[in,out] jones    Array of Jones scalars.
- */
-OSKAR_EXPORT
-void oskar_apply_element_taper_cosine_scalar_f(int num_sources,
-        float cos_power, const float* theta, float2* jones);
-
-/**
- * @brief
- * Function to apply a cosine taper to the matrix element response
- * (single precision).
- *
- * @details
- * This function multiplies the matrix response of the element by a
- * cosine taper. The multiplication is performed in-place.
- *
- * @param[in] num_sources  Number of source positions.
- * @param[in] cos_power    Power of cosine(theta) function.
- * @param[in] theta        Array of source theta values, in radians.
- * @param[in,out] jones    Array of Jones matrices.
- */
-OSKAR_EXPORT
-void oskar_apply_element_taper_cosine_matrix_f(int num_sources,
-        float cos_power, const float* theta, float4c* jones);
-
-/**
- * @brief
- * Function to apply a cosine taper to the scalar element response
- * (double precision).
- *
- * @details
- * This function multiplies the scalar response of the element by a
- * cosine taper. The multiplication is performed in-place.
- *
- * @param[in] num_sources  Number of source positions.
- * @param[in] cos_power    Power of cosine(theta) function.
- * @param[in] theta        Array of source theta values, in radians.
- * @param[in,out] jones    Array of Jones scalars.
- */
-OSKAR_EXPORT
-void oskar_apply_element_taper_cosine_scalar_d(int num_sources,
-        double cos_power, const double* theta, double2* jones);
-
-/**
- * @brief
- * Function to apply a cosine taper to the matrix element response
- * (double precision).
- *
- * @details
- * This function multiplies the matrix response of the element by a
- * cosine taper. The multiplication is performed in-place.
- *
- * @param[in] num_sources  Number of source positions.
- * @param[in] cos_power    Power of cosine(theta) function.
- * @param[in] theta        Array of source theta values, in radians.
- * @param[in,out] jones    Array of Jones matrices.
- */
-OSKAR_EXPORT
-void oskar_apply_element_taper_cosine_matrix_d(int num_sources,
-        double cos_power, const double* theta, double4c* jones);
-
-/**
- * @brief
- * Wrapper function to apply a cosine taper to the element response.
+ * Function to apply a cosine taper to the element response.
  *
  * @details
  * This function multiplies the response of the element by a
@@ -124,12 +51,13 @@ void oskar_apply_element_taper_cosine_matrix_d(int num_sources,
  * @param[in] num_sources  Number of source positions.
  * @param[in] cos_power    Power of cosine(theta) function.
  * @param[in] theta        Array of source theta values, in radians.
+ * @param[in] offset_out   Start offset into output array.
  * @param[in,out] jones    Array of Jones matrices.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_apply_element_taper_cosine(oskar_Mem* jones, int num_sources,
-        double cos_power, const oskar_Mem* theta, int* status);
+void oskar_apply_element_taper_cosine(int num_sources, double cos_power,
+        const oskar_Mem* theta, int offset_out, oskar_Mem* jones, int* status);
 
 #ifdef __cplusplus
 }

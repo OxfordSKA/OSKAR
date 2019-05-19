@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,8 +32,7 @@
 
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
-#include "utility/oskar_cl_utils.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 
 #include <string.h>
 
@@ -44,84 +43,67 @@ extern "C" {
 void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
         size_t offset_dst, size_t offset_src, size_t num_elements, int* status)
 {
-    int location_src, location_dst;
-    size_t bytes, element_size, start_dst, start_src;
     void *destination;
-    const void *source;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Return immediately if there is nothing to copy. */
     if (src->num_elements == 0 || num_elements == 0)
         return;
-
-    /* Check the data types. */
     if (src->type != dst->type)
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-
-    /* Check the data dimensions. */
     if (num_elements > src->num_elements ||
             num_elements > (dst->num_elements - offset_dst))
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
-
-    /* Get the number of bytes to copy. */
-    element_size = oskar_mem_element_size(src->type);
-    bytes        = element_size * num_elements;
-    start_dst    = element_size * offset_dst;
-    start_src    = element_size * offset_src;
-    destination  = (void*)((char*)(dst->data) + start_dst);
-    source       = (const void*)((const char*)(src->data) + start_src);
-    location_src = src->location;
-    location_dst = dst->location;
+    const size_t element_size = oskar_mem_element_size(src->type);
+    const size_t bytes        = element_size * num_elements;
+    const size_t start_dst    = element_size * offset_dst;
+    const size_t start_src    = element_size * offset_src;
+    const int location_src    = src->location;
+    const int location_dst    = dst->location;
+    const void *source = (const void*)((const char*)(src->data) + start_src);
+    destination        = (void*)((char*)(dst->data) + start_dst);
 
     /* Host to host. */
     if (location_src == OSKAR_CPU && location_dst == OSKAR_CPU)
     {
         memcpy(destination, source, bytes);
-        return;
     }
 
     /* Host to CUDA device. */
     else if (location_src == OSKAR_CPU && location_dst == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        cudaMemcpy(destination, source, bytes, cudaMemcpyHostToDevice);
-        oskar_device_check_error(status);
+        *status = (int)cudaMemcpy(destination, source, bytes,
+                cudaMemcpyHostToDevice);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
-        return;
     }
 
     /* CUDA device to host. */
     else if (location_src == OSKAR_GPU && location_dst == OSKAR_CPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        cudaMemcpy(destination, source, bytes, cudaMemcpyDeviceToHost);
-        oskar_device_check_error(status);
+        *status = (int)cudaMemcpy(destination, source, bytes,
+                cudaMemcpyDeviceToHost);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
-        return;
     }
 
     /* CUDA device to CUDA device. */
     else if (location_src == OSKAR_GPU && location_dst == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        cudaMemcpy(destination, source, bytes, cudaMemcpyDeviceToDevice);
-        oskar_device_check_error(status);
+        *status = (int)cudaMemcpy(destination, source, bytes,
+                cudaMemcpyDeviceToDevice);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
-        return;
     }
 
     /* Host to OpenCL device. */
@@ -129,30 +111,17 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     {
 #ifdef OSKAR_HAVE_OPENCL
         cl_int error;
-        if (!source)
-        {
-            *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-            return;
-        }
-        error = clEnqueueWriteBuffer(oskar_cl_command_queue(), dst->buffer,
-                CL_TRUE, start_dst, bytes, source, 0, NULL, NULL);
+        error = clEnqueueWriteBuffer(oskar_device_queue_cl(),
+                dst->buffer, CL_TRUE, start_dst, bytes, source,
+                0, NULL, NULL);
         if (error != CL_SUCCESS)
         {
-            size_t available;
-            clGetMemObjectInfo(dst->buffer, CL_MEM_SIZE,
-                    sizeof(size_t), &available, NULL);
-            fprintf(stderr, "clEnqueueWriteBuffer() error (%d): "
-                    "Copy size: %lu, Offset: %lu, Available: %lu\n",
-                    error,
-                    (unsigned long) bytes,
-                    (unsigned long) start_dst,
-                    (unsigned long) available);
+            fprintf(stderr, "clEnqueueWriteBuffer() error (%d)\n", error);
             *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
         }
 #else
         *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
-        return;
     }
 
     /* OpenCL device to host. */
@@ -160,8 +129,9 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     {
 #ifdef OSKAR_HAVE_OPENCL
         cl_int error;
-        error = clEnqueueReadBuffer(oskar_cl_command_queue(), src->buffer,
-                CL_TRUE, start_src, bytes, destination, 0, NULL, NULL);
+        error = clEnqueueReadBuffer(oskar_device_queue_cl(),
+                src->buffer, CL_TRUE, start_src, bytes, destination,
+                0, NULL, NULL);
         if (error != CL_SUCCESS)
         {
             fprintf(stderr, "clEnqueueReadBuffer() error (%d)\n", error);
@@ -170,7 +140,6 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
 #else
         *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
-        return;
     }
 
     /* OpenCL device to OpenCL device. */
@@ -178,8 +147,9 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     {
 #ifdef OSKAR_HAVE_OPENCL
         cl_int error;
-        error = clEnqueueCopyBuffer(oskar_cl_command_queue(), src->buffer,
-                dst->buffer, start_src, start_dst, bytes, 0, NULL, NULL);
+        error = clEnqueueCopyBuffer(oskar_device_queue_cl(),
+                src->buffer, dst->buffer, start_src, start_dst, bytes,
+                0, NULL, NULL);
         if (error != CL_SUCCESS)
         {
             fprintf(stderr, "clEnqueueCopyBuffer() error (%d)\n", error);
@@ -188,10 +158,9 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
 #else
         *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
 #endif
-        return;
     }
-
-    *status = OSKAR_ERR_BAD_LOCATION;
+    else
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

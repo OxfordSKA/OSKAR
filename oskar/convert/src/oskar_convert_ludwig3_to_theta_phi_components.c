@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,111 +26,78 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "convert/define_convert_ludwig3_to_theta_phi_components.h"
 #include "convert/oskar_convert_ludwig3_to_theta_phi_components.h"
-#include "convert/oskar_convert_ludwig3_to_theta_phi_components_cuda.h"
-#include "utility/oskar_device_utils.h"
-#include "convert/private_convert_ludwig3_to_theta_phi_components_inline.h"
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_convert_ludwig3_to_theta_phi_components_f(int num_points,
-        float2* h_theta, float2* v_phi, const float* phi, int stride)
-{
-    int i;
-    for (i = 0; i < num_points; ++i)
-    {
-        oskar_convert_ludwig3_to_theta_phi_components_inline_f(
-                &h_theta[i*stride], &v_phi[i*stride], phi[i]);
-    }
-}
+OSKAR_CONVERT_LUDWIG3_TO_THETA_PHI(convert_ludwig3_to_theta_phi_float, float, float2)
+OSKAR_CONVERT_LUDWIG3_TO_THETA_PHI(convert_ludwig3_to_theta_phi_double, double, double2)
 
-/* Double precision. */
-void oskar_convert_ludwig3_to_theta_phi_components_d(int num_points,
-        double2* h_theta, double2* v_phi, const double* phi, int stride)
+void oskar_convert_ludwig3_to_theta_phi_components(
+        int num_points, const oskar_Mem* phi, int stride, int offset,
+        oskar_Mem* vec, int* status)
 {
-    int i;
-    for (i = 0; i < num_points; ++i)
-    {
-        oskar_convert_ludwig3_to_theta_phi_components_inline_d(
-                &h_theta[i*stride], &v_phi[i*stride], phi[i]);
-    }
-}
-
-/* Wrapper. */
-void oskar_convert_ludwig3_to_theta_phi_components(oskar_Mem* vec,
-        int offset, int stride, int num_points, const oskar_Mem* phi,
-        int* status)
-{
-    int type, location;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Check that the vector component data is in matrix form. */
+    const int type = oskar_mem_type(phi);
+    const int location = oskar_mem_location(phi);
+    const int off_h = offset, off_v = offset + 1;
     if (!oskar_mem_is_matrix(vec))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-
-    /* Get data type and location. */
-    type = oskar_mem_type(phi);
-    location = oskar_mem_location(phi);
-
-    /* Convert vector representation from Ludwig-3 to spherical. */
-    if (type == OSKAR_SINGLE)
+    if (location == OSKAR_CPU)
     {
-        float2 *h_theta, *v_phi;
-        const float *phi_;
-        h_theta = oskar_mem_float2(vec, status) + offset;
-        v_phi = oskar_mem_float2(vec, status) + offset + 1;
-        phi_ = oskar_mem_float_const(phi, status);
-
-        if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_convert_ludwig3_to_theta_phi_components_cuda_f(num_points,
-                    h_theta, v_phi, phi_, stride);
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location == OSKAR_CPU)
-        {
-            oskar_convert_ludwig3_to_theta_phi_components_f(num_points,
-                    h_theta, v_phi, phi_, stride);
-        }
-    }
-    else if (type == OSKAR_DOUBLE)
-    {
-        double2 *h_theta, *v_phi;
-        const double *phi_;
-        h_theta = oskar_mem_double2(vec, status) + offset;
-        v_phi = oskar_mem_double2(vec, status) + offset + 1;
-        phi_ = oskar_mem_double_const(phi, status);
-
-        if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_convert_ludwig3_to_theta_phi_components_cuda_d(num_points,
-                    h_theta, v_phi, phi_, stride);
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (location == OSKAR_CPU)
-        {
-            oskar_convert_ludwig3_to_theta_phi_components_d(num_points,
-                    h_theta, v_phi, phi_, stride);
-        }
+        if (type == OSKAR_SINGLE)
+            convert_ludwig3_to_theta_phi_float(
+                    num_points,
+                    oskar_mem_float_const(phi, status),
+                    stride, off_h, off_v,
+                    oskar_mem_float2(vec, status),
+                    oskar_mem_float2(vec, status));
+        else if (type == OSKAR_DOUBLE)
+            convert_ludwig3_to_theta_phi_double(
+                    num_points,
+                    oskar_mem_double_const(phi, status),
+                    stride, off_h, off_v,
+                    oskar_mem_double2(vec, status),
+                    oskar_mem_double2(vec, status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
+    {
+        size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
+        const char* k = 0;
+        if (type == OSKAR_SINGLE)
+            k = "convert_ludwig3_to_theta_phi_float";
+        else if (type == OSKAR_DOUBLE)
+            k = "convert_ludwig3_to_theta_phi_double";
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = oskar_device_global_size(
+                (size_t) num_points, local_size[0]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &num_points},
+                {PTR_SZ, oskar_mem_buffer_const(phi)},
+                {INT_SZ, &stride},
+                {INT_SZ, &off_h},
+                {INT_SZ, &off_v},
+                {PTR_SZ, oskar_mem_buffer(vec)},
+                {PTR_SZ, oskar_mem_buffer(vec)}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
+    }
 }
 
 #ifdef __cplusplus

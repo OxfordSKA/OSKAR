@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
 #include "apps/oskar_settings_to_telescope.h"
 #include "apps/oskar_settings_log.h"
 #include "apps/oskar_settings_to_sky.h"
@@ -38,6 +37,7 @@
 #include "convert/oskar_convert_apparent_ra_dec_to_enu_directions.h"
 #include "log/oskar_log.h"
 #include "math/oskar_evaluate_image_lon_lat_grid.h"
+#include "settings/oskar_option_parser.h"
 #include "sky/oskar_sky.h"
 #include "telescope/oskar_telescope.h"
 #include "telescope/station/oskar_evaluate_pierce_points.h"
@@ -98,14 +98,14 @@ int main(int argc, char** argv)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Create the log.
-    oskar_Log* log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_STATUS);
-    oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
+    oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_STATUS);
+    oskar_log_message('M', 0, "Running binary %s", argv[0]);
 
     const char* settings_file = opt.get_arg(0);
     oskar_Settings_old settings;
-    oskar_settings_old_load(&settings, log, settings_file, &status);
-    oskar_log_set_keep_file(log, settings.sim.keep_log_file);
-    oskar_Telescope* tel = oskar_settings_to_telescope(&settings, log, &status);
+    oskar_settings_old_load(&settings, 0, settings_file, &status);
+    oskar_log_set_keep_file(settings.sim.keep_log_file);
+    oskar_Telescope* tel = oskar_settings_to_telescope(&settings, 0, &status);
 
     // Generate or load TEC screen image
     // -------------------------------------------------------------------------
@@ -128,9 +128,9 @@ int main(int argc, char** argv)
 
     // Generate or load pierce points
     // -------------------------------------------------------------------------
-    status = evaluate_pp(&pp_lon, &pp_lat, settings, log, tel);
+    status = evaluate_pp(&pp_lon, &pp_lat, settings, 0, tel);
     if (status)
-        oskar_log_error(log, "XXX: %s.", oskar_get_error_string(status));
+        oskar_log_error("XXX: %s.", oskar_get_error_string(status));
 
     // Write out KML
     // -------------------------------------------------------------------------
@@ -141,14 +141,14 @@ int main(int argc, char** argv)
     oskar_mem_free(TEC_screen, &status);
     oskar_mem_free(pp_lon, &status);
     oskar_mem_free(pp_lat, &status);
-    oskar_log_free(log);
+    oskar_log_free();
 }
 
 int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings_old& settings,
         oskar_Log* log, const oskar_Telescope* tel)
 {
     int status = 0;
-    oskar_Sky* sky = oskar_settings_to_sky(&settings, log, &status);
+    oskar_Sky* sky = oskar_settings_to_sky(&settings, 0, &status);
 
     // FIXME remove this restriction ... (see evaluate Z)
     if (settings.ionosphere.num_TID_screens != 1)
@@ -300,8 +300,8 @@ int get_lon_lat_quad_coords(double* coords, oskar_Settings_old* settings,
 
     pp_lon = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
     pp_lat = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
-    oskar_evaluate_image_lon_lat_grid(pp_lon, pp_lat, im_size, im_size, fov,
-            fov, pp_lon0, pp_lat0, &status);
+    oskar_evaluate_image_lon_lat_grid(im_size, im_size, fov, fov,
+            pp_lon0, pp_lat0, pp_lon, pp_lat, &status);
     double rad2deg = 180.0/M_PI;
     if (type == OSKAR_DOUBLE)
     {

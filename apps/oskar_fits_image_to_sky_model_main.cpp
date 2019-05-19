@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
 #include "log/oskar_log.h"
+#include "settings/oskar_option_parser.h"
 #include "sky/oskar_sky.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
@@ -55,12 +55,9 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     // Parse command line.
-    double spectral_index = 0.0;
-    double min_peak_fraction = 0.0;
-    double min_abs_val = 0.0;
-    opt.get("-f")->getDouble(min_peak_fraction);
-    opt.get("-n")->getDouble(min_abs_val);
-    opt.get("-s")->getDouble(spectral_index);
+    double min_peak_fraction = opt.get_double("-f");
+    double min_abs_val = opt.get_double("-n");
+    double spectral_index = opt.get_double("-s");
 
     // Load the FITS image data.
     oskar_Sky* sky = oskar_sky_from_fits_file(OSKAR_DOUBLE, opt.get_arg(0),
@@ -71,7 +68,7 @@ int main(int argc, char** argv)
     oskar_sky_save(opt.get_arg(1), sky, &error);
     if (error)
     {
-        oskar_log_error(0, oskar_get_error_string(error));
+        oskar_log_error(oskar_get_error_string(error));
         return error;
     }
 

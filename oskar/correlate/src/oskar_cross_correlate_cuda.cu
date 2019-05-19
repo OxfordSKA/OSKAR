@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2018, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,149 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "correlate/private_correlate_functions_inline.h"
+#include "correlate/define_correlate_utils.h"
+#include "correlate/define_cross_correlate.h"
 #include "correlate/oskar_cross_correlate_cuda.h"
-#include "math/oskar_add_inline.h"
-#include "utility/oskar_device_utils.h"
-#include <cuda_runtime.h>
-#include <cstdlib>
-#include <cstring>
+#include "math/define_multiply.h"
+#include "utility/oskar_kernel_macros.h"
+#include "utility/oskar_vector_types.h"
 
-// Indices into the visibility/baseline matrix.
-#define SP blockIdx.x /* Column index. */
-#define SQ blockIdx.y /* Row index. */
+#include <stdlib.h>
+#include <string.h>
+#include <cuda_runtime.h>
 
 enum { VER_OLD = 1, VER_NON_SM = 2, VER_SM = 3 };
 static int ver_ = 0;
 static int correlate_version(void);
 
+// Original kernel.
 template
 <
 // Compile-time parameters.
 bool BANDWIDTH_SMEARING, bool TIME_SMEARING, bool GAUSSIAN,
-typename REAL, typename REAL2, typename REAL8
+typename FP, typename FP2, typename FP4c
 >
-__global__
-void oskar_xcorr_cudak(
-        const int                   num_sources,
-        const int                   num_stations,
-        const REAL8* const restrict jones,
-        const REAL*  const restrict source_I,
-        const REAL*  const restrict source_Q,
-        const REAL*  const restrict source_U,
-        const REAL*  const restrict source_V,
-        const REAL*  const restrict source_l,
-        const REAL*  const restrict source_m,
-        const REAL*  const restrict source_n,
-        const REAL*  const restrict source_a,
-        const REAL*  const restrict source_b,
-        const REAL*  const restrict source_c,
-        const REAL*  const restrict station_u,
-        const REAL*  const restrict station_v,
-        const REAL*  const restrict station_w,
-        const REAL*  const restrict station_x,
-        const REAL*  const restrict station_y,
-        const REAL                  uv_min_lambda,
-        const REAL                  uv_max_lambda,
-        const REAL                  inv_wavelength,
-        const REAL                  frac_bandwidth,
-        const REAL                  time_int_sec,
-        const REAL                  gha0_rad,
-        const REAL                  dec0_rad,
-        REAL8*             restrict vis)
-{
-    extern __shared__ __align__(sizeof(double4c)) unsigned char my_smem[];
-    __shared__ REAL uv_len, uu, vv, ww, uu2, vv2, uuvv, du, dv, dw;
-    REAL8 m1, m2, sum; // Partial sum per thread.
-    REAL8* smem = reinterpret_cast<REAL8*>(my_smem); // Allows template.
+OSKAR_XCORR_GPU(oskar_xcorr_cudak, BANDWIDTH_SMEARING, TIME_SMEARING, GAUSSIAN, FP, FP2, FP4c)
 
-    // Return immediately if in the wrong half of the visibility matrix.
-    if (SQ >= SP) return;
-
-    // Get common baseline values per thread block.
-    if (threadIdx.x == 0)
-    {
-        OSKAR_BASELINE_TERMS(REAL, station_u[SP], station_u[SQ],
-                station_v[SP], station_v[SQ], station_w[SP], station_w[SQ],
-                uu, vv, ww, uu2, vv2, uuvv, uv_len);
-
-        if (TIME_SMEARING)
-            OSKAR_BASELINE_DELTAS(REAL, station_x[SP], station_x[SQ],
-                    station_y[SP], station_y[SQ], du, dv, dw);
-    }
-    __syncthreads();
-
-    // Apply the baseline length filter.
-    if (uv_len < uv_min_lambda || uv_len > uv_max_lambda) return;
-
-    // Get pointers to source vectors for both stations.
-    const REAL8* const restrict station_p = &jones[num_sources * SP];
-    const REAL8* const restrict station_q = &jones[num_sources * SQ];
-
-    // Each thread loops over a subset of the sources.
-    OSKAR_CLEAR_COMPLEX_MATRIX(REAL, sum)
-    for (int i = threadIdx.x; i < num_sources; i += blockDim.x)
-    {
-        REAL smearing;
-        if (GAUSSIAN)
-        {
-            const REAL t = source_a[i] * uu2 + source_b[i] * uuvv +
-                    source_c[i] * vv2;
-            smearing = exp((REAL) -t);
-        }
-        else
-        {
-            smearing = (REAL) 1;
-        }
-        if (BANDWIDTH_SMEARING || TIME_SMEARING)
-        {
-            const REAL l = source_l[i];
-            const REAL m = source_m[i];
-            const REAL n = source_n[i] - (REAL) 1;
-            if (BANDWIDTH_SMEARING)
-            {
-                const REAL t = uu * l + vv * m + ww * n;
-                smearing *= oskar_sinc<REAL>(t);
-            }
-            if (TIME_SMEARING)
-            {
-                const REAL t = du * l + dv * m + dw * n;
-                smearing *= oskar_sinc<REAL>(t);
-            }
-        }
-
-        // Construct source brightness matrix.
-        OSKAR_CONSTRUCT_B(REAL, m2,
-                source_I[i], source_Q[i], source_U[i], source_V[i])
-
-        // Multiply first Jones matrix with source brightness matrix.
-        OSKAR_LOAD_MATRIX(m1, station_p[i])
-        OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(REAL2, m1, m2)
-
-        // Multiply result with second (Hermitian transposed) Jones matrix.
-        OSKAR_LOAD_MATRIX(m2, station_q[i])
-        OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(REAL2, m1, m2)
-
-        // Multiply result by smearing term and accumulate.
-        OSKAR_MUL_ADD_COMPLEX_MATRIX_SCALAR(sum, m1, smearing)
-    }
-
-    // Store partial sum for the thread in shared memory.
-    smem[threadIdx.x] = sum;
-    __syncthreads();
-
-    // Accumulate contents of shared memory.
-    if (threadIdx.x == 0)
-    {
-        // Sum over all sources for this baseline.
-        for (int i = 1; i < blockDim.x; ++i)
-            OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(sum, smem[i]);
-
-        // Add result of this thread block to the baseline visibility.
-        int i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
-        OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(vis[i], sum);
-    }
-}
+// Indices into the visibility/baseline matrix.
+#define SP blockIdx.x /* Column index. */
+#define SQ blockIdx.y /* Row index. */
 
 #define OKN_NSOURCES 32
 #define OKN_BPK 4 /* baselines per kernel */
@@ -178,42 +62,19 @@ template
 <
 // Compile-time parameters.
 bool BANDWIDTH_SMEARING, bool TIME_SMEARING, bool GAUSSIAN,
-typename REAL, typename REAL2, typename REAL8
+typename FP, typename FP2, typename FP4c
 >
 __global__
 void oskar_xcorr_NON_SM_cudak(
-        const int                   num_sources,
-        const int                   num_stations,
-        const REAL8* const restrict jones,
-        const REAL*  const restrict source_I,
-        const REAL*  const restrict source_Q,
-        const REAL*  const restrict source_U,
-        const REAL*  const restrict source_V,
-        const REAL*  const restrict source_l,
-        const REAL*  const restrict source_m,
-        const REAL*  const restrict source_n,
-        const REAL*  const restrict source_a,
-        const REAL*  const restrict source_b,
-        const REAL*  const restrict source_c,
-        const REAL*  const restrict station_u,
-        const REAL*  const restrict station_v,
-        const REAL*  const restrict station_w,
-        const REAL*  const restrict station_x,
-        const REAL*  const restrict station_y,
-        const REAL                  uv_min_lambda,
-        const REAL                  uv_max_lambda,
-        const REAL                  inv_wavelength,
-        const REAL                  frac_bandwidth,
-        const REAL                  time_int_sec,
-        const REAL                  gha0_rad,
-        const REAL                  dec0_rad,
-        REAL8*             restrict vis)
+        OSKAR_XCORR_ARGS(FP)
+        const FP4c* const __restrict__ jones,
+        FP4c*             __restrict__ vis)
 {
-    __shared__ REAL uv_len[OKN_BPK], uu[OKN_BPK], vv[OKN_BPK], ww[OKN_BPK];
-    __shared__ REAL uu2[OKN_BPK], vv2[OKN_BPK], uuvv[OKN_BPK];
-    __shared__ REAL du[OKN_BPK], dv[OKN_BPK], dw[OKN_BPK];
-    __shared__ const REAL8 *station_q[OKN_BPK];
-    REAL8 m1, m2, sum;
+    __shared__ FP uv_len[OKN_BPK], uu[OKN_BPK], vv[OKN_BPK], ww[OKN_BPK];
+    __shared__ FP uu2[OKN_BPK], vv2[OKN_BPK], uuvv[OKN_BPK];
+    __shared__ FP du[OKN_BPK], dv[OKN_BPK], dw[OKN_BPK];
+    __shared__ const FP4c *st_q[OKN_BPK];
+    FP4c m1, m2, sum;
 
     const int w = (threadIdx.x >> 5); // Warp ID.
     const int i = (threadIdx.x & 31); // ID within warp (local ID).
@@ -228,125 +89,111 @@ void oskar_xcorr_NON_SM_cudak(
 
         // Set pointer to source vector for station q to safe position
         // so non-existence SQ >= SP does not cause problems.
-        station_q[w] = &jones[0];
+        st_q[w] = &jones[0];
 
         if (i_sq < num_stations)
         {
-            OSKAR_BASELINE_TERMS(REAL,
-                    station_u[SP], station_u[i_sq],
-                    station_v[SP], station_v[i_sq],
-                    station_w[SP], station_w[i_sq],
-                    uu[w], vv[w], ww[w], uu2[w], vv2[w], uuvv[w], uv_len[w]);
+            OSKAR_BASELINE_TERMS(FP, st_u[SP], st_u[i_sq], st_v[SP], st_v[i_sq],
+                    st_w[SP], st_w[i_sq], uu[w], vv[w], ww[w],
+                    uu2[w], vv2[w], uuvv[w], uv_len[w]);
 
             if (TIME_SMEARING)
-                OSKAR_BASELINE_DELTAS(REAL,
-                        station_x[SP], station_x[i_sq],
-                        station_y[SP], station_y[i_sq],
-                        du[w], dv[w], dw[w]);
+                OSKAR_BASELINE_DELTAS(FP, st_x[SP], st_x[i_sq],
+                        st_y[SP], st_y[i_sq], du[w], dv[w], dw[w]);
 
             // Get valid pointer to source vector for station q.
-            station_q[w] = &jones[num_sources * i_sq];
+            st_q[w] = &jones[num_src * i_sq];
         }
     }
     __syncthreads();
 
     // Get pointer to source vector for station p.
-    const REAL8* const restrict station_p = &jones[num_sources * SP];
+    const FP4c* const __restrict__ st_p = &jones[num_src * SP];
 
     // Each thread from given warp loops over a subset of the sources,
     // and each warp works with a different station q.
-    OSKAR_CLEAR_COMPLEX_MATRIX(REAL, sum)
-    int itemp = (num_sources >> 5) * WARP;
-    for (int outer = i; outer < itemp; outer += WARP)
+    OSKAR_CLEAR_COMPLEX_MATRIX(FP, sum)
+    const int itemp = (num_src >> 5) * WARP;
+    for (int s = i; s < itemp; s += WARP)
     {
-        REAL smearing;
+        FP smearing;
         if (GAUSSIAN)
         {
-            const REAL t = source_a[outer] * uu2[w] +
-                    source_b[outer] * uuvv[w] + source_c[outer] * vv2[w];
-            smearing = exp((REAL) -t);
+            const FP t = src_a[s] * uu2[w] +
+                    src_b[s] * uuvv[w] + src_c[s] * vv2[w];
+            smearing = exp((FP) -t);
         }
-        else
-        {
-            smearing = (REAL) 1;
-        }
+        else smearing = (FP) 1;
         if (BANDWIDTH_SMEARING || TIME_SMEARING)
         {
-            const REAL l = source_l[outer];
-            const REAL m = source_m[outer];
-            const REAL n = source_n[outer] - (REAL) 1;
+            const FP l = src_l[s], m = src_m[s], n = src_n[s] - (FP) 1;
             if (BANDWIDTH_SMEARING)
             {
-                const REAL t = uu[w] * l + vv[w] * m + ww[w] * n;
-                smearing *= oskar_sinc<REAL>(t);
+                const FP t = uu[w] * l + vv[w] * m + ww[w] * n;
+                smearing *= OSKAR_SINC(FP, t);
             }
             if (TIME_SMEARING)
             {
-                const REAL t = du[w] * l + dv[w] * m + dw[w] * n;
-                smearing *= oskar_sinc<REAL>(t);
+                const FP t = du[w] * l + dv[w] * m + dw[w] * n;
+                smearing *= OSKAR_SINC(FP, t);
             }
         }
 
         // Construct source brightness matrix.
-        OSKAR_CONSTRUCT_B(REAL, m2, source_I[outer], source_Q[outer],
-                source_U[outer], source_V[outer])
+        OSKAR_CONSTRUCT_B(FP, m2, src_I[s], src_Q[s],
+                src_U[s], src_V[s])
 
         // Multiply first Jones matrix with source brightness matrix.
-        m1 = station_p[outer];
-        OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(REAL2, m1, m2)
+        m1 = st_p[s]; // FIXME(FD) Use OSKAR_LOAD_MATRIX here?
+        OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(FP2, m1, m2)
 
         // Multiply result with second (Hermitian transposed) Jones matrix.
-        OSKAR_LOAD_MATRIX(m2, (station_q[w])[outer])
-        OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(REAL2, m1, m2)
+        OSKAR_LOAD_MATRIX(m2, (st_q[w])[s])
+        OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(FP2, m1, m2)
 
         // Multiply result by smearing term and accumulate.
         OSKAR_MUL_ADD_COMPLEX_MATRIX_SCALAR(sum, m1, smearing)
         __syncthreads();
     }
-    if ((num_sources & 31) > 0)
+    if ((num_src & 31) > 0)
     {
-        int outer = (num_sources >> 5) * WARP + i;
-        if (outer < num_sources)
+        int s = (num_src >> 5) * WARP + i;
+        if (s < num_src)
         {
-            REAL smearing;
+            FP smearing;
             if (GAUSSIAN)
             {
-                const REAL t = source_a[outer] * uu2[w] +
-                        source_b[outer] * uuvv[w] + source_c[outer] * vv2[w];
-                smearing = exp((REAL) -t);
+                const FP t = src_a[s] * uu2[w] +
+                        src_b[s] * uuvv[w] + src_c[s] * vv2[w];
+                smearing = exp((FP) -t);
             }
-            else
-            {
-                smearing = (REAL) 1;
-            }
+            else smearing = (FP) 1;
             if (BANDWIDTH_SMEARING || TIME_SMEARING)
             {
-                const REAL l = source_l[outer];
-                const REAL m = source_m[outer];
-                const REAL n = source_n[outer] - (REAL) 1;
+                const FP l = src_l[s], m = src_m[s], n = src_n[s] - (FP) 1;
                 if (BANDWIDTH_SMEARING)
                 {
-                    const REAL t = uu[w] * l + vv[w] * m + ww[w] * n;
-                    smearing *= oskar_sinc<REAL>(t);
+                    const FP t = uu[w] * l + vv[w] * m + ww[w] * n;
+                    smearing *= OSKAR_SINC(FP, t);
                 }
                 if (TIME_SMEARING)
                 {
-                    const REAL t = du[w] * l + dv[w] * m + dw[w] * n;
-                    smearing *= oskar_sinc<REAL>(t);
+                    const FP t = du[w] * l + dv[w] * m + dw[w] * n;
+                    smearing *= OSKAR_SINC(FP, t);
                 }
             }
 
             // Construct source brightness matrix.
-            OSKAR_CONSTRUCT_B(REAL, m2, source_I[outer], source_Q[outer],
-                    source_U[outer], source_V[outer])
+            OSKAR_CONSTRUCT_B(FP, m2, src_I[s], src_Q[s],
+                    src_U[s], src_V[s])
 
             // Multiply first Jones matrix with source brightness matrix.
-            m1 = station_p[outer];
-            OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(REAL2, m1, m2)
+            m1 = st_p[s]; // FIXME(FD) Use OSKAR_LOAD_MATRIX here?
+            OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(FP2, m1, m2)
 
             // Multiply result with second (Hermitian transposed) Jones matrix.
-            OSKAR_LOAD_MATRIX(m2, (station_q[w])[outer])
-            OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(REAL2, m1, m2)
+            OSKAR_LOAD_MATRIX(m2, (st_q[w])[s])
+            OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(FP2, m1, m2)
 
             // Multiply result by smearing term and accumulate.
             OSKAR_MUL_ADD_COMPLEX_MATRIX_SCALAR(sum, m1, smearing)
@@ -354,21 +201,21 @@ void oskar_xcorr_NON_SM_cudak(
     }
 
     // Reduce matrices within warp.
-    OSKAR_WARP_REDUCE(sum.a.x);
-    OSKAR_WARP_REDUCE(sum.a.y);
-    OSKAR_WARP_REDUCE(sum.b.x);
-    OSKAR_WARP_REDUCE(sum.b.y);
-    OSKAR_WARP_REDUCE(sum.c.x);
-    OSKAR_WARP_REDUCE(sum.c.y);
-    OSKAR_WARP_REDUCE(sum.d.x);
-    OSKAR_WARP_REDUCE(sum.d.y);
+    WARP_REDUCE(sum.a.x);
+    WARP_REDUCE(sum.a.y);
+    WARP_REDUCE(sum.b.x);
+    WARP_REDUCE(sum.b.y);
+    WARP_REDUCE(sum.c.x);
+    WARP_REDUCE(sum.c.y);
+    WARP_REDUCE(sum.d.x);
+    WARP_REDUCE(sum.d.y);
 
     // Add result of this warp to the baseline visibility.
     if (i == 0 && (OKN_BPK * SQ + w) < SP)
     {
         if (uv_len[w] < uv_min_lambda || uv_len[w] > uv_max_lambda) return;
-        const int j = oskar_evaluate_baseline_index_inline(num_stations,
-                SP, OKN_BPK * SQ + w);
+        const int q = OKN_BPK * SQ + w;
+        const int j = OSKAR_BASELINE_INDEX(num_stations, SP, q) + offset_out;
         OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(vis[j], sum);
     }
 }
@@ -377,53 +224,30 @@ template
 <
 // Compile-time parameters.
 bool BANDWIDTH_SMEARING, bool TIME_SMEARING, bool GAUSSIAN,
-typename REAL, typename REAL2, typename REAL8
+typename FP, typename FP2, typename FP4c
 >
 __global__
 void oskar_xcorr_SM_cudak(
-        const int                   num_sources,
-        const int                   num_stations,
-        const REAL8* const restrict jones,
-        const REAL*  const restrict source_I,
-        const REAL*  const restrict source_Q,
-        const REAL*  const restrict source_U,
-        const REAL*  const restrict source_V,
-        const REAL*  const restrict source_l,
-        const REAL*  const restrict source_m,
-        const REAL*  const restrict source_n,
-        const REAL*  const restrict source_a,
-        const REAL*  const restrict source_b,
-        const REAL*  const restrict source_c,
-        const REAL*  const restrict station_u,
-        const REAL*  const restrict station_v,
-        const REAL*  const restrict station_w,
-        const REAL*  const restrict station_x,
-        const REAL*  const restrict station_y,
-        const REAL                  uv_min_lambda,
-        const REAL                  uv_max_lambda,
-        const REAL                  inv_wavelength,
-        const REAL                  frac_bandwidth,
-        const REAL                  time_int_sec,
-        const REAL                  gha0_rad,
-        const REAL                  dec0_rad,
-        REAL8*             restrict vis)
+        OSKAR_XCORR_ARGS(FP)
+        const FP4c* const __restrict__ jones,
+        FP4c*             __restrict__ vis)
 {
-    __shared__ REAL uv_len[OKN_BPK], uu[OKN_BPK], vv[OKN_BPK], ww[OKN_BPK];
-    __shared__ REAL uu2[OKN_BPK], vv2[OKN_BPK], uuvv[OKN_BPK];
-    __shared__ REAL du[OKN_BPK], dv[OKN_BPK], dw[OKN_BPK];
-    __shared__ const REAL8 *station_q[OKN_BPK];
-    __shared__ REAL   s_I[OKN_NSOURCES];
-    __shared__ REAL   s_Q[OKN_NSOURCES];
-    __shared__ REAL   s_U[OKN_NSOURCES];
-    __shared__ REAL   s_V[OKN_NSOURCES];
-    __shared__ REAL   s_l[OKN_NSOURCES];
-    __shared__ REAL   s_m[OKN_NSOURCES];
-    __shared__ REAL   s_n[OKN_NSOURCES];
-    __shared__ REAL   s_a[OKN_NSOURCES];
-    __shared__ REAL   s_b[OKN_NSOURCES];
-    __shared__ REAL   s_c[OKN_NSOURCES];
-    __shared__ REAL8 s_sp[OKN_NSOURCES];
-    REAL8 m1, m2, sum;
+    __shared__ FP uv_len[OKN_BPK], uu[OKN_BPK], vv[OKN_BPK], ww[OKN_BPK];
+    __shared__ FP uu2[OKN_BPK], vv2[OKN_BPK], uuvv[OKN_BPK];
+    __shared__ FP du[OKN_BPK], dv[OKN_BPK], dw[OKN_BPK];
+    __shared__ const FP4c *st_q[OKN_BPK];
+    __shared__ FP   s_I[OKN_NSOURCES];
+    __shared__ FP   s_Q[OKN_NSOURCES];
+    __shared__ FP   s_U[OKN_NSOURCES];
+    __shared__ FP   s_V[OKN_NSOURCES];
+    __shared__ FP   s_l[OKN_NSOURCES];
+    __shared__ FP   s_m[OKN_NSOURCES];
+    __shared__ FP   s_n[OKN_NSOURCES];
+    __shared__ FP   s_a[OKN_NSOURCES];
+    __shared__ FP   s_b[OKN_NSOURCES];
+    __shared__ FP   s_c[OKN_NSOURCES];
+    __shared__ FP4c s_sp[OKN_NSOURCES];
+    FP4c m1, m2, sum;
 
     const int w = (threadIdx.x >> 5); // Warp ID.
     const int i = (threadIdx.x & 31); // ID within warp (local ID).
@@ -438,189 +262,175 @@ void oskar_xcorr_SM_cudak(
 
         // Set pointer to source vector for station q to safe position
         // so non-existence SQ >= SP does not cause problems.
-        station_q[w] = &jones[0];
+        st_q[w] = &jones[0];
 
         if (i_sq < num_stations)
         {
-            OSKAR_BASELINE_TERMS(REAL,
-                    station_u[SP], station_u[i_sq],
-                    station_v[SP], station_v[i_sq],
-                    station_w[SP], station_w[i_sq],
-                    uu[w], vv[w], ww[w], uu2[w], vv2[w], uuvv[w], uv_len[w]);
+            OSKAR_BASELINE_TERMS(FP, st_u[SP], st_u[i_sq], st_v[SP], st_v[i_sq],
+                    st_w[SP], st_w[i_sq], uu[w], vv[w], ww[w],
+                    uu2[w], vv2[w], uuvv[w], uv_len[w]);
 
             if (TIME_SMEARING)
-                OSKAR_BASELINE_DELTAS(REAL,
-                        station_x[SP], station_x[i_sq],
-                        station_y[SP], station_y[i_sq],
-                        du[w], dv[w], dw[w]);
+                OSKAR_BASELINE_DELTAS(FP, st_x[SP], st_x[i_sq],
+                        st_y[SP], st_y[i_sq], du[w], dv[w], dw[w]);
 
             // Get valid pointer to source vector for station q.
-            station_q[w] = &jones[num_sources * i_sq];
+            st_q[w] = &jones[num_src * i_sq];
         }
     }
     __syncthreads();
 
     // Get pointer to source vector for station p.
-    const REAL8* const restrict station_p = &jones[num_sources * SP];
+    const FP4c* const __restrict__ st_p = &jones[num_src * SP];
 
     // Each thread from given warp loops over a subset of the sources,
     // and each warp works with a different station q.
-    OSKAR_CLEAR_COMPLEX_MATRIX(REAL, sum)
-    int itemp = (num_sources >> 5) * WARP;
-    for (int outer = i; outer < itemp; outer += WARP)
+    OSKAR_CLEAR_COMPLEX_MATRIX(FP, sum)
+    const int itemp = (num_src >> 5) * WARP;
+    for (int s = i; s < itemp; s += WARP)
     {
         if (w == 0)
         {
-            s_I[i] = source_I[outer];
+            s_I[i] = src_I[s];
             if (BANDWIDTH_SMEARING || TIME_SMEARING)
-                s_l[i] = source_l[outer];
+                s_l[i] = src_l[s];
             if (GAUSSIAN)
             {
-                s_a[i] = source_a[outer];
-                s_b[i] = source_b[outer];
+                s_a[i] = src_a[s];
+                s_b[i] = src_b[s];
             }
         }
         if (w == 1)
         {
-            s_Q[i] = source_Q[outer];
+            s_Q[i] = src_Q[s];
             if (BANDWIDTH_SMEARING || TIME_SMEARING)
-                s_m[i] = source_m[outer];
+                s_m[i] = src_m[s];
             if (GAUSSIAN)
-                s_c[i] = source_c[outer];
+                s_c[i] = src_c[s];
         }
         if (w == 2)
         {
-            s_U[i] = source_U[outer];
-            s_V[i] = source_V[outer];
+            s_U[i] = src_U[s];
+            s_V[i] = src_V[s];
             if (BANDWIDTH_SMEARING || TIME_SMEARING)
-                s_n[i] = source_n[outer];
+                s_n[i] = src_n[s];
         }
         if (w == 3)
         {
-            s_sp[i] = station_p[outer];
+            s_sp[i] = st_p[s]; // FIXME(FD) Use OSKAR_LOAD_MATRIX here?
         }
         __syncthreads();
 
-        REAL smearing;
+        FP smearing;
         if (GAUSSIAN)
         {
-            const REAL t = s_a[i] * uu2[w] +
+            const FP t = s_a[i] * uu2[w] +
                     s_b[i] * uuvv[w] + s_c[i] * vv2[w];
-            smearing = exp((REAL) -t);
+            smearing = exp((FP) -t);
         }
-        else
-        {
-            smearing = (REAL) 1;
-        }
+        else smearing = (FP) 1;
         if (BANDWIDTH_SMEARING || TIME_SMEARING)
         {
-            const REAL l = s_l[i];
-            const REAL m = s_m[i];
-            const REAL n = s_n[i] - (REAL) 1;
+            const FP l = s_l[i], m = s_m[i], n = s_n[i] - (FP) 1;
             if (BANDWIDTH_SMEARING)
             {
-                const REAL t = uu[w] * l + vv[w] * m + ww[w] * n;
-                smearing *= oskar_sinc<REAL>(t);
+                const FP t = uu[w] * l + vv[w] * m + ww[w] * n;
+                smearing *= OSKAR_SINC(FP, t);
             }
             if (TIME_SMEARING)
             {
-                const REAL t = du[w] * l + dv[w] * m + dw[w] * n;
-                smearing *= oskar_sinc<REAL>(t);
+                const FP t = du[w] * l + dv[w] * m + dw[w] * n;
+                smearing *= OSKAR_SINC(FP, t);
             }
         }
 
         // Construct source brightness matrix.
-        OSKAR_CONSTRUCT_B(REAL, m2, s_I[i], s_Q[i], s_U[i], s_V[i])
+        OSKAR_CONSTRUCT_B(FP, m2, s_I[i], s_Q[i], s_U[i], s_V[i])
 
         // Multiply first Jones matrix with source brightness matrix.
         m1 = s_sp[i];
-        OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(REAL2, m1, m2)
+        OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(FP2, m1, m2)
 
         // Multiply result with second (Hermitian transposed) Jones matrix.
-        OSKAR_LOAD_MATRIX(m2, (station_q[w])[outer])
-        OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(REAL2, m1, m2)
+        OSKAR_LOAD_MATRIX(m2, (st_q[w])[s])
+        OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(FP2, m1, m2)
 
         // Multiply result by smearing term and accumulate.
         OSKAR_MUL_ADD_COMPLEX_MATRIX_SCALAR(sum, m1, smearing)
         __syncthreads();
     }
-    if ((num_sources & 31) > 0)
+    if ((num_src & 31) > 0)
     {
-        int outer = (num_sources >> 5) * WARP + i;
-        if (outer < num_sources)
+        int s = (num_src >> 5) * WARP + i;
+        if (s < num_src)
         {
             if (w == 0)
             {
-                s_I[i] = source_I[outer];
+                s_I[i] = src_I[s];
                 if (BANDWIDTH_SMEARING || TIME_SMEARING)
-                    s_l[i] = source_l[outer];
+                    s_l[i] = src_l[s];
                 if (GAUSSIAN)
                 {
-                    s_a[i] = source_a[outer];
-                    s_b[i] = source_b[outer];
+                    s_a[i] = src_a[s];
+                    s_b[i] = src_b[s];
                 }
             }
             if (w == 1)
             {
-                s_Q[i] = source_Q[outer];
+                s_Q[i] = src_Q[s];
                 if (BANDWIDTH_SMEARING || TIME_SMEARING)
-                    s_m[i] = source_m[outer];
+                    s_m[i] = src_m[s];
                 if (GAUSSIAN)
-                    s_c[i] = source_c[outer];
+                    s_c[i] = src_c[s];
             }
             if (w == 2)
             {
-                s_U[i] = source_U[outer];
-                s_V[i] = source_V[outer];
+                s_U[i] = src_U[s];
+                s_V[i] = src_V[s];
                 if (BANDWIDTH_SMEARING || TIME_SMEARING)
-                    s_n[i] = source_n[outer];
+                    s_n[i] = src_n[s];
             }
             if (w == 3)
             {
-                s_sp[i] = station_p[outer];
+                s_sp[i] = st_p[s]; // FIXME(FD) Use OSKAR_LOAD_MATRIX here?
             }
         }
         __syncthreads();
-        if (outer < num_sources)
+        if (s < num_src)
         {
-            REAL smearing;
+            FP smearing;
             if (GAUSSIAN)
             {
-                const REAL t = s_a[i] * uu2[w] +
+                const FP t = s_a[i] * uu2[w] +
                         s_b[i] * uuvv[w] + s_c[i] * vv2[w];
-                smearing = exp((REAL) -t);
+                smearing = exp((FP) -t);
             }
-            else
-            {
-                smearing = (REAL) 1;
-            }
+            else smearing = (FP) 1;
             if (BANDWIDTH_SMEARING || TIME_SMEARING)
             {
-                const REAL l = s_l[i];
-                const REAL m = s_m[i];
-                const REAL n = s_n[i] - (REAL) 1;
+                const FP l = s_l[i], m = s_m[i], n = s_n[i] - (FP) 1;
                 if (BANDWIDTH_SMEARING)
                 {
-                    const REAL t = uu[w] * l + vv[w] * m + ww[w] * n;
-                    smearing *= oskar_sinc<REAL>(t);
+                    const FP t = uu[w] * l + vv[w] * m + ww[w] * n;
+                    smearing *= OSKAR_SINC(FP, t);
                 }
                 if (TIME_SMEARING)
                 {
-                    const REAL t = du[w] * l + dv[w] * m + dw[w] * n;
-                    smearing *= oskar_sinc<REAL>(t);
+                    const FP t = du[w] * l + dv[w] * m + dw[w] * n;
+                    smearing *= OSKAR_SINC(FP, t);
                 }
             }
 
             // Construct source brightness matrix.
-            OSKAR_CONSTRUCT_B(REAL, m2, s_I[i], s_Q[i], s_U[i], s_V[i])
+            OSKAR_CONSTRUCT_B(FP, m2, s_I[i], s_Q[i], s_U[i], s_V[i])
 
             // Multiply first Jones matrix with source brightness matrix.
             m1 = s_sp[i];
-            OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(REAL2, m1, m2)
+            OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(FP2, m1, m2)
 
             // Multiply result with second (Hermitian transposed) Jones matrix.
-            OSKAR_LOAD_MATRIX(m2, (station_q[w])[outer])
-            OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(REAL2, m1, m2)
+            OSKAR_LOAD_MATRIX(m2, (st_q[w])[s])
+            OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(FP2, m1, m2)
 
             // Multiply result by smearing term and accumulate.
             OSKAR_MUL_ADD_COMPLEX_MATRIX_SCALAR(sum, m1, smearing)
@@ -628,48 +438,48 @@ void oskar_xcorr_SM_cudak(
     }
 
     // Reduce matrices within warp.
-    OSKAR_WARP_REDUCE(sum.a.x);
-    OSKAR_WARP_REDUCE(sum.a.y);
-    OSKAR_WARP_REDUCE(sum.b.x);
-    OSKAR_WARP_REDUCE(sum.b.y);
-    OSKAR_WARP_REDUCE(sum.c.x);
-    OSKAR_WARP_REDUCE(sum.c.y);
-    OSKAR_WARP_REDUCE(sum.d.x);
-    OSKAR_WARP_REDUCE(sum.d.y);
+    WARP_REDUCE(sum.a.x);
+    WARP_REDUCE(sum.a.y);
+    WARP_REDUCE(sum.b.x);
+    WARP_REDUCE(sum.b.y);
+    WARP_REDUCE(sum.c.x);
+    WARP_REDUCE(sum.c.y);
+    WARP_REDUCE(sum.d.x);
+    WARP_REDUCE(sum.d.y);
 
     // Add result of this warp to the baseline visibility.
     if (i == 0 && (OKN_BPK * SQ + w) < SP)
     {
         if (uv_len[w] < uv_min_lambda || uv_len[w] > uv_max_lambda) return;
-        const int j = oskar_evaluate_baseline_index_inline(num_stations,
-                SP, OKN_BPK * SQ + w);
+        const int q = OKN_BPK * SQ + w;
+        const int j = OSKAR_BASELINE_INDEX(num_stations, SP, q) + offset_out;
         OSKAR_ADD_COMPLEX_MATRIX_IN_PLACE(vis[j], sum);
     }
 }
 
-#define XCORR_KERNEL(NAME, BS, TS, GAUSSIAN, REAL, REAL2, REAL8)            \
-        NAME<BS, TS, GAUSSIAN, REAL, REAL2, REAL8>                          \
-        OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)               \
-        (num_sources, num_stations, d_jones, d_I, d_Q, d_U, d_V,            \
-                d_l, d_m, d_n, d_a, d_b, d_c,                               \
-                d_station_u, d_station_v, d_station_w,                      \
-                d_station_x, d_station_y, uv_min_lambda, uv_max_lambda,     \
-                inv_wavelength, frac_bandwidth, time_int_sec,               \
-                gha0_rad, dec0_rad, d_vis);
+#define XCORR_KERNEL(NAME, BS, TS, GAUSSIAN, FP, FP2, FP4c)\
+        NAME<BS, TS, GAUSSIAN, FP, FP2, FP4c>\
+        OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)\
+        (num_sources, num_stations, offset_out, d_I, d_Q, d_U, d_V,\
+                d_l, d_m, d_n, d_a, d_b, d_c,\
+                d_station_u, d_station_v, d_station_w,\
+                d_station_x, d_station_y, uv_min_lambda, uv_max_lambda,\
+                inv_wavelength, frac_bandwidth, time_int_sec,\
+                gha0_rad, dec0_rad, d_jones, d_vis);
 
-#define XCORR_SELECT(NAME, GAUSSIAN, REAL, REAL2, REAL8)                    \
-        if (frac_bandwidth == (REAL)0 && time_int_sec == (REAL)0)           \
-            XCORR_KERNEL(NAME, false, false, GAUSSIAN, REAL, REAL2, REAL8)  \
-        else if (frac_bandwidth != (REAL)0 && time_int_sec == (REAL)0)      \
-            XCORR_KERNEL(NAME, true, false, GAUSSIAN, REAL, REAL2, REAL8)   \
-        else if (frac_bandwidth == (REAL)0 && time_int_sec != (REAL)0)      \
-            XCORR_KERNEL(NAME, false, true, GAUSSIAN, REAL, REAL2, REAL8)   \
-        else if (frac_bandwidth != (REAL)0 && time_int_sec != (REAL)0)      \
-            XCORR_KERNEL(NAME, true, true, GAUSSIAN, REAL, REAL2, REAL8)
+#define XCORR_SELECT(NAME, GAUSSIAN, FP, FP2, FP4c)\
+        if (frac_bandwidth == (FP)0 && time_int_sec == (FP)0)\
+            XCORR_KERNEL(NAME, false, false, GAUSSIAN, FP, FP2, FP4c)\
+        else if (frac_bandwidth != (FP)0 && time_int_sec == (FP)0)\
+            XCORR_KERNEL(NAME, true, false, GAUSSIAN, FP, FP2, FP4c)\
+        else if (frac_bandwidth == (FP)0 && time_int_sec != (FP)0)\
+            XCORR_KERNEL(NAME, false, true, GAUSSIAN, FP, FP2, FP4c)\
+        else if (frac_bandwidth != (FP)0 && time_int_sec != (FP)0)\
+            XCORR_KERNEL(NAME, true, true, GAUSSIAN, FP, FP2, FP4c)
 
 void oskar_cross_correlate_point_cuda_f(
-        int num_sources, int num_stations, const float4c* d_jones,
-        const float* d_I, const float* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const float4c* d_jones, const float* d_I, const float* d_Q,
         const float* d_U, const float* d_V,
         const float* d_l, const float* d_m, const float* d_n,
         const float* d_station_u, const float* d_station_v,
@@ -702,8 +512,8 @@ void oskar_cross_correlate_point_cuda_f(
 }
 
 void oskar_cross_correlate_point_cuda_d(
-        int num_sources, int num_stations, const double4c* d_jones,
-        const double* d_I, const double* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const double4c* d_jones, const double* d_I, const double* d_Q,
         const double* d_U, const double* d_V,
         const double* d_l, const double* d_m, const double* d_n,
         const double* d_station_u, const double* d_station_v,
@@ -739,8 +549,8 @@ void oskar_cross_correlate_point_cuda_d(
 }
 
 void oskar_cross_correlate_gaussian_cuda_f(
-        int num_sources, int num_stations, const float4c* d_jones,
-        const float* d_I, const float* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const float4c* d_jones, const float* d_I, const float* d_Q,
         const float* d_U, const float* d_V,
         const float* d_l, const float* d_m, const float* d_n,
         const float* d_a, const float* d_b, const float* d_c,
@@ -772,8 +582,8 @@ void oskar_cross_correlate_gaussian_cuda_f(
 }
 
 void oskar_cross_correlate_gaussian_cuda_d(
-        int num_sources, int num_stations, const double4c* d_jones,
-        const double* d_I, const double* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const double4c* d_jones, const double* d_I, const double* d_Q,
         const double* d_U, const double* d_V,
         const double* d_l, const double* d_m, const double* d_n,
         const double* d_a, const double* d_b, const double* d_c,
@@ -823,7 +633,11 @@ int correlate_version()
         }
         if (ver_ == 0)
         {
-            const int compute = oskar_device_compute_capability();
+            int ma = 0, mi = 0, id = 0;
+            cudaGetDevice(&id);
+            cudaDeviceGetAttribute(&ma, cudaDevAttrComputeCapabilityMajor, id);
+            cudaDeviceGetAttribute(&mi, cudaDevAttrComputeCapabilityMinor, id);
+            const int compute = 10 * ma + mi;
             if (compute >= 70)
                 ver_ = VER_NON_SM;
             else if (compute >= 30)

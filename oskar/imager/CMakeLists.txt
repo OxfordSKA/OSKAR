@@ -3,12 +3,17 @@
 #
 
 set(imager_SRC
+    define_grid_correction.h
+    define_grid_tile_grid_wproj.h
+    define_grid_tile_utils.h
+    define_imager_generate_w_phase_screen.h
     src/oskar_grid_correction.c
     src/oskar_grid_functions_spheroidal.c
     src/oskar_grid_functions_pillbox.c
     src/oskar_grid_simple.c
     src/oskar_grid_weights.c
     src/oskar_grid_wproj.c
+    src/oskar_grid_wproj2.c
     src/oskar_imager_accessors.c
     src/oskar_imager_check_init.c
     src/oskar_imager_create.c
@@ -20,6 +25,8 @@ set(imager_SRC
     src/oskar_imager_rotate_vis.c
     src/oskar_imager_run.c
     src/oskar_imager_update.c
+    src/oskar_imager_gpu.cl
+    src/oskar_imager.cl
     src/private_imager_composite_nearest_even.c
     src/private_imager_create_fits_files.c
     src/private_imager_filter_time.c
@@ -42,9 +49,7 @@ set(imager_SRC
 )
 
 if (CUDA_FOUND)
-    list(APPEND imager_SRC
-        src/private_imager_generate_w_phase_screen_cuda.cu
-    )
+    list(APPEND imager_SRC src/oskar_imager.cu)
 endif()
 
 set(imager_SRC "${imager_SRC}" PARENT_SCOPE)

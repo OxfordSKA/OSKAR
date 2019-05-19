@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,143 +27,90 @@
  */
 
 #include "convert/oskar_convert_station_uvw_to_baseline_uvw.h"
-#include "convert/oskar_convert_station_uvw_to_baseline_uvw_cuda.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_convert_station_uvw_to_baseline_uvw_f(int num_stations,
-        const float* u, const float* v, const float* w, float* uu,
-        float* vv, float* ww)
-{
-    int s1, s2, b; /* Station and baseline indices. */
-    for (s1 = 0, b = 0; s1 < num_stations; ++s1)
-    {
-        for (s2 = s1 + 1; s2 < num_stations; ++s2, ++b)
-        {
-            uu[b] = u[s2] - u[s1];
-            vv[b] = v[s2] - v[s1];
-            ww[b] = w[s2] - w[s1];
-        }
-    }
+#define CONVERT_STATION_TO_BASELINE(NAME, FP) static void NAME(\
+        const int num_stations,\
+        const int offset_in, const FP *u, const FP *v, const FP *w,\
+        const int offset_out, FP *uu, FP *vv, FP *ww)\
+{\
+    int s1, s2, b;\
+    for (s1 = 0, b = 0; s1 < num_stations; ++s1) {\
+        const int i1 = s1 + offset_in;\
+        for (s2 = s1 + 1; s2 < num_stations; ++s2, ++b) {\
+            const int i2 = s2 + offset_in;\
+            const int out = b + offset_out;\
+            uu[out] = u[i2] - u[i1];\
+            vv[out] = v[i2] - v[i1];\
+            ww[out] = w[i2] - w[i1];\
+        }\
+    }\
 }
 
-/* Double precision. */
-void oskar_convert_station_uvw_to_baseline_uvw_d(int num_stations,
-        const double* u, const double* v, const double* w, double* uu,
-        double* vv, double* ww)
-{
-    int s1, s2, b; /* Station and baseline indices. */
-    for (s1 = 0, b = 0; s1 < num_stations; ++s1)
-    {
-        for (s2 = s1 + 1; s2 < num_stations; ++s2, ++b)
-        {
-            uu[b] = u[s2] - u[s1];
-            vv[b] = v[s2] - v[s1];
-            ww[b] = w[s2] - w[s1];
-        }
-    }
-}
+CONVERT_STATION_TO_BASELINE(convert_station_uvw_to_baseline_uvw_float, float)
+CONVERT_STATION_TO_BASELINE(convert_station_uvw_to_baseline_uvw_double, double)
 
-/* Wrapper. */
-void oskar_convert_station_uvw_to_baseline_uvw(const oskar_Mem* u,
-        const oskar_Mem* v, const oskar_Mem* w, oskar_Mem* uu, oskar_Mem* vv,
-        oskar_Mem* ww, int* status)
+void oskar_convert_station_uvw_to_baseline_uvw(int num_stations, int offset_in,
+        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
+        int offset_out, oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
+        int* status)
 {
-    int type, location, num_stations, num_baselines;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Get data type, location and size. */
-    type = oskar_mem_type(u);
-    location = oskar_mem_location(u);
-    num_stations = (int)oskar_mem_length(u);
-    num_baselines = num_stations * (num_stations - 1) / 2;
-
-    /* Check that the data locations match. */
-    if (oskar_mem_location(v) != location ||
-            oskar_mem_location(w) != location ||
-            oskar_mem_location(uu) != location ||
-            oskar_mem_location(vv) != location ||
-            oskar_mem_location(ww) != location)
-    {
-        *status = OSKAR_ERR_LOCATION_MISMATCH;
-        return;
-    }
-
-    /* Check that the data dimensions are OK. */
-    if ((int)oskar_mem_length(v) < num_stations ||
-            (int)oskar_mem_length(w) < num_stations ||
-            (int)oskar_mem_length(uu) < num_baselines ||
-            (int)oskar_mem_length(vv) < num_baselines ||
-            (int)oskar_mem_length(ww) < num_baselines)
-    {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
-        return;
-    }
-
+    const int type = oskar_mem_type(u);
+    const int location = oskar_mem_location(u);
     if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
-        {
-            oskar_convert_station_uvw_to_baseline_uvw_f(num_stations,
+            convert_station_uvw_to_baseline_uvw_float(num_stations, offset_in,
                     oskar_mem_float_const(u, status),
                     oskar_mem_float_const(v, status),
-                    oskar_mem_float_const(w, status),
+                    oskar_mem_float_const(w, status), offset_out,
                     oskar_mem_float(uu, status),
                     oskar_mem_float(vv, status),
                     oskar_mem_float(ww, status));
-        }
         else if (type == OSKAR_DOUBLE)
-        {
-            oskar_convert_station_uvw_to_baseline_uvw_d(num_stations,
+            convert_station_uvw_to_baseline_uvw_double(num_stations, offset_in,
                     oskar_mem_double_const(u, status),
                     oskar_mem_double_const(v, status),
-                    oskar_mem_double_const(w, status),
+                    oskar_mem_double_const(w, status), offset_out,
                     oskar_mem_double(uu, status),
                     oskar_mem_double(vv, status),
                     oskar_mem_double(ww, status));
-        }
         else
-        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
-        }
     }
-    else if (location == OSKAR_GPU)
+    else
     {
-#ifdef OSKAR_HAVE_CUDA
+        size_t local_size[] = {32, 1, 1}, global_size[] = {1, 1, 1};
+        const char* k = 0;
         if (type == OSKAR_SINGLE)
-        {
-            oskar_convert_station_uvw_to_baseline_uvw_cuda_f(num_stations,
-                    oskar_mem_float_const(u, status),
-                    oskar_mem_float_const(v, status),
-                    oskar_mem_float_const(w, status),
-                    oskar_mem_float(uu, status),
-                    oskar_mem_float(vv, status),
-                    oskar_mem_float(ww, status));
-        }
+            k = "convert_station_uvw_to_baseline_uvw_float";
         else if (type == OSKAR_DOUBLE)
-        {
-            oskar_convert_station_uvw_to_baseline_uvw_cuda_d(num_stations,
-                    oskar_mem_double_const(u, status),
-                    oskar_mem_double_const(v, status),
-                    oskar_mem_double_const(w, status),
-                    oskar_mem_double(uu, status),
-                    oskar_mem_double(vv, status),
-                    oskar_mem_double(ww, status));
-        }
+            k = "convert_station_uvw_to_baseline_uvw_double";
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
-        oskar_device_check_error(status);
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = num_stations * local_size[0];
+        const oskar_Arg args[] = {
+                {INT_SZ, &num_stations},
+                {INT_SZ, &offset_in},
+                {PTR_SZ, oskar_mem_buffer_const(u)},
+                {PTR_SZ, oskar_mem_buffer_const(v)},
+                {PTR_SZ, oskar_mem_buffer_const(w)},
+                {INT_SZ, &offset_out},
+                {PTR_SZ, oskar_mem_buffer(uu)},
+                {PTR_SZ, oskar_mem_buffer(vv)},
+                {PTR_SZ, oskar_mem_buffer(ww)}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
     }
 }
 

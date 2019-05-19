@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,20 +51,20 @@ extern "C" {
  *
  * This assumes an orthographic projection.
  *
- * @param[out] lon          Output pixel positions in longitude, in radians.
- * @param[out] lat          Output pixel positions in latitude, in radians.
- * @param[in]  image_size_l Image side length in the l-dimension, in pixels.
- * @param[in]  image_size_m Image side length in the m-dimension, in pixels.
+ * @param[in]  num_pixels_l Image side length in the l-dimension, in pixels.
+ * @param[in]  num_pixels_m Image side length in the m-dimension, in pixels.
  * @param[in]  fov_rad_lon  Field-of-view in longitude (l-dimension), in radians.
  * @param[in]  fov_rad_lat  Field-of-view in latitude (m-dimension), in radians.
  * @param[in]  lon_rad      Image centre longitude, in radians.
  * @param[in]  lat_rad      Image centre latitude, in radians.
- * @param[in]  status       Status return code.
+ * @param[out] lon          Output pixel positions in longitude, in radians.
+ * @param[out] lat          Output pixel positions in latitude, in radians.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
-        int image_size_l, int image_size_m, double fov_rad_lon,
-        double fov_rad_lat, double lon_rad, double lat_rad, int* status);
+void oskar_evaluate_image_lon_lat_grid(int num_pixels_l, int num_pixels_m,
+        double fov_rad_lon, double fov_rad_lat, double lon_rad, double lat_rad,
+        oskar_Mem* lon, oskar_Mem* lat, int* status);
 
 #ifdef __cplusplus
 }

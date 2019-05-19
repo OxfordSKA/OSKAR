@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
 #include "binary/oskar_binary.h"
 #include "log/oskar_log.h"
 #include "mem/oskar_binary_read_mem.h"
 #include "ms/oskar_measurement_set.h"
+#include "settings/oskar_option_parser.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
 #include "vis/oskar_vis_header.h"
@@ -39,7 +39,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <string>
-#include <vector>
 
 using namespace std;
 
@@ -64,12 +63,11 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     // Get the options.
-    string out_path;
-    opt.get("-o")->getString(out_path);
-    vector<string> in_files = opt.get_input_files(1);
+    int num_in_files = 0;
+    string out_path(opt.get_string("-o"));
+    const char* const* in_files = opt.get_input_files(1, &num_in_files);
     bool verbose = opt.is_set("-q") ? false : true;
     bool force_polarised = opt.is_set("-p") ? true : false;
-    int num_in_files = in_files.size();
 
     // Print if verbose.
     if (verbose)
@@ -78,7 +76,7 @@ int main(int argc, char** argv)
         printf("Using the %d input files:\n", num_in_files);
         for (int i = 0; i < num_in_files; ++i)
         {
-            printf("  [%02d] %s\n", i, in_files[i].c_str());
+            printf("  [%02d] %s\n", i, in_files[i]);
         }
     }
 
@@ -94,8 +92,7 @@ int main(int argc, char** argv)
         if (error) break;
 
         // Read the file header.
-        const char* in_file = in_files[i].c_str();
-        oskar_Binary* h = oskar_binary_create(in_file, 'r', &error);
+        oskar_Binary* h = oskar_binary_create(in_files[i], 'r', &error);
         if (error) break;
         oskar_VisHeader* hdr = oskar_vis_header_read(h, &error);
         if (error) break;
@@ -141,7 +138,7 @@ int main(int argc, char** argv)
     // Close the Measurement Set.
     oskar_ms_close(ms);
     if (error)
-        oskar_log_error(0, oskar_get_error_string(error));
+        oskar_log_error(oskar_get_error_string(error));
     return error;
 }
 #else

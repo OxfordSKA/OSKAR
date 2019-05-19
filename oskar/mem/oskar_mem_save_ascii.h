@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,12 +59,13 @@ extern "C" {
  *
  * @param[in] file          Pointer to output stream.
  * @param[in] num_mem       Number of arrays to write.
+ * @param[in] offset        Offset into arrays.
  * @param[in] num_elements  Number of elements to write.
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
-        int* status, ...);
+void oskar_mem_save_ascii(FILE* file, size_t num_mem,
+        size_t offset, size_t num_elements, int* status, ...);
 
 #ifdef __cplusplus
 }

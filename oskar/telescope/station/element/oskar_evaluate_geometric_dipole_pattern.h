@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,102 +42,6 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates pattern of a perfect dipole at source positions
- * (single precision).
- *
- * @details
- * This function evaluates the pattern of a perfect dipole antenna
- * at the supplied source positions.
- *
- * The supplied theta and phi positions of the sources are the <b>modified</b>
- * source positions. They must be adjusted relative to a dipole with its axis
- * oriented along the x-direction.
- *
- * @param[in] num_points         Number of points.
- * @param[in] theta              Point position (modified) theta values in rad.
- * @param[in] phi                Point position (modified) phi values in rad.
- * @param[in] stride             Stride into output arrays (normally 4).
- * @param[out] E_theta           Response per point in E_theta.
- * @param[out] E_phi             Response per point in E_phi.
- */
-OSKAR_EXPORT
-void oskar_evaluate_geometric_dipole_pattern_f(int num_points,
-        const float* theta, const float* phi, int stride,
-        float2* E_theta, float2* E_phi);
-
-/**
- * @brief
- * Evaluates pattern of a perfect dipole at source positions
- * (scalar version, single precision).
- *
- * @details
- * This function evaluates the scalar pattern of a perfect dipole antenna
- * at the supplied source positions.
- *
- * The supplied theta and phi positions of the sources are the <b>modified</b>
- * source positions. They must be adjusted relative to a dipole with its axis
- * oriented along the x-direction.
- *
- * @param[in] num_points         Number of points.
- * @param[in] theta              Point position (modified) theta values in rad.
- * @param[in] phi                Point position (modified) phi values in rad.
- * @param[in] stride             Stride into output array (normally 1).
- * @param[out] pattern           Response per point.
- */
-OSKAR_EXPORT
-void oskar_evaluate_geometric_dipole_pattern_scalar_f(int num_points,
-        const float* theta, const float* phi, int stride, float2* pattern);
-
-/**
- * @brief
- * Evaluates pattern of a perfect dipole at source positions
- * (double precision).
- *
- * @details
- * This function evaluates the pattern of a perfect dipole antenna
- * at the supplied source positions.
- *
- * The supplied theta and phi positions of the sources are the <b>modified</b>
- * source positions. They must be adjusted relative to a dipole with its axis
- * oriented along the x-direction.
- *
- * @param[in] num_points         Number of points.
- * @param[in] theta              Point position (modified) theta values in rad.
- * @param[in] phi                Point position (modified) phi values in rad.
- * @param[in] stride             Stride into output arrays (normally 4).
- * @param[out] E_theta           Response per point in E_theta.
- * @param[out] E_phi             Response per point in E_phi.
- */
-OSKAR_EXPORT
-void oskar_evaluate_geometric_dipole_pattern_d(int num_points,
-        const double* theta, const double* phi, int stride,
-        double2* E_theta, double2* E_phi);
-
-/**
- * @brief
- * Evaluates pattern of a perfect dipole at source positions
- * (scalar version, double precision).
- *
- * @details
- * This function evaluates the scalar pattern of a perfect dipole antenna
- * at the supplied source positions.
- *
- * The supplied theta and phi positions of the sources are the <b>modified</b>
- * source positions. They must be adjusted relative to a dipole with its axis
- * oriented along the x-direction.
- *
- * @param[in] num_points         Number of points.
- * @param[in] theta              Point position (modified) theta values in rad.
- * @param[in] phi                Point position (modified) phi values in rad.
- * @param[in] stride             Stride into output array (normally 1).
- * @param[out] pattern           Response per point.
- */
-OSKAR_EXPORT
-void oskar_evaluate_geometric_dipole_pattern_scalar_d(int num_points,
-        const double* theta, const double* phi, int stride, double2* pattern);
-
-/**
- * @brief
  * Evaluates pattern of a perfect dipole at source positions.
  *
  * @details
@@ -148,17 +52,18 @@ void oskar_evaluate_geometric_dipole_pattern_scalar_d(int num_points,
  * source positions. They must be adjusted relative to a dipole with its axis
  * oriented along the x-direction.
  *
- * @param[out] pattern           Array of output Jones matrices/scalars per source.
+ * @param[in] num_points         Number of positions.
  * @param[in] theta              Point position (modified) theta values in rad.
  * @param[in] phi                Point position (modified) phi values in rad.
- * @param[in] offset             Offset index into output arrays.
  * @param[in] stride             Stride into output array (normally 1 or 4).
+ * @param[in] offset             Start offset into output array.
+ * @param[out] pattern           Array of output Jones matrices/scalars per source.
  * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_geometric_dipole_pattern(oskar_Mem* pattern, int num_points,
-        const oskar_Mem* theta, const oskar_Mem* phi, int offset, int stride,
-        int* status);
+void oskar_evaluate_geometric_dipole_pattern(int num_points,
+        const oskar_Mem* theta, const oskar_Mem* phi, int stride, int offset,
+        oskar_Mem* pattern, int* status);
 
 #ifdef __cplusplus
 }

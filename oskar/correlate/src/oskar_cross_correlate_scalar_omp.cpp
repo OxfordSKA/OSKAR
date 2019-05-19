@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "correlate/private_correlate_functions_inline.h"
+#include "correlate/define_correlate_utils.h"
 #include "correlate/oskar_cross_correlate_scalar_omp.h"
+#include "math/define_multiply.h"
 #include "math/oskar_kahan_sum.h"
+#include "utility/oskar_kernel_macros.h"
+#include "utility/oskar_vector_types.h"
+#include <stdio.h>
 
 template<typename T1, typename T2>
 struct is_same
@@ -53,19 +57,20 @@ typename REAL, typename REAL2
 void oskar_xcorr_scalar_omp(
         const int                   num_sources,
         const int                   num_stations,
-        const REAL2* const restrict jones,
-        const REAL*  const restrict source_I,
-        const REAL*  const restrict source_l,
-        const REAL*  const restrict source_m,
-        const REAL*  const restrict source_n,
-        const REAL*  const restrict source_a,
-        const REAL*  const restrict source_b,
-        const REAL*  const restrict source_c,
-        const REAL*  const restrict station_u,
-        const REAL*  const restrict station_v,
-        const REAL*  const restrict station_w,
-        const REAL*  const restrict station_x,
-        const REAL*  const restrict station_y,
+        const int                   offset_out,
+        const REAL2* const RESTRICT jones,
+        const REAL*  const RESTRICT source_I,
+        const REAL*  const RESTRICT source_l,
+        const REAL*  const RESTRICT source_m,
+        const REAL*  const RESTRICT source_n,
+        const REAL*  const RESTRICT source_a,
+        const REAL*  const RESTRICT source_b,
+        const REAL*  const RESTRICT source_c,
+        const REAL*  const RESTRICT station_u,
+        const REAL*  const RESTRICT station_v,
+        const REAL*  const RESTRICT station_w,
+        const REAL*  const RESTRICT station_x,
+        const REAL*  const RESTRICT station_y,
         const REAL                  uv_min_lambda,
         const REAL                  uv_max_lambda,
         const REAL                  inv_wavelength,
@@ -73,7 +78,7 @@ void oskar_xcorr_scalar_omp(
         const REAL                  time_int_sec,
         const REAL                  gha0_rad,
         const REAL                  dec0_rad,
-        REAL2*             restrict vis)
+        REAL2*             RESTRICT vis)
 {
     // Loop over stations.
 #pragma omp parallel for schedule(dynamic, 1)
@@ -88,7 +93,8 @@ void oskar_xcorr_scalar_omp(
             REAL uv_len, uu, vv, ww, uu2, vv2, uuvv, du, dv, dw;
             REAL2 t1, t2, sum, guard;
             sum.x = sum.y = (REAL) 0;
-            guard.x = guard.y = (REAL) 0;
+            if (is_same<REAL, float>::value)
+                guard.x = guard.y = (REAL) 0;
 
             // Pointer to source vector for station p.
             const REAL2* const station_p = &jones[SP * num_sources];
@@ -129,12 +135,12 @@ void oskar_xcorr_scalar_omp(
                     if (BANDWIDTH_SMEARING)
                     {
                         const REAL t = uu * l + vv * m + ww * n;
-                        smearing *= oskar_sinc<REAL>(t);
+                        smearing *= OSKAR_SINC(REAL, t);
                     }
                     if (TIME_SMEARING)
                     {
                         const REAL t = du * l + dv * m + dw * n;
-                        smearing *= oskar_sinc<REAL>(t);
+                        smearing *= OSKAR_SINC(REAL, t);
                     }
                 }
 
@@ -157,7 +163,7 @@ void oskar_xcorr_scalar_omp(
             }
 
             // Add result to the baseline visibility.
-            int i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
+            int i = OSKAR_BASELINE_INDEX(num_stations, SP, SQ) + offset_out;
             vis[i].x += sum.x;
             vis[i].y += sum.y;
         }
@@ -166,7 +172,7 @@ void oskar_xcorr_scalar_omp(
 
 #define XCORR_KERNEL(BS, TS, GAUSSIAN, REAL, REAL2)                         \
         oskar_xcorr_scalar_omp<BS, TS, GAUSSIAN, REAL, REAL2>               \
-        (num_sources, num_stations, d_jones, d_I, d_l, d_m, d_n,            \
+        (num_sources, num_stations, offset_out, d_jones, d_I, d_l, d_m, d_n,\
                 d_a, d_b, d_c, d_station_u, d_station_v, d_station_w,       \
                 d_station_x, d_station_y, uv_min_lambda, uv_max_lambda,     \
                 inv_wavelength, frac_bandwidth, time_int_sec,               \
@@ -183,8 +189,8 @@ void oskar_xcorr_scalar_omp(
             XCORR_KERNEL(true, true, GAUSSIAN, REAL, REAL2)
 
 void oskar_cross_correlate_scalar_point_omp_f(
-        int num_sources, int num_stations, const float2* d_jones,
-        const float* d_I, const float* d_l,
+        int num_sources, int num_stations, int offset_out,
+        const float2* d_jones, const float* d_I, const float* d_l,
         const float* d_m, const float* d_n,
         const float* d_station_u, const float* d_station_v,
         const float* d_station_w, const float* d_station_x,
@@ -197,8 +203,8 @@ void oskar_cross_correlate_scalar_point_omp_f(
 }
 
 void oskar_cross_correlate_scalar_point_omp_d(
-        int num_sources, int num_stations, const double2* d_jones,
-        const double* d_I, const double* d_l,
+        int num_sources, int num_stations, int offset_out,
+        const double2* d_jones, const double* d_I, const double* d_l,
         const double* d_m, const double* d_n,
         const double* d_station_u, const double* d_station_v,
         const double* d_station_w, const double* d_station_x,
@@ -211,8 +217,8 @@ void oskar_cross_correlate_scalar_point_omp_d(
 }
 
 void oskar_cross_correlate_scalar_gaussian_omp_f(
-        int num_sources, int num_stations, const float2* d_jones,
-        const float* d_I, const float* d_l,
+        int num_sources, int num_stations, int offset_out,
+        const float2* d_jones, const float* d_I, const float* d_l,
         const float* d_m, const float* d_n,
         const float* d_a, const float* d_b,
         const float* d_c, const float* d_station_u,
@@ -226,8 +232,8 @@ void oskar_cross_correlate_scalar_gaussian_omp_f(
 }
 
 void oskar_cross_correlate_scalar_gaussian_omp_d(
-        int num_sources, int num_stations, const double2* d_jones,
-        const double* d_I, const double* d_l,
+        int num_sources, int num_stations, int offset_out,
+        const double2* d_jones, const double* d_I, const double* d_l,
         const double* d_m, const double* d_n,
         const double* d_a, const double* d_b,
         const double* d_c, const double* d_station_u,

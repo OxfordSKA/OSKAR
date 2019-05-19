@@ -76,7 +76,7 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
 
     /* Resize the array of sky model handles. */
     new_size = (*set_size + num_extra_models) * sizeof(oskar_Sky*);
-    *set_ptr = realloc((*set_ptr), new_size);
+    *set_ptr = (oskar_Sky**) realloc((*set_ptr), new_size);
     set = *set_ptr;
     for (i = *set_size; i < *set_size + num_extra_models; ++i)
     {

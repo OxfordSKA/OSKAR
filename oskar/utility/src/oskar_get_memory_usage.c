@@ -1,9 +1,6 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2019, The University of Oxford
  * All rights reserved.
- *
- * This file is part of the OSKAR package.
- * Contact: oskar at oerc.ox.ac.uk
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -113,7 +110,7 @@ size_t oskar_get_free_physical_memory(void)
          * flexible. */
         return (size_t)((int64_t)vm_stats.free_count*(int64_t)page_size);
     }
-    return -1;
+    return 0;
 #elif defined(OSKAR_OS_WIN)
     MEMORYSTATUSEX memInfo;
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
@@ -144,7 +141,7 @@ size_t oskar_get_total_swap_memory(void)
     struct xsw_usage vmusage;
     size_t size = sizeof(vmusage);
     if (sysctlbyname("vm.swapusage", &vmusage, &size, NULL, 0)!=0)
-        return -1;
+        return 0;
     return (size_t)vmusage.xsu_total;
 #elif defined(OSKAR_OS_WIN)
     MEMORYSTATUSEX memInfo;
@@ -181,12 +178,16 @@ size_t oskar_get_free_swap_memory(void)
 }
 
 #ifdef OSKAR_OS_LINUX
-static int parse_line(char* line)
+static size_t parse_line(char* line)
 {
-    int i = strlen(line);
+    size_t i = strlen(line);
     while (*line < '0' || *line > '9') line++;
     line[i-3] = '\0';
-    i = atoi(line);
+#if __cplusplus >= 201103L || __STDC_VERSION__ >= 199901L
+    i = (size_t) strtoull(line, NULL, 10);
+#else
+    i = (size_t) strtoul(line, NULL, 10);
+#endif
     return i;
 }
 #endif
@@ -195,7 +196,7 @@ size_t oskar_get_memory_usage(void)
 {
 #ifdef OSKAR_OS_LINUX
     FILE* file = fopen("/proc/self/status", "r");
-    int result = -1;
+    size_t result = 0;
     char line[128];
     while (fgets(line, 128, file) != NULL) {
         if (strncmp(line, "VmRSS:", 6) == 0) {
@@ -204,7 +205,8 @@ size_t oskar_get_memory_usage(void)
         }
     }
     fclose(file);
-    return result;
+    /* Value in /proc/self/status is in kB. */
+    return result * 1024;
 #elif defined(OSKAR_OS_MAC)
     struct task_basic_info t_info;
     mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;

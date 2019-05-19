@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,13 @@
 
 #include "vis/private_vis_header.h"
 #include "vis/oskar_vis_header.h"
-#include "binary/oskar_binary.h"
 #include "mem/oskar_binary_write_mem.h"
-#include "utility/oskar_binary_write_metadata.h"
+#include "utility/oskar_dir.h"
+#include "oskar_version.h"
 
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,12 +45,11 @@ oskar_Binary* oskar_vis_header_write(const oskar_VisHeader* hdr,
 {
     unsigned char grp = OSKAR_TAG_GROUP_VIS_HEADER;
     oskar_Binary* h = 0;
-    const char* settings;
-
-    /* Check if safe to proceed. */
+    char *str, time_str[80];
+    struct tm* timeinfo;
     if (*status) return 0;
 
-    /* Create the handle. */
+    /* Create the file handle. */
     h = oskar_binary_create(filename, 'w', status);
     if (*status)
     {
@@ -56,16 +57,41 @@ oskar_Binary* oskar_vis_header_write(const oskar_VisHeader* hdr,
         return 0;
     }
 
-    /* Write the header and common metadata. */
-    oskar_binary_write_metadata(h, status);
+    /* Write the system date and time. */
+    const time_t unix_time = time(0);
+    timeinfo = localtime(&unix_time);
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
+    oskar_binary_write(h, OSKAR_CHAR,
+            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING,
+            0, 1 + strlen(time_str), time_str, status);
+
+    /* Write the OSKAR version string. */
+    oskar_binary_write(h, OSKAR_CHAR,
+            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_OSKAR_VERSION_STRING,
+            0, 1 + strlen(OSKAR_VERSION_STR), OSKAR_VERSION_STR, status);
+
+    /* Write the current working directory. */
+    str = oskar_dir_cwd();
+    if (str)
+        oskar_binary_write(h, OSKAR_CHAR,
+                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_CWD,
+                0, 1 + strlen(str), str, status);
+    free(str);
+
+    /* Write the username. */
+    str = getenv("USERNAME");
+    if (!str)
+        str = getenv("USER");
+    if (str && strlen(str) > 0)
+        oskar_binary_write(h, OSKAR_CHAR,
+                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_USERNAME,
+                0, 1 + strlen(str), str, status);
 
     /* If settings exist, write out the data. */
-    settings = oskar_mem_char_const(oskar_vis_header_settings_const(hdr));
-    if (settings && strlen(settings) > 0)
-    {
-        oskar_binary_write_mem(h, oskar_vis_header_settings_const(hdr),
+    str = oskar_mem_char(hdr->settings);
+    if (str && strlen(str) > 0)
+        oskar_binary_write_mem(h, hdr->settings,
                 OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0, status);
-    }
 
     /* Write the telescope model path. */
     oskar_binary_write_mem(h, hdr->telescope_path, grp,

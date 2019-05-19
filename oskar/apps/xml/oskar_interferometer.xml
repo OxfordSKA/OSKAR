@@ -34,7 +34,7 @@
     <s k="max_time_samples_per_block" priority="1">
         <label>Max. time samples per block</label>
         <!-- <depends k="interferometer/enable_bda" v="false"/> -->
-        <type name="uint" default="10"/>
+        <type name="uint" default="8"/>
         <desc>The maximum number of time samples held in memory before being
             written to disk.</desc>
     </s>

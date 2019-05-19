@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2018, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,234 +27,97 @@
  */
 
 #include "telescope/station/element/oskar_apply_element_taper_cosine.h"
-#include "telescope/station/element/oskar_apply_element_taper_cosine_cuda.h"
-#include "utility/oskar_cl_utils.h"
-#include "utility/oskar_device_utils.h"
-#include <math.h>
+#include "telescope/station/element/define_apply_element_taper_cosine.h"
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_apply_element_taper_cosine_scalar_f(int num_sources,
-        float cos_power, const float* theta, float2* jones)
-{
-    int i;
-    for (i = 0; i < num_sources; ++i)
-    {
-        const float f = powf(cosf(theta[i]), cos_power);
-        jones[i].x *= f;
-        jones[i].y *= f;
-    }
-}
+OSKAR_ELEMENT_TAPER_COSINE_SCALAR(element_taper_cosine_scalar_f, float, float2)
+OSKAR_ELEMENT_TAPER_COSINE_MATRIX(element_taper_cosine_matrix_f, float, float4c)
+OSKAR_ELEMENT_TAPER_COSINE_SCALAR(element_taper_cosine_scalar_d, double, double2)
+OSKAR_ELEMENT_TAPER_COSINE_MATRIX(element_taper_cosine_matrix_d, double, double4c)
 
-void oskar_apply_element_taper_cosine_matrix_f(int num_sources,
-        float cos_power, const float* theta, float4c* jones)
-{
-    int i;
-    for (i = 0; i < num_sources; ++i)
-    {
-        const float f = powf(cosf(theta[i]), cos_power);
-        jones[i].a.x *= f;
-        jones[i].a.y *= f;
-        jones[i].b.x *= f;
-        jones[i].b.y *= f;
-        jones[i].c.x *= f;
-        jones[i].c.y *= f;
-        jones[i].d.x *= f;
-        jones[i].d.y *= f;
-    }
-}
-
-/* Double precision. */
-void oskar_apply_element_taper_cosine_scalar_d(int num_sources,
-        double cos_power, const double* theta, double2* jones)
-{
-    int i;
-    for (i = 0; i < num_sources; ++i)
-    {
-        const double f = pow(cos(theta[i]), cos_power);
-        jones[i].x *= f;
-        jones[i].y *= f;
-    }
-}
-
-void oskar_apply_element_taper_cosine_matrix_d(int num_sources,
-        double cos_power, const double* theta, double4c* jones)
-{
-    int i;
-    for (i = 0; i < num_sources; ++i)
-    {
-        const double f = pow(cos(theta[i]), cos_power);
-        jones[i].a.x *= f;
-        jones[i].a.y *= f;
-        jones[i].b.x *= f;
-        jones[i].b.y *= f;
-        jones[i].c.x *= f;
-        jones[i].c.y *= f;
-        jones[i].d.x *= f;
-        jones[i].d.y *= f;
-    }
-}
-
-/* Wrapper. */
-void oskar_apply_element_taper_cosine(oskar_Mem* jones, int num_sources,
-        double cos_power, const oskar_Mem* theta, int* status)
+void oskar_apply_element_taper_cosine(int num_sources, double cos_power,
+        const oskar_Mem* theta, int offset_out, oskar_Mem* jones, int* status)
 {
     if (*status) return;
-
-    /* Check arrays are co-located. */
     const int location = oskar_mem_location(jones);
+    const float cos_power_f = (float) cos_power;
     if (oskar_mem_location(theta) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-
-    /* Check types for consistency. */
     if (oskar_mem_type(theta) != oskar_mem_precision(jones))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-
-    /* Apply taper. */
     if (location == OSKAR_CPU)
     {
         switch (oskar_mem_type(jones))
         {
         case OSKAR_SINGLE_COMPLEX:
-            oskar_apply_element_taper_cosine_scalar_f(num_sources,
-                    (float)cos_power, oskar_mem_float_const(theta, status),
+            element_taper_cosine_scalar_f(num_sources, cos_power_f,
+                    oskar_mem_float_const(theta, status), offset_out,
                     oskar_mem_float2(jones, status));
             break;
         case OSKAR_DOUBLE_COMPLEX:
-            oskar_apply_element_taper_cosine_scalar_d(num_sources,
-                    cos_power, oskar_mem_double_const(theta, status),
+            element_taper_cosine_scalar_d(num_sources, cos_power,
+                    oskar_mem_double_const(theta, status), offset_out,
                     oskar_mem_double2(jones, status));
             break;
         case OSKAR_SINGLE_COMPLEX_MATRIX:
-            oskar_apply_element_taper_cosine_matrix_f(num_sources,
-                    (float)cos_power, oskar_mem_float_const(theta, status),
+            element_taper_cosine_matrix_f(num_sources, cos_power_f,
+                    oskar_mem_float_const(theta, status), offset_out,
                     oskar_mem_float4c(jones, status));
             break;
         case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            oskar_apply_element_taper_cosine_matrix_d(num_sources,
-                    cos_power, oskar_mem_double_const(theta, status),
+            element_taper_cosine_matrix_d(num_sources, cos_power,
+                    oskar_mem_double_const(theta, status), offset_out,
                     oskar_mem_double4c(jones, status));
             break;
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             break;
         }
-    }
-    else if (location == OSKAR_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        switch (oskar_mem_type(jones))
-        {
-        case OSKAR_SINGLE_COMPLEX:
-            oskar_apply_element_taper_cosine_scalar_cuda_f(num_sources,
-                    (float)cos_power, oskar_mem_float_const(theta, status),
-                    oskar_mem_float2(jones, status));
-            break;
-        case OSKAR_DOUBLE_COMPLEX:
-            oskar_apply_element_taper_cosine_scalar_cuda_d(num_sources,
-                    cos_power, oskar_mem_double_const(theta, status),
-                    oskar_mem_double2(jones, status));
-            break;
-        case OSKAR_SINGLE_COMPLEX_MATRIX:
-            oskar_apply_element_taper_cosine_matrix_cuda_f(num_sources,
-                    (float)cos_power, oskar_mem_float_const(theta, status),
-                    oskar_mem_float4c(jones, status));
-            break;
-        case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            oskar_apply_element_taper_cosine_matrix_cuda_d(num_sources,
-                    cos_power, oskar_mem_double_const(theta, status),
-                    oskar_mem_double4c(jones, status));
-            break;
-        default:
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            break;
-        }
-        oskar_device_check_error(status);
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-    }
-    else if (location & OSKAR_CL)
-    {
-#ifdef OSKAR_HAVE_OPENCL
-        cl_device_type dev_type;
-        cl_event event;
-        cl_kernel k = 0;
-        cl_int is_gpu, error, num;
-        cl_uint arg = 0;
-        size_t global_size, local_size;
-        clGetDeviceInfo(oskar_cl_device_id(),
-                CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_type, NULL);
-        is_gpu = dev_type & CL_DEVICE_TYPE_GPU;
-        switch (oskar_mem_type(jones))
-        {
-        case OSKAR_SINGLE_COMPLEX:
-            k = oskar_cl_kernel("apply_element_taper_cosine_scalar_float");
-            break;
-        case OSKAR_DOUBLE_COMPLEX:
-            k = oskar_cl_kernel("apply_element_taper_cosine_scalar_double");
-            break;
-        case OSKAR_SINGLE_COMPLEX_MATRIX:
-            k = oskar_cl_kernel("apply_element_taper_cosine_matrix_float");
-            break;
-        case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            k = oskar_cl_kernel("apply_element_taper_cosine_matrix_double");
-            break;
-        default:
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            return;
-        }
-        if (!k)
-        {
-            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-            return;
-        }
-
-        /* Set kernel arguments. */
-        num = (cl_int) num_sources;
-        error = clSetKernelArg(k, arg++, sizeof(cl_int), &num);
-        if (oskar_mem_precision(jones) == OSKAR_SINGLE)
-        {
-            cl_float w = (cl_float) cos_power;
-            error = clSetKernelArg(k, arg++, sizeof(cl_float), &w);
-        }
-        else
-        {
-            cl_double w = (cl_double) cos_power;
-            error = clSetKernelArg(k, arg++, sizeof(cl_double), &w);
-        }
-        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
-                oskar_mem_cl_buffer_const(theta, status));
-        error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
-                oskar_mem_cl_buffer(jones, status));
-        if (error != CL_SUCCESS)
-        {
-            *status = OSKAR_ERR_INVALID_ARGUMENT;
-            return;
-        }
-
-        /* Launch kernel on current command queue. */
-        local_size = is_gpu ? 256 : 128;
-        global_size = ((num + local_size - 1) / local_size) * local_size;
-        error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
-                &global_size, &local_size, 0, NULL, &event);
-        if (error != CL_SUCCESS)
-            *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
-#else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
-#endif
     }
     else
-        *status = OSKAR_ERR_BAD_LOCATION;
+    {
+        size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
+        const char* k = 0;
+        const int is_dbl = oskar_mem_is_double(jones);
+        switch (oskar_mem_type(jones))
+        {
+        case OSKAR_SINGLE_COMPLEX:
+            k = "apply_element_taper_cosine_scalar_float"; break;
+        case OSKAR_DOUBLE_COMPLEX:
+            k = "apply_element_taper_cosine_scalar_double"; break;
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            k = "apply_element_taper_cosine_matrix_float"; break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            k = "apply_element_taper_cosine_matrix_double"; break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = oskar_device_global_size(
+                (size_t) num_sources, local_size[0]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &num_sources},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&cos_power : (const void*)&cos_power_f},
+                {PTR_SZ, oskar_mem_buffer_const(theta)},
+                {INT_SZ, &offset_out},
+                {PTR_SZ, oskar_mem_buffer(jones)}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
+    }
 }
 
 #ifdef __cplusplus

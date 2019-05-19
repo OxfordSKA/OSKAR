@@ -116,7 +116,7 @@ TEST(random_gaussian, random_gaussian24)
     if (save)
     {
         FILE* fhan = fopen("random_gaussian.txt", "w");
-        oskar_mem_save_ascii(fhan, 3, n, &status, a, data2, data4);
+        oskar_mem_save_ascii(fhan, 3, 0, n, &status, a, data2, data4);
         fclose(fhan);
     }
 

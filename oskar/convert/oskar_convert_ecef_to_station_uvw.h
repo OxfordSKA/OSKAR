@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,54 +42,6 @@ extern "C" {
 
 /**
  * @brief
- * Transforms station (x,y,z) coordinates to (u,v,w) coordinates
- * (single precision).
- *
- * @details
- * Given the hour angle and declination of the phase tracking centre, this
- * function transforms the station (x,y,z) coordinates to (u,v,w) coordinates.
- *
- * @param[in]  num_stations The size of the station coordinate arrays.
- * @param[in]  x            Input station x coordinates (ECEF or related frame).
- * @param[in]  y            Input station y coordinates (ECEF or related frame).
- * @param[in]  z            Input station z coordinates (ECEF or related frame).
- * @param[in]  ha0_rad      The Hour Angle of the phase centre, in radians.
- * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
- * @param[out] u            Output station u coordinates.
- * @param[out] v            Output station v coordinates.
- * @param[out] w            Output station w coordinates.
- */
-OSKAR_EXPORT
-void oskar_convert_ecef_to_station_uvw_f(int num_stations, const float* x,
-        const float* y, const float* z, double ha0_rad, double dec0_rad,
-        float* u, float* v, float* w);
-
-/**
- * @brief
- * Transforms station (x,y,z) coordinates to (u,v,w) coordinates
- * (double precision).
- *
- * @details
- * Given the hour angle and declination of the phase tracking centre, this
- * function transforms the station (x,y,z) coordinates to (u,v,w) coordinates.
- *
- * @param[in]  num_stations The size of the station coordinate arrays.
- * @param[in]  x            Input station x coordinates (ECEF or related frame).
- * @param[in]  y            Input station y coordinates (ECEF or related frame).
- * @param[in]  z            Input station z coordinates (ECEF or related frame).
- * @param[in]  ha0_rad      The Hour Angle of the phase centre, in radians.
- * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
- * @param[out] u            Output station u coordinates.
- * @param[out] v            Output station v coordinates.
- * @param[out] w            Output station w coordinates.
- */
-OSKAR_EXPORT
-void oskar_convert_ecef_to_station_uvw_d(int num_stations, const double* x,
-        const double* y, const double* z, double ha0_rad, double dec0_rad,
-        double* u, double* v, double* w);
-
-/**
- * @brief
  * Evaluates the station (u,v,w) coordinates.
  *
  * @details
@@ -104,16 +56,17 @@ void oskar_convert_ecef_to_station_uvw_d(int num_stations, const double* x,
  * @param[in]  ra0_rad      The Right Ascension of the phase centre, in radians.
  * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
  * @param[in]  gast         The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in]  offset_out   Start offset into output arrays.
  * @param[out] u            Output station u coordinates.
  * @param[out] v            Output station v coordinates.
  * @param[out] w            Output station w coordinates.
  * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_convert_ecef_to_station_uvw(int num_stations, const oskar_Mem* x,
-        const oskar_Mem* y, const oskar_Mem* z, double ra0_rad,
-        double dec0_rad, double gast, oskar_Mem* u, oskar_Mem* v,
-        oskar_Mem* w, int* status);
+void oskar_convert_ecef_to_station_uvw(int num_stations,
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        double ra0_rad, double dec0_rad, double gast, int offset_out,
+        oskar_Mem* u, oskar_Mem* v, oskar_Mem* w, int* status);
 
 #ifdef __cplusplus
 }

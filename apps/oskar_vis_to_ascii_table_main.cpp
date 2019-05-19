@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
 #include "binary/oskar_binary.h"
+#include "settings/oskar_option_parser.h"
 #include "vis/oskar_vis.h"
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_get_error_string.h"
@@ -82,15 +82,10 @@ int main(int argc, char** argv)
     else {
         txt_file = std::string(vis_file) + ".txt";
     }
-    int c = 0;
-    if (opt.is_set("-c"))
-        opt.get("-c")->getInt(c);
-    int p = 0;
-    if (opt.is_set("-p"))
-        opt.get("-p")->getInt(p);
-    int t = -1;
-    if (opt.is_set("-t"))
-        opt.get("-t")->getInt(t);
+    int c = 0, p = 0, t = -1;
+    if (opt.is_set("-c")) c = opt.get_int("-c");
+    if (opt.is_set("-p")) p = opt.get_int("-p");
+    if (opt.is_set("-t")) t = opt.get_int("-t");
     bool metres = !opt.is_set("-w");
     bool write_header = opt.is_set("-h");
     bool csv = opt.is_set("--csv");

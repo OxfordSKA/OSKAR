@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@
 #include "sky/oskar_sky.h"
 #include "binary/oskar_binary.h"
 #include "mem/oskar_binary_write_mem.h"
-#include "utility/oskar_binary_write_metadata.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,22 +36,15 @@ extern "C" {
 
 void oskar_sky_write(const char* filename, const oskar_Sky* sky, int* status)
 {
-    int type, num_sources, idx = 0;
-    unsigned char group = OSKAR_TAG_GROUP_SKY_MODEL;
+    const int idx = 0;
+    const int type = oskar_sky_precision(sky);
+    const int num_sources = oskar_sky_num_sources(sky);
+    const unsigned char group = OSKAR_TAG_GROUP_SKY_MODEL;
     oskar_Binary* h = 0;
-
-    /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Get the data type and number of sources. */
-    type = oskar_sky_precision(sky);
-    num_sources = oskar_sky_num_sources(sky);
-
-    /* Create the handle. */
+    /* Create the file handle. */
     h = oskar_binary_create(filename, 'w', status);
-
-    /* Write the common metadata. */
-    oskar_binary_write_metadata(h, status);
 
     /* Write the sky model data parameters. */
     oskar_binary_write_int(h, group,

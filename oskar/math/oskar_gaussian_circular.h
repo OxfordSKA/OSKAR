@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,22 +39,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-OSKAR_EXPORT
-void oskar_gaussian_circular_complex_f(int n, const float* x,
-        const float* y, float std, float2* z);
-
-OSKAR_EXPORT
-void oskar_gaussian_circular_matrix_f(int n, const float* x,
-        const float* y, float std, float4c* z);
-
-OSKAR_EXPORT
-void oskar_gaussian_circular_complex_d(int n, const double* x,
-        const double* y, double std, double2* z);
-
-OSKAR_EXPORT
-void oskar_gaussian_circular_matrix_d(int n, const double* x,
-        const double* y, double std, double4c* z);
 
 OSKAR_EXPORT
 void oskar_gaussian_circular(int num_points,

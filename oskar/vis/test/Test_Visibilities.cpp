@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,267 +28,183 @@
 
 #include <gtest/gtest.h>
 
-#include "vis/oskar_vis.h"
+#include "vis/oskar_vis_header.h"
+#include "vis/oskar_vis_block.h"
 #include "utility/oskar_get_error_string.h"
 
 #include <cstring>
-#include <iostream>
 #include <cstdio>
 #include <cmath>
-
-TEST(Visibilities, create)
-{
-    int num_channels  = 4;
-    int num_times     = 2;
-    int num_stations  = 27;
-    int num_baselines = num_stations * (num_stations - 1) / 2;
-    int num_coords    = num_times * num_baselines;
-    int num_amps      = num_channels * num_times * num_baselines;
-
-    // Expect an error for non complex visibility data types.
-    {
-        int status = 0;
-        oskar_Vis* vis;
-        vis = oskar_vis_create(OSKAR_SINGLE, OSKAR_CPU,
-                num_channels, num_times, num_stations, &status);
-        EXPECT_EQ(OSKAR_ERR_BAD_DATA_TYPE, status);
-        status = 0;
-        oskar_vis_free(vis, &status);
-        vis = oskar_vis_create(OSKAR_DOUBLE, OSKAR_CPU,
-                num_channels, num_times, num_stations, &status);
-        EXPECT_EQ(OSKAR_ERR_BAD_DATA_TYPE, status);
-        status = 0;
-        oskar_vis_free(vis, &status);
-    }
-
-    // Don't expect an error for complex types.
-    {
-        int status = 0;
-        oskar_Vis* vis;
-        vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU,
-                num_channels, num_times, num_stations, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_vis_free(vis, &status);
-        vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU,
-                num_channels, num_times, num_stations, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_vis_free(vis, &status);
-        vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_CPU,
-                num_channels, num_times, num_stations, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_vis_free(vis, &status);
-        vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
-                num_channels, num_times, num_stations, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_vis_free(vis, &status);
-    }
-    {
-        int status = 0;
-
-        // Construct visibility data on the CPU and check dimensions.
-        oskar_Vis* vis;
-        vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX_MATRIX,
-                OSKAR_CPU, num_channels, num_times, num_stations,
-                &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis));
-
-        ASSERT_EQ((int)OSKAR_SINGLE_COMPLEX_MATRIX,
-                oskar_mem_type(oskar_vis_amplitude(vis)));
-        ASSERT_EQ((int)OSKAR_SINGLE,
-                oskar_mem_type(oskar_vis_baseline_uu_metres(vis)));
-        ASSERT_EQ((int)OSKAR_SINGLE,
-                oskar_mem_type(oskar_vis_baseline_vv_metres(vis)));
-        ASSERT_EQ((int)OSKAR_SINGLE,
-                oskar_mem_type(oskar_vis_baseline_ww_metres(vis)));
-        ASSERT_EQ(num_channels, oskar_vis_num_channels(vis));
-        ASSERT_EQ(num_times, oskar_vis_num_times(vis));
-        ASSERT_EQ(num_baselines, oskar_vis_num_baselines(vis));
-        ASSERT_EQ(num_stations, oskar_vis_num_stations(vis));
-        ASSERT_EQ(num_amps, oskar_vis_num_channels(vis) *
-                oskar_vis_num_times(vis) * oskar_vis_num_baselines(vis));
-        ASSERT_EQ(num_amps, (int)oskar_mem_length(oskar_vis_amplitude(vis)));
-        ASSERT_EQ(num_coords,
-                (int)oskar_mem_length(oskar_vis_baseline_uu_metres(vis)));
-        ASSERT_EQ(num_coords,
-                (int)oskar_mem_length(oskar_vis_baseline_vv_metres(vis)));
-        ASSERT_EQ(num_coords,
-                (int)oskar_mem_length(oskar_vis_baseline_ww_metres(vis)));
-        oskar_vis_free(vis, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-
-        vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                OSKAR_CPU, 0, 0, 0, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis));
-        ASSERT_EQ((int)OSKAR_DOUBLE_COMPLEX_MATRIX,
-                oskar_mem_type(oskar_vis_amplitude(vis)));
-        ASSERT_EQ((int)OSKAR_DOUBLE,
-                oskar_mem_type(oskar_vis_baseline_uu_metres(vis)));
-        ASSERT_EQ((int)OSKAR_DOUBLE,
-                oskar_mem_type(oskar_vis_baseline_vv_metres(vis)));
-        ASSERT_EQ((int)OSKAR_DOUBLE,
-                oskar_mem_type(oskar_vis_baseline_ww_metres(vis)));
-        ASSERT_EQ(0, oskar_vis_num_channels(vis));
-        ASSERT_EQ(0, oskar_vis_num_times(vis));
-        ASSERT_EQ(0, oskar_vis_num_baselines(vis));
-        ASSERT_EQ(0, oskar_vis_num_stations(vis));
-        ASSERT_EQ(0, (int)oskar_mem_length(oskar_vis_amplitude(vis)));
-        ASSERT_EQ(0, (int)oskar_mem_length(oskar_vis_baseline_uu_metres(vis)));
-        ASSERT_EQ(0, (int)oskar_mem_length(oskar_vis_baseline_vv_metres(vis)));
-        ASSERT_EQ(0, (int)oskar_mem_length(oskar_vis_baseline_ww_metres(vis)));
-        ASSERT_EQ(0, (int)oskar_mem_length(oskar_vis_baseline_uu_metres(vis)));
-        ASSERT_EQ(0, (int)oskar_mem_length(oskar_vis_baseline_vv_metres(vis)));
-        ASSERT_EQ(0, (int)oskar_mem_length(oskar_vis_baseline_ww_metres(vis)));
-        oskar_vis_free(vis, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    }
-    {
-        int status = 0;
-
-        // Construct visibility data on the GPU and check dimensions.
-        oskar_Vis* vis;
-        vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX_MATRIX,
-                OSKAR_CPU, num_channels, num_times, num_stations,
-                &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis));
-
-        ASSERT_EQ((int)OSKAR_SINGLE_COMPLEX_MATRIX,
-                oskar_mem_type(oskar_vis_amplitude(vis)));
-        ASSERT_EQ((int)OSKAR_SINGLE,
-                oskar_mem_type(oskar_vis_baseline_uu_metres(vis)));
-        ASSERT_EQ((int)OSKAR_SINGLE,
-                oskar_mem_type(oskar_vis_baseline_vv_metres(vis)));
-        ASSERT_EQ((int)OSKAR_SINGLE,
-                oskar_mem_type(oskar_vis_baseline_ww_metres(vis)));
-        ASSERT_EQ(num_channels, oskar_vis_num_channels(vis));
-        ASSERT_EQ(num_times, oskar_vis_num_times(vis));
-        ASSERT_EQ(num_baselines, oskar_vis_num_baselines(vis));
-        ASSERT_EQ(num_stations, oskar_vis_num_stations(vis));
-        ASSERT_EQ(num_amps, oskar_vis_num_channels(vis) *
-                oskar_vis_num_times(vis) * oskar_vis_num_baselines(vis));
-        ASSERT_EQ(num_amps, (int)oskar_mem_length(oskar_vis_amplitude(vis)));
-        ASSERT_EQ(num_coords,
-                (int)oskar_mem_length(oskar_vis_baseline_uu_metres(vis)));
-        ASSERT_EQ(num_coords,
-                (int)oskar_mem_length(oskar_vis_baseline_vv_metres(vis)));
-        ASSERT_EQ(num_coords,
-                (int)oskar_mem_length(oskar_vis_baseline_ww_metres(vis)));
-        oskar_vis_free(vis, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    }
-}
-
 
 TEST(Visibilities, read_write)
 {
     int status = 0;
-    int num_channels     = 10;
-    int num_times        = 77;
-    int num_stations     = 20;
-    double start_freq    = 200.0e6;
-    double freq_inc      = 10.0e6;
-    double time_start_mjd_utc = 10.0;
-    double time_inc_seconds   = 1.5;
-    int precision        = OSKAR_DOUBLE;
-    int amp_type         = precision | OSKAR_COMPLEX;
-    const char* filename = "vis_temp.dat";
-    oskar_Vis *vis1, *vis2;
+    int num_channels           = 10;
+    int num_times              = 77;
+    int num_stations           = 20;
+    int num_baselines          = num_stations * (num_stations - 1) / 2;
+    int max_times_per_block    = 10;
+    int max_channels_per_block = num_channels;
+    double start_freq          = 200.0e6;
+    double freq_inc            = 10.0e6;
+    double time_start_mjd_utc  = 10.0;
+    double time_inc_seconds    = 1.5;
+    int precision              = OSKAR_DOUBLE;
+    int amp_type               = precision | OSKAR_COMPLEX | OSKAR_MATRIX;
+    const char* filename       = "temp_test_vis.dat";
 
-    // Create visibilities on the CPU, fill in some data and write to file.
+    // Calculate number of visibility blocks required.
+    int num_blocks = (num_times + max_times_per_block - 1) / max_times_per_block;
+
+    // Write visibilities.
     {
-        vis1 = oskar_vis_create(amp_type, OSKAR_CPU,
-                num_channels, num_times, num_stations, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_vis_set_freq_start_hz(vis1, start_freq);
-        oskar_vis_set_freq_inc_hz(vis1, freq_inc);
-        oskar_vis_set_time_start_mjd_utc(vis1, time_start_mjd_utc);
-        oskar_vis_set_time_inc_sec(vis1, time_inc_seconds);
+        // Create the header.
+        oskar_VisHeader* hdr = oskar_vis_header_create(amp_type, precision,
+                max_times_per_block, num_times,
+                max_channels_per_block, num_channels,
+                num_stations, 0, 1, &status);
+        oskar_vis_header_set_freq_start_hz(hdr, start_freq);
+        oskar_vis_header_set_freq_inc_hz(hdr, freq_inc);
+        oskar_vis_header_set_time_start_mjd_utc(hdr, time_start_mjd_utc);
+        oskar_vis_header_set_time_inc_sec(hdr, time_inc_seconds);
         const char* name = "dummy";
-        oskar_mem_append_raw(oskar_vis_telescope_path(vis1), name,
+        oskar_mem_append_raw(oskar_vis_header_telescope_path(hdr), name,
                 OSKAR_CHAR, OSKAR_CPU, 1 + strlen(name), &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        double2* amp = oskar_mem_double2(oskar_vis_amplitude(vis1), &status);
-        double* uu = oskar_mem_double(oskar_vis_baseline_uu_metres(vis1), &status);
-        double* vv = oskar_mem_double(oskar_vis_baseline_vv_metres(vis1), &status);
-        double* ww = oskar_mem_double(oskar_vis_baseline_ww_metres(vis1), &status);
 
-        for (int i = 0, c = 0; c < oskar_vis_num_channels(vis1); ++c)
+        // Write the header.
+        oskar_Binary* h = oskar_vis_header_write(hdr, filename, &status);
+        ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
+        // Create a visibility block.
+        oskar_VisBlock* blk = oskar_vis_block_create_from_header(
+                OSKAR_CPU, hdr, &status);
+        ASSERT_EQ(0, status) << oskar_get_error_string(status);
+        ASSERT_EQ(num_baselines, oskar_vis_block_num_baselines(blk));
+
+        // Get pointers to data in block.
+        double4c* v_ = oskar_mem_double4c(
+                oskar_vis_block_cross_correlations(blk), &status);
+        double* uu = oskar_mem_double(
+                oskar_vis_block_baseline_uu_metres(blk), &status);
+        double* vv = oskar_mem_double(
+                oskar_vis_block_baseline_vv_metres(blk), &status);
+        double* ww = oskar_mem_double(
+                oskar_vis_block_baseline_ww_metres(blk), &status);
+
+        // Loop over blocks.
+        for (int i_block = 0; i_block < num_blocks; ++i_block)
         {
-            for (int t = 0; t < oskar_vis_num_times(vis1); ++t)
+            for (int i = 0, t = 0; t < max_times_per_block; ++t)
             {
-                for (int b = 0; b < oskar_vis_num_baselines(vis1); ++b, ++i)
+                for (int c = 0; c < max_channels_per_block; ++c)
                 {
-                    amp[i].x = (double)i + 1.123;
-                    amp[i].y = (double)i - 0.456;
+                    for (int b = 0; b < num_baselines; ++b, ++i)
+                    {
+                        // XX
+                        v_[i].a.x = 0.1 + (double)(t + i_block * max_times_per_block);
+                        v_[i].a.y = 0.05;
+                        // XY
+                        v_[i].b.x = 0.2 + (double)c;
+                        v_[i].b.y = 0.15;
+                        // YX
+                        v_[i].c.x = 0.3 + (double)b;
+                        v_[i].c.y = 0.25;
+                        // YY
+                        v_[i].d.x = 0.4 + (double)i;
+                        v_[i].d.y = 0.35;
+                    }
                 }
             }
-        }
-        for (int i = 0, t = 0; t < oskar_vis_num_times(vis1); ++t)
-        {
-            for (int b = 0; b < oskar_vis_num_baselines(vis1); ++b, ++i)
+            for (int i = 0, t = 0; t < max_times_per_block; ++t)
             {
-                uu[i] = (double)t + 0.1;
-                vv[i] = (double)b + 0.2;
-                ww[i] = (double)i + 0.3;
+                for (int b = 0; b < num_baselines; ++b, ++i)
+                {
+                    uu[i] = 0.1 + (double)(t + i_block * max_times_per_block);
+                    vv[i] = 0.2 + (double)b;
+                    ww[i] = 0.3 + (double)i;
+                }
             }
-        }
-        oskar_vis_write(vis1, NULL, filename, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    }
 
-    // Load the visibility structure from file.
-    {
-        oskar_Binary* h = oskar_binary_create(filename, 'r', &status);
-        vis2 = oskar_vis_read(h, &status);
+            // Write the block.
+            oskar_vis_block_write(blk, h, i_block, &status);
+            ASSERT_EQ(0, status) << oskar_get_error_string(status);
+        }
+        oskar_vis_header_free(hdr, &status);
+        oskar_vis_block_free(blk, &status);
         oskar_binary_free(h);
+    }
+
+    // Read visibilities.
+    {
+        // Read the header.
+        oskar_Binary* h = oskar_binary_create(filename, 'r', &status);
+        oskar_VisHeader* hdr = oskar_vis_header_read(h, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ(amp_type, oskar_mem_type(oskar_vis_amplitude(vis2)));
-        ASSERT_EQ(precision, oskar_mem_type(oskar_vis_baseline_uu_metres(vis2)));
-        ASSERT_EQ(precision, oskar_mem_type(oskar_vis_baseline_vv_metres(vis2)));
-        ASSERT_EQ(precision, oskar_mem_type(oskar_vis_baseline_ww_metres(vis2)));
-        ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis2));
-        ASSERT_EQ(num_channels, oskar_vis_num_channels(vis2));
-        ASSERT_EQ(num_stations * (num_stations - 1) / 2, oskar_vis_num_baselines(vis2));
-        ASSERT_EQ(num_times, oskar_vis_num_times(vis2));
+        ASSERT_EQ(amp_type, oskar_vis_header_amp_type(hdr));
+        ASSERT_EQ(precision, oskar_vis_header_coord_precision(hdr));
+        ASSERT_EQ(num_channels, oskar_vis_header_num_channels_total(hdr));
+        ASSERT_EQ(num_times, oskar_vis_header_num_times_total(hdr));
+        ASSERT_EQ(start_freq, oskar_vis_header_freq_start_hz(hdr));
+        ASSERT_EQ(freq_inc, oskar_vis_header_freq_inc_hz(hdr));
+        ASSERT_EQ(time_start_mjd_utc, oskar_vis_header_time_start_mjd_utc(hdr));
+        ASSERT_EQ(time_inc_seconds, oskar_vis_header_time_inc_sec(hdr));
 
-        ASSERT_EQ(start_freq, oskar_vis_freq_start_hz(vis2));
-        ASSERT_EQ(freq_inc, oskar_vis_freq_inc_hz(vis2));
-        ASSERT_EQ(time_start_mjd_utc, oskar_vis_time_start_mjd_utc(vis2));
-        ASSERT_EQ(time_inc_seconds, oskar_vis_time_inc_sec(vis2));
-        double2* amp = oskar_mem_double2(oskar_vis_amplitude(vis2), &status);
-        double* uu = oskar_mem_double(oskar_vis_baseline_uu_metres(vis2), &status);
-        double* vv = oskar_mem_double(oskar_vis_baseline_vv_metres(vis2), &status);
-        double* ww = oskar_mem_double(oskar_vis_baseline_ww_metres(vis2), &status);
+        // Create a visibility block.
+        oskar_VisBlock* blk = oskar_vis_block_create_from_header(
+                OSKAR_CPU, hdr, &status);
 
-        // Check the data loaded correctly.
-        for (int i = 0, c = 0; c < oskar_vis_num_channels(vis2); ++c)
+        // Loop over blocks.
+        for (int i_block = 0; i_block < num_blocks; ++i_block)
         {
-            for (int t = 0; t < oskar_vis_num_times(vis2); ++t)
+            // Read the block.
+            oskar_vis_block_read(blk, hdr, h, i_block, &status);
+            ASSERT_EQ(num_baselines, oskar_vis_block_num_baselines(blk));
+
+            // Check the data loaded correctly.
+            double4c* v_ = oskar_mem_double4c(
+                    oskar_vis_block_cross_correlations(blk), &status);
+            double* uu = oskar_mem_double(
+                    oskar_vis_block_baseline_uu_metres(blk), &status);
+            double* vv = oskar_mem_double(
+                    oskar_vis_block_baseline_vv_metres(blk), &status);
+            double* ww = oskar_mem_double(
+                    oskar_vis_block_baseline_ww_metres(blk), &status);
+            for (int i = 0, t = 0; t < max_times_per_block; ++t)
             {
-                for (int b = 0; b < oskar_vis_num_baselines(vis2); ++b, ++i)
+                for (int c = 0; c < max_channels_per_block; ++c)
                 {
-                    ASSERT_FLOAT_EQ((double)i + 1.123, amp[i].x);
-                    ASSERT_FLOAT_EQ((double)i - 0.456, amp[i].y);
+                    for (int b = 0; b < num_baselines; ++b, ++i)
+                    {
+                        // XX
+                        ASSERT_DOUBLE_EQ(0.1 + (double)(t + i_block * max_times_per_block), v_[i].a.x);
+                        ASSERT_DOUBLE_EQ(0.05, v_[i].a.y);
+                        // XY
+                        ASSERT_DOUBLE_EQ(0.2 + (double)c, v_[i].b.x);
+                        ASSERT_DOUBLE_EQ(0.15, v_[i].b.y);
+                        // YX
+                        ASSERT_DOUBLE_EQ(0.3 + (double)b, v_[i].c.x);
+                        ASSERT_DOUBLE_EQ(0.25, v_[i].c.y);
+                        // YY
+                        ASSERT_DOUBLE_EQ(0.4 + (double)i, v_[i].d.x);
+                        ASSERT_DOUBLE_EQ(0.35, v_[i].d.y);
+                    }
+                }
+            }
+            for (int i = 0, t = 0; t < max_times_per_block; ++t)
+            {
+                for (int b = 0; b < num_baselines; ++b, ++i)
+                {
+                    ASSERT_DOUBLE_EQ(0.1 + (double)(t + i_block * max_times_per_block), uu[i]);
+                    ASSERT_DOUBLE_EQ(0.2 + (double)b, vv[i]);
+                    ASSERT_DOUBLE_EQ(0.3 + (double)i, ww[i]);
                 }
             }
         }
-        for (int i = 0, t = 0; t < oskar_vis_num_times(vis2); ++t)
-        {
-            for (int b = 0; b < oskar_vis_num_baselines(vis2); ++b, ++i)
-            {
-                ASSERT_FLOAT_EQ((double)t + 0.10, uu[i]);
-                ASSERT_FLOAT_EQ((double)b + 0.20, vv[i]);
-                ASSERT_FLOAT_EQ((double)i + 0.30, ww[i]);
-            }
-        }
+        oskar_vis_header_free(hdr, &status);
+        oskar_vis_block_free(blk, &status);
+        oskar_binary_free(h);
     }
-
-    // Free memory.
-    oskar_vis_free(vis1, &status);
-    oskar_vis_free(vis2, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Delete temporary file.
     remove(filename);

@@ -68,22 +68,22 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_grid_wproj_d(
         const size_t num_w_planes,
-        const int* restrict support,
+        const int* RESTRICT support,
         const int oversample,
         const int conv_size_half,
-        const double* restrict conv_func,
+        const double* RESTRICT conv_func,
         const size_t num_points,
-        const double* restrict uu,
-        const double* restrict vv,
-        const double* restrict ww,
-        const double* restrict vis,
-        const double* restrict weight,
+        const double* RESTRICT uu,
+        const double* RESTRICT vv,
+        const double* RESTRICT ww,
+        const double* RESTRICT vis,
+        const double* RESTRICT weight,
         const double cell_size_rad,
         const double w_scale,
         const int grid_size,
-        size_t* restrict num_skipped,
-        double* restrict norm,
-        double* restrict grid);
+        size_t* RESTRICT num_skipped,
+        double* RESTRICT norm,
+        double* RESTRICT grid);
 
 /**
  * @brief
@@ -113,22 +113,22 @@ void oskar_grid_wproj_d(
 OSKAR_EXPORT
 void oskar_grid_wproj_f(
         const size_t num_w_planes,
-        const int* restrict support,
+        const int* RESTRICT support,
         const int oversample,
         const int conv_size_half,
-        const float* restrict conv_func,
+        const float* RESTRICT conv_func,
         const size_t num_points,
-        const float* restrict uu,
-        const float* restrict vv,
-        const float* restrict ww,
-        const float* restrict vis,
-        const float* restrict weight,
+        const float* RESTRICT uu,
+        const float* RESTRICT vv,
+        const float* RESTRICT ww,
+        const float* RESTRICT vis,
+        const float* RESTRICT weight,
         const float cell_size_rad,
         const float w_scale,
         const int grid_size,
-        size_t* restrict num_skipped,
-        double* restrict norm,
-        float* restrict grid);
+        size_t* RESTRICT num_skipped,
+        double* RESTRICT norm,
+        float* RESTRICT grid);
 
 #ifdef __cplusplus
 }

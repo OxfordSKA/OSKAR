@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 #include "math/oskar_random_broken_power_law.h"
 #include "sky/oskar_generate_random_coordinate.h"
 #include "sky/oskar_sky.h"
-#include "log/oskar_log.h"
 #include "utility/oskar_get_error_string.h"
 
 #include "math/oskar_cmath.h"
@@ -47,22 +46,22 @@ using oskar::SettingsTree;
 #define D2R M_PI/180.0
 #define ARCSEC2RAD M_PI/648000.0
 
-static void load_osm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void load_osm(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status);
-static void load_gsm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void load_gsm(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status);
-static void load_fits_image(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void load_fits_image(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status);
-static void load_healpix_fits(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void load_healpix_fits(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status);
 
-static void gen_grid(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void gen_grid(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status);
-static void gen_healpix(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void gen_healpix(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status);
-static void gen_rpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void gen_rpl(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status);
-static void gen_rbpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void gen_rbpl(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status);
 
 static void set_up_filter(oskar_Sky* sky, SettingsTree* s,
@@ -72,13 +71,14 @@ static void set_up_pol(oskar_Sky* sky, SettingsTree* s, int* status);
 
 oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
 {
+    (void) log;
     const char* filename;
     if (*status || !s) return 0;
     s->clear_group();
 
     /* Create an empty sky model. */
-    if (log) oskar_log_section(log, 'M', "Sky model set-up");
-    int type = s->to_int("simulator/double_precision", status) ?
+    oskar_log_section('M', "Sky model set-up");
+    const int type = s->to_int("simulator/double_precision", status) ?
             OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_Sky* sky = oskar_sky_create(type, OSKAR_CPU, 0, status);
     s->begin_group("observation");
@@ -88,22 +88,22 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
     s->begin_group("sky");
 
     /* Load sky model data files. */
-    load_osm(sky, log, s, ra0, dec0, status);
-    load_gsm(sky, log, s, ra0, dec0, status);
-    load_fits_image(sky, log, s, ra0, dec0, status);
-    load_healpix_fits(sky, log, s, ra0, dec0, status);
+    load_osm(sky, s, ra0, dec0, status);
+    load_gsm(sky, s, ra0, dec0, status);
+    load_fits_image(sky, s, ra0, dec0, status);
+    load_healpix_fits(sky, s, ra0, dec0, status);
 
     /* Generate sky models from generator parameters. */
-    gen_grid(sky, log, s, ra0, dec0, status);
-    gen_healpix(sky, log, s, ra0, dec0, status);
-    gen_rpl(sky, log, s, ra0, dec0, status);
-    gen_rbpl(sky, log, s, ra0, dec0, status);
+    gen_grid(sky, s, ra0, dec0, status);
+    gen_healpix(sky, s, ra0, dec0, status);
+    gen_rpl(sky, s, ra0, dec0, status);
+    gen_rbpl(sky, s, ra0, dec0, status);
 
     /* Return if sky model contains no sources. */
     int num_sources = oskar_sky_num_sources(sky);
     if (num_sources == 0)
     {
-        if (log) oskar_log_warning(log, "Sky model contains no sources.");
+        oskar_log_warning("Sky model contains no sources.");
         s->clear_group();
         return sky;
     }
@@ -115,7 +115,7 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
         double std_dev = s->to_double("spectral_index/std_dev", status);
         double ref = s->to_double("spectral_index/ref_frequency_hz", status);
         int seed = s->to_int("spectral_index/seed", status);
-        if (log) oskar_log_message(log, 'M', 0,
+        oskar_log_message('M', 0,
                 "Overriding source spectral index values...");
         for (int i = 0; i < num_sources; ++i)
         {
@@ -124,7 +124,7 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
             val[0] = std_dev * val[0] + mean;
             oskar_sky_set_spectral_index(sky, i, ref, val[0], status);
         }
-        if (log) oskar_log_message(log, 'M', 1, "done.");
+        oskar_log_message('M', 1, "done.");
     }
 
     if (*status)
@@ -137,7 +137,7 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
     filename = s->to_string("output_text_file", status);
     if (filename && strlen(filename) > 0 && !*status)
     {
-        if (log) oskar_log_message(log, 'M', 1,
+        oskar_log_message('M', 1,
                 "Writing sky model text file: %s", filename);
         oskar_sky_save(filename, sky, status);
     }
@@ -146,7 +146,7 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
     filename = s->to_string("output_binary_file", status);
     if (filename && strlen(filename) > 0 && !*status)
     {
-        if (log) oskar_log_message(log, 'M', 1,
+        oskar_log_message('M', 1,
                 "Writing sky model binary file: %s", filename);
         oskar_sky_write(filename, sky, status);
     }
@@ -156,7 +156,7 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
 }
 
 
-static void load_osm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void load_osm(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
     int num_files = 0;
@@ -169,7 +169,7 @@ static void load_osm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         if (!files[i] || strlen(files[i]) == 0) continue;
 
         /* Load into a temporary sky model. */
-        if (log) oskar_log_message(log, 'M', 0,
+        oskar_log_message('M', 0,
                 "Loading OSKAR sky model file '%s' ...", files[i]);
 
         /* Try to read sky model as a binary file first. */
@@ -188,7 +188,7 @@ static void load_osm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         if (!*status)
         {
             oskar_sky_append(sky, t, status);
-            if (log) oskar_log_message(log, 'M', 1, "done.");
+            oskar_log_message('M', 1, "done.");
         }
         oskar_sky_free(t, status);
     }
@@ -196,14 +196,14 @@ static void load_osm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
 }
 
 
-static void load_gsm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void load_gsm(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
     const char* filename = s->to_string("gsm/file", status);
     if (*status || !filename || strlen(filename) == 0) return;
 
     /* Load the file. */
-    if (log) oskar_log_message(log, 'M', 0, "Loading GSM data...");
+    oskar_log_message('M', 0, "Loading GSM data...");
     oskar_Mem* data = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
     int num_pixels = (int) oskar_mem_load_ascii(filename,
             1, status, data, "");
@@ -238,13 +238,13 @@ static void load_gsm(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
     if (!*status)
     {
         oskar_sky_append(sky, t, status);
-        if (log) oskar_log_message(log, 'M', 1, "done.");
+        oskar_log_message('M', 1, "done.");
     }
     oskar_sky_free(t, status);
 }
 
 
-static void load_fits_image(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void load_fits_image(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
     int num_files = 0;
@@ -259,8 +259,7 @@ static void load_fits_image(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
     {
         if (*status) break;
         if (!files[i] || strlen(files[i]) == 0) continue;
-        if (log) oskar_log_message(log, 'M', 0,
-                "Loading FITS file '%s' ...", files[i]);
+        oskar_log_message('M', 0, "Loading FITS file '%s' ...", files[i]);
 
         /* Convert the image into a sky model. */
         oskar_Sky* t = oskar_sky_from_fits_file(oskar_sky_precision(sky),
@@ -268,7 +267,7 @@ static void load_fits_image(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
                 default_map_units, override_map_units,
                 0.0, spectral_index, status);
         if (*status == OSKAR_ERR_BAD_UNITS)
-            oskar_log_error(log, "Units error: Need K, mK, Jy/pixel or "
+            oskar_log_error("Units error: Need K, mK, Jy/pixel or "
                     "Jy/beam and beam size.");
 
         /* Apply filters. */
@@ -278,7 +277,7 @@ static void load_fits_image(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         if (!*status)
         {
             oskar_sky_append(sky, t, status);
-            if (log) oskar_log_message(log, 'M', 1, "done.");
+            oskar_log_message('M', 1, "done.");
         }
         oskar_sky_free(t, status);
     }
@@ -286,7 +285,7 @@ static void load_fits_image(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
 }
 
 
-static void load_healpix_fits(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void load_healpix_fits(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
     int num_files = 0;
@@ -304,7 +303,7 @@ static void load_healpix_fits(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         if (!files[i] || strlen(files[i]) == 0) continue;
 
         /* Read the data from file. */
-        if (log) oskar_log_message(log, 'M', 0,
+        oskar_log_message('M', 0,
                 "Loading HEALPix FITS file '%s' ...", files[i]);
 
         /* Convert the image into a sky model. */
@@ -313,7 +312,7 @@ static void load_healpix_fits(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
                 default_map_units, override_map_units,
                 freq_hz, spectral_index, status);
         if (*status == OSKAR_ERR_BAD_UNITS)
-            oskar_log_error(log, "Units error: Need K, mK, Jy/pixel or "
+            oskar_log_error("Units error: Need K, mK, Jy/pixel or "
                     "Jy/beam and beam size.");
 
         /* Apply filters and extended source over-ride. */
@@ -324,7 +323,7 @@ static void load_healpix_fits(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         if (!*status)
         {
             oskar_sky_append(sky, t, status);
-            if (log) oskar_log_message(log, 'M', 1, "done.");
+            oskar_log_message('M', 1, "done.");
         }
         oskar_sky_free(t, status);
     }
@@ -332,7 +331,7 @@ static void load_healpix_fits(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
 }
 
 
-static void gen_grid(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void gen_grid(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
     /* Check if generator is enabled. */
@@ -341,8 +340,7 @@ static void gen_grid(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         return;
 
     /* Generate a sky model containing the grid. */
-    if (log)
-        oskar_log_message(log, 'M', 0, "Generating source grid positions...");
+    oskar_log_message('M', 0, "Generating source grid positions...");
     s->begin_group("generator/grid");
     double fov_rad = s->to_double("fov_deg", status) * D2R;
     double mean_flux_jy = s->to_double("mean_flux_jy", status);
@@ -360,13 +358,13 @@ static void gen_grid(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
     if (!*status)
     {
         oskar_sky_append(sky, t, status);
-        if (log) oskar_log_message(log, 'M', 1, "done.");
+        oskar_log_message('M', 1, "done.");
     }
     oskar_sky_free(t, status);
 }
 
 
-static void gen_healpix(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void gen_healpix(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
     /* Check if generator is enabled. */
@@ -375,8 +373,7 @@ static void gen_healpix(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         return;
 
     /* Generate the new positions into a temporary sky model. */
-    if (log)
-        oskar_log_message(log, 'M', 0, "Generating HEALPix source positions...");
+    oskar_log_message('M', 0, "Generating HEALPix source positions...");
     int npix = 12 * nside * nside;
     int type = oskar_sky_precision(sky);
     oskar_Sky* t = oskar_sky_create(type, OSKAR_CPU, npix, status);
@@ -400,13 +397,13 @@ static void gen_healpix(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
     if (!*status)
     {
         oskar_sky_append(sky, t, status);
-        if (log) oskar_log_message(log, 'M', 1, "done.");
+        oskar_log_message('M', 1, "done.");
     }
     oskar_sky_free(t, status);
 }
 
 
-static void gen_rpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void gen_rpl(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
     /* Check if generator is enabled. */
@@ -416,7 +413,7 @@ static void gen_rpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         return;
 
     /* Generate the sources into a temporary sky model. */
-    if (log) oskar_log_message(log, 'M', 0,
+    oskar_log_message('M', 0,
             "Generating random power law source distribution...");
     s->begin_group("generator/random_power_law");
     double flux_min = s->to_double("flux_min", status);
@@ -435,13 +432,13 @@ static void gen_rpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
     if (!*status)
     {
         oskar_sky_append(sky, t, status);
-        if (log) oskar_log_message(log, 'M', 1, "done.");
+        oskar_log_message('M', 1, "done.");
     }
     oskar_sky_free(t, status);
 }
 
 
-static void gen_rbpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
+static void gen_rbpl(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, int* status)
 {
     /* Check if generator is enabled. */
@@ -451,7 +448,7 @@ static void gen_rbpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
         return;
 
     /* Generate the sources into a temporary sky model. */
-    if (log) oskar_log_message(log, 'M', 0,
+    oskar_log_message('M', 0,
             "Generating random broken power law source distribution...");
     s->begin_group("generator/random_broken_power_law");
     double flux_min = s->to_double("flux_min", status);
@@ -484,7 +481,7 @@ static void gen_rbpl(oskar_Sky* sky, oskar_Log* log, SettingsTree* s,
     if (!*status)
     {
         oskar_sky_append(sky, t, status);
-        if (log) oskar_log_message(log, 'M', 1, "done.");
+        oskar_log_message('M', 1, "done.");
     }
     oskar_sky_free(t, status);
 }

@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
 #include "oskar_rebin_sky_cuda.h"
 #include "log/oskar_log.h"
+#include "settings/oskar_option_parser.h"
 #include "sky/oskar_sky.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 #include "utility/oskar_get_error_string.h"
 
 #include <cstdio>
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
             oskar_mem_float_const(oskar_sky_ra_rad_const(output_gpu), &error),
             oskar_mem_float_const(oskar_sky_dec_rad_const(output_gpu), &error),
             oskar_mem_float(oskar_sky_I(output_gpu), &error));
-    oskar_device_check_error(&error);
+    oskar_device_check_error_cuda(&error);
     if (error)
         fprintf(stderr, "CUDA error (%s).\n", oskar_get_error_string(error));
 

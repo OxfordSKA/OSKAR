@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,14 +28,16 @@
 
 #include <gtest/gtest.h>
 
-#include "math/oskar_dft_c2r.h"
 #include "math/oskar_cmath.h"
+#include "math/oskar_dft_c2r.h"
 #include "math/oskar_evaluate_image_lmn_grid.h"
+#include "utility/oskar_device.h"
 #include "utility/oskar_get_error_string.h"
-#include "utility/oskar_cl_utils.h"
+#include "utility/oskar_timer.h"
 
 #include <cstdlib>
 #include <cstdio>
+#include <string>
 
 static void run_test(int type, int loc, int num_baselines,
         const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w, int side,
@@ -57,13 +59,18 @@ static void run_test(int type, int loc, int num_baselines,
     oskar_Mem *amp = oskar_mem_create(type | OSKAR_COMPLEX,
             loc, num_baselines, status);
     oskar_Mem *wt = oskar_mem_create(type, loc, num_baselines, status);
-    oskar_mem_set_value_real(amp, 1.0, 0, 0, status);
-    oskar_mem_set_value_real(wt, 1.0, 0, 0, status);
+    oskar_mem_set_value_real(amp, 1.0, 0, num_baselines, status);
+    oskar_mem_set_value_real(wt, 1.0, 0, num_baselines, status);
+    oskar_mem_clear_contents(out, status);
 
     /* Run DFT. */
+    oskar_Timer* tmr = oskar_timer_create(loc);
+    oskar_timer_resume(tmr);
     oskar_dft_c2r(num_baselines, wavenumber, u_, v_, w_, amp, wt,
             (int) num_pixels, l_, m_, 0, out, status);
-    EXPECT_EQ(0, *status);
+    printf("Time taken for oskar_dft_c2r(): %.3f\n", oskar_timer_elapsed(tmr));
+    oskar_timer_free(tmr);
+    EXPECT_EQ(0, *status) << oskar_get_error_string(*status);
 
     /* Write data. */
     oskar_mem_write_fits_cube(out, filename, side, side, 1, 0, status);
@@ -82,8 +89,8 @@ static void run_test(int type, int loc, int num_baselines,
 
 TEST(dft, c2r)
 {
-    int side = 128, status = 0;
-    int type = OSKAR_SINGLE;
+    int num_devices = 0, side = 128, status = 0;
+    int type = OSKAR_SINGLE, location = 0;
     size_t num_pixels = side * side;
     size_t num_baselines = 1000;
     double fov = 4.0 * M_PI / 180.0;
@@ -102,17 +109,37 @@ TEST(dft, c2r)
     ASSERT_EQ(0, status);
 
     /* Run on devices. */
-#ifdef OSKAR_HAVE_OPENCL
-    oskar_cl_init("GPU", "NVIDIA|AMD");
-    printf("Using %s\n", oskar_cl_device_name());
-    run_test(type, OSKAR_CL, (int) num_baselines, u, v, w,
-            side, l, m, n, "test_dft_cl", &status);
-    oskar_cl_free();
-#endif
-#ifdef OSKAR_HAVE_CUDA
-    run_test(type, OSKAR_GPU, (int) num_baselines, u, v, w,
-            side, l, m, n, "test_dft_cuda", &status);
-#endif
+    oskar_device_set_require_double_precision(0);
+    num_devices = oskar_device_count("OpenCL", &location);
+    for (int i = 0; i < num_devices; ++i)
+    {
+        oskar_device_set(location, i, &status);
+        char* device_name = oskar_device_name(location, i);
+        std::string device(device_name);
+        free(device_name);
+        printf("Using OpenCL device %s\n", device.c_str());
+        for (size_t j = 0; j < device.length(); ++j)
+            if (device[j] == ' ' || device[j] == '@' ||
+                    device[j] == '(' || device[j] == ')')
+                device[j] = '_';
+        device = std::string("test_dft_cl_") + device;
+        run_test(type, location, (int) num_baselines, u, v, w,
+                side, l, m, n, device.c_str(), &status);
+    }
+    num_devices = oskar_device_count("CUDA", &location);
+    for (int i = 0; i < num_devices; ++i)
+    {
+        oskar_device_set(location, i, &status);
+        char* device_name = oskar_device_name(location, i);
+        std::string device(device_name);
+        free(device_name);
+        printf("Using CUDA device %s\n", device.c_str());
+        for (size_t j = 0; j < device.length(); ++j)
+            if (device[j] == ' ') device[j] = '_';
+        device = std::string("test_dft_cuda_") + device;
+        run_test(type, location, (int) num_baselines, u, v, w,
+                side, l, m, n, device.c_str(), &status);
+    }
     run_test(type, OSKAR_CPU, (int) num_baselines, u, v, w,
             side, l, m, n, "test_dft_cpu", &status);
 

@@ -51,7 +51,8 @@ void oskar_station_create_child_stations(oskar_Station* station,
     }
 
     /* Allocate memory for child station array. */
-    station->child = malloc(station->num_elements * sizeof(oskar_Station*));
+    station->child = (oskar_Station**) malloc(
+            station->num_elements * sizeof(oskar_Station*));
     if (!station->child)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;

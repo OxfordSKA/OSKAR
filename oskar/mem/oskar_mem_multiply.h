@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,69 +41,34 @@ extern "C" {
 #endif
 
 /**
- * @brief
- * Multiplies (element-wise) the contents of two arrays.
+ * @brief Element-wise multiply of the supplied arrays.
  *
  * @details
  * This function multiplies each element of one array by each element in
  * another array.
  *
- * The arrays can be in either CPU or GPU memory, but will be copied to the
- * output memory location if necessary before performing the multiplication.
+ * The input arrays can be in any supported memory location, and will be
+ * copied to the output memory location if necessary before the multiplication.
  *
- * If c is NULL on input then the operation becomes a = a .* b.
- *
- * @param[out]    c   Output array.
- * @param[in,out] a   Input and/or output array.
- * @param[in]     b   Second input array.
- * @param[in]     num If >0, use only this number of elements from A and B.
- * @param[in,out]  status   Status return code.
+ * @param[out]     out          Output array.
+ * @param[in]      in1          First input array.
+ * @param[in]      in2          Second input array.
+ * @param[in]      offset_out   Start offset into output array.
+ * @param[in]      offset_in1   Start offset into first input array.
+ * @param[in]      offset_in2   Start offset into second input array.
+ * @param[in]      num_elements Number of elements to multiply.
+ * @param[in,out]  status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_multiply(oskar_Mem* c, oskar_Mem* a, const oskar_Mem* b,
-        size_t num, int* status);
-
-
-OSKAR_EXPORT
-void oskar_mem_multiply_rr_r_f(size_t num, float* c,
-        const float* a, const float* b);
-
-OSKAR_EXPORT
-void oskar_mem_multiply_cc_c_f(size_t num, float2* c,
-        const float2* a, const float2* b);
-
-OSKAR_EXPORT
-void oskar_mem_multiply_cc_m_f(size_t num, float4c* c,
-        const float2* a, const float2* b);
-
-OSKAR_EXPORT
-void oskar_mem_multiply_cm_m_f(size_t num, float4c* c,
-        const float2* a, const float4c* b);
-
-OSKAR_EXPORT
-void oskar_mem_multiply_mm_m_f(size_t num, float4c* c,
-        const float4c* a, const float4c* b);
-
-
-OSKAR_EXPORT
-void oskar_mem_multiply_rr_r_d(size_t num, double* c,
-        const double* a, const double* b);
-
-OSKAR_EXPORT
-void oskar_mem_multiply_cc_c_d(size_t num, double2* c,
-        const double2* a, const double2* b);
-
-OSKAR_EXPORT
-void oskar_mem_multiply_cc_m_d(size_t num, double4c* c,
-        const double2* a, const double2* b);
-
-OSKAR_EXPORT
-void oskar_mem_multiply_cm_m_d(size_t num, double4c* c,
-        const double2* a, const double4c* b);
-
-OSKAR_EXPORT
-void oskar_mem_multiply_mm_m_d(size_t num, double4c* c,
-        const double4c* a, const double4c* b);
+void oskar_mem_multiply(
+        oskar_Mem* out,
+        const oskar_Mem* in1,
+        const oskar_Mem* in2,
+        size_t offset_out,
+        size_t offset_in1,
+        size_t offset_in2,
+        size_t num_elements,
+        int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,7 @@ extern "C" {
 
 /**
  * @brief
- * Converts CIRS relative direction cosines to ENU direction cosines
- * (single precision).
+ * Converts CIRS relative direction cosines to ENU direction cosines.
  *
  * @details
  * This function converts CIRS vector components relative to
@@ -81,105 +80,26 @@ extern "C" {
  * @param[out] z                 Output ENU z (up) vector components.
  */
 OSKAR_EXPORT
-void oskar_convert_cirs_relative_directions_to_enu_directions_f(
-        int num_points, const float* l, const float* m, const float* n,
-        float ra0_rad, float dec0_rad, float lon_rad, float lat_rad,
-        float era_rad, float pm_x_rad, float pm_y_rad,
-        float diurnal_aberration, float* x, float* y, float* z);
-
-/**
- * @brief
- * Converts CIRS relative direction cosines to ENU direction cosines
- * (double precision).
- *
- * @details
- * This function converts CIRS vector components relative to
- * the given right ascension and declination to topocentric east-north-up
- * vector components for an observer at the given location.
- *
- * Allowance is made for polar motion and diurnal aberration.
- * The magnitude of the diurnal aberration vector can be obtained by calling
- * oskar_evaluate_diurnal_aberration().
- * If not known, these quantities can be set to zero.
- *
- * No allowance is made for atmospheric refraction.
- *
- * To be rigorous, lon_rad is east longitude + s_prime, the direction to the
- * terrestial intermediate origin (TIO). This correction is sufficiently small
- * to be safely neglected for all but the most precise applications.
- *
- * This function uses the same algorithm as implemented in the IAU
- * Standards of Fundamental Astronomy (SOFA) library.
- *
- * @param[in] num_points         Number of points in all arrays.
- * @param[in] l                  CIRS relative directions (l-component).
- * @param[in] m                  CIRS relative directions (m-component).
- * @param[in] n                  CIRS relative directions (n-component).
- * @param[in] ra0_rad            CIRS reference right ascension, in radians.
- * @param[in] dec0_rad           CIRS reference declination, in radians.
- * @param[in] lon_rad            Observer's longitude, in radians.
- * @param[in] lat_rad            Observer's geodetic latitude, in radians.
- * @param[in] era_rad            Current Earth rotation angle, in radians.
- * @param[in] pm_x_rad           Polar motion, x component, in radians.
- * @param[in] pm_y_rad           Polar motion, y component, in radians.
- * @param[in] diurnal_aberration Magnitude of diurnal aberration vector.
- * @param[out] x                 Output ENU x (east) vector components.
- * @param[out] y                 Output ENU y (north) vector components.
- * @param[out] z                 Output ENU z (up) vector components.
- */
-OSKAR_EXPORT
-void oskar_convert_cirs_relative_directions_to_enu_directions_d(
-        int num_points, const double* l, const double* m, const double* n,
-        double ra0_rad, double dec0_rad, double lon_rad, double lat_rad,
-        double era_rad, double pm_x_rad, double pm_y_rad,
-        double diurnal_aberration, double* x, double* y, double* z);
-
-/**
- * @brief
- * Converts CIRS relative direction cosines to ENU direction cosines
- * (wrapper).
- *
- * @details
- * This function converts CIRS vector components relative to
- * the given right ascension and declination to topocentric east-north-up
- * vector components for an observer at the given location.
- *
- * Allowance is made for polar motion and diurnal aberration.
- * The magnitude of the diurnal aberration vector can be obtained by calling
- * oskar_evaluate_diurnal_aberration().
- * If not known, these quantities can be set to zero.
- *
- * No allowance is made for atmospheric refraction.
- *
- * To be rigorous, lon_rad is east longitude + s_prime, the direction to the
- * terrestial intermediate origin (TIO). This correction is sufficiently small
- * to be safely neglected for all but the most precise applications.
- *
- * This function uses the same algorithm as implemented in the IAU
- * Standards of Fundamental Astronomy (SOFA) library.
- *
- * @param[in] num_points         Number of points in all arrays.
- * @param[in] l                  CIRS relative directions (l-component).
- * @param[in] m                  CIRS relative directions (m-component).
- * @param[in] n                  CIRS relative directions (n-component).
- * @param[in] ra0_rad            CIRS reference right ascension, in radians.
- * @param[in] dec0_rad           CIRS reference declination, in radians.
- * @param[in] lon_rad            Observer's longitude, in radians.
- * @param[in] lat_rad            Observer's geodetic latitude, in radians.
- * @param[in] era_rad            Current Earth rotation angle, in radians.
- * @param[in] pm_x_rad           Polar motion, x component, in radians.
- * @param[in] pm_y_rad           Polar motion, y component, in radians.
- * @param[in] diurnal_aberration Magnitude of diurnal aberration vector.
- * @param[out] x                 Output ENU x (east) vector components.
- * @param[out] y                 Output ENU y (north) vector components.
- * @param[out] z                 Output ENU z (up) vector components.
- */
-OSKAR_EXPORT
-void oskar_convert_cirs_relative_directions_to_enu_directions(int num_points,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        double ra0_rad, double dec0_rad, double lon_rad, double lat_rad,
-        double era_rad, double pm_x_rad, double pm_y_rad,
-        double diurnal_aberration, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
+void oskar_convert_cirs_relative_directions_to_enu_directions(
+        int at_origin,
+        int bypass,
+        int offset_in,
+        int num_points,
+        const oskar_Mem* l,
+        const oskar_Mem* m,
+        const oskar_Mem* n,
+        double ra0_rad,
+        double dec0_rad,
+        double lon_rad,
+        double lat_rad,
+        double era_rad,
+        double pm_x_rad,
+        double pm_y_rad,
+        double diurnal_aberration,
+        int offset_out,
+        oskar_Mem* x,
+        oskar_Mem* y,
+        oskar_Mem* z,
         int* status);
 
 #ifdef __cplusplus

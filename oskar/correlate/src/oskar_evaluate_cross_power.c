@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "correlate/define_evaluate_cross_power.h"
 #include "correlate/oskar_evaluate_cross_power.h"
-#include "correlate/oskar_evaluate_cross_power_cuda.h"
-#include "correlate/oskar_evaluate_cross_power_omp.h"
-#include "utility/oskar_device_utils.h"
+#include "math/define_multiply.h"
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
+#include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Wrapper. */
-void oskar_evaluate_cross_power(int num_sources,
-        int num_stations, const oskar_Mem* jones, oskar_Mem* out,
-        int *status)
+OSKAR_CROSS_POWER_MATRIX(evaluate_cross_power_float, float, float4c)
+OSKAR_CROSS_POWER_MATRIX(evaluate_cross_power_double, double, double4c)
+OSKAR_CROSS_POWER_SCALAR(evaluate_cross_power_scalar_float, float, float2)
+OSKAR_CROSS_POWER_SCALAR(evaluate_cross_power_scalar_double, double, double2)
+
+void oskar_evaluate_cross_power(int num_sources, int num_stations,
+        const oskar_Mem* jones, int offset_out, oskar_Mem* out, int *status)
 {
-    int type, location;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Check type and location. */
-    type = oskar_mem_type(jones);
-    location = oskar_mem_location(jones);
+    const int type = oskar_mem_type(jones);
+    const int location = oskar_mem_location(jones);
+    const double norm = 2.0 / (num_stations * (num_stations - 1));
+    const float norm_f = (float) norm;
     if (type != oskar_mem_type(out))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
@@ -58,30 +60,28 @@ void oskar_evaluate_cross_power(int num_sources,
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-
-    /* Switch on type and location combination. */
     if (location == OSKAR_CPU)
     {
         switch (type)
         {
         case OSKAR_SINGLE_COMPLEX_MATRIX:
-            oskar_evaluate_cross_power_omp_f(num_sources, num_stations,
-                    oskar_mem_float4c_const(jones, status),
+            evaluate_cross_power_float(num_sources, num_stations,
+                    oskar_mem_float4c_const(jones, status), norm, offset_out,
                     oskar_mem_float4c(out, status));
             break;
         case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            oskar_evaluate_cross_power_omp_d(num_sources, num_stations,
-                    oskar_mem_double4c_const(jones, status),
+            evaluate_cross_power_double(num_sources, num_stations,
+                    oskar_mem_double4c_const(jones, status), norm, offset_out,
                     oskar_mem_double4c(out, status));
             break;
         case OSKAR_SINGLE_COMPLEX:
-            oskar_evaluate_cross_power_scalar_omp_f(num_sources, num_stations,
-                    oskar_mem_float2_const(jones, status),
+            evaluate_cross_power_scalar_float(num_sources, num_stations,
+                    oskar_mem_float2_const(jones, status), norm, offset_out,
                     oskar_mem_float2(out, status));
             break;
         case OSKAR_DOUBLE_COMPLEX:
-            oskar_evaluate_cross_power_scalar_omp_d(num_sources, num_stations,
-                    oskar_mem_double2_const(jones, status),
+            evaluate_cross_power_scalar_double(num_sources, num_stations,
+                    oskar_mem_double2_const(jones, status), norm, offset_out,
                     oskar_mem_double2(out, status));
             break;
         default:
@@ -89,39 +89,41 @@ void oskar_evaluate_cross_power(int num_sources,
             return;
         }
     }
-    else if (location == OSKAR_GPU)
+    else
     {
-#ifdef OSKAR_HAVE_CUDA
+        size_t local_size[] = {128, 1, 1}, global_size[] = {1, 1, 1};
+        const int is_dbl = (oskar_type_precision(type) == OSKAR_DOUBLE);
+        const char* k = 0;
         switch (type)
         {
         case OSKAR_SINGLE_COMPLEX_MATRIX:
-            oskar_evaluate_cross_power_cuda_f(num_sources, num_stations,
-                    oskar_mem_float4c_const(jones, status),
-                    oskar_mem_float4c(out, status));
-            break;
+            k = "evaluate_cross_power_float"; break;
         case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            oskar_evaluate_cross_power_cuda_d(num_sources, num_stations,
-                    oskar_mem_double4c_const(jones, status),
-                    oskar_mem_double4c(out, status));
+            k = "evaluate_cross_power_double";
+            local_size[0] = 64;
             break;
         case OSKAR_SINGLE_COMPLEX:
-            oskar_evaluate_cross_power_scalar_cuda_f(num_sources, num_stations,
-                    oskar_mem_float2_const(jones, status),
-                    oskar_mem_float2(out, status));
-            break;
+            k = "evaluate_cross_power_scalar_float"; break;
         case OSKAR_DOUBLE_COMPLEX:
-            oskar_evaluate_cross_power_scalar_cuda_d(num_sources, num_stations,
-                    oskar_mem_double2_const(jones, status),
-                    oskar_mem_double2(out, status));
-            break;
+            k = "evaluate_cross_power_scalar_double"; break;
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             return;
         }
-        oskar_device_check_error(status);
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = oskar_device_global_size(
+                (size_t) num_sources, local_size[0]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &num_sources},
+                {INT_SZ, &num_stations},
+                {PTR_SZ, oskar_mem_buffer_const(jones)},
+                {is_dbl ? DBL_SZ : FLT_SZ,
+                        is_dbl ? (const void*)&norm : (const void*)&norm_f},
+                {INT_SZ, &offset_out},
+                {PTR_SZ, oskar_mem_buffer(out)}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
     }
 }
 

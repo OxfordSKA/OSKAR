@@ -118,7 +118,7 @@ protected:
         oskar_mem_clear_contents(vis1, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_timer_start(timer1);
-        oskar_auto_correlate(vis1, oskar_sky_num_sources(sky), jones, sky,
+        oskar_auto_correlate(oskar_sky_num_sources(sky), jones, sky, 0, vis1,
                 &status);
         time1 = oskar_timer_elapsed(timer1);
         destroyTestData();
@@ -132,7 +132,7 @@ protected:
         oskar_mem_clear_contents(vis2, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_timer_start(timer2);
-        oskar_auto_correlate(vis2, oskar_sky_num_sources(sky), jones, sky,
+        oskar_auto_correlate(oskar_sky_num_sources(sky), jones, sky, 0, vis2,
                 &status);
         time2 = oskar_timer_elapsed(timer2);
         destroyTestData();

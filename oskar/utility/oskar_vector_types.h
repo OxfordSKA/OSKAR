@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,6 @@
  * @file oskar_vector_types.h
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifdef __CUDACC__
 /* Include the CUDA vector types header first, if we're compiling with nvcc. */
 #   include <vector_types.h>
@@ -54,28 +50,30 @@ extern "C" {
 #   else
 #       define __builtin_align__(a)
 #   endif
-#endif
 
-
-#if !(defined(__VECTOR_TYPES_H__) || defined(__CUDACC__))
 /**
- * @brief
- * Two-element structure (single precision).
+ * @brief Two-element structure (single precision).
  *
  * @details
  * Structure used to hold data for a length-2 vector.
  * This must be compatible with the CUDA float2 type.
  */
-struct __builtin_align__(8)  float2
-{
-    float x, y;
-};
+struct __builtin_align__(8) float2 { float x, y; };
 typedef struct float2 float2;
+
+/**
+ * @brief Two-element structure (double precision).
+ *
+ * @details
+ * Structure used to hold data for a length-2 vector.
+ * This must be compatible with the CUDA double2 type.
+ */
+struct __builtin_align__(16) double2 { double x, y; };
+typedef struct double2 double2;
 #endif
 
 /**
- * @brief
- * Four-element complex structure (single precision).
+ * @brief Four-element complex structure (single precision).
  *
  * @details
  * Structure used to hold data for a length-4 single precision complex vector.
@@ -84,32 +82,11 @@ typedef struct float2 float2;
  *   ( a  b )
  *   ( c  d )
  */
-struct __builtin_align__(8) float4c
-{
-    float2 a, b, c, d;
-};
+struct __align__(32) float4c { float2 a, b, c, d; };
 typedef struct float4c float4c;
 
-#if !(defined(__VECTOR_TYPES_H__) || defined(__CUDACC__))
 /**
- * @brief
- * Two-element structure (double precision).
- *
- * @details
- * Structure used to hold data for a length-2 vector.
- * This must be compatible with the CUDA double2 type.
- */
-struct __builtin_align__(16) double2
-{
-    double x, y;
-
-};
-typedef struct double2 double2;
-#endif
-
-/**
- * @brief
- * Four-element complex structure (double precision).
+ * @brief Four-element complex structure (double precision).
  *
  * @details
  * Structure used to hold data for a length-4 double precision complex vector.
@@ -118,14 +95,7 @@ typedef struct double2 double2;
  *   ( a  b )
  *   ( c  d )
  */
-struct __builtin_align__(16) double4c
-{
-    double2 a, b, c, d;
-};
+struct __align__(64) double4c { double2 a, b, c, d; };
 typedef struct double4c double4c;
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* OSKAR_VECTOR_TYPES_H_ */
+#endif /* include guard */

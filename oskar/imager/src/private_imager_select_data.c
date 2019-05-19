@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,7 @@ void oskar_imager_select_data(
         oskar_Mem* time_out,
         int* status)
 {
-    int i, c, p, num_channels;
-    double inv_wavelength;
+    int i, c, p;
     const double s = 0.05;
     const double df = h->freq_inc_hz != 0.0 ? h->freq_inc_hz : 1.0;
     const double f0 = h->vis_freq_start_hz;
@@ -85,7 +84,7 @@ void oskar_imager_select_data(
     if (num_pols == 1) p = 0;
 
     /* Check whether using frequency snapshots or frequency synthesis. */
-    num_channels = 1 + end_chan - start_chan;
+    const int num_channels = 1 + end_chan - start_chan;
     if (h->chan_snaps)
     {
         /* Get the channel for the image and check if out of range. */
@@ -94,13 +93,13 @@ void oskar_imager_select_data(
         if (fabs((im_freq_hz - f0) - c * df) > s * df) return;
 
         /* Copy the baseline coordinates in wavelengths. */
-        inv_wavelength = (f0 + c * df) / C0;
+        const double inv_wavelength = (f0 + c * df) / C0;
         oskar_mem_copy_contents(uu_out, uu_in, 0, 0, num_rows, status);
         oskar_mem_copy_contents(vv_out, vv_in, 0, 0, num_rows, status);
         oskar_mem_copy_contents(ww_out, ww_in, 0, 0, num_rows, status);
-        oskar_mem_scale_real(uu_out, inv_wavelength, status);
-        oskar_mem_scale_real(vv_out, inv_wavelength, status);
-        oskar_mem_scale_real(ww_out, inv_wavelength, status);
+        oskar_mem_scale_real(uu_out, inv_wavelength, 0, num_rows, status);
+        oskar_mem_scale_real(vv_out, inv_wavelength, 0, num_rows, status);
+        oskar_mem_scale_real(ww_out, inv_wavelength, 0, num_rows, status);
 
         /* Copy visibility data and weights if present. */
         copy_vis_pol(num_rows, num_channels, num_pols,
@@ -110,18 +109,13 @@ void oskar_imager_select_data(
         /* Copy time centroids if present. */
         if (time_in && time_out)
         {
-            if (oskar_mem_length(time_out) < num_rows)
-                oskar_mem_realloc(time_out, num_rows, status);
+            oskar_mem_ensure(time_out, num_rows, status);
             oskar_mem_copy_contents(time_out, time_in, 0, 0, num_rows, status);
         }
         *num_out += num_rows;
     }
     else /* Frequency synthesis */
     {
-        oskar_Mem *uu_, *vv_, *ww_;
-        uu_ = oskar_mem_create_alias(0, 0, 0, status);
-        vv_ = oskar_mem_create_alias(0, 0, 0, status);
-        ww_ = oskar_mem_create_alias(0, 0, 0, status);
         for (i = 0; i < h->num_sel_freqs; ++i)
         {
             c = (int) round((h->sel_freqs[i] - f0) / df);
@@ -129,16 +123,19 @@ void oskar_imager_select_data(
             if (fabs((h->sel_freqs[i] - f0) - c * df) > s * df) continue;
 
             /* Copy the baseline coordinates in wavelengths. */
-            inv_wavelength = (f0 + c * df) / C0;
-            oskar_mem_set_alias(uu_, uu_out, *num_out, num_rows, status);
-            oskar_mem_set_alias(vv_, vv_out, *num_out, num_rows, status);
-            oskar_mem_set_alias(ww_, ww_out, *num_out, num_rows, status);
-            oskar_mem_copy_contents(uu_, uu_in, 0, 0, num_rows, status);
-            oskar_mem_copy_contents(vv_, vv_in, 0, 0, num_rows, status);
-            oskar_mem_copy_contents(ww_, ww_in, 0, 0, num_rows, status);
-            oskar_mem_scale_real(uu_, inv_wavelength, status);
-            oskar_mem_scale_real(vv_, inv_wavelength, status);
-            oskar_mem_scale_real(ww_, inv_wavelength, status);
+            const double inv_wavelength = (f0 + c * df) / C0;
+            oskar_mem_copy_contents(uu_out, uu_in,
+                    *num_out, 0, num_rows, status);
+            oskar_mem_copy_contents(vv_out, vv_in,
+                    *num_out, 0, num_rows, status);
+            oskar_mem_copy_contents(ww_out, ww_in,
+                    *num_out, 0, num_rows, status);
+            oskar_mem_scale_real(uu_out, inv_wavelength,
+                    *num_out, num_rows, status);
+            oskar_mem_scale_real(vv_out, inv_wavelength,
+                    *num_out, num_rows, status);
+            oskar_mem_scale_real(ww_out, inv_wavelength,
+                    *num_out, num_rows, status);
 
             /* Copy visibility data and weights if present. */
             copy_vis_pol(num_rows, num_channels, num_pols,
@@ -148,17 +145,12 @@ void oskar_imager_select_data(
             /* Copy time centroids if present. */
             if (time_in && time_out)
             {
-                if (oskar_mem_length(time_out) < num_rows * h->num_sel_freqs)
-                    oskar_mem_realloc(time_out, num_rows * h->num_sel_freqs,
-                            status);
+                oskar_mem_ensure(time_out, num_rows * h->num_sel_freqs, status);
                 oskar_mem_copy_contents(time_out, time_in, *num_out, 0,
                         num_rows, status);
             }
             *num_out += num_rows;
         }
-        oskar_mem_free(uu_, status);
-        oskar_mem_free(vv_, status);
-        oskar_mem_free(ww_, status);
     }
 }
 

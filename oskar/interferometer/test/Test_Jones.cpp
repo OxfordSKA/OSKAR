@@ -204,7 +204,8 @@ static void test_ones(int precision, int location)
     jones = oskar_jones_create(precision | OSKAR_COMPLEX, location,
             stations, sources, &status);
     ASSERT_EQ(0, status);
-    oskar_jones_set_real_scalar(jones, 1.0, &status);
+    oskar_mem_set_value_real(oskar_jones_mem(jones), 1.0,
+            0, stations * sources, &status);
     EXPECT_EQ(0, status);
     j_ptr = jones;
 
@@ -254,7 +255,8 @@ static void test_ones(int precision, int location)
     jones = oskar_jones_create(precision | OSKAR_COMPLEX | OSKAR_MATRIX,
             location, stations, sources, &status);
     ASSERT_EQ(0, status);
-    oskar_jones_set_real_scalar(jones, 1.0, &status);
+    oskar_mem_set_value_real(oskar_jones_mem(jones), 1.0,
+            0, stations * sources, &status);
     EXPECT_EQ(0, status);
     j_ptr = jones;
 

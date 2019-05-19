@@ -50,7 +50,7 @@ extern "C" {
  *
  * @param[in,out] telescope  Pointer to telescope model to fill.
  * @param[in]     path       Pathname of telescope model directory to load.
- * @param[in,out] log        Pointer to log.
+ * @param[in,out] log        Pointer to log (IGNORED, WILL BE REMOVED).
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT

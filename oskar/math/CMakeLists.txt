@@ -3,22 +3,25 @@
 #
 
 set(math_SRC
+    define_dft_c2r.h
+    define_dftw_c2c.h
+    define_dftw_m2m.h
+    define_dftw_o2c.h
+    define_fftphase.h
+    define_gaussian_circular.h
+    define_legendre_polynomial.h
+    define_multiply.h
+    define_prefix_sum.h
+    define_spherical_harmonic.h
     src/oskar_angular_distance.c
     src/oskar_bearing_angle.c
-    src/oskar_dft_c2r_2d_omp.c
-    src/oskar_dft_c2r_3d_omp.c
     src/oskar_dft_c2r.c
-    src/oskar_dftw_c2c_2d_omp.c
-    src/oskar_dftw_c2c_3d_omp.c
-    src/oskar_dftw_m2m_2d_omp.c
-    src/oskar_dftw_m2m_3d_omp.c
-    src/oskar_dftw_o2c_2d_omp.c
-    src/oskar_dftw_o2c_3d_omp.c
     src/oskar_dftw.c
     src/oskar_ellipse_radius.c
     src/oskar_evaluate_image_lon_lat_grid.c
     src/oskar_evaluate_image_lm_grid.c
     src/oskar_evaluate_image_lmn_grid.c
+    src/oskar_fft.c
     src/oskar_fftpack_cfft.c
     src/oskar_fftpack_cfft_f.c
     src/oskar_fftphase.c
@@ -28,46 +31,26 @@ set(math_SRC
     src/oskar_healpix_npix_to_nside.c
     src/oskar_lapack_subset.c
     src/oskar_linspace.c
+    src/oskar_math_cpu.cl
+    src/oskar_math_gpu.cl
+    src/oskar_math.cl
     src/oskar_matrix_multiply.c
     src/oskar_meshgrid.c
     src/oskar_prefix_sum.c
+    src/oskar_prefix_sum_cpu.cl
+    src/oskar_prefix_sum_gpu.cl
     src/oskar_random_broken_power_law.c
     src/oskar_random_gaussian.c
     src/oskar_random_power_law.c
     src/oskar_rotate.c
     src/oskar_round_robin.c
+    src/oskar_spherical_harmonic_sum.c
+    src/oskar_spherical_harmonic.c
     #src/oskar_sph_rotate_to_position.c
 )
 
 if (CUDA_FOUND)
-    list(APPEND math_SRC
-        src/oskar_dft_c2r_2d_cuda.cu
-        src/oskar_dft_c2r_3d_cuda.cu
-        src/oskar_dftw_c2c_2d_cuda.cu
-        src/oskar_dftw_c2c_3d_cuda.cu
-        src/oskar_dftw_m2m_2d_cuda.cu
-        src/oskar_dftw_m2m_3d_cuda.cu
-        #src/oskar_dftw_m2m_3d_indexed_input_cuda.cu
-        src/oskar_dftw_o2c_2d_cuda.cu
-        src/oskar_dftw_o2c_3d_cuda.cu
-        src/oskar_fftphase_cuda.cu
-        src/oskar_prefix_sum_cuda.cu
-        src/oskar_gaussian_circular_cuda.cu
-    )
-endif()
-
-if (OpenCL_FOUND)
-    list(APPEND math_SRC
-        src/oskar_dft_c2r_2d.cl
-        src/oskar_dft_c2r_3d.cl
-        src/oskar_dftw_c2c_2d.cl
-        src/oskar_dftw_c2c_3d.cl
-        src/oskar_dftw_m2m_2d.cl
-        src/oskar_dftw_m2m_3d.cl
-        src/oskar_dftw_o2c_2d.cl
-        src/oskar_dftw_o2c_3d.cl
-        src/oskar_gaussian_circular.cl
-    )
+    list(APPEND math_SRC src/oskar_math.cu)
 endif()
 
 set(math_SRC "${math_SRC}" PARENT_SCOPE)

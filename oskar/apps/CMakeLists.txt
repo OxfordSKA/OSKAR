@@ -19,16 +19,13 @@ set(apps_SRC
     # src/oskar_sim_tec_screen.cpp
     )
 add_library(oskar_apps ${apps_SRC})
-
-target_link_libraries(oskar_apps
-    oskar
-    oskar_settings)
+target_link_libraries(oskar_apps oskar oskar_settings)
 
 set_target_properties(oskar_apps PROPERTIES
     SOVERSION ${OSKAR_VERSION}
     VERSION ${OSKAR_VERSION})
 
-# Install target for the apps library.
+# Install target.
 install(TARGETS oskar_apps
     ARCHIVE DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
     LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries

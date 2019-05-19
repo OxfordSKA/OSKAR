@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, The University of Oxford
+ * Copyright (c) 2015-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,160 +26,128 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "correlate/define_auto_correlate.h"
+#include "correlate/define_correlate_utils.h"
 #include "correlate/oskar_auto_correlate.h"
-#include "correlate/oskar_auto_correlate_cuda.h"
-#include "correlate/oskar_auto_correlate_omp.h"
-#include "correlate/oskar_auto_correlate_scalar_cuda.h"
-#include "correlate/oskar_auto_correlate_scalar_omp.h"
-#include "utility/oskar_device_utils.h"
+#include "math/define_multiply.h"
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_auto_correlate(oskar_Mem* vis, int n_sources,
-        const oskar_Jones* jones, const oskar_Sky* sky, int* status)
+OSKAR_ACORR_CPU(acorr_float, float, float2, float4c)
+OSKAR_ACORR_CPU(acorr_double, double, double2, double4c)
+OSKAR_ACORR_SCALAR_CPU(acorr_scalar_float, float, float2)
+OSKAR_ACORR_SCALAR_CPU(acorr_scalar_double, double, double2)
+
+void oskar_auto_correlate(int num_sources, const oskar_Jones* jones,
+        const oskar_Sky* sky, int offset_out, oskar_Mem* vis, int* status)
 {
-    int jones_type, base_type, location, n_stations;
-    const oskar_Mem *J, *I, *Q, *U, *V;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Get the data dimensions. */
-    n_stations = oskar_jones_num_stations(jones);
-
-    /* Check data locations. */
-    location = oskar_sky_mem_location(sky);
-    if (oskar_jones_mem_location(jones) != location ||
+    const oskar_Mem* jones_ = oskar_jones_mem_const(jones);
+    const oskar_Mem* src_I = oskar_sky_I_const(sky);
+    const oskar_Mem* src_Q = oskar_sky_Q_const(sky);
+    const oskar_Mem* src_U = oskar_sky_U_const(sky);
+    const oskar_Mem* src_V = oskar_sky_V_const(sky);
+    const int num_stations = oskar_jones_num_stations(jones);
+    const int location = oskar_sky_mem_location(sky);
+    if (oskar_mem_location(jones_) != location ||
             oskar_mem_location(vis) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-
-    /* Check for consistent data types. */
-    jones_type = oskar_jones_type(jones);
-    base_type = oskar_sky_precision(sky);
-    if (oskar_mem_precision(vis) != base_type ||
-            oskar_type_precision(jones_type) != base_type)
+    if (oskar_mem_precision(jones_) != oskar_sky_precision(sky) ||
+            oskar_mem_type(jones_) != oskar_mem_type(vis))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-    if (oskar_mem_type(vis) != jones_type)
-    {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
-    }
-
-    /* If neither single or double precision, return error. */
-    if (base_type != OSKAR_SINGLE && base_type != OSKAR_DOUBLE)
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
-    }
-
-    /* Check the input dimensions. */
-    if (oskar_jones_num_sources(jones) < n_sources)
+    if (oskar_jones_num_sources(jones) < num_sources)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
     }
-
-    /* Get handles to arrays. */
-    J = oskar_jones_mem_const(jones);
-    I = oskar_sky_I_const(sky);
-    Q = oskar_sky_Q_const(sky);
-    U = oskar_sky_U_const(sky);
-    V = oskar_sky_V_const(sky);
-
-    /* Select kernel. */
     if (location == OSKAR_CPU)
     {
         switch (oskar_mem_type(vis))
         {
         case OSKAR_SINGLE_COMPLEX_MATRIX:
-            oskar_auto_correlate_omp_f(n_sources, n_stations,
-                    oskar_mem_float4c_const(J, status),
-                    oskar_mem_float_const(I, status),
-                    oskar_mem_float_const(Q, status),
-                    oskar_mem_float_const(U, status),
-                    oskar_mem_float_const(V, status),
+            acorr_float(num_sources, num_stations, offset_out,
+                    oskar_mem_float_const(src_I, status),
+                    oskar_mem_float_const(src_Q, status),
+                    oskar_mem_float_const(src_U, status),
+                    oskar_mem_float_const(src_V, status),
+                    oskar_mem_float4c_const(jones_, status),
                     oskar_mem_float4c(vis, status));
             break;
         case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            oskar_auto_correlate_omp_d(n_sources, n_stations,
-                    oskar_mem_double4c_const(J, status),
-                    oskar_mem_double_const(I, status),
-                    oskar_mem_double_const(Q, status),
-                    oskar_mem_double_const(U, status),
-                    oskar_mem_double_const(V, status),
+            acorr_double(num_sources, num_stations, offset_out,
+                    oskar_mem_double_const(src_I, status),
+                    oskar_mem_double_const(src_Q, status),
+                    oskar_mem_double_const(src_U, status),
+                    oskar_mem_double_const(src_V, status),
+                    oskar_mem_double4c_const(jones_, status),
                     oskar_mem_double4c(vis, status));
             break;
         case OSKAR_SINGLE_COMPLEX:
-            oskar_auto_correlate_scalar_omp_f(n_sources, n_stations,
-                    oskar_mem_float2_const(J, status),
-                    oskar_mem_float_const(I, status),
+            acorr_scalar_float(num_sources, num_stations, offset_out,
+                    oskar_mem_float_const(src_I, status),
+                    oskar_mem_float_const(src_Q, status),
+                    oskar_mem_float_const(src_U, status),
+                    oskar_mem_float_const(src_V, status),
+                    oskar_mem_float2_const(jones_, status),
                     oskar_mem_float2(vis, status));
             break;
         case OSKAR_DOUBLE_COMPLEX:
-            oskar_auto_correlate_scalar_omp_d(n_sources, n_stations,
-                    oskar_mem_double2_const(J, status),
-                    oskar_mem_double_const(I, status),
+            acorr_scalar_double(num_sources, num_stations, offset_out,
+                    oskar_mem_double_const(src_I, status),
+                    oskar_mem_double_const(src_Q, status),
+                    oskar_mem_double_const(src_U, status),
+                    oskar_mem_double_const(src_V, status),
+                    oskar_mem_double2_const(jones_, status),
                     oskar_mem_double2(vis, status));
             break;
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             return;
         }
-    }
-    else if (location == OSKAR_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        switch (oskar_mem_type(vis))
-        {
-        case OSKAR_SINGLE_COMPLEX_MATRIX:
-            oskar_auto_correlate_cuda_f(n_sources, n_stations,
-                    oskar_mem_float4c_const(J, status),
-                    oskar_mem_float_const(I, status),
-                    oskar_mem_float_const(Q, status),
-                    oskar_mem_float_const(U, status),
-                    oskar_mem_float_const(V, status),
-                    oskar_mem_float4c(vis, status));
-            break;
-        case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            oskar_auto_correlate_cuda_d(n_sources, n_stations,
-                    oskar_mem_double4c_const(J, status),
-                    oskar_mem_double_const(I, status),
-                    oskar_mem_double_const(Q, status),
-                    oskar_mem_double_const(U, status),
-                    oskar_mem_double_const(V, status),
-                    oskar_mem_double4c(vis, status));
-            break;
-        case OSKAR_SINGLE_COMPLEX:
-            oskar_auto_correlate_scalar_cuda_f(n_sources, n_stations,
-                    oskar_mem_float2_const(J, status),
-                    oskar_mem_float_const(I, status),
-                    oskar_mem_float2(vis, status));
-            break;
-        case OSKAR_DOUBLE_COMPLEX:
-            oskar_auto_correlate_scalar_cuda_d(n_sources, n_stations,
-                    oskar_mem_double2_const(J, status),
-                    oskar_mem_double_const(I, status),
-                    oskar_mem_double2(vis, status));
-            break;
-        default:
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            return;
-        }
-        oskar_device_check_error(status);
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
     }
     else
-        *status = OSKAR_ERR_BAD_LOCATION;
+    {
+        size_t local_size[] = {128, 1, 1}, global_size[] = {1, 1, 1};
+        const char* k = 0;
+        switch (oskar_mem_type(vis))
+        {
+        case OSKAR_SINGLE_COMPLEX_MATRIX: k = "acorr_float"; break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX: k = "acorr_double"; break;
+        case OSKAR_SINGLE_COMPLEX:        k = "acorr_scalar_float"; break;
+        case OSKAR_DOUBLE_COMPLEX:        k = "acorr_scalar_double"; break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = num_stations * local_size[0];
+        const oskar_Arg args[] = {
+                {INT_SZ, &num_sources}, {INT_SZ, &num_stations},
+                {INT_SZ, &offset_out},
+                {PTR_SZ, oskar_mem_buffer_const(src_I)},
+                {PTR_SZ, oskar_mem_buffer_const(src_Q)},
+                {PTR_SZ, oskar_mem_buffer_const(src_U)},
+                {PTR_SZ, oskar_mem_buffer_const(src_V)},
+                {PTR_SZ, oskar_mem_buffer_const(jones_)},
+                {PTR_SZ, oskar_mem_buffer(vis)}
+        };
+        const size_t arg_size_local[] = {
+                local_size[0] * oskar_mem_element_size(oskar_mem_type(vis))
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args,
+                1, arg_size_local, status);
+    }
 }
 
 #ifdef __cplusplus

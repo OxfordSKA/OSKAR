@@ -34,7 +34,6 @@
  */
 
 #include <oskar_global.h>
-#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,12 +46,11 @@ extern "C" {
  * This function summarises the given binary file and writes details of the
  * tags it contains to the log.
  *
- * @param[in,out] log      Pointer to log structure.
  * @param[in] filename     Name of binary file.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status);
+void oskar_scan_binary_file(const char* filename, int* status);
 
 #ifdef __cplusplus
 }

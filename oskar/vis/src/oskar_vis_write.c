@@ -39,8 +39,7 @@
 extern "C" {
 #endif
 
-void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
-        const char* filename, int* status)
+void oskar_vis_write(const oskar_Vis* vis, const char* filename, int* status)
 {
     int amp_type, coord_precision, i, num_baselines, num_blocks, num_channels;
     int num_stations, num_times;
@@ -154,7 +153,7 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     }
 
     /* If log exists, then write it out. */
-    log_data = oskar_log_file_data(log, &log_size);
+    log_data = oskar_log_file_data(&log_size);
     if (log_data)
     {
         oskar_binary_write(h, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,

@@ -51,7 +51,7 @@ void oskar_telescope_resize(oskar_Telescope* telescope, int size, int* status)
     if (size > old_size)
     {
         /* Enlarge the station array and create new stations. */
-        telescope->station = realloc(telescope->station,
+        telescope->station = (oskar_Station**) realloc(telescope->station,
                 size * sizeof(oskar_Station*));
         if (!telescope->station)
         {
@@ -73,7 +73,7 @@ void oskar_telescope_resize(oskar_Telescope* telescope, int size, int* status)
         {
             oskar_station_free(oskar_telescope_station(telescope, i), status);
         }
-        telescope->station = realloc(telescope->station,
+        telescope->station = (oskar_Station**) realloc(telescope->station,
                 size * sizeof(oskar_Station*));
     }
     else

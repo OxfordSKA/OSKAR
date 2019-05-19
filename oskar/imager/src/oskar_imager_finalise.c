@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OSKAR_HAVE_CUDA
-#include <cufft.h>
-#endif
-
 #include "imager/private_imager.h"
 #include "imager/oskar_imager.h"
 
 #include "imager/oskar_grid_correction.h"
 #include "imager/oskar_grid_functions_pillbox.h"
 #include "imager/oskar_grid_functions_spheroidal.h"
-#include "math/oskar_fftpack_cfft.h"
-#include "math/oskar_fftpack_cfft_f.h"
+#include "math/oskar_fft.h"
 #include "math/oskar_fftphase.h"
 #include "mem/oskar_mem.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 #include "utility/oskar_timer.h"
 
 #include <fitsio.h>
@@ -60,8 +55,9 @@ void oskar_imager_finalise(oskar_Imager* h,
         int num_output_images, oskar_Mem** output_images,
         int num_output_grids, oskar_Mem** output_grids, int* status)
 {
-    size_t n;
-    int c, p, i, plane_size;
+    int c, p, i;
+    size_t j, log_size = 0, length = 0;
+    char* log_data;
     if (*status || !h->planes) return;
 
     /* Adjust normalisation if required. */
@@ -74,24 +70,28 @@ void oskar_imager_finalise(oskar_Imager* h,
     /* Copy grids to output grid planes if given. */
     for (i = 0; (i < h->num_planes) && (i < num_output_grids); ++i)
     {
+        oskar_Mem *plane = h->planes[i];
         if (!(output_grids[i]))
-            output_grids[i] = oskar_mem_create(oskar_mem_type(h->planes[i]),
+            output_grids[i] = oskar_mem_create(oskar_mem_type(plane),
                     OSKAR_CPU, 0, status);
-        oskar_mem_copy(output_grids[i], h->planes[i], status);
-        oskar_mem_scale_real(output_grids[i], 1.0 / h->plane_norm[i], status);
+        oskar_mem_copy(output_grids[i], plane, status);
+        oskar_mem_scale_real(output_grids[i], 1.0 / h->plane_norm[i],
+                0, oskar_mem_length(output_grids[i]), status);
     }
 
     /* Check if images are required. */
     if (h->fits_file[0] || output_images)
     {
-        n = h->image_size * h->image_size;
-        plane_size = oskar_imager_plane_size(h);
+        const size_t num_pix = (size_t)h->image_size * (size_t)h->image_size;
+        const int plane_size = oskar_imager_plane_size(h);
 
         /* Finalise all the planes. */
         for (i = 0; i < h->num_planes; ++i)
         {
-            oskar_imager_finalise_plane(h, h->planes[i],
-                    h->plane_norm[i], status);
+            oskar_Mem *plane = h->planes[i];
+            oskar_imager_finalise_plane(h, plane, h->plane_norm[i], status);
+            if (plane != h->planes[i])
+                oskar_mem_copy(h->planes[i], plane, status);
             oskar_imager_trim_image(h, h->planes[i],
                     plane_size, h->image_size, status);
         }
@@ -101,12 +101,11 @@ void oskar_imager_finalise(oskar_Imager* h,
         {
             if (!(output_images[i]))
                 output_images[i] = oskar_mem_create(h->imager_prec,
-                        OSKAR_CPU, n, status);
-            if (oskar_mem_length(output_images[i]) < n)
-                oskar_mem_realloc(output_images[i], n, status);
+                        OSKAR_CPU, num_pix, status);
+            oskar_mem_ensure(output_images[i], num_pix, status);
             memcpy(oskar_mem_void(output_images[i]),
                     oskar_mem_void_const(h->planes[i]),
-                    n * oskar_mem_element_size(h->imager_prec));
+                    num_pix * oskar_mem_element_size(h->imager_prec));
         }
 
         /* Write to files if required. */
@@ -118,56 +117,51 @@ void oskar_imager_finalise(oskar_Imager* h,
     }
 
     /* Record time taken. */
-    if (h->log)
+    oskar_log_set_value_width(25);
+    oskar_log_section('M', "Imager timing");
+    oskar_log_value('M', 0, "Initialise", "%.3f s",
+            oskar_timer_elapsed(h->tmr_init));
+    oskar_log_value('M', 0, "Grid update", "%.3f s",
+            oskar_timer_elapsed(h->tmr_grid_update));
+    oskar_log_value('M', 0, "Grid finalise", "%.3f s",
+            oskar_timer_elapsed(h->tmr_grid_finalise));
+    oskar_log_value('M', 0, "Read visibility data", "%.3f s",
+            oskar_timer_elapsed(h->tmr_read));
+    oskar_log_value('M', 0, "Write image data", "%.3f s",
+            oskar_timer_elapsed(h->tmr_write));
+    oskar_log_section('M', "Imaging complete");
+    if (h->output_root)
     {
-        size_t j, log_size = 0, length = 0;
-        char* log_data;
-        oskar_log_set_value_width(h->log, 25);
-        oskar_log_section(h->log, 'M', "Imager timing");
-        oskar_log_value(h->log, 'M', 0, "Initialise", "%.3f s",
-                oskar_timer_elapsed(h->tmr_init));
-        oskar_log_value(h->log, 'M', 0, "Grid update", "%.3f s",
-                oskar_timer_elapsed(h->tmr_grid_update));
-        oskar_log_value(h->log, 'M', 0, "Grid finalise", "%.3f s",
-                oskar_timer_elapsed(h->tmr_grid_finalise));
-        oskar_log_value(h->log, 'M', 0, "Read visibility data", "%.3f s",
-                oskar_timer_elapsed(h->tmr_read));
-        oskar_log_value(h->log, 'M', 0, "Write image data", "%.3f s",
-                oskar_timer_elapsed(h->tmr_write));
-        oskar_log_section(h->log, 'M', "Imaging complete");
-        if (h->output_root)
-        {
-            oskar_log_message(h->log, 'M', 0, "Output(s):");
-            for (i = 0; i < h->num_im_pols; ++i)
-                oskar_log_value(h->log, 'M', 1, "FITS file", "%s",
-                        h->output_name[i]);
-        }
-
-        /* Write log to the output FITS files as HISTORY entries.
-         * Replace newlines with zeros. */
-        log_data = oskar_log_file_data(h->log, &log_size);
-        for (j = 0; j < log_size; ++j)
-        {
-            if (log_data[j] == '\n') log_data[j] = 0;
-            if (log_data[j] == '\r') log_data[j] = ' ';
-        }
+        oskar_log_message('M', 0, "Output(s):");
         for (i = 0; i < h->num_im_pols; ++i)
-        {
-            const char* line = log_data;
-            length = log_size;
-            for (; log_size > 0;)
-            {
-                const char* eol;
-                fits_write_history(h->fits_file[i], line, status);
-                eol = (const char*) memchr(line, '\0', length);
-                if (!eol) break;
-                eol += 1;
-                length -= (eol - line);
-                line = eol;
-            }
-        }
-        free(log_data);
+            oskar_log_value('M', 1, "FITS file", "%s",
+                    h->output_name[i]);
     }
+
+    /* Write log to the output FITS files as HISTORY entries.
+     * Replace newlines with zeros. */
+    log_data = oskar_log_file_data(&log_size);
+    for (j = 0; j < log_size; ++j)
+    {
+        if (log_data[j] == '\n') log_data[j] = 0;
+        if (log_data[j] == '\r') log_data[j] = ' ';
+    }
+    for (i = 0; i < h->num_im_pols; ++i)
+    {
+        const char* line = log_data;
+        length = log_size;
+        for (; log_size > 0;)
+        {
+            const char* eol;
+            fits_write_history(h->fits_file[i], line, status);
+            eol = (const char*) memchr(line, '\0', length);
+            if (!eol) break;
+            eol += 1;
+            length -= (eol - line);
+            line = eol;
+        }
+    }
+    free(log_data);
 
     /* Reset imager memory. */
     oskar_imager_reset_cache(h, status);
@@ -177,15 +171,14 @@ void oskar_imager_finalise(oskar_Imager* h,
 void oskar_imager_finalise_plane(oskar_Imager* h,
         oskar_Mem* plane, double plane_norm, int* status)
 {
-    int size;
-    size_t num_cells;
     if (*status) return;
 
     /* Apply normalisation. */
     if (plane_norm > 0.0 || plane_norm < 0.0)
     {
         oskar_timer_resume(h->tmr_grid_finalise);
-        oskar_mem_scale_real(plane, 1.0 / plane_norm, status);
+        oskar_mem_scale_real(plane, 1.0 / plane_norm,
+                0, oskar_mem_length(plane), status);
         oskar_timer_pause(h->tmr_grid_finalise);
     }
 
@@ -202,9 +195,8 @@ void oskar_imager_finalise_plane(oskar_Imager* h,
     }
 
     /* Check plane size is as expected. */
-    size = oskar_imager_plane_size(h);
-    num_cells = size * size;
-    if (oskar_mem_length(plane) != num_cells)
+    const int size = oskar_imager_plane_size(h);
+    if (oskar_mem_length(plane) != ((size_t)size * (size_t)size))
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
@@ -212,99 +204,41 @@ void oskar_imager_finalise_plane(oskar_Imager* h,
 
     /* Perform FFT shift of the input grid. */
     oskar_timer_resume(h->tmr_grid_finalise);
-    if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
-        oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
-    else
-        oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
+    oskar_fftphase(size, size, plane, status);
 
     /* Call FFT. */
-#ifdef OSKAR_HAVE_CUDA
-    if (h->fft_on_gpu && h->num_gpus > 0)
-    {
-        size_t work_size = 0;
-        oskar_Mem *plane_gpu = 0, *plane_ptr = 0;
-        oskar_device_set(h->gpu_ids[0], status);
-        if (cufftGetSize(h->cufft_plan, &work_size) != CUFFT_SUCCESS)
-            cufftPlan2d(&h->cufft_plan, size, size,
-                    (h->imager_prec == OSKAR_DOUBLE) ? CUFFT_Z2Z : CUFFT_C2C);
-        plane_ptr = plane;
-        if (oskar_mem_location(plane) != OSKAR_GPU)
-        {
-            plane_gpu = oskar_mem_create_copy(plane, OSKAR_GPU, status);
-            plane_ptr = plane_gpu;
-        }
-        if (h->imager_prec == OSKAR_DOUBLE)
-            cufftExecZ2Z(h->cufft_plan, oskar_mem_void(plane_ptr),
-                    oskar_mem_void(plane_ptr), CUFFT_FORWARD);
-        else
-            cufftExecC2C(h->cufft_plan, oskar_mem_void(plane_ptr),
-                    oskar_mem_void(plane_ptr), CUFFT_FORWARD);
-        if (oskar_mem_location(plane) != OSKAR_GPU)
-            oskar_mem_copy(plane, plane_ptr, status);
-        oskar_mem_free(plane_gpu, status);
-    }
-    else
-#endif
-    {
-        if (!h->fftpack_work)
-            h->fftpack_work = oskar_mem_create(h->imager_prec, OSKAR_CPU,
-                    2 * num_cells, status);
-        if (!h->fftpack_wsave)
-        {
-            int len = 4 * size + 2 * (int)(log((double)size) / log(2.0)) + 8;
-            h->fftpack_wsave = oskar_mem_create(h->imager_prec, OSKAR_CPU,
-                    len, status);
-            if (h->imager_prec == OSKAR_DOUBLE)
-                oskar_fftpack_cfft2i(size, size,
-                        oskar_mem_double(h->fftpack_wsave, status));
-            else
-                oskar_fftpack_cfft2i_f(size, size,
-                        oskar_mem_float(h->fftpack_wsave, status));
-        }
-        if (h->imager_prec == OSKAR_DOUBLE)
-            oskar_fftpack_cfft2f(size, size, size,
-                    oskar_mem_double(plane, status),
-                    oskar_mem_double(h->fftpack_wsave, status),
-                    oskar_mem_double(h->fftpack_work, status));
-        else
-            oskar_fftpack_cfft2f_f(size, size, size,
-                    oskar_mem_float(plane, status),
-                    oskar_mem_float(h->fftpack_wsave, status),
-                    oskar_mem_float(h->fftpack_work, status));
-        oskar_mem_scale_real(plane, (double)num_cells, status);
-    }
+    const int fft_loc = (h->fft_on_gpu && h->num_gpus > 0) ?
+            OSKAR_GPU : OSKAR_CPU;
+    if (fft_loc != OSKAR_CPU)
+        oskar_device_set(h->dev_loc, h->gpu_ids[0], status);
+    if (!h->fft)
+        h->fft = oskar_fft_create(h->imager_prec, fft_loc, 2, size, 0, status);
+    oskar_fft_exec(h->fft, plane, status);
 
     /* Generate grid correction function if required. */
     if (!h->corr_func)
     {
-        h->corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, size, status);
+        oskar_Mem* corr_func = 0;
+        corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, size, status);
         if (h->algorithm != OSKAR_ALGORITHM_FFT)
             oskar_grid_correction_function_spheroidal(size, h->oversample,
-                    oskar_mem_double(h->corr_func, status));
+                    oskar_mem_double(corr_func, status));
         else
         {
             if (h->kernel_type == 'S')
                 oskar_grid_correction_function_spheroidal(size, 0,
-                        oskar_mem_double(h->corr_func, status));
+                        oskar_mem_double(corr_func, status));
             else if (h->kernel_type == 'P')
                 oskar_grid_correction_function_pillbox(size,
-                        oskar_mem_double(h->corr_func, status));
+                        oskar_mem_double(corr_func, status));
         }
+        h->corr_func = oskar_mem_convert_precision(corr_func,
+                h->imager_prec, status);
     }
 
     /* FFT shift again, and apply grid correction. */
-    if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
-    {
-        oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
-        oskar_grid_correction_d(size, oskar_mem_double(h->corr_func, status),
-                oskar_mem_double(plane, status));
-    }
-    else
-    {
-        oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
-        oskar_grid_correction_f(size, oskar_mem_double(h->corr_func, status),
-                oskar_mem_float(plane, status));
-    }
+    oskar_fftphase(size, size, plane, status);
+    oskar_grid_correction(size, h->corr_func, plane, status);
     oskar_timer_pause(h->tmr_grid_finalise);
 }
 
@@ -312,15 +246,14 @@ void oskar_imager_finalise_plane(oskar_Imager* h,
 void oskar_imager_trim_image(oskar_Imager* h, oskar_Mem* plane,
         int plane_size, int image_size, int* status)
 {
-    int size_diff;
     if (*status) return;
 
     /* Get the real part only, if the plane is complex. */
     oskar_timer_resume(h->tmr_grid_finalise);
     if (oskar_mem_is_complex(plane))
     {
-        size_t i, num_cells;
-        num_cells = plane_size * plane_size;
+        size_t i;
+        const size_t num_cells = (size_t)plane_size * (size_t)plane_size;
         if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
         {
             double *t = oskar_mem_double(plane, status);
@@ -334,16 +267,16 @@ void oskar_imager_trim_image(oskar_Imager* h, oskar_Mem* plane,
     }
 
     /* Trim to required image size. */
-    size_diff = plane_size - image_size;
+    const int size_diff = plane_size - image_size;
     if (size_diff > 0)
     {
         char *ptr;
-        size_t in = 0, out = 0, copy_len = 0, element_size = 0;
+        size_t in = 0, out = 0, element_size = 0;
         int i;
         ptr = oskar_mem_char(plane);
         element_size = oskar_mem_element_size(oskar_mem_precision(plane));
-        copy_len = element_size * image_size;
         in = element_size * (size_diff / 2) * (plane_size + 1);
+        const size_t copy_len = element_size * image_size;
         for (i = 0; i < image_size; ++i)
         {
             /* Use memmove() instead of memcpy() to allow for overlap. */
@@ -359,15 +292,14 @@ void oskar_imager_trim_image(oskar_Imager* h, oskar_Mem* plane,
 void write_plane(oskar_Imager* h, oskar_Mem* plane,
         int c, int p, int* status)
 {
-    int datatype, num_pixels;
     long firstpix[3];
     if (*status) return;
     if (!h->fits_file[p]) return;
-    datatype = (oskar_mem_is_double(plane) ? TDOUBLE : TFLOAT);
+    const int datatype = (oskar_mem_is_double(plane) ? TDOUBLE : TFLOAT);
     firstpix[0] = 1;
     firstpix[1] = 1;
     firstpix[2] = 1 + c;
-    num_pixels = h->image_size * h->image_size;
+    const int num_pixels = h->image_size * h->image_size;
     fits_write_pix(h->fits_file[p], datatype, firstpix, num_pixels,
             oskar_mem_void(plane), status);
 }

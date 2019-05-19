@@ -14,7 +14,6 @@ add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)
 add_test(correlate_test ${name})
 
-# Correlator benchmark binary.
 set(name oskar_correlator_benchmark)
 add_executable(${name} ${name}.cpp)
-target_link_libraries(${name} oskar)
+target_link_libraries(${name} oskar oskar_settings)

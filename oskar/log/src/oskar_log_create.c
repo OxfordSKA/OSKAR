@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #ifdef OSKAR_OS_WIN
 #define WIN32_LEAN_AND_MEAN
@@ -45,50 +46,67 @@
 extern "C" {
 #endif
 
-oskar_Log* oskar_log_create(int file_priority, int term_priority)
+static int oskar_log_file_exists(const char* filename)
+{
+    FILE* stream;
+    if (!filename || !*filename) return 0;
+    stream = fopen(filename, "r");
+    if (stream)
+    {
+        fclose(stream);
+        return 1;
+    }
+    return 0;
+}
+
+void oskar_log_create(int file_priority, int term_priority)
 {
     oskar_Log* log = 0;
-    char fname1[64], fname2[64];
-    char* current_dir = 0;
     size_t buf_len = 0;
-    int time_data[10];
+    struct tm* timeinfo;
+    char fname1[64], fname2[64], time_str[80], *current_dir = 0;
     int i = 0, n = 0;
 
-    /* Allocate the structure. */
-    log = (oskar_Log*) malloc(sizeof(oskar_Log));
-    if (!log) return 0;
+    /* Get handle to log. */
+    log = oskar_log_handle();
+    if (log->file)
+    {
+        fclose(log->file);
+        log->file = 0;
+    }
+    if (log->name)
+    {
+        free(log->name);
+        log->name = 0;
+    }
+    /*log = (oskar_Log*) calloc(1, sizeof(oskar_Log));*/
+    /*if (!log) return 0;*/
 
     /* Initialise memory for the log data. */
     log->keep_file = 1;
     log->file_priority = file_priority;
     log->term_priority = term_priority;
-    log->name = 0;
-    log->code = 0;
-    log->offset = 0;
-    log->length = 0;
-    log->timestamp = 0;
-    log->size = 0;
-    log->capacity = 0;
-    log->file = 0;
     log->value_width = OSKAR_LOG_DEFAULT_VALUE_WIDTH;
 
-    /* Get the system time information. */
-    oskar_log_system_clock_data(0, time_data);
-
     /* Construct log file name root. */
+    const time_t unix_time = time(NULL);
+    timeinfo = localtime(&unix_time);
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
+    timeinfo->tm_mon += 1;
+    timeinfo->tm_year += 1900;
 #if __STDC_VERSION__ >= 199901L
     n = snprintf(fname1, sizeof(fname1),
             "oskar_%.4d-%.2d-%.2d_%.2d%.2d%.2d",
-            time_data[5], time_data[4], time_data[3],
-            time_data[2], time_data[1], time_data[0]);
+            timeinfo->tm_year, timeinfo->tm_mon, timeinfo->tm_mday,
+            timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 #else
     n = sprintf(fname1,
             "oskar_%.4d-%.2d-%.2d_%.2d%.2d%.2d",
-            time_data[5], time_data[4], time_data[3],
-            time_data[2], time_data[1], time_data[0]);
+            timeinfo->tm_year, timeinfo->tm_mon, timeinfo->tm_mday,
+            timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
 #endif
     if (n < 0 || n >= (int)sizeof(fname1))
-        return 0;
+        return;
 
     /* Construct a unique log file name. */
     do
@@ -111,16 +129,17 @@ oskar_Log* oskar_log_create(int file_priority, int term_priority)
 #endif
         }
         if (n < 0 || n >= (int)sizeof(fname1))
-            return 0;
+            return;
     }
     while (oskar_log_file_exists(fname2));
 
     /* Open the log file for appending, and save the file handle. */
-    log->file = fopen(fname2, "a+");
+    if (log->file_priority > OSKAR_LOG_NONE)
+        log->file = fopen(fname2, "a+");
 
     /* Write standard header. */
-    oskar_log_section(log, 'M', "OSKAR-%s starting at %s.",
-            OSKAR_VERSION_STR, oskar_log_system_clock_string(0));
+    oskar_log_section('M', "OSKAR-%s starting at %s.",
+            OSKAR_VERSION_STR, time_str);
 
     /* Get the current working directory. */
 #ifdef OSKAR_OS_WIN
@@ -135,7 +154,7 @@ oskar_Log* oskar_log_create(int file_priority, int term_priority)
     }
     while (getcwd(current_dir, buf_len) == NULL);
 #endif
-    oskar_log_message(log, 'M', 0, "Current dir is %s", current_dir);
+    oskar_log_message('M', 0, "Current dir is %s", current_dir);
     free(current_dir);
 
     /* Write a message to say if the log file was opened successfully. */
@@ -144,14 +163,12 @@ oskar_Log* oskar_log_create(int file_priority, int term_priority)
         /* Save the file name in the structure. */
         log->name = (char*) calloc(n + 1, sizeof(char));
         strcpy(log->name, fname2);
-        oskar_log_message(log, 'M', 0, "Logging to file %s", fname2);
+        oskar_log_message('M', 0, "Logging to file %s", fname2);
     }
-    else
+    else if (log->file_priority > OSKAR_LOG_NONE)
     {
-        oskar_log_warning(log, "File error: log file could not be created.");
+        oskar_log_warning("File error: log file could not be created.");
     }
-
-    return log;
 }
 
 #ifdef __cplusplus

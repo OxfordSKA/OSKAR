@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utility/oskar_device.h"
 #include "utility/oskar_timer.h"
 #include "utility/oskar_thread.h"
 #include <stdlib.h>
@@ -43,57 +44,50 @@
 #include <cuda_runtime_api.h>
 #endif
 
+#ifdef OSKAR_HAVE_OPENCL
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
+#include <CL/cl.h>
+#endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 struct oskar_Timer
 {
-    int type;
-    int paused;
-    double elapsed;
-    double start;
     oskar_Mutex* mutex;
 #ifdef OSKAR_HAVE_CUDA
-    cudaEvent_t start_cuda;
-    cudaEvent_t end_cuda;
+    cudaEvent_t start_cuda, end_cuda;
 #endif
+    double start, elapsed;
 #ifdef OSKAR_OS_WIN
     double freq;
 #endif
+    int type, paused;
 };
 
 static double oskar_get_wtime(oskar_Timer* timer)
 {
-    /* Declarations first (needs separate ifdef block). */
-#ifdef OSKAR_OS_WIN
-    LARGE_INTEGER cntr;
-#else
-#if _POSIX_MONOTONIC_CLOCK > 0
-    struct timespec ts;
-#else
-    struct timeval tv;
-#endif
-#endif
-
-    /* Return immediately if timer is not of native type. */
-    if (timer->type != OSKAR_TIMER_NATIVE)
-        return 0.0;
-
-#ifdef OSKAR_OS_WIN
+#if defined(OSKAR_OS_WIN)
     /* Windows-specific version. */
+    LARGE_INTEGER cntr;
     QueryPerformanceCounter(&cntr);
     return (double)(cntr.QuadPart) / timer->freq;
-#else
-#if _POSIX_MONOTONIC_CLOCK > 0
+#elif _POSIX_MONOTONIC_CLOCK > 0
     /* Use monotonic clock if available. */
+    struct timespec ts;
+    (void)timer;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec + ts.tv_nsec / 1e9;
 #else
     /* Use gettimeofday() as fallback. */
+    struct timeval tv;
+    (void)timer;
     gettimeofday(&tv, 0);
     return tv.tv_sec + tv.tv_usec / 1e6;
-#endif
 #endif
 }
 
@@ -103,19 +97,14 @@ oskar_Timer* oskar_timer_create(int type)
 #ifdef OSKAR_OS_WIN
     LARGE_INTEGER freq;
 #endif
-
-    /* Create the structure. */
     timer = (oskar_Timer*) calloc(1, sizeof(oskar_Timer));
     timer->mutex = oskar_mutex_create();
-
 #ifdef OSKAR_OS_WIN
     QueryPerformanceFrequency(&freq);
     timer->freq = (double)(freq.QuadPart);
 #endif
     timer->type = type;
     timer->paused = 1;
-    timer->elapsed = 0.0;
-    timer->start = 0.0;
 #ifdef OSKAR_HAVE_CUDA
     if (timer->type == OSKAR_TIMER_CUDA)
     {
@@ -142,14 +131,11 @@ void oskar_timer_free(oskar_Timer* timer)
 
 double oskar_timer_elapsed(oskar_Timer* timer)
 {
-    double now = 0.0;
-
     /* If timer is paused, return immediately with current elapsed time. */
     if (timer->paused)
         return timer->elapsed;
 
 #ifdef OSKAR_HAVE_CUDA
-    /* CUDA timer. */
     if (timer->type == OSKAR_TIMER_CUDA)
     {
         float millisec = 0.0f;
@@ -160,40 +146,53 @@ double oskar_timer_elapsed(oskar_Timer* timer)
         cudaEventSynchronize(timer->end_cuda);
         cudaEventElapsedTime(&millisec, timer->start_cuda, timer->end_cuda);
 
-        /* Increment elapsed time. */
+        /* Increment elapsed time and restart. */
         timer->elapsed += millisec / 1000.0;
-
-        /* Restart. */
         cudaEventRecord(timer->start_cuda, 0);
-        oskar_mutex_unlock(timer->mutex);
-        return timer->elapsed;
     }
+    else
 #endif
+#ifdef OSKAR_HAVE_OPENCL
+    if (timer->type == OSKAR_TIMER_CL)
+    {
+        /* Get elapsed time since start. */
+        /* Note that clGetEventProfilingInfo() seems to be broken
+         * in various ways, at least on macOS. So just enqueue a marker,
+         * wait on its event and use the native timer instead. */
+        cl_event event = 0;
+        clEnqueueMarkerWithWaitList(oskar_device_queue_cl(), 0, NULL, &event);
+        clWaitForEvents(1, &event);
 
-    /* Native timer. */
-    oskar_mutex_lock(timer->mutex);
-    if (timer->type == OSKAR_TIMER_NATIVE)
-        now = oskar_get_wtime(timer);
+        /* Increment elapsed time and restart. */
+        oskar_mutex_lock(timer->mutex);
+        const double now = oskar_get_wtime(timer);
+        timer->elapsed += (now - timer->start);
+        timer->start = now;
+    }
+    else
+#endif
+    {
+        oskar_mutex_lock(timer->mutex);
+        const double now = oskar_get_wtime(timer);
 
-    /* Increment elapsed time and restart. */
-    timer->elapsed += (now - timer->start);
-    timer->start = now;
+        /* Increment elapsed time and restart. */
+        timer->elapsed += (now - timer->start);
+        timer->start = now;
+    }
     oskar_mutex_unlock(timer->mutex);
     return timer->elapsed;
 }
 
 void oskar_timer_pause(oskar_Timer* timer)
 {
-    if (timer->paused)
-        return;
+    if (timer->paused) return;
     (void)oskar_timer_elapsed(timer);
     timer->paused = 1;
 }
 
 void oskar_timer_resume(oskar_Timer* timer)
 {
-    if (!timer->paused)
-        return;
+    if (!timer->paused) return;
     oskar_timer_restart(timer);
 }
 
@@ -201,15 +200,12 @@ void oskar_timer_restart(oskar_Timer* timer)
 {
     timer->paused = 0;
 #ifdef OSKAR_HAVE_CUDA
-    /* CUDA timer. */
     if (timer->type == OSKAR_TIMER_CUDA)
     {
         cudaEventRecord(timer->start_cuda, 0);
         return;
     }
 #endif
-
-    /* Native timer. */
     timer->start = oskar_get_wtime(timer);
 }
 

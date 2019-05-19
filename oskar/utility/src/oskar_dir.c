@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,11 @@
 #ifndef OSKAR_OS_WIN
 #include <dirent.h>
 #include <errno.h>
+#include <limits.h>
+#include <pwd.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #else
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -44,6 +48,28 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+char* oskar_dir_cwd(void)
+{
+    char* str = 0;
+    size_t len = 0;
+#ifndef OSKAR_OS_WIN
+    do
+    {
+        len += 256;
+        str = (char*) realloc(str, len);
+        if (!str) return 0;
+    }
+    while (getcwd(str, len) == NULL);
+#else
+    len = GetCurrentDirectory(0, NULL);
+    str = (char*) calloc(len, sizeof(char));
+    if (!str) return 0;
+    GetCurrentDirectory((DWORD) len, str);
+#endif
+    return str;
+}
+
 
 int oskar_dir_exists(const char* dir_path)
 {
@@ -75,6 +101,18 @@ int oskar_dir_file_exists(const char* dir_path, const char* file_name)
 }
 
 
+char* oskar_dir_get_home_path(const char* item_name, int* exists)
+{
+    char *path, *home_dir;
+    home_dir = oskar_dir_home();
+    path = oskar_dir_get_path(home_dir, item_name);
+    if (exists)
+        *exists = oskar_dir_file_exists(home_dir, item_name);
+    free(home_dir);
+    return path;
+}
+
+
 char* oskar_dir_get_path(const char* dir_path, const char* item_name)
 {
     char* buffer = 0;
@@ -82,11 +120,47 @@ char* oskar_dir_get_path(const char* dir_path, const char* item_name)
     dir_path_len = (int) strlen(dir_path);
     buf_len = 2 + dir_path_len + (int) strlen(item_name);
     buffer = (char*) calloc(buf_len, sizeof(char));
+    if (!buffer) return 0;
     if (dir_path[dir_path_len - 1] == oskar_dir_separator())
         sprintf(buffer, "%s%s", dir_path, item_name);
     else
         sprintf(buffer, "%s%c%s", dir_path, oskar_dir_separator(), item_name);
     return buffer;
+}
+
+
+char* oskar_dir_home(void)
+{
+    char *tmp = 0, *home_dir = 0;
+#ifndef OSKAR_OS_WIN
+    char *buffer = 0;
+    struct passwd pwd, *result = 0;
+    tmp = getenv("HOME");
+    if (!tmp)
+    {
+        long int buf_len = sysconf(_SC_GETPW_R_SIZE_MAX);
+        if (buf_len == -1) buf_len = 16384;
+        buffer = (char*) malloc((size_t) buf_len);
+        if (!buffer) return 0;
+        getpwuid_r(geteuid(), &pwd, buffer, (size_t) buf_len, &result);
+        if (result != NULL)
+            tmp = pwd.pw_dir;
+    }
+    if (tmp)
+    {
+        home_dir = (char*) calloc(1 + strlen(tmp), 1);
+        if (home_dir) strcpy(home_dir, tmp);
+    }
+    free(buffer);
+#else
+    tmp = getenv("USERPROFILE");
+    if (tmp)
+    {
+        home_dir = (char*) calloc(1 + strlen(tmp), 1);
+        if (home_dir) strcpy(home_dir, tmp);
+    }
+#endif
+    return home_dir;
 }
 
 
@@ -116,10 +190,10 @@ static void item(const char* dir_path, const char* name, const char* wildcard,
     if (wildcard && !match(wildcard, name)) return;
     if (match_files ^ match_dirs)
     {
-        int is_dir = 0, rejected = 0;
+        int rejected = 0;
         char* item_path;
         item_path = oskar_dir_get_path(dir_path, name);
-        is_dir = oskar_dir_exists(item_path);
+        const int is_dir = oskar_dir_exists(item_path);
         if ((is_dir && !match_dirs) || (!is_dir && match_dirs))
             rejected = 1;
         free(item_path);
@@ -128,7 +202,7 @@ static void item(const char* dir_path, const char* name, const char* wildcard,
     if (items && *i < num_items)
     {
         items[*i] = (char*) realloc(items[*i], 1 + strlen(name));
-        strcpy(items[*i], name);
+        if (items[*i]) strcpy(items[*i], name);
     }
     ++(*i);
 }
@@ -151,6 +225,7 @@ static int get_items(const char* dir_path, const char* wildcard,
     HANDLE h = 0;
     char* buffer = 0;
     buffer = (char*) malloc(3 + strlen(dir_path));
+    if (!buffer) return 0;
     (void) sprintf(buffer, "%s\\*", dir_path);
     if ((h = FindFirstFile(buffer, &f)) == INVALID_HANDLE_VALUE)
     {
@@ -181,11 +256,19 @@ void oskar_dir_items(const char* dir_path, const char* wildcard,
     {
         for (i = *num_items; i < old_num_items; ++i) free((*items)[i]);
         *items = (char**) realloc(*items, *num_items * sizeof(char**));
+        if (!*items) return;
         for (i = old_num_items; i < *num_items; ++i) (*items)[i] = 0;
         (void) get_items(dir_path, wildcard, match_files, match_dirs,
                 *num_items, *items);
         qsort(*items, *num_items, sizeof(char*), name_cmp);
     }
+}
+
+
+const char* oskar_dir_leafname(const char* path)
+{
+    const char* leafname = strrchr(path, (int)oskar_dir_separator());
+    return !leafname ? path : leafname + 1;
 }
 
 
@@ -221,11 +304,10 @@ int oskar_dir_mkpath(const char* dir_path)
 {
     char *start, *sep, *dir_path_p;
     int error = 0;
-    size_t path_len;
 
     /* Copy the input path string so it can be modified. */
-    path_len = 1 + strlen(dir_path);
-    dir_path_p = malloc(path_len);
+    const size_t path_len = 1 + strlen(dir_path);
+    dir_path_p = (char*) malloc(path_len);
     if (!dir_path_p) return 0;
     memcpy(dir_path_p, dir_path, path_len);
 

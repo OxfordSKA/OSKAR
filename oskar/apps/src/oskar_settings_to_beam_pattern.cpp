@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@ using namespace std;
 oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
         oskar_Log* log, int* status)
 {
+    (void) log;
     int size = 0;
     if (*status || !s) return 0;
     s->clear_group();
@@ -45,7 +46,6 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
     int prec = s->to_int("double_precision", status) ?
             OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_BeamPattern* h = oskar_beam_pattern_create(prec, status);
-    oskar_beam_pattern_set_log(h, log);
     oskar_beam_pattern_set_max_chunk_size(h,
             s->to_int("max_sources_per_chunk", status));
     if (!s->to_int("use_gpus", status))
@@ -65,9 +65,8 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
         oskar_beam_pattern_set_num_devices(h, -1);
     else
         oskar_beam_pattern_set_num_devices(h, s->to_int("num_devices", status));
-    oskar_log_set_keep_file(log, s->to_int("keep_log_file", status));
-    oskar_log_set_file_priority(log,
-            s->to_int("write_status_to_log_file", status) ?
+    oskar_log_set_keep_file(s->to_int("keep_log_file", status));
+    oskar_log_set_file_priority(s->to_int("write_status_to_log_file", status) ?
             OSKAR_LOG_STATUS : OSKAR_LOG_MESSAGE);
     s->end_group();
 

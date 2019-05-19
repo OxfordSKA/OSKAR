@@ -116,7 +116,8 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     /* Initialise the station structures. */
     telescope->station = NULL;
     if (num_stations > 0)
-        telescope->station = malloc(num_stations * sizeof(oskar_Station*));
+        telescope->station = (oskar_Station**) malloc(
+                num_stations * sizeof(oskar_Station*));
     for (i = 0; i < num_stations; ++i)
     {
         telescope->station[i] = oskar_station_create(type, location, 0, status);

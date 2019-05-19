@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@
  */
 
 #include <oskar_global.h>
-#include <log/oskar_log.h>
 #include <telescope/oskar_telescope.h>
 
 #ifdef __cplusplus
@@ -95,9 +94,6 @@ void oskar_beam_pattern_set_image_size(oskar_BeamPattern* h,
 OSKAR_EXPORT
 void oskar_beam_pattern_set_image_fov(oskar_BeamPattern* h,
         double width_deg, double height_deg);
-
-OSKAR_EXPORT
-void oskar_beam_pattern_set_log(oskar_BeamPattern* h, oskar_Log* log);
 
 OSKAR_EXPORT
 void oskar_beam_pattern_set_max_chunk_size(oskar_BeamPattern* h, int value);

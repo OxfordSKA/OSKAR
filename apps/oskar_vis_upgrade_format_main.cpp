@@ -26,17 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
 #include "binary/oskar_binary.h"
 #include "log/oskar_log.h"
 #include "mem/oskar_binary_read_mem.h"
+#include "settings/oskar_option_parser.h"
 #include "utility/oskar_version_string.h"
 #include "utility/oskar_get_error_string.h"
 #include "vis/oskar_vis.h"
 
 #include <string>
 #include <cstdio>
-#include <vector>
 #include <iostream>
 #include <iomanip>
 
@@ -54,10 +53,10 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     // Get the options.
+    int num_in_files = 0;
     string out_path;
-    vector<string> in_files = opt.get_input_files(1);
+    const char* const* in_files = opt.get_input_files(1, &num_in_files);
     bool verbose = opt.is_set("-q") ? false : true;
-    int num_in_files = (int)in_files.size();
 
     // Print if verbose.
     if (verbose)
@@ -72,26 +71,20 @@ int main(int argc, char** argv)
     // Loop over input files.
     for (int i = 0; i < num_in_files; ++i)
     {
-        std::string out;
-
-        // Break on error.
         if (error) break;
 
-        // Get the name of the current input file.
-        const char* in_file = in_files[i].c_str();
-        out = in_files[i] + ".upgraded.vis";
-
         // Load the visibility file.
-        oskar_Binary* h = oskar_binary_create(in_file, 'r', &error);
+        oskar_Binary* h = oskar_binary_create(in_files[i], 'r', &error);
         oskar_Vis* vis = oskar_vis_read(h, &error);
         oskar_binary_free(h);
 
         // Write data in new format and free the structure.
-        oskar_vis_write(vis, 0, out.c_str(), &error);
+        string out = string(in_files[i]) + ".upgraded.vis";
+        oskar_vis_write(vis, out.c_str(), &error);
         oskar_vis_free(vis, &error);
     }
 
     if (error)
-        oskar_log_error(0, oskar_get_error_string(error));
+        oskar_log_error(oskar_get_error_string(error));
     return error;
 }

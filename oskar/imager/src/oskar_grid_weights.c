@@ -36,10 +36,10 @@ extern "C" {
 #endif
 
 void oskar_grid_weights_write_d(const size_t num_points,
-        const double* restrict uu, const double* restrict vv,
-        const double* restrict weight, const double cell_size_rad,
-        const int grid_size, size_t* restrict num_skipped,
-        double* restrict grid)
+        const double* RESTRICT uu, const double* RESTRICT vv,
+        const double* RESTRICT weight, const double cell_size_rad,
+        const int grid_size, size_t* RESTRICT num_skipped,
+        double* RESTRICT grid)
 {
     size_t i;
     const int grid_centre = grid_size / 2;
@@ -70,10 +70,10 @@ void oskar_grid_weights_write_d(const size_t num_points,
 }
 
 void oskar_grid_weights_read_d(const size_t num_points,
-        const double* restrict uu, const double* restrict vv,
-        const double* restrict weight_in, double* restrict weight_out,
+        const double* RESTRICT uu, const double* RESTRICT vv,
+        const double* RESTRICT weight_in, double* RESTRICT weight_out,
         const double cell_size_rad, const int grid_size,
-        size_t* restrict num_skipped, const double* restrict grid)
+        size_t* RESTRICT num_skipped, const double* RESTRICT grid)
 {
     size_t i;
     const int grid_centre = grid_size / 2;
@@ -104,10 +104,10 @@ void oskar_grid_weights_read_d(const size_t num_points,
 }
 
 void oskar_grid_weights_write_f(const size_t num_points,
-        const float* restrict uu, const float* restrict vv,
-        const float* restrict weight, const float cell_size_rad,
-        const int grid_size, size_t* restrict num_skipped,
-        float* restrict grid)
+        const float* RESTRICT uu, const float* RESTRICT vv,
+        const float* RESTRICT weight, const float cell_size_rad,
+        const int grid_size, size_t* RESTRICT num_skipped,
+        float* RESTRICT grid)
 {
     size_t i;
     const int grid_centre = grid_size / 2;
@@ -138,10 +138,10 @@ void oskar_grid_weights_write_f(const size_t num_points,
 }
 
 void oskar_grid_weights_read_f(const size_t num_points,
-        const float* restrict uu, const float* restrict vv,
-        const float* restrict weight_in, float* restrict weight_out,
+        const float* RESTRICT uu, const float* RESTRICT vv,
+        const float* RESTRICT weight_in, float* RESTRICT weight_out,
         const float cell_size_rad, const int grid_size,
-        size_t* restrict num_skipped, const float* restrict grid)
+        size_t* RESTRICT num_skipped, const float* RESTRICT grid)
 {
     size_t i;
     const int grid_centre = grid_size / 2;

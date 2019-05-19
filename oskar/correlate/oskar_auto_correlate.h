@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,15 +50,16 @@ extern "C" {
  * The source brightness matrices are constructed from the Stokes parameters
  * in the supplied sky model.
  *
- * @param[out] vis          Output visibilities.
- * @param[in]  n_sources    Number of sources to use.
+ * @param[in]  num_sources  Number of sources to use.
  * @param[in]  jones        Set of Jones matrices.
  * @param[in]  sky          Sky model.
+ * @param[out] offset_out   Start offset into output array.
+ * @param[out] vis          Output visibilities.
  * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_auto_correlate(oskar_Mem* vis, int n_sources,
-        const oskar_Jones* jones, const oskar_Sky* sky, int* status);
+void oskar_auto_correlate(int num_sources, const oskar_Jones* jones,
+        const oskar_Sky* sky, int offset_out, oskar_Mem* vis, int* status);
 
 #ifdef __cplusplus
 }

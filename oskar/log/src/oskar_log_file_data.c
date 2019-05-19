@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,13 +36,14 @@
 extern "C" {
 #endif
 
-char* oskar_log_file_data(oskar_Log* log, size_t* size)
+char* oskar_log_file_data(size_t* size)
 {
+    oskar_Log* log = oskar_log_handle();
     char* data = 0;
     if (!size || !log) return 0;
 
     /* If log exists, then read the whole file. */
-    if (log->file)
+    if (log->file && log->name)
     {
         FILE* temp_handle = 0;
 

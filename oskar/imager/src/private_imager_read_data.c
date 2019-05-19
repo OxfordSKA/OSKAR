@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,8 +53,8 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
 #ifndef OSKAR_NO_MS
     oskar_MeasurementSet* ms;
     oskar_Mem *uvw, *u, *v, *w, *data, *weight, *time_centroid;
-    int num_channels, num_pols, num_stations, type;
-    size_t num_baselines, start_row, num_rows;
+    int type;
+    size_t start_row;
     double *uvw_, *u_, *v_, *w_;
     if (*status) return;
 
@@ -65,11 +65,11 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-    num_rows = (size_t) oskar_ms_num_rows(ms);
-    num_stations = (int) oskar_ms_num_stations(ms);
-    num_baselines = num_stations * (num_stations - 1) / 2;
-    num_pols = (int) oskar_ms_num_pols(ms);
-    num_channels = (int) oskar_ms_num_channels(ms);
+    const size_t num_rows = (size_t) oskar_ms_num_rows(ms);
+    const size_t num_stations = (size_t) oskar_ms_num_stations(ms);
+    const size_t num_baselines = num_stations * (num_stations - 1) / 2;
+    const int num_pols = (int) oskar_ms_num_pols(ms);
+    const int num_channels = (int) oskar_ms_num_channels(ms);
 
     /* Set visibility meta-data. */
     oskar_imager_set_vis_frequency(h,
@@ -135,14 +135,14 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
 
         /* Update the imager with the data. */
         oskar_timer_pause(h->tmr_read);
-        oskar_imager_update(h, block_size, 0, num_channels - 1, num_pols,
-                u, v, w, data, weight, time_centroid, status);
+        oskar_imager_update(h, block_size, 0, num_channels - 1,
+                num_pols, u, v, w, data, weight, time_centroid, status);
         *percent_done = (int) round(100.0 * (
                 (start_row + block_size) / (double)(num_rows * num_files) +
                 i_file / (double)num_files));
-        if (h->log && percent_next && *percent_done >= *percent_next)
+        if (percent_next && *percent_done >= *percent_next)
         {
-            oskar_log_message(h->log, 'S', -2, "%3d%% ...", *percent_done);
+            oskar_log_message('S', -2, "%3d%% ...", *percent_done);
             *percent_next = 10 + 10 * (*percent_done / 10);
         }
     }
@@ -172,82 +172,76 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
 {
     oskar_Binary* vis_file;
     oskar_VisBlock* block;
-    oskar_VisHeader* header;
-    oskar_Mem *weight, *time_centroid, *time_slice, *scratch = 0, *ptr;
-    int max_times_per_block, tags_per_block, i_block, num_blocks;
-    int num_times_tot, num_channels_tot, num_stations, num_baselines, num_pols;
+    oskar_VisHeader* hdr;
+    oskar_Mem *weight, *time_centroid, *scratch = 0, *ptr;
+    int i_block;
     double time_start_mjd, time_inc_sec;
     if (*status) return;
 
     /* Read the header. */
     vis_file = oskar_binary_create(filename, 'r', status);
-    header = oskar_vis_header_read(vis_file, status);
+    hdr = oskar_vis_header_read(vis_file, status);
     if (*status)
     {
-        oskar_vis_header_free(header, status);
+        oskar_vis_header_free(hdr, status);
         oskar_binary_free(vis_file);
         return;
     }
-    max_times_per_block = oskar_vis_header_max_times_per_block(header);
-    tags_per_block = oskar_vis_header_num_tags_per_block(header);
-    num_times_tot = oskar_vis_header_num_times_total(header);
-    num_channels_tot = oskar_vis_header_num_channels_total(header);
-    num_stations = oskar_vis_header_num_stations(header);
-    num_baselines = num_stations * (num_stations - 1) / 2;
-    num_pols = oskar_type_is_matrix(oskar_vis_header_amp_type(header)) ? 4 : 1;
-    num_blocks = (num_times_tot + max_times_per_block - 1) /
+    const int max_times_per_block = oskar_vis_header_max_times_per_block(hdr);
+    const int tags_per_block = oskar_vis_header_num_tags_per_block(hdr);
+    const int num_times_tot = oskar_vis_header_num_times_total(hdr);
+    const int num_channels_tot = oskar_vis_header_num_channels_total(hdr);
+    const int num_stations = oskar_vis_header_num_stations(hdr);
+    const int num_baselines = num_stations * (num_stations - 1) / 2;
+    const int num_pols =
+            oskar_type_is_matrix(oskar_vis_header_amp_type(hdr)) ? 4 : 1;
+    const int num_weights = num_baselines * num_pols * max_times_per_block;
+    const int num_blocks = (num_times_tot + max_times_per_block - 1) /
             max_times_per_block;
-    time_start_mjd = oskar_vis_header_time_start_mjd_utc(header) * 86400.0;
-    time_inc_sec = oskar_vis_header_time_inc_sec(header);
+    time_start_mjd = oskar_vis_header_time_start_mjd_utc(hdr) * 86400.0;
+    time_inc_sec = oskar_vis_header_time_inc_sec(hdr);
 
     /* Set visibility meta-data. */
     oskar_imager_set_vis_frequency(h,
-            oskar_vis_header_freq_start_hz(header),
-            oskar_vis_header_freq_inc_hz(header), num_channels_tot);
+            oskar_vis_header_freq_start_hz(hdr),
+            oskar_vis_header_freq_inc_hz(hdr), num_channels_tot);
     oskar_imager_set_vis_phase_centre(h,
-            oskar_vis_header_phase_centre_ra_deg(header),
-            oskar_vis_header_phase_centre_dec_deg(header));
+            oskar_vis_header_phase_centre_ra_deg(hdr),
+            oskar_vis_header_phase_centre_dec_deg(hdr));
 
     /* Create scratch arrays. Weights are all 1. */
     time_centroid = oskar_mem_create(OSKAR_DOUBLE,
             OSKAR_CPU, num_baselines * max_times_per_block, status);
-    time_slice = oskar_mem_create_alias(0, 0, 0, status);
-    weight = oskar_mem_create(h->imager_prec,
-            OSKAR_CPU, num_baselines * num_pols * max_times_per_block, status);
-    oskar_mem_set_value_real(weight, 1.0, 0, 0, status);
+    weight = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_weights, status);
+    oskar_mem_set_value_real(weight, 1.0, 0, num_weights, status);
     if (num_channels_tot > 1)
-        scratch = oskar_mem_create(oskar_vis_header_amp_type(header), OSKAR_CPU,
+        scratch = oskar_mem_create(oskar_vis_header_amp_type(hdr), OSKAR_CPU,
                 num_baselines * num_channels_tot * max_times_per_block, status);
 
     /* Loop over visibility blocks. */
-    block = oskar_vis_block_create_from_header(OSKAR_CPU, header, status);
+    block = oskar_vis_block_create_from_header(OSKAR_CPU, hdr, status);
     for (i_block = 0; i_block < num_blocks; ++i_block)
     {
-        int t, num_times, num_channels, start_time, start_chan, end_chan;
-        size_t num_rows;
+        int t;
         if (*status) break;
 
         /* Read the visibility data. */
         oskar_timer_resume(h->tmr_read);
         oskar_binary_set_query_search_start(vis_file,
                 i_block * tags_per_block, status);
-        oskar_vis_block_read(block, header, vis_file, i_block, status);
-        start_time   = oskar_vis_block_start_time_index(block);
-        start_chan   = oskar_vis_block_start_channel_index(block);
-        num_times    = oskar_vis_block_num_times(block);
-        num_channels = oskar_vis_block_num_channels(block);
-        num_rows     = num_times * num_baselines;
-        end_chan     = start_chan + num_channels - 1;
+        oskar_vis_block_read(block, hdr, vis_file, i_block, status);
+        const int start_time   = oskar_vis_block_start_time_index(block);
+        const int start_chan   = oskar_vis_block_start_channel_index(block);
+        const int num_times    = oskar_vis_block_num_times(block);
+        const int num_channels = oskar_vis_block_num_channels(block);
+        const int end_chan     = start_chan + num_channels - 1;
+        const size_t num_rows  = num_times * num_baselines;
 
         /* Fill in the time centroid values. */
         for (t = 0; t < num_times; ++t)
-        {
-            oskar_mem_set_alias(time_slice, time_centroid,
-                    t * num_baselines, num_baselines, status);
-            oskar_mem_set_value_real(time_slice,
+            oskar_mem_set_value_real(time_centroid,
                     time_start_mjd + (start_time + t + 0.5) * time_inc_sec,
-                    0, num_baselines, status);
-        }
+                    t * num_baselines, num_baselines, status);
 
         /* Swap baseline and channel dimensions. */
         ptr = oskar_vis_block_cross_correlations(block);
@@ -296,18 +290,17 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
         *percent_done = (int) round(100.0 * (
                 (i_block + 1) / (double)(num_blocks * num_files) +
                 i_file / (double)num_files));
-        if (h->log && percent_next && *percent_done >= *percent_next)
+        if (percent_next && *percent_done >= *percent_next)
         {
-            oskar_log_message(h->log, 'S', -2, "%3d%% ...", *percent_done);
+            oskar_log_message('S', -2, "%3d%% ...", *percent_done);
             *percent_next = 10 + 10 * (*percent_done / 10);
         }
     }
     oskar_mem_free(scratch, status);
     oskar_mem_free(weight, status);
     oskar_mem_free(time_centroid, status);
-    oskar_mem_free(time_slice, status);
     oskar_vis_block_free(block, status);
-    oskar_vis_header_free(header, status);
+    oskar_vis_header_free(hdr, status);
     oskar_binary_free(vis_file);
 }
 

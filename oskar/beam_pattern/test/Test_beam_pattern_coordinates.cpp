@@ -60,8 +60,8 @@ TEST(beam_pattern_coordinates, generate_lon_lat_grid)
     // ##### Generates a grid of pixels centred on ra0, dec0 ##################
     oskar_Timer* timer = oskar_timer_create(OSKAR_TIMER_NATIVE);
     oskar_timer_start(timer);
-    oskar_evaluate_image_lon_lat_grid(lon, lat, image_size, image_size,
-            fov, fov, lon0, lat0, &status);
+    oskar_evaluate_image_lon_lat_grid(image_size, image_size,
+            fov, fov, lon0, lat0, lon, lat, &status);
     ASSERT_EQ(0, status);
     std::cout << "Grid generation: " << oskar_timer_elapsed(timer)/1000.0
             << " ms" << std::endl;

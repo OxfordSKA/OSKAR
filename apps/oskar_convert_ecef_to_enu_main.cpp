@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
 #include "convert/oskar_convert_ecef_to_enu.h"
 #include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
 #include "mem/oskar_mem.h"
+#include "settings/oskar_option_parser.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
 
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
             oskar_mem_double(enu_z, &status));
 
     // Print converted coordinates.
-    oskar_mem_save_ascii(stdout, 3, num_points, &status, enu_x, enu_y, enu_z);
+    oskar_mem_save_ascii(stdout, 3, 0, num_points, &status, enu_x, enu_y, enu_z);
 
     // Clean up.
     oskar_mem_free(ecef_x, &status);
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
     oskar_mem_free(enu_z, &status);
     if (status)
     {
-        oskar_log_error(0, oskar_get_error_string(status));
+        oskar_log_error(oskar_get_error_string(status));
         return status;
     }
 

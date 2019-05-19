@@ -151,7 +151,7 @@ TEST(Mem, random_uniform)
 #ifdef OSKAR_HAVE_OPENCL
         num_mem += 2;
 #endif
-        oskar_mem_save_ascii(fhan, num_mem, n, &status, v_cpu_f, v_cpu_d
+        oskar_mem_save_ascii(fhan, num_mem, 0, n, &status, v_cpu_f, v_cpu_d
 #ifdef OSKAR_HAVE_CUDA
                 , v_gpu_f, v_gpu_d
 #endif
@@ -281,7 +281,7 @@ TEST(Mem, random_gaussian)
 #ifdef OSKAR_HAVE_OPENCL
         num_mem += 2;
 #endif
-        oskar_mem_save_ascii(fhan, num_mem, n, &status, v_cpu_f, v_cpu_d
+        oskar_mem_save_ascii(fhan, num_mem, 0, n, &status, v_cpu_f, v_cpu_d
 #ifdef OSKAR_HAVE_CUDA
                 , v_gpu_f, v_gpu_d
 #endif
@@ -333,7 +333,7 @@ TEST(Mem, random_gaussian_accum)
     if (save)
     {
         FILE* fhan = fopen("random_gaussian_accum.txt", "w");
-        oskar_mem_save_ascii(fhan, 1, blocksize * rounds, &status, total);
+        oskar_mem_save_ascii(fhan, 1, 0, blocksize * rounds, &status, total);
         fclose(fhan);
     }
 

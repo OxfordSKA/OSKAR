@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2018, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,7 @@ extern "C" {
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] d_jones        Matrix of Jones scalars to correlate.
  * @param[in] d_I            Source Stokes I values, in Jy.
  * @param[in] d_l            Source l-direction cosines from phase centre.
@@ -76,8 +77,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_scalar_point_cuda_f(
-        int num_sources, int num_stations, const float2* d_jones,
-        const float* d_I, const float* d_l,
+        int num_sources, int num_stations, int offset_out,
+        const float2* d_jones, const float* d_I, const float* d_l,
         const float* d_m, const float* d_n,
         const float* d_station_u, const float* d_station_v,
         const float* d_station_w, const float* d_station_x,
@@ -100,6 +101,7 @@ void oskar_cross_correlate_scalar_point_cuda_f(
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] d_jones        Matrix of Jones scalars to correlate.
  * @param[in] d_I            Source Stokes I values, in Jy.
  * @param[in] d_l            Source l-direction cosines from phase centre.
@@ -121,8 +123,8 @@ void oskar_cross_correlate_scalar_point_cuda_f(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_scalar_point_cuda_d(
-        int num_sources, int num_stations, const double2* d_jones,
-        const double* d_I, const double* d_l,
+        int num_sources, int num_stations, int offset_out,
+        const double2* d_jones, const double* d_I, const double* d_l,
         const double* d_m, const double* d_n,
         const double* d_station_u, const double* d_station_v,
         const double* d_station_w, const double* d_station_x,
@@ -148,6 +150,7 @@ void oskar_cross_correlate_scalar_point_cuda_d(
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] d_jones        Matrix of Jones scalars to correlate.
  * @param[in] d_I            Source Stokes I values, in Jy.
  * @param[in] d_l            Source l-direction cosines from phase centre.
@@ -172,8 +175,8 @@ void oskar_cross_correlate_scalar_point_cuda_d(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_scalar_gaussian_cuda_f(
-        int num_sources, int num_stations, const float2* d_jones,
-        const float* d_I, const float* d_l,
+        int num_sources, int num_stations, int offset_out,
+        const float2* d_jones, const float* d_I, const float* d_l,
         const float* d_m, const float* d_n,
         const float* d_a, const float* d_b,
         const float* d_c, const float* d_station_u,
@@ -201,6 +204,7 @@ void oskar_cross_correlate_scalar_gaussian_cuda_f(
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] d_jones        Matrix of Jones scalars to correlate.
  * @param[in] d_I            Source Stokes I values, in Jy.
  * @param[in] d_l            Source l-direction cosines from phase centre.
@@ -225,8 +229,8 @@ void oskar_cross_correlate_scalar_gaussian_cuda_f(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_scalar_gaussian_cuda_d(
-        int num_sources, int num_stations, const double2* d_jones,
-        const double* d_I, const double* d_l,
+        int num_sources, int num_stations, int offset_out,
+        const double2* d_jones, const double* d_I, const double* d_l,
         const double* d_m, const double* d_n,
         const double* d_a, const double* d_b,
         const double* d_c, const double* d_station_u,

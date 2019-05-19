@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,20 +29,14 @@
 #include "sky/private_sky.h"
 #include "sky/oskar_sky.h"
 #include "sky/oskar_sky_copy_source_data.h"
-#include "sky/oskar_sky_copy_source_data_cuda.h"
-#include "utility/oskar_cl_utils.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 
+#define CB(m) oskar_mem_buffer(m)
+#define CBC(m) oskar_mem_buffer_const(m)
 #define CF(m) oskar_mem_float(m, status)
 #define CFC(m) oskar_mem_float_const(m, status)
 #define CD(m) oskar_mem_double(m, status)
 #define CDC(m) oskar_mem_double_const(m, status)
-#define CCL(m) oskar_mem_cl_buffer(m, status)
-#define CCLC(m) oskar_mem_cl_buffer_const(m, status)
-#define ARG_MEM_CONST(m) \
-    error |= clSetKernelArg(k, arg++, sizeof(cl_mem), CCLC(m))
-#define ARG_MEM(m) \
-    error |= clSetKernelArg(k, arg++, sizeof(cl_mem), CCL(m))
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,107 +71,15 @@ void oskar_sky_copy_source_data(const oskar_Sky* in,
         const oskar_Mem* horizon_mask, const oskar_Mem* indices,
         oskar_Sky* out, int* status)
 {
-    int i, num_in, num_out = 0, location, type;
-    const int *mask;
+    int i, num_in, num_out = 0;
     if (*status) return;
-    location = oskar_sky_mem_location(in);
-    type = oskar_sky_precision(out);
-    mask = oskar_mem_int_const(horizon_mask, status);
+    const int location = oskar_sky_mem_location(in);
+    const int type = oskar_sky_precision(out);
     num_in = oskar_sky_num_sources(in);
-    if (location & OSKAR_CL)
+    if (location == OSKAR_CPU)
     {
-#ifdef OSKAR_HAVE_OPENCL
-        cl_event event;
-        cl_kernel k = 0;
-        cl_int error, n_in, n_out = 0;
-        cl_uint arg = 0;
-        size_t global_size, local_size;
-        if (type == OSKAR_DOUBLE)
-            k = oskar_cl_kernel("copy_source_data_double");
-        else if (type == OSKAR_SINGLE)
-            k = oskar_cl_kernel("copy_source_data_float");
-        else
-        {
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            return;
-        }
-        if (!k)
-        {
-            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-            return;
-        }
-
-        /* Set kernel arguments. */
-        n_in = (cl_int) num_in;
-        error = clSetKernelArg(k, arg++, sizeof(cl_int), &n_in);
-        ARG_MEM_CONST(horizon_mask);
-        ARG_MEM_CONST(indices);
-        ARG_MEM_CONST(oskar_sky_ra_rad_const(in));
-        ARG_MEM(oskar_sky_ra_rad(out));
-        ARG_MEM_CONST(oskar_sky_dec_rad_const(in));
-        ARG_MEM(oskar_sky_dec_rad(out));
-        ARG_MEM_CONST(oskar_sky_I_const(in));
-        ARG_MEM(oskar_sky_I(out));
-        ARG_MEM_CONST(oskar_sky_Q_const(in));
-        ARG_MEM(oskar_sky_Q(out));
-        ARG_MEM_CONST(oskar_sky_U_const(in));
-        ARG_MEM(oskar_sky_U(out));
-        ARG_MEM_CONST(oskar_sky_V_const(in));
-        ARG_MEM(oskar_sky_V(out));
-        ARG_MEM_CONST(oskar_sky_reference_freq_hz_const(in));
-        ARG_MEM(oskar_sky_reference_freq_hz(out));
-        ARG_MEM_CONST(oskar_sky_spectral_index_const(in));
-        ARG_MEM(oskar_sky_spectral_index(out));
-        ARG_MEM_CONST(oskar_sky_rotation_measure_rad_const(in));
-        ARG_MEM(oskar_sky_rotation_measure_rad(out));
-        ARG_MEM_CONST(oskar_sky_l_const(in));
-        ARG_MEM(oskar_sky_l(out));
-        ARG_MEM_CONST(oskar_sky_m_const(in));
-        ARG_MEM(oskar_sky_m(out));
-        ARG_MEM_CONST(oskar_sky_n_const(in));
-        ARG_MEM(oskar_sky_n(out));
-        ARG_MEM_CONST(oskar_sky_gaussian_a_const(in));
-        ARG_MEM(oskar_sky_gaussian_a(out));
-        ARG_MEM_CONST(oskar_sky_gaussian_b_const(in));
-        ARG_MEM(oskar_sky_gaussian_b(out));
-        ARG_MEM_CONST(oskar_sky_gaussian_c_const(in));
-        ARG_MEM(oskar_sky_gaussian_c(out));
-        ARG_MEM_CONST(oskar_sky_fwhm_major_rad_const(in));
-        ARG_MEM(oskar_sky_fwhm_major_rad(out));
-        ARG_MEM_CONST(oskar_sky_fwhm_minor_rad_const(in));
-        ARG_MEM(oskar_sky_fwhm_minor_rad(out));
-        ARG_MEM_CONST(oskar_sky_position_angle_rad_const(in));
-        ARG_MEM(oskar_sky_position_angle_rad(out));
-        if (error != CL_SUCCESS)
-        {
-            *status = OSKAR_ERR_INVALID_ARGUMENT;
-            return;
-        }
-
-        /* Launch kernel on current command queue. */
-        local_size = oskar_cl_is_gpu() ? 256 : 128;
-        global_size = ((n_in + local_size - 1) / local_size) * local_size;
-        error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
-                &global_size, &local_size, 0, NULL, &event);
-        if (error != CL_SUCCESS)
-        {
-            *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
-            return;
-        }
-
-        /* Get the number of sources copied. */
-        error = clEnqueueReadBuffer(oskar_cl_command_queue(), *CCLC(indices),
-                CL_TRUE, (n_in - 1) * sizeof(cl_int), sizeof(cl_int),
-                &n_out, 0, NULL, NULL);
-        if (error != CL_SUCCESS)
-            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
-        num_out = (int) (n_out + 1);
-#else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
-#endif
-    }
-    else
-    {
+        const int* mask = oskar_mem_int_const(horizon_mask, status);
+        (void) indices;
         switch (type)
         {
         case OSKAR_SINGLE:
@@ -228,28 +130,7 @@ void oskar_sky_copy_source_data(const oskar_Sky* in,
             o_maj = CF(oskar_sky_fwhm_major_rad(out));
             o_min = CF(oskar_sky_fwhm_minor_rad(out));
             o_pa = CF(oskar_sky_position_angle_rad(out));
-
-            /* Copy source data. */
-            if (location == OSKAR_GPU)
-            {
-#ifdef OSKAR_HAVE_CUDA
-                oskar_sky_copy_source_data_cuda_f(num_in, &num_out, mask,
-                        oskar_mem_int_const(indices, status),
-                        ra, o_ra, dec, o_dec, I, o_I, Q, o_Q, U, o_U, V, o_V,
-                        ref, o_ref, sp, o_sp, rm, o_rm, l, o_l, m, o_m, n, o_n,
-                        a, o_a, b, o_b, c, o_c, maj, o_maj, min, o_min, pa, o_pa);
-                oskar_device_check_error(status);
-#else
-                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-            }
-            else if (location == OSKAR_CPU)
-            {
-                (void) indices;
-                COPY_SOURCE_DATA
-            }
-            else
-                *status = OSKAR_ERR_BAD_LOCATION;
+            COPY_SOURCE_DATA
             break;
         }
         case OSKAR_DOUBLE:
@@ -300,34 +181,73 @@ void oskar_sky_copy_source_data(const oskar_Sky* in,
             o_maj = CD(oskar_sky_fwhm_major_rad(out));
             o_min = CD(oskar_sky_fwhm_minor_rad(out));
             o_pa = CD(oskar_sky_position_angle_rad(out));
-
-            /* Copy source data. */
-            if (location == OSKAR_GPU)
-            {
-#ifdef OSKAR_HAVE_CUDA
-                oskar_sky_copy_source_data_cuda_d(num_in, &num_out, mask,
-                        oskar_mem_int_const(indices, status),
-                        ra, o_ra, dec, o_dec, I, o_I, Q, o_Q, U, o_U, V, o_V,
-                        ref, o_ref, sp, o_sp, rm, o_rm, l, o_l, m, o_m, n, o_n,
-                        a, o_a, b, o_b, c, o_c, maj, o_maj, min, o_min, pa, o_pa);
-                oskar_device_check_error(status);
-#else
-                *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-            }
-            else if (location == OSKAR_CPU)
-            {
-                (void) indices;
-                COPY_SOURCE_DATA
-            }
-            else
-                *status = OSKAR_ERR_BAD_LOCATION;
+            COPY_SOURCE_DATA
             break;
         }
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             break;
         }
+    }
+    else
+    {
+        size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
+        const char* k = 0;
+        if (type == OSKAR_DOUBLE)      k = "copy_source_data_double";
+        else if (type == OSKAR_SINGLE) k = "copy_source_data_float";
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = oskar_device_global_size(
+                (size_t) num_in, local_size[0]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &num_in},
+                {PTR_SZ, oskar_mem_buffer_const(horizon_mask)},
+                {PTR_SZ, oskar_mem_buffer_const(indices)},
+                {PTR_SZ, CBC(oskar_sky_ra_rad_const(in))},
+                {PTR_SZ, CB(oskar_sky_ra_rad(out))},
+                {PTR_SZ, CBC(oskar_sky_dec_rad_const(in))},
+                {PTR_SZ, CB(oskar_sky_dec_rad(out))},
+                {PTR_SZ, CBC(oskar_sky_I_const(in))},
+                {PTR_SZ, CB(oskar_sky_I(out))},
+                {PTR_SZ, CBC(oskar_sky_Q_const(in))},
+                {PTR_SZ, CB(oskar_sky_Q(out))},
+                {PTR_SZ, CBC(oskar_sky_U_const(in))},
+                {PTR_SZ, CB(oskar_sky_U(out))},
+                {PTR_SZ, CBC(oskar_sky_V_const(in))},
+                {PTR_SZ, CB(oskar_sky_V(out))},
+                {PTR_SZ, CBC(oskar_sky_reference_freq_hz_const(in))},
+                {PTR_SZ, CB(oskar_sky_reference_freq_hz(out))},
+                {PTR_SZ, CBC(oskar_sky_spectral_index_const(in))},
+                {PTR_SZ, CB(oskar_sky_spectral_index(out))},
+                {PTR_SZ, CBC(oskar_sky_rotation_measure_rad_const(in))},
+                {PTR_SZ, CB(oskar_sky_rotation_measure_rad(out))},
+                {PTR_SZ, CBC(oskar_sky_l_const(in))},
+                {PTR_SZ, CB(oskar_sky_l(out))},
+                {PTR_SZ, CBC(oskar_sky_m_const(in))},
+                {PTR_SZ, CB(oskar_sky_m(out))},
+                {PTR_SZ, CBC(oskar_sky_n_const(in))},
+                {PTR_SZ, CB(oskar_sky_n(out))},
+                {PTR_SZ, CBC(oskar_sky_gaussian_a_const(in))},
+                {PTR_SZ, CB(oskar_sky_gaussian_a(out))},
+                {PTR_SZ, CBC(oskar_sky_gaussian_b_const(in))},
+                {PTR_SZ, CB(oskar_sky_gaussian_b(out))},
+                {PTR_SZ, CBC(oskar_sky_gaussian_c_const(in))},
+                {PTR_SZ, CB(oskar_sky_gaussian_c(out))},
+                {PTR_SZ, CBC(oskar_sky_fwhm_major_rad_const(in))},
+                {PTR_SZ, CB(oskar_sky_fwhm_major_rad(out))},
+                {PTR_SZ, CBC(oskar_sky_fwhm_minor_rad_const(in))},
+                {PTR_SZ, CB(oskar_sky_fwhm_minor_rad(out))},
+                {PTR_SZ, CBC(oskar_sky_position_angle_rad_const(in))},
+                {PTR_SZ, CB(oskar_sky_position_angle_rad(out))}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
+        /* Last element of index array is the total number copied. */
+        oskar_mem_read_element(indices, num_in, &num_out, status);
     }
 
     /* Copy metadata. */
@@ -338,7 +258,6 @@ void oskar_sky_copy_source_data(const oskar_Sky* in,
     /* Set the number of sources in the output sky model. */
     out->num_sources = num_out;
 }
-
 
 #ifdef __cplusplus
 }

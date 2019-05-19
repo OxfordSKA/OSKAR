@@ -1,8 +1,9 @@
 #
-# settings/CMakeLists.txt
+# oskar/settings/CMakeLists.txt
 #
 
 set(oskar_settings_SRC
+    src/oskar_option_parser.cpp
     src/oskar_settings_utility_string.cpp
     src/oskar_SettingsDeclareXml.cpp
     src/oskar_SettingsDependency.cpp

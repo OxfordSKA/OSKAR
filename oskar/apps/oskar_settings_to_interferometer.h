@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@
  * given settings.
  *
  * @param[in] s           A pointer to the settings tree.
- * @param[in,out] log     A pointer to the log to use.
+ * @param[in,out] log     A pointer to the log to use (IGNORED).
  * @param[in,out] status  Status return code.
  *
  * @return A handle to the new simulator.

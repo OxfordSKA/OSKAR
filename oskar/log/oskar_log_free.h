@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,11 +45,9 @@ extern "C" {
  *
  * @details
  * This function frees memory held in a log structure and closes the log file.
- *
- * @param[in,out] log  Pointer to a log structure.
  */
 OSKAR_EXPORT
-void oskar_log_free(oskar_Log* log);
+void oskar_log_free(void);
 
 #ifdef __cplusplus
 }

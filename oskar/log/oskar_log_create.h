@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,11 +41,11 @@ extern "C" {
 
 /**
  * @brief
- * Creates and initialises a log structure.
+ * Initialises the log.
  *
  * @details
- * This function creates and initialises a log structure, opening a new log
- * file. The filename is generated based on the current date and time.
+ * This function initialises a log, opening a new log file.
+ * The filename is generated based on the current date and time.
  *
  * @param[in] file_priority Sets the default logging verbosity level for log
  *                          files. Log entries with priority below this level
@@ -54,11 +54,9 @@ extern "C" {
  *                          logging to the terminal (stderr, stdout). Log
  *                          entries with priority below this level will not be
  *                          printed.
- *
- * @return A handle to the new log.
  */
 OSKAR_EXPORT
-oskar_Log* oskar_log_create(int file_priority, int term_priority);
+void oskar_log_create(int file_priority, int term_priority);
 
 #ifdef __cplusplus
 }

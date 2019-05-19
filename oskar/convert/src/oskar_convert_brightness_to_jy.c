@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include "convert/oskar_convert_brightness_to_jy.h"
+#include "log/oskar_log.h"
 #include <string.h>
 
 #ifdef __cplusplus
@@ -101,7 +102,7 @@ void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
     {
         if (beam_area_pixels == 0.0)
         {
-            fprintf(stderr, "Need beam area for maps in Jy/beam.\n");
+            oskar_log_error("Need beam area for maps in Jy/beam.");
             *status = OSKAR_ERR_BAD_UNITS;
         }
         else
@@ -122,7 +123,7 @@ void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
 
     /* Scale pixels into Jy. */
     if (scaling != 1.0)
-        oskar_mem_scale_real(data, scaling, status);
+        oskar_mem_scale_real(data, scaling, 0, oskar_mem_length(data), status);
 }
 
 #ifdef __cplusplus

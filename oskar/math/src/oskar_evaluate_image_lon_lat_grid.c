@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,74 +37,60 @@
 extern "C" {
 #endif
 
-void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
-        int image_size_l, int image_size_m, double fov_rad_lon,
-        double fov_rad_lat, double lon_rad, double lat_rad, int* status)
+void oskar_evaluate_image_lon_lat_grid(int num_pixels_l, int num_pixels_m,
+        double fov_rad_lon, double fov_rad_lat, double lon_rad, double lat_rad,
+        oskar_Mem* lon, oskar_Mem* lat, int* status)
 {
-    int num_pixels, type, location;
-    oskar_Mem *lon_cpu, *lat_cpu;
-
-    /* Get meta-data. */
-    type = oskar_mem_type(lon);
-    location = oskar_mem_location(lon);
-    num_pixels = image_size_l * image_size_m;
-
-    /* Ensure enough space in output arrays. */
-    if ((int)oskar_mem_length(lon) < num_pixels)
-        oskar_mem_realloc(lon, num_pixels, status);
-    if ((int)oskar_mem_length(lat) < num_pixels)
-        oskar_mem_realloc(lat, num_pixels, status);
-
-    /* Check if safe to proceed. */
+    oskar_Mem *lon_cpu = 0, *lat_cpu = 0, *lon_p, *lat_p;
+    const int type = oskar_mem_type(lon);
+    const int location = oskar_mem_location(lon);
+    const int num_pixels = num_pixels_l * num_pixels_m;
+    oskar_mem_ensure(lon, num_pixels, status);
+    oskar_mem_ensure(lat, num_pixels, status);
     if (*status) return;
-
-    /* Initialise temporary memory. */
     if (location != OSKAR_CPU)
     {
         lon_cpu = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
         lat_cpu = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
+        lon_p = lon_cpu;
+        lat_p = lat_cpu;
     }
     else
     {
-        lon_cpu = oskar_mem_create_alias(lon, 0, num_pixels, status);
-        lat_cpu = oskar_mem_create_alias(lat, 0, num_pixels, status);
+        lon_p = lon;
+        lat_p = lat;
     }
-
-    /* Check if safe to proceed. */
     if (! *status)
     {
-        /* Evaluate pixel grid and convert to longitude, latitude values. */
         if (type == OSKAR_SINGLE)
         {
-            oskar_evaluate_image_lm_grid_f(image_size_l, image_size_m,
-                    fov_rad_lon, fov_rad_lat, oskar_mem_float(lon_cpu, status),
-                    oskar_mem_float(lat_cpu, status));
+            oskar_evaluate_image_lm_grid_f(num_pixels_l, num_pixels_m,
+                    fov_rad_lon, fov_rad_lat, oskar_mem_float(lon_p, status),
+                    oskar_mem_float(lat_p, status));
             oskar_convert_relative_directions_to_lon_lat_2d_f(num_pixels,
-                    oskar_mem_float_const(lon_cpu, status),
-                    oskar_mem_float_const(lat_cpu, status),
+                    oskar_mem_float_const(lon_p, status),
+                    oskar_mem_float_const(lat_p, status),
                     lon_rad, lat_rad,
-                    oskar_mem_float(lon_cpu, status),
-                    oskar_mem_float(lat_cpu, status));
+                    oskar_mem_float(lon_p, status),
+                    oskar_mem_float(lat_p, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_evaluate_image_lm_grid_d(image_size_l, image_size_m,
-                    fov_rad_lon, fov_rad_lat, oskar_mem_double(lon_cpu, status),
-                    oskar_mem_double(lat_cpu, status));
+            oskar_evaluate_image_lm_grid_d(num_pixels_l, num_pixels_m,
+                    fov_rad_lon, fov_rad_lat, oskar_mem_double(lon_p, status),
+                    oskar_mem_double(lat_p, status));
             oskar_convert_relative_directions_to_lon_lat_2d_d(num_pixels,
-                    oskar_mem_double_const(lon_cpu, status),
-                    oskar_mem_double_const(lat_cpu, status),
+                    oskar_mem_double_const(lon_p, status),
+                    oskar_mem_double_const(lat_p, status),
                     lon_rad, lat_rad,
-                    oskar_mem_double(lon_cpu, status),
-                    oskar_mem_double(lat_cpu, status));
+                    oskar_mem_double(lon_p, status),
+                    oskar_mem_double(lat_p, status));
         }
     }
-
-    /* Copy data to GPU and free temporary arrays, if required. */
     if (location != OSKAR_CPU)
     {
-        oskar_mem_copy(lon, lon_cpu, status);
-        oskar_mem_copy(lat, lat_cpu, status);
+        oskar_mem_copy(lon, lon_p, status);
+        oskar_mem_copy(lat, lat_p, status);
     }
     oskar_mem_free(lon_cpu, status);
     oskar_mem_free(lat_cpu, status);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -222,7 +222,7 @@ TEST(Mem, to_const_float)
     oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, size,
             &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 2.0, 0, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     const float* data = oskar_mem_float_const(mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -239,7 +239,7 @@ TEST(Mem, to_const_float2)
     oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU,
             size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 2.0, 0, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     const float2* data = oskar_mem_float2_const(mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -257,7 +257,7 @@ TEST(Mem, to_const_float4c)
     oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX,
             OSKAR_CPU, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 2.0, 0, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     const float4c* data = oskar_mem_float4c_const(mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -281,7 +281,7 @@ TEST(Mem, to_const_double)
     oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 2.0, 0, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     const double* data = oskar_mem_double_const(mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -298,7 +298,7 @@ TEST(Mem, to_const_double2)
     oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU,
             size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 2.0, 0, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     const double2* data = oskar_mem_double2_const(mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -316,7 +316,7 @@ TEST(Mem, to_const_double4c)
     oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX_MATRIX,
             OSKAR_CPU, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 2.0, 0, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     const double4c* data = oskar_mem_double4c_const(mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);

@@ -100,7 +100,8 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
             src->station_measured_z_enu_metres, status);
 
     /* Copy each station. */
-    telescope->station = malloc(src->num_stations * sizeof(oskar_Station*));
+    telescope->station = (oskar_Station**) malloc(
+            src->num_stations * sizeof(oskar_Station*));
     for (i = 0; i < src->num_stations; ++i)
     {
         telescope->station[i] = oskar_station_create_copy(

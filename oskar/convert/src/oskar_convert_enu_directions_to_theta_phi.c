@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,111 +26,75 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "convert/define_convert_enu_directions_to_theta_phi.h"
 #include "convert/oskar_convert_enu_directions_to_theta_phi.h"
-#include "convert/oskar_convert_enu_directions_to_theta_phi_cuda.h"
-#include "utility/oskar_device_utils.h"
-#include "convert/private_convert_enu_directions_to_theta_phi_inline.h"
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_convert_enu_directions_to_theta_phi_f(
-        const int num_points, const float* x, const float* y,
-        const float* z, const float delta_phi, float* theta, float* phi)
-{
-    int i;
-    for (i = 0; i < num_points; ++i)
-    {
-        oskar_convert_enu_directions_to_theta_phi_inline_f(x[i], y[i],
-                z[i], delta_phi, &theta[i], &phi[i]);
-    }
-}
+OSKAR_CONVERT_ENU_DIR_TO_THETA_PHI(convert_enu_directions_to_theta_phi_float, float)
+OSKAR_CONVERT_ENU_DIR_TO_THETA_PHI(convert_enu_directions_to_theta_phi_double, double)
 
-/* Double precision. */
-void oskar_convert_enu_directions_to_theta_phi_d(
-        const int num_points, const double* x, const double* y,
-        const double* z, const double delta_phi, double* theta, double* phi)
-{
-    int i;
-    for (i = 0; i < num_points; ++i)
-    {
-        oskar_convert_enu_directions_to_theta_phi_inline_d(x[i], y[i],
-                z[i], delta_phi, &theta[i], &phi[i]);
-    }
-}
-
-/* Wrapper. */
-void oskar_convert_enu_directions_to_theta_phi(int num_points,
+void oskar_convert_enu_directions_to_theta_phi(int offset_in, int num_points,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         double delta_phi, oskar_Mem* theta, oskar_Mem* phi, int* status)
 {
-    int type, location;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Get data type and location. */
-    type = oskar_mem_type(theta);
-    location = oskar_mem_location(theta);
-
-    /* Compute modified theta and phi coordinates. */
-    if (location == OSKAR_GPU)
+    const int type = oskar_mem_type(theta);
+    const int location = oskar_mem_location(theta);
+    const float delta_phi_f = (float) delta_phi;
+    if (location == OSKAR_CPU)
     {
-#ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
-        {
-            oskar_convert_enu_directions_to_theta_phi_cuda_f(num_points,
+            convert_enu_directions_to_theta_phi_float(offset_in, num_points,
                     oskar_mem_float_const(x, status),
                     oskar_mem_float_const(y, status),
-                    oskar_mem_float_const(z, status), (float)delta_phi,
+                    oskar_mem_float_const(z, status), delta_phi_f,
                     oskar_mem_float(theta, status),
                     oskar_mem_float(phi, status));
-            oskar_device_check_error(status);
-        }
         else if (type == OSKAR_DOUBLE)
-        {
-            oskar_convert_enu_directions_to_theta_phi_cuda_d(num_points,
+            convert_enu_directions_to_theta_phi_double(offset_in, num_points,
                     oskar_mem_double_const(x, status),
                     oskar_mem_double_const(y, status),
                     oskar_mem_double_const(z, status), delta_phi,
                     oskar_mem_double(theta, status),
                     oskar_mem_double(phi, status));
-            oskar_device_check_error(status);
-        }
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-    }
-    else if (location == OSKAR_CPU)
-    {
-        if (type == OSKAR_SINGLE)
-        {
-            oskar_convert_enu_directions_to_theta_phi_f(num_points,
-                    oskar_mem_float_const(x, status),
-                    oskar_mem_float_const(y, status),
-                    oskar_mem_float_const(z, status), (float)delta_phi,
-                    oskar_mem_float(theta, status),
-                    oskar_mem_float(phi, status));
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-            oskar_convert_enu_directions_to_theta_phi_d(num_points,
-                    oskar_mem_double_const(x, status),
-                    oskar_mem_double_const(y, status),
-                    oskar_mem_double_const(z, status), delta_phi,
-                    oskar_mem_double(theta, status),
-                    oskar_mem_double(phi, status));
-        }
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
+        const char* k = 0;
+        const int is_dbl = oskar_mem_is_double(theta);
+        if (type == OSKAR_SINGLE)
+            k = "convert_enu_directions_to_theta_phi_float";
+        else if (type == OSKAR_DOUBLE)
+            k = "convert_enu_directions_to_theta_phi_double";
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = oskar_device_global_size(
+                (size_t) num_points, local_size[0]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &offset_in},
+                {INT_SZ, &num_points},
+                {PTR_SZ, oskar_mem_buffer_const(x)},
+                {PTR_SZ, oskar_mem_buffer_const(y)},
+                {PTR_SZ, oskar_mem_buffer_const(z)},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&delta_phi : (const void*)&delta_phi_f},
+                {PTR_SZ, oskar_mem_buffer(theta)},
+                {PTR_SZ, oskar_mem_buffer(phi)}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
     }
 }
 

@@ -44,8 +44,8 @@ void oskar_imager_linear_to_stokes(const oskar_Mem* in, oskar_Mem** out,
     /* Create output array or resize if required. */
     if (!*out)
         *out = oskar_mem_create(oskar_mem_type(in), OSKAR_CPU, num, status);
-    else if (oskar_mem_length(*out) < num)
-        oskar_mem_realloc(*out, num, status);
+    else
+        oskar_mem_ensure(*out, num, status);
 
     /* Copy or convert if required. */
     if (!oskar_mem_is_matrix(in)) /* Already Stokes I. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,7 @@ void TelescopeLoaderElementPattern::load(oskar_Telescope* telescope,
     // Load element pattern data for stations only at the deepest level!
     if (num_subdirs == 0)
     {
-        int num_stations = oskar_telescope_num_stations(telescope);
+        const int num_stations = oskar_telescope_num_stations(telescope);
         for (int i = 0; i < num_stations; ++i)
         {
             oskar_Station* s = oskar_telescope_station(telescope, i);
@@ -96,15 +96,16 @@ string TelescopeLoaderElementPattern::name() const
 void TelescopeLoaderElementPattern::load_element_patterns(
         oskar_Station* station, const map<string, string>& filemap, int* status)
 {
-    // Check if safe to proceed.
     if (*status) return;
 
     // FIXME(FD) Return if element patterns are disabled.
+    // FIXME(FD) Don't do this here, if loading functional data...
     if (!oskar_telescope_enable_numerical_patterns(telescope_))
         return;
 
     // Get lists of all paths in the map that have keys starting with the
     // right root name.
+    vector<string> keys_sw_fit, paths_sw_fit;
     vector<string> keys_fit_x, keys_fit_y, keys_fit_scalar;
     vector<string> paths_fit_x, paths_fit_y, paths_fit_scalar;
     vector<string> keys_x, keys_y, paths_x, paths_y;
@@ -126,6 +127,11 @@ void TelescopeLoaderElementPattern::load_element_patterns(
         {
             keys_fit_scalar.push_back(key);
             paths_fit_scalar.push_back(i->second);
+        }
+        else if (key.find("_wave", 0) != string::npos)
+        {
+            keys_sw_fit.push_back(key);
+            paths_sw_fit.push_back(i->second);
         }
         else if (key.compare(0, root_x.size(), root_x) == 0)
         {
@@ -152,6 +158,7 @@ void TelescopeLoaderElementPattern::load_element_patterns(
     }
 
     // Load fitted X, Y or scalar data.
+    load_spherical_wave_data(station, keys_sw_fit, paths_sw_fit, status);
     if (oskar_telescope_pol_mode(telescope_) == OSKAR_POL_MODE_FULL)
     {
         load_fitted_data(1, station, keys_fit_x, paths_fit_x, status);
@@ -176,8 +183,8 @@ void TelescopeLoaderElementPattern::load_fitted_data(int port,
     {
         int ind = 0;
         double freq = 0.0;
-        string key = keys[i];
-        string path = paths[i];
+        const string key = keys[i];
+        const string path = paths[i];
 
         // Get the element index and frequency from the key.
         parse_filename(key.c_str(), &buffer, &buflen, &ind, &freq);
@@ -202,8 +209,8 @@ void TelescopeLoaderElementPattern::load_functional_data(int port,
     for (size_t i = 0; i < keys.size(); ++i)
     {
         int ind = 0;
-        string key = keys[i];
-        string path = paths[i];
+        const string key = keys[i];
+        const string path = paths[i];
 
         // Get the element index from the key.
         parse_filename(key.c_str(), &buffer, &buflen, &ind, 0);
@@ -214,6 +221,34 @@ void TelescopeLoaderElementPattern::load_functional_data(int port,
             oskar_station_resize_element_types(station, ind + 1, status);
         oskar_element_load(oskar_station_element(station, ind), path.c_str(),
                 port == 1 ? 1 : 0, status);
+    }
+    free(buffer);
+}
+
+void TelescopeLoaderElementPattern::load_spherical_wave_data(
+        oskar_Station* station, const vector<string>& keys,
+        const vector<string>& paths, int* status)
+{
+    size_t buflen = 0;
+    char* buffer = 0;
+    if (*status) return;
+    for (size_t i = 0; i < keys.size(); ++i)
+    {
+        int ind = 0;
+        double freq = 0.0;
+        const string key = keys[i];
+        const string path = paths[i];
+
+        // Get the element index and frequency from the key.
+        parse_filename(key.c_str(), &buffer, &buflen, &ind, &freq);
+
+        // Load the file.
+        if (*status) break;
+        if (oskar_station_num_element_types(station) < ind + 1)
+            oskar_station_resize_element_types(station, ind + 1, status);
+        oskar_element_load_spherical_wave_coeff(
+                oskar_station_element(station, ind), path.c_str(),
+                freq, status);
     }
     free(buffer);
 }

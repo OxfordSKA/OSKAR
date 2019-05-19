@@ -45,6 +45,7 @@ macro(OSKAR_APP)
     add_executable(${target} ${APP_SOURCES})
     target_link_libraries(${target}
         oskar_apps          # default libs
+        oskar_settings
         ${APP_EXTRA_LIBS}   # extra libs
     )
     set_target_properties(${target} PROPERTIES OUTPUT_NAME "${APP_NAME}")
@@ -62,7 +63,7 @@ macro(OSKAR_WRAP_CL SRC_LIST)
     foreach (CL_FILE ${ARGN})
         get_filename_component(name_ ${CL_FILE} NAME_WE)
         set(CL_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${CL_FILE})
-        set(CXX_FILE ${CMAKE_CURRENT_BINARY_DIR}/${name_}_cl_kernel.cpp)
+        set(CXX_FILE ${CMAKE_CURRENT_BINARY_DIR}/${name_}_cl_fragment.cpp)
         add_custom_command(OUTPUT ${CXX_FILE}
             COMMAND ${CMAKE_COMMAND}
                 -D CL_FILE:FILEPATH=${CL_FILE}

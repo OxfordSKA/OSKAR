@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #include "imager/oskar_imager.h"
 #include "math/oskar_cmath.h"
 #include "math/oskar_dft_c2r.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 #include "utility/oskar_thread.h"
 
 #ifdef _OPENMP
@@ -49,7 +49,8 @@ static void* run_blocks(void* arg);
 struct ThreadArgs
 {
     oskar_Imager* h;
-    oskar_Mem* plane;
+    oskar_Mem *plane;
+    const oskar_Mem *uu, *vv, *ww, *amp, *weight;
     int thread_id, num_vis;
 };
 typedef struct ThreadArgs ThreadArgs;
@@ -59,7 +60,7 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
         double* plane_norm, int* status)
 {
-    size_t i, num_pixels, num_threads;
+    size_t i, num_pixels;
     oskar_Thread** threads = 0;
     ThreadArgs* args = 0;
     if (*status) return;
@@ -71,25 +72,11 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
         *status = OSKAR_ERR_TYPE_MISMATCH;
     if (oskar_mem_is_complex(plane) || oskar_mem_is_matrix(plane))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
-    if (oskar_mem_length(plane) < num_pixels)
-        oskar_mem_realloc(plane, num_pixels, status);
+    oskar_mem_ensure(plane, num_pixels, status);
     if (*status) return;
 
-    /* Copy visibility data to each device. */
-    num_threads = (size_t) (h->num_devices);
-    for (i = 0; i < num_threads; ++i)
-    {
-        if (i < (size_t) (h->num_gpus))
-            oskar_device_set(h->gpu_ids[i], status);
-        oskar_mem_copy(h->d[i].uu, uu, status);
-        oskar_mem_copy(h->d[i].vv, vv, status);
-        oskar_mem_copy(h->d[i].amp, amps, status);
-        oskar_mem_copy(h->d[i].weight, weight, status);
-        if (h->algorithm == OSKAR_ALGORITHM_DFT_3D)
-            oskar_mem_copy(h->d[i].ww, ww, status);
-    }
-
     /* Set up worker threads. */
+    const size_t num_threads = (size_t) (h->num_devices);
     threads = (oskar_Thread**) calloc(num_threads, sizeof(oskar_Thread*));
     args = (ThreadArgs*) calloc(num_threads, sizeof(ThreadArgs));
     for (i = 0; i < num_threads; ++i)
@@ -97,6 +84,11 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
         args[i].h = h;
         args[i].thread_id = (int) i;
         args[i].num_vis = (int) num_vis;
+        args[i].uu = uu;
+        args[i].vv = vv;
+        args[i].ww = ww;
+        args[i].amp = amps;
+        args[i].weight = weight;
         args[i].plane = plane;
     }
 
@@ -123,14 +115,12 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
     /* Update normalisation. */
     if (oskar_mem_precision(weight) == OSKAR_DOUBLE)
     {
-        const double* w;
-        w = oskar_mem_double_const(weight, status);
+        const double* w = oskar_mem_double_const(weight, status);
         for (i = 0; i < num_vis; ++i) *plane_norm += w[i];
     }
     else
     {
-        const float* w;
-        w = oskar_mem_float_const(weight, status);
+        const float* w = oskar_mem_float_const(weight, status);
         for (i = 0; i < num_vis; ++i) *plane_norm += w[i];
     }
 }
@@ -138,24 +128,32 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
 static void* run_blocks(void* arg)
 {
     oskar_Imager* h;
-    oskar_Mem *t, *plane;
-    DeviceData* d;
-    size_t max_block_size, num_pixels;
+    oskar_Mem *plane, *uu, *vv, *ww = 0, *amp, *weight, *block, *l, *m, *n;
+    size_t max_size;
     const size_t smallest = 1024, largest = 65536;
-    int i_block, thread_id, num_blocks, num_vis;
-    int *status;
+    int dev_loc = OSKAR_CPU, *status;
 
     /* Get thread function arguments. */
     h = ((ThreadArgs*)arg)->h;
-    thread_id = ((ThreadArgs*)arg)->thread_id;
-    num_vis = ((ThreadArgs*)arg)->num_vis;
+    const int thread_id = ((ThreadArgs*)arg)->thread_id;
+    const int num_vis = ((ThreadArgs*)arg)->num_vis;
     plane = ((ThreadArgs*)arg)->plane;
     status = &(h->status);
 
     /* Set the device used by the thread. */
-    d = &h->d[thread_id];
     if (thread_id < h->num_gpus)
-        oskar_device_set(h->gpu_ids[thread_id], status);
+    {
+        dev_loc = h->dev_loc;
+        oskar_device_set(h->dev_loc, h->gpu_ids[thread_id], status);
+    }
+
+    /* Copy visibility data to device. */
+    uu = oskar_mem_create_copy(((ThreadArgs*)arg)->uu, dev_loc, status);
+    vv = oskar_mem_create_copy(((ThreadArgs*)arg)->vv, dev_loc, status);
+    amp = oskar_mem_create_copy(((ThreadArgs*)arg)->amp, dev_loc, status);
+    weight = oskar_mem_create_copy(((ThreadArgs*)arg)->weight, dev_loc, status);
+    if (h->algorithm == OSKAR_ALGORITHM_DFT_3D)
+        ww = oskar_mem_create_copy(((ThreadArgs*)arg)->ww, dev_loc, status);
 
 #ifdef _OPENMP
     /* Disable nested parallelism. */
@@ -163,61 +161,62 @@ static void* run_blocks(void* arg)
     omp_set_num_threads(1);
 #endif
 
-    /* Pointer to output block. */
-    t = oskar_mem_create_alias(0, 0, 0, status);
-
     /* Calculate the maximum pixel block size, and number of blocks. */
-    num_pixels = h->image_size * h->image_size;
-    max_block_size = num_pixels / h->num_devices;
-    max_block_size = ((max_block_size + smallest - 1) / smallest) * smallest;
-    if (max_block_size > largest) max_block_size = largest;
-    if (max_block_size < smallest) max_block_size = smallest;
-    num_blocks = (int) ((num_pixels + max_block_size - 1) / max_block_size);
+    const size_t num_pixels = (size_t)h->image_size * (size_t)h->image_size;
+    max_size = num_pixels / h->num_devices;
+    max_size = ((max_size + smallest - 1) / smallest) * smallest;
+    if (max_size > largest) max_size = largest;
+    if (max_size < smallest) max_size = smallest;
+    const int num_blocks = (int) ((num_pixels + max_size - 1) / max_size);
+
+    /* Allocate device memory for pixel block data. */
+    block = oskar_mem_create(h->imager_prec, dev_loc, 0, status);
+    l = oskar_mem_create(h->imager_prec, dev_loc, max_size, status);
+    m = oskar_mem_create(h->imager_prec, dev_loc, max_size, status);
+    n = oskar_mem_create(h->imager_prec, dev_loc, max_size, status);
 
     /* Loop until all blocks are done. */
     for (;;)
     {
-        size_t block_size, block_start;
+        size_t block_size;
 
         /* Get a unique block index. */
         oskar_mutex_lock(h->mutex);
-        i_block = (h->i_block)++;
+        const int i_block = (h->i_block)++;
         oskar_mutex_unlock(h->mutex);
         if ((i_block >= num_blocks) || *status) break;
 
         /* Calculate the block size. */
-        block_start = i_block * max_block_size;
+        const size_t block_start = i_block * max_size;
         block_size = num_pixels - block_start;
-        if (block_size > max_block_size) block_size = max_block_size;
+        if (block_size > max_size) block_size = max_size;
 
-        /* Copy the l,m,n positions for the block. */
-        if (oskar_mem_length(d->l) < block_size)
-            oskar_mem_realloc(d->l, block_size, status);
-        oskar_mem_copy_contents(d->l, h->l, 0, block_start,
-                block_size, status);
-        if (oskar_mem_length(d->m) < block_size)
-            oskar_mem_realloc(d->m, block_size, status);
-        oskar_mem_copy_contents(d->m, h->m, 0, block_start,
-                block_size, status);
+        /* Copy the (l,m,n) positions for the block. */
+        oskar_mem_copy_contents(l, h->l, 0, block_start, block_size, status);
+        oskar_mem_copy_contents(m, h->m, 0, block_start, block_size, status);
         if (h->algorithm == OSKAR_ALGORITHM_DFT_3D)
-        {
-            if (oskar_mem_length(d->n) < block_size)
-                oskar_mem_realloc(d->n, block_size, status);
-            oskar_mem_copy_contents(d->n, h->n, 0, block_start,
+            oskar_mem_copy_contents(n, h->n, 0, block_start,
                     block_size, status);
-        }
 
         /* Run DFT for the block. */
-        oskar_dft_c2r(num_vis, 2.0 * M_PI, d->uu, d->vv, d->ww,
-                d->amp, d->weight, (int) block_size,
-                d->l, d->m, d->n, d->block_dev, status);
+        oskar_dft_c2r(num_vis, 2.0 * M_PI, uu, vv, ww, amp, weight,
+                (int) block_size, l, m, n, block, status);
 
-        /* Copy data to the host and add to existing pixels. */
-        oskar_mem_copy(d->block_cpu, d->block_dev, status);
-        oskar_mem_set_alias(t, plane, block_start, block_size, status);
-        oskar_mem_add(t, t, d->block_cpu, block_size, status);
+        /* Add data to existing pixels. */
+        oskar_mem_add(plane, plane, block,
+                block_start, block_start, 0, block_size, status);
     }
-    oskar_mem_free(t, status);
+
+    /* Free memory. */
+    oskar_mem_free(uu, status);
+    oskar_mem_free(vv, status);
+    oskar_mem_free(ww, status);
+    oskar_mem_free(amp, status);
+    oskar_mem_free(weight, status);
+    oskar_mem_free(block, status);
+    oskar_mem_free(l, status);
+    oskar_mem_free(m, status);
+    oskar_mem_free(n, status);
     return 0;
 }
 

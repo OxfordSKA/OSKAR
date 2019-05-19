@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@
  */
 
 #include <oskar_global.h>
-#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,12 +47,11 @@ extern "C" {
  * Writes a summary of the telescope model to the log.
  *
  * @param[in] telescope  Telescope model structure to summarise.
- * @param[in,out] log    Pointer to log.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
 void oskar_telescope_log_summary(const oskar_Telescope* telescope,
-        oskar_Log* log, int* status);
+        int* status);
 
 #ifdef __cplusplus
 }

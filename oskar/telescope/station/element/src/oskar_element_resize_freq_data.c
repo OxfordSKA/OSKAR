@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,43 +33,43 @@
 extern "C" {
 #endif
 
-static void realloc_arrays(oskar_Element* e, int size, int* status);
+static void realloc_arrays(oskar_Element* e, int size);
 
 void oskar_element_resize_freq_data(oskar_Element* model, int size,
         int* status)
 {
-    int i, old_size, loc, precision;
-
-    /* Check if safe to proceed. */
+    int i;
     if (*status) return;
-
-    /* Get the old size. */
-    old_size = model->num_freq;
-    loc = oskar_element_mem_location(model);
-    precision = oskar_element_precision(model);
-
+    const int old_size = model->num_freq;
+    const int loc = model->mem_location;
+    const int prec = model->precision;
+    const int cplx = prec | OSKAR_COMPLEX;
     if (size > old_size)
     {
         /* Enlarge the arrays and create new structures. */
-        realloc_arrays(model, size, status);
+        realloc_arrays(model, size);
         for (i = old_size; i < size; ++i)
         {
-            model->filename_x[i] = oskar_mem_create(OSKAR_CHAR,
-                    OSKAR_CPU, 0, status);
-            model->filename_y[i] = oskar_mem_create(OSKAR_CHAR,
-                    OSKAR_CPU, 0, status);
-            model->filename_scalar[i] = oskar_mem_create(OSKAR_CHAR,
-                    OSKAR_CPU, 0, status);
-            model->x_v_re[i] = oskar_splines_create(precision, loc, status);
-            model->x_v_im[i] = oskar_splines_create(precision, loc, status);
-            model->x_h_re[i] = oskar_splines_create(precision, loc, status);
-            model->x_h_im[i] = oskar_splines_create(precision, loc, status);
-            model->y_v_re[i] = oskar_splines_create(precision, loc, status);
-            model->y_v_im[i] = oskar_splines_create(precision, loc, status);
-            model->y_h_re[i] = oskar_splines_create(precision, loc, status);
-            model->y_h_im[i] = oskar_splines_create(precision, loc, status);
-            model->scalar_re[i] = oskar_splines_create(precision, loc, status);
-            model->scalar_im[i] = oskar_splines_create(precision, loc, status);
+            model->filename_x[i] =
+                    oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
+            model->filename_y[i] =
+                    oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
+            model->filename_scalar[i] =
+                    oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
+            model->x_v_re[i] = oskar_splines_create(prec, loc, status);
+            model->x_v_im[i] = oskar_splines_create(prec, loc, status);
+            model->x_h_re[i] = oskar_splines_create(prec, loc, status);
+            model->x_h_im[i] = oskar_splines_create(prec, loc, status);
+            model->y_v_re[i] = oskar_splines_create(prec, loc, status);
+            model->y_v_im[i] = oskar_splines_create(prec, loc, status);
+            model->y_h_re[i] = oskar_splines_create(prec, loc, status);
+            model->y_h_im[i] = oskar_splines_create(prec, loc, status);
+            model->scalar_re[i] = oskar_splines_create(prec, loc, status);
+            model->scalar_im[i] = oskar_splines_create(prec, loc, status);
+            model->x_te[i] = oskar_mem_create(cplx, loc, 0, status);
+            model->x_tm[i] = oskar_mem_create(cplx, loc, 0, status);
+            model->y_te[i] = oskar_mem_create(cplx, loc, 0, status);
+            model->y_tm[i] = oskar_mem_create(cplx, loc, 0, status);
         }
     }
     else if (size < old_size)
@@ -90,49 +90,40 @@ void oskar_element_resize_freq_data(oskar_Element* model, int size,
             oskar_splines_free(model->y_h_im[i], status);
             oskar_splines_free(model->scalar_re[i], status);
             oskar_splines_free(model->scalar_im[i], status);
-        }
-        realloc_arrays(model, size, status);
-    }
-    else
-    {
-        /* No resize necessary. */
-        return;
-    }
+            oskar_mem_free(model->x_te[i], status);
+            oskar_mem_free(model->x_tm[i], status);
+            oskar_mem_free(model->y_te[i], status);
+            oskar_mem_free(model->y_tm[i], status);
 
-    /* Store the new size. */
+        }
+        realloc_arrays(model, size);
+    }
     model->num_freq = size;
 }
 
-static void realloc_arrays(oskar_Element* e, int size, int* status)
+static void realloc_arrays(oskar_Element* e, int size)
 {
-    e->freqs_hz = realloc(e->freqs_hz, size * sizeof(double));
-    if (!e->freqs_hz) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->filename_x = realloc(e->filename_x, size * sizeof(oskar_Mem*));
-    if (!e->filename_x) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->filename_y = realloc(e->filename_y, size * sizeof(oskar_Mem*));
-    if (!e->filename_y) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->filename_scalar = realloc(e->filename_scalar, size * sizeof(oskar_Mem*));
-    if (!e->filename_scalar) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->x_v_re = realloc(e->x_v_re, size * sizeof(oskar_Splines*));
-    if (!e->x_v_re) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->x_v_im = realloc(e->x_v_im, size * sizeof(oskar_Splines*));
-    if (!e->x_v_im) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->x_h_re = realloc(e->x_h_re, size * sizeof(oskar_Splines*));
-    if (!e->x_h_re) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->x_h_im = realloc(e->x_h_im, size * sizeof(oskar_Splines*));
-    if (!e->x_h_im) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->y_v_re = realloc(e->y_v_re, size * sizeof(oskar_Splines*));
-    if (!e->y_v_re) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->y_v_im = realloc(e->y_v_im, size * sizeof(oskar_Splines*));
-    if (!e->y_v_im) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->y_h_re = realloc(e->y_h_re, size * sizeof(oskar_Splines*));
-    if (!e->y_h_re) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->y_h_im = realloc(e->y_h_im, size * sizeof(oskar_Splines*));
-    if (!e->y_h_im) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->scalar_re = realloc(e->scalar_re, size * sizeof(oskar_Splines*));
-    if (!e->scalar_re) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    e->scalar_im = realloc(e->scalar_im, size * sizeof(oskar_Splines*));
-    if (!e->scalar_im) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    const size_t sz = size * sizeof(void*);
+    e->freqs_hz = (double*) realloc(e->freqs_hz, size * sizeof(double));
+    e->x_lmax = (int*) realloc(e->x_lmax, size * sizeof(int));
+    e->y_lmax = (int*) realloc(e->y_lmax, size * sizeof(int));
+    e->filename_x = (oskar_Mem**) realloc(e->filename_x, sz);
+    e->filename_y = (oskar_Mem**) realloc(e->filename_y, sz);
+    e->filename_scalar = (oskar_Mem**) realloc(e->filename_scalar, sz);
+    e->x_v_re = (oskar_Splines**) realloc(e->x_v_re, sz);
+    e->x_v_im = (oskar_Splines**) realloc(e->x_v_im, sz);
+    e->x_h_re = (oskar_Splines**) realloc(e->x_h_re, sz);
+    e->x_h_im = (oskar_Splines**) realloc(e->x_h_im, sz);
+    e->y_v_re = (oskar_Splines**) realloc(e->y_v_re, sz);
+    e->y_v_im = (oskar_Splines**) realloc(e->y_v_im, sz);
+    e->y_h_re = (oskar_Splines**) realloc(e->y_h_re, sz);
+    e->y_h_im = (oskar_Splines**) realloc(e->y_h_im, sz);
+    e->scalar_re = (oskar_Splines**) realloc(e->scalar_re, sz);
+    e->scalar_im = (oskar_Splines**) realloc(e->scalar_im, sz);
+    e->x_te = (oskar_Mem**) realloc(e->x_te, sz);
+    e->x_tm = (oskar_Mem**) realloc(e->x_tm, sz);
+    e->y_te = (oskar_Mem**) realloc(e->y_te, sz);
+    e->y_tm = (oskar_Mem**) realloc(e->y_tm, sz);
 }
 
 #ifdef __cplusplus

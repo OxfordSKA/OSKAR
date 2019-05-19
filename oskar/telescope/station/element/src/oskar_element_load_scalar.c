@@ -26,11 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "log/oskar_log.h"
+#include "math/oskar_cmath.h"
 #include "telescope/station/element/private_element.h"
 #include "telescope/station/element/oskar_element.h"
 #include "utility/oskar_getline.h"
 #include "utility/oskar_string_to_array.h"
-#include "math/oskar_cmath.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,11 +44,11 @@ extern "C" {
 
 #define DEG2RAD (M_PI/180.0)
 
-static void fit_splines(oskar_Log* log, oskar_Splines* splines, int n,
+static void fit_splines(oskar_Splines* splines, int n,
         oskar_Mem* theta, oskar_Mem* phi, oskar_Mem* data, oskar_Mem* weight,
         double closeness, double closeness_inc, const char* name, int* status);
 
-void oskar_element_load_scalar(oskar_Element* data, oskar_Log* log,
+void oskar_element_load_scalar(oskar_Element* data,
         double freq_hz, const char* filename,
         double closeness, double closeness_inc, int ignore_at_poles,
         int ignore_below_horizon, int* status)
@@ -95,8 +96,8 @@ void oskar_element_load_scalar(oskar_Element* data, oskar_Log* log,
     }
 
     /* Get pointers to surface data based on frequency index. */
-    scalar_re = oskar_element_scalar_re(data, i);
-    scalar_im = oskar_element_scalar_im(data, i);
+    scalar_re = data->scalar_re[i];
+    scalar_im = data->scalar_im[i];
 
     /* Open the file. */
     file = fopen(filename, "r");
@@ -141,8 +142,7 @@ void oskar_element_load_scalar(oskar_Element* data, oskar_Log* log,
         /* Ensure enough space in arrays. */
         if (n % 100 == 0)
         {
-            int size;
-            size = n + 100;
+            const int size = n + 100;
             oskar_mem_realloc(theta, size, status);
             oskar_mem_realloc(phi, size, status);
             oskar_mem_realloc(re, size, status);
@@ -176,9 +176,9 @@ void oskar_element_load_scalar(oskar_Element* data, oskar_Log* log,
     fclose(file);
 
     /* Fit splines to the surface data. */
-    fit_splines(log, scalar_re, n, theta, phi, re, weight,
+    fit_splines(scalar_re, n, theta, phi, re, weight,
             closeness, closeness_inc, "Scalar [real]", status);
-    fit_splines(log, scalar_im, n, theta, phi, im, weight,
+    fit_splines(scalar_im, n, theta, phi, im, weight,
             closeness, closeness_inc, "Scalar [imag]", status);
 
     /* Store the filename. */
@@ -194,23 +194,23 @@ void oskar_element_load_scalar(oskar_Element* data, oskar_Log* log,
 }
 
 
-static void fit_splines(oskar_Log* log, oskar_Splines* splines, int n,
+static void fit_splines(oskar_Splines* splines, int n,
         oskar_Mem* theta, oskar_Mem* phi, oskar_Mem* data, oskar_Mem* weight,
         double closeness, double closeness_inc, const char* name, int* status)
 {
     double avg_frac_error;
     if (*status) return;
     avg_frac_error = closeness; /* Copy the fitting parameter. */
-    oskar_log_message(log, 'M', 0, "");
-    oskar_log_message(log, 'M', 0, "Fitting surface %s...", name);
+    oskar_log_message('M', 0, "");
+    oskar_log_message('M', 0, "Fitting surface %s...", name);
     oskar_splines_fit(splines, n, oskar_mem_double(theta, status),
             oskar_mem_double(phi, status), oskar_mem_double_const(data, status),
             oskar_mem_double_const(weight, status), OSKAR_SPLINES_SPHERICAL, 1,
             &avg_frac_error, closeness_inc, 1, 1e-14, status);
-    oskar_log_message(log, 'M', 1, "Surface fitted to %.4f average "
+    oskar_log_message('M', 1, "Surface fitted to %.4f average "
             "frac. error (s=%.2e).", avg_frac_error,
             oskar_splines_smoothing_factor(splines));
-    oskar_log_message(log, 'M', 1, "Number of knots (theta, phi) = (%d, %d).",
+    oskar_log_message('M', 1, "Number of knots (theta, phi) = (%d, %d).",
             oskar_splines_num_knots_x_theta(splines),
             oskar_splines_num_knots_y_phi(splines));
 }

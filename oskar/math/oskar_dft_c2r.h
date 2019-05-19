@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,32 @@ extern "C" {
 
 /**
  * @brief
+ * Function to perform a 2D or 3D complex-to-real DFT.
  *
  * @details
+ * Computes a real output from a set of complex input data, by
+ * evaluating a 2D or 3D Direct Fourier Transform (DFT).
+ *
+ * This function must be supplied with the input x- and y-positions, and the
+ * output x- and y-positions. The output positions are direction cosines.
+ *
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
+ *
+ * The fastest-varying dimension in the output array is along x. The output is
+ * assumed to be completely real, so the conjugate copy of the input data
+ * should not be supplied.
+ *
+ * @param[in] num_in       Number of input points.
+ * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
+ * @param[in] x_in         Array of input x positions.
+ * @param[in] y_in         Array of input y positions.
+ * @param[in] data_in      Array of complex input data.
+ * @param[in] weight_in    Array of input data weights.
+ * @param[in] num_out      Number of output points.
+ * @param[in] x_out        Array of output 1/x positions.
+ * @param[in] y_out        Array of output 1/y positions.
+ * @param[out] output      Array of computed output points.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
@@ -66,4 +90,4 @@ void oskar_dft_c2r(
 }
 #endif
 
-#endif
+#endif /* include guard */

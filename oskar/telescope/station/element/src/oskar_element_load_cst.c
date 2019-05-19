@@ -26,10 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "log/oskar_log.h"
+#include "math/oskar_cmath.h"
 #include "telescope/station/element/private_element.h"
 #include "telescope/station/element/oskar_element.h"
 #include "utility/oskar_getline.h"
-#include "math/oskar_cmath.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,17 +43,16 @@ extern "C" {
 
 #define DEG2RAD (M_PI/180.0)
 
-static void fit_splines(oskar_Log* log, oskar_Splines* splines, int n,
+static void fit_splines(oskar_Splines* splines, int n,
         oskar_Mem* theta, oskar_Mem* phi, oskar_Mem* data, oskar_Mem* weight,
         double closeness, double closeness_inc, const char* name, int* status);
 
-void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
+void oskar_element_load_cst(oskar_Element* data,
         int port, double freq_hz, const char* filename,
         double closeness, double closeness_inc, int ignore_at_poles,
         int ignore_below_horizon, int* status)
 {
-    int i, n = 0, type = OSKAR_DOUBLE;
-    size_t fname_len;
+    int i, n = 0;
     oskar_Splines *data_h_re = 0, *data_h_im = 0;
     oskar_Splines *data_v_re = 0, *data_v_im = 0;
     oskar_Mem *theta, *phi, *h_re, *h_im, *v_re, *v_im, *weight;
@@ -62,24 +62,18 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     size_t bufsize = 0;
     FILE* file;
 
-    /* Check if safe to proceed. */
+    /* Check inputs. */
     if (*status) return;
-
-    /* Check port number. */
     if (port != 0 && port != 1 && port != 2)
     {
         *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
     }
-
-    /* Check the data type. */
-    if (oskar_element_precision(data) != type)
+    if (oskar_element_precision(data) != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-
-    /* Check the location. */
     if (oskar_element_mem_location(data) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
@@ -105,21 +99,21 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     /* Get pointers to surface data based on port number and frequency index. */
     if (port == 1 || port == 0)
     {
-        data_h_re = oskar_element_x_h_re(data, i);
-        data_h_im = oskar_element_x_h_im(data, i);
-        data_v_re = oskar_element_x_v_re(data, i);
-        data_v_im = oskar_element_x_v_im(data, i);
+        data_h_re = data->x_h_re[i];
+        data_h_im = data->x_h_im[i];
+        data_v_re = data->x_v_re[i];
+        data_v_im = data->x_v_im[i];
     }
     else if (port == 2)
     {
-        data_h_re = oskar_element_y_h_re(data, i);
-        data_h_im = oskar_element_y_h_im(data, i);
-        data_v_re = oskar_element_y_v_re(data, i);
-        data_v_im = oskar_element_y_v_im(data, i);
+        data_h_re = data->y_h_re[i];
+        data_h_im = data->y_h_im[i];
+        data_v_re = data->y_v_re[i];
+        data_v_im = data->y_v_im[i];
     }
 
     /* Open the file. */
-    fname_len = 1 + strlen(filename);
+    const size_t fname_len = 1 + strlen(filename);
     file = fopen(filename, "r");
     if (!file)
     {
@@ -143,13 +137,13 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     ludwig3 = strstr(line, "Horiz");
 
     /* Create local arrays to hold data for fitting. */
-    theta  = oskar_mem_create(type, OSKAR_CPU, 0, status);
-    phi    = oskar_mem_create(type, OSKAR_CPU, 0, status);
-    h_re   = oskar_mem_create(type, OSKAR_CPU, 0, status);
-    h_im   = oskar_mem_create(type, OSKAR_CPU, 0, status);
-    v_re   = oskar_mem_create(type, OSKAR_CPU, 0, status);
-    v_im   = oskar_mem_create(type, OSKAR_CPU, 0, status);
-    weight = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    theta  = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    phi    = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    h_re   = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    h_im   = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    v_re   = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    v_im   = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    weight = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
     if (*status) return;
 
     /* Loop over and read each line in the file. */
@@ -158,7 +152,6 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     {
         double t = 0., p = 0., abs_theta_horiz, phase_theta_horiz;
         double abs_phi_verti, phase_phi_verti;
-        double theta_horiz_re, theta_horiz_im, phi_verti_re, phi_verti_im;
         double h_re_, h_im_, v_re_, v_im_;
         void *p_theta = 0, *p_phi = 0, *p_h_re = 0, *p_h_im = 0, *p_v_re = 0;
         void *p_v_im = 0, *p_weight = 0;
@@ -185,8 +178,7 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         /* Ensure enough space in arrays. */
         if (n % 100 == 0)
         {
-            int size;
-            size = n + 100;
+            const int size = n + 100;
             oskar_mem_realloc(theta, size, status);
             oskar_mem_realloc(phi, size, status);
             oskar_mem_realloc(h_re, size, status);
@@ -212,10 +204,10 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         }
 
         /* Amp,phase to real,imag conversion. */
-        theta_horiz_re = abs_theta_horiz * cos(phase_theta_horiz);
-        theta_horiz_im = abs_theta_horiz * sin(phase_theta_horiz);
-        phi_verti_re = abs_phi_verti * cos(phase_phi_verti);
-        phi_verti_im = abs_phi_verti * sin(phase_phi_verti);
+        const double theta_horiz_re = abs_theta_horiz * cos(phase_theta_horiz);
+        const double theta_horiz_im = abs_theta_horiz * sin(phase_theta_horiz);
+        const double phi_verti_re = abs_phi_verti * cos(phase_phi_verti);
+        const double phi_verti_im = abs_phi_verti * sin(phase_phi_verti);
 
         /* Convert to Ludwig-3 polarisation system if required. */
         if (ludwig3)
@@ -229,9 +221,8 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         else
         {
             /* Convert from theta/phi to Ludwig-3. */
-            double cos_p, sin_p;
-            sin_p = sin(p);
-            cos_p = cos(p);
+            const double sin_p = sin(p);
+            const double cos_p = cos(p);
             h_re_ = theta_horiz_re * cos_p - phi_verti_re * sin_p;
             h_im_ = theta_horiz_im * cos_p - phi_verti_im * sin_p;
             v_re_ = theta_horiz_re * sin_p + phi_verti_re * cos_p;
@@ -256,13 +247,13 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     fclose(file);
 
     /* Fit splines to the surface data. */
-    fit_splines(log, data_h_re, n, theta, phi, h_re, weight,
+    fit_splines(data_h_re, n, theta, phi, h_re, weight,
             closeness, closeness_inc, "H [real]", status);
-    fit_splines(log, data_h_im, n, theta, phi, h_im, weight,
+    fit_splines(data_h_im, n, theta, phi, h_im, weight,
             closeness, closeness_inc, "H [imag]", status);
-    fit_splines(log, data_v_re, n, theta, phi, v_re, weight,
+    fit_splines(data_v_re, n, theta, phi, v_re, weight,
             closeness, closeness_inc, "V [real]", status);
-    fit_splines(log, data_v_im, n, theta, phi, v_im, weight,
+    fit_splines(data_v_im, n, theta, phi, v_im, weight,
             closeness, closeness_inc, "V [imag]", status);
 
     /* Store the filename. */
@@ -304,23 +295,23 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
 }
 
 
-static void fit_splines(oskar_Log* log, oskar_Splines* splines, int n,
+static void fit_splines(oskar_Splines* splines, int n,
         oskar_Mem* theta, oskar_Mem* phi, oskar_Mem* data, oskar_Mem* weight,
         double closeness, double closeness_inc, const char* name, int* status)
 {
     double avg_frac_error;
     if (*status) return;
     avg_frac_error = closeness; /* Copy the fitting parameter. */
-    oskar_log_line(log, 'M', ' ');
-    oskar_log_message(log, 'M', 0, "Fitting surface %s...", name);
+    oskar_log_line('M', ' ');
+    oskar_log_message('M', 0, "Fitting surface %s...", name);
     oskar_splines_fit(splines, n, oskar_mem_double(theta, status),
             oskar_mem_double(phi, status), oskar_mem_double_const(data, status),
             oskar_mem_double_const(weight, status), OSKAR_SPLINES_SPHERICAL, 1,
             &avg_frac_error, closeness_inc, 1, 1e-14, status);
-    oskar_log_message(log, 'M', 1, "Surface fitted to %.4f average "
+    oskar_log_message('M', 1, "Surface fitted to %.4f average "
             "frac. error (s=%.2e).", avg_frac_error,
             oskar_splines_smoothing_factor(splines));
-    oskar_log_message(log, 'M', 1, "Number of knots (theta, phi) = (%d, %d).",
+    oskar_log_message('M', 1, "Number of knots (theta, phi) = (%d, %d).",
             oskar_splines_num_knots_x_theta(splines),
             oskar_splines_num_knots_y_phi(splines));
 }

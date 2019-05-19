@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,7 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
         int* status)
 {
     int i;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
     dst->precision = src->precision;
     dst->element_type = src->element_type;
     dst->taper_type = src->taper_type;
@@ -48,14 +45,12 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
     dst->gaussian_fwhm_rad = src->gaussian_fwhm_rad;
     dst->dipole_length = src->dipole_length;
     dst->dipole_length_units = src->dipole_length_units;
-
-    /* Resize the arrays. */
     oskar_element_resize_freq_data(dst, src->num_freq, status);
-
-    /* Copy the new data across. */
     for (i = 0; i < src->num_freq; ++i)
     {
         dst->freqs_hz[i] = src->freqs_hz[i];
+        dst->x_lmax[i] = src->x_lmax[i];
+        dst->y_lmax[i] = src->y_lmax[i];
         oskar_mem_copy(dst->filename_x[i], src->filename_x[i], status);
         oskar_mem_copy(dst->filename_y[i], src->filename_y[i], status);
         oskar_mem_copy(dst->filename_scalar[i], src->filename_scalar[i], status);
@@ -69,6 +64,10 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
         oskar_splines_copy(dst->y_h_im[i], src->y_h_im[i], status);
         oskar_splines_copy(dst->scalar_re[i], src->scalar_re[i], status);
         oskar_splines_copy(dst->scalar_im[i], src->scalar_im[i], status);
+        oskar_mem_copy(dst->x_te[i], src->x_te[i], status);
+        oskar_mem_copy(dst->x_tm[i], src->x_tm[i], status);
+        oskar_mem_copy(dst->y_te[i], src->y_te[i], status);
+        oskar_mem_copy(dst->y_tm[i], src->y_tm[i], status);
     }
 }
 

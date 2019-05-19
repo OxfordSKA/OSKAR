@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include "imager/oskar_grid_weights.h"
 #include "imager/private_imager_weight_uniform.h"
+#include "log/oskar_log.h"
 #include <math.h>
 
 #ifdef __cplusplus
@@ -70,7 +71,7 @@ void oskar_imager_weight_uniform(size_t num_points, const oskar_Mem* uu,
                 cell_size_rad, grid_size, &num_skipped,
                 oskar_mem_float_const(weight_grid, status));
     if (num_skipped > 0)
-        printf("WARNING: Skipped %lu visibility weights.\n",
+        oskar_log_warning("Skipped %lu visibility weights.",
                 (unsigned long) num_skipped);
 }
 

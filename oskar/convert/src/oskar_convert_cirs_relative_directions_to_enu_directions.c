@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,82 +26,63 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "convert/define_convert_cirs_relative_directions_to_enu_directions.h"
 #include "convert/oskar_convert_cirs_relative_directions_to_enu_directions.h"
-#include "convert/oskar_convert_cirs_relative_directions_to_enu_directions_cuda.h"
-#include "convert/private_convert_cirs_relative_directions_to_enu_directions_inline.h"
-#include "convert/private_evaluate_cirs_observed_parameters.h"
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_convert_cirs_relative_directions_to_enu_directions_f(
-        int num_points, const float* l, const float* m, const float* n,
-        float ra0_rad, float dec0_rad, float lon_rad, float lat_rad,
-        float era_rad, float pm_x_rad, float pm_y_rad,
-        float diurnal_aberration, float* x, float* y, float* z)
-{
-    int i;
-    double sin_lat, cos_lat, sin_ha0, cos_ha0, sin_dec0, cos_dec0;
-    double local_pm_x, local_pm_y;
+OSKAR_CONVERT_CIRS_REL_DIR_TO_ENU_DIR(convert_cirs_relative_directions_to_enu_directions_float, float)
+OSKAR_CONVERT_CIRS_REL_DIR_TO_ENU_DIR(convert_cirs_relative_directions_to_enu_directions_double, double)
 
-    /* Calculate common transform parameters. */
-    oskar_evaluate_cirs_observed_parameters(lon_rad, lat_rad, era_rad,
-            ra0_rad, dec0_rad, pm_x_rad, pm_y_rad, &sin_lat, &cos_lat, &sin_ha0,
-            &cos_ha0, &sin_dec0, &cos_dec0, &local_pm_x, &local_pm_y);
-
-    /* Loop over positions. */
-    for (i = 0; i < num_points; ++i)
-    {
-        oskar_convert_cirs_relative_directions_to_enu_directions_inline_f(
-                l[i], m[i], n[i], sin_lat, cos_lat, sin_ha0, cos_ha0,
-                sin_dec0, cos_dec0, local_pm_x, local_pm_y,
-                diurnal_aberration, &x[i], &y[i], &z[i]);
-    }
-}
-
-/* Double precision. */
-void oskar_convert_cirs_relative_directions_to_enu_directions_d(
-        int num_points, const double* l, const double* m, const double* n,
-        double ra0_rad, double dec0_rad, double lon_rad, double lat_rad,
-        double era_rad, double pm_x_rad, double pm_y_rad,
-        double diurnal_aberration, double* x, double* y, double* z)
-{
-    int i;
-    double sin_lat, cos_lat, sin_ha0, cos_ha0, sin_dec0, cos_dec0;
-    double local_pm_x, local_pm_y;
-
-    /* Calculate common transform parameters. */
-    oskar_evaluate_cirs_observed_parameters(lon_rad, lat_rad, era_rad,
-            ra0_rad, dec0_rad, pm_x_rad, pm_y_rad, &sin_lat, &cos_lat, &sin_ha0,
-            &cos_ha0, &sin_dec0, &cos_dec0, &local_pm_x, &local_pm_y);
-
-    /* Loop over positions. */
-    for (i = 0; i < num_points; ++i)
-    {
-        oskar_convert_cirs_relative_directions_to_enu_directions_inline_d(
-                l[i], m[i], n[i], sin_lat, cos_lat, sin_ha0, cos_ha0,
-                sin_dec0, cos_dec0, local_pm_x, local_pm_y,
-                diurnal_aberration, &x[i], &y[i], &z[i]);
-    }
-}
-
-/* Wrapper. */
-void oskar_convert_cirs_relative_directions_to_enu_directions(int num_points,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        double ra0_rad, double dec0_rad, double lon_rad, double lat_rad,
-        double era_rad, double pm_x_rad, double pm_y_rad,
-        double diurnal_aberration, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
+void oskar_convert_cirs_relative_directions_to_enu_directions(
+        int at_origin,
+        int bypass,
+        int offset_in,
+        int num_points,
+        const oskar_Mem* l,
+        const oskar_Mem* m,
+        const oskar_Mem* n,
+        double ra0_rad,
+        double dec0_rad,
+        double lon_rad,
+        double lat_rad,
+        double era_rad,
+        double pm_x_rad,
+        double pm_y_rad,
+        double diurnal_aberration,
+        int offset_out,
+        oskar_Mem* x,
+        oskar_Mem* y,
+        oskar_Mem* z,
         int* status)
 {
-    int type, location;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Get type and check consistency. */
-    type = oskar_mem_type(x);
+    const int type = oskar_mem_type(x);
+    const int location = oskar_mem_location(x);
+    const double ha0_rad = era_rad + lon_rad - ra0_rad;
+    const double sin_ha0  = sin(ha0_rad);
+    const double cos_ha0  = cos(ha0_rad);
+    const double sin_dec0 = sin(dec0_rad);
+    const double cos_dec0 = cos(dec0_rad);
+    const double sin_lon  = sin(lon_rad);
+    const double cos_lon  = cos(lon_rad);
+    const double sin_lat  = sin(lat_rad);
+    const double cos_lat  = cos(lat_rad);
+    const double local_pm_x = pm_x_rad * cos_lon - pm_y_rad * sin_lon;
+    const double local_pm_y = pm_x_rad * sin_lon + pm_y_rad * cos_lon;
+    const float sin_ha0_f  = (float) sin_ha0;
+    const float cos_ha0_f  = (float) cos_ha0;
+    const float sin_dec0_f = (float) sin_dec0;
+    const float cos_dec0_f = (float) cos_dec0;
+    const float sin_lat_f  = (float) sin_lat;
+    const float cos_lat_f  = (float) cos_lat;
+    const float local_pm_x_f = (float) local_pm_x;
+    const float local_pm_y_f = (float) local_pm_y;
+    const float diurnal_aberration_f = (float) diurnal_aberration;
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -114,9 +95,6 @@ void oskar_convert_cirs_relative_directions_to_enu_directions(int num_points,
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-
-    /* Get location and check consistency. */
-    location = oskar_mem_location(x);
     if (location != oskar_mem_location(y) ||
             location != oskar_mem_location(z) ||
             location != oskar_mem_location(l) ||
@@ -126,79 +104,89 @@ void oskar_convert_cirs_relative_directions_to_enu_directions(int num_points,
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-
-    /* Check dimension consistency. */
-    if ((int)oskar_mem_length(x) < num_points ||
-            (int)oskar_mem_length(y) < num_points ||
-            (int)oskar_mem_length(z) < num_points ||
-            (int)oskar_mem_length(l) < num_points ||
-            (int)oskar_mem_length(m) < num_points ||
-            (int)oskar_mem_length(n) < num_points)
+    if (location == OSKAR_CPU)
     {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
-        return;
-    }
-
-    /* Switch on type and location. */
-    if (type == OSKAR_DOUBLE)
-    {
-        double *x_, *y_, *z_;
-        const double *l_, *m_, *n_;
-        x_ = oskar_mem_double(x, status);
-        y_ = oskar_mem_double(y, status);
-        z_ = oskar_mem_double(z, status);
-        l_ = oskar_mem_double_const(l, status);
-        m_ = oskar_mem_double_const(m, status);
-        n_ = oskar_mem_double_const(n, status);
-
-        if (location == OSKAR_CPU)
-        {
-            oskar_convert_cirs_relative_directions_to_enu_directions_d(
-                    num_points, l_, m_, n_, ra0_rad, dec0_rad, lon_rad,
-                    lat_rad, era_rad, pm_x_rad, pm_y_rad, diurnal_aberration,
-                    x_, y_, z_);
-        }
-        else if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_convert_cirs_relative_directions_to_enu_directions_cuda_d(
-                    num_points, l_, m_, n_, ra0_rad, dec0_rad, lon_rad,
-                    lat_rad, era_rad, pm_x_rad, pm_y_rad, diurnal_aberration,
-                    x_, y_, z_);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
+        if (type == OSKAR_SINGLE)
+            convert_cirs_relative_directions_to_enu_directions_float(
+                    at_origin, bypass, offset_in, num_points,
+                    (!at_origin ? oskar_mem_float_const(l, status) : 0),
+                    (!at_origin ? oskar_mem_float_const(m, status) : 0),
+                    (!at_origin ? oskar_mem_float_const(n, status) : 0),
+                    sin_ha0_f, cos_ha0_f, sin_dec0_f, cos_dec0_f,
+                    sin_lat_f, cos_lat_f, local_pm_x_f, local_pm_y_f,
+                    diurnal_aberration_f, offset_out,
+                    oskar_mem_float(x, status),
+                    oskar_mem_float(y, status),
+                    oskar_mem_float(z, status));
+        else if (type == OSKAR_DOUBLE)
+            convert_cirs_relative_directions_to_enu_directions_double(
+                    at_origin, bypass, offset_in, num_points,
+                    (!at_origin ? oskar_mem_double_const(l, status) : 0),
+                    (!at_origin ? oskar_mem_double_const(m, status) : 0),
+                    (!at_origin ? oskar_mem_double_const(n, status) : 0),
+                    sin_ha0, cos_ha0, sin_dec0, cos_dec0,
+                    sin_lat, cos_lat, local_pm_x, local_pm_y,
+                    diurnal_aberration, offset_out,
+                    oskar_mem_double(x, status),
+                    oskar_mem_double(y, status),
+                    oskar_mem_double(z, status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else
     {
-        float *x_, *y_, *z_;
-        const float *l_, *m_, *n_;
-        x_ = oskar_mem_float(x, status);
-        y_ = oskar_mem_float(y, status);
-        z_ = oskar_mem_float(z, status);
-        l_ = oskar_mem_float_const(l, status);
-        m_ = oskar_mem_float_const(m, status);
-        n_ = oskar_mem_float_const(n, status);
-
-        if (location == OSKAR_CPU)
+        size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
+        const int is_dbl = (type == OSKAR_DOUBLE);
+        const char* k = 0;
+        const void* np = 0;
+        if (type == OSKAR_SINGLE)
+            k = "convert_cirs_relative_directions_to_enu_directions_float";
+        else if (type == OSKAR_DOUBLE)
+            k = "convert_cirs_relative_directions_to_enu_directions_double";
+        else
         {
-            oskar_convert_cirs_relative_directions_to_enu_directions_f(
-                    num_points, l_, m_, n_, ra0_rad, dec0_rad, lon_rad,
-                    lat_rad, era_rad, pm_x_rad, pm_y_rad, diurnal_aberration,
-                    x_, y_, z_);
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
-        else if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_convert_cirs_relative_directions_to_enu_directions_cuda_f(
-                    num_points, l_, m_, n_, ra0_rad, dec0_rad, lon_rad,
-                    lat_rad, era_rad, pm_x_rad, pm_y_rad, diurnal_aberration,
-                    x_, y_, z_);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
+        if (num_points <= 32) local_size[0] = 32;
+        else if (num_points <= 64) local_size[0] = 64;
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = oskar_device_global_size(
+                (size_t) num_points, local_size[0]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &at_origin},
+                {INT_SZ, &bypass},
+                {INT_SZ, &offset_in},
+                {INT_SZ, &num_points},
+                {PTR_SZ, (!at_origin ? oskar_mem_buffer_const(l) : &np)},
+                {PTR_SZ, (!at_origin ? oskar_mem_buffer_const(m) : &np)},
+                {PTR_SZ, (!at_origin ? oskar_mem_buffer_const(n) : &np)},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&sin_ha0 : (const void*)&sin_ha0_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&cos_ha0 : (const void*)&cos_ha0_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&sin_dec0 : (const void*)&sin_dec0_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&cos_dec0 : (const void*)&cos_dec0_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&sin_lat : (const void*)&sin_lat_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&cos_lat : (const void*)&cos_lat_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&local_pm_x : (const void*)&local_pm_x_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&local_pm_y : (const void*)&local_pm_y_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&diurnal_aberration :
+                        (const void*)&diurnal_aberration_f},
+                {INT_SZ, &offset_out},
+                {PTR_SZ, oskar_mem_buffer(x)},
+                {PTR_SZ, oskar_mem_buffer(y)},
+                {PTR_SZ, oskar_mem_buffer(z)}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
     }
 }
 

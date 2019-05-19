@@ -3,6 +3,9 @@
 #
 
 set(sky_SRC
+    define_sky_copy_source_data.h
+    define_sky_scale_flux_with_frequency.h
+    define_update_horizon_mask.h
     src/oskar_evaluate_tec_tid.c
     src/oskar_generate_random_coordinate.c
     src/oskar_sky_accessors.c
@@ -35,24 +38,12 @@ set(sky_SRC
     src/oskar_sky_set_source.c
     src/oskar_sky_set_spectral_index.c
     src/oskar_sky_write.c
+    src/oskar_sky.cl
     src/oskar_update_horizon_mask.c
 )
 
 if (CUDA_FOUND)
-    list(APPEND sky_SRC
-        #src/oskar_rebin_sky_cuda.cu # Doesn't work on compute 1.3 architectures.
-        src/oskar_sky_copy_source_data_cuda.cu
-        src/oskar_sky_scale_flux_with_frequency_cuda.cu
-        src/oskar_update_horizon_mask_cuda.cu
-    )
-endif()
-
-if (OpenCL_FOUND)
-    list(APPEND sky_SRC
-        src/oskar_sky_copy_source_data.cl
-        src/oskar_sky_scale_flux_with_frequency.cl
-        src/oskar_update_horizon_mask.cl
-    )
+    list(APPEND sky_SRC src/oskar_sky.cu)
 endif()
 
 set(sky_SRC "${sky_SRC}" PARENT_SCOPE)

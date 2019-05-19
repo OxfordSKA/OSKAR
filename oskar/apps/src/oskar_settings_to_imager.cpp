@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@ using namespace std;
 oskar_Imager* oskar_settings_to_imager(oskar::SettingsTree* s,
         oskar_Log* log, int* status)
 {
+    (void) log;
     if (*status || !s) return 0;
     s->clear_group();
 
@@ -44,7 +45,6 @@ oskar_Imager* oskar_settings_to_imager(oskar::SettingsTree* s,
     oskar_Imager* h = oskar_imager_create(
             s->to_int("double_precision", status) ?
             OSKAR_DOUBLE : OSKAR_SINGLE, status);
-    oskar_imager_set_log(h, log);
 
     // Set GPU IDs.
     if (!s->to_int("use_gpus", status))

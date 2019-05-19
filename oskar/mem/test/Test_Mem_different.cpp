@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,8 @@ TEST(Mem, different_none)
     one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(one, 4.4, 0, 0, &status);
-    oskar_mem_set_value_real(two, 4.4, 0, 0, &status);
+    oskar_mem_set_value_real(one, 4.4, 0, 20, &status);
+    oskar_mem_set_value_real(two, 4.4, 0, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ((int)OSKAR_FALSE, oskar_mem_different(one, two, 0, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -59,8 +59,8 @@ TEST(Mem, different_all)
     one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(one, 4.4, 0, 0, &status);
-    oskar_mem_set_value_real(two, 4.2, 0, 0, &status);
+    oskar_mem_set_value_real(one, 4.4, 0, 20, &status);
+    oskar_mem_set_value_real(two, 4.2, 0, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ((int)OSKAR_TRUE, oskar_mem_different(one, two, 0, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -78,8 +78,8 @@ TEST(Mem, different_by_one)
     one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(one, 1.0, 0, 0, &status);
-    oskar_mem_set_value_real(two, 1.0, 0, 0, &status);
+    oskar_mem_set_value_real(one, 1.0, 0, 20, &status);
+    oskar_mem_set_value_real(two, 1.0, 0, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_float(two, &status)[4] = 1.1f;
     ASSERT_EQ((int)OSKAR_TRUE, oskar_mem_different(one, two, 0, &status));
@@ -99,8 +99,8 @@ TEST(Mem, different_up_to_a_point)
     one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(one, 1.0, 0, 0, &status);
-    oskar_mem_set_value_real(two, 1.0, 0, 0, &status);
+    oskar_mem_set_value_real(one, 1.0, 0, 20, &status);
+    oskar_mem_set_value_real(two, 1.0, 0, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_float(two, &status)[4] = 1.1f;
     ASSERT_EQ((int)OSKAR_FALSE, oskar_mem_different(one, two, 4, &status));

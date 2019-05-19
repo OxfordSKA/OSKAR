@@ -36,20 +36,16 @@ extern "C" {
 void oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2,
         int* status)
 {
-    int num_elements, n_sources1, n_sources2, n_sources3;
-    int n_stations1, n_stations2, n_stations3;
-
-    /* Check if safe to proceed. */
     if (*status) return;
 
     /* Get the dimensions of the input data. */
     if (!j3) j3 = j1;
-    n_sources1 = j1->num_sources;
-    n_sources2 = j2->num_sources;
-    n_sources3 = j3->num_sources;
-    n_stations1 = j1->num_stations;
-    n_stations2 = j2->num_stations;
-    n_stations3 = j3->num_stations;
+    const int n_sources1 = j1->num_sources;
+    const int n_sources2 = j2->num_sources;
+    const int n_sources3 = j3->num_sources;
+    const int n_stations1 = j1->num_stations;
+    const int n_stations2 = j2->num_stations;
+    const int n_stations3 = j3->num_stations;
 
     /* Check the data dimensions. */
     if (n_sources1 != n_sources2 || n_sources1 != n_sources3)
@@ -58,8 +54,9 @@ void oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2,
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Multiply the array elements. */
-    num_elements = n_sources1 * n_stations1;
-    oskar_mem_multiply(j3->data, j1->data, j2->data, num_elements, status);
+    const size_t num_elements = n_sources1 * n_stations1;
+    oskar_mem_multiply(j3->data, j1->data, j2->data,
+            0, 0, 0, num_elements, status);
 }
 
 #ifdef __cplusplus

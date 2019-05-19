@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
+#include "settings/oskar_option_parser.h"
 #include "correlate/oskar_cross_correlate.h"
-#include "sky/oskar_sky.h"
 #include "interferometer/oskar_jones.h"
-#include "mem/oskar_mem.h"
+#include "sky/oskar_sky.h"
 #include "telescope/oskar_telescope.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_timer.h"
+#include "utility/oskar_device.h"
 #include "oskar_version.h"
 
-#ifndef _WIN32
-#   include <sys/time.h>
-#endif /* _WIN32 */
 #include <cmath>
 #include <cstdlib>
 #include <cstdio>
+#include <string>
 #include <vector>
 
 static void benchmark(int num_stations, int num_sources, int type,
@@ -59,6 +57,7 @@ int main(int argc, char** argv)
     opt.add_flag("-s", "Use scalar Jones terms (default: matrix/polarised).");
     opt.add_flag("-g", "Run on the GPU");
     opt.add_flag("-c", "Run on the CPU");
+    opt.add_flag("-cl", "Run using OpenCL");
     opt.add_flag("-e", "Use Gaussian sources (default: point sources).");
     opt.add_flag("-b", "Use bandwidth smearing (default: no bandwidth smearing).");
     opt.add_flag("-t", "Use time smearing (default: no time smearing).");
@@ -71,32 +70,34 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
 
-    int location, niter, num_stations, num_sources, status = 0;
+    int location = -1, status = 0;
     double max_std_dev = 0.0;
-    opt.get("-nst")->getInt(num_stations);
-    opt.get("-nsrc")->getInt(num_sources);
+    int num_stations = opt.get_int("-nst");
+    int num_sources = opt.get_int("-nsrc");
     int type = opt.is_set("-sp") ? OSKAR_SINGLE : OSKAR_DOUBLE;
     int jones_type = type | OSKAR_COMPLEX;
     if (!opt.is_set("-s"))
         jones_type |= OSKAR_MATRIX;
-    opt.get("-n")->getInt(niter);
+    int niter = opt.get_int("-n");
     int use_extended = opt.is_set("-e") ? OSKAR_TRUE : OSKAR_FALSE;
     int use_bandwidth_smearing = opt.is_set("-b") ? OSKAR_TRUE : OSKAR_FALSE;
     int use_time_smearing = opt.is_set("-t") ? OSKAR_TRUE : OSKAR_FALSE;
     std::string raw_file, ascii_file;
     if (opt.is_set("-r"))
-        opt.get("-r")->getString(raw_file);
+        raw_file = opt.get_string("-r");
     if (opt.is_set("-a"))
-        opt.get("-a")->getString(ascii_file);
+        ascii_file = opt.get_string("-a");
     if (opt.is_set("-std"))
-        opt.get("-std")->getDouble(max_std_dev);
+        max_std_dev = opt.get_double("-std");
     if (opt.is_set("-g"))
         location = OSKAR_GPU;
     if (opt.is_set("-c"))
         location = OSKAR_CPU;
-    if (!(opt.is_set("-c") ^ opt.is_set("-g")))
+    if (opt.is_set("-cl"))
+        location = OSKAR_CL;
+    if (location < 0)
     {
-        opt.error("Please select one of -g or -c");
+        opt.error("Please select one of -g, -c or -cl");
         return EXIT_FAILURE;
     }
 
@@ -121,6 +122,7 @@ int main(int argc, char** argv)
     }
 
     // Run benchmarks.
+    oskar_device_set_require_double_precision(type == OSKAR_DOUBLE);
     double time_taken_sec = 0.0, average_time_sec = 0.0;
     std::vector<double> times;
     benchmark(num_stations, num_sources, type, jones_type, location,
@@ -217,8 +219,7 @@ void benchmark(int num_stations, int num_sources, int type,
         int niter, std::vector<double>& times, const std::string& ascii_file,
         int* status)
 {
-    oskar_Timer* timer = oskar_timer_create(location == OSKAR_GPU ?
-            OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
+    oskar_Timer* timer = oskar_timer_create(location);
 
     // Create a sky model, telescope model and Jones matrices.
     oskar_Telescope* tel = oskar_telescope_create(type, location,
@@ -261,18 +262,21 @@ void benchmark(int num_stations, int num_sources, int type,
     oskar_mem_random_range(oskar_sky_gaussian_c(sky), 0.1e-6, 0.2e-6, status);
 
     // Set options for bandwidth smearing, time smearing, extended sources.
-    oskar_telescope_set_channel_bandwidth(tel, 100e3 * use_bandwidth_smearing);
-    oskar_telescope_set_time_average(tel, (double) use_time_smearing);
+    oskar_telescope_set_channel_bandwidth(tel, 10e6 * use_bandwidth_smearing);
+    oskar_telescope_set_time_average(tel, 10 * use_time_smearing);
     oskar_sky_set_use_extended(sky, use_extended);
 
     // Run benchmark.
     times.resize(niter);
+    char* device_name = oskar_device_name(location, 0);
+    printf("Using device '%s'\n", device_name);
+    free(device_name);
     for (int i = 0; i < niter; ++i)
     {
         oskar_mem_clear_contents(vis, status);
         oskar_timer_start(timer);
-        oskar_cross_correlate(vis, oskar_sky_num_sources(sky), J, sky, tel,
-                u, v, w, 0.0, 100e6, status);
+        oskar_cross_correlate(oskar_sky_num_sources(sky), J, sky, tel,
+                u, v, w, 0.0, 100e6, 0, vis, status);
         times[i] = oskar_timer_elapsed(timer);
     }
 
@@ -282,7 +286,8 @@ void benchmark(int num_stations, int num_sources, int type,
         FILE* fhan = fopen(ascii_file.c_str(), "w");
         if (fhan)
         {
-            oskar_mem_save_ascii(fhan, 1, oskar_mem_length(vis), status, vis);
+            oskar_mem_save_ascii(fhan, 1, 0, oskar_mem_length(vis),
+                    status, vis);
             fclose(fhan);
         }
     }

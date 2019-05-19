@@ -285,3 +285,75 @@ TEST(string_to_array_realloc_s, reuse_buffer)
     // Free the list array.
     free(list);
 }
+
+
+TEST(string_to_array_realloc_d, reuse_buffer)
+{
+    // Test lines with comments and blanks.
+    double *list = 0;
+    size_t n = 0, filled = 0;
+
+    {
+        char line[] = "# This is a comment.";
+        filled = oskar_string_to_array_realloc_d(line, &n, &list);
+        ASSERT_EQ((size_t)0, filled);
+        ASSERT_EQ((size_t)0, n);
+    }
+
+    {
+        char line[] = " # This is another comment.";
+        filled = oskar_string_to_array_realloc_d(line, &n, &list);
+        ASSERT_EQ((size_t)0, filled);
+        ASSERT_EQ((size_t)0, n);
+    }
+
+    {
+        char line[] = "1, 10.2, 20.3";
+        filled = oskar_string_to_array_realloc_d(line, &n, &list);
+        ASSERT_EQ((size_t)3, filled);
+        ASSERT_GE(n, (size_t)3);
+        EXPECT_DOUBLE_EQ(1,    list[0]);
+        EXPECT_DOUBLE_EQ(10.2, list[1]);
+        EXPECT_DOUBLE_EQ(20.3, list[2]);
+    }
+
+    {
+        char line[] = " ";
+        filled = oskar_string_to_array_realloc_d(line, &n, &list);
+        ASSERT_EQ((size_t)0, filled);
+        ASSERT_GE(n, (size_t)3);
+    }
+
+    {
+        char line[] = "";
+        filled = oskar_string_to_array_realloc_d(line, &n, &list);
+        ASSERT_EQ((size_t)0, filled);
+        ASSERT_GE(n, (size_t)3);
+    }
+
+    {
+        char line[] = "2 0, foo, 3, 34.5 67.8 bar";
+        filled = oskar_string_to_array_realloc_d(line, &n, &list);
+        ASSERT_EQ((size_t)5, filled);
+        ASSERT_GE(n, (size_t)5);
+        EXPECT_DOUBLE_EQ(2,     list[0]);
+        EXPECT_DOUBLE_EQ(0,     list[1]);
+        EXPECT_DOUBLE_EQ(3,     list[2]);
+        EXPECT_DOUBLE_EQ(34.5,  list[3]);
+        EXPECT_DOUBLE_EQ(67.8,  list[4]);
+    }
+
+    {
+        char line[] = "1, 2, 50.5, 60, hmmm # Another comment";
+        filled = oskar_string_to_array_realloc_d(line, &n, &list);
+        ASSERT_EQ((size_t)4, filled);
+        ASSERT_GE(n, (size_t)5);
+        EXPECT_DOUBLE_EQ(1,    list[0]);
+        EXPECT_DOUBLE_EQ(2,    list[1]);
+        EXPECT_DOUBLE_EQ(50.5, list[2]);
+        EXPECT_DOUBLE_EQ(60,   list[3]);
+    }
+
+    // Free the list array.
+    free(list);
+}

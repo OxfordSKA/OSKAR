@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
+#include "settings/oskar_option_parser.h"
 #include "vis/oskar_vis.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
@@ -35,16 +35,13 @@
 #include <cmath>
 #include <iostream>
 #include <cfloat>
-#include <vector>
 #include <iomanip>
 
 using namespace std;
 using namespace oskar;
 
 // -----------------------------------------------------------------------------
-static void set_options(OptionParser& opt);
-static bool check_options(OptionParser& opt, int argc, char** argv);
-static bool isCompatible(const oskar_Vis* vis1, const oskar_Vis* vis2);
+static bool is_compatible(const oskar_Vis* vis1, const oskar_Vis* vis2);
 static void print_error(int status, const char* message);
 // -----------------------------------------------------------------------------
 
@@ -52,15 +49,26 @@ int main(int argc, char** argv)
 {
     // Register options =======================================================
     OptionParser opt("oskar_vis_add", oskar_version_string());
-    set_options(opt);
-    if (!check_options(opt, argc, argv)) return EXIT_FAILURE;
+    opt.set_description("Application to combine OSKAR binary visibility files.");
+    opt.add_required("OSKAR visibility files...");
+    opt.add_flag("-o", "Output visibility file name", 1, "out.vis", false, "--output");
+    opt.add_flag("-q", "Disable log messages", false, "--quiet");
+    opt.add_example("oskar_vis_add file1.vis file2.vis");
+    opt.add_example("oskar_vis_add file1.vis file2.vis -o combined.vis");
+    opt.add_example("oskar_vis_add -q file1.vis file2.vis file3.vis");
+    opt.add_example("oskar_vis_add *.vis");
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     // Retrieve options ========================================================
-    string out_path;
-    opt.get("-o")->getString(out_path);
-    vector<string> in_files = opt.get_input_files(2);
+    string out_path(opt.get_string("-o"));
+    int num_in_files = 0;
+    const char* const* in_files = opt.get_input_files(2, &num_in_files);
     bool verbose = opt.is_set("-q") ? false : true;
-    int num_in_files = (int)in_files.size();
+    if (num_in_files < 2)
+    {
+        opt.error("Please provide 2 or more visibility files to combine.");
+        return EXIT_FAILURE;
+    }
 
     // Print if verbose.
     if (verbose)
@@ -77,17 +85,16 @@ int main(int argc, char** argv)
     int status = 0;
 
     // Load the first visibility structure.
-    oskar_Binary* h;
-    h = oskar_binary_create(in_files[0].c_str(), 'r', &status);
+    oskar_Binary* h = oskar_binary_create(in_files[0], 'r', &status);
     oskar_Vis* out = oskar_vis_read(h, &status);
     oskar_binary_free(h);
     if (status)
     {
-        string msg = "Failed to read visibility data file " + in_files[0];
+        string msg = string("Failed to read visibility data file ") + in_files[0];
         print_error(status, msg.c_str());
     }
     oskar_mem_clear_contents(oskar_vis_settings_path(out), &status);
-    // TODO write some sort of tag into here to indicate this is an
+    // TODO(BM) write some sort of tag into here to indicate this is an
     // accumulated visibility data set...
 
     // Loop over other visibility files and combine.
@@ -95,22 +102,22 @@ int main(int argc, char** argv)
     {
         if (status) break;
 
-        h = oskar_binary_create(in_files[i].c_str(), 'r', &status);
+        h = oskar_binary_create(in_files[i], 'r', &status);
         oskar_Vis* in = oskar_vis_read(h, &status);
         oskar_binary_free(h);
         if (status)
         {
-            string msg = "Failed to read visibility data file " + in_files[i];
+            string msg = string("Failed to read visibility data file ") + in_files[i];
             print_error(status, msg.c_str());
             break;
         }
-        if (!isCompatible(out, in))
+        if (!is_compatible(out, in))
         {
             cerr << "ERROR: Input visibility data must match!" << endl;
             status = OSKAR_ERR_TYPE_MISMATCH;
         }
         oskar_mem_add(oskar_vis_amplitude(out), oskar_vis_amplitude_const(out),
-                oskar_vis_amplitude_const(in),
+                oskar_vis_amplitude_const(in), 0, 0, 0,
                 oskar_mem_length(oskar_vis_amplitude(out)), &status);
         if (status)
             print_error(status, "Visibility amplitude addition failed.");
@@ -120,7 +127,7 @@ int main(int argc, char** argv)
     // Write output data ======================================================
     if (verbose)
         cout << "Writing OSKAR visibility file: " << out_path << endl;
-    oskar_vis_write(out, 0, out_path.c_str(), &status);
+    oskar_vis_write(out, out_path.c_str(), &status);
     oskar_vis_free(out, &status);
     if (status)
         print_error(status, "Failed writing output visibility structure to file.");
@@ -135,7 +142,7 @@ static void print_error(int status, const char* message)
 }
 
 
-static bool isCompatible(const oskar_Vis* v1, const oskar_Vis* v2)
+static bool is_compatible(const oskar_Vis* v1, const oskar_Vis* v2)
 {
     if (oskar_vis_num_channels(v1) != oskar_vis_num_channels(v2))
         return false;
@@ -173,32 +180,3 @@ static bool isCompatible(const oskar_Vis* v1, const oskar_Vis* v2)
 
     return true;
 }
-
-static void set_options(OptionParser& opt)
-{
-    opt.set_description("Application to combine OSKAR binary visibility files.");
-    opt.add_required("OSKAR visibility files...");
-    opt.add_flag("-o", "Output visibility file name", 1, "out.vis", false, "--output");
-    opt.add_flag("-q", "Disable log messages", false, "--quiet");
-    opt.add_example("oskar_vis_add file1.vis file2.vis");
-    opt.add_example("oskar_vis_add file1.vis file2.vis -o combined.vis");
-    opt.add_example("oskar_vis_add -q file1.vis file2.vis file3.vis");
-    opt.add_example("oskar_vis_add *.vis");
-}
-
-static bool check_options(OptionParser& opt, int argc, char** argv)
-{
-    if (!opt.check_options(argc, argv))
-        return false;
-    bool visFirst = ((int)opt.firstArgs.size() >= 3) &&
-            ((int)opt.lastArgs.size() == 0);
-    bool visEnd = ((int)opt.firstArgs.size() == 1) &&
-            ((int)opt.lastArgs.size() >= 2);
-    if (!visFirst && !visEnd)
-    {
-        opt.error("Please provide 2 or more visibility files to combine.");
-        return false;
-    }
-    return true;
-}
-

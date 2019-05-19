@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 
 #include <oskar_global.h>
 #include <mem/oskar_mem.h>
-#include <splines/oskar_splines.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,13 +47,24 @@ OSKAR_EXPORT
 int oskar_element_mem_location(const oskar_Element* data);
 
 OSKAR_EXPORT
-int oskar_element_has_x_spline_data(const oskar_Element* data);
+int oskar_element_has_x_spline_data(const oskar_Element* data,
+        int freq_id);
 
 OSKAR_EXPORT
-int oskar_element_has_y_spline_data(const oskar_Element* data);
+int oskar_element_has_y_spline_data(const oskar_Element* data,
+        int freq_id);
 
 OSKAR_EXPORT
-int oskar_element_has_scalar_spline_data(const oskar_Element* data);
+int oskar_element_has_scalar_spline_data(const oskar_Element* data,
+        int freq_id);
+
+OSKAR_EXPORT
+int oskar_element_has_x_spherical_wave_data(const oskar_Element* data,
+        int freq_id);
+
+OSKAR_EXPORT
+int oskar_element_has_y_spherical_wave_data(const oskar_Element* data,
+        int freq_id);
 
 OSKAR_EXPORT
 int oskar_element_num_freq(const oskar_Element* data);
@@ -63,7 +73,7 @@ OSKAR_EXPORT
 const double* oskar_element_freqs_hz_const(const oskar_Element* data);
 
 OSKAR_EXPORT
-int oskar_element_type(const oskar_Element* data);
+int oskar_element_is_isotropic(const oskar_Element* data);
 
 OSKAR_EXPORT
 int oskar_element_taper_type(const oskar_Element* data);
@@ -81,97 +91,15 @@ OSKAR_EXPORT
 int oskar_element_dipole_length_units(const oskar_Element* data);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_element_x_filename(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
 const oskar_Mem* oskar_element_x_filename_const(const oskar_Element* data,
         int freq_id);
-
-OSKAR_EXPORT
-oskar_Mem* oskar_element_y_filename(oskar_Element* data, int freq_id);
 
 OSKAR_EXPORT
 const oskar_Mem* oskar_element_y_filename_const(const oskar_Element* data,
         int freq_id);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_element_scalar_filename(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
 const oskar_Mem* oskar_element_scalar_filename_const(const oskar_Element* data,
-        int freq_id);
-
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_x_h_re(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_x_h_re_const(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_x_h_im(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_x_h_im_const(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_x_v_re(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_x_v_re_const(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_x_v_im(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_x_v_im_const(const oskar_Element* data,
-        int freq_id);
-
-
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_y_h_re(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_y_h_re_const(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_y_h_im(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_y_h_im_const(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_y_v_re(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_y_v_re_const(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_y_v_im(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_y_v_im_const(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_scalar_re(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_scalar_re_const(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_scalar_im(oskar_Element* data, int freq_id);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_scalar_im_const(const oskar_Element* data,
         int freq_id);
 
 

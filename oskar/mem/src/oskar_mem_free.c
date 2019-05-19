@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@
 
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
-#include "utility/oskar_device_utils.h"
 
 #include <stdlib.h>
 
@@ -73,8 +72,8 @@ void oskar_mem_free(oskar_Mem* mem, int* status)
         {
 #ifdef OSKAR_HAVE_CUDA
             /* Free GPU memory. */
-            cudaFree(mem->data);
-            oskar_device_check_error(status);
+            const int error = (int)cudaFree(mem->data);
+            if (status && error) *status = error;
 #else
             if (status) *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

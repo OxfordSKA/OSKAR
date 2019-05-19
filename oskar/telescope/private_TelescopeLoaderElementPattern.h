@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,9 @@ private:
     void load_functional_data(int port, oskar_Station* station,
             const std::vector<std::string>& keys,
             const std::vector<std::string>& paths, int* status);
+    void load_spherical_wave_data(oskar_Station* station,
+            const std::vector<std::string>& keys,
+            const std::vector<std::string>& paths, int* status);
     static void parse_filename(const char* s, char** buffer, size_t* buflen,
             int* index, double* freq);
     void update_map(std::map<std::string, std::string>& files,
@@ -62,11 +65,8 @@ private:
 
 private:
     std::string wildcard;
-    std::string fit_root_x;
-    std::string fit_root_y;
-    std::string fit_root_scalar;
-    std::string root_x;
-    std::string root_y;
+    std::string fit_root_x, fit_root_y, fit_root_scalar;
+    std::string root_x, root_y;
     oskar_Telescope* telescope_;
 };
 

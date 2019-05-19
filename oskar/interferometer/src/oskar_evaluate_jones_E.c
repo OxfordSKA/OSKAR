@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
  */
 
 #include "interferometer/oskar_evaluate_jones_E.h"
-#include "interferometer/oskar_jones_get_station_pointer.h"
+#include "interferometer/oskar_jones_accessors.h"
 #include "telescope/station/oskar_evaluate_station_beam.h"
 
 #ifdef __cplusplus
@@ -39,63 +39,49 @@ void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, int coord_type,
         double gast, double frequency_hz, oskar_StationWork* work,
         int time_index, int* status)
 {
-    int i, num_stations;
-    oskar_Mem *E_st;
-
-    /* Check if safe to proceed. */
+    int i;
     if (*status) return;
-
-    /* Check number of stations. */
-    num_stations = oskar_telescope_num_stations(tel);
+    const int num_stations = oskar_telescope_num_stations(tel);
+    const int num_sources = oskar_jones_num_sources(E);
     if (num_stations == 0)
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;
     }
+    if (num_stations != oskar_jones_num_stations(E))
+    {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     /* Evaluate the station beams. */
-    E_st = oskar_mem_create_alias(0, 0, 0, status);
     if (oskar_telescope_allow_station_beam_duplication(tel) &&
             oskar_telescope_identical_stations(tel))
     {
-        /* Identical stations. */
-        oskar_Mem *E0; /* Pointer to row of E for station 0. */
-        const oskar_Station* station0;
-
-        /* Evaluate the beam pattern for station 0 */
-        E0 = oskar_mem_create_alias(0, 0, 0, status);
-        station0 = oskar_telescope_station_const(tel, 0);
-        oskar_jones_get_station_pointer(E0, E, 0, status);
-
-        oskar_evaluate_station_beam(E0, num_points, coord_type, x, y, z,
+        /* Identical stations: Evaluate beam for station 0 and copy it. */
+        oskar_evaluate_station_beam(num_points, coord_type, x, y, z,
                 oskar_telescope_phase_centre_ra_rad(tel),
                 oskar_telescope_phase_centre_dec_rad(tel),
-                station0, work, time_index, frequency_hz, gast, status);
-
-        /* Copy E for station 0 into memory for other stations. */
+                oskar_telescope_station_const(tel, 0),
+                work, time_index, frequency_hz, gast,
+                0, oskar_jones_mem(E), status);
         for (i = 1; i < num_stations; ++i)
-        {
-            oskar_jones_get_station_pointer(E_st, E, i, status);
-            oskar_mem_copy_contents(E_st, E0, 0, 0,
-                    oskar_mem_length(E0), status);
-        }
-        oskar_mem_free(E0, status);
+            oskar_mem_copy_contents(
+                    oskar_jones_mem(E), oskar_jones_mem(E),
+                    (size_t)(i * num_sources), 0,
+                    (size_t)num_sources, status);
     }
     else
     {
         /* Different stations. */
         for (i = 0; i < num_stations; ++i)
-        {
-            const oskar_Station* station;
-            station = oskar_telescope_station_const(tel, i);
-            oskar_jones_get_station_pointer(E_st, E, i, status);
-            oskar_evaluate_station_beam(E_st, num_points, coord_type, x, y, z,
+            oskar_evaluate_station_beam(num_points, coord_type, x, y, z,
                     oskar_telescope_phase_centre_ra_rad(tel),
                     oskar_telescope_phase_centre_dec_rad(tel),
-                    station, work, time_index, frequency_hz, gast, status);
-        }
+                    oskar_telescope_station_const(tel, i),
+                    work, time_index, frequency_hz, gast,
+                    i * num_sources, oskar_jones_mem(E), status);
     }
-    oskar_mem_free(E_st, status);
 }
 
 #ifdef __cplusplus

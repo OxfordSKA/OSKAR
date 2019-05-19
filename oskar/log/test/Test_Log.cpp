@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,104 +33,72 @@
 
 TEST(Log, oskar_log_message)
 {
-    oskar_Log* log = 0;
-    //log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_MESSAGE);
-    //oskar_log_set_keep_file(log, false);
-
+    //oskar_log_create(OSKAR_LOG_NONE, OSKAR_LOG_MESSAGE);
+    //oskar_log_set_keep_file(false);
     int max_depth = 3;
-    char priority;
+    oskar_log_set_term_priority(OSKAR_LOG_DEBUG);
+    oskar_log_message('M', -1, "This is a message");
 
-    oskar_log_message(log, 'M', -1, "This is a message");
+    for (int i = 0; i < max_depth; ++i)
+        oskar_log_message('E', i, "depth %i", i);
 
-    priority = 'E';
-    for (int i = 0; i < max_depth; ++i) {
-        oskar_log_message(log, priority, i, "depth %i", i);
-    }
+    for (int i = 0; i < max_depth; ++i)
+        oskar_log_message('W', i, "depth %i", i);
 
-    priority = 'W';
-    for (int i = 0; i < max_depth; ++i) {
-        oskar_log_message(log, priority, i, "depth %i", i);
-    }
+    for (int i = 0; i < max_depth; ++i)
+        oskar_log_message('M', i, "depth %i", i);
 
-    priority = 'M';
-    for (int i = 0; i < max_depth; ++i) {
-        oskar_log_message(log, priority, i, "depth %i", i);
-    }
-
-    priority = 'D';
-    for (int i = 0; i < max_depth; ++i) {
-        oskar_log_message(log, priority, i, "depth %i", i);
-    }
-
-    if (log) oskar_log_free(log);
+    for (int i = 0; i < max_depth; ++i)
+        oskar_log_message('D', i, "depth %i", i);
 }
 
 TEST(Log, oskar_log_value)
 {
-    oskar_Log* log = 0;
-//  log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_MESSAGE);
-//   oskar_log_set_keep_file(log, false);
-//   oskar_log_set_value_width(log, 30);
-
+    oskar_log_create(OSKAR_LOG_WARNING, OSKAR_LOG_MESSAGE);
+    oskar_log_set_keep_file(false);
+    oskar_log_set_value_width(30);
     int max_depth = 3;
-    char priority;
+    oskar_log_message('M', -1, "%s", "Hello");
+    oskar_log_value('M', 0, "prefix", "%s", "value");
 
-    oskar_log_value(log, 'M', -1, "prefix", "%s", "value");
+    for (int i = 0; i < max_depth; ++i)
+        oskar_log_value('E', i, "depth", "%i", i);
 
-    priority = 'E';
-    for (int i = 0; i < max_depth; ++i) {
-        oskar_log_value(log, priority, i, "depth", "%i", i);
-    }
+    for (int i = 0; i < max_depth; ++i)
+        oskar_log_value('W', i, "depth", "%i", i);
 
-    priority = 'W';
-    for (int i = 0; i < max_depth; ++i) {
-        oskar_log_value(log, priority, i, "depth", "%i", i);
-    }
+    for (int i = 0; i < max_depth; ++i)
+        oskar_log_value('M', i, "depth", "%i", i);
 
-    priority = 'M';
-    for (int i = 0; i < max_depth; ++i) {
-        oskar_log_value(log, priority, i, "depth", "%i", i);
-    }
-
-    priority = 'D';
-    for (int i = 0; i < max_depth; ++i) {
-        oskar_log_value(log, priority, i, "depth", "%i", i);
-    }
-
-    if (log) oskar_log_free(log);
+    oskar_log_set_term_priority(OSKAR_LOG_DEBUG);
+    for (int i = 0; i < max_depth; ++i)
+        oskar_log_value('D', i, "depth", "%i", i);
+    oskar_log_free();
 }
 
 TEST(Log, oskar_log_section)
 {
-    oskar_Log* log = 0;
-
-    oskar_log_section(log, 'E', "%s", "message");
-    oskar_log_section(log, 'W', "%s", "message");
-    oskar_log_section(log, 'M', "%s", "message");
-    oskar_log_section(log, 'D', "%s", "message");
-
-    if (log) oskar_log_free(log);
+    oskar_log_set_term_priority(OSKAR_LOG_DEBUG);
+    oskar_log_section('E', "%s", "message");
+    oskar_log_section('W', "%s", "message");
+    oskar_log_section('M', "%s", "message");
+    oskar_log_section('D', "%s", "message");
 }
 
 TEST(Log, oskar_log_line)
 {
-    oskar_Log* log = 0;
-    /*oskar_Log* log = oskar_log_create(OSKAR_LOG_NONE, OSKAR_LOG_NONE);*/
-    /*oskar_log_set_keep_file(log, false);*/
-
-    oskar_log_line(log, 'E', '>');
-    oskar_log_line(log, 'W', '+');
-    oskar_log_line(log, 'M', '-');
-    oskar_log_line(log, 'D', '*');
-
-    if (log) oskar_log_free(log);
+    /*oskar_log_create(OSKAR_LOG_NONE, OSKAR_LOG_NONE);*/
+    /*oskar_log_set_keep_file(false);*/
+    oskar_log_set_term_priority(OSKAR_LOG_DEBUG);
+    oskar_log_line('E', '>');
+    oskar_log_line('W', '+');
+    oskar_log_line('M', '-');
+    oskar_log_line('D', '*');
 }
 
 TEST(Log, oskar_log_error)
 {
-    oskar_Log* log = 0;
-    oskar_log_error(log, "This is an error.");
-    if (log) oskar_log_free(log);
+    oskar_log_error("This is an error");
 }
 
 TEST(Log, depth_symbol)
@@ -144,12 +112,11 @@ TEST(Log, depth_symbol)
 
 TEST(Log, special_methods)
 {
-    oskar_Log* log = 0;
-    /*log = oskar_log_create(OSKAR_LOG_WARNING, OSKAR_LOG_DEBUG);*/
-    oskar_log_warning(log, "This is a warning");
-    oskar_log_error(log, "This is an error");
-    oskar_log_section(log, 'M', "This is a section!");
-    oskar_log_section(log, 'W', "This is a warning section!");
-    oskar_log_section(log, 'D', "This is a warning section!");
-    if (log) oskar_log_free(log);
+    /*oskar_log_create(OSKAR_LOG_NONE, OSKAR_LOG_DEBUG);*/
+    oskar_log_set_term_priority(OSKAR_LOG_DEBUG);
+    oskar_log_warning("This is a warning");
+    oskar_log_error("This is an error");
+    oskar_log_section('M', "This is a section");
+    oskar_log_section('W', "This is a warning section");
+    oskar_log_section('D', "This is a debug section");
 }

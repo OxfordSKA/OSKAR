@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 
 #include <utility/oskar_vector_types.h>
 
-#include <stdlib.h> /* For size_t */
+#include <stddef.h> /* For size_t */
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,36 +56,6 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_mem_allocated(const oskar_Mem* mem);
-
-#ifdef OSKAR_HAVE_OPENCL
-/**
- * @brief
- * Returns handle to the OpenCL memory buffer object, if applicable.
- *
- * @details
- * Returns handle to the OpenCL memory buffer object, if applicable.
- *
- * @param[in] mem Pointer to the memory block.
- *
- * @return OpenCL memory buffer handle.
- */
-OSKAR_EXPORT
-cl_mem* oskar_mem_cl_buffer(oskar_Mem* mem, int* status);
-
-/**
- * @brief
- * Returns handle to the OpenCL memory buffer object, if applicable.
- *
- * @details
- * Returns handle to the OpenCL memory buffer object, if applicable.
- *
- * @param[in] mem Pointer to the memory block.
- *
- * @return OpenCL memory buffer handle.
- */
-OSKAR_EXPORT
-const cl_mem* oskar_mem_cl_buffer_const(const oskar_Mem* mem, int* status);
-#endif
 
 /**
  * @brief
@@ -226,6 +196,38 @@ int oskar_mem_is_matrix(const oskar_Mem* mem);
  */
 OSKAR_EXPORT
 int oskar_mem_is_scalar(const oskar_Mem* mem);
+
+/**
+ * @brief
+ * Returns a pointer to the data needed for kernel launches.
+ *
+ * @details
+ * This function returns the pointer held in the memory structure as a
+ * void*, suitable for kernel launches.
+ * (This is the address of the pointer returned from oskar_mem_void()).
+ *
+ * @param[in]     mem    Pointer to data structure.
+ *
+ * @return A pointer to access the data for kernel launches.
+ */
+OSKAR_EXPORT
+void* oskar_mem_buffer(oskar_Mem* mem);
+
+/**
+ * @brief
+ * Returns a pointer to the data needed for kernel launches.
+ *
+ * @details
+ * This function returns the pointer held in the memory structure as a
+ * const void*, suitable for kernel launches.
+ * (This is the address of the pointer returned from oskar_mem_void_const()).
+ *
+ * @param[in]     mem    Pointer to data structure.
+ *
+ * @return A pointer to access the data for kernel launches.
+ */
+OSKAR_EXPORT
+const void* oskar_mem_buffer_const(const oskar_Mem* mem);
 
 /**
  * @brief

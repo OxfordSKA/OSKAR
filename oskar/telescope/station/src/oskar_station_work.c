@@ -42,7 +42,7 @@ oskar_StationWork* oskar_station_work_create(int type,
     oskar_StationWork* work = 0;
 
     /* Allocate memory for the structure. */
-    work = (oskar_StationWork*) malloc(sizeof(oskar_StationWork));
+    work = (oskar_StationWork*) calloc(1, sizeof(oskar_StationWork));
 
     /* Check the base type is correct. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
@@ -62,7 +62,7 @@ oskar_StationWork* oskar_station_work_create(int type,
             location, 0, status);
     work->array_pattern = oskar_mem_create((type | OSKAR_COMPLEX),
             location, 0, status);
-    work->normalised_beam = 0;
+    work->beam_out_scratch = 0;
     work->num_depths = 0;
     work->beam = 0;
 
@@ -84,7 +84,7 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
     oskar_mem_free(work->weights, status);
     oskar_mem_free(work->weights_error, status);
     oskar_mem_free(work->array_pattern, status);
-    oskar_mem_free(work->normalised_beam, status);
+    oskar_mem_free(work->beam_out_scratch, status);
 
     for (i = 0; i < work->num_depths; ++i)
     {
@@ -120,12 +120,12 @@ oskar_Mem* oskar_station_work_enu_direction_z(oskar_StationWork* work)
     return work->enu_direction_z;
 }
 
-oskar_Mem* oskar_station_work_normalised_beam(oskar_StationWork* work,
-        const oskar_Mem* output_beam, int* status)
+oskar_Mem* oskar_station_work_beam_out(oskar_StationWork* work,
+        const oskar_Mem* output_beam, size_t length, int* status)
 {
-    get_mem_from_template(&work->normalised_beam, output_beam,
-            1 + oskar_mem_length(output_beam), status);
-    return work->normalised_beam;
+    get_mem_from_template(&work->beam_out_scratch, output_beam,
+            1 + length, status);
+    return work->beam_out_scratch;
 }
 
 oskar_Mem* oskar_station_work_beam(oskar_StationWork* work,
@@ -136,7 +136,8 @@ oskar_Mem* oskar_station_work_beam(oskar_StationWork* work,
         int i, old_num_depths;
         old_num_depths = work->num_depths;
         work->num_depths = depth + 1;
-        work->beam = realloc(work->beam, work->num_depths * sizeof(oskar_Mem*));
+        work->beam = (oskar_Mem**) realloc(work->beam,
+                work->num_depths * sizeof(oskar_Mem*));
         for (i = old_num_depths; i < work->num_depths; ++i)
         {
             work->beam[i] = 0;
@@ -150,9 +151,8 @@ oskar_Mem* oskar_station_work_beam(oskar_StationWork* work,
 static void get_mem_from_template(oskar_Mem** b, const oskar_Mem* a,
         size_t length, int* status)
 {
-    int type, loc;
-    type = oskar_mem_type(a);
-    loc = oskar_mem_location(a);
+    const int type = oskar_mem_type(a);
+    const int loc = oskar_mem_location(a);
 
     /* Check if the array exists with an incorrect type and location. */
     if (*b && (oskar_mem_type(*b) != type || oskar_mem_location(*b) != loc))
@@ -164,8 +164,8 @@ static void get_mem_from_template(oskar_Mem** b, const oskar_Mem* a,
     /* Create or resize the array. */
     if (!*b)
         *b = oskar_mem_create(type, loc, length, status);
-    else if (oskar_mem_length(*b) < length)
-        oskar_mem_realloc(*b, length, status);
+    else
+        oskar_mem_ensure(*b, length, status);
 }
 
 #ifdef __cplusplus

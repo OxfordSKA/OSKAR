@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,156 +42,6 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates a scalar VLA dish beam, as implemented in the AIPS task PBCOR
- * (single precision).
- *
- * @details
- * This function evaluates a scalar VLA dish beam, as implemented in the AIPS
- * task PBCOR.
- *
- * See http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?PBCOR
- *
- * @param[out] beam          VLA beam evaluated at source positions.
- * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  l             Direction cosine of each source from phase centre.
- * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  freq_ghz      Current observing frequency in GHz.
- * @param[in]  p1            Value of PBPARM(3) for this frequency.
- * @param[in]  p2            Value of PBPARM(4) for this frequency.
- * @param[in]  p3            Value of PBPARM(5) for this frequency.
- */
-OSKAR_EXPORT
-void oskar_evaluate_vla_beam_pbcor_f(float* beam, int num_sources,
-        const float* l, const float* m, const float freq_ghz, const float p1,
-        const float p2, const float p3);
-
-/**
- * @brief
- * Evaluates a scalar VLA dish beam, as implemented in the AIPS task PBCOR
- * (single precision).
- *
- * @details
- * This function evaluates a scalar VLA dish beam, as implemented in the AIPS
- * task PBCOR.
- *
- * See http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?PBCOR
- *
- * @param[out] beam          VLA beam evaluated at source positions.
- * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  l             Direction cosine of each source from phase centre.
- * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  freq_ghz      Current observing frequency in GHz.
- * @param[in]  p1            Value of PBPARM(3) for this frequency.
- * @param[in]  p2            Value of PBPARM(4) for this frequency.
- * @param[in]  p3            Value of PBPARM(5) for this frequency.
- */
-OSKAR_EXPORT
-void oskar_evaluate_vla_beam_pbcor_complex_f(float2* beam, int num_sources,
-        const float* l, const float* m, const float freq_ghz, const float p1,
-        const float p2, const float p3);
-
-/**
- * @brief
- * Evaluates a scalar VLA dish beam, as implemented in the AIPS task PBCOR
- * (single precision).
- *
- * @details
- * This function evaluates a scalar VLA dish beam, as implemented in the AIPS
- * task PBCOR.
- *
- * See http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?PBCOR
- *
- * @param[out] beam          VLA beam evaluated at source positions.
- * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  l             Direction cosine of each source from phase centre.
- * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  freq_ghz      Current observing frequency in GHz.
- * @param[in]  p1            Value of PBPARM(3) for this frequency.
- * @param[in]  p2            Value of PBPARM(4) for this frequency.
- * @param[in]  p3            Value of PBPARM(5) for this frequency.
- */
-OSKAR_EXPORT
-void oskar_evaluate_vla_beam_pbcor_matrix_f(float4c* beam, int num_sources,
-        const float* l, const float* m, const float freq_ghz, const float p1,
-        const float p2, const float p3);
-
-/**
- * @brief
- * Evaluates a scalar VLA dish beam, as implemented in the AIPS task PBCOR
- * (double precision).
- *
- * @details
- * This function evaluates a scalar VLA dish beam, as implemented in the AIPS
- * task PBCOR.
- *
- * See http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?PBCOR
- *
- * @param[out] beam          VLA beam evaluated at source positions.
- * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  l             Direction cosine of each source from phase centre.
- * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  freq_ghz      Current observing frequency in GHz.
- * @param[in]  p1            Value of PBPARM(3) for this frequency.
- * @param[in]  p2            Value of PBPARM(4) for this frequency.
- * @param[in]  p3            Value of PBPARM(5) for this frequency.
- */
-OSKAR_EXPORT
-void oskar_evaluate_vla_beam_pbcor_d(double* beam, int num_sources,
-        const double* l, const double* m, const double freq_ghz,
-        const double p1, const double p2, const double p3);
-
-/**
- * @brief
- * Evaluates a scalar VLA dish beam, as implemented in the AIPS task PBCOR
- * (double precision).
- *
- * @details
- * This function evaluates a scalar VLA dish beam, as implemented in the AIPS
- * task PBCOR.
- *
- * See http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?PBCOR
- *
- * @param[out] beam          VLA beam evaluated at source positions.
- * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  l             Direction cosine of each source from phase centre.
- * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  freq_ghz      Current observing frequency in GHz.
- * @param[in]  p1            Value of PBPARM(3) for this frequency.
- * @param[in]  p2            Value of PBPARM(4) for this frequency.
- * @param[in]  p3            Value of PBPARM(5) for this frequency.
- */
-OSKAR_EXPORT
-void oskar_evaluate_vla_beam_pbcor_complex_d(double2* beam, int num_sources,
-        const double* l, const double* m, const double freq_ghz,
-        const double p1, const double p2, const double p3);
-
-/**
- * @brief
- * Evaluates a scalar VLA dish beam, as implemented in the AIPS task PBCOR
- * (double precision).
- *
- * @details
- * This function evaluates a scalar VLA dish beam, as implemented in the AIPS
- * task PBCOR.
- *
- * See http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?PBCOR
- *
- * @param[out] beam          VLA beam evaluated at source positions.
- * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  l             Direction cosine of each source from phase centre.
- * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  freq_ghz      Current observing frequency in GHz.
- * @param[in]  p1            Value of PBPARM(3) for this frequency.
- * @param[in]  p2            Value of PBPARM(4) for this frequency.
- * @param[in]  p3            Value of PBPARM(5) for this frequency.
- */
-OSKAR_EXPORT
-void oskar_evaluate_vla_beam_pbcor_matrix_d(double4c* beam, int num_sources,
-        const double* l, const double* m, const double freq_ghz,
-        const double p1, const double p2, const double p3);
-
-/**
- * @brief
  * Evaluates a scalar VLA dish beam, as implemented in the AIPS task PBCOR.
  *
  * @details
@@ -200,17 +50,16 @@ void oskar_evaluate_vla_beam_pbcor_matrix_d(double4c* beam, int num_sources,
  *
  * See http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?PBCOR
  *
- * @param[out] beam          VLA beam evaluated at source positions.
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
  * @param[in]  l             Direction cosine of each source from phase centre.
  * @param[in]  m             Direction cosine of each source from phase centre.
  * @param[in]  frequency_hz  Current observing frequency in Hz.
+ * @param[out] beam          VLA beam evaluated at source positions.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_vla_beam_pbcor(oskar_Mem* beam, int num_sources,
-        const oskar_Mem* l, const oskar_Mem* m, double frequency_hz,
-        int* status);
+void oskar_evaluate_vla_beam_pbcor(int num_sources, const oskar_Mem* l,
+        const oskar_Mem* m, double frequency_hz, oskar_Mem* beam, int* status);
 
 #ifdef __cplusplus
 }

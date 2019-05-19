@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2018, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,7 @@ extern "C" {
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] d_jones        Matrix of Jones matrices to correlate.
  * @param[in] d_I            Source Stokes I values, in Jy.
  * @param[in] d_Q            Source Stokes Q values, in Jy.
@@ -79,8 +80,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_point_cuda_f(
-        int num_sources, int num_stations, const float4c* d_jones,
-        const float* d_I, const float* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const float4c* d_jones, const float* d_I, const float* d_Q,
         const float* d_U, const float* d_V,
         const float* d_l, const float* d_m,
         const float* d_n, const float* d_station_u,
@@ -105,6 +106,7 @@ void oskar_cross_correlate_point_cuda_f(
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] d_jones        Matrix of Jones matrices to correlate.
  * @param[in] d_I            Source Stokes I values, in Jy.
  * @param[in] d_Q            Source Stokes Q values, in Jy.
@@ -129,8 +131,8 @@ void oskar_cross_correlate_point_cuda_f(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_point_cuda_d(
-        int num_sources, int num_stations, const double4c* d_jones,
-        const double* d_I, const double* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const double4c* d_jones, const double* d_I, const double* d_Q,
         const double* d_U, const double* d_V,
         const double* d_l, const double* d_m,
         const double* d_n, const double* d_station_u,
@@ -158,6 +160,7 @@ void oskar_cross_correlate_point_cuda_d(
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] d_jones        Matrix of Jones matrices to correlate.
  * @param[in] d_I            Source Stokes I values, in Jy.
  * @param[in] d_Q            Source Stokes Q values, in Jy.
@@ -185,8 +188,8 @@ void oskar_cross_correlate_point_cuda_d(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_gaussian_cuda_f(
-        int num_sources, int num_stations, const float4c* d_jones,
-        const float* d_I, const float* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const float4c* d_jones, const float* d_I, const float* d_Q,
         const float* d_U, const float* d_V,
         const float* d_l, const float* d_m,
         const float* d_n, const float* d_a,
@@ -215,6 +218,7 @@ void oskar_cross_correlate_gaussian_cuda_f(
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
+ * @param[in] offset_out     Output visibility start offset.
  * @param[in] d_jones        Matrix of Jones matrices to correlate.
  * @param[in] d_I            Source Stokes I values, in Jy.
  * @param[in] d_Q            Source Stokes Q values, in Jy.
@@ -242,8 +246,8 @@ void oskar_cross_correlate_gaussian_cuda_f(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_gaussian_cuda_d(
-        int num_sources, int num_stations, const double4c* d_jones,
-        const double* d_I, const double* d_Q,
+        int num_sources, int num_stations, int offset_out,
+        const double4c* d_jones, const double* d_I, const double* d_Q,
         const double* d_U, const double* d_V,
         const double* d_l, const double* d_m,
         const double* d_n, const double* d_a,

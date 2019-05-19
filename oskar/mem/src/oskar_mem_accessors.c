@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,30 +37,6 @@ int oskar_mem_allocated(const oskar_Mem* mem)
 {
     return mem->data ? 1 : 0;
 }
-
-#ifdef OSKAR_HAVE_OPENCL
-cl_mem* oskar_mem_cl_buffer(oskar_Mem* mem, int* status)
-{
-    if (mem->location & OSKAR_CL)
-        return &mem->buffer;
-    else
-    {
-        *status = OSKAR_ERR_LOCATION_MISMATCH;
-        return 0;
-    }
-}
-
-const cl_mem* oskar_mem_cl_buffer_const(const oskar_Mem* mem, int* status)
-{
-    if (mem->location & OSKAR_CL)
-        return &mem->buffer;
-    else
-    {
-        *status = OSKAR_ERR_LOCATION_MISMATCH;
-        return 0;
-    }
-}
-#endif
 
 size_t oskar_mem_length(const oskar_Mem* mem)
 {
@@ -113,6 +89,16 @@ int oskar_mem_is_scalar(const oskar_Mem* mem)
 }
 
 /* Pointer conversion functions. */
+
+void* oskar_mem_buffer(oskar_Mem* mem)
+{
+    return (void*) &mem->data;
+}
+
+const void* oskar_mem_buffer_const(const oskar_Mem* mem)
+{
+    return (const void*) &mem->data;
+}
 
 void* oskar_mem_void(oskar_Mem* mem)
 {

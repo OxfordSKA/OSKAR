@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,33 +62,39 @@ extern "C" {
  * The computed points are returned in the \p output array.
  * These are the complex values for each output position.
  *
- * @param[in] num_in       Number of input points.
- * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
- * @param[in] x_in         Array of input x positions.
- * @param[in] y_in         Array of input y positions.
- * @param[in] z_in         Array of input z positions.
- * @param[in] weights_in   Array of complex DFT weights.
- * @param[in] num_out      Number of output points.
- * @param[in] x_out        Array of output 1/x positions.
- * @param[in] y_out        Array of output 1/y positions.
- * @param[in] z_out        Array of output 1/z positions.
- * @param[out] data        Input data (see note, above).
- * @param[out] output      Array of computed output points (see note, above).
- * @param[in,out] status   Status return code.
+ * @param[in] normalise        If true, divide output values by \p num_in.
+ * @param[in] num_in           Number of input points.
+ * @param[in] wavenumber       Wavenumber (2 pi / wavelength).
+ * @param[in] weights_in       Array of input complex DFT weights.
+ * @param[in] x_in             Array of input x positions.
+ * @param[in] y_in             Array of input y positions.
+ * @param[in] z_in             Array of input z positions.
+ * @param[in] offset_coord_out Start offset into output coordinate arrays.
+ * @param[in] num_out          Number of output points.
+ * @param[in] x_out            Array of output 1/x positions.
+ * @param[in] y_out            Array of output 1/y positions.
+ * @param[in] z_out            Array of output 1/z positions.
+ * @param[in] data             Input data (see note, above).
+ * @param[in] offset_out       Start offset into output data array.
+ * @param[out] output          Output data (see note, above).
+ * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
 void oskar_dftw(
+        int normalise,
         int num_in,
         double wavenumber,
+        const oskar_Mem* weights_in,
         const oskar_Mem* x_in,
         const oskar_Mem* y_in,
         const oskar_Mem* z_in,
-        const oskar_Mem* weights_in,
+        int offset_coord_out,
         int num_out,
         const oskar_Mem* x_out,
         const oskar_Mem* y_out,
         const oskar_Mem* z_out,
         const oskar_Mem* data,
+        int offset_out,
         oskar_Mem* output,
         int* status);
 
@@ -96,4 +102,4 @@ void oskar_dftw(
 }
 #endif
 
-#endif
+#endif /* include guard */

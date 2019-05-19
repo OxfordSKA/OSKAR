@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,25 +37,16 @@ void oskar_station_override_element_time_variable_gains(oskar_Station* s,
         double gain_std, int* status)
 {
     int i;
-
-    /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check if there are child stations. */
+    /* Override element data only at last level. */
     if (oskar_station_has_child(s))
-    {
-        /* Recursive call to find the last level (i.e. the element data). */
         for (i = 0; i < s->num_elements; ++i)
-        {
             oskar_station_override_element_time_variable_gains(
                     oskar_station_child(s, i), gain_std, status);
-        }
-    }
     else
-    {
-        /* Override element data at last level. */
-        oskar_mem_set_value_real(s->element_gain_error, gain_std, 0, 0, status);
-    }
+        oskar_mem_set_value_real(s->element_gain_error,
+                gain_std, 0, s->num_elements, status);
 }
 
 #ifdef __cplusplus

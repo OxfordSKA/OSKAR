@@ -23,9 +23,10 @@ in \ref install_deps "Dependencies" (below).
 Then download the archive and follow the short steps
 in \ref install_build_commands "Build Commands".
 
-If using a GPU on Linux, also be sure to install the latest NVIDIA
-driver from your distribution's repository, or from
-https://www.geforce.com/drivers
+If using a GPU on Linux, please ensure you have an up-to-date driver for it.
+Drivers can often be installed from your distribution's repository,
+but may not always support the latest hardware.
+NVIDIA drivers can be downloaded from https://www.geforce.com/drivers
 
 \subsubsection install_linux_uninstall Uninstallation
 
@@ -46,8 +47,9 @@ file and drag the OSKAR.app bundle to your /Applications folder.
 After installation, double-click the OSKAR.app bundle to launch the GUI and
 set symbolic links to the applications in /usr/local/bin.
 
-If using a GPU on macOS, also be sure to install the latest NVIDIA CUDA
-driver from http://www.nvidia.com/object/mac-driver-archive.html
+If using a GPU on macOS, please ensure you have an up-to-date driver for it.
+NVIDIA drivers for macOS can be downloaded from
+http://www.nvidia.com/object/mac-driver-archive.html
 
 \subsubsection install_macos_uninstall Uninstallation
 
@@ -68,8 +70,8 @@ installer executable and follow the on-screen instructions.
 After installation, the GUI can be launched using the shortcut on the
 Desktop or Start Menu.
 
-If using a GPU on Windows, also be sure to install the latest NVIDIA
-driver from<br/> https://www.geforce.com/drivers
+If using a GPU on Windows, please ensure you have an up-to-date driver for it.
+NVIDIA drivers can be downloaded from https://www.geforce.com/drivers
 
 \subsubsection install_windows_uninstall Uninstallation
 
@@ -78,12 +80,11 @@ software in Control Panel in the usual way.
 
 \section install_build Building OSKAR
 
-This section describes the steps needed to build and install OSKAR
-from source.
+This section describes the steps needed to build and install OSKAR from source.
 
 \subsection install_deps Dependencies
 
-If GPU acceleration is required, an NVIDIA GPU with CUDA 5.5 or later
+If GPU acceleration is required, an NVIDIA GPU with CUDA 7.0 or later
 (and associated NVIDIA CUDA driver) must be installed.
 If the graphical user interface (GUI) is required, Qt must also be installed.
 Additionally, the casacore libraries must be present if Measurement Sets
@@ -93,7 +94,7 @@ building from source, not if using a pre-built package.
 The dependencies are:
 
 - CMake (https://cmake.org), version >= 3.1
-- [Optional] NVIDIA CUDA <br/>(https://developer.nvidia.com/cuda-downloads), version >= 5.5
+- [Optional] NVIDIA CUDA <br/>(https://developer.nvidia.com/cuda-downloads), version >= 7.0
 - [Optional] Qt 5 (https://www.qt.io)
 - [Optional] casacore (https://github.com/casacore/casacore), version >= 2.0.0
 
@@ -125,7 +126,7 @@ These are as listed below.
 - <tt><b>-DCUDA_ARCH="<arch>"</b></tt> (default: all)
   - Sets the target architecture for the compilation of CUDA device code
   - \<arch\> must be one of either: 1.3, 2.0, 2.1, 3.0, 3.2, 3.5, 3.7, 5.0, 5.2, 6.0, 6.1, 6.2, 7.0, 7.2, 7.5 or ALL
-  - ALL is for all Kepler, Maxwell and Pascal architectures (>= 3.0).
+  - ALL is for all Kepler, Maxwell, Pascal, Volta and Turing architectures (>= 3.0).
   - Multiple architectures can be specified by separating them with semi-colons.
 
 - <tt><b>-DCMAKE_INSTALL_PREFIX=\<path\></b></tt>  (default: /usr/local/)
@@ -151,6 +152,9 @@ These are as listed below.
 
 - <tt><b>-DFIND_CUDA=ON|OFF</b></tt> (default: ON)
   - Can be used to tell the build system not to find or link against CUDA.
+
+- <tt><b>-DFIND_OPENCL=ON|OFF</b></tt> (default: OFF)
+  - Can be used to tell the build system not to find or link against OpenCL.
 
 - <tt><b>-DNVCC_COMPILER_BINDIR=\<path\></b></tt> (default: None)
   - Specifies a nvcc compiler binary directory override. See nvcc help.
@@ -189,8 +193,8 @@ OSKAR, to the email address oskar@oerc.ox.ac.uk.
 \subsection install_test_example Running the Example Simulation
 
 With any fresh install of OSKAR, we recommend running the
-\ref example "example simulation" to establish if a simple simulation
-behaves as expected.
+\ref example "example simulation" to check that a simple simulation
+runs as expected.
 
 \latexonly
 \vskip 1cm
@@ -228,9 +232,10 @@ behaves as expected.
     Updated required CMake version to 3.1.
     Added platform-specific guidelines.
     </td></tr>
-<tr><td>9</td><td>2018-04-23</td>
+<tr><td>9</td><td>2019-05-17</td>
     <td>Rearranged sections to clarify that dependencies are only
-    required when building from source.</td></tr>
+    required when building from source.
+    Added options to not find (or link against) OpenCL.</td></tr>
 </table>
 
 */

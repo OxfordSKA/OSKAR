@@ -95,6 +95,7 @@ enum OSKAR_ELEMENT_TAPER
 #include <telescope/station/element/oskar_element_load.h>
 #include <telescope/station/element/oskar_element_load_cst.h>
 #include <telescope/station/element/oskar_element_load_scalar.h>
+#include <telescope/station/element/oskar_element_load_spherical_wave_coeff.h>
 #include <telescope/station/element/oskar_element_resize_freq_data.h>
 #include <telescope/station/element/oskar_element_read.h>
 #include <telescope/station/element/oskar_element_save.h>

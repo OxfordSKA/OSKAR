@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,7 @@ typedef struct DataProduct DataProduct;
 struct oskar_BeamPattern
 {
     /* Settings. */
-    int prec, num_devices, num_gpus, *gpu_ids;
+    int prec, num_devices, num_gpus_avail, dev_loc, num_gpus, *gpu_ids;
     int coord_type, max_chunk_size;
     int num_time_steps, num_channels, num_chunks;
     int pol_mode, width, height, num_pixels, nside;
@@ -116,7 +116,6 @@ struct oskar_BeamPattern
     oskar_Mem* ctemp; /* Complex-valued array used for reordering. */
 
     /* Settings log data. */
-    oskar_Log* log;
     char* settings_log;
     size_t settings_log_length;
 

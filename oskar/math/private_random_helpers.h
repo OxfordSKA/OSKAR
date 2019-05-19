@@ -80,7 +80,7 @@ void oskar_box_muller_f(unsigned long u0, unsigned long u1,
 #ifdef __CUDACC__
     sincospif(oskar_int_to_range_minus_1_to_1_f(u0), f0, f1);
 #else
-    float t = M_PIf;
+    float t = (float) M_PI;
     t *= oskar_int_to_range_minus_1_to_1_f(u0);
     *f0 = sinf(t);
     *f1 = cosf(t);

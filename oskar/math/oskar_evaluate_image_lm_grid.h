@@ -66,16 +66,16 @@ extern "C" {
  * figure 3.2 (2001 edition); "l and m are the direction cosines measured with
  * respect to the axes u and v." (page 71, 2001 edition).
  *
- * @param[out] l       The output list of l-direction cosines.
- * @param[out] m       The output list of m-direction cosines.
- * @param[in]  nl      Number of required grid points in the longitude dimension.
- * @param[in]  nm      Number of required grid points in the latitude dimension.
+ * @param[in]  num_l   Number of required grid points in the longitude dimension.
+ * @param[in]  num_m   Number of required grid points in the latitude dimension.
  * @param[in]  fov_lon The field of view in longitude (image width) in radians.
  * @param[in]  fov_lat The field of view in latitude (image height) in radians.
+ * @param[out] l       The output list of l-direction cosines.
+ * @param[out] m       The output list of m-direction cosines.
  */
 OSKAR_EXPORT
-void oskar_evaluate_image_lm_grid(oskar_Mem* l, oskar_Mem* m, int nl, int nm,
-        double fov_lon, double fov_lat, int* status);
+void oskar_evaluate_image_lm_grid(int num_l, int num_m, double fov_lon,
+        double fov_lat, oskar_Mem* l, oskar_Mem* m, int* status);
 
 /**
  * @brief

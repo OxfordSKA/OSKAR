@@ -36,54 +36,43 @@
 extern "C" {
 #endif
 
-/* oskar_Mem wrapper */
-void oskar_evaluate_image_lm_grid(oskar_Mem* l, oskar_Mem* m, int nl, int nm,
-        double fov_lon, double fov_lat, int* status)
+void oskar_evaluate_image_lm_grid(int num_l, int num_m, double fov_lon,
+        double fov_lat, oskar_Mem* l, oskar_Mem* m, int* status)
 {
-    int type, loc;
-
     if (*status) return;
-
-    type = oskar_mem_type(l);
-    if (oskar_mem_type(m) != type) {
+    const int type = oskar_mem_type(l);
+    const int loc = oskar_mem_location(l);
+    if (oskar_mem_type(m) != type)
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-    loc = oskar_mem_location(l);
-    if (oskar_mem_location(m) != loc) {
+    if (oskar_mem_location(m) != loc)
+    {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-
     if (loc == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE)
-        {
-            double* l_ = oskar_mem_double(l, status);
-            double* m_ = oskar_mem_double(m, status);
-            oskar_evaluate_image_lm_grid_d(nl, nm, fov_lon, fov_lat, l_, m_);
-        }
+            oskar_evaluate_image_lm_grid_d(num_l, num_m,
+                    fov_lon, fov_lat,
+                    oskar_mem_double(l, status),
+                    oskar_mem_double(m, status));
         else if (type == OSKAR_SINGLE)
-        {
-            float* l_ = oskar_mem_float(l, status);
-            float* m_ = oskar_mem_float(m, status);
-            oskar_evaluate_image_lm_grid_f(nl, nm, (float)fov_lon,
-                    (float)fov_lat, l_, m_);
-        }
+            oskar_evaluate_image_lm_grid_f(num_l, num_m,
+                    (float)fov_lon, (float)fov_lat,
+                    oskar_mem_float(l, status),
+                    oskar_mem_float(m, status));
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             return;
         }
     }
-    else if (loc == OSKAR_GPU)
-    {
-        /* There is currently no need for a GPU version of this function */
-        *status = OSKAR_ERR_BAD_LOCATION;
-        return;
-    }
     else
     {
+        /* There is currently no need for a GPU version of this function */
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
@@ -97,8 +86,8 @@ void oskar_evaluate_image_lm_grid_f(int num_l, int num_m,
     float l_max, m_max, *l, *m, r;
 
     /* Allocate temporary memory for vectors. */
-    l = malloc(num_l * sizeof(float));
-    m = malloc(num_m * sizeof(float));
+    l = (float*) malloc(num_l * sizeof(float));
+    m = (float*) malloc(num_m * sizeof(float));
 
     /* Set up the grid boundaries. */
     l_max = sin(0.5 * fov_lon);
@@ -140,8 +129,8 @@ void oskar_evaluate_image_lm_grid_d(int num_l, int num_m,
     double l_max, m_max, *l, *m, r;
 
     /* Allocate temporary memory for vectors. */
-    l = malloc(num_l * sizeof(double));
-    m = malloc(num_m * sizeof(double));
+    l = (double*) malloc(num_l * sizeof(double));
+    m = (double*) malloc(num_m * sizeof(double));
 
     /* Set up the grid boundaries. */
     l_max = sin(0.5 * fov_lon);

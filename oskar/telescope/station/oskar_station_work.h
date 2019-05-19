@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,8 +93,8 @@ OSKAR_EXPORT
 oskar_Mem* oskar_station_work_enu_direction_z(oskar_StationWork* work);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_work_normalised_beam(oskar_StationWork* work,
-        const oskar_Mem* output_beam, int* status);
+oskar_Mem* oskar_station_work_beam_out(oskar_StationWork* work,
+        const oskar_Mem* output_beam, size_t length, int* status);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_station_work_beam(oskar_StationWork* work,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
 #include "log/oskar_log.h"
-#include "utility/oskar_cuda_info.h"
+#include "settings/oskar_option_parser.h"
+#include "utility/oskar_device.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
+
+#include <cstdlib>
 
 int main(int argc, char** argv)
 {
     oskar::OptionParser opt("oskar_cuda_system_info", oskar_version_string());
     opt.set_description("Display a summary of the available CUDA capability");
     if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
+    oskar_log_set_term_priority(OSKAR_LOG_STATUS);
 
-    // Create the CUDA info structure.
-    int error = 0;
-    oskar_CudaInfo* info = oskar_cuda_info_create(&error);
+    oskar_Device** devices = 0;
+    int error = 0, num_devices = 0, platform = 0;
+
+    // Create CUDA device information list.
+    oskar_device_count("CUDA", &platform);
+    devices = oskar_device_create_list(platform, &num_devices);
+    oskar_device_check_error_cuda(&error);
+    oskar_log_section('M', "CUDA devices (%d)", num_devices);
     if (error)
-    {
-        oskar_log_error(0, "Could not determine CUDA system information (%s)",
+        oskar_log_error("Could not determine CUDA device information (%s)",
                 oskar_get_error_string(error));
-        oskar_cuda_info_free(info);
-        return error;
+    for (int i = 0; i < num_devices; ++i)
+    {
+        oskar_device_log_details(devices[i]);
+        oskar_device_free(devices[i]);
     }
-
-    // Log the CUDA system info.
-    oskar_cuda_info_log(NULL, info);
-    oskar_cuda_info_free(info);
+    free(devices);
     return 0;
 }

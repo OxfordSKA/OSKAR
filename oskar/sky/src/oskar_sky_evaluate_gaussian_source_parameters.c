@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,24 +53,16 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
         int zero_failed_sources, double ra0, double dec0, int* num_failed,
         int* status)
 {
-    int i, j, num_sources;
-    int type;
-
-    /* Check if safe to proceed. */
+    int i, j;
     if (*status) return;
-
-    /* Return if memory is not on the CPU. */
     if (oskar_sky_mem_location(sky) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
-
-    /* Get data type and number of sources. */
-    type = oskar_sky_precision(sky);
-    num_sources = oskar_sky_num_sources(sky);
-
-    /* Switch on type. */
+    const int type = oskar_sky_precision(sky);
+    const int num_sources = oskar_sky_num_sources(sky);
+    const double sin_dec0 = sin(dec0), cos_dec0 = cos(dec0);
     if (type == OSKAR_DOUBLE)
     {
         /* Double precision. */
@@ -109,6 +101,38 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
             ellipse_b = min_[i]/2.0;
             cos_pa = cos(pa_[i]);
             sin_pa = sin(pa_[i]);
+#if 0
+            /* TODO(FD) Consider replacing existing code with this version? */
+            /* Get source parameters. */
+            const double cos_ra = cos(ra_[i]);
+            const double sin_ra = sin(ra_[i]);
+            const double cos_dec = cos(dec_[i]);
+            const double sin_dec = sin(dec_[i]);
+            for (j = 0; j < ELLIPSE_PTS; ++j)
+            {
+                double sin_t, cos_t;
+                /* Evaluate shape of ellipse on the l,m plane
+                 * at RA = 0, Dec = 0. */
+                t = j * 60.0 * M_PI / 180.0; sin_t = sin(t); cos_t = cos(t);
+                const double l_ = ellipse_a * cos_t * sin_pa + ellipse_b * sin_t * cos_pa;
+                const double m_ = ellipse_a * cos_t * cos_pa - ellipse_b * sin_t * sin_pa;
+                const double n_ = sqrt(1.0 - l_*l_ - m_*m_);
+
+                /* Rotate to source position.
+                 * For a source on tangent plane at (x, y, z) = (1, 0, 0),
+                 * x parallel to n, y parallel to l, z parallel to m. */
+                const double x = n_ * cos_ra * cos_dec - l_ * sin_ra - m_ * cos_ra * sin_dec;
+                const double y = n_ * cos_dec * sin_ra + l_ * cos_ra - m_ * sin_ra * sin_dec;
+                const double z = n_ * sin_dec + m_ * cos_dec;
+
+                /* Get ellipse points relative to phase centre.
+                 * sin(lat) is z; cos(lat) is sqrt(x*x + y*y); t is rel_lon */
+                t = atan2(y, x) - ra0; sin_t = sin(t); cos_t = cos(t);
+                const double cos_lat = sqrt(x*x + y*y);
+                l[j] = cos_lat * sin_t;
+                m[j] = cos_dec0 * z - sin_dec0 * cos_lat * cos_t;
+            }
+#else
             for (j = 0; j < ELLIPSE_PTS; ++j)
             {
                 t = j * 60.0 * M_PI / 180.0;
@@ -124,8 +148,8 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
             oskar_convert_xyz_to_lon_lat_d(ELLIPSE_PTS, x, y, z, lon, lat);
 
             oskar_convert_lon_lat_to_relative_directions_2d_d(
-                    ELLIPSE_PTS, lon, lat, ra0, dec0, l, m);
-
+                    ELLIPSE_PTS, lon, lat, ra0, cos_dec0, sin_dec0, l, m, 0);
+#endif
             /* Get new major and minor axes and position angle. */
             oskar_fit_ellipse_d(&maj, &min, &pa, ELLIPSE_PTS, l, m, work1,
                     work2, status);
@@ -209,8 +233,9 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
             oskar_rotate_sph_f(ELLIPSE_PTS, x, y, z, ra_[i], dec_[i]);
             oskar_convert_xyz_to_lon_lat_f(ELLIPSE_PTS, x, y, z, lon, lat);
 
-            oskar_convert_lon_lat_to_relative_directions_2d_f(
-                    ELLIPSE_PTS, lon, lat, (float)ra0, (float)dec0, l, m);
+            oskar_convert_lon_lat_to_relative_directions_2d_f(ELLIPSE_PTS,
+                    lon, lat, (float)ra0, (float)cos_dec0, (float)sin_dec0,
+                    l, m, 0);
 
             /* Get new major and minor axes and position angle. */
             oskar_fit_ellipse_f(&maj, &min, &pa, ELLIPSE_PTS, l, m, work1,

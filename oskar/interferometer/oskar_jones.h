@@ -53,9 +53,7 @@ typedef struct oskar_Jones oskar_Jones;
 #include <interferometer/oskar_jones_create.h>
 #include <interferometer/oskar_jones_create_copy.h>
 #include <interferometer/oskar_jones_free.h>
-#include <interferometer/oskar_jones_get_station_pointer.h>
 #include <interferometer/oskar_jones_join.h>
-#include <interferometer/oskar_jones_set_real_scalar.h>
 #include <interferometer/oskar_jones_set_size.h>
 
 #endif /* OSKAR_JONES_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,15 +44,18 @@ extern "C" {
  * Scales the contents of the memory by a real number.
  *
  * @details
- * This function multiplies all the elements in a block of memory by a real
+ * This function multiplies the elements in a block of memory by a real
  * number.
  *
- * @param[in] mem Pointer to the block of memory to scale.
- * @param[in] value Value by which to scale.
+ * @param[in] mem           Pointer to the block of memory to scale.
+ * @param[in] value         Value by which to scale.
+ * @param[in] offset        Start offset into array.
+ * @param[in] num_elements  Number of elements to scale.
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status);
+void oskar_mem_scale_real(oskar_Mem* mem, double value,
+        size_t offset, size_t num_elements, int* status);
 
 #ifdef __cplusplus
 }

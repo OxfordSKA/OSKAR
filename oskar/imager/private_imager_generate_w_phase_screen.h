@@ -35,9 +35,9 @@
 extern "C" {
 #endif
 
-void oskar_imager_generate_w_phase_screen(const int iw, const int conv_size,
-        const int inner, const double sampling, const double w_scale,
-        const oskar_Mem* taper_func, oskar_Mem* screen, int* status);
+void oskar_imager_generate_w_phase_screen(int iw, int conv_size, int inner,
+        double sampling, double w_scale, const oskar_Mem* taper_func,
+        oskar_Mem* screen, int* status);
 
 #ifdef __cplusplus
 }

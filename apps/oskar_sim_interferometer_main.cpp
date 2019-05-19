@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,12 +27,12 @@
  */
 
 #include "apps/oskar_app_settings.h"
-#include "apps/oskar_option_parser.h"
 #include "apps/oskar_settings_log.h"
 #include "apps/oskar_settings_to_interferometer.h"
 #include "apps/oskar_settings_to_sky.h"
 #include "apps/oskar_settings_to_telescope.h"
 #include "log/oskar_log.h"
+#include "settings/oskar_option_parser.h"
 #include "interferometer/oskar_interferometer.h"
 #include "utility/oskar_timer.h"
 #include "utility/oskar_get_error_string.h"
@@ -55,21 +55,20 @@ int main(int argc, char** argv)
     int status = 0;
 
     // Create the log if necessary.
-    oskar_Log* log = 0;
     if (!opt.is_set("--get") && !opt.is_set("--set"))
     {
         int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
-        log = oskar_log_create(OSKAR_LOG_MESSAGE, priority);
-        oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
-        oskar_log_section(log, 'M', "Loading settings file '%s'", settings);
+        oskar_log_create(OSKAR_LOG_MESSAGE, priority);
+        oskar_log_message('M', 0, "Running binary %s", argv[0]);
+        oskar_log_section('M', "Loading settings file '%s'", settings);
     }
 
     // Load the settings file.
     SettingsTree* s = oskar_app_settings_tree(app, settings);
     if (!s)
     {
-        oskar_log_error(log, "Failed to read settings file.");
-        if (log) oskar_log_free(log);
+        oskar_log_error("Failed to read settings file.");
+        oskar_log_free();
         return EXIT_FAILURE;
     }
 
@@ -85,25 +84,25 @@ int main(int argc, char** argv)
         const char* key = opt.get_arg(1);
         const char* val = opt.get_arg(2);
         bool ok = val ? s->set_value(key, val) : s->set_default(key);
-        if (!ok) oskar_log_error(log, "Failed to set '%s'='%s'", key, val);
+        if (!ok) oskar_log_error("Failed to set '%s'='%s'", key, val);
         SettingsTree::free(s);
         return ok ? 0 : EXIT_FAILURE;
     }
 
     // Write settings to log.
-    oskar_settings_log(s, log);
+    oskar_settings_log(s);
 
     // Set up the sky model and telescope model.
     oskar_Telescope* tel = 0;
-    oskar_Sky* sky = oskar_settings_to_sky(s, log, &status);
+    oskar_Sky* sky = oskar_settings_to_sky(s, NULL, &status);
     if (!sky || status)
-        oskar_log_error(log, "Failed to set up sky model: %s.",
+        oskar_log_error("Failed to set up sky model: %s.",
                 oskar_get_error_string(status));
     else
     {
-        tel = oskar_settings_to_telescope(s, log, &status);
+        tel = oskar_settings_to_telescope(s, NULL, &status);
         if (!tel || status)
-            oskar_log_error(log, "Failed to set up telescope model: %s.",
+            oskar_log_error("Failed to set up telescope model: %s.",
                     oskar_get_error_string(status));
     }
 
@@ -112,7 +111,7 @@ int main(int argc, char** argv)
     oskar_Interferometer* sim = 0;
     if (sky && tel)
     {
-        sim = oskar_settings_to_interferometer(s, log, &status);
+        sim = oskar_settings_to_interferometer(s, NULL, &status);
         oskar_interferometer_set_sky_model(sim, sky, &status);
         oskar_interferometer_set_telescope_model(sim, tel, &status);
         if (oskar_sky_num_sources(sky) < 32 &&
@@ -120,13 +119,13 @@ int main(int argc, char** argv)
         {
             warning_source_count = "It may be faster to use CPU cores only, "
                     "as the sky model contains fewer than 32 sources.";
-            oskar_log_warning(log, warning_source_count);
+            oskar_log_warning(warning_source_count);
         }
         if (s->to_int("simulator/use_gpus", &status) &&
                 oskar_interferometer_num_gpus(sim) == 0)
         {
             warning_gpu = "No GPU capability available.";
-            oskar_log_warning(log, warning_gpu);
+            oskar_log_warning(warning_gpu);
         }
     }
     oskar_sky_free(sky, &status);
@@ -139,22 +138,22 @@ int main(int argc, char** argv)
 
     // Check for errors.
     if (!status)
-        oskar_log_message(log, 'M', 0, "Run completed in %.3f sec.",
+        oskar_log_message('M', 0, "Run completed in %.3f sec.",
                 oskar_timer_elapsed(tmr));
     else
-        oskar_log_error(log, "Run failed with code %i: %s.", status,
+        oskar_log_error("Run failed with code %i: %s.", status,
                 oskar_get_error_string(status));
 
     // Reiterate warnings.
     if (warning_source_count)
-        oskar_log_warning(log, warning_source_count);
+        oskar_log_warning(warning_source_count);
     if (warning_gpu)
-        oskar_log_warning(log, warning_gpu);
+        oskar_log_warning(warning_gpu);
 
     // Free memory.
     oskar_timer_free(tmr);
     oskar_interferometer_free(sim, &status);
-    oskar_log_free(log);
+    oskar_log_free();
     SettingsTree::free(s);
     return status;
 }

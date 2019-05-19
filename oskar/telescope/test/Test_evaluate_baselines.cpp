@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,8 @@ TEST(evaluate_baselines, cpu_gpu)
     }
 
     // Evaluate baseline coordinates on CPU.
-    oskar_convert_station_uvw_to_baseline_uvw(u, v, w, uu, vv, ww, &status);
+    oskar_convert_station_uvw_to_baseline_uvw(num_stations,
+            0, u, v, w, 0, uu, vv, ww, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check results are correct.
@@ -95,8 +96,8 @@ TEST(evaluate_baselines, cpu_gpu)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Evaluate baseline coordinates on device.
-    oskar_convert_station_uvw_to_baseline_uvw(u_gpu, v_gpu, w_gpu,
-            uu_gpu, vv_gpu, ww_gpu, &status);
+    oskar_convert_station_uvw_to_baseline_uvw(num_stations,
+            0, u_gpu, v_gpu, w_gpu, 0, uu_gpu, vv_gpu, ww_gpu, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check results are consistent.

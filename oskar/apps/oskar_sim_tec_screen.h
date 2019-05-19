@@ -47,7 +47,6 @@ extern "C" {
  * @details
  *
  * @param settings   Pointer to settings.
- * @param log        Pointer to a log structure to use.
  */
 OSKAR_APPS_EXPORT
 oskar_Mem* oskar_sim_tec_screen(const oskar_Settings_old* settings,

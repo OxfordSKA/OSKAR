@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,52 +34,11 @@
  */
 
 #include <oskar_global.h>
-#include <utility/oskar_vector_types.h>
 #include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * @brief
- * Evaluates weights errors for antenna elements (single precision, CPU).
- *
- * @details
- * Uses uniform random Gaussian values to generate weights errors for antennas.
- *
- * @param[in] num_elements The number of antenna elements.
- * @param[in] gain         Element gain values.
- * @param[in] gain_error   Standard deviation for time-variable element gains.
- * @param[in] phase        Element phase offsets, in radians.
- * @param[in] phase_error  Standard deviation for time-variable element phases.
- * @param[in,out] errors   On input, normal random Gaussian values; on exit, complex error weights.
- */
-OSKAR_EXPORT
-void oskar_evaluate_element_weights_errors_f(int num_elements,
-        const float* amp_gain, const float* amp_error,
-        const float* phase_offset, const float* phase_error,
-        float2* errors);
-
-/**
- * @brief
- * Evaluates weights errors for antenna elements (double precision, CPU).
- *
- * @details
- * Uses uniform random Gaussian values to generate weights errors for antennas.
- *
- * @param[in] num_elements The number of antenna elements.
- * @param[in] gain         Element gain values.
- * @param[in] gain_error   Standard deviation for time-variable element gains.
- * @param[in] phase        Element phase offsets, in radians.
- * @param[in] phase_error  Standard deviation for time-variable element phases.
- * @param[in,out] errors   On input, normal random Gaussian values; on exit, complex error weights.
- */
-OSKAR_EXPORT
-void oskar_evaluate_element_weights_errors_d(int num_elements,
-        const double* amp_gain, const double* amp_error,
-        const double* phase_offset, const double* phase_error,
-        double2* errors);
 
 /**
  * @brief

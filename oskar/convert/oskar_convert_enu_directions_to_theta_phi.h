@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,7 @@ extern "C" {
 
 /**
  * @brief
- * Function to compute theta and phi angles from horizontal direction
- * cosines (single precision).
+ * Function to compute azimuth and elevation from horizontal direction cosines.
  *
  * @details
  * Computes the angles theta and phi from the given horizontal direction
@@ -57,66 +56,7 @@ extern "C" {
  * Theta is the polar angle from the z-axis to the xy-plane, and phi is the
  * azimuthal angle from the x-axis to the y-axis.
  *
- * @param[in]  num_points  The number of points.
- * @param[in]  x           The x-direction-cosines.
- * @param[in]  y           The y-direction-cosines.
- * @param[in]  z           The z-direction-cosines.
- * @param[in]  delta_phi   Angle to add to computed values of phi.
- * @param[out] theta       The theta angles, in radians.
- * @param[out] phi         The phi angles, in radians.
- */
-OSKAR_EXPORT
-void oskar_convert_enu_directions_to_theta_phi_f(
-        const int num_points, const float* x, const float* y,
-        const float* z, const float delta_phi, float* theta, float* phi);
-
-/**
- * @brief
- * Function to compute azimuth and elevation from horizontal direction
- * cosines (double precision).
- *
- * @details
- * Computes the angles theta and phi from the given horizontal direction
- * cosines.
- *
- * The directions are:
- * - x: pointing East,
- * - y: pointing North,
- * - z: pointing to the zenith.
- *
- * Theta is the polar angle from the z-axis to the xy-plane, and phi is the
- * azimuthal angle from the x-axis to the y-axis.
- *
- * @param[in]  num_points  The number of points.
- * @param[in]  x           The x-direction-cosines.
- * @param[in]  y           The y-direction-cosines.
- * @param[in]  z           The z-direction-cosines.
- * @param[in]  delta_phi   Angle to add to computed values of phi.
- * @param[out] theta       The theta angles, in radians.
- * @param[out] phi         The phi angles, in radians.
- */
-OSKAR_EXPORT
-void oskar_convert_enu_directions_to_theta_phi_d(
-        const int num_points, const double* x, const double* y,
-        const double* z, const double delta_phi, double* theta, double* phi);
-
-/**
- * @brief
- * Wrapper function to compute azimuth and elevation from horizontal direction
- * cosines.
- *
- * @details
- * Computes the angles theta and phi from the given horizontal direction
- * cosines.
- *
- * The directions are:
- * - x: pointing East,
- * - y: pointing North,
- * - z: pointing to the zenith.
- *
- * Theta is the polar angle from the z-axis to the xy-plane, and phi is the
- * azimuthal angle from the x-axis to the y-axis.
- *
+ * @param[in]  offset_in   Start offset into the input coordinate arrays.
  * @param[in]  num_points  The number of points.
  * @param[in]  x           The x-direction-cosines.
  * @param[in]  y           The y-direction-cosines.
@@ -127,7 +67,7 @@ void oskar_convert_enu_directions_to_theta_phi_d(
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_convert_enu_directions_to_theta_phi(int num_points,
+void oskar_convert_enu_directions_to_theta_phi(int offset_in, int num_points,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         double delta_phi, oskar_Mem* theta, oskar_Mem* phi, int* status);
 

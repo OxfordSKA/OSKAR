@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,14 +55,14 @@ extern "C" {
  * @param[in] num_stations   The number of stations in the input arrays.
  * @param[in] jones          Pointer to Jones matrix block
  *                           (length \p num_sources * \p num_stations).
+ * @param[in] offset_out     Start offset into output array.
  * @param[out] out           Pointer to output average cross-power product
  *                           (length \p num_sources).
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_cross_power(int num_sources,
-        int num_stations, const oskar_Mem* jones, oskar_Mem* out,
-        int *status);
+void oskar_evaluate_cross_power(int num_sources, int num_stations,
+        const oskar_Mem* jones, int offset_out, oskar_Mem* out, int *status);
 
 #ifdef __cplusplus
 }

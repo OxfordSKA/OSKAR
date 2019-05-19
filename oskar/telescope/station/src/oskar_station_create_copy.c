@@ -142,7 +142,8 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     /* Recursively copy child stations. */
     if (oskar_station_has_child(src))
     {
-        model->child = malloc(src->num_elements * sizeof(oskar_Station*));
+        model->child = (oskar_Station**) malloc(
+                src->num_elements * sizeof(oskar_Station*));
         if (!model->child)
         {
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;

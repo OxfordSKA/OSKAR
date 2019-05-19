@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,10 @@
 #include <cuda_runtime_api.h>
 #endif
 
+#include "log/oskar_log.h"
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
-#include "utility/oskar_cl_utils.h"
+#include "utility/oskar_device.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -43,39 +44,28 @@ extern "C" {
 
 void oskar_mem_clear_contents(oskar_Mem* mem, int* status)
 {
-    size_t size;
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Compute the size. */
-    size = mem->num_elements * oskar_mem_element_size(mem->type);
-
-    /* Clear the memory. */
+    if (*status || mem->num_elements == 0) return;
+    const size_t size = mem->num_elements * oskar_mem_element_size(mem->type);
     if (mem->location == OSKAR_CPU)
-    {
         memset(mem->data, 0, size);
-    }
     else if (mem->location == OSKAR_GPU)
-    {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemset(mem->data, 0, size);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
-    }
     else if (mem->location & OSKAR_CL)
     {
 #ifdef OSKAR_HAVE_OPENCL
         cl_event event;
         cl_int error;
         char zero = '\0';
-        error = clEnqueueFillBuffer(oskar_cl_command_queue(),
+        error = clEnqueueFillBuffer(oskar_device_queue_cl(),
                 mem->buffer, &zero, sizeof(char), 0, size, 0, NULL, &event);
         clWaitForEvents(1, &event); /* This is required. */
         if (error != CL_SUCCESS)
         {
-            fprintf(stderr, "clEnqueueFillBuffer() error (%d)\n", error);
+            oskar_log_error("clEnqueueFillBuffer() error (%d)", error);
             *status = OSKAR_ERR_INVALID_ARGUMENT;
         }
 #else
@@ -83,9 +73,7 @@ void oskar_mem_clear_contents(oskar_Mem* mem, int* status)
 #endif
     }
     else
-    {
         *status = OSKAR_ERR_BAD_LOCATION;
-    }
 }
 
 #ifdef __cplusplus

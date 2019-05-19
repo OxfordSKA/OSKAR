@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,9 @@
 
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
+#include "utility/oskar_device.h"
+
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,24 +42,16 @@ extern "C" {
 
 double oskar_mem_get_element(const oskar_Mem* mem, size_t index, int* status)
 {
-    int precision, location;
-
-    /* Check if safe to proceed. */
     if (*status) return 0.0;
-
-    /* Get the data precision and location. */
-    precision = oskar_type_precision(mem->type);
-    location = mem->location;
-
-    /* Get the data. */
+    const int location = mem->location;
     if (location == OSKAR_CPU)
     {
-        switch (precision)
+        switch (mem->type)
         {
         case OSKAR_DOUBLE:
-            return ((double*)(mem->data))[index];
+            return ((const double*)mem->data)[index];
         case OSKAR_SINGLE:
-            return ((float*)(mem->data))[index];
+            return ((const float*)mem->data)[index];
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
@@ -64,21 +59,21 @@ double oskar_mem_get_element(const oskar_Mem* mem, size_t index, int* status)
     else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        switch (precision)
+        const size_t bytes = oskar_mem_element_size(mem->type);
+        const void* src = ((const char*)mem->data) + bytes * index;
+        switch (mem->type)
         {
         case OSKAR_DOUBLE:
         {
             double val;
-            cudaMemcpy(&val, (double*)(mem->data) + index, sizeof(double),
-                    cudaMemcpyDeviceToHost);
+            cudaMemcpy(&val, src, bytes, cudaMemcpyDeviceToHost);
             return val;
         }
         case OSKAR_SINGLE:
         {
             float val;
-            cudaMemcpy(&val, (float*)(mem->data) + index, sizeof(float),
-                    cudaMemcpyDeviceToHost);
-            return val;
+            cudaMemcpy(&val, src, bytes, cudaMemcpyDeviceToHost);
+            return (double)val;
         }
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -87,166 +82,38 @@ double oskar_mem_get_element(const oskar_Mem* mem, size_t index, int* status)
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
     }
+    else if (location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        /* Really, don't do this. There's a better way. */
+        const size_t bytes = oskar_mem_element_size(mem->type);
+        const size_t offset = bytes * index;
+        switch (mem->type)
+        {
+        case OSKAR_DOUBLE:
+        {
+            double val;
+            clEnqueueReadBuffer(oskar_device_queue_cl(),
+                    mem->buffer, CL_TRUE, offset, bytes, &val, 0, NULL, NULL);
+            return val;
+        }
+        case OSKAR_SINGLE:
+        {
+            float val;
+            clEnqueueReadBuffer(oskar_device_queue_cl(),
+                    mem->buffer, CL_TRUE, offset, bytes, &val, 0, NULL, NULL);
+            return (double)val;
+        }
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+#endif
+    }
     else
         *status = OSKAR_ERR_BAD_LOCATION;
     return 0.0;
-}
-
-double2 oskar_mem_get_element_complex(const oskar_Mem* mem, size_t index,
-        int* status)
-{
-    size_t n;
-    int type, location;
-    double2 val;
-    val.x = 0.0;
-    val.y = 0.0;
-
-    /* Check if safe to proceed. */
-    if (*status) return val;
-
-    /* Get the data type, location, and number of elements. */
-    type = mem->type;
-    location = mem->location;
-    n = mem->num_elements;
-    if (index >= n)
-    {
-        *status = OSKAR_ERR_OUT_OF_RANGE;
-        return val;
-    }
-
-    /* Get the data. */
-    if (location == OSKAR_CPU)
-    {
-        if (type == OSKAR_DOUBLE_COMPLEX)
-        {
-            return ((double2*)(mem->data))[index];
-        }
-        else if (type == OSKAR_SINGLE_COMPLEX)
-        {
-            float2 temp;
-            temp = ((float2*)(mem->data))[index];
-            val.x = (double) temp.x;
-            val.y = (double) temp.y;
-        }
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-    }
-    else if (location == OSKAR_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_DOUBLE_COMPLEX)
-        {
-            cudaMemcpy(&val, (double2*)(mem->data) + index, sizeof(double2),
-                    cudaMemcpyDeviceToHost);
-            return val;
-        }
-        else if (type == OSKAR_SINGLE_COMPLEX)
-        {
-            float2 temp;
-            cudaMemcpy(&temp, (float2*)(mem->data) + index, sizeof(float2),
-                    cudaMemcpyDeviceToHost);
-            val.x = (double) temp.x;
-            val.y = (double) temp.y;
-            return val;
-        }
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-    }
-    else
-        *status = OSKAR_ERR_BAD_LOCATION;
-
-    return val;
-}
-
-double4c oskar_mem_get_element_matrix(const oskar_Mem* mem, size_t index,
-        int* status)
-{
-    size_t n;
-    int type, location;
-    double4c val;
-    val.a.x = 0.0;
-    val.a.y = 0.0;
-    val.b.x = 0.0;
-    val.b.y = 0.0;
-    val.c.x = 0.0;
-    val.c.y = 0.0;
-    val.d.x = 0.0;
-    val.d.y = 0.0;
-
-    /* Check if safe to proceed. */
-    if (*status) return val;
-
-    /* Get the data type, location, and number of elements. */
-    type = mem->type;
-    location = mem->location;
-    n = mem->num_elements;
-    if (index >= n)
-    {
-        *status = OSKAR_ERR_OUT_OF_RANGE;
-        return val;
-    }
-
-    /* Get the data. */
-    if (location == OSKAR_CPU)
-    {
-        if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-        {
-            return ((double4c*)(mem->data))[index];
-        }
-        else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-        {
-            float4c temp;
-            temp = ((float4c*)(mem->data))[index];
-            val.a.x = (double) temp.a.x;
-            val.a.y = (double) temp.a.y;
-            val.b.x = (double) temp.b.x;
-            val.b.y = (double) temp.b.y;
-            val.c.x = (double) temp.c.x;
-            val.c.y = (double) temp.c.y;
-            val.d.x = (double) temp.d.x;
-            val.d.y = (double) temp.d.y;
-            return val;
-        }
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-    }
-    else if (location == OSKAR_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-        {
-            cudaMemcpy(&val, (double4c*)(mem->data) + index, sizeof(double4c),
-                    cudaMemcpyDeviceToHost);
-            return val;
-        }
-        else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-        {
-            float4c temp;
-            cudaMemcpy(&temp, (float4c*)(mem->data) + index, sizeof(float4c),
-                    cudaMemcpyDeviceToHost);
-            val.a.x = (double) temp.a.x;
-            val.a.y = (double) temp.a.y;
-            val.b.x = (double) temp.b.x;
-            val.b.y = (double) temp.b.y;
-            val.c.x = (double) temp.c.x;
-            val.c.y = (double) temp.c.y;
-            val.d.x = (double) temp.d.x;
-            val.d.y = (double) temp.d.y;
-            return val;
-        }
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-    }
-    else
-        *status = OSKAR_ERR_BAD_LOCATION;
-
-    return val;
 }
 
 #ifdef __cplusplus

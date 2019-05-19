@@ -28,6 +28,7 @@
 
 #include "imager/private_imager.h"
 #include "imager/private_imager_set_num_planes.h"
+#include "log/oskar_log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,8 +40,7 @@ void oskar_imager_set_num_planes(oskar_Imager* h, int* status)
     if (*status || h->num_planes > 0) return;
     if (h->num_sel_freqs == 0)
     {
-        oskar_log_error(h->log,
-                "Input visibility channel frequencies not set.");
+        oskar_log_error("Input visibility channel frequencies not set.");
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }

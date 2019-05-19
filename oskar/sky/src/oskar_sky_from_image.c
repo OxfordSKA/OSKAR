@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_sky.h"
 #include "convert/oskar_convert_relative_directions_to_lon_lat.h"
+#include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
+#include "sky/oskar_sky.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,8 +56,8 @@ oskar_Sky* oskar_sky_from_image(int precision, const oskar_Mem* image,
     if (image_cellsize_deg == 0.0)
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
-        fprintf(stderr, "Unknown image pixel size. "
-                "(Ensure all WCS headers are present.)\n");
+        oskar_log_error("Unknown image pixel size. "
+                "(Ensure all WCS headers are present.)");
         return 0;
     }
 

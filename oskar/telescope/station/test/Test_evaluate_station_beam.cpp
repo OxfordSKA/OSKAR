@@ -37,7 +37,7 @@
 #include "math/oskar_meshgrid.h"
 #include "binary/oskar_binary.h"
 #include "mem/oskar_binary_write_mem.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 
 #include "math/oskar_cmath.h"
 #include <cstdio>
@@ -137,7 +137,7 @@ TEST(evaluate_station_beam, test_array_pattern)
     // Save beam to file for plotting.
     const char* filename = "temp_test_beam_pattern.txt";
     FILE* file = fopen(filename, "w");
-    oskar_mem_save_ascii(file, 3, num_pixels, &error, h_l, h_m, beam_pattern);
+    oskar_mem_save_ascii(file, 3, 0, num_pixels, &error, h_l, h_m, beam_pattern);
     fclose(file);
     remove(filename);
 

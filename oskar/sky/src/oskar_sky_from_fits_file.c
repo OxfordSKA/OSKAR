@@ -26,9 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_sky.h"
 #include "convert/oskar_convert_brightness_to_jy.h"
+#include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
+#include "sky/oskar_sky.h"
 #include <fitsio.h>
 
 #ifdef __cplusplus
@@ -70,7 +71,7 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
         if (!*status && ordering != 'R')
         {
             *status = OSKAR_ERR_FILE_IO;
-            fprintf(stderr, "HEALPix data is not in RING format.\n");
+            oskar_log_error("HEALPix data is not in RING format.");
         }
     }
     else

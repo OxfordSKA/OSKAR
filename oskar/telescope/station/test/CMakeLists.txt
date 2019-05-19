@@ -18,9 +18,6 @@ target_link_libraries(${name} oskar gtest)
 add_test(station_test ${name})
 
 # Array pattern benchmark binary.
-if (CUDA_FOUND)
-    include_directories(${CUDA_INCLUDE_DIRS})
-    set(name oskar_array_pattern_benchmark)
-    add_executable(${name} ${name}.cpp)
-    target_link_libraries(${name} oskar ${CUDA_LIBRARIES})
-endif()
+set(name oskar_array_pattern_benchmark)
+add_executable(${name} ${name}.cpp)
+target_link_libraries(${name} oskar oskar_settings)

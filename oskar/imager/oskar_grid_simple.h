@@ -65,17 +65,17 @@ OSKAR_EXPORT
 void oskar_grid_simple_d(
         const int support,
         const int oversample,
-        const double* restrict conv_func,
+        const double* RESTRICT conv_func,
         const size_t num_points,
-        const double* restrict uu,
-        const double* restrict vv,
-        const double* restrict vis,
-        const double* restrict weight,
+        const double* RESTRICT uu,
+        const double* RESTRICT vv,
+        const double* RESTRICT vis,
+        const double* RESTRICT weight,
         const double cell_size_rad,
         const int grid_size,
-        size_t* restrict num_skipped,
-        double* restrict norm,
-        double* restrict grid);
+        size_t* RESTRICT num_skipped,
+        double* RESTRICT norm,
+        double* RESTRICT grid);
 
 /**
  * @brief
@@ -102,17 +102,17 @@ OSKAR_EXPORT
 void oskar_grid_simple_f(
         const int support,
         const int oversample,
-        const float* restrict conv_func,
+        const float* RESTRICT conv_func,
         const size_t num_points,
-        const float* restrict uu,
-        const float* restrict vv,
-        const float* restrict vis,
-        const float* restrict weight,
+        const float* RESTRICT uu,
+        const float* RESTRICT vv,
+        const float* RESTRICT vis,
+        const float* RESTRICT weight,
         const float cell_size_rad,
         const int grid_size,
-        size_t* restrict num_skipped,
-        double* restrict norm,
-        float* restrict grid);
+        size_t* RESTRICT num_skipped,
+        double* RESTRICT norm,
+        float* RESTRICT grid);
 
 #ifdef __cplusplus
 }

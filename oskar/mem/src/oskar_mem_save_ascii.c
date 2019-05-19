@@ -38,8 +38,8 @@ extern "C" {
 #define SDF "% .6e "
 #define SDD "% .14e "
 
-void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
-        int* status, ...)
+void oskar_mem_save_ascii(FILE* file, size_t num_mem,
+        size_t offset, size_t num_elements, int* status, ...)
 {
     int type;
     size_t i, j;
@@ -96,32 +96,32 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
             {
             case OSKAR_SINGLE:
             {
-                fprintf(file, SDF, ((const float*)data)[j]);
+                fprintf(file, SDF, ((const float*)data)[j + offset]);
                 continue;
             }
             case OSKAR_DOUBLE:
             {
-                fprintf(file, SDD, ((const double*)data)[j]);
+                fprintf(file, SDD, ((const double*)data)[j + offset]);
                 continue;
             }
             case OSKAR_SINGLE_COMPLEX:
             {
                 float2 d;
-                d = ((const float2*)data)[j];
+                d = ((const float2*)data)[j + offset];
                 fprintf(file, SDF SDF, d.x, d.y);
                 continue;
             }
             case OSKAR_DOUBLE_COMPLEX:
             {
                 double2 d;
-                d = ((const double2*)data)[j];
+                d = ((const double2*)data)[j + offset];
                 fprintf(file, SDD SDD, d.x, d.y);
                 continue;
             }
             case OSKAR_SINGLE_COMPLEX_MATRIX:
             {
                 float4c d;
-                d = ((const float4c*)data)[j];
+                d = ((const float4c*)data)[j + offset];
                 fprintf(file, SDF SDF SDF SDF SDF SDF SDF SDF,
                         d.a.x, d.a.y, d.b.x, d.b.y, d.c.x, d.c.y, d.d.x, d.d.y);
                 continue;
@@ -129,19 +129,19 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
             {
                 double4c d;
-                d = ((const double4c*)data)[j];
+                d = ((const double4c*)data)[j + offset];
                 fprintf(file, SDD SDD SDD SDD SDD SDD SDD SDD,
                         d.a.x, d.a.y, d.b.x, d.b.y, d.c.x, d.c.y, d.d.x, d.d.y);
                 continue;
             }
             case OSKAR_CHAR:
             {
-                putc(((const char*)data)[j], file);
+                putc(((const char*)data)[j + offset], file);
                 continue;
             }
             case OSKAR_INT:
             {
-                fprintf(file, "%5d ", ((const int*)data)[j]);
+                fprintf(file, "%5d ", ((const int*)data)[j + offset]);
                 continue;
             }
             default:

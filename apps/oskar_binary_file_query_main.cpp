@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_option_parser.h"
 #include "log/oskar_log.h"
+#include "settings/oskar_option_parser.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_scan_binary_file.h"
 #include "utility/oskar_version_string.h"
@@ -45,9 +45,9 @@ int main(int argc, char** argv)
 
     // Scan the file.
     int error = 0;
-    oskar_scan_binary_file(0, filename, &error);
+    oskar_scan_binary_file(filename, &error);
     if (error)
-        oskar_log_error(0, oskar_get_error_string(error));
+        oskar_log_error(oskar_get_error_string(error));
 
     return error;
 }

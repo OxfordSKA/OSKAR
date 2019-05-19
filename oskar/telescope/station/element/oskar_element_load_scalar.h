@@ -34,7 +34,6 @@
  */
 
 #include <oskar_global.h>
-#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,7 +54,6 @@ extern "C" {
  * - <phase, deg> [optional]
  *
  * @param[in,out] data         Pointer to element model data structure to fill.
- * @param[in,out] log          Pointer to log structure to use.
  * @param[in]  freq_hz         Frequency at which element data applies, in Hz.
  * @param[in]  filename        Data file name.
  * @param[in]  closeness       Target average fractional error required (<< 1).
@@ -65,7 +63,7 @@ extern "C" {
  * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_element_load_scalar(oskar_Element* data, oskar_Log* log,
+void oskar_element_load_scalar(oskar_Element* data,
         double freq_hz, const char* filename, double closeness,
         double closeness_inc, int ignore_at_poles, int ignore_below_horizon,
         int* status);

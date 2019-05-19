@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,17 +48,25 @@ extern "C" {
  *
  * Addition can only be performed on arrays of the same data type.
  *
- * An error is returned if there is not enough space in the output array.
- *
- * @param[in,out]  out          Array containing the result of adding inputs.
+ * @param[out]     out          Output array.
  * @param[in]      in1          First input array.
  * @param[in]      in2          Second input array.
+ * @param[in]      offset_out   Start offset into output array.
+ * @param[in]      offset_in1   Start offset into first input array.
+ * @param[in]      offset_in2   Start offset into second input array.
  * @param[in]      num_elements Number of elements to add.
  * @param[in,out]  status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
-        size_t num_elements, int* status);
+void oskar_mem_add(
+        oskar_Mem* out,
+        const oskar_Mem* in1,
+        const oskar_Mem* in2,
+        size_t offset_out,
+        size_t offset_in1,
+        size_t offset_in2,
+        size_t num_elements,
+        int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #include "math/oskar_meshgrid.h"
 #include "math/oskar_evaluate_image_lmn_grid.h"
 #include "interferometer/oskar_evaluate_jones_E.h"
+#include "utility/oskar_timer.h"
 #include "utility/oskar_get_error_string.h"
 
 #include "math/oskar_cmath.h"
@@ -49,14 +50,45 @@ static int device_loc = OSKAR_GPU;
 static int device_loc = OSKAR_CPU;
 #endif
 
+static void jones_to_power(const oskar_Mem* jones, oskar_Mem* power,
+        int* status)
+{
+    const oskar_Mem *input;
+    oskar_Mem *jones_ = 0;
+    if (oskar_mem_location(jones) == OSKAR_CPU)
+        input = jones;
+    else
+    {
+        jones_ = oskar_mem_create_copy(jones, OSKAR_CPU, status);
+        input = jones_;
+    }
+    const size_t num_elements = oskar_mem_length(input);
+    oskar_mem_ensure(power, num_elements, status);
+    if (oskar_mem_precision(input) == OSKAR_SINGLE)
+    {
+        const float2* in = oskar_mem_float2_const(input, status);
+        float* out = oskar_mem_float(power, status);
+        for (size_t i = 0; i < num_elements; ++i)
+            out[i] = in[i].x * in[i].x + in[i].y * in[i].y;
+    }
+    else if (oskar_mem_precision(input) == OSKAR_DOUBLE)
+    {
+        const double2* in = oskar_mem_double2_const(input, status);
+        double* out = oskar_mem_double(power, status);
+        for (size_t i = 0; i < num_elements; ++i)
+            out[i] = in[i].x * in[i].x + in[i].y * in[i].y;
+    }
+    oskar_mem_free(jones_, status);
+}
+
 TEST(evaluate_jones_E, evaluate_e)
 {
-    int error = 0;
+    int error = 0, prec = OSKAR_SINGLE;
     double gast = 0.0;
 
     // Construct telescope model.
-    int num_stations = 2;
-    oskar_Telescope* tel_cpu = oskar_telescope_create(OSKAR_SINGLE,
+    int num_stations = 6;
+    oskar_Telescope* tel_cpu = oskar_telescope_create(prec,
             OSKAR_CPU, num_stations, &error);
     double frequency = 30e6;
     int station_dim = 20;
@@ -84,15 +116,19 @@ TEST(evaluate_jones_E, evaluate_e)
                 oskar_mem_float(
                         oskar_station_element_measured_y_enu_metres(s), &error),
                 &x_pos[0], station_dim, &x_pos[0], station_dim);
+        oskar_mem_copy(oskar_station_element_true_x_enu_metres(s),
+                oskar_station_element_measured_x_enu_metres(s), &error);
+        oskar_mem_copy(oskar_station_element_true_y_enu_metres(s),
+                oskar_station_element_measured_y_enu_metres(s), &error);
     }
     oskar_telescope_set_station_ids(tel_cpu);
     oskar_telescope_set_phase_centre(tel_cpu,
             OSKAR_SPHERICAL_TYPE_EQUATORIAL, 0.0, M_PI/2.0);
-    oskar_telescope_set_allow_station_beam_duplication(tel_cpu, OSKAR_TRUE);
+    oskar_telescope_set_allow_station_beam_duplication(tel_cpu, OSKAR_FALSE);
     oskar_telescope_analyse(tel_cpu, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    // Copy telescope structure to the GPU, and free the CPU version.
+    // Copy telescope model to device.
     oskar_Telescope* tel_gpu = oskar_telescope_create_copy(tel_cpu,
             device_loc, &error);
     oskar_telescope_free(tel_cpu, &error);
@@ -100,62 +136,40 @@ TEST(evaluate_jones_E, evaluate_e)
 
     // Create pixel positions.
     int num_l = 128, num_m = 128;
-    int num_pts = 1 + num_l * num_m;
-    oskar_Mem* l = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pts, &error);
-    oskar_Mem* m = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pts, &error);
-    oskar_Mem* n = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pts, &error);
-    oskar_evaluate_image_lmn_grid(num_l, num_m, 90.0 * D2R, 90.0 * D2R,
+    int num_pts = num_l * num_m;
+    oskar_Mem* l = oskar_mem_create(prec, OSKAR_CPU, 1 + num_pts, &error);
+    oskar_Mem* m = oskar_mem_create(prec, OSKAR_CPU, 1 + num_pts, &error);
+    oskar_Mem* n = oskar_mem_create(prec, OSKAR_CPU, 1 + num_pts, &error);
+    oskar_evaluate_image_lmn_grid(num_l, num_m, 40.0 * D2R, 40.0 * D2R,
             1, l, m, n, &error);
 
-    // Set up GPU memory.
+    // Set up device memory.
     oskar_Mem* l_gpu = oskar_mem_create_copy(l, device_loc, &error);
     oskar_Mem* m_gpu = oskar_mem_create_copy(m, device_loc, &error);
     oskar_Mem* n_gpu = oskar_mem_create_copy(n, device_loc, &error);
-    oskar_Jones* E = oskar_jones_create(OSKAR_SINGLE_COMPLEX,
+    oskar_Jones* E = oskar_jones_create(prec | OSKAR_COMPLEX,
             device_loc, num_stations, num_pts, &error);
-    oskar_StationWork* work = oskar_station_work_create(OSKAR_SINGLE,
+    oskar_StationWork* work = oskar_station_work_create(prec,
             device_loc, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Evaluate Jones E.
-    oskar_evaluate_jones_E(E, num_pts - 1, OSKAR_RELATIVE_DIRECTIONS,
+    oskar_Timer* tmr = oskar_timer_create(device_loc);
+    oskar_timer_start(tmr);
+    oskar_evaluate_jones_E(E, num_pts, OSKAR_RELATIVE_DIRECTIONS,
             l_gpu, m_gpu, n_gpu, tel_gpu, gast, frequency, work, 0, &error);
+    printf("Jones E evaluation took %.3f s\n", oskar_timer_elapsed(tmr));
+    oskar_timer_free(tmr);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    // Save to file for plotting.
-    const char* filename = "temp_test_E_jones.txt";
-    FILE* file = fopen(filename, "w");
-    oskar_Mem *E_station = oskar_mem_create_alias(0, 0, 0, &error);
-    for (int j = 0; j < num_stations; ++j)
-    {
-        oskar_jones_get_station_pointer(E_station, E, j, &error);
-        ASSERT_EQ(0, error) << oskar_get_error_string(error);
-        oskar_mem_save_ascii(file, 4, num_pts - 1, &error,
-                oskar_station_work_enu_direction_x(work),
-                oskar_station_work_enu_direction_y(work),
-                oskar_station_work_enu_direction_z(work),
-                E_station);
-    }
-    oskar_mem_free(E_station, &error);
-    fclose(file);
-    remove(filename);
+    // Calculate power and save image cube.
+    oskar_Mem* power = oskar_mem_create(prec, OSKAR_CPU, 0, &error);
+    jones_to_power(oskar_jones_mem(E), power, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
+    oskar_mem_write_fits_cube(power, "temp_test_jones_E",
+            num_l, num_m, num_stations, -1, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    /*
-        data = dlmread('temp_test_E_jones.txt');
-        l  = reshape(data(:,1), length(data(:,1))/2, 2);
-        m  = reshape(data(:,2), length(data(:,2))/2, 2);
-        n  = reshape(data(:,3), length(data(:,3))/2, 2);
-        re = reshape(data(:,4), length(data(:,4))/2, 2);
-        im = reshape(data(:,5), length(data(:,5))/2, 2);
-        amp = sqrt(re.^2 + im.^2);
-        %idx = find(n > 0.0);
-        %l = l(idx);
-        %m = m(idx);
-        %n = n(idx);
-        %amp = amp(idx);
-        station = 1;
-        scatter3(l(:,station),m(:,station),n(:,station),2,amp(:,station));
-     */
     oskar_jones_free(E, &error);
     oskar_mem_free(l, &error);
     oskar_mem_free(m, &error);
@@ -163,6 +177,7 @@ TEST(evaluate_jones_E, evaluate_e)
     oskar_mem_free(l_gpu, &error);
     oskar_mem_free(m_gpu, &error);
     oskar_mem_free(n_gpu, &error);
+    oskar_mem_free(power, &error);
     oskar_telescope_free(tel_gpu, &error);
     oskar_station_work_free(work, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);

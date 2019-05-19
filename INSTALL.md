@@ -15,7 +15,7 @@ from source.
 
 ## 2.1. Dependencies
 
-If GPU acceleration is required, an NVIDIA GPU with CUDA 5.5 or later
+If GPU acceleration is required, an NVIDIA GPU with CUDA 7.0 or later
 (and associated NVIDIA CUDA driver) must be installed.
 If the graphical user interface (GUI) is required, Qt must also be installed.
 Additionally, the casacore libraries must be present if Measurement Sets
@@ -25,7 +25,7 @@ building from source, not if using a pre-built package.
 The dependencies are:
 
 * CMake (https://cmake.org), version >= 3.1
-* [Optional] NVIDIA CUDA (https://developer.nvidia.com/cuda-downloads), version >= 5.5
+* [Optional] NVIDIA CUDA (https://developer.nvidia.com/cuda-downloads), version >= 7.0
 * [Optional] Qt 5 (https://www.qt.io)
 * [Optional] casacore (https://github.com/casacore/casacore), version >= 2.0.0
 
@@ -53,7 +53,7 @@ These are listed below.
         Sets the target architecture for the compilation of CUDA device code.
         <arch> must be one of either: 1.3, 2.0, 2.1, 3.0, 3.2, 3.5, 3.7,
                                       5.0, 5.2, 6.0, 6.1, 6.2, 7.0, 7.2, 7.5 or ALL.
-        ALL is for all Kepler, Maxwell and Pascal architectures (>= 3.0).
+        ALL is for all Kepler, Maxwell, Pascal, Volta and Turing architectures (>= 3.0).
         Multiple architectures can be specified by separating them with
         semi-colons.
 
@@ -84,6 +84,9 @@ Advanced Build Options:
     * -DFIND_CUDA=ON|OFF (default: ON)
         Can be used to tell the build system not to find or link against CUDA.
 
+    * -DFIND_OPENCL=ON|OFF (default: OFF)
+        Can be used to tell the build system not to find or link against OpenCL.
+
     * -DNVCC_COMPILER_BINDIR=<path> (default: None)
         Specifies a nvcc compiler binary directory override. See nvcc help.
         Note: This is likely to be needed only on macOS when the version of the
@@ -104,7 +107,7 @@ Advanced Build Options:
 ## 2.4. Custom (Non-System) Qt Installations
 
 If Qt 5 cannot be found from the default system paths, make sure to set
-CMAKE_PREFIX_PATH as described above.
+`CMAKE_PREFIX_PATH` as described above.
 
 
 # 3. Testing the Installation

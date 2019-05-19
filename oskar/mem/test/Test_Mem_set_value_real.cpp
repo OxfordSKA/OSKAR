@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ TEST(Mem, set_value_real_double)
     int n = 100, status = 0;
     oskar_Mem *mem;
     mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, n, &status);
-    oskar_mem_set_value_real(mem, 4.5, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 4.5, 0, n, &status);
     double* v = oskar_mem_double(mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
@@ -62,7 +62,7 @@ TEST(Mem, set_value_real_single)
     int n = 100, status = 0;
     oskar_Mem *mem;
     mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, n, &status);
-    oskar_mem_set_value_real(mem, 4.5, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 4.5, 0, n, &status);
     float* v = oskar_mem_float(mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
@@ -79,7 +79,7 @@ TEST(Mem, set_value_real_double_complex)
     int n = 100, status = 0;
     oskar_Mem *mem, *mem2;
     mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, location, n, &status);
-    oskar_mem_set_value_real(mem, 6.5, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 6.5, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     mem2 = oskar_mem_create_copy(mem, OSKAR_CPU, &status);
@@ -100,7 +100,7 @@ TEST(Mem, set_value_real_double_complex_matrix)
     int n = 100, status = 0;
     oskar_Mem *mem, *mem2;
     mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX_MATRIX, location, n, &status);
-    oskar_mem_set_value_real(mem, 6.5, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 6.5, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     mem2 = oskar_mem_create_copy(mem, OSKAR_CPU, &status);
@@ -127,7 +127,7 @@ TEST(Mem, set_value_real_single_complex)
     int n = 100, status = 0;
     oskar_Mem *mem, *mem2;
     mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX, location, n, &status);
-    oskar_mem_set_value_real(mem, 6.5, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 6.5, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     mem2 = oskar_mem_create_copy(mem, OSKAR_CPU, &status);
@@ -148,7 +148,7 @@ TEST(Mem, set_value_real_single_complex_matrix)
     int n = 100, status = 0;
     oskar_Mem *mem, *mem2;
     mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, location, n, &status);
-    oskar_mem_set_value_real(mem, 6.5, 0, 0, &status);
+    oskar_mem_set_value_real(mem, 6.5, 0, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     mem2 = oskar_mem_create_copy(mem, OSKAR_CPU, &status);

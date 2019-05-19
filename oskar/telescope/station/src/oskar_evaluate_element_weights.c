@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,10 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
         const oskar_Station* station, double x_beam, double y_beam,
         double z_beam, int time_index, int* status)
 {
-    int num_elements;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Resize weights and weights error work arrays if required. */
-    num_elements = oskar_station_num_elements(station);
-    if ((int)oskar_mem_length(weights) < num_elements)
-        oskar_mem_realloc(weights, num_elements, status);
-    if ((int)oskar_mem_length(weights_error) < num_elements)
-        oskar_mem_realloc(weights_error, num_elements, status);
+    const int num_elements = oskar_station_num_elements(station);
+    oskar_mem_ensure(weights, num_elements, status);
+    oskar_mem_ensure(weights_error, num_elements, status);
 
     /* Generate DFT weights. */
     oskar_evaluate_element_weights_dft(num_elements,
@@ -61,7 +54,6 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
     /* Apply time-variable errors. */
     if (oskar_station_apply_element_errors(station))
     {
-        /* Generate weights errors. */
         oskar_evaluate_element_weights_errors(num_elements,
                 oskar_station_element_gain_const(station),
                 oskar_station_element_gain_error_const(station),
@@ -69,18 +61,15 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
                 oskar_station_element_phase_error_rad_const(station),
                 oskar_station_seed_time_variable_errors(station), time_index,
                 oskar_station_unique_id(station), weights_error, status);
-
-        /* Modify the weights (complex multiply with error vector). */
-        oskar_mem_multiply(0, weights, weights_error, num_elements, status);
+        oskar_mem_multiply(weights, weights, weights_error,
+                0, 0, 0, num_elements, status);
     }
 
-    /* Modify the weights using the provided apodisation values. */
+    /* Apply apodisation. */
     if (oskar_station_apply_element_weight(station))
-    {
-        oskar_mem_multiply(0, weights,
-                oskar_station_element_weight_const(station), num_elements,
-                status);
-    }
+        oskar_mem_multiply(weights, weights,
+                oskar_station_element_weight_const(station),
+                0, 0, 0, num_elements, status);
 }
 
 #ifdef __cplusplus

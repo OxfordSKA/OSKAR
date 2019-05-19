@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 #include "imager/oskar_imager_accessors.h"
 #include "imager/oskar_imager_create.h"
 #include "utility/oskar_timer.h"
+#include "utility/oskar_device.h"
 
 #include <stdlib.h>
 #include <float.h>
@@ -72,6 +73,10 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return h;
     }
+
+    /* Get number of devices available, and device location. */
+    oskar_device_set_require_double_precision(imager_precision == OSKAR_DOUBLE);
+    h->num_gpus_avail = oskar_device_count(0, &h->dev_loc);
 
     /* Set sensible defaults. */
     oskar_imager_set_gpus(h, -1, 0, status);

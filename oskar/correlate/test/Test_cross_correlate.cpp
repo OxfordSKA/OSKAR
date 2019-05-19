@@ -161,8 +161,8 @@ protected:
         oskar_telescope_set_channel_bandwidth(tel, bandwidth);
         oskar_telescope_set_time_average(tel, time_average);
         oskar_timer_start(timer1);
-        oskar_cross_correlate(vis1, oskar_sky_num_sources(sky), jones, sky,
-                tel, u_, v_, w_, 1.0, frequency, &status);
+        oskar_cross_correlate(oskar_sky_num_sources(sky), jones, sky,
+                tel, u_, v_, w_, 1.0, frequency, 0, vis1, &status);
         time1 = oskar_timer_elapsed(timer1);
         destroyTestData();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -179,8 +179,8 @@ protected:
         oskar_telescope_set_channel_bandwidth(tel, bandwidth);
         oskar_telescope_set_time_average(tel, time_average);
         oskar_timer_start(timer2);
-        oskar_cross_correlate(vis2, oskar_sky_num_sources(sky), jones, sky,
-                tel, u_, v_, w_, 1.0, frequency, &status);
+        oskar_cross_correlate(oskar_sky_num_sources(sky), jones, sky,
+                tel, u_, v_, w_, 1.0, frequency, 0, vis2, &status);
         time2 = oskar_timer_elapsed(timer2);
         destroyTestData();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);

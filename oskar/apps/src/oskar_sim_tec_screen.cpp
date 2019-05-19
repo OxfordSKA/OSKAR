@@ -84,13 +84,13 @@ oskar_Mem* oskar_sim_tec_screen(const oskar_Settings_old* settings,
     oskar_Mem *pp_lon, *pp_lat, *pp_rel_path;
     pp_lon = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
     pp_lat = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
-    oskar_evaluate_image_lon_lat_grid(pp_lon, pp_lat, im_size, im_size, fov,
-            fov, *pp_lon0, *pp_lat0, status);
+    oskar_evaluate_image_lon_lat_grid(im_size, im_size, fov, fov,
+            *pp_lon0, *pp_lat0, pp_lon, pp_lat, status);
 
     // Relative path in direction of p.p. (1.0 here as we are not using
     // any stations)
     pp_rel_path = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
-    oskar_mem_set_value_real(pp_rel_path, 1.0, 0, 0, status);
+    oskar_mem_set_value_real(pp_rel_path, 1.0, 0, num_pixels, status);
 
     // Initialise return values
     TEC_screen = oskar_mem_create(type, OSKAR_CPU, num_pixels * num_times,

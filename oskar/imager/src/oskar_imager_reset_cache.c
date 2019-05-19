@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OSKAR_HAVE_CUDA
-#include <cufft.h>
-#endif
-
 #include "imager/private_imager.h"
 #include "imager/oskar_imager_reset_cache.h"
+#include "imager/private_imager_free_device_data.h"
+#include "math/oskar_fft.h"
 #include <fitsio.h>
 
 #include <stdlib.h>
@@ -44,25 +42,18 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
 {
     int i;
 
+    /* Clear all device data. */
+    oskar_imager_free_device_data(h, status);
+
     /* Clear selected axes. */
-    free(h->sel_freqs);
-    free(h->im_freqs);
-    h->sel_freqs = 0;
-    h->im_freqs = 0;
+    free(h->sel_freqs); h->sel_freqs = 0;
+    free(h->im_freqs); h->im_freqs = 0;
     h->num_sel_freqs = 0;
     h->num_im_channels = 0;
 
     /* Clear FFT caches. */
-    oskar_mem_free(h->corr_func, status);
-    oskar_mem_free(h->fftpack_wsave, status);
-    oskar_mem_free(h->fftpack_work, status);
-#ifdef OSKAR_HAVE_CUDA
-    cufftDestroy(h->cufft_plan);
-    h->cufft_plan = 0;
-#endif
-    h->corr_func = 0;
-    h->fftpack_wsave = 0;
-    h->fftpack_work = 0;
+    oskar_fft_free(h->fft); h->fft = 0;
+    oskar_mem_free(h->corr_func, status); h->corr_func = 0;
 
     /* Clear algorithm-specific caches. */
     oskar_mem_free(h->l, status); h->l = 0;
@@ -78,17 +69,14 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     if (h->planes)
         for (i = 0; i < h->num_planes; ++i)
             oskar_mem_free(h->planes[i], status);
-    free(h->planes);
-    h->planes = 0;
-    free(h->plane_norm);
-    h->plane_norm = 0;
+    free(h->planes); h->planes = 0;
+    free(h->plane_norm); h->plane_norm = 0;
 
     /* Free the weights grids if they exist. */
     if (h->weights_grids)
         for (i = 0; i < h->num_planes; ++i)
             oskar_mem_free(h->weights_grids[i], status);
-    free(h->weights_grids);
-    h->weights_grids = 0;
+    free(h->weights_grids); h->weights_grids = 0;
 
     /* Collapse temp arrays. */
     oskar_mem_realloc(h->uu_im, 0, status);
@@ -101,8 +89,7 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     oskar_mem_realloc(h->weight_im, 0, status);
     oskar_mem_realloc(h->weight_tmp, 0, status);
     oskar_mem_realloc(h->time_im, 0, status);
-    oskar_mem_free(h->stokes, status);
-    h->stokes = 0;
+    oskar_mem_free(h->stokes, status); h->stokes = 0;
 
     /* Close any open FITS files. */
     for (i = 0; i < h->num_im_pols; ++i)
@@ -110,8 +97,7 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
         if (h->fits_file[i])
             ffclos(h->fits_file[i], status);
         h->fits_file[i] = 0;
-        free(h->output_name[i]);
-        h->output_name[i] = 0;
+        free(h->output_name[i]); h->output_name[i] = 0;
     }
 
     /* Clear the number of image planes. */

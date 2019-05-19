@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,31 +42,20 @@ extern "C" {
 
 /**
  * @brief
+ * Convert vector components from the Ludwig-3 system to the theta-phi system.
  *
  * @details
+ * This function converts vector components from the Ludwig-3 system (H/V)
+ * to the spherical theta-phi system.
  *
- * @param[in] num_points The number of points.
- * @param[in,out] vec    The Ludwig-3 (input) and spherical (output) components.
- * @param[out] phi       The phi angles, in radians.
- */
-OSKAR_EXPORT
-void oskar_convert_ludwig3_to_theta_phi_components_f(int num_points,
-        float2* h_theta, float2* v_phi, const float* phi, int stride);
-
-OSKAR_EXPORT
-void oskar_convert_ludwig3_to_theta_phi_components_d(int num_points,
-        double2* h_theta, double2* v_phi, const double* phi, int stride);
-
-/**
- * @brief
- *
- * @details
+ * @param[in] phi          The phi angles, in radians.
+ * @param[in,out] vec      The Ludwig-3 (input) and spherical (output) components.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_convert_ludwig3_to_theta_phi_components(oskar_Mem* vec,
-        int offset, int stride, int num_points, const oskar_Mem* phi,
-        int* status);
+void oskar_convert_ludwig3_to_theta_phi_components(
+        int num_points, const oskar_Mem* phi, int stride, int offset,
+        oskar_Mem* vec, int* status);
 
 #ifdef __cplusplus
 }

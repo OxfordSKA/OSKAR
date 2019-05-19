@@ -69,33 +69,6 @@ void oskar_work_jones_z_free(oskar_WorkJonesZ* work, int* status)
     free(work);
 }
 
-int oskar_work_jones_z_type(oskar_WorkJonesZ* work)
-{
-    if (oskar_mem_type(work->hor_x) == OSKAR_DOUBLE &&
-            oskar_mem_type(work->hor_y) == OSKAR_DOUBLE &&
-            oskar_mem_type(work->hor_z) == OSKAR_DOUBLE &&
-            oskar_mem_type(work->pp_lon) == OSKAR_DOUBLE &&
-            oskar_mem_type(work->pp_lat) == OSKAR_DOUBLE &&
-            oskar_mem_type(work->pp_rel_path) == OSKAR_DOUBLE &&
-            oskar_mem_type(work->screen_TEC) == OSKAR_DOUBLE &&
-            oskar_mem_type(work->total_TEC) == OSKAR_DOUBLE)
-    {
-        return OSKAR_DOUBLE;
-    }
-    else if (oskar_mem_type(work->hor_x) == OSKAR_SINGLE &&
-            oskar_mem_type(work->hor_y) == OSKAR_SINGLE &&
-            oskar_mem_type(work->hor_z) == OSKAR_SINGLE &&
-            oskar_mem_type(work->pp_lon) == OSKAR_SINGLE &&
-            oskar_mem_type(work->pp_lat) == OSKAR_SINGLE &&
-            oskar_mem_type(work->pp_rel_path) == OSKAR_SINGLE &&
-            oskar_mem_type(work->screen_TEC) == OSKAR_SINGLE &&
-            oskar_mem_type(work->total_TEC) == OSKAR_SINGLE)
-    {
-        return OSKAR_SINGLE;
-    }
-    return -1;
-}
-
 void oskar_work_jones_z_resize(oskar_WorkJonesZ* work, int n, int* status)
 {
     oskar_mem_realloc(work->hor_x, n, status);

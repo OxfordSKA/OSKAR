@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,16 +54,17 @@ extern "C" {
  *
  * Integer types will cause an error code to be returned.
  *
- * @param[in] mem Pointer to the block of memory to update.
- * @param[in] val All memory elements will be set to this value.
- * @param[in] offset Array index offset at which to start.
- * @param[in] length Number of array elements to set, starting at offset.
- *                   Note that 0 for both \p offset and \p length means "all".
- * @param[in,out]  status   Status return code.
+ * @param[in,out] mem          The block of memory to update.
+ * @param[in]     value        Elements will be set to this value.
+ * @param[in]     offset       Array index offset at which to start.
+ * @param[in]     num_elements Number of array elements to set.
+ *                             Note that 0 for both \p offset
+ *                             and \p num_elements means "all".
+ * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_set_value_real(oskar_Mem* mem, double val,
-        size_t offset, size_t length, int* status);
+void oskar_mem_set_value_real(oskar_Mem* mem, double value,
+        size_t offset, size_t num_elements, int* status);
 
 #ifdef __cplusplus
 }

@@ -61,3 +61,12 @@ TEST(dir, list)
     for (int i = 0; i < n; ++i) free(d[i]);
     free(d);
 }
+
+
+TEST(dir, home)
+{
+    int exists = 0;
+    char* home_path = oskar_dir_get_home_path("foo.txt", &exists);
+//    printf("Path to item: %s, Exists: %i\n", home_path, exists);
+    free(home_path);
+}

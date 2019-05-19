@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2018, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #include "convert/oskar_convert_lon_lat_to_relative_directions.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_timer.h"
-#include "utility/oskar_cl_utils.h"
+#include "utility/oskar_device.h"
 
 #include <cstdlib>
 #include "math/oskar_cmath.h"
@@ -79,8 +79,7 @@ TEST(oskar_Sky, copy)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check contents.
-    oskar_Sky* sky_temp = oskar_sky_create_copy(sky2,
-            OSKAR_CPU, &status);
+    oskar_Sky* sky_temp = oskar_sky_create_copy(sky2, OSKAR_CPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ(sky1_num_sources, oskar_sky_num_sources(sky_temp));
     for (int i = 0; i < oskar_sky_num_sources(sky_temp); ++i)
@@ -143,8 +142,7 @@ TEST(SkyModel, append)
     ASSERT_EQ(device_loc, oskar_sky_mem_location(sky1));
 
     // Copy back and check contents.
-    oskar_Sky* sky_temp = oskar_sky_create_copy(sky1,
-            OSKAR_CPU, &status);
+    oskar_Sky* sky_temp = oskar_sky_create_copy(sky1, OSKAR_CPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ(sky1_num_sources + sky2_num_sorces,
             oskar_sky_num_sources(sky_temp));
@@ -292,7 +290,7 @@ TEST(SkyModel, evaluate_gaussian_source_parameters)
     const double asec2rad = M_PI / (180.0 * 3600.0);
     const double deg2rad  = M_PI / 180.0;
 
-    int num_sources = 100;
+    int num_sources = 16384;
     int status = 0;
     int num_failed = 0;
 
@@ -302,13 +300,18 @@ TEST(SkyModel, evaluate_gaussian_source_parameters)
     for (int i = 0; i < num_sources; ++i)
     {
         oskar_sky_set_source(sky, i,
-                i * deg2rad * 2.0, i * deg2rad * 0.5,
+                i * deg2rad * 0.001, i * deg2rad * 0.001,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                20 * 60 * asec2rad, 10 * 60 * asec2rad, 30 * deg2rad, &status);
+                1200 * asec2rad, 600 * asec2rad, 30 * deg2rad, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
+    oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    oskar_timer_start(tmr);
     oskar_sky_evaluate_gaussian_source_parameters(sky, 0,
-            0.0, 10.0 * deg2rad, &num_failed, &status);
+            0.0, 10 * deg2rad, &num_failed, &status);
+    printf("Evaluate Gaussian source parameters took %.3f s\n",
+            oskar_timer_elapsed(tmr));
+    oskar_timer_free(tmr);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_sky_free(sky, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -472,11 +475,11 @@ void horizon_clip(const oskar_Sky* sky_in, const oskar_Telescope* telescope,
     {
         oskar_timer_start(tmr);
         oskar_sky_horizon_clip(sky_out, sky_in_dev, telescope, 0.0, work, status);
-//        printf("Horizon clip took %.3f s\n", oskar_timer_elapsed(tmr));
+        printf("Horizon clip took %.3f s\n", oskar_timer_elapsed(tmr));
         ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
         EXPECT_EQ(n_sources / 2, oskar_sky_num_sources(sky_out));
     }
-//    printf("Done.\n");
+    printf("Done.\n");
 
     // Check sky data.
     oskar_Sky* sky_temp = oskar_sky_create_copy(sky_out, OSKAR_CPU, status);
@@ -557,7 +560,9 @@ TEST(SkyModel, horizon_clip)
 
 #ifdef OSKAR_HAVE_OPENCL
     // Horizon clip on OpenCL.
-    printf("Using %s\n", oskar_cl_device_name());
+    char* device_name = oskar_device_name(OSKAR_CL, 0);
+    printf("Using %s\n", device_name);
+    free(device_name);
     horizon_clip(sky_in, telescope, type, OSKAR_CL, &status);
 #endif
 
@@ -619,12 +624,18 @@ TEST(SkyModel, scale_by_spectral_index)
     // Create and fill a sky model.
     oskar_Sky* sky = oskar_sky_create(OSKAR_SINGLE, OSKAR_CPU,
             num_sources, &status);
-    oskar_mem_set_value_real(oskar_sky_I(sky), stokes_I, 0, 0, &status);
-    oskar_mem_set_value_real(oskar_sky_Q(sky), stokes_Q, 0, 0, &status);
-    oskar_mem_set_value_real(oskar_sky_U(sky), stokes_U, 0, 0, &status);
-    oskar_mem_set_value_real(oskar_sky_V(sky), stokes_V, 0, 0, &status);
-    oskar_mem_set_value_real(oskar_sky_reference_freq_hz(sky), freq_ref, 0, 0, &status);
-    oskar_mem_set_value_real(oskar_sky_spectral_index(sky), spix, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_I(sky), stokes_I,
+            0, num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_Q(sky), stokes_Q,
+            0, num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_U(sky), stokes_U,
+            0, num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_V(sky), stokes_V,
+            0, num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_reference_freq_hz(sky), freq_ref,
+            0, num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_spectral_index(sky), spix,
+            0, num_sources, &status);
 
     // Copy to GPU.
     oskar_Sky* sky_gpu = oskar_sky_create_copy(sky, device_loc, &status);
@@ -646,8 +657,7 @@ TEST(SkyModel, scale_by_spectral_index)
     oskar_timer_free(timer);
 
     // Copy GPU data to CPU for check.
-    oskar_Sky* sky_cpu = oskar_sky_create_copy(sky_gpu, OSKAR_CPU,
-            &status);
+    oskar_Sky* sky_cpu = oskar_sky_create_copy(sky_gpu, OSKAR_CPU, &status);
 
     // Check contents.
     float* I_cpu = oskar_mem_float(oskar_sky_I(sky), &status);
@@ -697,13 +707,20 @@ TEST(SkyModel, rotation_measure)
     // Create and fill a sky model.
     oskar_Sky* sky_ref = oskar_sky_create(OSKAR_SINGLE, OSKAR_CPU,
             num_sources, &status);
-    oskar_mem_set_value_real(oskar_sky_I(sky_ref), stokes_I, 0, 0, &status);
-    oskar_mem_set_value_real(oskar_sky_Q(sky_ref), stokes_Q, 0, 0, &status);
-    oskar_mem_set_value_real(oskar_sky_U(sky_ref), stokes_U, 0, 0, &status);
-    oskar_mem_set_value_real(oskar_sky_V(sky_ref), stokes_V, 0, 0, &status);
-    oskar_mem_set_value_real(oskar_sky_reference_freq_hz(sky_ref), freq_ref, 0, 0, &status);
-    oskar_mem_set_value_real(oskar_sky_spectral_index(sky_ref), spix, 0, 0, &status);
-    oskar_mem_set_value_real(oskar_sky_rotation_measure_rad(sky_ref), rm, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_I(sky_ref), stokes_I,
+            0, num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_Q(sky_ref), stokes_Q,
+            0, num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_U(sky_ref), stokes_U,
+            0, num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_V(sky_ref), stokes_V,
+            0, num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_reference_freq_hz(sky_ref), freq_ref,
+            0, num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_spectral_index(sky_ref), spix,
+            0, num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_rotation_measure_rad(sky_ref), rm,
+            0, num_sources, &status);
 
     // Copy to CPU.
     oskar_Sky* sky_cpu = oskar_sky_create_copy(sky_ref, OSKAR_CPU, &status);
@@ -830,8 +847,8 @@ TEST(SkyModel, set_source)
 {
     int status = 0;
 
-    // Construct a sky model on the GPU of zero size.
-    oskar_Sky* sky = oskar_sky_create(OSKAR_SINGLE, device_loc, 0, &status);
+    // Construct a sky model of zero size.
+    oskar_Sky* sky = oskar_sky_create(OSKAR_SINGLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ(0, oskar_sky_num_sources(sky));
 
@@ -854,12 +871,9 @@ TEST(SkyModel, set_source)
             250.0e6, -0.8, 2.5, 0.0, 0.0, 0.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky));
-    ASSERT_EQ(device_loc, oskar_sky_mem_location(sky));
 
-    // Copy back into temp. structure on the CPU to check the values were set
-    // correctly.
-    oskar_Sky* sky_temp = oskar_sky_create_copy(sky,
-            OSKAR_CPU, &status);
+    // Copy back into temp. structure and check the values were set correctly.
+    oskar_Sky* sky_temp = oskar_sky_create_copy(sky, OSKAR_CPU, &status);
     ASSERT_EQ((int)OSKAR_CPU, oskar_sky_mem_location(sky_temp));
     ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky_temp));
     ASSERT_EQ(2, oskar_sky_num_sources(sky_temp));

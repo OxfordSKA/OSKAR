@@ -52,12 +52,13 @@ using std::vector;
 static void load_directories(oskar_Telescope* telescope,
         const string& cwd, oskar_Station* station, int depth,
         const vector<oskar_TelescopeLoadAbstract*>& loaders,
-        map<string, string> filemap, oskar_Log* log, int* status);
+        map<string, string> filemap, int* status);
 
 extern "C"
 void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
         oskar_Log* log, int* status)
 {
+    (void) log;
     // Check if safe to proceed.
     if (*status) return;
 
@@ -94,10 +95,10 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
     // Load everything recursively from the telescope directory tree.
     map<string, string> filemap;
     load_directories(telescope, string(path), NULL, 0, loaders,
-            filemap, log, status);
+            filemap, status);
     if (*status)
     {
-        oskar_log_error(log, "Failed to load telescope model (%s).",
+        oskar_log_error("Failed to load telescope model (%s).",
                 oskar_get_error_string(*status));
     }
 
@@ -118,7 +119,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
 static void load_directories(oskar_Telescope* telescope,
         const string& cwd, oskar_Station* station, int depth,
         const vector<oskar_TelescopeLoadAbstract*>& loaders,
-        map<string, string> filemap, oskar_Log* log, int* status)
+        map<string, string> filemap, int* status)
 {
     int num_dirs = 0;
     char** children = 0;
@@ -140,7 +141,7 @@ static void load_directories(oskar_Telescope* telescope,
             {
                 string s = string("Error in ") + loaders[i]->name() +
                         string(" in '") + cwd + string("'.");
-                oskar_log_error(log, "%s", s.c_str());
+                oskar_log_error("%s", s.c_str());
                 goto fail;
             }
         }
@@ -152,7 +153,7 @@ static void load_directories(oskar_Telescope* telescope,
             load_directories(telescope,
                     oskar_TelescopeLoadAbstract::get_path(cwd, children[0]),
                     oskar_telescope_station(telescope, 0), depth + 1,
-                    loaders, filemap, log, status);
+                    loaders, filemap, status);
 
             // Copy station 0 to all the others.
             oskar_telescope_duplicate_first_station(telescope, status);
@@ -173,7 +174,7 @@ static void load_directories(oskar_Telescope* telescope,
                 load_directories(telescope,
                         oskar_TelescopeLoadAbstract::get_path(cwd, children[i]),
                         oskar_telescope_station(telescope, i), depth + 1,
-                        loaders, filemap, log, status);
+                        loaders, filemap, status);
             }
         } // End check on number of directories.
     }
@@ -189,7 +190,7 @@ static void load_directories(oskar_Telescope* telescope,
             {
                 string s = string("Error in ") + loaders[i]->name() +
                         string(" in '") + cwd + string("'.");
-                oskar_log_error(log, "%s", s.c_str());
+                oskar_log_error("%s", s.c_str());
                 goto fail;
             }
         }
@@ -201,7 +202,7 @@ static void load_directories(oskar_Telescope* telescope,
             load_directories(telescope,
                     oskar_TelescopeLoadAbstract::get_path(cwd, children[0]),
                     oskar_station_child(station, 0), depth + 1, loaders,
-                    filemap, log, status);
+                    filemap, status);
 
             // Copy station 0 to all the others.
             oskar_station_duplicate_first_child(station, status);
@@ -222,7 +223,7 @@ static void load_directories(oskar_Telescope* telescope,
                 load_directories(telescope,
                         oskar_TelescopeLoadAbstract::get_path(cwd, children[i]),
                         oskar_station_child(station, i), depth + 1, loaders,
-                        filemap, log, status);
+                        filemap, status);
             }
         } // End check on number of directories.
     } // End check on depth.

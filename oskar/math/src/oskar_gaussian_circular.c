@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,293 +26,113 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "math/define_gaussian_circular.h"
 #include "math/oskar_gaussian_circular.h"
-#include "math/oskar_gaussian_circular_cuda.h"
-#include "utility/oskar_cl_utils.h"
-#include "utility/oskar_device_utils.h"
-
-#include <math.h>
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_gaussian_circular_complex_f(int n, const float* x,
-        const float* y, float std, float2* z)
-{
-    int i;
-    float inv_2_var;
-    inv_2_var = 1.0f / (2.0f * std * std);
-
-    for (i = 0; i < n; ++i)
-    {
-        float x_, y_, arg;
-        x_ = x[i];
-        y_ = y[i];
-        arg = (x_*x_ + y_*y_) * inv_2_var;
-        z[i].x = expf(-arg);
-        z[i].y = 0.0f;
-    }
-}
-
-void oskar_gaussian_circular_matrix_f(int n, const float* x,
-        const float* y, float std, float4c* z)
-{
-    int i;
-    float inv_2_var;
-    inv_2_var = 1.0f / (2.0f * std * std);
-
-    for (i = 0; i < n; ++i)
-    {
-        float x_, y_, arg, value;
-        x_ = x[i];
-        y_ = y[i];
-        arg = (x_*x_ + y_*y_) * inv_2_var;
-        value = expf(-arg);
-        z[i].a.x = value;
-        z[i].a.y = 0.0f;
-        z[i].b.x = 0.0f;
-        z[i].b.y = 0.0f;
-        z[i].c.x = 0.0f;
-        z[i].c.y = 0.0f;
-        z[i].d.x = value;
-        z[i].d.y = 0.0f;
-    }
-}
-
-
-/* Double precision. */
-void oskar_gaussian_circular_complex_d(int n, const double* x,
-        const double* y, double std, double2* z)
-{
-    int i;
-    double inv_2_var;
-    inv_2_var = 1.0 / (2.0 * std * std);
-
-    for (i = 0; i < n; ++i)
-    {
-        double x_, y_, arg;
-        x_ = x[i];
-        y_ = y[i];
-        arg = (x_*x_ + y_*y_) * inv_2_var;
-        z[i].x = exp(-arg);
-        z[i].y = 0.0;
-    }
-}
-
-void oskar_gaussian_circular_matrix_d(int n, const double* x,
-        const double* y, double std, double4c* z)
-{
-    int i;
-    double inv_2_var;
-    inv_2_var = 1.0 / (2.0 * std * std);
-
-    for (i = 0; i < n; ++i)
-    {
-        double x_, y_, arg, value;
-        x_ = x[i];
-        y_ = y[i];
-        arg = (x_*x_ + y_*y_) * inv_2_var;
-        value = exp(-arg);
-        z[i].a.x = value;
-        z[i].a.y = 0.0;
-        z[i].b.x = 0.0;
-        z[i].b.y = 0.0;
-        z[i].c.x = 0.0;
-        z[i].c.y = 0.0;
-        z[i].d.x = value;
-        z[i].d.y = 0.0;
-    }
-}
+OSKAR_GAUSSIAN_CIRCULAR_COMPLEX(gaussian_circular_complex_f, float, float2)
+OSKAR_GAUSSIAN_CIRCULAR_MATRIX(gaussian_circular_matrix_f, float, float4c)
+OSKAR_GAUSSIAN_CIRCULAR_COMPLEX(gaussian_circular_complex_d, double, double2)
+OSKAR_GAUSSIAN_CIRCULAR_MATRIX(gaussian_circular_matrix_d, double, double4c)
 
 void oskar_gaussian_circular(int num_points,
         const oskar_Mem* l, const oskar_Mem* m, double std,
         oskar_Mem* out, int* status)
 {
-    int type, location;
     if (*status) return;
-
-    /* Get type and check consistency. */
-    type = oskar_mem_precision(out);
-    if (type != oskar_mem_type(l) || type != oskar_mem_type(m))
+    const int location = oskar_mem_location(out);
+    const double inv_2_var = 1.0 / (2.0 * std * std);
+    const float inv_2_var_f = (float)inv_2_var;
+    if (oskar_mem_precision(out) != oskar_mem_type(l) ||
+            oskar_mem_precision(out) != oskar_mem_type(m))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-
-    /* Get location and check consistency. */
-    location = oskar_mem_location(out);
-    if (location != oskar_mem_location(l) ||
-            location != oskar_mem_location(m))
+    if (location != oskar_mem_location(l) || location != oskar_mem_location(m))
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-
-    /* Check that length of input arrays are consistent. */
     if ((int)oskar_mem_length(l) < num_points ||
             (int)oskar_mem_length(m) < num_points)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
     }
-
-    /* Resize output array if needed. */
-    if ((int)oskar_mem_length(out) < num_points)
-        oskar_mem_realloc(out, num_points, status);
+    oskar_mem_ensure(out, num_points, status);
     if (*status) return;
-
     if (location == OSKAR_CPU)
     {
         switch (oskar_mem_type(out))
         {
         case OSKAR_SINGLE_COMPLEX:
-            oskar_gaussian_circular_complex_f(num_points,
+            gaussian_circular_complex_f(num_points,
                     oskar_mem_float_const(l, status),
-                    oskar_mem_float_const(m, status), std,
+                    oskar_mem_float_const(m, status), inv_2_var_f,
                     oskar_mem_float2(out, status));
             break;
         case OSKAR_DOUBLE_COMPLEX:
-            oskar_gaussian_circular_complex_d(num_points,
+            gaussian_circular_complex_d(num_points,
                     oskar_mem_double_const(l, status),
-                    oskar_mem_double_const(m, status), std,
+                    oskar_mem_double_const(m, status), inv_2_var,
                     oskar_mem_double2(out, status));
             break;
         case OSKAR_SINGLE_COMPLEX_MATRIX:
-            oskar_gaussian_circular_matrix_f(num_points,
+            gaussian_circular_matrix_f(num_points,
                     oskar_mem_float_const(l, status),
-                    oskar_mem_float_const(m, status), std,
+                    oskar_mem_float_const(m, status), inv_2_var_f,
                     oskar_mem_float4c(out, status));
             break;
         case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            oskar_gaussian_circular_matrix_d(num_points,
+            gaussian_circular_matrix_d(num_points,
                     oskar_mem_double_const(l, status),
-                    oskar_mem_double_const(m, status), std,
+                    oskar_mem_double_const(m, status), inv_2_var,
                     oskar_mem_double4c(out, status));
             break;
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             break;
         }
-    }
-    else if (location == OSKAR_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        switch (oskar_mem_type(out))
-        {
-        case OSKAR_SINGLE_COMPLEX:
-            oskar_gaussian_circular_cuda_complex_f(num_points,
-                    oskar_mem_float_const(l, status),
-                    oskar_mem_float_const(m, status), std,
-                    oskar_mem_float2(out, status));
-            break;
-        case OSKAR_DOUBLE_COMPLEX:
-            oskar_gaussian_circular_cuda_complex_d(num_points,
-                    oskar_mem_double_const(l, status),
-                    oskar_mem_double_const(m, status), std,
-                    oskar_mem_double2(out, status));
-            break;
-        case OSKAR_SINGLE_COMPLEX_MATRIX:
-            oskar_gaussian_circular_cuda_matrix_f(num_points,
-                    oskar_mem_float_const(l, status),
-                    oskar_mem_float_const(m, status), std,
-                    oskar_mem_float4c(out, status));
-            break;
-        case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            oskar_gaussian_circular_cuda_matrix_d(num_points,
-                    oskar_mem_double_const(l, status),
-                    oskar_mem_double_const(m, status), std,
-                    oskar_mem_double4c(out, status));
-            break;
-        default:
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            break;
-        }
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-    }
-    else if (location & OSKAR_CL)
-    {
-#ifdef OSKAR_HAVE_OPENCL
-        cl_kernel k = 0;
-        cl_device_type dev_type;
-        cl_int error, gpu, n;
-        size_t global_size, local_size;
-        double inv_2_var;
-
-        switch (oskar_mem_type(out))
-        {
-        case OSKAR_SINGLE_COMPLEX:
-            k = oskar_cl_kernel("gaussian_circular_complex_float");
-            break;
-        case OSKAR_DOUBLE_COMPLEX:
-            k = oskar_cl_kernel("gaussian_circular_complex_double");
-            break;
-        case OSKAR_SINGLE_COMPLEX_MATRIX:
-            k = oskar_cl_kernel("gaussian_circular_matrix_float");
-            break;
-        case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            k = oskar_cl_kernel("gaussian_circular_matrix_double");
-            break;
-        default:
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            return;
-        }
-        if (!k)
-        {
-            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-            return;
-        }
-
-        /* Set kernel arguments. */
-        clGetDeviceInfo(oskar_cl_device_id(),
-                CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_type, NULL);
-        gpu = dev_type & CL_DEVICE_TYPE_GPU;
-        n = (cl_int) num_points;
-        error = clSetKernelArg(k, 0, sizeof(cl_int), &n);
-        error |= clSetKernelArg(k, 1, sizeof(cl_mem),
-                oskar_mem_cl_buffer_const(l, status));
-        error |= clSetKernelArg(k, 2, sizeof(cl_mem),
-                oskar_mem_cl_buffer_const(m, status));
-        inv_2_var = 1.0 / (2.0 * std * std);
-        if (type == OSKAR_SINGLE)
-        {
-            cl_float w = (cl_float) inv_2_var;
-            error |= clSetKernelArg(k, 3, sizeof(cl_float), &w);
-        }
-        else
-        {
-            cl_double w = (cl_double) inv_2_var;
-            error |= clSetKernelArg(k, 3, sizeof(cl_double), &w);
-        }
-        error |= clSetKernelArg(k, 4, sizeof(cl_mem),
-                oskar_mem_cl_buffer(out, status));
-        if (*status) return;
-        if (error != CL_SUCCESS)
-        {
-            *status = OSKAR_ERR_INVALID_ARGUMENT;
-            return;
-        }
-
-        /* Launch kernel on current command queue. */
-        local_size = gpu ? 256 : 128;
-        global_size = ((num_points + local_size - 1) / local_size) *
-                local_size;
-        error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
-                    &global_size, &local_size, 0, NULL, NULL);
-        if (error != CL_SUCCESS)
-        {
-            *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
-            return;
-        }
-#else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
-#endif
     }
     else
-        *status = OSKAR_ERR_BAD_LOCATION;
+    {
+        size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
+        const char* k = 0;
+        const int is_dbl = oskar_mem_is_double(out);
+        switch (oskar_mem_type(out))
+        {
+        case OSKAR_SINGLE_COMPLEX:
+            k = "gaussian_circular_complex_float"; break;
+        case OSKAR_DOUBLE_COMPLEX:
+            k = "gaussian_circular_complex_double"; break;
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            k = "gaussian_circular_matrix_float"; break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            k = "gaussian_circular_matrix_double"; break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = oskar_device_global_size(
+                (size_t) num_points, local_size[0]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &num_points},
+                {PTR_SZ, oskar_mem_buffer_const(l)},
+                {PTR_SZ, oskar_mem_buffer_const(m)},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&inv_2_var : (const void*)&inv_2_var_f},
+                {PTR_SZ, oskar_mem_buffer(out)}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
+    }
 }
 
 #ifdef __cplusplus

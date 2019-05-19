@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,8 +53,7 @@ size_t oskar_string_to_array_i(char* str, size_t n, int* data)
     {
         token = strtok_r(str, DELIMITERS, &save_ptr);
         str = NULL;
-        if (!token) break;
-        if (token[0] == '#') break;
+        if (!token || token[0] == '#') break;
         if (sscanf(token, "%i", &data[i]) > 0) i++;
     }
     while (i < n);
@@ -70,8 +69,7 @@ size_t oskar_string_to_array_f(char* str, size_t n, float* data)
     {
         token = strtok_r(str, DELIMITERS, &save_ptr);
         str = NULL;
-        if (!token) break;
-        if (token[0] == '#') break;
+        if (!token || token[0] == '#') break;
         if (sscanf(token, "%f", &data[i]) > 0) i++;
     }
     while (i < n);
@@ -87,8 +85,7 @@ size_t oskar_string_to_array_d(char* str, size_t n, double* data)
     {
         token = strtok_r(str, DELIMITERS, &save_ptr);
         str = NULL;
-        if (!token) break;
-        if (token[0] == '#') break;
+        if (!token || token[0] == '#') break;
         if (sscanf(token, "%lf", &data[i]) > 0) i++;
     }
     while (i < n);
@@ -110,6 +107,33 @@ size_t oskar_string_to_array_s(char* str, size_t n, char** data)
     return i;
 }
 
+/* Double precision. */
+size_t oskar_string_to_array_realloc_d(char* str, size_t* n, double** data)
+{
+    size_t i = 0;
+    char *save_ptr = 0, *token = 0;
+    for (;;)
+    {
+        double val;
+        token = strtok_r(str, DELIMITERS, &save_ptr);
+        str = NULL;
+        if (!token || token[0] == '#') break;
+        if (sscanf(token, "%lf", &val) > 0)
+        {
+            i++;
+            if (*n < i || !(*data))
+            {
+                *n += 20;
+                void* t = realloc(*data, (*n) * sizeof(double));
+                if (!t) break;
+                *data = (double*) t;
+            }
+            (*data)[i - 1] = val;
+        }
+    }
+    return i;
+}
+
 /* String array. */
 size_t oskar_string_to_array_realloc_s(char* str, size_t* n, char*** data)
 {
@@ -119,16 +143,14 @@ size_t oskar_string_to_array_realloc_s(char* str, size_t* n, char*** data)
     {
         token = strtok_r(str, DELIMITERS, &save_ptr);
         str = NULL;
-        if (!token) break;
-        if (token[0] == '#') break;
+        if (!token || token[0] == '#') break;
 
         /* Ensure array is big enough. */
         if (*n <= i || !(*data))
         {
-            void* t;
-            t = realloc(*data, ((*n) + 1) * sizeof(char*));
+            void* t = realloc(*data, ((*n) + 1) * sizeof(char*));
             if (!t) break;
-            *data = t;
+            *data = (char**) t;
             ++(*n);
         }
         (*data)[i] = token;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,24 +48,37 @@ extern "C" {
  * This function evaluates the element pattern model at the given source
  * positions.
  *
- * @param[in] model      Pointer to element model structure.
- * @param[in,out] output Pointer to memory into which to accumulate output data.
+ * @param[in] model         Pointer to element model structure.
  * @param[in] orientation_x Azimuth of X dipole in radians.
  * @param[in] orientation_y Azimuth of Y dipole in radians.
- * @param[in] num_points Number of points at which to evaluate beam.
- * @param[in] x          Pointer to x-direction cosines.
- * @param[in] y          Pointer to y-direction cosines.
- * @param[in] z          Pointer to z-direction cosines.
- * @param[in] frequency_hz Current observing frequency in Hz.
- * @param[out] theta     Pointer to work array for computing theta values.
- * @param[out] phi       Pointer to work array for computing phi values.
- * @param[in,out] status Status return code.
+ * @param[in] offset_points Start offset into input coordinate arrays.
+ * @param[in] num_points    Number of points at which to evaluate beam.
+ * @param[in] x             Pointer to x-direction cosines.
+ * @param[in] y             Pointer to y-direction cosines.
+ * @param[in] z             Pointer to z-direction cosines.
+ * @param[in] frequency_hz  Current observing frequency in Hz.
+ * @param[in,out] theta     Pointer to work array for computing theta values.
+ * @param[in,out] phi       Pointer to work array for computing phi values.
+ * @param[in] offset_out    Start offset into output array.
+ * @param[in,out] output    Pointer to output array.
+ * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
-        double orientation_x, double orientation_y, int num_points,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double frequency_hz, oskar_Mem* theta, oskar_Mem* phi, int* status);
+void oskar_element_evaluate(
+        const oskar_Element* model,
+        double orientation_x,
+        double orientation_y,
+        int offset_points,
+        int num_points,
+        const oskar_Mem* x,
+        const oskar_Mem* y,
+        const oskar_Mem* z,
+        double frequency_hz,
+        oskar_Mem* theta,
+        oskar_Mem* phi,
+        int offset_out,
+        oskar_Mem* output,
+        int* status);
 
 #ifdef __cplusplus
 }

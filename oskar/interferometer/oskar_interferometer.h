@@ -34,7 +34,6 @@
  */
 
 #include <oskar_global.h>
-#include <log/oskar_log.h>
 #include <sky/oskar_sky.h>
 #include <telescope/oskar_telescope.h>
 #include <vis/oskar_vis_block.h>
@@ -109,9 +108,6 @@ void oskar_interferometer_set_gpus(oskar_Interferometer* h, int num_gpus,
 
 OSKAR_EXPORT
 void oskar_interferometer_set_horizon_clip(oskar_Interferometer* h, int value);
-
-OSKAR_EXPORT
-void oskar_interferometer_set_log(oskar_Interferometer* h, oskar_Log* log);
 
 OSKAR_EXPORT
 void oskar_interferometer_set_max_sources_per_chunk(oskar_Interferometer* h,

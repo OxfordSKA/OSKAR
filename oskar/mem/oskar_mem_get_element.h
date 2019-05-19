@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2016, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,15 +42,11 @@ extern "C" {
 
 /**
  * @brief
- * Gets the value of one element in a scalar array, either from CPU or GPU
- * memory.
+ * Gets the value or magnitude of one element in an array.
  *
  * @details
  * This function returns the value of one element in an array at the
  * specified index. The array may be either in CPU or GPU memory.
- *
- * The index is with respect to the precision of the base data type,
- * so this can also be used to return part of a complex number.
  *
  * @param[in] mem           Pointer to the memory block.
  * @param[in] index         Array index to return.
@@ -58,40 +54,6 @@ extern "C" {
  */
 OSKAR_EXPORT
 double oskar_mem_get_element(const oskar_Mem* mem, size_t index, int* status);
-
-/**
- * @brief
- * Gets the value of one element in a complex array, either from CPU or GPU
- * memory.
- *
- * @details
- * This function returns the value of one element in a complex array at the
- * specified index. The array may be either in CPU or GPU memory.
- *
- * @param[in] mem           Pointer to the memory block.
- * @param[in] index         Array index to return.
- * @param[in,out]  status   Status return code.
- */
-OSKAR_EXPORT
-double2 oskar_mem_get_element_complex(const oskar_Mem* mem, size_t index,
-        int* status);
-
-/**
- * @brief
- * Gets the value of one element in a matrix array, either from CPU or GPU
- * memory.
- *
- * @details
- * This function returns the value of one element in a matrix array at the
- * specified index. The array may be either in CPU or GPU memory.
- *
- * @param[in] mem           Pointer to the memory block.
- * @param[in] index         Array index to return.
- * @param[in,out]  status   Status return code.
- */
-OSKAR_EXPORT
-double4c oskar_mem_get_element_matrix(const oskar_Mem* mem, size_t index,
-        int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 #include "convert/oskar_convert_fov_to_cellsize.h"
 #include "math/oskar_cmath.h"
 #include "math/private_cond2_2x2.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 #include "utility/oskar_file_exists.h"
 #include "oskar_version.h"
 
@@ -86,7 +86,7 @@ void oskar_beam_pattern_check_init(oskar_BeamPattern* h, int* status)
     /* Check that the telescope model has been set. */
     if (!h->tel)
     {
-        oskar_log_error(h->log, "Telescope model not set.");
+        oskar_log_error("Telescope model not set.");
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
     }
@@ -123,7 +123,7 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
      * reasonable file header. Replace newlines with zeros. */
     h->settings_log_length = 0;
     free(h->settings_log);
-    h->settings_log = oskar_log_file_data(h->log, &h->settings_log_length);
+    h->settings_log = oskar_log_file_data(&h->settings_log_length);
     for (j = 0; j < h->settings_log_length; ++j)
     {
         if (h->settings_log[j] == '\n') h->settings_log[j] = 0;
@@ -198,7 +198,7 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
     if (h->num_data_products == 0 && !*status)
     {
         *status = OSKAR_ERR_FILE_IO;
-        oskar_log_error(h->log, "No output file(s) selected.");
+        oskar_log_error("No output file(s) selected.");
     }
 }
 
@@ -385,7 +385,7 @@ static int data_product_index(oskar_BeamPattern* h, int data_product_type,
     if (i == h->num_data_products)
     {
         i = h->num_data_products++;
-        h->data_products = realloc(h->data_products,
+        h->data_products = (DataProduct*) realloc(h->data_products,
                 h->num_data_products * sizeof(DataProduct));
         memset(&(h->data_products[i]), 0, sizeof(DataProduct));
         h->data_products[i].type = data_product_type;
@@ -408,7 +408,7 @@ static char* construct_filename(oskar_BeamPattern* h, int data_product_type,
 
     /* Construct the filename. */
     buflen = (int) strlen(h->root_path) + 100;
-    name = calloc(buflen, 1);
+    name = (char*) calloc(buflen, 1);
     start += SNPRINTF(name + start, buflen - start, "%s", h->root_path);
     if (i_station >= 0)
         start += SNPRINTF(name + start, buflen - start, "_S%04d",
@@ -585,8 +585,8 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
         /* Select the device. */
         if (i < h->num_gpus)
         {
-            oskar_device_set(h->gpu_ids[i], status);
-            dev_loc = OSKAR_GPU;
+            oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
+            dev_loc = h->dev_loc;
         }
         else
         {
@@ -648,7 +648,7 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
             {
                 if (h->num_active_stations < 2)
                 {
-                    oskar_log_error(h->log, "Cannot create cross-power beam "
+                    oskar_log_error("Cannot create cross-power beam "
                             "using less than two active stations.");
                     *status = OSKAR_ERR_INVALID_ARGUMENT;
                     break;
@@ -660,7 +660,6 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
 
                 /* Host memory. */
                 d->cross_power_cpu[i_stokes][0] = oskar_mem_create(
-
                         beam_type, OSKAR_CPU, max_src, status);
                 d->cross_power_cpu[i_stokes][1] = oskar_mem_create(
                         beam_type, OSKAR_CPU, max_src, status);

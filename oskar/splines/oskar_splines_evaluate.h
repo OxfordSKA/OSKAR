@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,16 +48,16 @@ extern "C" {
  * This function evaluates a surface fitted by splines at the given
  * positions.
  *
- * @param[out] output     Output values.
  * @param[in] spline      Pointer to data structure.
  * @param[in] x           List of x coordinates.
  * @param[in] y           List of y coordinates.
+ * @param[out] output     Output values.
  * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
-        const oskar_Splines* spline, int num_points, const oskar_Mem* x,
-        const oskar_Mem* y, int* status);
+void oskar_splines_evaluate(const oskar_Splines* spline,
+        int num_points, const oskar_Mem* x, const oskar_Mem* y,
+        int stride_out, int offset_out, oskar_Mem* output, int* status);
 
 #ifdef __cplusplus
 }

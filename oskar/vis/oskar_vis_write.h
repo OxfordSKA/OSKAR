@@ -34,7 +34,6 @@
  */
 
 #include <oskar_global.h>
-#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,13 +49,11 @@ extern "C" {
  * Do not use this function in new code.
 
  * @param[in] vis      The visibility structure to write.
- * @param[in,out] log  Pointer to log structure to use.
  * @param[in] filename The filename to write to.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
-        const char* filename, int* status);
+void oskar_vis_write(const oskar_Vis* vis, const char* filename, int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,11 +41,8 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
         const oskar_Telescope* telescope, double gast,
         oskar_StationWork* work, int* status)
 {
-    int i, num_stations, location, num_in;
+    int i;
     oskar_Mem *horizon_mask, *source_indices;
-    double ra0, dec0;
-
-    /* Check if safe to proceed. */
     if (*status) return;
 
     /* Get pointers to work arrays. */
@@ -60,7 +57,7 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
     }
 
     /* Check that the locations match. */
-    location = oskar_sky_mem_location(out);
+    const int location = oskar_sky_mem_location(out);
     if (oskar_sky_mem_location(in) != location ||
             oskar_mem_location(horizon_mask) != location ||
             oskar_mem_location(source_indices) != location)
@@ -70,23 +67,21 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
     }
 
     /* Get remaining properties of input sky model. */
-    num_in = oskar_sky_num_sources(in);
-    ra0 = oskar_sky_reference_ra_rad(in);
-    dec0 = oskar_sky_reference_dec_rad(in);
+    const int num_in = oskar_sky_num_sources(in);
+    const double ra0 = oskar_sky_reference_ra_rad(in);
+    const double dec0 = oskar_sky_reference_dec_rad(in);
 
     /* Resize the output sky model if necessary. */
     if (oskar_sky_capacity(out) < num_in)
         oskar_sky_resize(out, num_in, status);
 
     /* Resize the work buffers if necessary. */
-    if ((int)oskar_mem_length(horizon_mask) < num_in)
-        oskar_mem_realloc(horizon_mask, num_in, status);
-    if ((int)oskar_mem_length(source_indices) < num_in)
-        oskar_mem_realloc(source_indices, num_in, status);
+    oskar_mem_ensure(horizon_mask, num_in, status);
+    oskar_mem_ensure(source_indices, num_in + 1, status);
 
     /* Create the horizon mask. */
     oskar_mem_clear_contents(horizon_mask, status);
-    num_stations = oskar_telescope_num_stations(telescope);
+    const int num_stations = oskar_telescope_num_stations(telescope);
     for (i = 0; i < num_stations; ++i)
     {
         const oskar_Station* s = oskar_telescope_station_const(telescope, i);
@@ -96,9 +91,10 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
                 oskar_station_lat_rad(s), horizon_mask, status);
     }
 
-    /* Apply exclusive prefix sum to mask to get source output indices. */
+    /* Apply exclusive prefix sum to mask to get source output indices.
+     * Last element of index array is total number to copy. */
     if (location != OSKAR_CPU)
-        oskar_prefix_sum(num_in, horizon_mask, source_indices, 0, 1, status);
+        oskar_prefix_sum(num_in, horizon_mask, source_indices, status);
 
     /* Copy sources above horizon. */
     oskar_sky_copy_source_data(in, horizon_mask, source_indices, out, status);

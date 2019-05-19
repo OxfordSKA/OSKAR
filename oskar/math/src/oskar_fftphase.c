@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,88 +26,66 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "math/define_fftphase.h"
 #include "math/oskar_fftphase.h"
-#include "math/oskar_fftphase_cuda.h"
-#include <stddef.h>
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_fftphase_cf(const int num_x, const int num_y, float* complex_data)
-{
-    int ix, iy;
-    for (iy = 0; iy < num_y; ++iy)
-    {
-        size_t i1 = iy;
-        i1 *= num_x;
-        for (ix = 0; ix < num_x; ++ix)
-        {
-            const size_t i = (i1 + ix) << 1;
-            const int x = 1 - (((ix + iy) & 1) << 1);
-            complex_data[i]     *= x;
-            complex_data[i + 1] *= x;
-        }
-    }
-}
-
-void oskar_fftphase_cd(const int num_x, const int num_y, double* complex_data)
-{
-    int ix, iy;
-    for (iy = 0; iy < num_y; ++iy)
-    {
-        size_t i1 = iy;
-        i1 *= num_x;
-        for (ix = 0; ix < num_x; ++ix)
-        {
-            const size_t i = (i1 + ix) << 1;
-            const int x = 1 - (((ix + iy) & 1) << 1);
-            complex_data[i]     *= x;
-            complex_data[i + 1] *= x;
-        }
-    }
-}
+OSKAR_FFTPHASE(fftphase_float, float)
+OSKAR_FFTPHASE(fftphase_double, double)
 
 void oskar_fftphase(const int num_x, const int num_y,
         oskar_Mem* complex_data, int* status)
 {
-    int type, location;
     if (*status) return;
-    if (!oskar_mem_is_complex(complex_data))
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
-    }
-    type = oskar_mem_precision(complex_data);
-    location = oskar_mem_location(complex_data);
+    const int type = oskar_mem_type(complex_data);
+    const int location = oskar_mem_location(complex_data);
     if (location == OSKAR_CPU)
     {
-        if (type == OSKAR_SINGLE)
-            oskar_fftphase_cf(num_x, num_y,
+        if (type == OSKAR_SINGLE_COMPLEX)
+            fftphase_float(num_x, num_y,
                     oskar_mem_float(complex_data, status));
-        else if (type == OSKAR_DOUBLE)
-            oskar_fftphase_cd(num_x, num_y,
+        else if (type == OSKAR_DOUBLE_COMPLEX)
+            fftphase_double(num_x, num_y,
                     oskar_mem_double(complex_data, status));
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
-    }
-    else if (location == OSKAR_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_SINGLE)
-            oskar_fftphase_cuda_cf(num_x, num_y,
-                    oskar_mem_float(complex_data, status));
-        else if (type == OSKAR_DOUBLE)
-            oskar_fftphase_cuda_cd(num_x, num_y,
-                    oskar_mem_double(complex_data, status));
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
     }
     else
-        *status = OSKAR_ERR_BAD_LOCATION;
+    {
+        size_t local_size[] = {32, 8, 1}, global_size[] = {1, 1, 1};
+        const char* k = 0;
+        if (type == OSKAR_SINGLE_COMPLEX)      k = "fftphase_float";
+        else if (type == OSKAR_DOUBLE_COMPLEX) k = "fftphase_double";
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        if (num_x == 1)
+        {
+            local_size[0] = 1;
+            local_size[1] = 256;
+        }
+        if (num_y == 1)
+        {
+            local_size[0] = 256;
+            local_size[1] = 1;
+        }
+        const oskar_Arg arg[] = {
+                {INT_SZ, &num_x},
+                {INT_SZ, &num_y},
+                {PTR_SZ, oskar_mem_buffer(complex_data)}
+        };
+        global_size[0] = oskar_device_global_size(num_x, local_size[0]);
+        global_size[1] = oskar_device_global_size(num_y, local_size[1]);
+        oskar_device_launch_kernel(k, location, 2, local_size, global_size,
+                sizeof(arg) / sizeof(oskar_Arg), arg, 0, 0, status);
+    }
 }
 
 #ifdef __cplusplus

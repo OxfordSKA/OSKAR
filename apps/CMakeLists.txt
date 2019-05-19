@@ -28,6 +28,7 @@ declare_oskar_apps(
     oskar_imager
     oskar_sim_beam_pattern
     oskar_sim_interferometer
+    oskar_system_info
     oskar_vis_add
     oskar_vis_add_noise
     oskar_vis_summary
@@ -39,10 +40,6 @@ set(IONOSPHERE_TESTING OFF)
 if (IONOSPHERE_TESTING)
     # BINARY: oskar_sim_tec_screen
     set(name oskar_sim_tec_screen)
-    oskar_app(NAME ${name} SOURCES ${name}_main.cpp NO_INSTALL)
-
-    # BINARY: oskar_evaluate_pierce_points
-    set(name oskar_evaluate_pierce_points)
     oskar_app(NAME ${name} SOURCES ${name}_main.cpp NO_INSTALL)
 
     #if (PNG_FOUND)

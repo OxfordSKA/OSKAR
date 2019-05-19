@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,9 @@
 
 /* Public interface. */
 
+#include <oskar_global.h>
+#include <stdarg.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,10 +47,6 @@ struct oskar_Log;
 #define OSKAR_LOG_TYPEDEF_
 typedef struct oskar_Log oskar_Log;
 #endif /* OSKAR_LOG_TYPEDEF_ */
-
-#ifdef __cplusplus
-}
-#endif
 
 #define OSKAR_LOG_DEFAULT_PRIORITY    3  /* 3 = OSKAR_LOG_STATUS (or code 'S') */
 #define OSKAR_LOG_DEFAULT_VALUE_WIDTH 40 /* Default width for value log entries */
@@ -73,18 +72,149 @@ enum OSKAR_LOG_PRIORITY {
     OSKAR_LOG_DEBUG   =  4   /* == 'D' */
 };
 
-#include <log/oskar_log_accessors.h>
+/**
+ * @brief Writes an error message to the log.
+ *
+ * @details
+ * This function writes an error message to the log.
+ *
+ * @param[in]     format Format string for printf().
+ */
+OSKAR_EXPORT
+void oskar_log_error(const char* format, ...);
+
+/**
+ * @brief Writes a character symbol line to the log.
+ *
+ * @details
+ * This function writes a character symbol line to the log.
+ *
+ * The priority code takes one of the following values:
+ *   - 'E' : Error
+ *   - 'W' : Warning
+ *   - 'M' : Message
+ *   - 'D' : Debug
+ *
+ * @param[in]     priority Priority of log entry.
+ * @param[in]     symbol   Symbol to use for the line.
+ */
+OSKAR_EXPORT
+void oskar_log_line(char priority, char symbol);
+
+/**
+ * @brief Writes a message log entry.
+ *
+ * @details
+ * This function writes a message log entry.
+ *
+ * Message log entries have a depth which will indent the message
+ * by 2 spaces per depth value and, if positive, prefix the message with a
+ * list bullet. If the depth value is negative the list bullet will be omitted.
+ *
+ * Log entries are created with a priority code which is used to determine
+ * which log are printed in the log and also sets a letter code with which
+ * the message is tagged.
+ *
+ * The priority code takes one of the following values:
+ *   - 'E' : Error
+ *   - 'W' : Warning
+ *   - 'M' : Message
+ *   - 'D' : Debug
+ *
+ * @param[in]     priority Priority of log entry.
+ * @param[in]     depth    Level of nesting of log entry.
+ * @param[in]     format   Format string for printf().
+ */
+OSKAR_EXPORT
+void oskar_log_message(char priority, int depth, const char* format, ...);
+
+/**
+ * @brief Writes a section-level message to the log.
+ *
+ * @details
+ * This function writes a section-level message to the log.
+ *
+ * The priority code takes one of the following values:
+ *   - 'E' : Error
+ *   - 'W' : Warning
+ *   - 'M' : Message
+ *   - 'D' : Debug
+ *
+ * @param[in]     priority Priority code of the message.
+ * @param[in]     format   Format string for printf().
+ */
+OSKAR_EXPORT
+void oskar_log_section(char priority, const char* format, ...);
+
+/**
+ * @brief Writes a key-value pair to the log.
+ *
+ * @details
+ * This function writes a key-value pair to the log, where the value is
+ * written starting at a fixed column offset from the start of the entry.
+ *
+ * The separation of the key and value is specified by the log width parameter
+ * which is set by the oskar_log_set_value_width() method. The default
+ * width for value messages places the value of the message is determined
+ * by the OSKAR_LOG_DEFAULT_VALUE_WIDTH macro in the oskar_log.h header.
+ *
+ * Value log entries have a depth which, if positive, will indent the message
+ * by 2 spaces per depth value and prefix the message with a list bullet.
+ *
+ * If the depth value is set to -1 the list bullet will be omitted and
+ * no indent is applied.
+ *
+ * Log entries are created with a priority code which is used to determine
+ * which log are printed in the log and also sets a letter code with which
+ * the message is tagged.
+ *
+ * The priority code takes one of the following values:
+ *   - 'E' : Error
+ *   - 'W' : Warning
+ *   - 'M' : Message
+ *   - 'D' : Debug
+ *
+ * @param[in]     Depth    List depth of the log entry.
+ * @param[in]     priority Priority of nesting of log entry.
+ * @param[in]     prefix   String prefix (key).
+ * @param[in]     format   Format string for printf().
+ */
+OSKAR_EXPORT
+void oskar_log_value(char priority, int depth,
+        const char* prefix, const char* format, ...);
+
+/**
+ * @brief Writes a warning message to the log.
+ *
+ * @details
+ * This function writes a warning message to the log.
+ *
+ * @param[in]     format Format string for printf().
+ */
+OSKAR_EXPORT
+void oskar_log_warning(const char* format, ...);
+
+OSKAR_EXPORT
+oskar_Log* oskar_log_handle(void);
+
+OSKAR_EXPORT
+void oskar_log_set_keep_file(int value);
+
+OSKAR_EXPORT
+void oskar_log_set_file_priority(int value);
+
+OSKAR_EXPORT
+void oskar_log_set_term_priority(int value);
+
+OSKAR_EXPORT
+void oskar_log_set_value_width(int value);
+
+#ifdef __cplusplus
+}
+#endif
+
 #include <log/oskar_log_create.h>
-#include <log/oskar_log_error.h>
 #include <log/oskar_log_file_data.h>
-#include <log/oskar_log_file_exists.h>
 #include <log/oskar_log_free.h>
-#include <log/oskar_log_line.h>
-#include <log/oskar_log_message.h>
-#include <log/oskar_log_section.h>
-#include <log/oskar_log_system_clock_data.h>
-#include <log/oskar_log_system_clock_string.h>
-#include <log/oskar_log_value.h>
-#include <log/oskar_log_warning.h>
 
 #endif /* OSKAR_LOG_H_ */

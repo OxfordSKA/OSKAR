@@ -3,7 +3,7 @@
 \mainpage Introduction
 
 \latexonly
-\def \docversion{8}
+\def \docversion{9}
 \endlatexonly
 
 \section intro_intro What is OSKAR?
@@ -19,7 +19,7 @@ Below is a summary of the current features of the OSKAR package.
 
 - **Simulation capability:**
   - Evaluation of a polarised Radio Interferometer Measurement Equation,
-    accelerated using NVIDIA GPU(s).
+    accelerated using GPU(s).
   - Extensible framework using Jones matrix formalism.
   - Optimised for simulation using very large source catalogues.
   - Capable of simulating interferometers constructed from large aperture
@@ -107,19 +107,17 @@ If you encounter a problem with OSKAR, please report it to oskar@oerc.ox.ac.uk.
 
 -# <b>Does OSKAR require an NVIDIA GPU to work?</b><br>
 No, but simulations will probably run faster if an NVIDIA GPU is available.
-Other GPUs are not currently supported.
+Limited support for using other GPUs with OSKAR is currently experimental.
 
 -# <b>Which GPU model should I use to run OSKAR simulations?</b><br>
 OSKAR should be able to run on an NVIDIA GPU with compute capability of 2.0
 or higher. We recommend using a dedicated compute card which has decent
 double precision floating point performance, as consumer gaming models only
-work well in single precision (the exception being the Kepler NVIDIA Titans).
-Recent OSKAR simulations have been running successfully using NVIDIA's
-K20 and K40 compute cards in HPC clusters.
+work well in single precision.
 
--# <b>I have multiple NVIDIA GPUs in my computer.
+-# <b>I have multiple GPUs in my computer.
 Can OSKAR make use of all of them to run faster?</b><br>
-Yes, normally, as the CUDA device(s) to use can be specified at
+Yes, normally, as the GPU device(s) to use can be specified at
 run-time, and work is shared between them by splitting up the sky model and
 the time samples within a visibility block. However, see also the answer to
 the next question to check if using multiple GPUs in this way will be
@@ -138,8 +136,10 @@ sky models like this. It will probably be faster to use CPU cores only for
 sky models containing fewer than 32 sources.
 
 -# <b>Is OpenCL supported?</b><br>
-No. However, depending on demand, support for OpenCL could potentially be
-added in a future release.
+OpenCL support in OSKAR is currently experimental.
+The oskar_imager application does not work using OpenCL at the moment, but
+test simulations have been run successfully using AMD, Intel and NVIDIA
+GPU hardware.
 
 -# <b>Are pre-built binary packages of OSKAR available?</b><br>
 Binary installer packages are now available for macOS and Windows systems.
@@ -147,25 +147,6 @@ On Linux, OSKAR still needs to be compiled from source.
 
 -# <b>I found a bug!</b><br>
 Please let us know by sending an email to oskar@oerc.ox.ac.uk.
-
--# <b>I found a bug, but I managed to fix it!</b><br>
-Wonderful! Please send us your patch by sending an email to
-oskar@oerc.ox.ac.uk. We'll test it and integrate it back into the master branch.
-
--# <b>Please could you add this feature?</b><br>
-Please get in touch - we will certainly consider new features but can't
-guarantee that we can implement all of them.
-
-\section intro_roadmap Roadmap
-
-We hope to add the following capabilities to OSKAR at some point.
-In no particular order:
-
-- Allow use of analytical and numerical dish patterns.
-- Swap X and Y dipoles to match IAU polarisation axes on the sky.
-- Allow full 3D specification of individual element feed angles.
-- Allow full Stokes beam patterns.
-- Include a usable ionospheric model.
 
 
 \latexonly
@@ -176,7 +157,7 @@ In no particular order:
 
 OSKAR is made available under the 3-clause BSD License, as follows:
 
-Copyright (c) 2011-2017, The University of Oxford<br/>
+Copyright (c) 2011-2019, The University of Oxford<br/>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -519,6 +500,9 @@ IN THE SOFTWARE.
 <tr><td>8</td><td>2017-10-26</td>
     <td>Updated FAQ. Added License section and reproduced third-party
     licenses to allow for binary distributions.</td></tr>
+<tr><td>9</td><td>2019-05-17</td>
+    <td>Updated FAQ to address current state of OpenCL support
+    in OSKAR.</td></tr>
 </table>
 
 */

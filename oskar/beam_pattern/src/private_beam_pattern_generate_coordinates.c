@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,12 @@
 #include <stdio.h>
 #include <stddef.h>
 
-static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
-        const char* filename, int* status);
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
+        const char* filename, int* status);
 
 void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         int beam_coord_type, int* status)

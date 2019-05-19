@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,7 @@ const char* oskar_get_error_string(int error)
     case OSKAR_ERR_FUNCTION_NOT_AVAILABLE: return "functionality not available";
     case OSKAR_ERR_OUT_OF_RANGE:           return "out of range";
     case OSKAR_ERR_MEMORY_ALLOC_FAILURE:   return "memory allocation failure";
+    case OSKAR_ERR_MEMORY_COPY_FAILURE:    return "memory copy failure";
     case OSKAR_ERR_MEMORY_NOT_ALLOCATED:   return "memory not allocated";
     case OSKAR_ERR_TYPE_MISMATCH:          return "data type mismatch";
     case OSKAR_ERR_LOCATION_MISMATCH:      return "data location mismatch";
@@ -66,6 +67,7 @@ const char* oskar_get_error_string(int error)
     case OSKAR_ERR_BAD_UNITS:              return "invalid units";
     case OSKAR_ERR_CUDA_NOT_AVAILABLE:     return "CUDA not available";
     case OSKAR_ERR_OPENCL_NOT_AVAILABLE:   return "OpenCL not available";
+    case OSKAR_ERR_KERNEL_LAUNCH_FAILURE:  return "kernel launch failure";
     case OSKAR_ERR_COMPUTE_DEVICES:        return "compute device not found";
 
     /* The following enumerators are under review... */

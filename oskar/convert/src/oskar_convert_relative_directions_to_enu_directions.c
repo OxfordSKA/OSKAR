@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,161 +26,118 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "convert/define_convert_relative_directions_to_enu_directions.h"
 #include "convert/oskar_convert_relative_directions_to_enu_directions.h"
-#include "convert/oskar_convert_relative_directions_to_enu_directions_cuda.h"
-#include "convert/oskar_convert_relative_directions_to_enu_directions_inline.h"
-#include <math.h>
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_convert_relative_directions_to_enu_directions_f(
-        float* x, float* y, float* z, int num_points, const float* l,
-        const float* m, const float* n, float ha0, float dec0, float lat)
+OSKAR_CONVERT_REL_DIR_TO_ENU_DIR(convert_relative_directions_to_enu_directions_float, float)
+OSKAR_CONVERT_REL_DIR_TO_ENU_DIR(convert_relative_directions_to_enu_directions_double, double)
+
+void oskar_convert_relative_directions_to_enu_directions(int at_origin,
+        int bypass, int offset_in, int num_points, const oskar_Mem* l,
+        const oskar_Mem* m, const oskar_Mem* n, double ha0, double dec0,
+        double lat, int offset_out, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
+        int* status)
 {
-    int i;
-    float sin_ha0, cos_ha0, sin_dec0, cos_dec0, sin_lat, cos_lat;
-    sin_ha0  = (float) sin(ha0);
-    cos_ha0  = (float) cos(ha0);
-    sin_dec0 = (float) sin(dec0);
-    cos_dec0 = (float) cos(dec0);
-    sin_lat  = (float) sin(lat);
-    cos_lat  = (float) cos(lat);
-
-    for (i = 0; i < num_points; ++i)
-    {
-        oskar_convert_relative_directions_to_enu_directions_inline_f(
-                &x[i], &y[i], &z[i], l[i], m[i], n[i],
-                cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
-    }
-}
-
-/* Double precision. */
-void oskar_convert_relative_directions_to_enu_directions_d(
-        double* x, double* y, double* z, int num_points, const double* l,
-        const double* m, const double* n, double ha0, double dec0, double lat)
-{
-    int i;
-    double sin_ha0, cos_ha0, sin_dec0, cos_dec0, sin_lat, cos_lat;
-    sin_ha0  = sin(ha0);
-    cos_ha0  = cos(ha0);
-    sin_dec0 = sin(dec0);
-    cos_dec0 = cos(dec0);
-    sin_lat  = sin(lat);
-    cos_lat  = cos(lat);
-
-    for (i = 0; i < num_points; ++i)
-    {
-        oskar_convert_relative_directions_to_enu_directions_inline_d(
-                &x[i], &y[i], &z[i], l[i], m[i], n[i],
-                cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
-    }
-}
-
-/* Wrapper. */
-void oskar_convert_relative_directions_to_enu_directions(
-        oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int num_points,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        double ha0, double dec0, double lat, int* status)
-{
-    int type, location;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Get type and check consistency. */
-    type = oskar_mem_type(x);
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
-    }
-    if (type != oskar_mem_type(y) || type != oskar_mem_type(z) ||
-            type != oskar_mem_type(l) || type != oskar_mem_type(m) ||
-            type != oskar_mem_type(n))
+    const int type = oskar_mem_type(x);
+    const int location = oskar_mem_location(x);
+    const double sin_h0  = sin(ha0),  cos_h0  = cos(ha0);
+    const double sin_d0  = sin(dec0), cos_d0  = cos(dec0);
+    const double sin_lat = sin(lat),  cos_lat = cos(lat);
+    const float sin_h0_f = (float) sin_h0, cos_h0_f = (float) cos_h0;
+    const float sin_d0_f = (float) sin_d0, cos_d0_f = (float) cos_d0;
+    const float sin_lat_f  = (float) sin_lat, cos_lat_f  = (float) cos_lat;
+    if (type != oskar_mem_type(y) || type != oskar_mem_type(z))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-
-    /* Get location and check consistency. */
-    location = oskar_mem_location(x);
     if (location != oskar_mem_location(y) ||
-            location != oskar_mem_location(z) ||
-            location != oskar_mem_location(l) ||
-            location != oskar_mem_location(m) ||
-            location != oskar_mem_location(n))
+            location != oskar_mem_location(z))
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-
-    /* Check dimension consistency. */
-    if ((int)oskar_mem_length(x) < num_points ||
-            (int)oskar_mem_length(y) < num_points ||
-            (int)oskar_mem_length(z) < num_points ||
-            (int)oskar_mem_length(l) < num_points ||
-            (int)oskar_mem_length(m) < num_points ||
-            (int)oskar_mem_length(n) < num_points)
+    if (location == OSKAR_CPU)
     {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
-        return;
-    }
-
-    /* Switch on type and location. */
-    if (type == OSKAR_DOUBLE)
-    {
-        double *x_, *y_, *z_;
-        const double *l_, *m_, *n_;
-        x_ = oskar_mem_double(x, status);
-        y_ = oskar_mem_double(y, status);
-        z_ = oskar_mem_double(z, status);
-        l_ = oskar_mem_double_const(l, status);
-        m_ = oskar_mem_double_const(m, status);
-        n_ = oskar_mem_double_const(n, status);
-
-        if (location == OSKAR_CPU)
-        {
-            oskar_convert_relative_directions_to_enu_directions_d(
-                    x_, y_, z_, num_points, l_, m_, n_, ha0, dec0, lat);
-        }
-        else if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_convert_relative_directions_to_enu_directions_cuda_d(
-                    x_, y_, z_, num_points, l_, m_, n_, ha0, dec0, lat);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
+        if (type == OSKAR_SINGLE)
+            convert_relative_directions_to_enu_directions_float(
+                    at_origin, bypass, offset_in, num_points,
+                    (!at_origin ? oskar_mem_float_const(l, status) : 0),
+                    (!at_origin ? oskar_mem_float_const(m, status) : 0),
+                    (!at_origin ? oskar_mem_float_const(n, status) : 0),
+                    sin_h0_f, cos_h0_f, sin_d0_f, cos_d0_f,
+                    sin_lat_f, cos_lat_f, offset_out,
+                    oskar_mem_float(x, status),
+                    oskar_mem_float(y, status),
+                    oskar_mem_float(z, status));
+        else if (type == OSKAR_DOUBLE)
+            convert_relative_directions_to_enu_directions_double(
+                    at_origin, bypass, offset_in, num_points,
+                    (!at_origin ? oskar_mem_double_const(l, status) : 0),
+                    (!at_origin ? oskar_mem_double_const(m, status) : 0),
+                    (!at_origin ? oskar_mem_double_const(n, status) : 0),
+                    sin_h0, cos_h0, sin_d0, cos_d0,
+                    sin_lat, cos_lat, offset_out,
+                    oskar_mem_double(x, status),
+                    oskar_mem_double(y, status),
+                    oskar_mem_double(z, status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else
     {
-        float *x_, *y_, *z_;
-        const float *l_, *m_, *n_;
-        x_ = oskar_mem_float(x, status);
-        y_ = oskar_mem_float(y, status);
-        z_ = oskar_mem_float(z, status);
-        l_ = oskar_mem_float_const(l, status);
-        m_ = oskar_mem_float_const(m, status);
-        n_ = oskar_mem_float_const(n, status);
-
-        if (location == OSKAR_CPU)
+        size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
+        const int is_dbl = (type == OSKAR_DOUBLE);
+        const char* k = 0;
+        const void* np = 0;
+        if (type == OSKAR_SINGLE)
+            k = "convert_relative_directions_to_enu_directions_float";
+        else if (type == OSKAR_DOUBLE)
+            k = "convert_relative_directions_to_enu_directions_double";
+        else
         {
-            oskar_convert_relative_directions_to_enu_directions_f(
-                    x_, y_, z_, num_points, l_, m_, n_, ha0, dec0, lat);
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
-        else if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_convert_relative_directions_to_enu_directions_cuda_f(
-                    x_, y_, z_, num_points, l_, m_, n_, ha0, dec0, lat);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
+        if (num_points <= 32) local_size[0] = 32;
+        else if (num_points <= 64) local_size[0] = 64;
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = oskar_device_global_size(
+                (size_t) num_points, local_size[0]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &at_origin},
+                {INT_SZ, &bypass},
+                {INT_SZ, &offset_in},
+                {INT_SZ, &num_points},
+                {PTR_SZ, (!at_origin ? oskar_mem_buffer_const(l) : &np)},
+                {PTR_SZ, (!at_origin ? oskar_mem_buffer_const(m) : &np)},
+                {PTR_SZ, (!at_origin ? oskar_mem_buffer_const(n) : &np)},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&sin_h0 : (const void*)&sin_h0_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&cos_h0 : (const void*)&cos_h0_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&sin_d0 : (const void*)&sin_d0_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&cos_d0 : (const void*)&cos_d0_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&sin_lat : (const void*)&sin_lat_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&cos_lat : (const void*)&cos_lat_f},
+                {INT_SZ, &offset_out},
+                {PTR_SZ, oskar_mem_buffer(x)},
+                {PTR_SZ, oskar_mem_buffer(y)},
+                {PTR_SZ, oskar_mem_buffer(z)}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
     }
 }
 

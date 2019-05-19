@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2018, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,8 +32,7 @@
 
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
-#include "utility/oskar_cl_utils.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -45,9 +44,6 @@ extern "C" {
 
 void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
 {
-    size_t element_size, new_size, old_size;
-
-    /* Check if safe to proceed. */
     if (*status) return;
 
     /* Check if the structure owns the memory it points to. */
@@ -58,14 +54,14 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
     }
 
     /* Get size of new and old memory blocks. */
-    element_size = oskar_mem_element_size(mem->type);
+    const size_t element_size = oskar_mem_element_size(mem->type);
     if (element_size == 0)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
-    new_size = num_elements * element_size;
-    old_size = mem->num_elements * element_size;
+    const size_t new_size = num_elements * element_size;
+    const size_t old_size = mem->num_elements * element_size;
 
     /* Do nothing if new size and old size are the same. */
     if (new_size == old_size)
@@ -75,8 +71,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
     if (mem->location == OSKAR_CPU)
     {
         /* Reallocate the memory. */
-        void* mem_new = NULL;
-        mem_new = realloc(mem->data, new_size);
+        void* mem_new = realloc(mem->data, new_size);
         if (!mem_new && (new_size > 0))
         {
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
@@ -95,11 +90,10 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
     {
 #ifdef OSKAR_HAVE_CUDA
         /* Allocate and initialise a new block of memory. */
-        int cuda_error = 0;
         void* mem_new = NULL;
         if (new_size > 0)
         {
-            cuda_error = cudaMalloc(&mem_new, new_size);
+            const int cuda_error = (int)cudaMalloc(&mem_new, new_size);
             if (cuda_error)
             {
                 *status = cuda_error;
@@ -116,15 +110,15 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         const size_t copy_size = (old_size > new_size) ? new_size : old_size;
         if (copy_size > 0)
         {
-            cuda_error = cudaMemcpy(mem_new, mem->data, copy_size,
-                    cudaMemcpyDeviceToDevice);
+            const int cuda_error = (int)cudaMemcpy(mem_new,
+                    mem->data, copy_size, cudaMemcpyDeviceToDevice);
             if (cuda_error)
                 *status = cuda_error;
         }
 
         /* Free the old block. */
-        cudaFree(mem->data);
-        oskar_device_check_error(status);
+        const int cuda_error = (int)cudaFree(mem->data);
+        if (cuda_error && !*status) *status = cuda_error;
 
         /* Set the new meta-data. */
         mem->data = mem_new;
@@ -140,7 +134,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         cl_event event;
         cl_int error = 0;
         cl_mem mem_new;
-        mem_new = clCreateBuffer(oskar_cl_context(),
+        mem_new = clCreateBuffer(oskar_device_context_cl(),
                 CL_MEM_READ_WRITE, new_size, NULL, &error);
         if (error != CL_SUCCESS)
         {
@@ -152,7 +146,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         const size_t copy_size = (old_size > new_size) ? new_size : old_size;
         if (copy_size > 0)
         {
-            error = clEnqueueCopyBuffer(oskar_cl_command_queue(), mem->buffer,
+            error = clEnqueueCopyBuffer(oskar_device_queue_cl(), mem->buffer,
                     mem_new, 0, 0, copy_size, 0, NULL, &event);
             if (error != CL_SUCCESS)
                 *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
@@ -164,6 +158,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
 
         /* Set the new meta-data. */
         mem->buffer = mem_new;
+        mem->data = (void*) (mem->buffer);
         mem->num_elements = num_elements;
 #else
         *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;

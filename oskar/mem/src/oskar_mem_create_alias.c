@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,7 @@ oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
             mem->buffer = clCreateSubBuffer(src->buffer,
                     CL_MEM_READ_WRITE, CL_BUFFER_CREATE_TYPE_REGION,
                     &r, &error);
+            mem->data = (void*) (mem->buffer);
             if (error != CL_SUCCESS)
                 *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
         }

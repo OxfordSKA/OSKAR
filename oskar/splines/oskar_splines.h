@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,8 @@
  * @file oskar_splines.h
  */
 
-/* Public interface. */
+#include <oskar_global.h>
+#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,15 +64,95 @@ enum OSKAR_SPLINES_TYPE
     OSKAR_SPLINES_SPHERICAL = 1
 };
 
+OSKAR_EXPORT
+int oskar_splines_precision(const oskar_Splines* data);
+
+OSKAR_EXPORT
+int oskar_splines_mem_location(const oskar_Splines* data);
+
+OSKAR_EXPORT
+int oskar_splines_have_coeffs(const oskar_Splines* data);
+
+OSKAR_EXPORT
+int oskar_splines_num_knots_x_theta(const oskar_Splines* data);
+
+OSKAR_EXPORT
+int oskar_splines_num_knots_y_phi(const oskar_Splines* data);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_splines_knots_x(oskar_Splines* data);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_splines_knots_x_theta_const(const oskar_Splines* data);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_splines_knots_y(oskar_Splines* data);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_splines_knots_y_phi_const(const oskar_Splines* data);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_splines_coeff(oskar_Splines* data);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_splines_coeff_const(const oskar_Splines* data);
+
+OSKAR_EXPORT
+double oskar_splines_smoothing_factor(const oskar_Splines* data);
+
+/**
+ * @brief
+ * Copies the contents of one data structure to another data structure.
+ *
+ * @details
+ * This function copies data held in one structure to another structure.
+ *
+ * @param[out] dst          Pointer to destination data structure to copy into.
+ * @param[in]  src          Pointer to source data structure to copy from.
+ * @param[in,out]  status   Status return code.
+ */
+OSKAR_EXPORT
+void oskar_splines_copy(oskar_Splines* dst, const oskar_Splines* src,
+        int* status);
+
+/**
+ * @brief
+ * Creates and initialises a spline data structure.
+ *
+ * @details
+ * This function creates and initialises a spline data structure,
+ * and returns a handle to it.
+ *
+ * The data structure must be deallocated using oskar_splines_free() when it is
+ * no longer required.
+ *
+ * @param[in] precision Enumerated type of data structure.
+ * @param[in] location Enumerated location of memory held in data structure.
+ * @param[in,out]  status   Status return code.
+ *
+ * @return A handle to the new data structure.
+ */
+OSKAR_EXPORT
+oskar_Splines* oskar_splines_create(int precision, int location, int* status);
+
+/**
+ * @brief
+ * Frees memory held by a spline data structure.
+ *
+ * @details
+ * This function releases memory held by a spline data structure.
+ *
+ * @param[in,out] data Pointer to data structure.
+ * @param[in,out]  status   Status return code.
+ */
+OSKAR_EXPORT
+void oskar_splines_free(oskar_Splines* data, int* status);
+
 #ifdef __cplusplus
 }
 #endif
 
-#include <splines/oskar_splines_accessors.h>
-#include <splines/oskar_splines_copy.h>
-#include <splines/oskar_splines_create.h>
 #include <splines/oskar_splines_evaluate.h>
-#include <splines/oskar_splines_free.h>
 #include <splines/oskar_splines_fit.h>
 
 #endif /* OSKAR_SPLINES_H_ */

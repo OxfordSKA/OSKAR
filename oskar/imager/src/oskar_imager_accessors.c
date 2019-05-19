@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 #include "imager/private_imager_free_device_data.h"
 #include "imager/private_imager_set_num_planes.h"
 #include "math/oskar_cmath.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 #include "utility/oskar_get_num_procs.h"
 
 #include <float.h>
@@ -351,21 +351,20 @@ void oskar_imager_set_generate_w_kernels_on_gpu(oskar_Imager* h, int value)
 void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
         int* status)
 {
-    int i, num_gpus_avail;
+    int i;
     if (*status) return;
     oskar_imager_free_device_data(h, status);
-    num_gpus_avail = oskar_device_count(status);
     if (*status) return;
     if (num < 0)
     {
-        h->num_gpus = num_gpus_avail;
+        h->num_gpus = h->num_gpus_avail;
         h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
             h->gpu_ids[i] = i;
     }
     else if (num > 0)
     {
-        if (num > num_gpus_avail)
+        if (num > h->num_gpus_avail)
         {
             *status = OSKAR_ERR_COMPUTE_DEVICES;
             return;
@@ -383,7 +382,7 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
     }
     for (i = 0; i < h->num_gpus; ++i)
     {
-        oskar_device_set(h->gpu_ids[i], status);
+        oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
         if (*status) return;
     }
 }
@@ -488,12 +487,6 @@ void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
 }
 
 
-void oskar_imager_set_log(oskar_Imager* h, oskar_Log* log)
-{
-    h->log = log;
-}
-
-
 void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
         int* status)
 {
@@ -502,7 +495,7 @@ void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
     len = (int) strlen(column);
     if (len == 0) { *status = OSKAR_ERR_INVALID_ARGUMENT; return; }
     free(h->ms_column);
-    h->ms_column = calloc(1 + len, 1);
+    h->ms_column = (char*) calloc(1 + len, 1);
     strcpy(h->ms_column, column);
 }
 
@@ -528,7 +521,7 @@ void oskar_imager_set_output_root(oskar_Imager* h, const char* filename)
     if (filename) len = (int) strlen(filename);
     if (len > 0)
     {
-        h->output_root = calloc(1 + len, 1);
+        h->output_root = (char*) calloc(1 + len, 1);
         strcpy(h->output_root, filename);
     }
 }

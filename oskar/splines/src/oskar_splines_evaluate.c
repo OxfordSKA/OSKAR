@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,33 +27,30 @@
  */
 
 #include "splines/oskar_dierckx_bispev.h"
-#include "splines/oskar_dierckx_bispev_bicubic_cuda.h"
 #include "splines/oskar_splines.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
-        const oskar_Splines* spline, int num_points, const oskar_Mem* x,
-        const oskar_Mem* y, int* status)
+void oskar_splines_evaluate(const oskar_Splines* spline,
+        int num_points, const oskar_Mem* x, const oskar_Mem* y,
+        int stride_out, int offset_out, oskar_Mem* output, int* status)
 {
-    int nx, ny, type, location;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Check type. */
-    type = oskar_splines_precision(spline);
+    const int type = oskar_splines_precision(spline);
+    const int location = oskar_splines_mem_location(spline);
+    const int nx = oskar_splines_num_knots_x_theta(spline);
+    const int ny = oskar_splines_num_knots_y_phi(spline);
+    const oskar_Mem* tx = oskar_splines_knots_x_theta_const(spline);
+    const oskar_Mem* ty = oskar_splines_knots_y_phi_const(spline);
+    const oskar_Mem* coeff = oskar_splines_coeff_const(spline);
     if (type != oskar_mem_type(x) || type != oskar_mem_type(y))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-
-    /* Check that all arrays are co-located. */
-    location = oskar_splines_mem_location(spline);
     if (location != oskar_mem_location(output) ||
             location != oskar_mem_location(x) ||
             location != oskar_mem_location(y))
@@ -61,50 +58,31 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-
-    /* Get number of knots. */
-    nx = oskar_splines_num_knots_x_theta(spline);
-    ny = oskar_splines_num_knots_y_phi(spline);
-
-    /* Check data type. */
-    if (type == OSKAR_SINGLE)
+    if (location == OSKAR_CPU)
     {
-        const float *tx, *ty, *coeff, *x_, *y_;
-        float *out;
-        tx    = oskar_mem_float_const(
-                oskar_splines_knots_x_theta_const(spline), status);
-        ty    = oskar_mem_float_const(
-                oskar_splines_knots_y_phi_const(spline), status);
-        coeff = oskar_mem_float_const(
-                oskar_splines_coeff_const(spline), status);
-        x_    = oskar_mem_float_const(x, status);
-        y_    = oskar_mem_float_const(y, status);
-        out   = oskar_mem_float(output, status) + offset;
-
-        /* Check if data are in CPU memory. */
-        if (location == OSKAR_CPU)
+        int i;
+        if (type == OSKAR_SINGLE)
         {
-            int i;
-            if (nx == 0 || ny == 0 || !tx || !ty || !coeff)
-            {
-                for (i = 0; i < num_points; ++i)
-                {
-                    out[i * stride] = 0.0f;
-                }
-            }
+            const float *tx_, *ty_, *coeff_, *x_, *y_;
+            float *out;
+            tx_    = oskar_mem_float_const(tx, status);
+            ty_    = oskar_mem_float_const(ty, status);
+            coeff_ = oskar_mem_float_const(coeff, status);
+            x_     = oskar_mem_float_const(x, status);
+            y_     = oskar_mem_float_const(y, status);
+            out    = oskar_mem_float(output, status) + offset_out;
+            if (nx == 0 || ny == 0 || !tx_ || !ty_ || !coeff_)
+                for (i = 0; i < num_points; ++i) out[i * stride_out] = 0.0f;
             else
             {
-                /* Set up workspace. */
                 float x1, y1, wrk[8];
                 int iwrk1[2], kwrk1 = 2, lwrk = 8, err = 0;
-
-                /* Evaluate surface at the points. */
                 for (i = 0; i < num_points; ++i)
                 {
                     x1 = x_[i];
                     y1 = y_[i];
-                    oskar_dierckx_bispev_f(tx, nx, ty, ny, coeff, 3, 3,
-                            &x1, 1, &y1, 1, &out[i * stride],
+                    oskar_dierckx_bispev_f(tx_, nx, ty_, ny, coeff_, 3, 3,
+                            &x1, 1, &y1, 1, &out[i * stride_out],
                             wrk, lwrk, iwrk1, kwrk1, &err);
                     if (err != 0)
                     {
@@ -114,57 +92,28 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
                 }
             }
         }
-        else if (location == OSKAR_GPU)
+        else if (type == OSKAR_DOUBLE)
         {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_dierckx_bispev_bicubic_cuda_f(tx, nx, ty, ny, coeff,
-                    num_points, x_, y_, stride, out);
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else
-            *status = OSKAR_ERR_BAD_LOCATION;
-    }
-    else if (type == OSKAR_DOUBLE)
-    {
-        const double *tx, *ty, *coeff, *x_, *y_;
-        double *out;
-        tx    = oskar_mem_double_const(
-                oskar_splines_knots_x_theta_const(spline), status);
-        ty    = oskar_mem_double_const(
-                oskar_splines_knots_y_phi_const(spline), status);
-        coeff = oskar_mem_double_const(
-                oskar_splines_coeff_const(spline), status);
-        x_    = oskar_mem_double_const(x, status);
-        y_    = oskar_mem_double_const(y, status);
-        out   = oskar_mem_double(output, status) + offset;
-
-        /* Check if data are in CPU memory. */
-        if (location == OSKAR_CPU)
-        {
-            int i;
-            if (nx == 0 || ny == 0 || !tx || !ty || !coeff)
-            {
-                for (i = 0; i < num_points; ++i)
-                {
-                    out[i * stride] = 0.0;
-                }
-            }
+            const double *tx_, *ty_, *coeff_, *x_, *y_;
+            double *out;
+            tx_    = oskar_mem_double_const(tx, status);
+            ty_    = oskar_mem_double_const(ty, status);
+            coeff_ = oskar_mem_double_const(coeff, status);
+            x_     = oskar_mem_double_const(x, status);
+            y_     = oskar_mem_double_const(y, status);
+            out    = oskar_mem_double(output, status) + offset_out;
+            if (nx == 0 || ny == 0 || !tx_ || !ty_ || !coeff_)
+                for (i = 0; i < num_points; ++i) out[i * stride_out] = 0.0;
             else
             {
-                /* Set up workspace. */
                 double x1, y1, wrk[8];
                 int iwrk1[2], kwrk1 = 2, lwrk = 8, err = 0;
-
-                /* Evaluate surface at the points. */
                 for (i = 0; i < num_points; ++i)
                 {
                     x1 = x_[i];
                     y1 = y_[i];
-                    oskar_dierckx_bispev_d(tx, nx, ty, ny, coeff, 3, 3,
-                            &x1, 1, &y1, 1, &out[i * stride],
+                    oskar_dierckx_bispev_d(tx_, nx, ty_, ny, coeff_, 3, 3,
+                            &x1, 1, &y1, 1, &out[i * stride_out],
                             wrk, lwrk, iwrk1, kwrk1, &err);
                     if (err != 0)
                     {
@@ -174,21 +123,63 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
                 }
             }
         }
-        else if (location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_dierckx_bispev_bicubic_cuda_d(tx, nx, ty, ny, coeff,
-                    num_points, x_, y_, stride, out);
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
         else
-            *status = OSKAR_ERR_BAD_LOCATION;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
+    {
+        size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
+        const char* k = 0;
+        if (nx == 0 || ny == 0)
+        {
+            if (type == OSKAR_DOUBLE)      k = "set_zeros_stride_double";
+            else if (type == OSKAR_SINGLE) k = "set_zeros_stride_float";
+            else
+            {
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+                return;
+            }
+            oskar_device_check_local_size(location, 0, local_size);
+            global_size[0] = oskar_device_global_size(
+                    (size_t) num_points, local_size[0]);
+            const oskar_Arg args[] = {
+                    {INT_SZ, &num_points},
+                    {INT_SZ, &stride_out},
+                    {INT_SZ, &offset_out},
+                    {PTR_SZ, oskar_mem_buffer(output)}
+            };
+            oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                    sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
+        }
+        else
+        {
+            if (type == OSKAR_DOUBLE)      k = "dierckx_bispev_bicubic_double";
+            else if (type == OSKAR_SINGLE) k = "dierckx_bispev_bicubic_float";
+            else
+            {
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+                return;
+            }
+            oskar_device_check_local_size(location, 0, local_size);
+            global_size[0] = oskar_device_global_size(
+                    (size_t) num_points, local_size[0]);
+            const oskar_Arg args[] = {
+                    {PTR_SZ, oskar_mem_buffer_const(tx)},
+                    {INT_SZ, &nx},
+                    {PTR_SZ, oskar_mem_buffer_const(ty)},
+                    {INT_SZ, &ny},
+                    {PTR_SZ, oskar_mem_buffer_const(coeff)},
+                    {INT_SZ, &num_points},
+                    {PTR_SZ, oskar_mem_buffer_const(x)},
+                    {PTR_SZ, oskar_mem_buffer_const(y)},
+                    {INT_SZ, &stride_out},
+                    {INT_SZ, &offset_out},
+                    {PTR_SZ, oskar_mem_buffer(output)}
+            };
+            oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                    sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
+        }
+    }
 }
 
 #ifdef __cplusplus

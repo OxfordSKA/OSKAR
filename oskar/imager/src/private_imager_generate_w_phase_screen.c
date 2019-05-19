@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,111 +26,79 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "imager/define_imager_generate_w_phase_screen.h"
 #include "imager/private_imager_generate_w_phase_screen.h"
-#include "imager/private_imager_generate_w_phase_screen_cuda.h"
-#include "math/oskar_cmath.h"
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN(imager_generate_w_phase_screen_float, float)
+OSKAR_IMAGER_GENERATE_W_PHASE_SCREEN(imager_generate_w_phase_screen_double, double)
 
-void oskar_imager_generate_w_phase_screen(const int iw, const int conv_size,
-        const int inner, const double sampling, const double w_scale,
-        const oskar_Mem* taper_func, oskar_Mem* screen, int* status)
+void oskar_imager_generate_w_phase_screen(int iw, int conv_size, int inner,
+        double sampling, double w_scale, const oskar_Mem* taper_func,
+        oskar_Mem* screen, int* status)
 {
-    int iy;
-    const double f = (2.0 * M_PI * iw * iw) / w_scale;
+    const int location = oskar_mem_location(screen);
+    const int type = oskar_mem_precision(screen);
     const int inner_half = inner / 2;
-
+    const double f = (2.0 * M_PI * iw * iw) / w_scale;
+    const float f_f = (float)f;
+    const float sampling_f = (float)sampling;
     oskar_mem_clear_contents(screen, status);
     if (*status) return;
-    if (oskar_mem_precision(screen) == OSKAR_SINGLE)
+    if (location == OSKAR_CPU)
     {
-        float* scr;
-        const float* tp;
-        scr = oskar_mem_float(screen, status);
-        tp = oskar_mem_float_const(taper_func, status);
-        if (oskar_mem_location(screen) == OSKAR_CPU)
-        {
-            for (iy = -inner_half; iy < inner_half; ++iy)
-            {
-                int ix, ind, offset;
-                double l, m, msq, phase, rsq, taper, taper_x, taper_y;
-                taper_y = tp[iy + inner_half];
-                m = sampling * (double)iy;
-                msq = m*m;
-                offset = (iy > -1 ? iy : (iy + conv_size)) * conv_size;
-                for (ix = -inner_half; ix < inner_half; ++ix)
-                {
-                    l = sampling * (double)ix;
-                    rsq = l*l + msq;
-                    if (rsq < 1.0)
-                    {
-                        taper_x = tp[ix + inner_half];
-                        taper = taper_x * taper_y;
-                        ind = 2 * (offset + (ix > -1 ? ix : (ix + conv_size)));
-                        phase = f * (sqrt(1.0 - rsq) - 1.0);
-                        scr[ind]     = taper * cos(phase);
-                        scr[ind + 1] = taper * sin(phase);
-                    }
-                }
-            }
-        }
+        if (type == OSKAR_SINGLE)
+            imager_generate_w_phase_screen_float(
+                    conv_size, inner_half, sampling_f, f_f,
+                    oskar_mem_float_const(taper_func, status),
+                    oskar_mem_float(screen, status));
+        else if (type == OSKAR_DOUBLE)
+            imager_generate_w_phase_screen_double(
+                    conv_size, inner_half, sampling, f,
+                    oskar_mem_double_const(taper_func, status),
+                    oskar_mem_double(screen, status));
         else
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_imager_generate_w_phase_screen_cuda_f(iw, conv_size,
-                    inner, (float) sampling, (float) w_scale, tp, scr);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else
     {
-        double* scr;
-        const double* tp;
-        scr = oskar_mem_double(screen, status);
-        tp = oskar_mem_double_const(taper_func, status);
-        if (oskar_mem_location(screen) == OSKAR_CPU)
-        {
-            for (iy = -inner_half; iy < inner_half; ++iy)
-            {
-                int ix, ind, offset;
-                double l, m, msq, phase, rsq, taper, taper_x, taper_y;
-                taper_y = tp[iy + inner_half];
-                m = sampling * (double)iy;
-                msq = m*m;
-                offset = (iy > -1 ? iy : (iy + conv_size)) * conv_size;
-                for (ix = -inner_half; ix < inner_half; ++ix)
-                {
-                    l = sampling * (double)ix;
-                    rsq = l*l + msq;
-                    if (rsq < 1.0)
-                    {
-                        taper_x = tp[ix + inner_half];
-                        taper = taper_x * taper_y;
-                        ind = 2 * (offset + (ix > -1 ? ix : (ix + conv_size)));
-                        phase = f * (sqrt(1.0 - rsq) - 1.0);
-                        scr[ind]     = taper * cos(phase);
-                        scr[ind + 1] = taper * sin(phase);
-                    }
-                }
-            }
-        }
+        size_t local_size[] = {16, 16, 1}, global_size[] = {1, 1, 1};
+        const int is_dbl = (type == OSKAR_DOUBLE);
+        const char* k = 0;
+        if (type == OSKAR_SINGLE)
+            k = "imager_generate_w_phase_screen_float";
+        else if (type == OSKAR_DOUBLE)
+            k = "imager_generate_w_phase_screen_double";
         else
         {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_imager_generate_w_phase_screen_cuda_d(iw, conv_size,
-                    inner, sampling, w_scale, tp, scr);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
+        oskar_device_check_local_size(location, 0, local_size);
+        oskar_device_check_local_size(location, 1, local_size);
+        global_size[0] = oskar_device_global_size(
+                (size_t) inner, local_size[0]);
+        global_size[1] = oskar_device_global_size(
+                (size_t) inner, local_size[1]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &conv_size},
+                {INT_SZ, &inner_half},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&sampling : (const void*)&sampling_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&f : (const void*)&f_f},
+                {PTR_SZ, oskar_mem_buffer_const(taper_func)},
+                {PTR_SZ, oskar_mem_buffer(screen)}
+        };
+        oskar_device_launch_kernel(k, location, 2, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
     }
 }
-
 
 #ifdef __cplusplus
 }

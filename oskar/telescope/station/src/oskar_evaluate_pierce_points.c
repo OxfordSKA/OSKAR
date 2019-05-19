@@ -27,7 +27,6 @@
  */
 
 #include "telescope/station/oskar_evaluate_pierce_points.h"
-#include "math/oskar_cmath.h"
 #include "convert/private_convert_ecef_to_geodetic_spherical_inline.h"
 
 #ifdef __cplusplus
@@ -205,7 +204,7 @@ void oskar_evaluate_pierce_points_d(int num_directions, const double* hor_x,
             cos_el = cos(el);
             arg = (cos_el * norm_xyz) / earth_radius_plus_screen_height_m;
             alpha_prime = asin(arg);
-            sin_beta = sin((M_PI_2 - el) - alpha_prime);
+            sin_beta = sin(((M_PI/2) - el) - alpha_prime);
             pp_sec = 1.0 / cos(alpha_prime);
             scale = earth_radius_plus_screen_height_m * sin_beta / cos_el;
         }

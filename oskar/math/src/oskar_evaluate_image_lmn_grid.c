@@ -94,8 +94,8 @@ void oskar_evaluate_image_lmn_grid_f(int num_l, int num_m, float fov_lon,
         double l_max, m_max, *l, *m, r;
 
         /* Allocate temporary memory for vectors. */
-        l = malloc(num_l * sizeof(double));
-        m = malloc(num_m * sizeof(double));
+        l = (double*) malloc(num_l * sizeof(double));
+        m = (double*) malloc(num_m * sizeof(double));
 
         /* Set up the grid boundaries. */
         l_max = -sin(0.5 * fov_lon); /* FITS convention. */
@@ -176,8 +176,8 @@ void oskar_evaluate_image_lmn_grid_d(int num_l, int num_m, double fov_lon,
         double l_max, m_max, *l, *m, r;
 
         /* Allocate temporary memory for vectors. */
-        l = malloc(num_l * sizeof(double));
-        m = malloc(num_m * sizeof(double));
+        l = (double*) malloc(num_l * sizeof(double));
+        m = (double*) malloc(num_m * sizeof(double));
 
         /* Set up the grid boundaries. */
         l_max = -sin(0.5 * fov_lon); /* FITS convention. */

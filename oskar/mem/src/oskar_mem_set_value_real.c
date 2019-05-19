@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,32 +27,21 @@
  */
 
 #include "mem/oskar_mem.h"
-#include "mem/oskar_mem_set_value_real_cuda.h"
 #include "mem/private_mem.h"
-#include "utility/oskar_cl_utils.h"
+#include "utility/oskar_device.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_mem_set_value_real(oskar_Mem* mem, double val,
-        size_t offset, size_t length, int* status)
+void oskar_mem_set_value_real(oskar_Mem* mem, double value,
+        size_t offset, size_t num_elements, int* status)
 {
-    size_t i, n;
-    int type, location;
-
-    /* Check if safe to proceed. */
+    size_t i;
     if (*status) return;
-
-    /* Get the data type, location, and number of elements. */
-    type = mem->type;
-    location = mem->location;
-    n = length;
-    if (offset == 0 && length == 0)
-    {
-        n = mem->num_elements;
-    }
-
+    const int type = mem->type;
+    const int location = mem->location;
+    const float value_f = (float) value;
     if (location == OSKAR_CPU)
     {
         switch (type)
@@ -61,16 +50,16 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
         {
             double *v;
             v = (double*)(mem->data) + offset;
-            for (i = 0; i < n; ++i) v[i] = val;
+            for (i = 0; i < num_elements; ++i) v[i] = value;
             break;
         }
         case OSKAR_DOUBLE_COMPLEX:
         {
             double2 *v;
             v = (double2*)(mem->data) + offset;
-            for (i = 0; i < n; ++i)
+            for (i = 0; i < num_elements; ++i)
             {
-                v[i].x = val;
+                v[i].x = value;
                 v[i].y = 0.0;
             }
             break;
@@ -80,34 +69,27 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
             double4c d;
             double4c *v;
             v = (double4c*)(mem->data) + offset;
-            for (i = 0; i < n; ++i)
-            {
-                d.a.x = val;
-                d.a.y = 0.0;
-                d.b.x = 0.0;
-                d.b.y = 0.0;
-                d.c.x = 0.0;
-                d.c.y = 0.0;
-                d.d.x = val;
-                d.d.y = 0.0;
-                v[i] = d;
-            }
+            d.a.x = value; d.a.y = 0.0;
+            d.b.x = d.b.y = 0.0;
+            d.c.x = d.c.y = 0.0;
+            d.d.x = value; d.d.y = 0.0;
+            for (i = 0; i < num_elements; ++i) v[i] = d;
             break;
         }
         case OSKAR_SINGLE:
         {
             float *v;
             v = (float*)(mem->data) + offset;
-            for (i = 0; i < n; ++i) v[i] = (float)val;
+            for (i = 0; i < num_elements; ++i) v[i] = value_f;
             break;
         }
         case OSKAR_SINGLE_COMPLEX:
         {
             float2 *v;
             v = (float2*)(mem->data) + offset;
-            for (i = 0; i < n; ++i)
+            for (i = 0; i < num_elements; ++i)
             {
-                v[i].x = (float)val;
+                v[i].x = value_f;
                 v[i].y = 0.0f;
             }
             break;
@@ -117,147 +99,55 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
             float4c d;
             float4c *v;
             v = (float4c*)(mem->data) + offset;
-            for (i = 0; i < n; ++i)
-            {
-                d.a.x = (float)val;
-                d.a.y = 0.0f;
-                d.b.x = 0.0f;
-                d.b.y = 0.0f;
-                d.c.x = 0.0f;
-                d.c.y = 0.0f;
-                d.d.x = (float)val;
-                d.d.y = 0.0f;
-                v[i] = d;
-            }
+            d.a.x = value_f; d.a.y = 0.0f;
+            d.b.x = d.b.y = 0.0f;
+            d.c.x = d.c.y = 0.0f;
+            d.d.x = value_f; d.d.y = 0.0f;
+            for (i = 0; i < num_elements; ++i) v[i] = d;
             break;
         }
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             break;
         }
-    }
-    else if (location == OSKAR_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        switch (type)
-        {
-        case OSKAR_DOUBLE:
-            oskar_mem_set_value_real_cuda_r_d((int)n,
-                    (double*)(mem->data) + offset, val);
-            break;
-        case OSKAR_DOUBLE_COMPLEX:
-            oskar_mem_set_value_real_cuda_c_d((int)n,
-                    (double2*)(mem->data) + offset, val);
-            break;
-        case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            oskar_mem_set_value_real_cuda_m_d((int)n,
-                    (double4c*)(mem->data) + offset, val);
-            break;
-        case OSKAR_SINGLE:
-            oskar_mem_set_value_real_cuda_r_f((int)n,
-                    (float*)(mem->data) + offset, (float)val);
-            break;
-        case OSKAR_SINGLE_COMPLEX:
-            oskar_mem_set_value_real_cuda_c_f((int)n,
-                    (float2*)(mem->data) + offset, (float)val);
-            break;
-        case OSKAR_SINGLE_COMPLEX_MATRIX:
-            oskar_mem_set_value_real_cuda_m_f((int)n,
-                    (float4c*)(mem->data) + offset, (float)val);
-            break;
-        default:
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            break;
-        }
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-    }
-    else if (location & OSKAR_CL)
-    {
-#ifdef OSKAR_HAVE_OPENCL
-        cl_device_type dev_type;
-        cl_event event;
-        cl_kernel k = 0;
-        cl_int is_gpu, error, n_in, off;
-        cl_uint arg = 0;
-
-        /* Get the appropriate kernel. */
-        /*
-         * NOTE: Don't use clEnqueueFillBuffer(),
-         * as this is currently broken on macOS.
-         */
-        clGetDeviceInfo(oskar_cl_device_id(),
-                CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_type, NULL);
-        is_gpu = dev_type & CL_DEVICE_TYPE_GPU;
-        const size_t local_size = is_gpu ? 256 : 128;
-        switch (type)
-        {
-        case OSKAR_DOUBLE:
-            k = oskar_cl_kernel("mem_set_value_real_r_double");
-            break;
-        case OSKAR_DOUBLE_COMPLEX:
-            k = oskar_cl_kernel("mem_set_value_real_c_double");
-            break;
-        case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            k = oskar_cl_kernel("mem_set_value_real_m_double");
-            break;
-        case OSKAR_SINGLE:
-            k = oskar_cl_kernel("mem_set_value_real_r_float");
-            break;
-        case OSKAR_SINGLE_COMPLEX:
-            k = oskar_cl_kernel("mem_set_value_real_c_float");
-            break;
-        case OSKAR_SINGLE_COMPLEX_MATRIX:
-            k = oskar_cl_kernel("mem_set_value_real_m_float");
-            break;
-        default:
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            break;
-        }
-
-        /* Set kernel arguments. */
-        if (k)
-        {
-            n_in = (cl_int) (mem->num_elements);
-            off = (cl_int) offset;
-            error = clSetKernelArg(k, arg++, sizeof(cl_int), &n_in);
-            error |= clSetKernelArg(k, arg++, sizeof(cl_mem),
-                    oskar_mem_cl_buffer_const(mem, status));
-            error |= clSetKernelArg(k, arg++, sizeof(cl_int), &off);
-            if (oskar_mem_precision(mem) == OSKAR_SINGLE)
-            {
-                cl_float v = (cl_float) val;
-                error |= clSetKernelArg(k, arg++, sizeof(cl_float), &v);
-            }
-            else
-            {
-                cl_double v = (cl_double) val;
-                error |= clSetKernelArg(k, arg++, sizeof(cl_double), &v);
-            }
-            if (!*status && error != CL_SUCCESS)
-                *status = OSKAR_ERR_INVALID_ARGUMENT;
-            if (!*status)
-            {
-                /* Launch kernel on current command queue. */
-                const size_t global_size = ((n + local_size - 1) /
-                        local_size) * local_size;
-                error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1,
-                        NULL, &global_size, &local_size, 0, NULL, &event);
-                if (error != CL_SUCCESS)
-                    *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
-            }
-        }
-        else
-        {
-            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-        }
-#else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
-#endif
     }
     else
-        *status = OSKAR_ERR_BAD_LOCATION;
+    {
+        size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
+        const unsigned int off = (unsigned int) offset;
+        const unsigned int n = (unsigned int) num_elements;
+        const int is_dbl = (oskar_mem_precision(mem) == OSKAR_DOUBLE);
+        const char* k = 0;
+        switch (type)
+        {
+        case OSKAR_DOUBLE:
+            k = "mem_set_value_real_r_double"; break;
+        case OSKAR_DOUBLE_COMPLEX:
+            k = "mem_set_value_real_c_double"; break;
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            k = "mem_set_value_real_m_double"; break;
+        case OSKAR_SINGLE:
+            k = "mem_set_value_real_r_float"; break;
+        case OSKAR_SINGLE_COMPLEX:
+            k = "mem_set_value_real_c_float"; break;
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            k = "mem_set_value_real_m_float"; break;
+        default:
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = oskar_device_global_size(num_elements, local_size[0]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &off},
+                {INT_SZ, &n},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&value : (const void*)&value_f},
+                {PTR_SZ, oskar_mem_buffer(mem)}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
+    }
 }
 
 #ifdef __cplusplus

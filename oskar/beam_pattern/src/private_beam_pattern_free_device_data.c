@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 #include "beam_pattern/private_beam_pattern.h"
 #include "beam_pattern/private_beam_pattern_free_device_data.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 
 #include <string.h>
 
@@ -44,7 +44,7 @@ void oskar_beam_pattern_free_device_data(oskar_BeamPattern* h, int* status)
         DeviceData* d = &h->d[i];
         if (!d) continue;
         if (i < h->num_gpus)
-            oskar_device_set(h->gpu_ids[i], status);
+            oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
         oskar_mem_free(d->jones_data_cpu[0], status);
         oskar_mem_free(d->jones_data_cpu[1], status);
         oskar_mem_free(d->jones_data, status);

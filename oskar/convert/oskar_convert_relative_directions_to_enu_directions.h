@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,108 +42,6 @@ extern "C" {
 
 /**
  * @brief
- * Converts from relative direction cosines to horizon ENU direction cosines
- * (single precision, CPU version).
- *
- * @details
- * This function transforms the given \f$(l, m, n)\f$ directions in the
- * equatorial frame to \f$(x, y, z)\f$ directions in the horizontal frame.
- *
- * It is equivalent to the product of matrix transformations as follows:
- *
-   \f[
-    \begin{bmatrix}
-    x \\
-    y \\
-    z
-    \end{bmatrix}
-
-        = R_x(\phi) \cdot R_y(-H_0) \cdot R_x(-\delta_0) \cdot
-
-    \begin{bmatrix}
-    l \\
-    m \\
-    n
-    \end{bmatrix}
-   \f]
- *
- * Here, \f$ R_x \f$ and \f$ R_y \f$ correspond to rotations around
- * the \f$x\f$- and \f$y\f$-axes, respectively.
- * The angles \f$ \phi \f$, \f$ H_0 \f$ and \f$ \delta_0 \f$ correspond to
- * the observer's geodetic latitude, the hour angle and the declination of
- * the phase centre.
- *
- * @param[out] x          ENU direction cosines (East).
- * @param[out] y          ENU direction cosines (North).
- * @param[out] z          ENU direction cosines (up).
- * @param[in]  num_points Number of points to convert.
- * @param[in]  l          Relative direction cosines.
- * @param[in]  m          Relative direction cosines.
- * @param[in]  n          Relative direction cosines.
- * @param[in]  ha0        Hour angle of the origin of the relative directions,
- *                        in radians.
- * @param[in]  dec0       Declination of the origin of the relative directions,
- *                        in radians.
- * @param[in]  lat        Latitude of the ENU coordinate frame, in radians.
- */
-OSKAR_EXPORT
-void oskar_convert_relative_directions_to_enu_directions_f(
-        float* x, float* y, float* z, int num_points, const float* l,
-        const float* m, const float* n, float ha0, float dec0, float lat);
-
-/**
- * @brief
- * Converts from relative direction cosines to horizon ENU direction cosines
- * (double precision, CPU version).
- *
- * @details
- * This function transforms the given \f$(l, m, n)\f$ directions in the
- * equatorial frame to \f$(x, y, z)\f$ directions in the horizontal frame.
- *
- * It is equivalent to the product of matrix transformations as follows:
- *
-   \f[
-    \begin{bmatrix}
-    x \\
-    y \\
-    z
-    \end{bmatrix}
-
-        = R_x(\phi) \cdot R_y(-H_0) \cdot R_x(-\delta_0) \cdot
-
-    \begin{bmatrix}
-    l \\
-    m \\
-    n
-    \end{bmatrix}
-   \f]
- *
- * Here, \f$ R_x \f$ and \f$ R_y \f$ correspond to rotations around
- * the \f$x\f$- and \f$y\f$-axes, respectively.
- * The angles \f$ \phi \f$, \f$ H_0 \f$ and \f$ \delta_0 \f$ correspond to
- * the observer's geodetic latitude, the hour angle and the declination of
- * the phase centre.
- *
- * @param[out] x          ENU direction cosines (East).
- * @param[out] y          ENU direction cosines (North).
- * @param[out] z          ENU direction cosines (up).
- * @param[in]  num_points Number of points to convert.
- * @param[in]  l          Relative direction cosines.
- * @param[in]  m          Relative direction cosines.
- * @param[in]  n          Relative direction cosines.
- * @param[in]  ha0        Hour angle of the origin of the relative directions,
- *                        in radians.
- * @param[in]  dec0       Declination of the origin of the relative directions,
- *                        in radians.
- * @param[in]  lat        Latitude of the ENU coordinate frame, in radians.
- */
-OSKAR_EXPORT
-void oskar_convert_relative_directions_to_enu_directions_d(
-        double* x, double* y, double* z, int num_points, const double* l,
-        const double* m, const double* n, double ha0, double dec0, double lat);
-
-/**
- * @brief
  * Converts from relative equatorial direction cosines to horizon ENU
  * direction cosines.
  *
@@ -175,9 +73,6 @@ void oskar_convert_relative_directions_to_enu_directions_d(
  * the observer's geodetic latitude, the hour angle and the declination of
  * the phase centre.
  *
- * @param[out] x          ENU direction cosines (East).
- * @param[out] y          ENU direction cosines (North).
- * @param[out] z          ENU direction cosines (up).
  * @param[in]  num_points Number of points to convert.
  * @param[in]  l          Relative direction cosines.
  * @param[in]  m          Relative direction cosines.
@@ -187,12 +82,17 @@ void oskar_convert_relative_directions_to_enu_directions_d(
  * @param[in]  dec0       Declination of the origin of the relative directions,
  *                        in radians.
  * @param[in]  lat        Latitude of the ENU coordinate frame, in radians.
+ * @param[out] x          ENU direction cosines (East).
+ * @param[out] y          ENU direction cosines (North).
+ * @param[out] z          ENU direction cosines (up).
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_convert_relative_directions_to_enu_directions(
-        oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int num_points,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        double ha0, double dec0, double lat, int* status);
+void oskar_convert_relative_directions_to_enu_directions(int at_origin,
+        int bypass, int offset_in, int num_points, const oskar_Mem* l,
+        const oskar_Mem* m, const oskar_Mem* n, double ha0, double dec0,
+        double lat, int offset_out, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
+        int* status);
 
 #ifdef __cplusplus
 }

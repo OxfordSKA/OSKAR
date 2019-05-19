@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2018, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,8 +54,7 @@ extern "C" {
  * The Jones matrices should have dimensions corresponding to the number of
  * sources in the brightness matrix and the number of stations.
  *
- * @param[out] vis          Output visibility amplitudes.
- * @param[in]  n_sources    Number of sources to use.
+ * @param[in]  num_sources  Number of sources to use.
  * @param[in]  jones        Set of Jones matrices.
  * @param[in]  sky          Sky model.
  * @param[in]  tel          Telescope model.
@@ -64,13 +63,16 @@ extern "C" {
  * @param[in]  w            Station w coordinates, in metres.
  * @param[in]  gast         Greenwich apparent sidereal time, in radians.
  * @param[in]  frequency_hz Current observation frequency, in Hz.
+ * @param[in]  offset_out   Output visibility start offset.
+ * @param[out] vis          Output visibility amplitudes.
  * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_cross_correlate(oskar_Mem* vis, int n_sources,
-        const oskar_Jones* jones, const oskar_Sky* sky,
-        const oskar_Telescope* tel, const oskar_Mem* u, const oskar_Mem* v,
-        const oskar_Mem* w, double gast, double frequency_hz, int* status);
+void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
+        const oskar_Sky* sky, const oskar_Telescope* tel,
+        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
+        double gast, double frequency_hz, int offset_out, oskar_Mem* vis,
+        int* status);
 
 #ifdef __cplusplus
 }

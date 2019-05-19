@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,13 +51,12 @@ extern "C" {
  * WARNING: This function allocates memory internally, and the returned pointer
  * must be explicitly freed by the caller using free().
  *
- * @param[in,out] log    Pointer to a log structure.
  * @param[out] size      Size (in bytes) of returned array.
  *
  * @return Pointer to memory buffer containing data currently in the log file.
  */
 OSKAR_EXPORT
-char* oskar_log_file_data(oskar_Log* log, size_t* size);
+char* oskar_log_file_data(size_t* size);
 
 #ifdef __cplusplus
 }

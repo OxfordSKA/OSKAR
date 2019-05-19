@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -116,7 +116,7 @@ void oskar_convert_ecef_to_geodetic_spherical_inline_f(const float x,
     }
     else if (r == 0.0f)
     {
-        phi = (z > 0.0f) ? (float) M_PI_2 : (float) -M_PI_2;
+        phi = (z > 0.0f) ? (float) (M_PI/2) : (float) -(M_PI/2);
         h = fabsf(z) - b;
     }
 
@@ -200,7 +200,7 @@ void oskar_convert_ecef_to_geodetic_spherical_inline_d(const double x,
     }
     else if (r == 0.0)
     {
-        phi = (z > 0.0) ? M_PI_2 : -M_PI_2;
+        phi = (z > 0.0) ? M_PI/2 : -M_PI/2;
         h = fabs(z) - b;
     }
 

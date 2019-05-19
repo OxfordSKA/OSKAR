@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OSKAR_HAVE_CUDA
-#include <cufft.h>
-#endif
-
 #include <fitsio.h>
+#include <math/oskar_fft.h>
 #include <mem/oskar_mem.h>
-#include <log/oskar_log.h>
 #include <utility/oskar_thread.h>
 #include <utility/oskar_timer.h>
 
@@ -43,8 +39,11 @@ extern "C" {
 /* Memory allocated per GPU. */
 struct DeviceData
 {
-    oskar_Mem *uu, *vv, *ww, *amp, *weight, *l, *m, *n;
-    oskar_Mem *block_dev, *block_cpu;
+    int num_planes;
+    oskar_Mem **planes;
+
+    /* W-projection imager data. */
+    oskar_Mem *w_support, *w_kernels_compact, *w_kernel_start;
 };
 typedef struct DeviceData DeviceData;
 
@@ -52,14 +51,13 @@ struct oskar_Imager
 {
     char* output_name[4];
     fitsfile* fits_file[4];
-    oskar_Log* log;
     oskar_Timer *tmr_grid_update, *tmr_grid_finalise, *tmr_init;
     oskar_Timer *tmr_read, *tmr_write;
 
     /* Settings parameters. */
-    int imager_prec, num_devices, num_gpus, *gpu_ids, fft_on_gpu;
+    int imager_prec, num_devices, num_gpus_avail, dev_loc, num_gpus, *gpu_ids;
     int chan_snaps, im_type, num_im_channels, num_im_pols, pol_offset;
-    int algorithm, image_size, use_stokes, support, oversample;
+    int algorithm, fft_on_gpu, image_size, use_stokes, support, oversample;
     int generate_w_kernels_on_gpu, set_cellsize, set_fov, weighting;
     int num_files, scale_norm_with_num_input_files;
     char direction_type, kernel_type;
@@ -89,11 +87,9 @@ struct oskar_Imager
     oskar_Mem *l, *m, *n;
 
     /* FFT imager data. */
+    oskar_FFT* fft;
     int grid_size;
-    oskar_Mem *conv_func, *corr_func, *fftpack_wsave, *fftpack_work;
-#ifdef OSKAR_HAVE_CUDA
-    cufftHandle cufft_plan;
-#endif
+    oskar_Mem *conv_func, *corr_func;
 
     /* W-projection imager data. */
     size_t ww_points;

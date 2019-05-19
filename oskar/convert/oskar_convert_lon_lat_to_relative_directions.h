@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,15 +52,16 @@ extern "C" {
  * @param[in]  lon_rad    Input longitudes in radians.
  * @param[in]  lat_rad    Input latitudes in radians.
  * @param[in]  lon0_rad   Longitude of the reference point in radians.
- * @param[in]  lat0_rad   Latitude of the reference point in radians.
+ * @param[in]  cos_lat0   Cosine latitude of the reference point.
+ * @param[in]  sin_lat0   Sine latitude of the reference point.
  * @param[out] l          l-direction-cosines relative to the reference point.
  * @param[out] m          m-direction-cosines relative to the reference point.
  * @param[out] n          n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_lon_lat_to_relative_directions_f(int num_points,
+void oskar_convert_lon_lat_to_relative_directions_3d_f(int num_points,
         const float* lon_rad, const float* lat_rad, float lon0_rad,
-        float lat0_rad, float* l, float* m, float* n);
+        float cos_lat0, float sin_lat0, float* l, float* m, float* n);
 
 /**
  * @brief
@@ -74,15 +75,16 @@ void oskar_convert_lon_lat_to_relative_directions_f(int num_points,
  * @param[in]  lon_rad    Input longitudes in radians.
  * @param[in]  lat_rad    Input latitudes in radians.
  * @param[in]  lon0_rad   Longitude of the reference point in radians.
- * @param[in]  lat0_rad   Latitude of the reference point in radians.
+ * @param[in]  cos_lat0   Cosine latitude of the reference point.
+ * @param[in]  sin_lat0   Sine latitude of the reference point.
  * @param[out] l          l-direction-cosines relative to the reference point.
  * @param[out] m          m-direction-cosines relative to the reference point.
  * @param[out] n          n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_lon_lat_to_relative_directions_d(int num_points,
+void oskar_convert_lon_lat_to_relative_directions_3d_d(int num_points,
         const double* lon_rad, const double* lat_rad, double lon0_rad,
-        double lat0_rad, double* l, double* m, double* n);
+        double cos_lat0, double sin_lat0, double* l, double* m, double* n);
 
 /**
  * @brief
@@ -96,14 +98,16 @@ void oskar_convert_lon_lat_to_relative_directions_d(int num_points,
  * @param[in]  lon_rad    Input longitudes in radians.
  * @param[in]  lat_rad    Input latitudes in radians.
  * @param[in]  lon0_rad   Longitude of the reference point in radians.
- * @param[in]  lat0_rad   Latitude of the reference point in radians.
+ * @param[in]  cos_lat0   Cosine latitude of the reference point.
+ * @param[in]  sin_lat0   Sine latitude of the reference point.
  * @param[out] l          l-direction-cosines relative to the reference point.
  * @param[out] m          m-direction-cosines relative to the reference point.
+ * @param[out] n          Must be NULL.
  */
 OSKAR_EXPORT
 void oskar_convert_lon_lat_to_relative_directions_2d_f(int num_points,
         const float* lon_rad, const float* lat_rad, float lon0_rad,
-        float lat0_rad, float* l, float* m);
+        float cos_lat0, float sin_lat0, float* l, float* m, float* n);
 
 /**
  * @brief
@@ -117,22 +121,26 @@ void oskar_convert_lon_lat_to_relative_directions_2d_f(int num_points,
  * @param[in]  lon_rad    Input longitudes in radians.
  * @param[in]  lat_rad    Input latitudes in radians.
  * @param[in]  lon0_rad   Longitude of the reference point in radians.
- * @param[in]  lat0_rad   Latitude of the reference point in radians.
+ * @param[in]  cos_lat0   Cosine latitude of the reference point.
+ * @param[in]  sin_lat0   Sine latitude of the reference point.
  * @param[out] l          l-direction-cosines relative to the reference point.
  * @param[out] m          m-direction-cosines relative to the reference point.
+ * @param[out] n          Must be NULL.
  */
 OSKAR_EXPORT
 void oskar_convert_lon_lat_to_relative_directions_2d_d(int num_points,
         const double* lon_rad, const double* lat_rad, double lon0_rad,
-        double lat0_rad, double* l, double* m);
+        double cos_lat0, double sin_lat0, double* l, double* m, double* n);
 
 /**
  * @brief
- * Spherical to relative 3D direction cosines (wrapper function).
+ * Spherical to relative 2D or 3D direction cosines.
  *
  * @details
  * This function computes the direction cosines of the specified points
  * relative to the reference point.
+ *
+ * If only a 2D transform is required, \p n can be NULL on input.
  *
  * @param[in]  num_points Number of points.
  * @param[in]  lon_rad    Input longitudes in radians.

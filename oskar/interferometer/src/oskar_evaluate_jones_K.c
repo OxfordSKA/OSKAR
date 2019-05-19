@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,133 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "interferometer/define_evaluate_jones_K.h"
 #include "interferometer/oskar_evaluate_jones_K.h"
-#include "interferometer/oskar_evaluate_jones_K_cuda.h"
-#include "utility/oskar_device_utils.h"
-#include "math/oskar_cmath.h"
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_evaluate_jones_K_f(float2* jones, int num_sources, const float* l,
-        const float* m, const float* n, int num_stations,
-        const float* u, const float* v, const float* w, float wavenumber,
-        const float* source_filter, float source_filter_min,
-        float source_filter_max)
-{
-    int a, s;
+OSKAR_JONES_K_CPU(evaluate_jones_K_float, float, float2)
+OSKAR_JONES_K_CPU(evaluate_jones_K_double, double, double2)
 
-    /* Loop over stations. */
-    for (a = 0; a < num_stations; ++a)
-    {
-        float us, vs, ws;
-        float2* station_ptr;
-
-        /* Get the station data. */
-        station_ptr = &jones[a * num_sources];
-        us = wavenumber * u[a];
-        vs = wavenumber * v[a];
-        ws = wavenumber * w[a];
-
-        /* Loop over sources. */
-        for (s = 0; s < num_sources; ++s)
-        {
-            float phase;
-            float2 weight;
-
-            /* Calculate the source phase. */
-            if (source_filter[s] > source_filter_min &&
-                    source_filter[s] <= source_filter_max)
-            {
-                phase = us * l[s] + vs * m[s] + ws * (n[s] - 1.0f);
-                /* Double precision versions are converted to sincos() by the
-                 * compiler, so they're faster and more accurate
-                 * than sinf(), cosf(). */
-                weight.x = cos(phase);
-                weight.y = sin(phase);
-            }
-            else
-            {
-                weight.x = 0.0f;
-                weight.y = 0.0f;
-            }
-
-            /* Store the result. */
-            station_ptr[s] = weight;
-        }
-    }
-}
-
-/* Double precision. */
-void oskar_evaluate_jones_K_d(double2* jones, int num_sources, const double* l,
-        const double* m, const double* n, int num_stations,
-        const double* u, const double* v, const double* w, double wavenumber,
-        const double* source_filter, double source_filter_min,
-        double source_filter_max)
-{
-    int a, s;
-
-    /* Loop over stations. */
-    for (a = 0; a < num_stations; ++a)
-    {
-        double us, vs, ws;
-        double2* station_ptr;
-
-        /* Get the station data. */
-        station_ptr = &jones[a * num_sources];
-        us = wavenumber * u[a];
-        vs = wavenumber * v[a];
-        ws = wavenumber * w[a];
-
-        /* Loop over sources. */
-        for (s = 0; s < num_sources; ++s)
-        {
-            double phase;
-            double2 weight;
-
-            /* Calculate the source phase. */
-            if (source_filter[s] > source_filter_min &&
-                    source_filter[s] <= source_filter_max)
-            {
-                phase = us * l[s] + vs * m[s] + ws * (n[s] - 1.0);
-                weight.x = cos(phase);
-                weight.y = sin(phase);
-            }
-            else
-            {
-                weight.x = 0.0;
-                weight.y = 0.0;
-            }
-
-            /* Store the result. */
-            station_ptr[s] = weight;
-        }
-    }
-}
-
-/* Wrapper. */
 void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
         const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
         const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
         double frequency_hz, const oskar_Mem* source_filter,
         double source_filter_min, double source_filter_max, int* status)
 {
-    int num_stations, jones_type, base_type, location;
-    double wavenumber;
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Get the Jones matrix block meta-data. */
-    jones_type = oskar_jones_type(K);
-    base_type = oskar_type_precision(jones_type);
-    location = oskar_jones_mem_location(K);
-    num_stations = oskar_jones_num_stations(K);
-    wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
-
-    /* Check that the data is in the right location. */
+    const int type = oskar_jones_type(K);
+    const int precision = oskar_type_precision(type);
+    const int location = oskar_jones_mem_location(K);
+    const int num_stations = oskar_jones_num_stations(K);
+    const double wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
+    const float wavenumber_f = (float) wavenumber;
+    const float source_filter_min_f = (float) source_filter_min;
+    const float source_filter_max_f = (float) source_filter_max;
     if (oskar_mem_location(l) != location ||
             oskar_mem_location(m) != location ||
             oskar_mem_location(n) != location ||
@@ -164,30 +64,18 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-
-    /* Check that the data are of the right type. */
-    if (!oskar_type_is_complex(jones_type) ||
-            oskar_type_is_matrix(jones_type))
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
-    }
-    if (base_type != oskar_mem_type(l) || base_type != oskar_mem_type(m) ||
-            base_type != oskar_mem_type(n) || base_type != oskar_mem_type(u) ||
-            base_type != oskar_mem_type(v) || base_type != oskar_mem_type(w) ||
-            base_type != oskar_mem_type(source_filter))
+    if (precision != oskar_mem_type(l) || precision != oskar_mem_type(m) ||
+            precision != oskar_mem_type(n) || precision != oskar_mem_type(u) ||
+            precision != oskar_mem_type(v) || precision != oskar_mem_type(w) ||
+            precision != oskar_mem_type(source_filter))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-
-    /* Evaluate Jones matrices. */
-    if (location == OSKAR_GPU)
+    if (location == OSKAR_CPU)
     {
-#ifdef OSKAR_HAVE_CUDA
-        if (jones_type == OSKAR_SINGLE_COMPLEX)
-        {
-            oskar_evaluate_jones_K_cuda_f(oskar_jones_float2(K, status),
+        if (type == OSKAR_SINGLE_COMPLEX)
+            evaluate_jones_K_float(
                     num_sources,
                     oskar_mem_float_const(l, status),
                     oskar_mem_float_const(m, status),
@@ -195,13 +83,12 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
                     num_stations,
                     oskar_mem_float_const(u, status),
                     oskar_mem_float_const(v, status),
-                    oskar_mem_float_const(w, status), wavenumber,
+                    oskar_mem_float_const(w, status), wavenumber_f,
                     oskar_mem_float_const(source_filter, status),
-                    source_filter_min, source_filter_max);
-        }
-        else if (jones_type == OSKAR_DOUBLE_COMPLEX)
-        {
-            oskar_evaluate_jones_K_cuda_d(oskar_jones_double2(K, status),
+                    source_filter_min_f, source_filter_max_f,
+                    oskar_jones_float2(K, status));
+        else if (type == OSKAR_DOUBLE_COMPLEX)
+            evaluate_jones_K_double(
                     num_sources,
                     oskar_mem_double_const(l, status),
                     oskar_mem_double_const(m, status),
@@ -211,44 +98,60 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
                     oskar_mem_double_const(v, status),
                     oskar_mem_double_const(w, status), wavenumber,
                     oskar_mem_double_const(source_filter, status),
-                    source_filter_min, source_filter_max);
+                    source_filter_min, source_filter_max,
+                    oskar_jones_double2(K, status));
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
-        oskar_device_check_error(status);
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
     }
-    else if (location == OSKAR_CPU)
+    else
     {
-        if (jones_type == OSKAR_SINGLE_COMPLEX)
+        size_t local_size[] = {JONES_K_SOURCE, JONES_K_STATION, 1};
+        size_t global_size[] = {1, 1, 1};
+        const int is_dbl = (type == OSKAR_DOUBLE_COMPLEX);
+        const char* k = 0;
+        if (type == OSKAR_SINGLE_COMPLEX)
+            k = "evaluate_jones_K_float";
+        else if (type == OSKAR_DOUBLE_COMPLEX)
+            k = "evaluate_jones_K_double";
+        else
         {
-            oskar_evaluate_jones_K_f(oskar_jones_float2(K, status),
-                    num_sources,
-                    oskar_mem_float_const(l, status),
-                    oskar_mem_float_const(m, status),
-                    oskar_mem_float_const(n, status),
-                    num_stations,
-                    oskar_mem_float_const(u, status),
-                    oskar_mem_float_const(v, status),
-                    oskar_mem_float_const(w, status), wavenumber,
-                    oskar_mem_float_const(source_filter, status),
-                    source_filter_min, source_filter_max);
-
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
-        else if (jones_type == OSKAR_DOUBLE_COMPLEX)
-        {
-            oskar_evaluate_jones_K_d(oskar_jones_double2(K, status),
-                    num_sources,
-                    oskar_mem_double_const(l, status),
-                    oskar_mem_double_const(m, status),
-                    oskar_mem_double_const(n, status),
-                    num_stations,
-                    oskar_mem_double_const(u, status),
-                    oskar_mem_double_const(v, status),
-                    oskar_mem_double_const(w, status), wavenumber,
-                    oskar_mem_double_const(source_filter, status),
-                    source_filter_min, source_filter_max);
-        }
+        if (oskar_device_is_cpu(location))
+            local_size[1] = 1;
+        oskar_device_check_local_size(location, 0, local_size);
+        oskar_device_check_local_size(location, 1, local_size);
+        global_size[0] = oskar_device_global_size(
+                (size_t) num_sources, local_size[0]);
+        global_size[1] = oskar_device_global_size(
+                (size_t) num_stations, local_size[1]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &num_sources},
+                {PTR_SZ, oskar_mem_buffer_const(l)},
+                {PTR_SZ, oskar_mem_buffer_const(m)},
+                {PTR_SZ, oskar_mem_buffer_const(n)},
+                {INT_SZ, &num_stations},
+                {PTR_SZ, oskar_mem_buffer_const(u)},
+                {PTR_SZ, oskar_mem_buffer_const(v)},
+                {PTR_SZ, oskar_mem_buffer_const(w)},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&wavenumber :
+                        (const void*)&wavenumber_f},
+                {PTR_SZ, oskar_mem_buffer_const(source_filter)},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&source_filter_min :
+                        (const void*)&source_filter_min_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&source_filter_max :
+                        (const void*)&source_filter_max_f},
+                {PTR_SZ, oskar_mem_buffer(oskar_jones_mem(K))}
+        };
+        oskar_device_launch_kernel(k, location, 2, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
     }
 }
 

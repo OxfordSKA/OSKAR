@@ -29,9 +29,11 @@
 #ifndef OSKAR_PRIVATE_COND2_2X2_H_
 #define OSKAR_PRIVATE_COND2_2X2_H_
 
-#include <oskar_global.h>
-#include <math/oskar_multiply_inline.h>
 #include <math.h>
+
+#include "oskar_global.h"
+#include "math/define_multiply.h"
+#include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,7 +42,7 @@ extern "C" {
 /* Private inline functions. */
 
 OSKAR_INLINE
-float oskar_cond2_2x2_inline_f(const float4c* restrict in)
+float oskar_cond2_2x2_inline_f(const float4c* RESTRICT in)
 {
     float sum, diff, t1, t2, a, b;
     float4c p, q;
@@ -58,7 +60,7 @@ float oskar_cond2_2x2_inline_f(const float4c* restrict in)
 }
 
 OSKAR_INLINE
-double oskar_cond2_2x2_inline_d(const double4c* restrict in)
+double oskar_cond2_2x2_inline_d(const double4c* RESTRICT in)
 {
     double sum, diff, t1, t2, a, b;
     double4c p, q;

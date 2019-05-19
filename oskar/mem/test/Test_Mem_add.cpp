@@ -66,7 +66,7 @@ TEST(Mem, add_matrix_cpu)
 
     out = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements, &status);
-    oskar_mem_add(out, in1, in2, num_elements, &status);
+    oskar_mem_add(out, in1, in2, 0, 0, 0, num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     float4c* C = oskar_mem_float4c(out, &status);
@@ -119,7 +119,7 @@ TEST(Mem, add_in_place)
         EXPECT_FLOAT_EQ(0.0f, B[i].d.y);
     }
 
-    oskar_mem_add(in_out, in, in_out, num_elements, &status);
+    oskar_mem_add(in_out, in, in_out, 0, 0, 0, num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     for (int i = 0; i < num_elements; ++i)
@@ -156,7 +156,7 @@ TEST(Mem, add_gpu_single)
     in2_cl = oskar_mem_create_copy(in2, OSKAR_GPU, &status);
     out_cl = oskar_mem_create(prec, OSKAR_GPU, num_elements, &status);
     ASSERT_EQ(0, status);
-    oskar_mem_add(out_cl, in1_cl, in2_cl, num_elements, &status);
+    oskar_mem_add(out_cl, in1_cl, in2_cl, 0, 0, 0, num_elements, &status);
     ASSERT_EQ(0, status);
     out = oskar_mem_create_copy(out_cl, OSKAR_CPU, &status);
     float* C = oskar_mem_float(out, &status);
@@ -192,7 +192,7 @@ TEST(Mem, add_cl_single)
     in2_cl = oskar_mem_create_copy(in2, OSKAR_CL, &status);
     out_cl = oskar_mem_create(prec, OSKAR_CL, num_elements, &status);
     ASSERT_EQ(0, status);
-    oskar_mem_add(out_cl, in1_cl, in2_cl, num_elements, &status);
+    oskar_mem_add(out_cl, in1_cl, in2_cl, 0, 0, 0, num_elements, &status);
     ASSERT_EQ(0, status);
     out = oskar_mem_create_copy(out_cl, OSKAR_CPU, &status);
     float* C = oskar_mem_float(out, &status);
@@ -226,7 +226,7 @@ TEST(Mem, add_cl_double)
     in2_cl = oskar_mem_create_copy(in2, OSKAR_CL, &status);
     out_cl = oskar_mem_create(prec, OSKAR_CL, num_elements, &status);
     ASSERT_EQ(0, status);
-    oskar_mem_add(out_cl, in1_cl, in2_cl, num_elements, &status);
+    oskar_mem_add(out_cl, in1_cl, in2_cl, 0, 0, 0, num_elements, &status);
     ASSERT_EQ(0, status);
     out = oskar_mem_create_copy(out_cl, OSKAR_CPU, &status);
     double* C = oskar_mem_double(out, &status);
@@ -243,40 +243,3 @@ TEST(Mem, add_cl_double)
     oskar_mem_free(out_cl, &status);
 }
 #endif
-
-TEST(Mem, not_enough_output_elements)
-{
-    // Use Case: Not enough elements in output array.
-    int num_elements = 10, status = 0;
-    oskar_Mem *in1, *in2, *out;
-    in1 = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
-            num_elements, &status);
-    in2 = oskar_mem_create_copy(in1, OSKAR_CPU, &status);
-    out = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
-            num_elements / 2, &status);
-    oskar_mem_add(out, in1, in2, num_elements, &status);
-    ASSERT_EQ((int)OSKAR_ERR_DIMENSION_MISMATCH, status);
-    status = 0;
-    oskar_mem_free(in1, &status);
-    oskar_mem_free(in2, &status);
-    oskar_mem_free(out, &status);
-}
-
-TEST(Mem, add_dimension_mismatch)
-{
-    // Use Case: Dimension mismatch in arrays being added.
-    int num_elements = 10, status = 0;
-    oskar_Mem *in1, *in2, *out;
-    in1 = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
-            num_elements, &status);
-    in2 = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
-            num_elements / 2, &status);
-    out = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
-            num_elements, &status);
-    oskar_mem_add(out, in1, in2, num_elements, &status);
-    ASSERT_EQ((int)OSKAR_ERR_DIMENSION_MISMATCH, status);
-    status = 0;
-    oskar_mem_free(in1, &status);
-    oskar_mem_free(in2, &status);
-    oskar_mem_free(out, &status);
-}

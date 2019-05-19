@@ -27,7 +27,7 @@
  */
 
 #include "sky/oskar_sky.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 
 #include <float.h>
 

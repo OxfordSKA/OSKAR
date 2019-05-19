@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2017, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,148 +27,68 @@
  */
 
 #include "mem/oskar_mem.h"
-#include "mem/oskar_mem_scale_real_cuda.h"
 #include "mem/private_mem.h"
-#include "utility/oskar_cl_utils.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 
 #ifdef __cplusplus
 extern "C"
 #endif
-void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
+void oskar_mem_scale_real(oskar_Mem* mem, double value,
+        size_t offset, size_t num_elements, int* status)
 {
-    size_t num_elements, i;
-#ifdef OSKAR_HAVE_OPENCL
-    cl_kernel k = 0;
-#endif
-
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Get memory meta-data. */
-    num_elements = mem->num_elements;
-
-    /* Check if elements are real, complex or matrix. */
+    const int location = mem->location;
+    const int precision = oskar_mem_precision(mem);
+    const float value_f = (float) value;
     if (oskar_type_is_complex(mem->type))
+    {
+        offset *= 2;
         num_elements *= 2;
-    if (oskar_type_is_matrix(mem->type))
-        num_elements *= 4;
-
-    /* Scale the vector. */
-    if (oskar_type_is_single(mem->type))
-    {
-        if (mem->location == OSKAR_CPU)
-        {
-            float *aa;
-            aa = (float*) mem->data;
-            for (i = 0; i < num_elements; ++i) aa[i] *= (float)value;
-        }
-        else if (mem->location == OSKAR_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_mem_scale_real_cuda_f((int)num_elements, (float)value,
-                    (float*)(mem->data));
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else if (mem->location & OSKAR_CL)
-        {
-#ifdef OSKAR_HAVE_OPENCL
-            k = oskar_cl_kernel("mem_scale_float");
-#else
-            *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
-#endif
-        }
-        else
-            *status = OSKAR_ERR_BAD_LOCATION;
     }
-    else if (oskar_type_is_double(mem->type))
+    if (oskar_type_is_matrix(mem->type))
     {
-        if (mem->location == OSKAR_CPU)
+        offset *= 4;
+        num_elements *= 4;
+    }
+    if (location == OSKAR_CPU)
+    {
+        size_t i;
+        if (precision == OSKAR_SINGLE)
         {
-            double *aa;
-            aa = (double*) mem->data;
-            for (i = 0; i < num_elements; ++i) aa[i] *= value;
+            float *aa = (float*) mem->data;
+            for (i = 0; i < num_elements; ++i) aa[i + offset] *= value_f;
         }
-        else if (mem->location == OSKAR_GPU)
+        else if (precision == OSKAR_DOUBLE)
         {
-#ifdef OSKAR_HAVE_CUDA
-            oskar_mem_scale_real_cuda_d((int)num_elements, value,
-                    (double*)(mem->data));
-            oskar_device_check_error(status);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
+            double *aa = (double*) mem->data;
+            for (i = 0; i < num_elements; ++i) aa[i + offset] *= value;
         }
-        else if (mem->location & OSKAR_CL)
-        {
-#ifdef OSKAR_HAVE_OPENCL
-            k = oskar_cl_kernel("mem_scale_double");
-#else
-            *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
-#endif
-        }
-        else
-            *status = OSKAR_ERR_BAD_LOCATION;
+        else *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else
     {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-    }
-
-#ifdef OSKAR_HAVE_OPENCL
-    /* Call OpenCL kernel if required. */
-    if ((mem->location & OSKAR_CL) && !*status)
-    {
-        if (k)
-        {
-            cl_device_type dev_type;
-            cl_int error, gpu, n;
-            size_t global_size, local_size;
-
-            /* Set kernel arguments. */
-            clGetDeviceInfo(oskar_cl_device_id(),
-                    CL_DEVICE_TYPE, sizeof(cl_device_type), &dev_type, NULL);
-            gpu = dev_type & CL_DEVICE_TYPE_GPU;
-            n = (cl_int) num_elements;
-            error = clSetKernelArg(k, 0, sizeof(cl_int), &n);
-            if (oskar_type_is_double(mem->type))
-            {
-                cl_double v = (cl_double) value;
-                error |= clSetKernelArg(k, 1, sizeof(cl_double), &v);
-            }
-            else
-            {
-                cl_float v = (cl_float) value;
-                error |= clSetKernelArg(k, 1, sizeof(cl_float), &v);
-            }
-            error |= clSetKernelArg(k, 2, sizeof(cl_mem),
-                    oskar_mem_cl_buffer(mem, status));
-            if (*status) return;
-            if (error != CL_SUCCESS)
-            {
-                *status = OSKAR_ERR_INVALID_ARGUMENT;
-                return;
-            }
-
-            /* Launch kernel on current command queue. */
-            local_size = gpu ? 256 : 128;
-            global_size = ((num_elements + local_size - 1) / local_size) *
-                    local_size;
-            error = clEnqueueNDRangeKernel(oskar_cl_command_queue(), k, 1, NULL,
-                        &global_size, &local_size, 0, NULL, NULL);
-            if (error != CL_SUCCESS)
-            {
-                *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
-                return;
-            }
-        }
+        size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
+        const unsigned int n = (unsigned int) num_elements;
+        const unsigned int off = (unsigned int) offset;
+        const int is_dbl = (precision == OSKAR_DOUBLE);
+        const char* k = 0;
+        if (precision == OSKAR_SINGLE)      k = "mem_scale_float";
+        else if (precision == OSKAR_DOUBLE) k = "mem_scale_double";
         else
         {
-            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
         }
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = oskar_device_global_size(num_elements, local_size[0]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &off},
+                {INT_SZ, &n},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&value : (const void*)&value_f},
+                {PTR_SZ, oskar_mem_buffer(mem)}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
     }
-#endif
 }

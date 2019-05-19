@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,8 +54,14 @@ void oskar_element_free(oskar_Element* data, int* status)
         oskar_splines_free(data->y_h_im[i], status);
         oskar_splines_free(data->scalar_re[i], status);
         oskar_splines_free(data->scalar_im[i], status);
+        oskar_mem_free(data->x_te[i], status);
+        oskar_mem_free(data->x_tm[i], status);
+        oskar_mem_free(data->y_te[i], status);
+        oskar_mem_free(data->y_tm[i], status);
     }
     free(data->freqs_hz);
+    free(data->x_lmax);
+    free(data->y_lmax);
     free(data->filename_x);
     free(data->filename_y);
     free(data->filename_scalar);
@@ -69,6 +75,10 @@ void oskar_element_free(oskar_Element* data, int* status)
     free(data->y_v_im);
     free(data->scalar_re);
     free(data->scalar_im);
+    free(data->x_te);
+    free(data->x_tm);
+    free(data->y_te);
+    free(data->y_tm);
 
     /* Free the structure itself. */
     free(data);

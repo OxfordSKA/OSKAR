@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,6 @@ extern "C" {
  * This top-level function evaluates the beam pattern of a station at the
  * specified positions, given as direction cosines.
  *
- * @param[out] beam_pattern   Output beam pattern data.
  * @param[in] num_points      Number of direction cosines given.
  * @param[in] coord_type      Type of direction cosines
  *                            (OSKAR_RELATIVE_DIRECTIONS or
@@ -63,14 +62,16 @@ extern "C" {
  * @param[in] time_index      Simulation time index.
  * @param[in] frequency_hz    The observing frequency in Hz.
  * @param[in] gast            The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in] offset_out      Output array element offset.
+ * @param[out] beam_pattern   Output beam pattern data.
  * @param[in,out] status      Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
+void oskar_evaluate_station_beam(int num_points,
         int coord_type, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
         double norm_ra_rad, double norm_dec_rad, const oskar_Station* station,
         oskar_StationWork* work, int time_index, double frequency_hz,
-        double gast, int* status);
+        double GAST, int offset_out, oskar_Mem* beam, int* status);
 
 #ifdef __cplusplus
 }

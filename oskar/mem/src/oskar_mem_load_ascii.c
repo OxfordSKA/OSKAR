@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     }
 
     /* Allocate array of handles to data in CPU memory. */
-    mem_handle = calloc(num_mem, sizeof(oskar_Mem*));
+    mem_handle = (oskar_Mem**) calloc(num_mem, sizeof(oskar_Mem*));
     if (!mem_handle)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
@@ -89,7 +89,7 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     va_end(args);
 
     /* Allocate an array to hold numeric data for one row of the file. */
-    row_data = calloc(num_cols_max, sizeof(double));
+    row_data = (double*) calloc(num_cols_max, sizeof(double));
     if (!row_data)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
@@ -148,8 +148,7 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
         va_start(args, status);
         for (i = 0; i < num_mem; ++i)
         {
-            oskar_Mem* mem;
-            mem = va_arg(args, oskar_Mem*);
+            oskar_Mem* mem = va_arg(args, oskar_Mem*);
             if (oskar_mem_location(mem) != OSKAR_CPU)
             {
                 oskar_mem_copy(mem, mem_handle[i], status);
@@ -191,8 +190,7 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
 
         /* Get and store a handle to CPU-accessible memory for the array. */
         {
-            oskar_Mem* mem;
-            mem = va_arg(args, oskar_Mem*);
+            oskar_Mem* mem = va_arg(args, oskar_Mem*);
             mem_handle[i] = mem;
             if (oskar_mem_location(mem) != OSKAR_CPU)
             {
@@ -211,7 +209,8 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
         *num_cols_max += num_cols_needed;
 
         /* Resize array to hold row defaults. */
-        *row_defaults = realloc(*row_defaults, *num_cols_max * sizeof(double));
+        *row_defaults = (double*) realloc(*row_defaults,
+                *num_cols_max * sizeof(double));
         if (!*row_defaults)
         {
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
@@ -221,13 +220,12 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
         /* Make a copy of the default string from the argument list. */
         {
             size_t def_len;
-            const char* def;
-            def = va_arg(args, const char*);
+            const char* def = va_arg(args, const char*);
             def_len = 1 + strlen(def);
             if (buffer_size < def_len)
             {
                 buffer_size = def_len;
-                line = realloc(line, buffer_size);
+                line = (char*) realloc(line, buffer_size);
                 if (!line)
                 {
                     *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;

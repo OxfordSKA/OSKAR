@@ -50,7 +50,7 @@ void oskar_station_resize_element_types(oskar_Station* model,
     if (num_element_types > old_num_element_types)
     {
         /* Enlarge the element array and create new elements. */
-        model->element = realloc(model->element,
+        model->element = (oskar_Element**) realloc(model->element,
                 num_element_types * sizeof(oskar_Element*));
         if (!model->element)
         {
@@ -71,7 +71,7 @@ void oskar_station_resize_element_types(oskar_Station* model,
         {
             oskar_element_free(oskar_station_element(model, i), status);
         }
-        model->element = realloc(model->element,
+        model->element = (oskar_Element**) realloc(model->element,
                 num_element_types * sizeof(oskar_Element*));
     }
 

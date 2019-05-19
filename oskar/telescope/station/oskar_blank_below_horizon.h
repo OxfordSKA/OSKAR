@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,27 +35,10 @@
 
 #include <oskar_global.h>
 #include <mem/oskar_mem.h>
-#include <utility/oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-OSKAR_EXPORT
-void oskar_blank_below_horizon_matrix_f(const int num_sources,
-        const float* restrict mask, float4c* restrict jones);
-
-OSKAR_EXPORT
-void oskar_blank_below_horizon_scalar_f(const int num_sources,
-        const float* restrict mask, float2* restrict jones);
-
-OSKAR_EXPORT
-void oskar_blank_below_horizon_matrix_d(const int num_sources,
-        const double* restrict mask, double4c* restrict jones);
-
-OSKAR_EXPORT
-void oskar_blank_below_horizon_scalar_d(const int num_sources,
-        const double* restrict mask, double2* restrict jones);
 
 /**
  * @brief
@@ -68,14 +51,16 @@ void oskar_blank_below_horizon_scalar_d(const int num_sources,
  * For sources where the mask value is negative, the corresponding element
  * of the Jones data array is set to zero.
  *
+ * @param[in] offset_mask Start offset into mask array.
  * @param[in] num_sources Number of sources in arrays.
  * @param[in] mask        Array of mask values.
+ * @param[in] offset_out  Start offset into data array.
  * @param[in,out] data    Array of Jones matrices or scalars per source.
  * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_blank_below_horizon(int num_sources, const oskar_Mem* mask,
-        oskar_Mem* data, int* status);
+void oskar_blank_below_horizon(int offset_mask, int num_sources,
+        const oskar_Mem* mask, int offset_out, oskar_Mem* data, int* status);
 
 #ifdef __cplusplus
 }

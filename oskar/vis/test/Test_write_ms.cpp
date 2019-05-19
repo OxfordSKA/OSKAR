@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,14 +28,11 @@
 
 #include <gtest/gtest.h>
 
-#include "utility/oskar_dir.h"
-
 #include "convert/oskar_convert_date_time_to_mjd.h"
+#include "utility/oskar_dir.h"
+#include "utility/oskar_get_error_string.h"
 #include "vis/oskar_vis_block.h"
 #include "vis/oskar_vis_header.h"
-#include "telescope/oskar_telescope.h"
-#include "utility/oskar_get_error_string.h"
-#include "math/oskar_cmath.h"
 
 #include <cstdio>
 

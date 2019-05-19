@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,44 +29,39 @@
 #include "oskar_version.h"
 #include "log/private_log.h"
 #include "log/oskar_log.h"
-#include "log/oskar_log_file_exists.h"
-#include "log/oskar_log_system_clock_string.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_log_free(oskar_Log* log)
+void oskar_log_free(void)
 {
-    /* Print closing message. */
-    oskar_log_section(log, 'M', "OSKAR-%s ending at %s.",
-            OSKAR_VERSION_STR, oskar_log_system_clock_string(0));
-
-    /* If log is NULL, there's nothing more to do. */
-    if (!log) return;
-
-    /* Close the file. */
+    oskar_Log* log;
+    char time_str[80];
+    const time_t unix_time = time(NULL);
+    struct tm* timeinfo = localtime(&unix_time);
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
+    oskar_log_section('M', "OSKAR-%s ending at %s.",
+            OSKAR_VERSION_STR, time_str);
+    log = oskar_log_handle();
     if (log->file) fclose(log->file);
-
-    /* If flag is set to delete, then remove the log file. */
-    if (!log->keep_file && log->name)
+    log->file = 0;
+    if (!log->keep_file && log->name && strlen(log->name) > 0)
     {
-        if (oskar_log_file_exists(log->name))
+        FILE* f = fopen(log->name, "r");
+        if (f)
+        {
+            fclose(f);
             remove(log->name);
+        }
     }
-
-    /* Free memory for the log data. */
     free(log->name);
-    free(log->code);
-    free(log->offset);
-    free(log->length);
-    free(log->timestamp);
-
-    /* Free the structure itself. */
-    free(log);
+    log->name = 0;
 }
 
 #ifdef __cplusplus

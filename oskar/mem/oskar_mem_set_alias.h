@@ -42,9 +42,11 @@ extern "C" {
 
 /**
  * @brief
- * Sets data for an aliased pointer.
+ * Deprecated. Sets data for an aliased pointer.
  *
  * @details
+ * @note This function is deprecated.
+ *
  * This function sets the meta-data in a structure to set up a pointer alias
  * to existing memory. The destination structure must not own the memory to
  * which it points, so it must have been created using an

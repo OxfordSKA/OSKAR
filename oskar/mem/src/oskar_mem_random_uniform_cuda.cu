@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mem/oskar_mem_random_uniform_cuda.h"
 #include "math/private_random_helpers.h"
+#include "utility/oskar_cuda_registrar.h"
 #include <cuda_runtime.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 __global__
-void oskar_mem_random_uniform_cudak_f(
-        const int num_elements, float* data,
+void mem_random_uniform_float(
+        const unsigned int num_elements, float* data,
         const unsigned int seed, const unsigned int counter1,
         const unsigned int counter2, const unsigned int counter3)
 {
-    const int i = blockIdx.x * blockDim.x + threadIdx.x;
-    const int i4 = i * 4;
+    const unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+    const unsigned int i4 = i * 4;
     if (i4 >= num_elements) return;
 
     OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
@@ -70,15 +66,16 @@ void oskar_mem_random_uniform_cudak_f(
             data[i4 + 3] = r.w;
     }
 }
+OSKAR_CUDA_KERNEL(mem_random_uniform_float)
 
 __global__
-void oskar_mem_random_uniform_cudak_d(
-        const int num_elements, double* data,
+void mem_random_uniform_double(
+        const unsigned int num_elements, double* data,
         const unsigned int seed, const unsigned int counter1,
         const unsigned int counter2, const unsigned int counter3)
 {
-    const int i = blockIdx.x * blockDim.x + threadIdx.x;
-    const int i4 = i * 4;
+    const unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+    const unsigned int i4 = i * 4;
     if (i4 >= num_elements) return;
 
     OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
@@ -107,27 +104,4 @@ void oskar_mem_random_uniform_cudak_d(
             data[i4 + 3] = r.w;
     }
 }
-
-void oskar_mem_random_uniform_cuda_f(int num_elements,
-        float* d_data, unsigned int seed, unsigned int counter1,
-        unsigned int counter2, unsigned int counter3)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (((num_elements + 3) / 4) + num_threads - 1) / num_threads;
-    oskar_mem_random_uniform_cudak_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_elements, d_data, seed, counter1, counter2, counter3);
-}
-
-void oskar_mem_random_uniform_cuda_d(int num_elements,
-        double* d_data, unsigned int seed, unsigned int counter1,
-        unsigned int counter2, unsigned int counter3)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (((num_elements + 3) / 4) + num_threads - 1) / num_threads;
-    oskar_mem_random_uniform_cudak_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_elements, d_data, seed, counter1, counter2, counter3);
-}
-
-#ifdef __cplusplus
-}
-#endif
+OSKAR_CUDA_KERNEL(mem_random_uniform_double)

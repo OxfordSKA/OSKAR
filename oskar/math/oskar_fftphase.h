@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,38 +39,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * @brief
- * Provide fftshift() behaviour for complex gridded data (single precision).
- *
- * @details
- * Provide fftshift() behaviour for complex gridded data.
- * The data are multiplied by a checker-board pattern to achieve the same
- * result as fftshift(), without actually moving memory around.
- *
- * @param[in] num_x             Grid side length in x.
- * @param[in] num_y             Grid side length in y.
- * @param[in,out] complex_data  Pointer to complex grid.
- */
-OSKAR_EXPORT
-void oskar_fftphase_cf(const int num_x, const int num_y, float* complex_data);
-
-/**
- * @brief
- * Provide fftshift() behaviour for complex gridded data (double precision).
- *
- * @details
- * Provide fftshift() behaviour for complex gridded data.
- * The data are multiplied by a checker-board pattern to achieve the same
- * result as fftshift(), without actually moving memory around.
- *
- * @param[in] num_x             Grid side length in x.
- * @param[in] num_y             Grid side length in y.
- * @param[in,out] complex_data  Pointer to complex grid.
- */
-OSKAR_EXPORT
-void oskar_fftphase_cd(const int num_x, const int num_y, double* complex_data);
 
 /**
  * @brief

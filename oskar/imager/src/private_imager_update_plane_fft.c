@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,15 +41,12 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* weight, oskar_Mem* plane, double* plane_norm,
         size_t* num_skipped, int* status)
 {
-    int grid_size;
-    size_t num_cells;
     if (*status) return;
-    grid_size = oskar_imager_plane_size(h);
-    num_cells = grid_size * grid_size;
+    const int grid_size = oskar_imager_plane_size(h);
+    const size_t num_cells = grid_size * grid_size;
     if (oskar_mem_precision(plane) != h->imager_prec)
         *status = OSKAR_ERR_TYPE_MISMATCH;
-    if (oskar_mem_length(plane) < num_cells)
-        oskar_mem_realloc(plane, num_cells, status);
+    oskar_mem_ensure(plane, num_cells, status);
     if (*status) return;
     if (h->imager_prec == OSKAR_DOUBLE)
         oskar_grid_simple_d(h->support, h->oversample,

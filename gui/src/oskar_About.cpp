@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,7 +122,7 @@ About::About(QString app_name, QString app_version, QWidget *parent)
         paragraph.setBottomMargin(10);
         QTextCursor cursor(licenseText);
         cursor.setBlockFormat(paragraph);
-        cursor.insertText("Copyright (c) 2011-2017, The University of Oxford. "
+        cursor.insertText("Copyright (c) 2011-2019, The University of Oxford. "
                 "\nAll rights reserved.");
         cursor.insertBlock();
         cursor.insertText("Redistribution and use in source and binary forms, "

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ extern "C" {
 
 OSKAR_EXPORT
 void oskar_prefix_sum(size_t num_elements, const oskar_Mem* in,
-        oskar_Mem* out, int init_val, int exclusive, int* status);
+        oskar_Mem* out, int* status);
 
 #ifdef __cplusplus
 }

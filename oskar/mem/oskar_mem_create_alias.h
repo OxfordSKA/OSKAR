@@ -42,10 +42,12 @@ extern "C" {
 
 /**
  * @brief
- * Creates an aliased pointer from an existing one.
+ * Deprecated. Creates an aliased pointer from an existing one.
  *
  * @details
- * This function creates a handle to an OSKAR memory block that contains an
+ * @note This function is deprecated.
+ *
+ * This function creates a handle to a memory block that contains an
  * aliased pointer to (part of) an existing memory block. The structure does
  * not own the memory to which it points.
  *
@@ -60,7 +62,7 @@ extern "C" {
  * @param[in] num_elements  Number of elements in the returned array.
  * @param[in,out]  status   Status return code.
  *
- * @return A handle to the aliased memory block structure.
+ * @return A handle to the aliased memory.
  */
 OSKAR_EXPORT
 oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,

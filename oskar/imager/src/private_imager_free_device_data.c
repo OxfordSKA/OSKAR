@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 #include "imager/private_imager.h"
 #include "imager/private_imager_free_device_data.h"
-#include "utility/oskar_device_utils.h"
+#include "utility/oskar_device.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -39,23 +39,19 @@ extern "C" {
 
 void oskar_imager_free_device_data(oskar_Imager* h, int* status)
 {
-    int i;
+    int i, j;
     for (i = 0; i < h->num_devices; ++i)
     {
         DeviceData* d = &(h->d[i]);
         if (!d) continue;
         if (i < h->num_gpus)
-            oskar_device_set(h->gpu_ids[i], status);
-        oskar_mem_free(d->uu, status);
-        oskar_mem_free(d->vv, status);
-        oskar_mem_free(d->ww, status);
-        oskar_mem_free(d->amp, status);
-        oskar_mem_free(d->weight, status);
-        oskar_mem_free(d->l, status);
-        oskar_mem_free(d->m, status);
-        oskar_mem_free(d->n, status);
-        oskar_mem_free(d->block_dev, status);
-        oskar_mem_free(d->block_cpu, status);
+            oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
+        oskar_mem_free(d->w_support, status);
+        oskar_mem_free(d->w_kernels_compact, status);
+        oskar_mem_free(d->w_kernel_start, status);
+        for (j = 0; j < d->num_planes; ++j)
+            oskar_mem_free(d->planes[j], status);
+        free(d->planes);
         memset(d, 0, sizeof(DeviceData));
     }
 }

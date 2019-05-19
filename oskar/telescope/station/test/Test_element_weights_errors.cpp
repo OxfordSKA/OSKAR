@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,11 +66,13 @@ TEST(element_weights_errors, test_evaluate)
             num_elements, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    oskar_mem_set_value_real(d_gain, element_gain, 0, 0, &error);
-    oskar_mem_set_value_real(d_gain_error, element_gain_error, 0, 0, &error);
-    oskar_mem_set_value_real(d_phase, element_phase, 0, 0, &error);
-    oskar_mem_set_value_real(d_phase_error, element_phase_error, 0, 0, &error);
-    oskar_mem_set_value_real(d_errors, 0.0, 0, 0, &error);
+    oskar_mem_set_value_real(d_gain, element_gain, 0, num_elements, &error);
+    oskar_mem_set_value_real(d_phase, element_phase, 0, num_elements, &error);
+    oskar_mem_set_value_real(d_errors, 0.0, 0, num_elements, &error);
+    oskar_mem_set_value_real(d_gain_error, element_gain_error,
+            0, num_elements, &error);
+    oskar_mem_set_value_real(d_phase_error, element_phase_error,
+            0, num_elements, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Evaluate weights errors.
@@ -82,7 +84,7 @@ TEST(element_weights_errors, test_evaluate)
     // Write memory to file for inspection.
     const char* fname = "temp_test_element_errors.dat";
     FILE* file = fopen(fname, "w");
-    oskar_mem_save_ascii(file, 5, num_elements, &error,
+    oskar_mem_save_ascii(file, 5, 0, num_elements, &error,
             d_gain, d_gain_error, d_phase, d_phase_error, d_errors);
     fclose(file);
     remove(fname);
@@ -130,10 +132,12 @@ TEST(element_weights_errors, test_apply)
             num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    oskar_mem_set_value_real(d_gain, gain, 0, 0, &status);
-    oskar_mem_set_value_real(d_gain_error, gain_error, 0, 0, &status);
-    oskar_mem_set_value_real(d_phase, phase, 0, 0, &status);
-    oskar_mem_set_value_real(d_phase_error, phase_error, 0, 0, &status);
+    oskar_mem_set_value_real(d_gain, gain, 0, num_elements, &status);
+    oskar_mem_set_value_real(d_phase, phase, 0, num_elements, &status);
+    oskar_mem_set_value_real(d_gain_error, gain_error,
+            0, num_elements, &status);
+    oskar_mem_set_value_real(d_phase_error, phase_error,
+            0, num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     double2* h_weights_ = oskar_mem_double2(h_weights, &status);
@@ -148,13 +152,14 @@ TEST(element_weights_errors, test_apply)
             d_gain, d_gain_error, d_phase, d_phase_error,
             0, 0, 0, d_errors, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_multiply(NULL, d_weights, d_errors, num_elements, &status);
+    oskar_mem_multiply(d_weights, d_weights, d_errors,
+            0, 0, 0, num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Write memory to file for inspection.
     const char* fname = "temp_test_weights.dat";
     FILE* file = fopen(fname, "w");
-    oskar_mem_save_ascii(file, 7, num_elements, &status,
+    oskar_mem_save_ascii(file, 7, 0, num_elements, &status,
             d_gain, d_gain_error, d_phase, d_phase_error, d_errors,
             h_weights, d_weights);
     fclose(file);
@@ -195,10 +200,12 @@ TEST(element_weights_errors, test_reinit)
             num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    oskar_mem_set_value_real(d_gain, gain, 0, 0, &status);
-    oskar_mem_set_value_real(d_gain_error, gain_error, 0, 0, &status);
-    oskar_mem_set_value_real(d_phase, phase, 0, 0, &status);
-    oskar_mem_set_value_real(d_phase_error, phase_error, 0, 0, &status);
+    oskar_mem_set_value_real(d_gain, gain, 0, num_elements, &status);
+    oskar_mem_set_value_real(d_phase, phase, 0, num_elements, &status);
+    oskar_mem_set_value_real(d_gain_error, gain_error,
+            0, num_elements, &status);
+    oskar_mem_set_value_real(d_phase_error, phase_error,
+            0, num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     int num_channels = 2;

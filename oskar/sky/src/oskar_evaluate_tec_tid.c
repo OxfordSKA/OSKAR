@@ -51,7 +51,7 @@ void oskar_evaluate_tec_tid(oskar_Mem* tec, int num_directions,
     /* TODO check types, dimensions etc of memory */
     type = oskar_mem_type(tec);
 
-    oskar_mem_set_value_real(tec, 0.0, 0, 0, &status);
+    oskar_mem_set_value_real(tec, 0.0, 0, oskar_mem_length(tec), &status);
 
     /* Loop over TIDs */
     for (i = 0; i < TID->num_components; ++i)

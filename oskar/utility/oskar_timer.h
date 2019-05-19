@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,9 @@ typedef struct oskar_Timer oskar_Timer;
 
 enum OSKAR_TIMER_TYPE
 {
-    OSKAR_TIMER_NATIVE,
-    OSKAR_TIMER_CUDA
+    OSKAR_TIMER_NATIVE = 0,
+    OSKAR_TIMER_CUDA = 1,
+    OSKAR_TIMER_CL = 2
 };
 
 /**
@@ -59,11 +60,12 @@ enum OSKAR_TIMER_TYPE
  *
  * The \p type parameter may take the values:
  *
- * - OSKAR_TIMER_CUDA
- * - OSKAR_TIMER_NATIVE
+ * - OSKAR_TIMER_NATIVE (0)
+ * - OSKAR_TIMER_CUDA (1)
+ * - OSKAR_TIMER_CL (2)
  *
- * These timers are the ones provided by, respectively, CUDA, OpenMP or the
- * native system.
+ * These timers are used to measure performance of, respectively,
+ * native C code, CUDA, or OpenCL kernels.
  *
  * @param[in,out] timer Pointer to timer.
  * @param[in] type Type of timer to create.
@@ -143,4 +145,4 @@ void oskar_timer_start(oskar_Timer* timer);
 }
 #endif
 
-#endif /* OSKAR_TIMER_H_ */
+#endif /* include guard */

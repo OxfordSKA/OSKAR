@@ -51,8 +51,8 @@ void oskar_station_save_apodisation(const char* filename,
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-    oskar_mem_save_ascii(file, 1, oskar_station_num_elements(station), status,
-            oskar_station_element_weight_const(station));
+    oskar_mem_save_ascii(file, 1, 0, oskar_station_num_elements(station),
+            status, oskar_station_element_weight_const(station));
     fclose(file);
 }
 

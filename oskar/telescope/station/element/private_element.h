@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,28 +29,19 @@
 #ifndef OSKAR_PRIVATE_ELEMENT_H_
 #define OSKAR_PRIVATE_ELEMENT_H_
 
-#include <splines/oskar_splines.h>
 #include <mem/oskar_mem.h>
+#include <splines/oskar_splines.h>
 
 struct oskar_Element
 {
-    int precision;
-    int mem_location;
-
-    int x_element_type;               /* X element base type: dipole or isotropic. */
-    int y_element_type;               /* Y element base type: dipole or isotropic. */
-    int x_taper_type;                 /* X element taper function type. */
-    int y_taper_type;                 /* Y element taper function type. */
-    int x_dipole_length_units;        /* X element dipole length units (metres or wavelengths). */
-    int y_dipole_length_units;        /* Y element dipole length units (metres or wavelengths). */
-    double x_dipole_length;           /* X element dipole length. */
-    double y_dipole_length;           /* Y element dipole length. */
-    double x_taper_cosine_power;      /* X element taper cosine power. */
-    double y_taper_cosine_power;      /* Y element taper cosine power. */
-    double x_taper_gaussian_fwhm_rad; /* X element taper Gaussian FWHM, in radians. */
-    double y_taper_gaussian_fwhm_rad; /* Y element taper Gaussian FWHM, in radians. */
-    double x_taper_ref_freq_hz;       /* X element taper reference frequency, in Hz. */
-    double y_taper_ref_freq_hz;       /* Y element taper reference frequency, in Hz. */
+    int precision, mem_location;
+    int x_element_type,               y_element_type; /* Dipole or isotropic. */
+    int x_taper_type,                 y_taper_type;
+    int x_dipole_length_units,        y_dipole_length_units;
+    double x_dipole_length,           y_dipole_length;
+    double x_taper_cosine_power,      y_taper_cosine_power;
+    double x_taper_gaussian_fwhm_rad, y_taper_gaussian_fwhm_rad;
+    double x_taper_ref_freq_hz,       y_taper_ref_freq_hz;
 
     /* OLD: */
     int element_type; /* Dipole or isotropic. */
@@ -66,19 +57,18 @@ struct oskar_Element
     double max_radius_rad;
     int num_freq;
     double* freqs_hz; /* Array of frequencies in Hz. */
-    oskar_Mem** filename_x;
-    oskar_Mem** filename_y;
-    oskar_Mem** filename_scalar;
-    oskar_Splines** x_h_re;
-    oskar_Splines** x_h_im;
-    oskar_Splines** x_v_re;
-    oskar_Splines** x_v_im;
-    oskar_Splines** y_h_re;
-    oskar_Splines** y_h_im;
-    oskar_Splines** y_v_re;
-    oskar_Splines** y_v_im;
-    oskar_Splines** scalar_re;
-    oskar_Splines** scalar_im;
+    oskar_Mem **filename_x, **filename_y, **filename_scalar;
+
+    /* Spline data. */
+    oskar_Splines **x_h_re, **x_h_im;
+    oskar_Splines **x_v_re, **x_v_im;
+    oskar_Splines **y_h_re, **y_h_im;
+    oskar_Splines **y_v_re, **y_v_im;
+    oskar_Splines **scalar_re, **scalar_im;
+
+    /* Spherical wave data. */
+    int *x_lmax, *y_lmax;
+    oskar_Mem **x_te, **x_tm, **y_te, **y_tm;
 };
 
 #ifndef OSKAR_ELEMENT_TYPEDEF_
