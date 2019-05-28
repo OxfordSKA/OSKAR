@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <Python.h>
 
 #include <oskar.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 /*
  * NOTE: Don't use std::string here!
@@ -118,7 +119,8 @@ static PyObject* iterate_dict(PyObject* dict,
         if (PyString_Check(value))
 #endif
         {
-            char *k, *v, *parent = 0, *full_key = 0, *key_ptr = 0;
+            const char *k, *v, *parent = 0, *key_ptr = 0;
+            char *full_key = 0;
 #if PY_MAJOR_VERSION >= 3
             k = PyUnicode_AsUTF8(key);
             v = PyUnicode_AsUTF8(value);
@@ -136,7 +138,7 @@ static PyObject* iterate_dict(PyObject* dict,
             {
                 full_key = (char*) calloc(2 + strlen(parent) + strlen(k), 1);
                 key_ptr = full_key;
-                sprintf(key_ptr, "%s%c%s", parent, h->separator(), k);
+                sprintf(full_key, "%s%c%s", parent, h->separator(), k);
             }
             if (!h->set_value(key_ptr, v))
             {
