@@ -141,7 +141,7 @@ static void set_up_device_data(oskar_Interferometer* h, int* status);
 static void set_up_vis_header(oskar_Interferometer* h, int* status);
 static void record_timing(oskar_Interferometer* h);
 static unsigned int disp_width(unsigned int value);
-static void system_mem_log();
+static void system_mem_log(void);
 
 
 /* Public methods. */
@@ -1296,7 +1296,7 @@ static unsigned int disp_width(unsigned int v)
 }
 
 
-static void system_mem_log()
+static void system_mem_log(void)
 {
     size_t mem_total, mem_free, mem_used, gigabyte = 1024 * 1024 * 1024;
     size_t mem_resident;

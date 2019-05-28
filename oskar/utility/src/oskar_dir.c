@@ -29,6 +29,7 @@
 #include "utility/oskar_dir.h"
 
 #ifndef OSKAR_OS_WIN
+#define _BSD_SOURCE
 #include <dirent.h>
 #include <errno.h>
 #include <limits.h>
