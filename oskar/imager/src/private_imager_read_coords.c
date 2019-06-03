@@ -147,7 +147,7 @@ void oskar_imager_read_coords_ms(oskar_Imager* h, const char* filename,
     (void) num_files;
     (void) percent_done;
     (void) percent_next;
-    oskar_log_error(h->log, "OSKAR was compiled without Measurement Set support.");
+    oskar_log_error("OSKAR was compiled without Measurement Set support.");
     *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 #endif
 }

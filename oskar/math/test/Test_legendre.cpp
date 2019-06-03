@@ -35,7 +35,7 @@
 
 TEST(legendre, test)
 {
-    float x = 0.2;
+    float x = 0.2f;
     float y = sqrt((1 - x) * (1 + x));
     int l_max = 5;
     for (int l = 0; l <= l_max; ++l)

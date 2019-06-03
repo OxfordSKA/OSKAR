@@ -145,7 +145,7 @@ int main(int argc, char** argv)
 // No Measurement Set support.
 int main(void)
 {
-    oskar_log_error(0, "OSKAR was not compiled with Measurement Set support.");
+    oskar_log_error("OSKAR was compiled without Measurement Set support.");
     return EXIT_FAILURE;
 }
 #endif
