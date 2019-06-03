@@ -543,6 +543,7 @@ static std::string find_replace(std::string subject,
 
 static void oskar_device_set_up_cl(oskar_Device* device)
 {
+    int error = 0;
     if (!device->init)
         oskar_device_get_info_cl(device);
     if (!device->kern)
@@ -598,7 +599,6 @@ static void oskar_device_set_up_cl(oskar_Device* device)
 
 #ifdef OSKAR_HAVE_OPENCL
     // Create OpenCL context and program.
-    cl_int error = CL_SUCCESS;
     const char* func = 0;
     cl_context_properties props[] =
     {
