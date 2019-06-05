@@ -99,7 +99,7 @@ struct oskar_Interferometer
     int num_channels, num_time_steps;
     int max_sources_per_chunk, max_times_per_block;
     int apply_horizon_clip, force_polarised_ms, zero_failed_gaussians;
-    int coords_only;
+    int coords_only, ignore_w_components;
     double freq_start_hz, freq_inc_hz, time_start_mjd_utc, time_inc_sec;
     double source_min_jy, source_max_jy;
     char correlation_type, *vis_name, *ms_name, *settings_path;
@@ -279,7 +279,8 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
                 oskar_vis_block_num_times(b0),
                 oskar_vis_header_time_start_mjd_utc(h->header),
                 oskar_vis_header_time_inc_sec(h->header) / 86400.0,
-                oskar_vis_block_start_time_index(b0), h->t_u, h->t_v, h->t_w,
+                oskar_vis_block_start_time_index(b0), h->ignore_w_components,
+                h->t_u, h->t_v, h->t_w,
                 oskar_vis_block_baseline_uu_metres(b0),
                 oskar_vis_block_baseline_vv_metres(b0),
                 oskar_vis_block_baseline_ww_metres(b0), status);
@@ -757,6 +758,13 @@ void oskar_interferometer_set_horizon_clip(oskar_Interferometer* h, int value)
 }
 
 
+void oskar_interferometer_set_ignore_w_components(oskar_Interferometer* h,
+        int value)
+{
+    h->ignore_w_components = value;
+}
+
+
 void oskar_interferometer_set_max_sources_per_chunk(oskar_Interferometer* h,
         int value)
 {
@@ -974,7 +982,7 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     y = oskar_telescope_station_true_y_offset_ecef_metres_const(d->tel);
     z = oskar_telescope_station_true_z_offset_ecef_metres_const(d->tel);
     oskar_convert_ecef_to_station_uvw(num_stations, x, y, z, ra0, dec0, gast,
-            0, d->u, d->v, d->w, status);
+            0, 0, d->u, d->v, d->w, status);
 
     /* Set dimensions of Jones matrices. */
     if (d->R)
@@ -1024,7 +1032,8 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     oskar_evaluate_jones_K(d->K, num_src, oskar_sky_l_const(sky),
             oskar_sky_m_const(sky), oskar_sky_n_const(sky), d->u, d->v, d->w,
             frequency, oskar_sky_I_const(sky),
-            h->source_min_jy, h->source_max_jy, status);
+            h->source_min_jy, h->source_max_jy, h->ignore_w_components,
+            status);
     oskar_timer_pause(d->tmr_K);
 
     /* Join Jones K with Jones Z*E. */

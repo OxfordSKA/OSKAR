@@ -1,4 +1,4 @@
-2018-XX-YY  OSKAR-2.7.1
+2019-XX-YY  OSKAR-2.7.4
 
     * Fixed crash when manually specifying which CUDA device to use.
 
@@ -9,6 +9,8 @@
     * Refuse to load FITS images with an unknown pixel size.
 
     * Fixed compilation on Ubuntu 18.04.
+
+    * Added option to ignore baseline W-components.
 
 2017-10-31  OSKAR-2.7.0
 

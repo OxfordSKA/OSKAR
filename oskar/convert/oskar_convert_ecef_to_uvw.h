@@ -61,6 +61,7 @@ extern "C" {
  * @param[in]  time_ref_mjd_utc Start time of the observation.
  * @param[in]  time_inc_days    Time interval, in days.
  * @param[in]  start_time_index Time index for the start of the block.
+ * @param[in]  ignore_w_components If true, set all output w coordinates to 0.
  * @param[out] u                Output station u coordinates.
  * @param[out] v                Output station v coordinates.
  * @param[out] w                Output station w coordinates.
@@ -74,7 +75,7 @@ void oskar_convert_ecef_to_uvw(int num_stations,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         double ra0_rad, double dec0_rad, int num_times,
         double time_ref_mjd_utc, double time_inc_days, int start_time_index,
-        oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
+        int ignore_w_components, oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
         oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, int* status);
 
 #ifdef __cplusplus

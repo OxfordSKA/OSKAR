@@ -16,6 +16,7 @@
         GLOBAL_IN(FP,   source_filter),\
         const FP        source_filter_min,\
         const FP        source_filter_max,\
+        const int       ignore_w_components,\
         GLOBAL_OUT(FP2, jones)\
 
 #define OSKAR_JONES_K_GPU(NAME, FP, FP2) KERNEL(NAME) (\
@@ -43,7 +44,7 @@
         FP re, im, phase;\
         phase  = u_[la] * l_[ls];\
         phase += v_[la] * m_[ls];\
-        phase += w_[la] * n_[ls];\
+        if (!ignore_w_components) phase += w_[la] * n_[ls];\
         SINCOS(phase, im, re);\
         weight.x = re; weight.y = im;\
     }\
@@ -61,8 +62,9 @@ OSKAR_REGISTER_KERNEL(NAME)
     if (source_filter[s] > source_filter_min &&\
                 source_filter[s] <= source_filter_max) {\
         FP re, im, phase;\
-        phase = wavenumber * (u[a] * l[s] +\
-                v[a] * m[s] + w[a] * (n[s] - (FP)1));\
+        phase = u[a] * l[s] + v[a] * m[s];\
+        if (!ignore_w_components) phase += w[a] * (n[s] - (FP)1);\
+        phase *= wavenumber;\
         SINCOS(phase, im, re);\
         weight.x = re; weight.y = im;\
     }\

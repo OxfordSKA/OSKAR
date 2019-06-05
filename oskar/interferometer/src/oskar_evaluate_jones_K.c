@@ -42,7 +42,8 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
         const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
         const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
         double frequency_hz, const oskar_Mem* source_filter,
-        double source_filter_min, double source_filter_max, int* status)
+        double source_filter_min, double source_filter_max,
+        int ignore_w_components, int* status)
 {
     if (*status) return;
     const int type = oskar_jones_type(K);
@@ -86,6 +87,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
                     oskar_mem_float_const(w, status), wavenumber_f,
                     oskar_mem_float_const(source_filter, status),
                     source_filter_min_f, source_filter_max_f,
+                    ignore_w_components,
                     oskar_jones_float2(K, status));
         else if (type == OSKAR_DOUBLE_COMPLEX)
             evaluate_jones_K_double(
@@ -99,6 +101,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
                     oskar_mem_double_const(w, status), wavenumber,
                     oskar_mem_double_const(source_filter, status),
                     source_filter_min, source_filter_max,
+                    ignore_w_components,
                     oskar_jones_double2(K, status));
         else
         {
@@ -148,6 +151,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
                 {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
                         (const void*)&source_filter_max :
                         (const void*)&source_filter_max_f},
+                {INT_SZ, &ignore_w_components},
                 {PTR_SZ, oskar_mem_buffer(oskar_jones_mem(K))}
         };
         oskar_device_launch_kernel(k, location, 2, local_size, global_size,

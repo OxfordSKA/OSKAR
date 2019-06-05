@@ -107,6 +107,8 @@ oskar_Interferometer* oskar_settings_to_interferometer(oskar::SettingsTree* s,
             s->to_string("ms_filename", status));
     oskar_interferometer_set_force_polarised_ms(h,
             s->to_int("force_polarised_ms", status));
+    oskar_interferometer_set_ignore_w_components(h,
+            s->to_int("ignore_w_components", status));
     s->end_group();
 
     // Return handle to interferometer simulator.

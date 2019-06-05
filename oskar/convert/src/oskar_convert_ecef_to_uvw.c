@@ -39,7 +39,7 @@ void oskar_convert_ecef_to_uvw(int num_stations,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         double ra0_rad, double dec0_rad, int num_times,
         double time_ref_mjd_utc, double time_inc_days, int start_time_index,
-        oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
+        int ignore_w_components, oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
         oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, int* status)
 {
     int i;
@@ -60,7 +60,8 @@ void oskar_convert_ecef_to_uvw(int num_stations,
                 time_inc_days * ((i + 0.5) + start_time_index);
         const double gast = oskar_convert_mjd_to_gast_fast(t_dump);
         oskar_convert_ecef_to_station_uvw(num_stations, x, y, z,
-                ra0_rad, dec0_rad, gast, i * num_stations, u, v, w, status);
+                ra0_rad, dec0_rad, gast, ignore_w_components,
+                i * num_stations, u, v, w, status);
         if (uu && vv && ww)
             oskar_convert_station_uvw_to_baseline_uvw(num_stations,
                     i * num_stations, u, v, w,

@@ -84,4 +84,11 @@
             polarisation dimension in the the Measurement Set will be
             determined by the simulation mode.</desc>
     </s>
+    <s k="ignore_w_components">
+        <label>Ignore W-components</label>
+        <type name="Bool" default="false"/>
+        <desc>If enabled, baseline W-coordinate component values will be set
+            to 0. <b>This will disable W-smearing.
+            Use only if you know what you're doing!</b></desc>
+    </s>
 </s>

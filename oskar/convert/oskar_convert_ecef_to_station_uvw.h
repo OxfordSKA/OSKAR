@@ -56,6 +56,7 @@ extern "C" {
  * @param[in]  ra0_rad      The Right Ascension of the phase centre, in radians.
  * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
  * @param[in]  gast         The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in]  ignore_w_components If true, set all output w coordinates to 0.
  * @param[in]  offset_out   Start offset into output arrays.
  * @param[out] u            Output station u coordinates.
  * @param[out] v            Output station v coordinates.
@@ -65,8 +66,8 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_convert_ecef_to_station_uvw(int num_stations,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double ra0_rad, double dec0_rad, double gast, int offset_out,
-        oskar_Mem* u, oskar_Mem* v, oskar_Mem* w, int* status);
+        double ra0_rad, double dec0_rad, double gast, int ignore_w_components,
+        int offset_out, oskar_Mem* u, oskar_Mem* v, oskar_Mem* w, int* status);
 
 #ifdef __cplusplus
 }

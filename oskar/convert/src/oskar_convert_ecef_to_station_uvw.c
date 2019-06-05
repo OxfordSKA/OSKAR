@@ -40,8 +40,8 @@ OSKAR_CONVERT_ECEF_TO_STATION_UVW(convert_ecef_to_station_uvw_double, double)
 
 void oskar_convert_ecef_to_station_uvw(int num_stations,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double ra0_rad, double dec0_rad, double gast, int offset_out,
-        oskar_Mem* u, oskar_Mem* v, oskar_Mem* w, int* status)
+        double ra0_rad, double dec0_rad, double gast, int ignore_w_components,
+        int offset_out, oskar_Mem* u, oskar_Mem* v, oskar_Mem* w, int* status)
 {
     if (*status) return;
     const int type = oskar_mem_type(x);
@@ -78,7 +78,8 @@ void oskar_convert_ecef_to_station_uvw(int num_stations,
                     oskar_mem_float_const(x, status),
                     oskar_mem_float_const(y, status),
                     oskar_mem_float_const(z, status),
-                    sin_ha0_f, cos_ha0_f, sin_dec0_f, cos_dec0_f, offset_out,
+                    sin_ha0_f, cos_ha0_f, sin_dec0_f, cos_dec0_f,
+                    ignore_w_components, offset_out,
                     oskar_mem_float(u, status),
                     oskar_mem_float(v, status),
                     oskar_mem_float(w, status));
@@ -87,7 +88,8 @@ void oskar_convert_ecef_to_station_uvw(int num_stations,
                     oskar_mem_double_const(x, status),
                     oskar_mem_double_const(y, status),
                     oskar_mem_double_const(z, status),
-                    sin_ha0, cos_ha0, sin_dec0, cos_dec0, offset_out,
+                    sin_ha0, cos_ha0, sin_dec0, cos_dec0,
+                    ignore_w_components, offset_out,
                     oskar_mem_double(u, status),
                     oskar_mem_double(v, status),
                     oskar_mem_double(w, status));
@@ -124,6 +126,7 @@ void oskar_convert_ecef_to_station_uvw(int num_stations,
                         (const void*)&sin_dec0 : (const void*)&sin_dec0_f},
                 {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
                         (const void*)&cos_dec0 : (const void*)&cos_dec0_f},
+                {INT_SZ, &ignore_w_components},
                 {INT_SZ, &offset_out},
                 {PTR_SZ, oskar_mem_buffer(u)},
                 {PTR_SZ, oskar_mem_buffer(v)},

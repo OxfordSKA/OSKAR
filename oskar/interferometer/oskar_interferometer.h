@@ -110,8 +110,12 @@ OSKAR_EXPORT
 void oskar_interferometer_set_horizon_clip(oskar_Interferometer* h, int value);
 
 OSKAR_EXPORT
+void oskar_interferometer_set_ignore_w_components(oskar_Interferometer* h,
+        int value);
+
+OSKAR_EXPORT
 void oskar_interferometer_set_max_sources_per_chunk(oskar_Interferometer* h,
-int value);
+        int value);
 
 OSKAR_EXPORT
 void oskar_interferometer_set_max_times_per_block(oskar_Interferometer* h,

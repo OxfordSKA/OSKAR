@@ -79,14 +79,14 @@ static void run_test(int type, double tol)
     oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
     oskar_timer_start(tmr);
     oskar_evaluate_jones_K(K, num_sources, l, m, n, u, v, w,
-            freq_hz, I, I_min, I_max, &status);
+            freq_hz, I, I_min, I_max, 0, &status);
     printf("Jones K (CPU): %.3f sec\n", oskar_timer_elapsed(tmr));
 
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(tmr);
     for (int i = 0; i < n_tries; ++i)
         oskar_evaluate_jones_K(K_g, num_sources, l_g, m_g, n_g, u_g, v_g, w_g,
-                freq_hz, I_g, I_min, I_max, &status);
+                freq_hz, I_g, I_min, I_max, 0, &status);
     printf("Jones K (device): %.3f sec\n", oskar_timer_elapsed(tmr) / n_tries);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 

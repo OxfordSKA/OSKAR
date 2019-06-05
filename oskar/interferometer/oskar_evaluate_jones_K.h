@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,70 +43,6 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates the interferometer phase (K) Jones term (single precision).
- *
- * @details
- * This function constructs a set of Jones matrices that correspond to the
- * interferometer phase offset for each source and station, relative to the
- * array centre.
- *
- * The output set of Jones matrices (K) are scalar complex values.
- *
- * @param[out] jones             Output set of Jones matrices.
- * @param[in]  num_sources       Number of sources.
- * @param[in]  l                 Source l-direction cosines.
- * @param[in]  m                 Source m-direction cosines.
- * @param[in]  n                 Source n-direction cosines.
- * @param[in]  num_stations      Number of stations.
- * @param[in]  u                 Station u coordinates, in metres.
- * @param[in]  v                 Station v coordinates, in metres.
- * @param[in]  w                 Station w coordinates, in metres.
- * @param[in]  wavenumber        Wavenumber (2 pi / wavelength).
- * @param[in]  source_filter     Per-source values used for filtering.
- * @param[in]  source_filter_min Minimum allowed filter value (exclusive).
- * @param[in]  source_filter_max Maximum allowed filter value (inclusive).
- */
-OSKAR_EXPORT
-void oskar_evaluate_jones_K_f(float2* jones, int num_sources, const float* l,
-        const float* m, const float* n, int num_stations,
-        const float* u, const float* v, const float* w, float wavenumber,
-        const float* source_filter, float source_filter_min,
-        float source_filter_max);
-
-/**
- * @brief
- * Evaluates the interferometer phase (K) Jones term (double precision).
- *
- * @details
- * This function constructs a set of Jones matrices that correspond to the
- * interferometer phase offset for each source and station, relative to the
- * array centre.
- *
- * The output set of Jones matrices (K) are scalar complex values.
- *
- * @param[out] jones             Output set of Jones matrices.
- * @param[in]  num_sources       Number of sources.
- * @param[in]  l                 Source l-direction cosines.
- * @param[in]  m                 Source m-direction cosines.
- * @param[in]  n                 Source n-direction cosines.
- * @param[in]  num_stations      Number of stations.
- * @param[in]  u                 Station u coordinates, in metres.
- * @param[in]  v                 Station v coordinates, in metres.
- * @param[in]  w                 Station w coordinates, in metres.
- * @param[in]  wavenumber        Wavenumber (2 pi / wavelength).
- * @param[in]  source_filter     Per-source values used for filtering.
- * @param[in]  source_filter_min Minimum allowed filter value (exclusive).
- * @param[in]  source_filter_max Maximum allowed filter value (inclusive).
- */
-OSKAR_EXPORT
-void oskar_evaluate_jones_K_d(double2* jones, int num_sources, const double* l,
-        const double* m, const double* n, int num_stations,
-        const double* u, const double* v, const double* w, double wavenumber,
-        const double* source_filter, double source_filter_min,
-        double source_filter_max);
-
-/**
- * @brief
  * Evaluates the interferometer phase (K) Jones term.
  *
  * @details
@@ -129,6 +65,7 @@ void oskar_evaluate_jones_K_d(double2* jones, int num_sources, const double* l,
  * @param[in]  source_filter     Per-source values used for filtering.
  * @param[in]  source_filter_min Minimum allowed filter value (exclusive).
  * @param[in]  source_filter_max Maximum allowed filter value (inclusive).
+ * @param[in]  ignore_w_components If set, ignore station w coordinate values.
  * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
@@ -136,10 +73,11 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
         const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
         const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
         double frequency_hz, const oskar_Mem* source_filter,
-        double source_filter_min, double source_filter_max, int* status);
+        double source_filter_min, double source_filter_max,
+        int ignore_w_components, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_JONES_K_H_ */
+#endif /* include guard */
