@@ -813,8 +813,8 @@ void oskar_interferometer_set_observation_time(oskar_Interferometer* h,
 void oskar_interferometer_set_settings_path(oskar_Interferometer* h,
         const char* filename)
 {
-    int len;
-    len = (int) strlen(filename);
+    if (!filename) return;
+    const int len = (int) strlen(filename);
     if (len == 0) return;
     free(h->settings_path);
     h->settings_path = (char*) calloc(1 + len, 1);
