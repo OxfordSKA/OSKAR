@@ -258,8 +258,10 @@ void oskar_device_launch_kernel(const char* name, int location,
             mutex_.unlock();
         }
         for (j = 0; j < num_args; ++j) arg_[j] = const_cast<void*>(arg[j].ptr);
+        mutex_.lock();
         std::map<std::string, const void*>::iterator iter =
                 cuda_kernels_.find(std::string(name));
+        mutex_.unlock();
         if (iter != cuda_kernels_.end())
             *status = (int) cudaLaunchKernel(iter->second,
                     num_blocks, num_threads, arg_, shared_mem, 0);
