@@ -490,9 +490,8 @@ void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
 void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
         int* status)
 {
-    int len = 0;
-    if (*status) return;
-    len = (int) strlen(column);
+    if (*status || !column) return;
+    const int len = (int) strlen(column);
     if (len == 0) { *status = OSKAR_ERR_INVALID_ARGUMENT; return; }
     free(h->ms_column);
     h->ms_column = (char*) calloc(1 + len, 1);

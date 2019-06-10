@@ -214,6 +214,7 @@ void oskar_beam_pattern_set_observation_time(oskar_BeamPattern* h,
 
 void oskar_beam_pattern_set_root_path(oskar_BeamPattern* h, const char* path)
 {
+    if (!path) return;
     h->root_path = (char*) realloc(h->root_path, 1 + strlen(path));
     strcpy(h->root_path, path);
 }
@@ -229,6 +230,7 @@ void oskar_beam_pattern_set_separate_time_and_channel(oskar_BeamPattern* h,
 void oskar_beam_pattern_set_sky_model_file(oskar_BeamPattern* h,
         const char* path)
 {
+    if (!path) return;
     h->sky_model_file = (char*) realloc(h->sky_model_file, 1 + strlen(path));
     strcpy(h->sky_model_file, path);
 }

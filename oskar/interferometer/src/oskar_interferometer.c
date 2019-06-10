@@ -875,8 +875,8 @@ void oskar_interferometer_set_telescope_model(oskar_Interferometer* h,
 void oskar_interferometer_set_output_vis_file(oskar_Interferometer* h,
         const char* filename)
 {
-    int len;
-    len = (int) strlen(filename);
+    if (!filename) return;
+    const int len = (int) strlen(filename);
     free(h->vis_name);
     h->vis_name = 0;
     if (len == 0) return;
@@ -888,8 +888,8 @@ void oskar_interferometer_set_output_vis_file(oskar_Interferometer* h,
 void oskar_interferometer_set_output_measurement_set(oskar_Interferometer* h,
         const char* filename)
 {
-    int len;
-    len = (int) strlen(filename);
+    if (!filename) return;
+    const int len = (int) strlen(filename);
     free(h->ms_name);
     h->ms_name = 0;
     if (len == 0) return;
