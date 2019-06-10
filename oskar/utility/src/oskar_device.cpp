@@ -244,10 +244,11 @@ void oskar_device_launch_kernel(const char* name, int location,
         num_blocks.x  = (unsigned int) (global_size[0] / local_size[0]);
         num_blocks.y  = (unsigned int) (global_size[1] / local_size[1]);
         num_blocks.z  = (unsigned int) (global_size[2] / local_size[2]);
+        for (j = 0; j < num_args; ++j) arg_[j] = const_cast<void*>(arg[j].ptr);
         for (j = 0; j < num_local_args; ++j) shared_mem += arg_size_local[j];
+        mutex_.lock();
         if (cuda_kernels_.empty())
         {
-            mutex_.lock();
             const oskar::CudaKernelRegistrar::List& kernels =
                     oskar::CudaKernelRegistrar::kernels();
             for (int i = 0; i < kernels.size(); ++i)
@@ -255,10 +256,7 @@ void oskar_device_launch_kernel(const char* name, int location,
                 std::string key = std::string(kernels[i].first);
                 cuda_kernels_.insert(make_pair(key, kernels[i].second));
             }
-            mutex_.unlock();
         }
-        for (j = 0; j < num_args; ++j) arg_[j] = const_cast<void*>(arg[j].ptr);
-        mutex_.lock();
         std::map<std::string, const void*>::iterator iter =
                 cuda_kernels_.find(std::string(name));
         mutex_.unlock();
