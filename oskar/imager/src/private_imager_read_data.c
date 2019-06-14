@@ -189,7 +189,6 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
     }
     const int max_times_per_block = oskar_vis_header_max_times_per_block(hdr);
     const int tags_per_block = oskar_vis_header_num_tags_per_block(hdr);
-    const int num_times_tot = oskar_vis_header_num_times_total(hdr);
     const int num_channels_tot = oskar_vis_header_num_channels_total(hdr);
     const int num_stations = oskar_vis_header_num_stations(hdr);
     const int num_baselines = num_stations * (num_stations - 1) / 2;

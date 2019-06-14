@@ -176,7 +176,6 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
     const int coord_prec = oskar_vis_header_coord_precision(hdr);
     const int max_times_per_block = oskar_vis_header_max_times_per_block(hdr);
     const int tags_per_block = oskar_vis_header_num_tags_per_block(hdr);
-    const int num_times_total = oskar_vis_header_num_times_total(hdr);
     const int num_stations = oskar_vis_header_num_stations(hdr);
     const int num_baselines = num_stations * (num_stations - 1) / 2;
     const int num_pols =
