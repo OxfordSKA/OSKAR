@@ -182,14 +182,15 @@ static PyObject* override_element_gains(PyObject* self, PyObject* args)
                 "with code %d (%s).", status, oskar_get_error_string(status));
         return 0;
     }
+    return Py_BuildValue("");
 #else
     (void) h;
     (void) status;
     PyErr_SetString(PyExc_RuntimeError,
             "This function is not available in OSKAR " OSKAR_VERSION_STR ". "
             "Please update to a newer version.");
+    return 0;
 #endif
-    return Py_BuildValue("");
 }
 
 
@@ -210,14 +211,15 @@ static PyObject* override_element_phases(PyObject* self, PyObject* args)
                 "with code %d (%s).", status, oskar_get_error_string(status));
         return 0;
     }
+    return Py_BuildValue("");
 #else
     (void) h;
     (void) status;
     PyErr_SetString(PyExc_RuntimeError,
             "This function is not available in OSKAR " OSKAR_VERSION_STR ". "
             "Please update to a newer version.");
+    return 0;
 #endif
-    return Py_BuildValue("");
 }
 
 

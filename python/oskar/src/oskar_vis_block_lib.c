@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -286,6 +286,38 @@ static PyObject* num_times(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* read_block(PyObject* self, PyObject* args)
+{
+    oskar_VisBlock* h = 0;
+    oskar_VisHeader* hdr = 0;
+    oskar_Binary* b = 0;
+    PyObject *capsule = 0, *header = 0, *binary = 0;
+    int index = 0, status = 0;
+    if (!PyArg_ParseTuple(args, "OOOi", &capsule, &header, &binary, &index))
+        return 0;
+
+    /* Get handles to objects. */
+    if (!(h = (oskar_VisBlock*) get_handle(capsule, name))) return 0;
+    if (!(hdr = (oskar_VisHeader*) get_handle(header, "oskar_VisHeader")))
+        return 0;
+    if (!(b = (oskar_Binary*) get_handle(binary, "oskar_Binary")))
+        return 0;
+
+    /* Read the data. */
+    oskar_vis_block_read(h, hdr, b, index, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_vis_block_read() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
 static PyObject* start_channel_index(PyObject* self, PyObject* args)
 {
     oskar_VisBlock* h = 0;
@@ -333,6 +365,8 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "num_stations()"},
         {"num_times", (PyCFunction)num_times,
                 METH_VARARGS, "num_times()"},
+        {"read_block", (PyCFunction)read_block,
+                METH_VARARGS, "read_block(header, binary_handle, block_index)"},
         {"start_channel_index", (PyCFunction)start_channel_index,
                 METH_VARARGS, "start_channel_index()"},
         {"start_time_index", (PyCFunction)start_time_index,

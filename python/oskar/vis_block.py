@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2016-2017, The University of Oxford
+# Copyright (c) 2016-2019, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -73,7 +73,7 @@ class VisBlock(object):
         """Ensures the C capsule exists."""
         if self._capsule is None:
             raise RuntimeError(
-                "Creation of VisBlock in Python is not yet supported.")
+                "Call oskar.VisBlock.create_from_header() to create the block.")
 
     def capsule_get(self):
         """Returns the C capsule wrapped by the class."""
@@ -90,6 +90,17 @@ class VisBlock(object):
             self._capsule = new_capsule
         else:
             raise RuntimeError("Capsule is not of type oskar_VisBlock.")
+
+    @classmethod
+    def create_from_header(cls, header):
+        """Creates a visibility block from a header.
+
+        Args:
+            header (oskar.VisHeader): Visibility data header.
+        """
+        block = VisBlock()
+        block.capsule = _vis_block_lib.create_from_header(header.capsule)
+        return block
 
     def cross_correlations(self):
         """Returns an array reference to the cross correlations."""
@@ -140,3 +151,17 @@ class VisBlock(object):
     num_times = property(get_num_times)
     start_channel_index = property(get_start_channel_index)
     start_time_index = property(get_start_time_index)
+
+    def read(self, header, binary_handle, block_index):
+        """Reads visibility data from a binary file into the visibility block.
+
+        Use oskar.VisHeader.read() to obtain the header and binary file handle.
+
+        Args:
+            header (oskar.VisHeader): Visibility data header.
+            binary_handle (oskar.Binary): Handle to binary file.
+            block_index (int): Visibility block index to read.
+        """
+        self.capsule_ensure()
+        _vis_block_lib.read_block(self._capsule, header.capsule,
+                                  binary_handle.capsule, block_index)

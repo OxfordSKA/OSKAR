@@ -182,8 +182,7 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
     const int num_pols =
             oskar_type_is_matrix(oskar_vis_header_amp_type(hdr)) ? 4 : 1;
     const int num_weights = num_baselines * num_pols * max_times_per_block;
-    const int num_blocks = (num_times_total + max_times_per_block - 1) /
-            max_times_per_block;
+    const int num_blocks = oskar_vis_header_num_blocks(hdr);
     time_start_mjd = oskar_vis_header_time_start_mjd_utc(hdr) * 86400.0;
     time_inc_sec = oskar_vis_header_time_inc_sec(hdr);
 

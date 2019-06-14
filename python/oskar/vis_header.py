@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2016-2017, The University of Oxford
+# Copyright (c) 2016-2019, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -107,6 +107,11 @@ class VisHeader(object):
         self.capsule_ensure()
         return _vis_header_lib.max_times_per_block(self._capsule)
 
+    def get_num_blocks(self):
+        """Returns the expected number of visibility blocks for a run."""
+        self.capsule_ensure()
+        return _vis_header_lib.num_blocks(self._capsule)
+
     def get_num_channels_total(self):
         """Returns the total number of frequency channels."""
         self.capsule_ensure()
@@ -161,6 +166,7 @@ class VisHeader(object):
     freq_start_hz = property(get_freq_start_hz)
     max_channels_per_block = property(get_max_channels_per_block)
     max_times_per_block = property(get_max_times_per_block)
+    num_blocks = property(get_num_blocks)
     num_channels_total = property(get_num_channels_total)
     num_stations = property(get_num_stations)
     num_tags_per_block = property(get_num_tags_per_block)
@@ -185,11 +191,10 @@ class VisHeader(object):
         """
         if _vis_header_lib is None:
             raise RuntimeError("OSKAR library not found.")
-        t = VisHeader()
+        hdr = VisHeader()
         if isinstance(binary_file, Binary):
-            t.capsule = _vis_header_lib.read_header(binary_file.capsule)
-            return (t, binary_file)
-        else:
-            b = Binary(binary_file, 'r')
-            t.capsule = _vis_header_lib.read_header(b.capsule)
-            return (t, b)
+            hdr.capsule = _vis_header_lib.read_header(binary_file.capsule)
+            return (hdr, binary_file)
+        fhan = Binary(binary_file, b'r')
+        hdr.capsule = _vis_header_lib.read_header(fhan.capsule)
+        return (hdr, fhan)

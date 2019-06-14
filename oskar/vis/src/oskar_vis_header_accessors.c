@@ -89,6 +89,12 @@ int oskar_vis_header_max_channels_per_block(const oskar_VisHeader* vis)
     return vis->max_channels_per_block;
 }
 
+int oskar_vis_header_num_blocks(const oskar_VisHeader* vis)
+{
+    return ((vis->num_times_total + vis->max_times_per_block - 1) /
+            vis->max_times_per_block);
+}
+
 int oskar_vis_header_num_channels_total(const oskar_VisHeader* vis)
 {
     return vis->num_channels_total;

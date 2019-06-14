@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -181,7 +181,7 @@ static PyObject* read_data(PyObject* self, PyObject* args)
     }
     else if (use_strs)
     {
-        char *s_grp, *s_tag;
+        const char *s_grp, *s_tag;
 #if PY_MAJOR_VERSION >= 3
         s_grp = PyUnicode_AsUTF8(grp);
         s_tag = PyUnicode_AsUTF8(tag);

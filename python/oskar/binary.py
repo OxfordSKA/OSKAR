@@ -63,6 +63,7 @@ class Binary(object):
 
     def capsule_get(self):
         """Returns the C capsule wrapped by the class."""
+        self.capsule_ensure()
         return self._capsule
 
     def capsule_set(self, new_capsule):

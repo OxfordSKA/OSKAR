@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include <Python.h>
 
 #include <oskar.h>
+#include <oskar_version.h>
 #include <string.h>
 
 /* http://docs.scipy.org/doc/numpy-dev/reference/c-api.deprecations.html */
@@ -143,6 +144,24 @@ static PyObject* max_times_per_block(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
     return Py_BuildValue("i", oskar_vis_header_max_times_per_block(h));
+}
+
+
+static PyObject* num_blocks(PyObject* self, PyObject* args)
+{
+    oskar_VisHeader* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = (oskar_VisHeader*) get_handle(capsule, name))) return 0;
+#if OSKAR_VERSION > 0x020701
+    const int num_blocks = oskar_vis_header_num_blocks(h);
+#else
+    const int max_times_per_block = oskar_vis_header_max_times_per_block(h);
+    const int num_times_total = oskar_vis_header_num_times_total(h);
+    const int num_blocks = (num_times_total + max_times_per_block - 1) /
+                max_times_per_block;
+#endif
+    return Py_BuildValue("i", num_blocks);
 }
 
 
@@ -285,6 +304,8 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "max_channels_per_block()"},
         {"max_times_per_block", (PyCFunction)max_times_per_block,
                 METH_VARARGS, "max_times_per_block()"},
+        {"num_blocks", (PyCFunction)num_blocks,
+                METH_VARARGS, "num_blocks()"},
         {"num_channels_total", (PyCFunction)num_channels_total,
                 METH_VARARGS, "num_channels_total()"},
         {"num_stations", (PyCFunction)num_stations,
