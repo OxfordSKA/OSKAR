@@ -69,6 +69,8 @@ enum OSKAR_POL_MODE_TYPE
 #include <telescope/oskar_telescope_load_station_coords_enu.h>
 #include <telescope/oskar_telescope_load_station_coords_wgs84.h>
 #include <telescope/oskar_telescope_log_summary.h>
+#include <telescope/oskar_telescope_override_element_gains.h>
+#include <telescope/oskar_telescope_override_element_phases.h>
 #include <telescope/oskar_telescope_resize.h>
 #include <telescope/oskar_telescope_save.h>
 #include <telescope/oskar_telescope_save_layout.h>

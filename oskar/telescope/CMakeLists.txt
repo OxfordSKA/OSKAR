@@ -16,6 +16,8 @@ set(telescope_SRC
     src/oskar_telescope_load_station_coords_enu.c
     src/oskar_telescope_load_station_coords_wgs84.c
     src/oskar_telescope_log_summary.c
+    src/oskar_telescope_override_element_gains.c
+    src/oskar_telescope_override_element_phases.c
     src/oskar_telescope_resize.c
     src/oskar_telescope_save.c
     src/oskar_telescope_save_layout.c

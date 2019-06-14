@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2016-2017, The University of Oxford
+# Copyright (c) 2016-2019, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -106,6 +106,27 @@ class Telescope(object):
         self.capsule_ensure()
         _telescope_lib.load(self._capsule, dir_name)
 
+    def override_element_gains(self, mean, std, seed=1):
+        """Overrides element gains for all stations in a telescope model.
+
+        Args:
+            mean (float): Mean element gain.
+            std (float): Standard deviation of element gain.
+            seed (Optional[int]): Random generator seed. Default 1.
+        """
+        self.capsule_ensure()
+        _telescope_lib.override_element_gains(self._capsule, seed, mean, std)
+
+    def override_element_phases(self, std, seed=1):
+        """Overrides element phases for all stations in a telescope model.
+
+        Args:
+            std (float): Standard deviation of element phase.
+            seed (Optional[int]): Random generator seed. Default 1.
+        """
+        self.capsule_ensure()
+        _telescope_lib.override_element_phases(self._capsule, seed, std)
+
     def get_identical_stations(self):
         """Returns true if all stations are identical, false if not."""
         self.capsule_ensure()
@@ -192,7 +213,7 @@ class Telescope(object):
                 Start frequency, in Hz.
             inc_hz (Optional[float]):
                 Frequency increment, in Hz. Default 0.
-            num_channels (Optioanl[int]):
+            num_channels (Optional[int]):
                 Number of channels. Default 1.
         """
         self.capsule_ensure()

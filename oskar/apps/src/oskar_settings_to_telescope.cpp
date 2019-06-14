@@ -159,10 +159,8 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     if (gain > 0.0 || gain_err_fixed > 0.0)
     {
         int seed = s->to_int("seed_gain_errors", status);
-        for (int i = 0; i < num_stations; ++i)
-            oskar_station_override_element_gains(
-                    oskar_telescope_station(t, i), (unsigned int) seed,
-                    gain, gain_err_fixed, status);
+        oskar_telescope_override_element_gains(t, (unsigned int) seed,
+                gain, gain_err_fixed, status);
     }
 
     /* Override station element time-variable gain errors if required. */
@@ -179,10 +177,8 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     if (phase_err_fixed > 0.0)
     {
         int seed = s->to_int("seed_phase_errors", status);
-        for (int i = 0; i < num_stations; ++i)
-            oskar_station_override_element_phases(
-                    oskar_telescope_station(t, i), (unsigned int) seed,
-                    phase_err_fixed, status);
+        oskar_telescope_override_element_phases(t, (unsigned int) seed,
+                phase_err_fixed, status);
     }
 
     /* Override station element time-variable phase errors if required. */
