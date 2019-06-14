@@ -53,12 +53,12 @@ extern "C" {
  *
  * @param[in,out] s          Station model structure to modify.
  * @param[in] seed           Random generator seed.
- * @param[in] phase_std      Standard deviation of element phase, in radians.
+ * @param[in] phase_std_rad  Standard deviation of element phase, in radians.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
 void oskar_station_override_element_phases(oskar_Station* s, unsigned int seed,
-        double phase_std, int* status);
+        double phase_std_rad, int* status);
 
 #ifdef __cplusplus
 }

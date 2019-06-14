@@ -53,12 +53,12 @@ extern "C" {
  *
  * @param[in,out] t          Telescope model to modify.
  * @param[in] seed           Random generator seed.
- * @param[in] phase_std      Standard deviation of element phase, in radians.
+ * @param[in] phase_std_rad  Standard deviation of element phase, in radians.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
 void oskar_telescope_override_element_phases(oskar_Telescope* t,
-        unsigned int seed, double phase_std, int* status);
+        unsigned int seed, double phase_std_rad, int* status);
 
 #ifdef __cplusplus
 }

@@ -199,11 +199,11 @@ static PyObject* override_element_phases(PyObject* self, PyObject* args)
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
     int seed = 0, status = 0;
-    double std = 0.0;
-    if (!PyArg_ParseTuple(args, "Oid", &capsule, &seed, &std)) return 0;
+    double std_rad = 0.0;
+    if (!PyArg_ParseTuple(args, "Oid", &capsule, &seed, &std_rad)) return 0;
     if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
 #if OSKAR_VERSION > 0x020701
-    oskar_telescope_override_element_phases(h, seed, std, &status);
+    oskar_telescope_override_element_phases(h, seed, std_rad, &status);
     if (status)
     {
         PyErr_Format(PyExc_RuntimeError,

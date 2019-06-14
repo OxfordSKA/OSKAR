@@ -117,15 +117,16 @@ class Telescope(object):
         self.capsule_ensure()
         _telescope_lib.override_element_gains(self._capsule, seed, mean, std)
 
-    def override_element_phases(self, std, seed=1):
+    def override_element_phases(self, std_deg, seed=1):
         """Overrides element phases for all stations in a telescope model.
 
         Args:
-            std (float): Standard deviation of element phase.
+            std_deg (float): Standard deviation of element phase, in degrees.
             seed (Optional[int]): Random generator seed. Default 1.
         """
         self.capsule_ensure()
-        _telescope_lib.override_element_phases(self._capsule, seed, std)
+        _telescope_lib.override_element_phases(self._capsule, seed,
+                                               math.radians(std_deg))
 
     def get_identical_stations(self):
         """Returns true if all stations are identical, false if not."""
