@@ -39,7 +39,7 @@ extern "C" {
 int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
         int* status)
 {
-    int i, j, n, num_element_types;
+    int i, j, n;
 
     /* Check if safe to proceed. */
     if (*status) return 1;
@@ -79,38 +79,6 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
     if ( (oskar_station_has_element(a) && !oskar_station_has_element(b)) ||
             (!oskar_station_has_element(a) && oskar_station_has_element(b)) )
         return 1;
-
-    /* Check if element pattern filenames are different,
-     * for each element type. */
-    num_element_types = oskar_station_num_element_types(a);
-    for (j = 0; j < num_element_types; ++j)
-    {
-        const oskar_Element *e_a, *e_b;
-        int num_freq_a, num_freq_b;
-        e_a = oskar_station_element_const(a, j);
-        e_b = oskar_station_element_const(b, j);
-
-        /* Check if number of frequencies in element models are different. */
-        num_freq_a = oskar_element_num_freq(e_a);
-        num_freq_b = oskar_element_num_freq(e_b);
-        if (num_freq_a != num_freq_b)
-            return 1;
-
-        for (i = 0; i < num_freq_a; ++i)
-        {
-            const oskar_Mem *fname_a_x = 0, *fname_a_y = 0;
-            const oskar_Mem *fname_b_x = 0, *fname_b_y = 0;
-
-            fname_a_x = oskar_element_x_filename_const(e_a, i);
-            fname_a_y = oskar_element_y_filename_const(e_a, i);
-            fname_b_x = oskar_element_x_filename_const(e_b, i);
-            fname_b_y = oskar_element_y_filename_const(e_b, i);
-            if (oskar_mem_different(fname_a_x, fname_b_x, 0, status))
-                return 1;
-            if (oskar_mem_different(fname_a_y, fname_b_y, 0, status))
-                return 1;
-        }
-    }
 
     /* Check if the memory contents are different. */
     if (oskar_mem_different(a->noise_freq_hz, b->noise_freq_hz, 0, status))
@@ -174,6 +142,37 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
     if (oskar_mem_different(a->permitted_beam_el_rad,
             b->permitted_beam_el_rad, n, status))
         return 1;
+
+    /* Check if element pattern filenames are different,
+     * for each element type. */
+    const int num_element_types = oskar_station_num_element_types(a);
+    for (j = 0; j < num_element_types; ++j)
+    {
+        const oskar_Element *e_a, *e_b;
+        e_a = oskar_station_element_const(a, j);
+        e_b = oskar_station_element_const(b, j);
+
+        /* Check if number of frequencies in element models are different. */
+        const int num_freq_a = oskar_element_num_freq(e_a);
+        const int num_freq_b = oskar_element_num_freq(e_b);
+        if (num_freq_a != num_freq_b)
+            return 1;
+
+        for (i = 0; i < num_freq_a; ++i)
+        {
+            const oskar_Mem *fname_a_x = 0, *fname_a_y = 0;
+            const oskar_Mem *fname_b_x = 0, *fname_b_y = 0;
+
+            fname_a_x = oskar_element_x_filename_const(e_a, i);
+            fname_a_y = oskar_element_y_filename_const(e_a, i);
+            fname_b_x = oskar_element_x_filename_const(e_b, i);
+            fname_b_y = oskar_element_y_filename_const(e_b, i);
+            if (oskar_mem_different(fname_a_x, fname_b_x, 0, status))
+                return 1;
+            if (oskar_mem_different(fname_a_y, fname_b_y, 0, status))
+                return 1;
+        }
+    }
 
     /* Recursively check child stations. */
     if (oskar_station_has_child(a) && oskar_station_has_child(b))
