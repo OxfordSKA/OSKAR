@@ -45,7 +45,7 @@ int oskar_getline(char** lineptr, size_t* n, FILE* stream)
     /* Check if buffer is empty. */
     if (*n == 0 || *lineptr == 0)
     {
-        *n = 80;
+        *n = 1024;
         *lineptr = (char*)malloc(*n);
         if (*lineptr == 0)
             return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
