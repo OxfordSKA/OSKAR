@@ -82,7 +82,7 @@ void oskar_station_load_feed_angle(oskar_Station* station,
         /* Ensure the station model is big enough. */
         if (oskar_station_num_elements(station) <= n)
         {
-            oskar_station_resize(station, n + 100, status);
+            oskar_station_resize(station, n + 256, status);
             if (*status) break;
         }
 
