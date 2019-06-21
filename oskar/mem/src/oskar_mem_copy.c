@@ -34,8 +34,7 @@ extern "C" {
 
 void oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src, int* status)
 {
-    /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status || !src || !dst) return;
 
     /* Check the data types. */
     if (oskar_mem_type(src) != oskar_mem_type(dst))

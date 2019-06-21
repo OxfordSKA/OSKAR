@@ -45,17 +45,19 @@ int oskar_splines_mem_location(const oskar_Splines* data)
 
 int oskar_splines_have_coeffs(const oskar_Splines* data)
 {
-    return (data->num_knots_x_theta) > 0 && (data->num_knots_y_phi > 0);
+    return data &&
+            (data->num_knots_x_theta > 0) &&
+            (data->num_knots_y_phi > 0);
 }
 
 int oskar_splines_num_knots_x_theta(const oskar_Splines* data)
 {
-    return data->num_knots_x_theta;
+    return data ? data->num_knots_x_theta : 0;
 }
 
 int oskar_splines_num_knots_y_phi(const oskar_Splines* data)
 {
-    return data->num_knots_y_phi;
+    return data ? data->num_knots_y_phi : 0;
 }
 
 oskar_Mem* oskar_splines_knots_x(oskar_Splines* data)
@@ -96,7 +98,7 @@ double oskar_splines_smoothing_factor(const oskar_Splines* data)
 void oskar_splines_copy(oskar_Splines* dst, const oskar_Splines* src,
         int* status)
 {
-    if (*status) return;
+    if (*status || !dst || !src) return;
     dst->precision = src->precision;
     dst->smoothing_factor = src->smoothing_factor;
     dst->num_knots_x_theta = src->num_knots_x_theta;

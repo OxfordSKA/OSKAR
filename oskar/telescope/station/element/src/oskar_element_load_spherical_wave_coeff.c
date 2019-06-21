@@ -200,6 +200,12 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
         if (l_max1) *l_max1 = l_max;
         if (l_max2) *l_max2 = l_max;
         const size_t fname_len = 1 + strlen(filename);
+        if (!data->filename_x[i])
+            data->filename_x[i] = oskar_mem_create(
+                    OSKAR_CHAR, OSKAR_CPU, 0, status);
+        if (!data->filename_y[i])
+            data->filename_y[i] = oskar_mem_create(
+                    OSKAR_CHAR, OSKAR_CPU, 0, status);
         if (selector & OPTION_X)
             oskar_mem_append_raw(data->filename_x[i], filename,
                     OSKAR_CHAR, OSKAR_CPU, fname_len, status);

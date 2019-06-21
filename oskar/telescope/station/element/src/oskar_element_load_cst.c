@@ -43,7 +43,7 @@ extern "C" {
 
 #define DEG2RAD (M_PI/180.0)
 
-static void fit_splines(oskar_Splines* splines, int n,
+static void fit_splines(oskar_Splines** splines_ptr, int n,
         oskar_Mem* theta, oskar_Mem* phi, oskar_Mem* data, oskar_Mem* weight,
         double closeness, double closeness_inc, const char* name, int* status);
 
@@ -53,8 +53,8 @@ void oskar_element_load_cst(oskar_Element* data,
         int ignore_below_horizon, int* status)
 {
     int i, n = 0;
-    oskar_Splines *data_h_re = 0, *data_h_im = 0;
-    oskar_Splines *data_v_re = 0, *data_v_im = 0;
+    oskar_Splines **data_h_re = 0, **data_h_im = 0;
+    oskar_Splines **data_v_re = 0, **data_v_im = 0;
     oskar_Mem *theta, *phi, *h_re, *h_im, *v_re, *v_im, *weight;
 
     /* Declare the line buffer. */
@@ -99,21 +99,20 @@ void oskar_element_load_cst(oskar_Element* data,
     /* Get pointers to surface data based on port number and frequency index. */
     if (port == 1 || port == 0)
     {
-        data_h_re = data->x_h_re[i];
-        data_h_im = data->x_h_im[i];
-        data_v_re = data->x_v_re[i];
-        data_v_im = data->x_v_im[i];
+        data_h_re = &data->x_h_re[i];
+        data_h_im = &data->x_h_im[i];
+        data_v_re = &data->x_v_re[i];
+        data_v_im = &data->x_v_im[i];
     }
     else if (port == 2)
     {
-        data_h_re = data->y_h_re[i];
-        data_h_im = data->y_h_im[i];
-        data_v_re = data->y_v_re[i];
-        data_v_im = data->y_v_im[i];
+        data_h_re = &data->y_h_re[i];
+        data_h_im = &data->y_h_im[i];
+        data_v_re = &data->y_v_re[i];
+        data_v_im = &data->y_v_im[i];
     }
 
     /* Open the file. */
-    const size_t fname_len = 1 + strlen(filename);
     file = fopen(filename, "r");
     if (!file)
     {
@@ -256,28 +255,21 @@ void oskar_element_load_cst(oskar_Element* data,
     fit_splines(data_v_im, n, theta, phi, v_im, weight,
             closeness, closeness_inc, "V [imag]", status);
 
-    /* Store the filename. */
-    if (port == 0)
-    {
-        oskar_mem_append_raw(data->filename_x[i], filename, OSKAR_CHAR,
-                OSKAR_CPU, fname_len, status);
-        oskar_mem_append_raw(data->filename_y[i], filename, OSKAR_CHAR,
-                OSKAR_CPU, fname_len, status);
-    }
-    else if (port == 1)
-    {
-        oskar_mem_append_raw(data->filename_x[i], filename, OSKAR_CHAR,
-                OSKAR_CPU, fname_len, status);
-    }
-    else if (port == 2)
-    {
-        oskar_mem_append_raw(data->filename_y[i], filename, OSKAR_CHAR,
-                OSKAR_CPU, fname_len, status);
-    }
-
     /* Copy X to Y if both ports are the same. */
     if (port == 0)
     {
+        if (!data->y_h_re[i])
+            data->y_h_re[i] = oskar_splines_create(
+                    OSKAR_DOUBLE, OSKAR_CPU, status);
+        if (!data->y_h_im[i])
+            data->y_h_im[i] = oskar_splines_create(
+                    OSKAR_DOUBLE, OSKAR_CPU, status);
+        if (!data->y_v_re[i])
+            data->y_v_re[i] = oskar_splines_create(
+                    OSKAR_DOUBLE, OSKAR_CPU, status);
+        if (!data->y_v_im[i])
+            data->y_v_im[i] = oskar_splines_create(
+                    OSKAR_DOUBLE, OSKAR_CPU, status);
         oskar_splines_copy(data->y_h_re[i], data->x_h_re[i], status);
         oskar_splines_copy(data->y_h_im[i], data->x_h_im[i], status);
         oskar_splines_copy(data->y_v_re[i], data->x_v_re[i], status);
@@ -295,11 +287,15 @@ void oskar_element_load_cst(oskar_Element* data,
 }
 
 
-static void fit_splines(oskar_Splines* splines, int n,
+static void fit_splines(oskar_Splines** splines_ptr, int n,
         oskar_Mem* theta, oskar_Mem* phi, oskar_Mem* data, oskar_Mem* weight,
         double closeness, double closeness_inc, const char* name, int* status)
 {
     double avg_frac_error;
+    if (*status) return;
+    if (!*splines_ptr)
+        *splines_ptr = oskar_splines_create(OSKAR_DOUBLE, OSKAR_CPU, status);
+    oskar_Splines* splines = *splines_ptr;
     if (*status) return;
     avg_frac_error = closeness; /* Copy the fitting parameter. */
     oskar_log_line('M', ' ');

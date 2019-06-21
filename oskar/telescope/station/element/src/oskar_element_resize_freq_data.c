@@ -50,22 +50,19 @@ void oskar_element_resize_freq_data(oskar_Element* model, int size,
         realloc_arrays(model, size);
         for (i = old_size; i < size; ++i)
         {
-            model->filename_x[i] =
-                    oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
-            model->filename_y[i] =
-                    oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
-            model->filename_scalar[i] =
-                    oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
-            model->x_v_re[i] = oskar_splines_create(prec, loc, status);
-            model->x_v_im[i] = oskar_splines_create(prec, loc, status);
-            model->x_h_re[i] = oskar_splines_create(prec, loc, status);
-            model->x_h_im[i] = oskar_splines_create(prec, loc, status);
-            model->y_v_re[i] = oskar_splines_create(prec, loc, status);
-            model->y_v_im[i] = oskar_splines_create(prec, loc, status);
-            model->y_h_re[i] = oskar_splines_create(prec, loc, status);
-            model->y_h_im[i] = oskar_splines_create(prec, loc, status);
-            model->scalar_re[i] = oskar_splines_create(prec, loc, status);
-            model->scalar_im[i] = oskar_splines_create(prec, loc, status);
+            model->filename_x[i] = 0;
+            model->filename_y[i] = 0;
+            model->filename_scalar[i] = 0;
+            model->x_v_re[i] = 0;
+            model->x_v_im[i] = 0;
+            model->x_h_re[i] = 0;
+            model->x_h_im[i] = 0;
+            model->y_v_re[i] = 0;
+            model->y_v_im[i] = 0;
+            model->y_h_re[i] = 0;
+            model->y_h_im[i] = 0;
+            model->scalar_re[i] = 0;
+            model->scalar_im[i] = 0;
             model->x_te[i] = oskar_mem_create(cplx, loc, 0, status);
             model->x_tm[i] = oskar_mem_create(cplx, loc, 0, status);
             model->y_te[i] = oskar_mem_create(cplx, loc, 0, status);
