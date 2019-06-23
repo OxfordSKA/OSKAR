@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,8 @@
 #include "telescope/oskar_telescope.h"
 #include "utility/oskar_dir.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_get_num_procs.h"
+#include "utility/oskar_thread.h"
 #include "telescope/private_TelescopeLoaderApodisation.h"
 #include "telescope/private_TelescopeLoaderElementPattern.h"
 #include "telescope/private_TelescopeLoaderElementTypes.h"
@@ -114,6 +116,37 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
 
 // Private functions.
 
+struct ThreadArgs
+{
+    oskar_Telescope *telescope;
+    const string& cwd;
+    const vector<oskar_TelescopeLoadAbstract*>& loaders;
+    map<string, string>& filemap;
+    int i_thread, num_threads, num_dirs, *status;
+    const char* const* children;
+    ThreadArgs(oskar_Telescope* telescope,
+            const string& cwd,
+            const vector<oskar_TelescopeLoadAbstract*>& loaders,
+            map<string, string>& filemap)
+    : telescope(telescope), cwd(cwd), loaders(loaders), filemap(filemap),
+      i_thread(0), num_threads(0), num_dirs(0),
+      status(0), children(0) {}
+};
+typedef struct ThreadArgs ThreadArgs;
+
+static void* thread_func(void* arg)
+{
+    ThreadArgs* a = (ThreadArgs*) arg;
+    for (int i = a->i_thread; i < a->num_dirs; i += a->num_threads)
+    {
+        load_directories(a->telescope,
+                oskar_TelescopeLoadAbstract::get_path(a->cwd, a->children[i]),
+                oskar_telescope_station(a->telescope, i), 1,
+                a->loaders, a->filemap, a->status);
+    }
+    return 0;
+}
+
 // Must pass filemap by value rather than by reference; otherwise, recursive
 // behaviour will not work as intended.
 static void load_directories(oskar_Telescope* telescope,
@@ -123,8 +156,6 @@ static void load_directories(oskar_Telescope* telescope,
 {
     int num_dirs = 0;
     char** children = 0;
-
-    // Check if safe to proceed.
     if (*status) return;
 
     // Get a list of all (child) stations in this directory, sorted by name.
@@ -160,6 +191,10 @@ static void load_directories(oskar_Telescope* telescope,
         }
         else if (num_dirs > 1)
         {
+            const int num_procs = oskar_get_num_procs() - 1;
+            vector<oskar_Thread*> threads(num_procs);
+            vector<ThreadArgs> args;
+
             // Consistency check.
             if (num_dirs != oskar_telescope_num_stations(telescope))
             {
@@ -167,14 +202,26 @@ static void load_directories(oskar_Telescope* telescope,
                 goto fail;
             }
 
-            // Loop over and descend into all stations.
-            for (int i = 0; i < num_dirs; ++i)
+            // Use multi-threading for load at top level only.
+            for (int i = 0; i < num_procs; ++i)
             {
-                // Recursive call to load the station.
-                load_directories(telescope,
-                        oskar_TelescopeLoadAbstract::get_path(cwd, children[i]),
-                        oskar_telescope_station(telescope, i), depth + 1,
-                        loaders, filemap, status);
+                ThreadArgs arg(telescope, cwd, loaders, filemap);
+                arg.i_thread = i;
+                arg.num_threads = num_procs;
+                arg.num_dirs = num_dirs;
+                arg.status = status;
+                arg.children = children;
+                args.push_back(arg);
+            }
+            for (int i = 0; i < num_procs; ++i)
+            {
+                threads[i] = oskar_thread_create(
+                        thread_func, (void*)&args[i], 0);
+            }
+            for (int i = 0; i < num_procs; ++i)
+            {
+                oskar_thread_join(threads[i]);
+                oskar_thread_free(threads[i]);
             }
         } // End check on number of directories.
     }

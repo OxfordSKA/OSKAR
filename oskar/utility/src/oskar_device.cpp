@@ -50,6 +50,12 @@
 #include "utility/oskar_dir.h"
 #include "utility/oskar_thread.h"
 
+#ifdef OSKAR_OS_WIN
+#define THREAD_LOCAL __declspec(thread)
+#else
+#define THREAD_LOCAL __thread
+#endif
+
 struct oskar_DeviceKernels
 {
     std::string src;
@@ -68,14 +74,8 @@ struct oskar_DeviceKernels
 
 static void oskar_device_set_up_cl(oskar_Device* device);
 
-static
-#ifdef OSKAR_OS_WIN
-__declspec(thread)
-#else
-__thread
-#endif
-unsigned int current_device_ = 0;
-
+static THREAD_LOCAL unsigned int current_platform_ = 0;
+static THREAD_LOCAL unsigned int current_device_ = 0;
 static std::vector<oskar_Device*> cl_devices_;
 static std::map<std::string, const void*> cuda_kernels_;
 static int require_double_ = 1; // Set if double precision is required.
@@ -389,7 +389,11 @@ void oskar_device_set(int location, int id, int* status)
     if (*status || id < 0) return;
 #ifdef OSKAR_HAVE_CUDA
     if (location == OSKAR_GPU)
+    {
         *status = (int) cudaSetDevice(id);
+        current_device_ = id;
+        current_platform_ = location;
+    }
     else
 #endif
     if (location & OSKAR_CL)
@@ -401,6 +405,7 @@ void oskar_device_set(int location, int id, int* status)
             return;
         }
         current_device_ = id;
+        current_platform_ = location;
     }
 }
 
@@ -640,7 +645,7 @@ static void oskar_device_set_up_cl(oskar_Device* device)
     if (error == CL_SUCCESS)
     {
         if ((error = clBuildProgram(device->program, 0, 0,
-                "-cl-no-signed-zeros ", 0, 0)) == CL_SUCCESS)
+                "-cl-mad-enable -cl-no-signed-zeros ", 0, 0)) == CL_SUCCESS)
         {
             if ((error = clCreateKernelsInProgram(device->program,
                     0, NULL, &num_kernels)) != CL_SUCCESS)

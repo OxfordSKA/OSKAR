@@ -105,7 +105,7 @@ struct oskar_Interferometer
     char correlation_type, *vis_name, *ms_name, *settings_path;
 
     /* State. */
-    int init_sky, work_unit_index, status;
+    int init_sky, work_unit_index;
     oskar_Mutex* mutex;
     oskar_Barrier* barrier;
 
@@ -478,7 +478,8 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
 struct ThreadArgs
 {
     oskar_Interferometer* h;
-    int num_threads, thread_id;
+    DeviceData* d;
+    int num_threads, thread_id, *status;
 };
 typedef struct ThreadArgs ThreadArgs;
 
@@ -492,7 +493,7 @@ static void* run_blocks(void* arg)
     num_threads = ((ThreadArgs*)arg)->num_threads;
     thread_id = ((ThreadArgs*)arg)->thread_id;
     device_id = thread_id - 1;
-    status = &(h->status);
+    status = ((ThreadArgs*)arg)->status;
 
 #ifdef _OPENMP
     /* Disable any nested parallelism. */
@@ -581,6 +582,7 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
         args[i].h = h;
         args[i].num_threads = num_threads;
         args[i].thread_id = i;
+        args[i].status = status;
     }
 
     /* Record memory usage. */
@@ -596,9 +598,6 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
     /* Start simulation timer. */
     oskar_timer_start(h->tmr_sim);
 
-    /* Set status code. */
-    h->status = *status;
-
     /* Start the worker threads. */
     oskar_interferometer_reset_work_unit_index(h);
     for (i = 0; i < num_threads; ++i)
@@ -612,9 +611,6 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
     }
     free(threads);
     free(args);
-
-    /* Get status code. */
-    *status = h->status;
 
     /* Record memory usage. */
     if (!*status)
@@ -1127,88 +1123,116 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
 }
 
 
-static void set_up_device_data(oskar_Interferometer* h, int* status)
+static void* init_device(void* arg)
 {
-    int i, dev_loc, complx, vistype, num_stations, num_src;
-    if (*status) return;
-
-    /* Get local variables. */
-    num_stations = oskar_telescope_num_stations(h->tel);
-    num_src      = h->max_sources_per_chunk;
-    complx       = (h->prec) | OSKAR_COMPLEX;
-    vistype      = complx;
+    int dev_loc, vistype, *status;
+    ThreadArgs* a = (ThreadArgs*)arg;
+    oskar_Interferometer* h = a->h;
+    DeviceData* d = a->d;
+    status = a->status;
+    const int i = a->thread_id;
+    const int num_stations = oskar_telescope_num_stations(h->tel);
+    const int num_src = h->max_sources_per_chunk;
+    const int complx = (h->prec) | OSKAR_COMPLEX;
+    vistype = complx;
     if (oskar_telescope_pol_mode(h->tel) == OSKAR_POL_MODE_FULL)
         vistype |= OSKAR_MATRIX;
+
+    d->previous_chunk_index = -1;
+
+    /* Select the device. */
+    if (i < h->num_gpus)
+    {
+        oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
+        dev_loc = h->dev_loc;
+    }
+    else
+    {
+        dev_loc = OSKAR_CPU;
+    }
+
+    /* Timers. */
+    if (!d->tmr_compute)
+    {
+        d->tmr_compute   = oskar_timer_create(dev_loc);
+        d->tmr_copy      = oskar_timer_create(dev_loc);
+        d->tmr_clip      = oskar_timer_create(dev_loc);
+        d->tmr_E         = oskar_timer_create(dev_loc);
+        d->tmr_K         = oskar_timer_create(dev_loc);
+        d->tmr_join      = oskar_timer_create(dev_loc);
+        d->tmr_correlate = oskar_timer_create(dev_loc);
+    }
+
+    /* Visibility blocks. */
+    if (!d->vis_block)
+    {
+        d->vis_block = oskar_vis_block_create_from_header(dev_loc,
+                h->header, status);
+        d->vis_block_cpu[0] = oskar_vis_block_create_from_header(OSKAR_CPU,
+                h->header, status);
+        d->vis_block_cpu[1] = oskar_vis_block_create_from_header(OSKAR_CPU,
+                h->header, status);
+    }
+    oskar_vis_block_clear(d->vis_block, status);
+    oskar_vis_block_clear(d->vis_block_cpu[0], status);
+    oskar_vis_block_clear(d->vis_block_cpu[1], status);
+
+    /* Device scratch memory. */
+    if (!d->tel)
+    {
+        d->u = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+        d->v = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+        d->w = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+        d->chunk = oskar_sky_create(h->prec, dev_loc, num_src, status);
+        d->chunk_clip = oskar_sky_create(h->prec, dev_loc, num_src, status);
+        d->tel = oskar_telescope_create_copy(h->tel, dev_loc, status);
+        d->J = oskar_jones_create(vistype, dev_loc, num_stations, num_src,
+                status);
+        d->R = oskar_type_is_matrix(vistype) ? oskar_jones_create(vistype,
+                dev_loc, num_stations, num_src, status) : 0;
+        d->E = oskar_jones_create(vistype, dev_loc, num_stations, num_src,
+                status);
+        d->K = oskar_jones_create(complx, dev_loc, num_stations, num_src,
+                status);
+        d->Z = 0;
+        d->station_work = oskar_station_work_create(h->prec, dev_loc, status);
+    }
+    return 0;
+}
+
+
+static void set_up_device_data(oskar_Interferometer* h, int* status)
+{
+    int i;
+    oskar_Thread** threads = 0;
+    ThreadArgs* args = 0;
+    if (*status) return;
 
     /* Expand the number of devices to the number of selected GPUs,
      * if required. */
     if (h->num_devices < h->num_gpus)
         oskar_interferometer_set_num_devices(h, h->num_gpus);
 
-    for (i = 0; i < h->num_devices; ++i)
+    /* Set up devices in parallel. */
+    const int num_devices = h->num_devices;
+    threads = (oskar_Thread**) calloc(num_devices, sizeof(oskar_Thread*));
+    args = (ThreadArgs*) calloc(num_devices, sizeof(ThreadArgs));
+    for (i = 0; i < num_devices; ++i)
     {
-        DeviceData* d = &h->d[i];
-        d->previous_chunk_index = -1;
-
-        /* Select the device. */
-        if (i < h->num_gpus)
-        {
-            oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
-            dev_loc = h->dev_loc;
-        }
-        else
-        {
-            dev_loc = OSKAR_CPU;
-        }
-
-        /* Timers. */
-        if (!d->tmr_compute)
-        {
-            d->tmr_compute   = oskar_timer_create(dev_loc);
-            d->tmr_copy      = oskar_timer_create(dev_loc);
-            d->tmr_clip      = oskar_timer_create(dev_loc);
-            d->tmr_E         = oskar_timer_create(dev_loc);
-            d->tmr_K         = oskar_timer_create(dev_loc);
-            d->tmr_join      = oskar_timer_create(dev_loc);
-            d->tmr_correlate = oskar_timer_create(dev_loc);
-        }
-
-        /* Visibility blocks. */
-        if (!d->vis_block)
-        {
-            d->vis_block = oskar_vis_block_create_from_header(dev_loc,
-                    h->header, status);
-            d->vis_block_cpu[0] = oskar_vis_block_create_from_header(OSKAR_CPU,
-                    h->header, status);
-            d->vis_block_cpu[1] = oskar_vis_block_create_from_header(OSKAR_CPU,
-                    h->header, status);
-        }
-        oskar_vis_block_clear(d->vis_block, status);
-        oskar_vis_block_clear(d->vis_block_cpu[0], status);
-        oskar_vis_block_clear(d->vis_block_cpu[1], status);
-
-        /* Device scratch memory. */
-        if (!d->tel)
-        {
-            d->u = oskar_mem_create(h->prec, dev_loc, num_stations, status);
-            d->v = oskar_mem_create(h->prec, dev_loc, num_stations, status);
-            d->w = oskar_mem_create(h->prec, dev_loc, num_stations, status);
-            d->chunk = oskar_sky_create(h->prec, dev_loc, num_src, status);
-            d->chunk_clip = oskar_sky_create(h->prec, dev_loc, num_src, status);
-            d->tel = oskar_telescope_create_copy(h->tel, dev_loc, status);
-            d->J = oskar_jones_create(vistype, dev_loc, num_stations, num_src,
-                    status);
-            d->R = oskar_type_is_matrix(vistype) ? oskar_jones_create(vistype,
-                    dev_loc, num_stations, num_src, status) : 0;
-            d->E = oskar_jones_create(vistype, dev_loc, num_stations, num_src,
-                    status);
-            d->K = oskar_jones_create(complx, dev_loc, num_stations, num_src,
-                    status);
-            d->Z = 0;
-            d->station_work = oskar_station_work_create(h->prec, dev_loc,
-                    status);
-        }
+        args[i].h = h;
+        args[i].d = &h->d[i];
+        args[i].num_threads = num_devices;
+        args[i].thread_id = i;
+        args[i].status = status;
+        threads[i] = oskar_thread_create(init_device, (void*)&args[i], 0);
     }
+    for (i = 0; i < num_devices; ++i)
+    {
+        oskar_thread_join(threads[i]);
+        oskar_thread_free(threads[i]);
+    }
+    free(threads);
+    free(args);
 }
 
 
