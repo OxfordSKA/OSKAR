@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,8 @@ oskar_StationWork* oskar_station_work_create(int type,
     work->horizon_mask = oskar_mem_create(OSKAR_INT, location, 0, status);
     work->source_indices = oskar_mem_create(OSKAR_INT, location, 0, status);
     work->theta_modified = oskar_mem_create(type, location, 0, status);
-    work->phi_modified = oskar_mem_create(type, location, 0, status);
+    work->phi_x = oskar_mem_create(type, location, 0, status);
+    work->phi_y = oskar_mem_create(type, location, 0, status);
     work->enu_direction_x = oskar_mem_create(type, location, 0, status);
     work->enu_direction_y = oskar_mem_create(type, location, 0, status);
     work->enu_direction_z = oskar_mem_create(type, location, 0, status);
@@ -77,7 +78,8 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
     oskar_mem_free(work->horizon_mask, status);
     oskar_mem_free(work->source_indices, status);
     oskar_mem_free(work->theta_modified, status);
-    oskar_mem_free(work->phi_modified, status);
+    oskar_mem_free(work->phi_x, status);
+    oskar_mem_free(work->phi_y, status);
     oskar_mem_free(work->enu_direction_x, status);
     oskar_mem_free(work->enu_direction_y, status);
     oskar_mem_free(work->enu_direction_z, status);

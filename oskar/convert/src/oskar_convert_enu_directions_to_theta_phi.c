@@ -40,28 +40,34 @@ OSKAR_CONVERT_ENU_DIR_TO_THETA_PHI(convert_enu_directions_to_theta_phi_double, d
 
 void oskar_convert_enu_directions_to_theta_phi(int offset_in, int num_points,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double delta_phi, oskar_Mem* theta, oskar_Mem* phi, int* status)
+        double delta_phi1, double delta_phi2, oskar_Mem* theta,
+        oskar_Mem* phi1, oskar_Mem* phi2, int* status)
 {
     if (*status) return;
     const int type = oskar_mem_type(theta);
     const int location = oskar_mem_location(theta);
-    const float delta_phi_f = (float) delta_phi;
+    const float delta_phi1_f = (float) delta_phi1;
+    const float delta_phi2_f = (float) delta_phi2;
     if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
             convert_enu_directions_to_theta_phi_float(offset_in, num_points,
                     oskar_mem_float_const(x, status),
                     oskar_mem_float_const(y, status),
-                    oskar_mem_float_const(z, status), delta_phi_f,
+                    oskar_mem_float_const(z, status),
+                    delta_phi1_f, delta_phi2_f,
                     oskar_mem_float(theta, status),
-                    oskar_mem_float(phi, status));
+                    oskar_mem_float(phi1, status),
+                    oskar_mem_float(phi2, status));
         else if (type == OSKAR_DOUBLE)
             convert_enu_directions_to_theta_phi_double(offset_in, num_points,
                     oskar_mem_double_const(x, status),
                     oskar_mem_double_const(y, status),
-                    oskar_mem_double_const(z, status), delta_phi,
+                    oskar_mem_double_const(z, status),
+                    delta_phi1, delta_phi2,
                     oskar_mem_double(theta, status),
-                    oskar_mem_double(phi, status));
+                    oskar_mem_double(phi1, status),
+                    oskar_mem_double(phi2, status));
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
@@ -89,9 +95,12 @@ void oskar_convert_enu_directions_to_theta_phi(int offset_in, int num_points,
                 {PTR_SZ, oskar_mem_buffer_const(y)},
                 {PTR_SZ, oskar_mem_buffer_const(z)},
                 {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
-                        (const void*)&delta_phi : (const void*)&delta_phi_f},
+                        (const void*)&delta_phi1 : (const void*)&delta_phi1_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&delta_phi2 : (const void*)&delta_phi2_f},
                 {PTR_SZ, oskar_mem_buffer(theta)},
-                {PTR_SZ, oskar_mem_buffer(phi)}
+                {PTR_SZ, oskar_mem_buffer(phi1)},
+                {PTR_SZ, oskar_mem_buffer(phi2)}
         };
         oskar_device_launch_kernel(k, location, 1, local_size, global_size,
                 sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);

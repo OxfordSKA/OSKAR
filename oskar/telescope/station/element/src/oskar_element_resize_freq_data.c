@@ -41,9 +41,6 @@ void oskar_element_resize_freq_data(oskar_Element* model, int size,
     int i;
     if (*status) return;
     const int old_size = model->num_freq;
-    const int loc = model->mem_location;
-    const int prec = model->precision;
-    const int cplx = prec | OSKAR_COMPLEX;
     if (size > old_size)
     {
         /* Enlarge the arrays and create new structures. */
@@ -63,10 +60,8 @@ void oskar_element_resize_freq_data(oskar_Element* model, int size,
             model->y_h_im[i] = 0;
             model->scalar_re[i] = 0;
             model->scalar_im[i] = 0;
-            model->x_te[i] = oskar_mem_create(cplx, loc, 0, status);
-            model->x_tm[i] = oskar_mem_create(cplx, loc, 0, status);
-            model->y_te[i] = oskar_mem_create(cplx, loc, 0, status);
-            model->y_tm[i] = oskar_mem_create(cplx, loc, 0, status);
+            model->sph_wave[i] = 0;
+            model->l_max[i] = 0;
         }
     }
     else if (size < old_size)
@@ -87,10 +82,7 @@ void oskar_element_resize_freq_data(oskar_Element* model, int size,
             oskar_splines_free(model->y_h_im[i], status);
             oskar_splines_free(model->scalar_re[i], status);
             oskar_splines_free(model->scalar_im[i], status);
-            oskar_mem_free(model->x_te[i], status);
-            oskar_mem_free(model->x_tm[i], status);
-            oskar_mem_free(model->y_te[i], status);
-            oskar_mem_free(model->y_tm[i], status);
+            oskar_mem_free(model->sph_wave[i], status);
 
         }
         realloc_arrays(model, size);
@@ -102,8 +94,7 @@ static void realloc_arrays(oskar_Element* e, int size)
 {
     const size_t sz = size * sizeof(void*);
     e->freqs_hz = (double*) realloc(e->freqs_hz, size * sizeof(double));
-    e->x_lmax = (int*) realloc(e->x_lmax, size * sizeof(int));
-    e->y_lmax = (int*) realloc(e->y_lmax, size * sizeof(int));
+    e->l_max = (int*) realloc(e->l_max, size * sizeof(int));
     e->filename_x = (oskar_Mem**) realloc(e->filename_x, sz);
     e->filename_y = (oskar_Mem**) realloc(e->filename_y, sz);
     e->filename_scalar = (oskar_Mem**) realloc(e->filename_scalar, sz);
@@ -117,10 +108,7 @@ static void realloc_arrays(oskar_Element* e, int size)
     e->y_h_im = (oskar_Splines**) realloc(e->y_h_im, sz);
     e->scalar_re = (oskar_Splines**) realloc(e->scalar_re, sz);
     e->scalar_im = (oskar_Splines**) realloc(e->scalar_im, sz);
-    e->x_te = (oskar_Mem**) realloc(e->x_te, sz);
-    e->x_tm = (oskar_Mem**) realloc(e->x_tm, sz);
-    e->y_te = (oskar_Mem**) realloc(e->y_te, sz);
-    e->y_tm = (oskar_Mem**) realloc(e->y_tm, sz);
+    e->sph_wave = (oskar_Mem**) realloc(e->sph_wave, sz);
 }
 
 #ifdef __cplusplus

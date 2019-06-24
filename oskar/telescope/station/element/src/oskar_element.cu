@@ -6,7 +6,6 @@
 #include "telescope/station/element/define_apply_element_taper_cosine.h"
 #include "telescope/station/element/define_apply_element_taper_gaussian.h"
 #include "telescope/station/element/define_evaluate_dipole_pattern.h"
-#include "telescope/station/element/define_evaluate_geometric_dipole_pattern.h"
 #include "telescope/station/element/define_evaluate_spherical_wave.h"
 #include "utility/oskar_cuda_registrar.h"
 #include "utility/oskar_kernel_macros.h"

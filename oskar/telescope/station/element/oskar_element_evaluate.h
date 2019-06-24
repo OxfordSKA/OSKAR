@@ -58,7 +58,8 @@ extern "C" {
  * @param[in] z             Pointer to z-direction cosines.
  * @param[in] frequency_hz  Current observing frequency in Hz.
  * @param[in,out] theta     Pointer to work array for computing theta values.
- * @param[in,out] phi       Pointer to work array for computing phi values.
+ * @param[in,out] phi_x     Pointer to work array for computing phi values.
+ * @param[in,out] phi_y     Pointer to work array for computing phi values.
  * @param[in] offset_out    Start offset into output array.
  * @param[in,out] output    Pointer to output array.
  * @param[in,out] status    Status return code.
@@ -75,7 +76,8 @@ void oskar_element_evaluate(
         const oskar_Mem* z,
         double frequency_hz,
         oskar_Mem* theta,
-        oskar_Mem* phi,
+        oskar_Mem* phi_x,
+        oskar_Mem* phi_y,
         int offset_out,
         oskar_Mem* output,
         int* status);

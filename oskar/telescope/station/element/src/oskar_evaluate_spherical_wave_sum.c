@@ -38,21 +38,17 @@
 extern "C" {
 #endif
 
-OSKAR_EVALUATE_SPHERICAL_WAVE_SUM(evaluate_spherical_wave_sum_float, float, float2)
-OSKAR_EVALUATE_SPHERICAL_WAVE_SUM(evaluate_spherical_wave_sum_double, double, double2)
+OSKAR_EVALUATE_SPHERICAL_WAVE_SUM(evaluate_spherical_wave_sum_float, float, float2, float4c)
+OSKAR_EVALUATE_SPHERICAL_WAVE_SUM(evaluate_spherical_wave_sum_double, double, double2, double4c)
 
 void oskar_evaluate_spherical_wave_sum(int num_points, const oskar_Mem* theta,
-        const oskar_Mem* phi, int l_max, const oskar_Mem* alpha_te,
-        const oskar_Mem* alpha_tm, int stride, int offset,
-        oskar_Mem* pattern, int* status)
+        const oskar_Mem* phi_x, const oskar_Mem* phi_y, int l_max,
+        const oskar_Mem* alpha, int offset, oskar_Mem* pattern, int* status)
 {
     if (*status) return;
     const int location = oskar_mem_location(pattern);
-    const int E_theta_offset = offset;
-    const int E_phi_offset = offset + 1;
     const int coeff_required = (2 * l_max + 1) * l_max;
-    if (oskar_mem_length(alpha_te) < (size_t) coeff_required ||
-            oskar_mem_length(alpha_tm) < (size_t) coeff_required)
+    if (oskar_mem_length(alpha) < (size_t) coeff_required)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
@@ -64,26 +60,22 @@ void oskar_evaluate_spherical_wave_sum(int num_points, const oskar_Mem* theta,
         case OSKAR_SINGLE_COMPLEX_MATRIX:
             evaluate_spherical_wave_sum_float(num_points,
                     oskar_mem_float_const(theta, status),
-                    oskar_mem_float_const(phi, status), l_max,
-                    oskar_mem_float2_const(alpha_te, status),
-                    oskar_mem_float2_const(alpha_tm, status),
-                    stride, E_theta_offset, E_phi_offset,
-                    oskar_mem_float2(pattern, status),
-                    oskar_mem_float2(pattern, status));
+                    oskar_mem_float_const(phi_x, status),
+                    oskar_mem_float_const(phi_y, status), l_max,
+                    oskar_mem_float4c_const(alpha, status), offset,
+                    oskar_mem_float4c(pattern, status));
             break;
         case OSKAR_DOUBLE_COMPLEX_MATRIX:
             evaluate_spherical_wave_sum_double(num_points,
                     oskar_mem_double_const(theta, status),
-                    oskar_mem_double_const(phi, status), l_max,
-                    oskar_mem_double2_const(alpha_te, status),
-                    oskar_mem_double2_const(alpha_tm, status),
-                    stride, E_theta_offset, E_phi_offset,
-                    oskar_mem_double2(pattern, status),
-                    oskar_mem_double2(pattern, status));
+                    oskar_mem_double_const(phi_x, status),
+                    oskar_mem_double_const(phi_y, status), l_max,
+                    oskar_mem_double4c_const(alpha, status), offset,
+                    oskar_mem_double4c(pattern, status));
             break;
         case OSKAR_SINGLE_COMPLEX:
         case OSKAR_DOUBLE_COMPLEX:
-            oskar_log_error("Spherical wave patterns are not available "
+            oskar_log_error("Spherical wave patterns cannot be used "
                     "in scalar mode");
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             break;
@@ -104,7 +96,7 @@ void oskar_evaluate_spherical_wave_sum(int num_points, const oskar_Mem* theta,
             k = "evaluate_spherical_wave_sum_double"; break;
         case OSKAR_SINGLE_COMPLEX:
         case OSKAR_DOUBLE_COMPLEX:
-            oskar_log_error("Spherical wave patterns are not available "
+            oskar_log_error("Spherical wave patterns cannot be used "
                     "in scalar mode");
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             return;
@@ -118,14 +110,11 @@ void oskar_evaluate_spherical_wave_sum(int num_points, const oskar_Mem* theta,
         const oskar_Arg arg[] = {
                 {INT_SZ, &num_points},
                 {PTR_SZ, oskar_mem_buffer_const(theta)},
-                {PTR_SZ, oskar_mem_buffer_const(phi)},
+                {PTR_SZ, oskar_mem_buffer_const(phi_x)},
+                {PTR_SZ, oskar_mem_buffer_const(phi_y)},
                 {INT_SZ, &l_max},
-                {PTR_SZ, oskar_mem_buffer_const(alpha_te)},
-                {PTR_SZ, oskar_mem_buffer_const(alpha_tm)},
-                {INT_SZ, &stride},
-                {INT_SZ, &E_theta_offset},
-                {INT_SZ, &E_phi_offset},
-                {PTR_SZ, oskar_mem_buffer(pattern)},
+                {PTR_SZ, oskar_mem_buffer_const(alpha)},
+                {INT_SZ, &offset},
                 {PTR_SZ, oskar_mem_buffer(pattern)}
         };
         oskar_device_launch_kernel(k, location, 1, local_size, global_size,

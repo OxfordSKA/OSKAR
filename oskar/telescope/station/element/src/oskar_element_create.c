@@ -43,7 +43,7 @@ oskar_Element* oskar_element_create(int precision, int location, int* status)
     }
     data->precision = precision;
     data->mem_location = location;
-    data->element_type = OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE;
+    data->element_type = OSKAR_ELEMENT_TYPE_DIPOLE;
     data->taper_type = OSKAR_ELEMENT_TAPER_NONE;
     data->dipole_length = 0.5;
     data->dipole_length_units = OSKAR_WAVELENGTHS;

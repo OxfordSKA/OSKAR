@@ -74,18 +74,11 @@ int oskar_element_has_scalar_spline_data(const oskar_Element* data,
             oskar_splines_have_coeffs(data->scalar_im[freq_id]));
 }
 
-int oskar_element_has_x_spherical_wave_data(const oskar_Element* data,
+int oskar_element_has_spherical_wave_data(const oskar_Element* data,
         int freq_id)
 {
     return (data->num_freq > freq_id) && ( /* Safe short-circuit. */
-            data->x_lmax[freq_id] > 0);
-}
-
-int oskar_element_has_y_spherical_wave_data(const oskar_Element* data,
-        int freq_id)
-{
-    return (data->num_freq > freq_id) && ( /* Safe short-circuit. */
-            data->y_lmax[freq_id] > 0);
+            data->l_max[freq_id] > 0);
 }
 
 int oskar_element_num_freq(const oskar_Element* data)
@@ -155,8 +148,6 @@ void oskar_element_set_element_type(oskar_Element* data, const char* type,
     if (*status) return;
     if (!strncmp(type, "D", 1) || !strncmp(type, "d", 1))
         data->element_type = OSKAR_ELEMENT_TYPE_DIPOLE;
-    else if (!strncmp(type, "G",  1) || !strncmp(type, "g",  1))
-        data->element_type = OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE;
     else if (!strncmp(type, "I",  1) || !strncmp(type, "i",  1))
         data->element_type = OSKAR_ELEMENT_TYPE_ISOTROPIC;
     else

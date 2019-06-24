@@ -46,28 +46,48 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
     dst->dipole_length = src->dipole_length;
     dst->dipole_length_units = src->dipole_length_units;
     oskar_element_resize_freq_data(dst, src->num_freq, status);
+    const int prec = dst->precision;
+    const int loc = dst->mem_location;
+    const int sph_wave_type = prec | OSKAR_COMPLEX | OSKAR_MATRIX;
     for (i = 0; i < src->num_freq; ++i)
     {
         dst->freqs_hz[i] = src->freqs_hz[i];
-        dst->x_lmax[i] = src->x_lmax[i];
-        dst->y_lmax[i] = src->y_lmax[i];
+        dst->l_max[i] = src->l_max[i];
         oskar_mem_copy(dst->filename_x[i], src->filename_x[i], status);
         oskar_mem_copy(dst->filename_y[i], src->filename_y[i], status);
         oskar_mem_copy(dst->filename_scalar[i], src->filename_scalar[i], status);
+        if (src->x_v_re[i] && !dst->x_v_re[i])
+        {
+            dst->x_v_re[i] = oskar_splines_create(prec, loc, status);
+            dst->x_v_im[i] = oskar_splines_create(prec, loc, status);
+            dst->x_h_re[i] = oskar_splines_create(prec, loc, status);
+            dst->x_h_im[i] = oskar_splines_create(prec, loc, status);
+        }
         oskar_splines_copy(dst->x_v_re[i], src->x_v_re[i], status);
         oskar_splines_copy(dst->x_v_im[i], src->x_v_im[i], status);
         oskar_splines_copy(dst->x_h_re[i], src->x_h_re[i], status);
         oskar_splines_copy(dst->x_h_im[i], src->x_h_im[i], status);
+        if (src->y_v_re[i] && !dst->y_v_re[i])
+        {
+            dst->y_v_re[i] = oskar_splines_create(prec, loc, status);
+            dst->y_v_im[i] = oskar_splines_create(prec, loc, status);
+            dst->y_h_re[i] = oskar_splines_create(prec, loc, status);
+            dst->y_h_im[i] = oskar_splines_create(prec, loc, status);
+        }
         oskar_splines_copy(dst->y_v_re[i], src->y_v_re[i], status);
         oskar_splines_copy(dst->y_v_im[i], src->y_v_im[i], status);
         oskar_splines_copy(dst->y_h_re[i], src->y_h_re[i], status);
         oskar_splines_copy(dst->y_h_im[i], src->y_h_im[i], status);
+        if (src->scalar_re[i] && !dst->scalar_re[i])
+        {
+            dst->scalar_re[i] = oskar_splines_create(prec, loc, status);
+            dst->scalar_im[i] = oskar_splines_create(prec, loc, status);
+        }
         oskar_splines_copy(dst->scalar_re[i], src->scalar_re[i], status);
         oskar_splines_copy(dst->scalar_im[i], src->scalar_im[i], status);
-        oskar_mem_copy(dst->x_te[i], src->x_te[i], status);
-        oskar_mem_copy(dst->x_tm[i], src->x_tm[i], status);
-        oskar_mem_copy(dst->y_te[i], src->y_te[i], status);
-        oskar_mem_copy(dst->y_tm[i], src->y_tm[i], status);
+        if (src->sph_wave[i] && !dst->sph_wave[i])
+            dst->sph_wave[i] = oskar_mem_create(sph_wave_type, loc, 0, status);
+        oskar_mem_copy(dst->sph_wave[i], src->sph_wave[i], status);
     }
 }
 

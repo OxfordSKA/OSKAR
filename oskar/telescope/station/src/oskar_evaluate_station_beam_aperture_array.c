@@ -87,7 +87,8 @@ static void oskar_evaluate_station_beam_aperture_array_private(
         int depth, int offset_out, oskar_Mem* beam, int* status)
 {
     double beam_x, beam_y, beam_z;
-    oskar_Mem *weights, *weights_error, *signal, *theta, *phi, *array;
+    oskar_Mem *weights, *weights_error, *signal;
+    oskar_Mem *theta, *phi_x, *phi_y, *array;
     int i;
     if (*status) return;
 
@@ -98,7 +99,8 @@ static void oskar_evaluate_station_beam_aperture_array_private(
     weights       = work->weights;
     weights_error = work->weights_error;
     theta         = work->theta_modified;
-    phi           = work->phi_modified;
+    phi_x         = work->phi_x;
+    phi_y         = work->phi_y;
     array         = work->array_pattern;
 
     /* Compute direction cosines for the beam for this station. */
@@ -118,7 +120,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                     oskar_station_element_x_alpha_rad(s, 0) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                     oskar_station_element_y_alpha_rad(s, 0),
                     offset_points, num_points, x, y, z, frequency_hz,
-                    theta, phi, offset_out, beam, status);
+                    theta, phi_x, phi_y, offset_out, beam, status);
             if (oskar_station_enable_array_pattern(s))
             {
                 oskar_evaluate_element_weights(weights, weights_error,
@@ -158,7 +160,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                         oskar_station_element_x_alpha_rad(s, i) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_y_alpha_rad(s, i),
                         offset_points, num_points, x, y, z, frequency_hz,
-                        theta, phi, i * num_points, signal, status);
+                        theta, phi_x, phi_y, i * num_points, signal, status);
             }
             oskar_evaluate_element_weights(weights, weights_error,
                     wavenumber, s, beam_x, beam_y, beam_z,

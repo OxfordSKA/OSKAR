@@ -61,15 +61,18 @@ extern "C" {
  * @param[in]  x           The x-direction-cosines.
  * @param[in]  y           The y-direction-cosines.
  * @param[in]  z           The z-direction-cosines.
- * @param[in]  delta_phi   Angle to add to computed values of phi.
+ * @param[in]  delta_phi1  Angle to add to computed values of \p phi1.
+ * @param[in]  delta_phi2  Angle to add to computed values of \p phi2.
  * @param[out] theta       The theta angles, in radians.
- * @param[out] phi         The phi angles, in radians.
+ * @param[out] phi1        The phi angles, in radians.
+ * @param[out] phi2        The phi angles, in radians.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
 void oskar_convert_enu_directions_to_theta_phi(int offset_in, int num_points,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double delta_phi, oskar_Mem* theta, oskar_Mem* phi, int* status);
+        double delta_phi1, double delta_phi2, oskar_Mem* theta,
+        oskar_Mem* phi1, oskar_Mem* phi2, int* status);
 
 #ifdef __cplusplus
 }

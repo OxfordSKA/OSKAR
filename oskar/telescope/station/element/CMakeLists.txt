@@ -6,7 +6,6 @@ set(element_SRC
     define_apply_element_taper_cosine.h
     define_apply_element_taper_gaussian.h
     define_evaluate_dipole_pattern.h
-    define_evaluate_geometric_dipole_pattern.h
     define_evaluate_spherical_wave.h
     src/oskar_apply_element_taper_cosine.c
     src/oskar_apply_element_taper_gaussian.c
@@ -26,7 +25,6 @@ set(element_SRC
     src/oskar_element_write.c
     src/oskar_element.cl
     src/oskar_evaluate_dipole_pattern.c
-    src/oskar_evaluate_geometric_dipole_pattern.c
     src/oskar_evaluate_spherical_wave_sum.c
 )
 

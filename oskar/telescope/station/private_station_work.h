@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,8 @@ struct oskar_StationWork
     oskar_Mem* enu_direction_z;  /* Real scalar. ENU direction cosine. */
 
     oskar_Mem* theta_modified;   /* Real scalar. */
-    oskar_Mem* phi_modified;     /* Real scalar. */
+    oskar_Mem* phi_x;            /* Real scalar. */
+    oskar_Mem* phi_y;            /* Real scalar. */
     oskar_Mem* weights;          /* Complex scalar. */
     oskar_Mem* weights_error;    /* Complex scalar. */
     oskar_Mem* array_pattern;    /* Complex scalar. */

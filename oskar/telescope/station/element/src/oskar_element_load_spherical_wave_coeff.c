@@ -53,11 +53,13 @@ enum {
 void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
         const char* filename, double freq_hz, int* status)
 {
-    int i, j, n, offset = -1, selector = 0, *l_max1 = 0, *l_max2 = 0;
-    oskar_Mem *sw1 = 0, *sw2 = 0;
+    int i, j, n, selector = 0;
+    int offset_complex = -1, offset1 = 0, offset2 = -1;
+    oskar_Mem* sw = 0;
+    void* sw_p = 0;
     char *line = 0;
     size_t bufsize = 0, num_tmp = 0;
-    double *tmp_coeff = 0;
+    double *tmp = 0;
     FILE* file;
     if (*status) return;
 
@@ -95,10 +97,10 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     if (strstr(leafname, "_tm") || strstr(leafname, "_TM"))
         selector |= OPTION_TM;
     if (strstr(leafname, "_re") || strstr(leafname, "_RE"))
-        offset = 0;
+        offset_complex = 0;
     if (strstr(leafname, "_im") || strstr(leafname, "_IM"))
-        offset = 1;
-    if (offset < 0)
+        offset_complex = 1;
+    if (offset_complex < 0)
     {
         oskar_log_error("Unknown spherical wave filename pattern '%s'",
                 filename);
@@ -107,35 +109,30 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     }
 
     /* Get pointer to spherical wave data using selector and frequency. */
+    /* Coefficient data stored as:
+     * (x_te_re, x_te_im), (x_tm_re, x_tm_im),
+     * (y_te_re, y_te_im), (y_tm_re, y_tm_im)   */
     switch (selector)
     {
     case OPTION_TE:
-        l_max1 = &data->x_lmax[i];
-        l_max2 = &data->y_lmax[i];
-        sw1 = data->x_te[i];
-        sw2 = data->y_te[i];
+        offset1 = 0 + offset_complex;
+        offset2 = 4 + offset_complex;
         break;
     case OPTION_TM:
-        l_max1 = &data->x_lmax[i];
-        l_max2 = &data->y_lmax[i];
-        sw1 = data->x_tm[i];
-        sw2 = data->y_tm[i];
+        offset1 = 2 + offset_complex;
+        offset2 = 6 + offset_complex;
         break;
     case OPTION_X | OPTION_TE:
-        l_max1 = &data->x_lmax[i];
-        sw1 = data->x_te[i];
+        offset1 = 0 + offset_complex;
         break;
     case OPTION_X | OPTION_TM:
-        l_max1 = &data->x_lmax[i];
-        sw1 = data->x_tm[i];
+        offset1 = 2 + offset_complex;
         break;
     case OPTION_Y | OPTION_TE:
-        l_max1 = &data->y_lmax[i];
-        sw1 = data->y_te[i];
+        offset1 = 4 + offset_complex;
         break;
     case OPTION_Y | OPTION_TM:
-        l_max1 = &data->y_lmax[i];
-        sw1 = data->y_tm[i];
+        offset1 = 6 + offset_complex;
         break;
     default:
         oskar_log_error("Unknown spherical wave filename pattern '%s'",
@@ -143,6 +140,11 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
         *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
     }
+    const int type = data->precision;
+    if (!data->sph_wave[i])
+        data->sph_wave[i] = oskar_mem_create(
+                type | OSKAR_COMPLEX | OSKAR_MATRIX, OSKAR_CPU, 0, status);
+    sw = data->sph_wave[i];
 
     /* Open the file. */
     file = fopen(filename, "r");
@@ -153,42 +155,44 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     }
 
     /* Loop over and read each line in the file. */
-    const int type = oskar_element_precision(data);
     n = 0;
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
         const int num_read = (int)oskar_string_to_array_realloc_d(
-                line, &num_tmp, &tmp_coeff);
-        if (sw1 && (int)oskar_mem_length(sw1) < n + num_read)
-            oskar_mem_realloc(sw1, n + 10 * num_read, status);
-        if (sw2 && (int)oskar_mem_length(sw2) < n + num_read)
-            oskar_mem_realloc(sw2, n + 10 * num_read, status);
+                line, &num_tmp, &tmp);
+        if ((int)oskar_mem_length(sw) < n + num_read)
+            oskar_mem_realloc(sw, n + 10 * num_read, status);
+        sw_p = oskar_mem_void(sw);
         if (*status) break;
         if (type == OSKAR_DOUBLE)
         {
-            double* c = oskar_mem_double(sw1, status) + offset;
-            for (j = 0; j < num_read; ++j)
-                c[2 * (j + n)] = tmp_coeff[j];
-            if (sw2)
-            {
-                double* c = oskar_mem_double(sw2, status) + offset;
-                for (j = 0; j < num_read; ++j)
-                    c[2 * (j + n)] = tmp_coeff[j];
-            }
+            double* c = ((double*)sw_p) + offset1;
+            for (j = 0; j < num_read; ++j) c[8 * (j + n)] = tmp[j];
         }
         else
         {
-            float* c = oskar_mem_float(sw1, status) + offset;
-            for (j = 0; j < num_read; ++j)
-                c[2 * (j + n)] = (float)(tmp_coeff[j]);
-            if (sw2)
-            {
-                float* c = oskar_mem_float(sw2, status) + offset;
-                for (j = 0; j < num_read; ++j)
-                    c[2 * (j + n)] = (float)(tmp_coeff[j]);
-            }
+            float* c = ((float*)sw_p) + offset1;
+            for (j = 0; j < num_read; ++j) c[8 * (j + n)] = (float)(tmp[j]);
         }
         n += num_read;
+    }
+
+    /* Copy data if required. */
+    if (offset2 >= 0)
+    {
+        sw_p = oskar_mem_void(sw);
+        if (type == OSKAR_DOUBLE)
+        {
+            double* out = ((double*)sw_p) + offset2;
+            const double* in = ((double*)sw_p) + offset1;
+            for (j = 0; j < n; ++j) out[8 * j] = in[8 * j];
+        }
+        else
+        {
+            float* out = ((float*)sw_p) + offset2;
+            const float* in = ((float*)sw_p) + offset1;
+            for (j = 0; j < n; ++j) out[8 * j] = in[8 * j];
+        }
     }
 
     /* Check total number of coefficients to find l_max. */
@@ -197,27 +201,36 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     if (fabs((double)l_max - l_max_d) < FLT_EPSILON)
     {
         /* Store the filename. */
-        if (l_max1) *l_max1 = l_max;
-        if (l_max2) *l_max2 = l_max;
-        const size_t fname_len = 1 + strlen(filename);
-        if (!data->filename_x[i])
-            data->filename_x[i] = oskar_mem_create(
-                    OSKAR_CHAR, OSKAR_CPU, 0, status);
-        if (!data->filename_y[i])
-            data->filename_y[i] = oskar_mem_create(
-                    OSKAR_CHAR, OSKAR_CPU, 0, status);
-        if (selector & OPTION_X)
-            oskar_mem_append_raw(data->filename_x[i], filename,
-                    OSKAR_CHAR, OSKAR_CPU, fname_len, status);
-        else if (selector & OPTION_Y)
-            oskar_mem_append_raw(data->filename_y[i], filename,
-                    OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+        if (data->l_max[i] == 0 || data->l_max[i] == l_max)
+        {
+            data->l_max[i] = l_max;
+            const size_t fname_len = 1 + strlen(filename);
+            if (!data->filename_x[i])
+                data->filename_x[i] = oskar_mem_create(
+                        OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+            if (!data->filename_y[i])
+                data->filename_y[i] = oskar_mem_create(
+                        OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+            if (selector & OPTION_X)
+                oskar_mem_append_raw(data->filename_x[i], filename,
+                        OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+            else if (selector & OPTION_Y)
+                oskar_mem_append_raw(data->filename_y[i], filename,
+                        OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+            else
+            {
+                oskar_mem_append_raw(data->filename_x[i], filename,
+                        OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+                oskar_mem_append_raw(data->filename_y[i], filename,
+                        OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+            }
+        }
         else
         {
-            oskar_mem_append_raw(data->filename_x[i], filename,
-                    OSKAR_CHAR, OSKAR_CPU, fname_len, status);
-            oskar_mem_append_raw(data->filename_y[i], filename,
-                    OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+            oskar_log_error("Inconsistent number of coefficients for "
+                    "spherical wave pattern (current=%d, expected=%d) in '%s",
+                    l_max, data->l_max[i], filename);
+            *status = OSKAR_ERR_DIMENSION_MISMATCH;
         }
     }
     else
@@ -230,7 +243,7 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     }
 
     /* Free memory. */
-    free(tmp_coeff);
+    free(tmp);
     free(line);
     fclose(file);
 }

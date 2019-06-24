@@ -59,11 +59,7 @@ int oskar_element_has_scalar_spline_data(const oskar_Element* data,
         int freq_id);
 
 OSKAR_EXPORT
-int oskar_element_has_x_spherical_wave_data(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-int oskar_element_has_y_spherical_wave_data(const oskar_Element* data,
+int oskar_element_has_spherical_wave_data(const oskar_Element* data,
         int freq_id);
 
 OSKAR_EXPORT
