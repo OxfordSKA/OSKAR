@@ -209,6 +209,9 @@ void oskar_log_set_term_priority(int value);
 OSKAR_EXPORT
 void oskar_log_set_value_width(int value);
 
+OSKAR_EXPORT
+double oskar_log_timestamp(void);
+
 #ifdef __cplusplus
 }
 #endif

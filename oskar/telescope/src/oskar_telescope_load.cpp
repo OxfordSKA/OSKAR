@@ -191,7 +191,7 @@ static void load_directories(oskar_Telescope* telescope,
         }
         else if (num_dirs > 1)
         {
-            const int num_procs = oskar_get_num_procs() - 1;
+            const int num_procs = oskar_get_num_procs();
             vector<oskar_Thread*> threads(num_procs);
             vector<ThreadArgs> args;
 

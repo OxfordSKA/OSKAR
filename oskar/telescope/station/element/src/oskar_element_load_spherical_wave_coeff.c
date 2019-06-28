@@ -51,15 +51,15 @@ enum {
 };
 
 void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
-        const char* filename, double freq_hz, int* status)
+        const char* filename, double freq_hz, int* num_tmp, double** tmp,
+        int* status)
 {
-    int i, j, n, selector = 0;
+    int i, j, n, selector = 0, line_counter = 1;
     int offset_complex = -1, offset1 = 0, offset2 = -1;
     oskar_Mem* sw = 0;
     void* sw_p = 0;
     char *line = 0;
-    size_t bufsize = 0, num_tmp = 0;
-    double *tmp = 0;
+    size_t bufsize = 0;
     FILE* file;
     if (*status) return;
 
@@ -145,6 +145,7 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
         data->sph_wave[i] = oskar_mem_create(
                 type | OSKAR_COMPLEX | OSKAR_MATRIX, OSKAR_CPU, 0, status);
     sw = data->sph_wave[i];
+    sw_p = oskar_mem_void(sw);
 
     /* Open the file. */
     file = fopen(filename, "r");
@@ -158,45 +159,64 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     n = 0;
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        const int num_read = (int)oskar_string_to_array_realloc_d(
-                line, &num_tmp, &tmp);
-        if ((int)oskar_mem_length(sw) < n + num_read)
-            oskar_mem_realloc(sw, n + 10 * num_read, status);
-        sw_p = oskar_mem_void(sw);
-        if (*status) break;
-        if (type == OSKAR_DOUBLE)
+        const int num_m = (2 * line_counter + 1);
+        if (*num_tmp < num_m)
         {
-            double* c = ((double*)sw_p) + offset1;
-            for (j = 0; j < num_read; ++j) c[8 * (j + n)] = tmp[j];
+            *num_tmp += (2 * line_counter + 1);
+            *tmp = (double*) realloc(*tmp, *num_tmp * sizeof(double));
         }
-        else
-        {
-            float* c = ((float*)sw_p) + offset1;
-            for (j = 0; j < num_read; ++j) c[8 * (j + n)] = (float)(tmp[j]);
-        }
-        n += num_read;
+        const int num_read = (int)oskar_string_to_array_d(
+                line, num_m, *tmp + n);
+        if (num_read < num_m) continue;
+        n += num_m;
+        line_counter++;
     }
-
-    /* Copy data if required. */
-    if (offset2 >= 0)
+    if ((int)oskar_mem_length(sw) < n)
     {
+        oskar_mem_realloc(sw, (size_t)n, status);
         sw_p = oskar_mem_void(sw);
-        if (type == OSKAR_DOUBLE)
+        if (*status) return;
+    }
+    if (type == OSKAR_DOUBLE)
+    {
+        double* c1 = ((double*)sw_p) + offset1;
+        if (offset2 >= 0)
         {
-            double* out = ((double*)sw_p) + offset2;
-            const double* in = ((double*)sw_p) + offset1;
-            for (j = 0; j < n; ++j) out[8 * j] = in[8 * j];
+            double* c2 = ((double*)sw_p) + offset2;
+            for (j = 0; j < n; ++j)
+            {
+                c1[8 * j] = (*tmp)[j];
+                c2[8 * j] = (*tmp)[j];
+            }
         }
         else
         {
-            float* out = ((float*)sw_p) + offset2;
-            const float* in = ((float*)sw_p) + offset1;
-            for (j = 0; j < n; ++j) out[8 * j] = in[8 * j];
+            for (j = 0; j < n; ++j)
+                c1[8 * j] = (*tmp)[j];
+        }
+    }
+    else
+    {
+        float* c1 = ((float*)sw_p) + offset1;
+        if (offset2 >= 0)
+        {
+            float* c2 = ((float*)sw_p) + offset2;
+            for (j = 0; j < n; ++j)
+            {
+                float t = (float)((*tmp)[j]);
+                c1[8 * j] = t;
+                c2[8 * j] = t;
+            }
+        }
+        else
+        {
+            for (j = 0; j < n; ++j)
+                c1[8 * j] = (float)((*tmp)[j]);
         }
     }
 
     /* Check total number of coefficients to find l_max. */
-    const double l_max_d = (sqrt(1 + 8 * n) - 1) / 4;
+    const double l_max_d = sqrt(n + 1) - 1;
     const int l_max = (int)round(l_max_d);
     if (fabs((double)l_max - l_max_d) < FLT_EPSILON)
     {
@@ -238,12 +258,11 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
         oskar_log_error("Number of spherical wave coefficients loaded "
                 "(%d) does not match number required (%d) for closest value "
                 "of l_max=%d in '%s'",
-                n, (2 * l_max + 1) * l_max, l_max, filename);
+                n, (l_max + 1) * (l_max + 1) - 1, l_max, filename);
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
     /* Free memory. */
-    free(tmp);
     free(line);
     fclose(file);
 }

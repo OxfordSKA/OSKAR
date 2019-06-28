@@ -42,7 +42,7 @@ KERNEL(NAME) (\
         FP sin_t, cos_t;\
         SINCOS(theta_, sin_t, cos_t);\
         for (int l = 1; l <= l_max; ++l) {\
-            const int ind0 = (2 * l_max + 1) * (l - 1) + l;\
+            const int ind0 = l * l - 1 + l;\
             const FP f_ = (2 * l + 1) / (4 * ((FP)M_PI) * l * (l + 1));\
             for (int abs_m = l; abs_m >=0; --abs_m) {\
                 FP p, pds, dpms, sin_p, cos_p;\

@@ -33,9 +33,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef OSKAR_OS_WIN
+#include <sys/time.h>
+#include <unistd.h>
+#else
+#include <windows.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define WRITE_TIMESTAMP 0
 
 static void print_entry(FILE* stream, char priority, char code, int depth,
         const char* prefix, int width, const char* format, va_list args);
@@ -46,7 +55,31 @@ static char get_entry_code(char priority);
 static void write_log(oskar_Log* log, FILE* stream, char priority, char code,
         int depth, const char* prefix, const char* format, va_list args);
 
-static oskar_Log log_ = {0, OSKAR_LOG_NONE, OSKAR_LOG_WARNING, 40, 0, 0};
+static oskar_Log log_ = {0, OSKAR_LOG_NONE, OSKAR_LOG_WARNING, 40, 0, 0, 0.0};
+
+
+double oskar_log_timestamp()
+{
+#if defined(OSKAR_OS_WIN)
+    /* Windows-specific version. */
+    LARGE_INTEGER cntr, ifreq;
+    QueryPerformanceCounter(&cntr);
+    QueryPerformanceFrequency(&ifreq);
+    const double freq = (double)(ifreq.QuadPart);
+    return (double)(cntr.QuadPart) / freq;
+#elif _POSIX_MONOTONIC_CLOCK > 0
+    /* Use monotonic clock if available. */
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec + ts.tv_nsec / 1e9;
+#else
+    /* Use gettimeofday() as fallback. */
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return tv.tv_sec + tv.tv_usec / 1e6;
+#endif
+}
+
 
 void oskar_log_error(const char* format, ...)
 {
@@ -271,6 +304,11 @@ static void print_entry(FILE* stream, char priority, char code, int depth,
 
     /* Print the message code. */
     fprintf(stream, "%c|", code);
+
+#if WRITE_TIMESTAMP
+    /* Print the timestamp. */
+    fprintf(stream, "%6.1f ", oskar_log_timestamp() - log_.timestamp_start);
+#endif
 
     /* Print leading whitespace and symbol for this depth. */
     if (depth >= 0) {

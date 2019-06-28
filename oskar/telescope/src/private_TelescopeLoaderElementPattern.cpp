@@ -231,6 +231,8 @@ void TelescopeLoaderElementPattern::load_spherical_wave_data(
 {
     size_t buflen = 0;
     char* buffer = 0;
+    int num_tmp = 21;
+    double* tmp = (double*) calloc((size_t) num_tmp, sizeof(double));
     if (*status) return;
     for (size_t i = 0; i < keys.size(); ++i)
     {
@@ -248,9 +250,10 @@ void TelescopeLoaderElementPattern::load_spherical_wave_data(
             oskar_station_resize_element_types(station, ind + 1, status);
         oskar_element_load_spherical_wave_coeff(
                 oskar_station_element(station, ind), path.c_str(),
-                freq, status);
+                freq, &num_tmp, &tmp, status);
     }
     free(buffer);
+    free(tmp);
 }
 
 void TelescopeLoaderElementPattern::parse_filename(const char* s,

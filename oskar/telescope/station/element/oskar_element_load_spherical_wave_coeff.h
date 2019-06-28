@@ -73,7 +73,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
-        const char* filename, double freq_hz, int* status);
+        const char* filename, double freq_hz, int* num_tmp, double** tmp,
+        int* status);
 
 #ifdef __cplusplus
 }

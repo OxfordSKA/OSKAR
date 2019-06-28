@@ -143,6 +143,7 @@ if (CUDA_FOUND)
     set(CUDA_VERBOSE_BUILD OFF)
 
     # General NVCC compiler options.
+    list(APPEND CUDA_NVCC_FLAGS "--default-stream per-thread")
     set(CUDA_NVCC_FLAGS_RELEASE "-O3")
     set(CUDA_NVCC_FLAGS_DEBUG "-O0 -g --generate-line-info")
     set(CUDA_NVCC_FLAGS_RELWITHDEBINFO "-O3 -g --generate-line-info")

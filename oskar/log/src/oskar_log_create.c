@@ -87,6 +87,7 @@ void oskar_log_create(int file_priority, int term_priority)
     log->file_priority = file_priority;
     log->term_priority = term_priority;
     log->value_width = OSKAR_LOG_DEFAULT_VALUE_WIDTH;
+    log->timestamp_start = oskar_log_timestamp();
 
     /* Construct log file name root. */
     const time_t unix_time = time(NULL);

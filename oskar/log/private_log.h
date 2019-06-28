@@ -38,6 +38,7 @@ struct oskar_Log
     int value_width;                  /* Width of value message */
     FILE* file;                       /* Log file handle. */
     char* name;                       /* Log file pathname. */
+    double timestamp_start;           /* Timestamp of log creation. */
 };
 
 #ifndef OSKAR_LOG_TYPEDEF_

@@ -47,7 +47,7 @@ void oskar_evaluate_spherical_wave_sum(int num_points, const oskar_Mem* theta,
 {
     if (*status) return;
     const int location = oskar_mem_location(pattern);
-    const int coeff_required = (2 * l_max + 1) * l_max;
+    const int coeff_required = (l_max + 1) * (l_max + 1) - 1;
     if (oskar_mem_length(alpha) < (size_t) coeff_required)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
