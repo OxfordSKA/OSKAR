@@ -114,8 +114,10 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/oskar"
     COMPONENT headers
     FILES_MATCHING REGEX "(oskar.*h)|(.*hpp)"
     PATTERN ${install_include_dir} EXCLUDE
+    PATTERN define* EXCLUDE
     PATTERN private* EXCLUDE
     PATTERN *dierckx* EXCLUDE
+    PATTERN cmake EXCLUDE
     PATTERN src  EXCLUDE
     PATTERN test EXCLUDE
     PATTERN tests EXCLUDE

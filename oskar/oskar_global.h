@@ -218,11 +218,6 @@ enum OSKAR_DIRECTION_TYPE
 #else
 #    define OSKAR_EXPORT OSKAR_DECL_IMPORT
 #endif
-#ifdef oskar_ms_EXPORTS
-#    define OSKAR_MS_EXPORT OSKAR_DECL_EXPORT
-#else
-#    define OSKAR_MS_EXPORT OSKAR_DECL_IMPORT
-#endif
 #ifdef oskar_apps_EXPORTS
 #    define OSKAR_APPS_EXPORT OSKAR_DECL_EXPORT
 #else

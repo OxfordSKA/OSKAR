@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_ms_read.h
  */
 
-#include <oskar_global.h>
+#include <ms/oskar_ms_macros.h>
 
 #ifdef __cplusplus
 extern "C" {

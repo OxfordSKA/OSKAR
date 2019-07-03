@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
+ * Copyright (c) 2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MS_OPEN_H_
-#define OSKAR_MS_OPEN_H_
+#ifndef OSKAR_MS_MACROS_H_
+#define OSKAR_MS_MACROS_H_
 
-/**
- * @file oskar_ms_open.h
- */
-
-#include <ms/oskar_ms_macros.h>
-
-#ifdef __cplusplus
-extern "C" {
+#ifndef OSKAR_DECL_EXPORT
+#    ifdef _MSC_VER
+#        define OSKAR_DECL_EXPORT __declspec(dllexport)
+#    elif __GNUC__ >= 4
+#        define OSKAR_DECL_EXPORT __attribute__((visibility ("default")))
+#    else
+#        define OSKAR_DECL_EXPORT
+#    endif
+#endif
+#ifndef OSKAR_DECL_IMPORT
+#    ifdef _MSC_VER
+#        define OSKAR_DECL_IMPORT __declspec(dllimport)
+#    elif __GNUC__ >= 4
+#        define OSKAR_DECL_IMPORT __attribute__((visibility ("default")))
+#    else
+#        define OSKAR_DECL_IMPORT
+#    endif
 #endif
 
-/**
- * @brief Opens an existing Measurement Set.
- *
- * @details
- * Opens an existing Measurement Set.
- */
-OSKAR_MS_EXPORT
-oskar_MeasurementSet* oskar_ms_open(const char* filename);
 
-#ifdef __cplusplus
-}
+#ifdef oskar_ms_EXPORTS
+#    define OSKAR_MS_EXPORT OSKAR_DECL_EXPORT
+#else
+#    define OSKAR_MS_EXPORT OSKAR_DECL_IMPORT
 #endif
 
-#endif /* OSKAR_MS_OPEN_H_ */
+#endif /* include guard */
