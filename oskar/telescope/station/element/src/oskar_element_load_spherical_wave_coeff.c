@@ -160,9 +160,9 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
         const int num_m = (2 * line_counter + 1);
-        if (*num_tmp < num_m)
+        if (*num_tmp < n + num_m)
         {
-            *num_tmp += (2 * line_counter + 1);
+            *num_tmp += num_m;
             *tmp = (double*) realloc(*tmp, *num_tmp * sizeof(double));
         }
         const int num_read = (int)oskar_string_to_array_d(

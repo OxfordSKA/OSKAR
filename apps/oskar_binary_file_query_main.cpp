@@ -33,6 +33,7 @@
 #include "utility/oskar_version_string.h"
 
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 
 int main(int argc, char** argv)

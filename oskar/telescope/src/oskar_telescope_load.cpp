@@ -118,19 +118,20 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
 
 struct ThreadArgs
 {
-    oskar_Telescope *telescope;
-    const string& cwd;
-    const vector<oskar_TelescopeLoadAbstract*>& loaders;
-    map<string, string>& filemap;
+    oskar_Telescope* telescope;
+    const string* cwd;
+    const vector<oskar_TelescopeLoadAbstract*>* loaders;
+    map<string, string>* filemap;
     int i_thread, num_threads, num_dirs, *status;
     const char* const* children;
     ThreadArgs(oskar_Telescope* telescope,
             const string& cwd,
             const vector<oskar_TelescopeLoadAbstract*>& loaders,
-            map<string, string>& filemap)
-    : telescope(telescope), cwd(cwd), loaders(loaders), filemap(filemap),
-      i_thread(0), num_threads(0), num_dirs(0),
-      status(0), children(0) {}
+            map<string, string>& filemap, int i_thread, int num_threads,
+            int num_dirs, int* status, const char* const* children)
+    : telescope(telescope), cwd(&cwd), loaders(&loaders), filemap(&filemap),
+      i_thread(i_thread), num_threads(num_threads), num_dirs(num_dirs),
+      status(status), children(children) {}
 };
 typedef struct ThreadArgs ThreadArgs;
 
@@ -140,9 +141,9 @@ static void* thread_func(void* arg)
     for (int i = a->i_thread; i < a->num_dirs; i += a->num_threads)
     {
         load_directories(a->telescope,
-                oskar_TelescopeLoadAbstract::get_path(a->cwd, a->children[i]),
-                oskar_telescope_station(a->telescope, i), 1,
-                a->loaders, a->filemap, a->status);
+                oskar_TelescopeLoadAbstract::get_path(*(a->cwd),
+                a->children[i]), oskar_telescope_station(a->telescope, i), 1,
+                *(a->loaders), *(a->filemap), a->status);
     }
     return 0;
 }
@@ -205,13 +206,8 @@ static void load_directories(oskar_Telescope* telescope,
             // Use multi-threading for load at top level only.
             for (int i = 0; i < num_procs; ++i)
             {
-                ThreadArgs arg(telescope, cwd, loaders, filemap);
-                arg.i_thread = i;
-                arg.num_threads = num_procs;
-                arg.num_dirs = num_dirs;
-                arg.status = status;
-                arg.children = children;
-                args.push_back(arg);
+                args.push_back(ThreadArgs(telescope, cwd, loaders,
+                        filemap, i, num_procs, num_dirs, status, children));
             }
             for (int i = 0; i < num_procs; ++i)
             {
