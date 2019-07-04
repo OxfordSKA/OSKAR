@@ -89,12 +89,15 @@ class BuildExt(build_ext):
         global CHECKED_LIB
         if not CHECKED_LIB:
             CHECKED_LIB = True
+            if os.getenv('OSKAR_LIB_DIR'):
+                self.library_dirs.append(os.getenv('OSKAR_LIB_DIR'))
             directory = self.dir_contains('oskar.', self.library_dirs)
             if not directory:
                 raise RuntimeError(
                     "Could not find OSKAR library. "
                     "Check that OSKAR has already been installed on "
-                    "this system, and set the library path to build_ext "
+                    "this system, and either set the environment variable "
+                    "OSKAR_LIB_DIR, or set the library path to build_ext "
                     "using -L or --library-dirs")
             self.rpath.append(directory)
             self.libraries.append('oskar')
@@ -108,13 +111,16 @@ class BuildExt(build_ext):
         global CHECKED_INC
         if not CHECKED_INC:
             CHECKED_INC = True
+            if os.getenv('OSKAR_INC_DIR'):
+                self.include_dirs.append(os.getenv('OSKAR_INC_DIR'))
             header = self.find_file(
                 join('oskar', 'oskar_version.h'), self.include_dirs)
             if not header:
                 raise RuntimeError(
                     "Could not find oskar/oskar_version.h. "
                     "Check that OSKAR has already been installed on "
-                    "this system, and set the include path to build_ext "
+                    "this system, and either set the environment variable "
+                    "OSKAR_INC_DIR, or set the include path to build_ext "
                     "using -I or --include-dirs")
             self.include_dirs.insert(0, dirname(header))
             self.include_dirs.insert(0, get_include())
