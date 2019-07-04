@@ -32,6 +32,9 @@ MODULES = [
     ('_bda_utils', 'oskar_bda_utils.c')
 ]
 
+CHECKED_LIB = False
+CHECKED_INC = False
+
 
 class BuildExt(build_ext):
     """Class used to build OSKAR Python extensions. Inherits build_ext."""
@@ -80,41 +83,50 @@ class BuildExt(build_ext):
         Library directories and include directories are checked here, first.
         """
         # Check we can find the OSKAR library.
-        directory = self.dir_contains('oskar.', self.library_dirs)
-        if not directory:
-            raise RuntimeError(
-                "Could not find OSKAR library. "
-                "Check that OSKAR has already been installed on this system, "
-                "and set the library path to build_ext "
-                "using -L or --library-dirs")
-        self.rpath.append(directory)
-        self.libraries.append('oskar')
-        self.libraries.append('oskar_apps')
-        self.libraries.append('oskar_binary')
-        self.libraries.append('oskar_settings')
-        if self.dir_contains('oskar_ms.', self.library_dirs):
-            self.libraries.append('oskar_ms')
+        # For some reason, run() is sometimes called again after the build
+        # has already happened.
+        # Make sure not to fail the check the second time.
+        global CHECKED_LIB
+        if not CHECKED_LIB:
+            CHECKED_LIB = True
+            directory = self.dir_contains('oskar.', self.library_dirs)
+            if not directory:
+                raise RuntimeError(
+                    "Could not find OSKAR library. "
+                    "Check that OSKAR has already been installed on "
+                    "this system, and set the library path to build_ext "
+                    "using -L or --library-dirs")
+            self.rpath.append(directory)
+            self.libraries.append('oskar')
+            self.libraries.append('oskar_apps')
+            self.libraries.append('oskar_binary')
+            self.libraries.append('oskar_settings')
+            if self.dir_contains('oskar_ms.', self.library_dirs):
+                self.libraries.append('oskar_ms')
 
         # Check we can find the OSKAR headers.
-        header = self.find_file(
-            join('oskar', 'oskar_version.h'), self.include_dirs)
-        if not header:
-            raise RuntimeError(
-                "Could not find oskar/oskar_version.h. "
-                "Check that OSKAR has already been installed on this system, "
-                "and set the include path to build_ext "
-                "using -I or --include-dirs")
-        self.include_dirs.insert(0, dirname(header))
-        self.include_dirs.insert(0, get_include())
+        global CHECKED_INC
+        if not CHECKED_INC:
+            CHECKED_INC = True
+            header = self.find_file(
+                join('oskar', 'oskar_version.h'), self.include_dirs)
+            if not header:
+                raise RuntimeError(
+                    "Could not find oskar/oskar_version.h. "
+                    "Check that OSKAR has already been installed on "
+                    "this system, and set the include path to build_ext "
+                    "using -I or --include-dirs")
+            self.include_dirs.insert(0, dirname(header))
+            self.include_dirs.insert(0, get_include())
 
-        # Check the version of OSKAR is compatible.
-        version = self.get_oskar_version(header)
-        if not version.startswith(OSKAR_COMPATIBILITY_VERSION):
-            raise RuntimeError(
-                "The version of OSKAR found is not compatible with oskarpy. "
-                "Found OSKAR %s, but require OSKAR %s." % (
-                    version, OSKAR_COMPATIBILITY_VERSION)
-            )
+            # Check the version of OSKAR is compatible.
+            version = self.get_oskar_version(header)
+            if not version.startswith(OSKAR_COMPATIBILITY_VERSION):
+                raise RuntimeError(
+                    "The version of OSKAR found is not compatible with "
+                    "oskarpy. Found OSKAR %s, but require OSKAR %s." % (
+                        version, OSKAR_COMPATIBILITY_VERSION)
+                )
         build_ext.run(self)
 
     def build_extension(self, ext):
