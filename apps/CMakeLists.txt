@@ -7,9 +7,9 @@ add_subdirectory(test)
 # === Include build macros used for apps.
 include(${OSKAR_SOURCE_DIR}/cmake/oskar_build_macros.cmake)
 
-if (CUDA_FOUND)
+if (CASACORE_FOUND)
     oskar_app(
-        NAME oskar_cuda_system_info SOURCES oskar_cuda_system_info_main.cpp)
+        NAME oskar_vis_to_ms SOURCES oskar_vis_to_ms_main.cpp)
 endif()
 
 macro(declare_oskar_apps)
@@ -21,6 +21,7 @@ endmacro()
 declare_oskar_apps(
     oskar_convert_ecef_to_enu
     oskar_convert_geodetic_to_ecef
+    oskar_cuda_system_info
     oskar_binary_file_query
     oskar_filter_sky_model_clusters
     oskar_fit_element_data
@@ -32,7 +33,6 @@ declare_oskar_apps(
     oskar_vis_add
     oskar_vis_add_noise
     oskar_vis_summary
-    oskar_vis_to_ms
     oskar_vis_upgrade_format
     oskar_vis_to_ascii_table)
 

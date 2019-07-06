@@ -60,6 +60,8 @@ endif()
 # Link with oskar_ms if we have casacore.
 if (CASACORE_FOUND)
     target_link_libraries(${libname} oskar_ms)
+else()
+    add_definitions(-DOSKAR_NO_MS)
 endif()
 
 # Link with OpenCL if we have it.
