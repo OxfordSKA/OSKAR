@@ -41,6 +41,9 @@ static const char name[] = "oskar_Sky";
 
 #define deg2rad 1.74532925199432957692369e-2
 #define arcsec2rad 4.84813681109535993589914e-6
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
 
 static void* get_handle(PyObject* capsule, const char* name)
 {

@@ -47,10 +47,11 @@ class BuildExt(build_ext):
             dir_paths (array-like, str):  List of directories to search.
         """
         for directory in dir_paths:
+            directory = directory.strip('\"')
             if os.path.exists(directory):
                 test_path = join(directory, name)
                 if isfile(test_path):
-                    return test_path
+                    return test_path.strip('\"')
         return None
 
     @staticmethod
@@ -62,6 +63,7 @@ class BuildExt(build_ext):
             dir_paths (array-like, str):  List of directories to search.
         """
         for directory in dir_paths:
+            directory = directory.strip('\"')
             if os.path.exists(directory):
                 dir_contents = os.listdir(directory)
                 for item in dir_contents:
@@ -91,6 +93,10 @@ class BuildExt(build_ext):
             CHECKED_LIB = True
             if os.getenv('OSKAR_LIB_DIR'):
                 self.library_dirs.append(os.getenv('OSKAR_LIB_DIR'))
+            if platform.system() == 'Windows':
+                self.library_dirs.append('C:\\Program Files\\OSKAR\\lib')
+            for i, dir in enumerate(self.library_dirs):
+                self.library_dirs[i] = dir.strip('\"')
             directory = self.dir_contains('oskar.', self.library_dirs)
             if not directory:
                 raise RuntimeError(
@@ -99,7 +105,8 @@ class BuildExt(build_ext):
                     "this system, and either set the environment variable "
                     "OSKAR_LIB_DIR, or set the library path to build_ext "
                     "using -L or --library-dirs")
-            self.rpath.append(directory)
+            if platform.system() != 'Windows':
+                self.rpath.append(directory)
             self.libraries.append('oskar')
             self.libraries.append('oskar_apps')
             self.libraries.append('oskar_binary')
@@ -113,6 +120,8 @@ class BuildExt(build_ext):
             CHECKED_INC = True
             if os.getenv('OSKAR_INC_DIR'):
                 self.include_dirs.append(os.getenv('OSKAR_INC_DIR'))
+            if platform.system() == 'Windows':
+                self.include_dirs.append('C:\\Program Files\\OSKAR\\include')
             header = self.find_file(
                 join('oskar', 'oskar_version.h'), self.include_dirs)
             if not header:
@@ -124,6 +133,8 @@ class BuildExt(build_ext):
                     "using -I or --include-dirs")
             self.include_dirs.insert(0, dirname(header))
             self.include_dirs.insert(0, get_include())
+            for i, dir in enumerate(self.include_dirs):
+                self.include_dirs[i] = dir.strip('\"')
 
             # Check the version of OSKAR is compatible.
             version = self.get_oskar_version(header)
@@ -164,9 +175,11 @@ def get_oskarpy_version():
 # Call setup() with list of extensions to build.
 EXTENSIONS = []
 for module in MODULES:
+    if platform.system() == 'Windows' and 'measurement_set' in module[0]:
+        continue
     _, src_ext = splitext(module[1])
     extra_compile_args = []
-    if src_ext == ".c":
+    if src_ext == ".c" and platform.system != 'Windows':
         extra_compile_args = ["-std=c99"]
     EXTENSIONS.append(Extension(
         'oskar.' + module[0], sources=[join('oskar', 'src', module[1])],
@@ -184,13 +197,15 @@ setup(
         'Topic :: Scientific/Engineering :: Astronomy',
         'License :: OSI Approved :: BSD License',
         'Operating System :: POSIX',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
         'Programming Language :: C',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3'
     ],
     author='University of Oxford',
     author_email='oskar@oerc.ox.ac.uk',
-    url='http://oskar.oerc.ox.ac.uk',
+    url='https://github.com/OxfordSKA/OSKAR/tree/master/python',
     license='BSD',
     install_requires=['numpy'],
     setup_requires=['numpy'],
