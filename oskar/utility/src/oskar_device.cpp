@@ -48,6 +48,7 @@
 #include "utility/oskar_cl_registrar.h"
 #include "utility/oskar_cuda_registrar.h"
 #include "utility/oskar_dir.h"
+#include "utility/oskar_lock_file.h"
 #include "utility/oskar_thread.h"
 
 #ifdef OSKAR_OS_WIN
@@ -488,47 +489,53 @@ static void oskar_device_binary_save_cl(const oskar_Device* device)
 #ifdef OSKAR_HAVE_OPENCL
     int status = 0;
     char* cache_name = oskar_device_cache_path(device, 0);
-    oskar_Binary* file = oskar_binary_create(cache_name, 'w', &status);
-    if (!file || status)
+    std::string lock_name = std::string(cache_name) + std::string(".lock");
+    if (oskar_lock_file(lock_name.c_str()))
     {
-        free(cache_name);
+        oskar_Binary* file = oskar_binary_create(cache_name, 'w', &status);
+        if (!file || status)
+        {
+            oskar_binary_free(file);
+            remove(lock_name.c_str());
+            free(cache_name);
+            return;
+        }
+        cl_uint num_devices = 0;
+        clGetProgramInfo(device->program, CL_PROGRAM_NUM_DEVICES,
+                sizeof(cl_uint), &num_devices, 0);
+        if (num_devices != 1) return;
+        size_t* binary_sizes = (size_t*) malloc(num_devices * sizeof(size_t));
+        clGetProgramInfo(device->program, CL_PROGRAM_BINARY_SIZES,
+                num_devices * sizeof(size_t), binary_sizes, 0);
+        unsigned char** binaries =
+                (unsigned char**) malloc(num_devices * sizeof(unsigned char*));
+        for (cl_uint i = 0; i < num_devices; ++i)
+            binaries[i] = (unsigned char*) malloc(binary_sizes[i]);
+        clGetProgramInfo(device->program, CL_PROGRAM_BINARIES,
+                num_devices * sizeof(unsigned char*), binaries, 0);
+        const int program_source_len = (int) device->kern->src.length();
+        const int program_binary_size = (int) binary_sizes[0];
+        const unsigned long int program_crc = oskar_device_crc(device,
+                device->kern->src.c_str(), (size_t) program_source_len);
+        oskar_binary_write_ext(file, OSKAR_INT, device->name,
+                "PROGRAM_CRC", 0, sizeof(unsigned long int),
+                &program_crc, &status);
+        oskar_binary_write_ext(file, OSKAR_INT, device->name,
+                "PROGRAM_SOURCE_LENGTH", 0, sizeof(int),
+                &program_source_len, &status);
+        oskar_binary_write_ext(file, OSKAR_INT, device->name,
+                "PROGRAM_BINARY_SIZE", 0, sizeof(int),
+                &program_binary_size, &status);
+        oskar_binary_write_ext(file, OSKAR_CHAR, device->name,
+                "PROGRAM_BINARY", 0, binary_sizes[0],
+                binaries[0], &status);
+        for (cl_uint i = 0; i < num_devices; ++i) free(binaries[i]);
+        free(binaries);
+        free(binary_sizes);
         oskar_binary_free(file);
-        return;
+        remove(lock_name.c_str());
     }
-    cl_uint num_devices = 0;
-    clGetProgramInfo(device->program, CL_PROGRAM_NUM_DEVICES,
-            sizeof(cl_uint), &num_devices, 0);
-    if (num_devices != 1) return;
-    size_t* binary_sizes = (size_t*) malloc(num_devices * sizeof(size_t));
-    clGetProgramInfo(device->program, CL_PROGRAM_BINARY_SIZES,
-            num_devices * sizeof(size_t), binary_sizes, 0);
-    unsigned char** binaries =
-            (unsigned char**) malloc(num_devices * sizeof(unsigned char*));
-    for (cl_uint i = 0; i < num_devices; ++i)
-        binaries[i] = (unsigned char*) malloc(binary_sizes[i]);
-    clGetProgramInfo(device->program, CL_PROGRAM_BINARIES,
-            num_devices * sizeof(unsigned char*), binaries, 0);
-    const int program_source_len = (int) device->kern->src.length();
-    const int program_binary_size = (int) binary_sizes[0];
-    const unsigned long int program_crc = oskar_device_crc(device,
-            device->kern->src.c_str(), (size_t) program_source_len);
-    oskar_binary_write_ext(file, OSKAR_INT, device->name,
-            "PROGRAM_CRC", 0, sizeof(unsigned long int),
-            &program_crc, &status);
-    oskar_binary_write_ext(file, OSKAR_INT, device->name,
-            "PROGRAM_SOURCE_LENGTH", 0, sizeof(int),
-            &program_source_len, &status);
-    oskar_binary_write_ext(file, OSKAR_INT, device->name,
-            "PROGRAM_BINARY_SIZE", 0, sizeof(int),
-            &program_binary_size, &status);
-    oskar_binary_write_ext(file, OSKAR_CHAR, device->name,
-            "PROGRAM_BINARY", 0, binary_sizes[0],
-            binaries[0], &status);
-    for (cl_uint i = 0; i < num_devices; ++i) free(binaries[i]);
-    free(binaries);
-    free(binary_sizes);
     free(cache_name);
-    oskar_binary_free(file);
 #else
     (void) device;
 #endif
