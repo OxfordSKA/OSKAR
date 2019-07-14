@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,51 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
-#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
+#include "telescope/private_TelescopeLoaderCableLengthError.h"
+#include "utility/oskar_dir.h"
 
-/**
- * @file oskar_evaluate_element_weights_dft.h
- */
+using std::map;
+using std::string;
 
-#include <oskar_global.h>
-#include <mem/oskar_mem.h>
+static const char* cable_length_error_file = "cable_length_error.txt";
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Function to compute DFT element phase weights.
- *
- * @details
- * This function computes the DFT phase weights for each element.
- *
- * The wavelength used to compute the supplied wavenumber must be in the
- * same units as the input positions.
- *
- * @param[in] num_elements   The number of elements in the array.
- * @param[in] x              Element x positions.
- * @param[in] y              Element y positions.
- * @param[in] z              Element z positions.
- * @param[in] cable_length_error Element cable length errors.
- * @param[in] wavenumber     Wavenumber (2 pi / wavelength).
- * @param[in] x_beam         Beam x direction cosine.
- * @param[in] y_beam         Beam y direction cosine.
- * @param[in] z_beam         Beam z direction cosine.
- * @param[out] weights       Output DFT phase weights per element.
- * @param[in,out] status     Status return code.
- */
-OSKAR_EXPORT
-void oskar_evaluate_element_weights_dft(int num_elements,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        const oskar_Mem* cable_length_error, double wavenumber,
-        double x_beam, double y_beam, double z_beam, oskar_Mem* weights,
-        int* status);
-
-#ifdef __cplusplus
+void TelescopeLoaderCableLengthError::load(oskar_Station* station,
+        const string& cwd, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
+{
+    // Check for presence of "cable_length_error.txt".
+    if (oskar_dir_file_exists(cwd.c_str(), cable_length_error_file))
+    {
+        oskar_station_load_cable_length_error(station,
+                get_path(cwd, cable_length_error_file).c_str(), status);
+    }
 }
-#endif
 
-#endif /* include guard */
+string TelescopeLoaderCableLengthError::name() const
+{
+    return string("element cable length error file loader");
+}

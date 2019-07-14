@@ -36,13 +36,14 @@
 extern "C" {
 #endif
 
-OSKAR_ELEMENT_WEIGHTS_DFT(evaluate_element_weights_dft_f, float, float2)
-OSKAR_ELEMENT_WEIGHTS_DFT(evaluate_element_weights_dft_d, double, double2)
+OSKAR_ELEMENT_WEIGHTS_DFT(evaluate_element_weights_dft_float, float, float2)
+OSKAR_ELEMENT_WEIGHTS_DFT(evaluate_element_weights_dft_double, double, double2)
 
 void oskar_evaluate_element_weights_dft(int num_elements,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double wavenumber, double x_beam, double y_beam, double z_beam,
-        oskar_Mem* weights, int* status)
+        const oskar_Mem* cable_length_error, double wavenumber,
+        double x_beam, double y_beam, double z_beam, oskar_Mem* weights,
+        int* status)
 {
     if (*status) return;
     const int location = oskar_mem_location(weights);
@@ -72,17 +73,19 @@ void oskar_evaluate_element_weights_dft(int num_elements,
     if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE_COMPLEX)
-            evaluate_element_weights_dft_d(num_elements,
+            evaluate_element_weights_dft_double(num_elements,
                     oskar_mem_double_const(x, status),
                     oskar_mem_double_const(y, status),
                     oskar_mem_double_const(z, status),
+                    oskar_mem_double_const(cable_length_error, status),
                     wavenumber, x_beam, y_beam, z_beam,
                     oskar_mem_double2(weights, status));
         else if (type == OSKAR_SINGLE_COMPLEX)
-            evaluate_element_weights_dft_f(num_elements,
+            evaluate_element_weights_dft_float(num_elements,
                     oskar_mem_float_const(x, status),
                     oskar_mem_float_const(y, status),
                     oskar_mem_float_const(z, status),
+                    oskar_mem_float_const(cable_length_error, status),
                     wavenumber, x_beam, y_beam, z_beam,
                     oskar_mem_float2(weights, status));
         else
@@ -114,6 +117,7 @@ void oskar_evaluate_element_weights_dft(int num_elements,
                 {PTR_SZ, oskar_mem_buffer_const(x)},
                 {PTR_SZ, oskar_mem_buffer_const(y)},
                 {PTR_SZ, oskar_mem_buffer_const(z)},
+                {PTR_SZ, oskar_mem_buffer_const(cable_length_error)},
                 {is_dbl ? DBL_SZ : FLT_SZ,
                         is_dbl ? (const void*)&wavenumber : (const void*)&w},
                 {is_dbl ? DBL_SZ : FLT_SZ,

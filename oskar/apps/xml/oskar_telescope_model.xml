@@ -50,10 +50,33 @@
     </s>
 
     <!-- Aperture array settings group -->
-    <import filename="oskar_telescope_AA.xml"/>
+    <s k="aperture_array">
+        <label>Aperture array settings</label>
+        <depends k="telescope/station_type" v="Aperture array" />
+        <import filename="oskar_telescope_AA_array.xml" />
+        <import filename="oskar_telescope_AA_element.xml" />
+    </s>
 
     <!-- Gaussian beam telescope settings group -->
-    <import filename="oskar_telescope_gaussian.xml"/>
+    <s k="gaussian_beam">
+        <label>Gaussian station beam settings</label>
+        <depends k="telescope/station_type" v="Gaussian beam" />
+        <!-- Required IF the station type is 'Gaussian beam' -->
+        <s k="fwhm_deg">
+            <label>Gaussian FWHM [deg]</label>
+            <type name="double" default="0.0" />
+            <desc>For stations using a simple Gaussian beam, this setting
+                gives the full-width half maximum value of the Gaussian
+                station beam at the reference frequency, in degrees.</desc>
+        </s>
+        <!-- Required IF the station type is 'Gaussian beam' -->
+        <s k="ref_freq_hz">
+            <label>Reference frequency [Hz]</label>
+            <type name="double" default="0.0" />
+            <desc>The reference frequency of the specified FWHM, in Hz.</desc>
+        </s>
+    </s>
+
     <!--
     <s k="output_directory"><label>Output directory</label>
         <type name="OutputFile" default=""/>

@@ -37,8 +37,8 @@ import math
 import numpy
 try:
     from . import _telescope_lib
-except ImportError as e:
-    print("Import error: " + str(e))
+except ImportError as err:
+    print("Import error: " + str(err))
     _telescope_lib = None
 
 
@@ -105,6 +105,18 @@ class Telescope(object):
         """
         self.capsule_ensure()
         _telescope_lib.load(self._capsule, dir_name)
+
+    def override_element_cable_length_errors(self, std, seed=1, mean=0.0):
+        """Overrides element cable length errors for all stations.
+
+        Args:
+            std (float): Standard deviation of element cable length error.
+            seed (Optional[int]): Random generator seed. Default 1.
+            mean (Optional[float]): Mean element cable length error. Default 0.
+        """
+        self.capsule_ensure()
+        _telescope_lib.override_element_cable_length_errors(
+            self._capsule, seed, mean, std)
 
     def override_element_gains(self, mean, std, seed=1):
         """Overrides element gains for all stations in a telescope model.

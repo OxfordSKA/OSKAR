@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
-#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
+#ifndef OSKAR_TELESCOPE_OVERRIDE_ELEMENT_CABLE_LENGTH_ERRORS_H_
+#define OSKAR_TELESCOPE_OVERRIDE_ELEMENT_CABLE_LENGTH_ERRORS_H_
 
 /**
- * @file oskar_evaluate_element_weights_dft.h
+ * @file oskar_telescope_override_element_cable_length_errors.h
  */
 
 #include <oskar_global.h>
-#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,32 +41,25 @@ extern "C" {
 
 /**
  * @brief
- * Function to compute DFT element phase weights.
+ * Overrides element cable length errors for all stations in a telescope model.
  *
  * @details
- * This function computes the DFT phase weights for each element.
+ * This function overrides element cable length errors for all stations in a
+ * telescope model using the supplied mean and standard deviation.
  *
- * The wavelength used to compute the supplied wavenumber must be in the
- * same units as the input positions.
+ * Only the values at the deepest (element) level are set.
  *
- * @param[in] num_elements   The number of elements in the array.
- * @param[in] x              Element x positions.
- * @param[in] y              Element y positions.
- * @param[in] z              Element z positions.
- * @param[in] cable_length_error Element cable length errors.
- * @param[in] wavenumber     Wavenumber (2 pi / wavelength).
- * @param[in] x_beam         Beam x direction cosine.
- * @param[in] y_beam         Beam y direction cosine.
- * @param[in] z_beam         Beam z direction cosine.
- * @param[out] weights       Output DFT phase weights per element.
+ * The telescope model must be in CPU-accessible memory.
+ *
+ * @param[in,out] t          Telescope model to modify.
+ * @param[in] seed           Random generator seed.
+ * @param[in] mean_metres    Mean element cable length error.
+ * @param[in] std_metres     Standard deviation of element cable length error.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_element_weights_dft(int num_elements,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        const oskar_Mem* cable_length_error, double wavenumber,
-        double x_beam, double y_beam, double z_beam, oskar_Mem* weights,
-        int* status);
+void oskar_telescope_override_element_cable_length_errors(oskar_Telescope* t,
+        unsigned int seed, double mean_metres, double std_metres, int* status);
 
 #ifdef __cplusplus
 }

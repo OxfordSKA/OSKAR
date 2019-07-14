@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@ void oskar_station_free(oskar_Station* model, int* status)
     oskar_mem_free(model->element_measured_y_enu_metres, status);
     oskar_mem_free(model->element_measured_z_enu_metres, status);
     oskar_mem_free(model->element_weight, status);
+    oskar_mem_free(model->element_cable_length_error, status);
     oskar_mem_free(model->element_gain, status);
     oskar_mem_free(model->element_gain_error, status);
     oskar_mem_free(model->element_phase_offset_rad, status);

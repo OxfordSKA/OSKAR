@@ -49,6 +49,7 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
             oskar_station_element_measured_x_enu_metres_const(station),
             oskar_station_element_measured_y_enu_metres_const(station),
             oskar_station_element_measured_z_enu_metres_const(station),
+            oskar_station_element_cable_length_error_metres_const(station),
             wavenumber, x_beam, y_beam, z_beam, weights, status);
 
     /* Apply time-variable errors. */

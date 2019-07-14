@@ -165,6 +165,37 @@ static PyObject* num_stations(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* override_element_cable_length_errors(
+        PyObject* self, PyObject* args)
+{
+    oskar_Telescope* h = 0;
+    PyObject* capsule = 0;
+    int seed = 0, status = 0;
+    double mean = 0.0, std = 0.0;
+    if (!PyArg_ParseTuple(args, "Oidd", &capsule, &seed, &mean, &std)) return 0;
+    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
+#if OSKAR_VERSION > 0x020701
+    oskar_telescope_override_element_cable_length_errors(h, seed,
+            mean, std, &status);
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_telescope_override_element_cable_length_errors() failed "
+                "with code %d (%s).", status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+#else
+    (void) h;
+    (void) status;
+    PyErr_SetString(PyExc_RuntimeError,
+            "This function is not available in OSKAR " OSKAR_VERSION_STR ". "
+            "Please update to a newer version.");
+    return 0;
+#endif
+}
+
+
 static PyObject* override_element_gains(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
@@ -728,6 +759,10 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "num_baselines()"},
         {"num_stations", (PyCFunction)num_stations,
                 METH_VARARGS, "num_stations()"},
+        {"override_element_cable_length_errors",
+                (PyCFunction)override_element_cable_length_errors,
+                METH_VARARGS,
+                "override_element_cable_length_errors(seed, mean, std)"},
         {"override_element_gains", (PyCFunction)override_element_gains,
                 METH_VARARGS, "override_element_gains(seed, mean, std)"},
         {"override_element_phases", (PyCFunction)override_element_phases,

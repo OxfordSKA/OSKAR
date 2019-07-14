@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -231,6 +231,14 @@ oskar_Mem* oskar_station_element_measured_z_enu_metres(oskar_Station* model);
 
 OSKAR_EXPORT
 const oskar_Mem* oskar_station_element_measured_z_enu_metres_const(
+        const oskar_Station* model);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_element_cable_length_error_metres(
+        oskar_Station* model);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_element_cable_length_error_metres_const(
         const oskar_Station* model);
 
 OSKAR_EXPORT

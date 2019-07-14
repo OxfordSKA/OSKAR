@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,6 +75,8 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
             oskar_mem_create(type, location, num_elements, status);
     model->element_weight =
             oskar_mem_create(type | OSKAR_COMPLEX, location, num_elements, status);
+    model->element_cable_length_error =
+            oskar_mem_create(type, location, num_elements, status);
     model->element_gain =
             oskar_mem_create(type, location, num_elements, status);
     model->element_gain_error =

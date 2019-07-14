@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,6 +101,8 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     oskar_mem_copy(model->element_measured_z_enu_metres,
             src->element_measured_z_enu_metres, status);
     oskar_mem_copy(model->element_weight, src->element_weight, status);
+    oskar_mem_copy(model->element_cable_length_error,
+            src->element_cable_length_error, status);
     oskar_mem_copy(model->element_gain, src->element_gain, status);
     oskar_mem_copy(model->element_gain_error, src->element_gain_error, status);
     oskar_mem_copy(model->element_phase_offset_rad,

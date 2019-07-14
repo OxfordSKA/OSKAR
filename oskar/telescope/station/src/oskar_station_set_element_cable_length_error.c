@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,51 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
-#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
+#include <stdlib.h>
 
-/**
- * @file oskar_evaluate_element_weights_dft.h
- */
-
-#include <oskar_global.h>
-#include <mem/oskar_mem.h>
+#include "telescope/station/private_station.h"
+#include "telescope/station/oskar_station.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Function to compute DFT element phase weights.
- *
- * @details
- * This function computes the DFT phase weights for each element.
- *
- * The wavelength used to compute the supplied wavenumber must be in the
- * same units as the input positions.
- *
- * @param[in] num_elements   The number of elements in the array.
- * @param[in] x              Element x positions.
- * @param[in] y              Element y positions.
- * @param[in] z              Element z positions.
- * @param[in] cable_length_error Element cable length errors.
- * @param[in] wavenumber     Wavenumber (2 pi / wavelength).
- * @param[in] x_beam         Beam x direction cosine.
- * @param[in] y_beam         Beam y direction cosine.
- * @param[in] z_beam         Beam z direction cosine.
- * @param[out] weights       Output DFT phase weights per element.
- * @param[in,out] status     Status return code.
- */
-OSKAR_EXPORT
-void oskar_evaluate_element_weights_dft(int num_elements,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        const oskar_Mem* cable_length_error, double wavenumber,
-        double x_beam, double y_beam, double z_beam, oskar_Mem* weights,
-        int* status);
+void oskar_station_set_element_cable_length_error(oskar_Station* dst,
+        int index, const double error_metres, int* status)
+{
+    if (*status) return;
+    if (index >= dst->num_elements)
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
+    if (dst->mem_location == OSKAR_CPU)
+    {
+        void *cable = oskar_mem_void(dst->element_cable_length_error);
+        const int type = dst->precision;
+        if (type == OSKAR_DOUBLE)
+        {
+            ((double*)cable)[index] = error_metres;
+        }
+        else if (type == OSKAR_SINGLE)
+        {
+            ((float*)cable)[index] = (float)error_metres;
+        }
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+    }
+    else
+    {
+        oskar_mem_set_element_real(dst->element_cable_length_error,
+                index, error_metres, status);
+    }
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* include guard */

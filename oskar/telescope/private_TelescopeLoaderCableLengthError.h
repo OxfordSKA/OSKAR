@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,51 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
-#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
+#ifndef OSKAR_TELESCOPE_LOADER_CABLE_LENGTH_ERROR_H_
+#define OSKAR_TELESCOPE_LOADER_CABLE_LENGTH_ERROR_H_
 
-/**
- * @file oskar_evaluate_element_weights_dft.h
- */
+#include <telescope/oskar_TelescopeLoadAbstract.h>
 
-#include <oskar_global.h>
-#include <mem/oskar_mem.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Function to compute DFT element phase weights.
- *
- * @details
- * This function computes the DFT phase weights for each element.
- *
- * The wavelength used to compute the supplied wavenumber must be in the
- * same units as the input positions.
- *
- * @param[in] num_elements   The number of elements in the array.
- * @param[in] x              Element x positions.
- * @param[in] y              Element y positions.
- * @param[in] z              Element z positions.
- * @param[in] cable_length_error Element cable length errors.
- * @param[in] wavenumber     Wavenumber (2 pi / wavelength).
- * @param[in] x_beam         Beam x direction cosine.
- * @param[in] y_beam         Beam y direction cosine.
- * @param[in] z_beam         Beam z direction cosine.
- * @param[out] weights       Output DFT phase weights per element.
- * @param[in,out] status     Status return code.
- */
-OSKAR_EXPORT
-void oskar_evaluate_element_weights_dft(int num_elements,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        const oskar_Mem* cable_length_error, double wavenumber,
-        double x_beam, double y_beam, double z_beam, oskar_Mem* weights,
-        int* status);
-
-#ifdef __cplusplus
-}
-#endif
+class TelescopeLoaderCableLengthError : public oskar_TelescopeLoadAbstract
+{
+public:
+    TelescopeLoaderCableLengthError() {}
+    virtual ~TelescopeLoaderCableLengthError() {}
+    virtual void load(oskar_Station* station, const std::string& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
+    virtual std::string name() const;
+};
 
 #endif /* include guard */

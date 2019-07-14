@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,6 +109,9 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
             b->element_phase_offset_rad, n, status))
         return 1;
     if (oskar_mem_different(a->element_weight, b->element_weight, n, status))
+        return 1;
+    if (oskar_mem_different(a->element_cable_length_error,
+            b->element_cable_length_error, n, status))
         return 1;
     if (oskar_mem_different(a->element_x_alpha_cpu,
             b->element_x_alpha_cpu, n, status))

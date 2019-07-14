@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,48 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
-#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
+#ifndef OSKAR_STATION_SAVE_CABLE_LENGTH_ERROR_H_
+#define OSKAR_STATION_SAVE_CABLE_LENGTH_ERROR_H_
 
 /**
- * @file oskar_evaluate_element_weights_dft.h
+ * @file oskar_station_save_cable_length_error.h
  */
 
 #include <oskar_global.h>
-#include <mem/oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief
- * Function to compute DFT element phase weights.
+ * @brief Writes OSKAR station model data to an ASCII file.
  *
  * @details
- * This function computes the DFT phase weights for each element.
+ * This function writes element cable length error data from
+ * station model to an ASCII file.
  *
- * The wavelength used to compute the supplied wavenumber must be in the
- * same units as the input positions.
- *
- * @param[in] num_elements   The number of elements in the array.
- * @param[in] x              Element x positions.
- * @param[in] y              Element y positions.
- * @param[in] z              Element z positions.
- * @param[in] cable_length_error Element cable length errors.
- * @param[in] wavenumber     Wavenumber (2 pi / wavelength).
- * @param[in] x_beam         Beam x direction cosine.
- * @param[in] y_beam         Beam y direction cosine.
- * @param[in] z_beam         Beam z direction cosine.
- * @param[out] weights       Output DFT phase weights per element.
- * @param[in,out] status     Status return code.
+ * @param[in] filename   Pathname of file to write.
+ * @param[in] station    Station model to write.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_element_weights_dft(int num_elements,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        const oskar_Mem* cable_length_error, double wavenumber,
-        double x_beam, double y_beam, double z_beam, oskar_Mem* weights,
-        int* status);
+void oskar_station_save_cable_length_error(const char* filename,
+        const oskar_Station* station, int* status);
 
 #ifdef __cplusplus
 }

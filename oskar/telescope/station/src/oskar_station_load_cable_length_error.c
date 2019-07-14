@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,51 +26,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
-#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
+#include "telescope/station/oskar_station.h"
 
-/**
- * @file oskar_evaluate_element_weights_dft.h
- */
+#include "utility/oskar_getline.h"
+#include "utility/oskar_string_to_array.h"
 
-#include <oskar_global.h>
-#include <mem/oskar_mem.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Function to compute DFT element phase weights.
- *
- * @details
- * This function computes the DFT phase weights for each element.
- *
- * The wavelength used to compute the supplied wavenumber must be in the
- * same units as the input positions.
- *
- * @param[in] num_elements   The number of elements in the array.
- * @param[in] x              Element x positions.
- * @param[in] y              Element y positions.
- * @param[in] z              Element z positions.
- * @param[in] cable_length_error Element cable length errors.
- * @param[in] wavenumber     Wavenumber (2 pi / wavelength).
- * @param[in] x_beam         Beam x direction cosine.
- * @param[in] y_beam         Beam y direction cosine.
- * @param[in] z_beam         Beam z direction cosine.
- * @param[out] weights       Output DFT phase weights per element.
- * @param[in,out] status     Status return code.
- */
-OSKAR_EXPORT
-void oskar_evaluate_element_weights_dft(int num_elements,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        const oskar_Mem* cable_length_error, double wavenumber,
-        double x_beam, double y_beam, double z_beam, oskar_Mem* weights,
-        int* status);
+void oskar_station_load_cable_length_error(oskar_Station* station,
+        const char* filename, int* status)
+{
+    char* line = NULL;
+    size_t bufsize = 0;
+    int n = 0;
+    FILE* file;
+    if (*status) return;
+    const int type = oskar_station_precision(station);
+    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
+    file = fopen(filename, "r");
+    if (!file)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
+    const int old_size = oskar_station_num_elements(station);
+    while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
+    {
+        double par[] = {0.0};
+        size_t num_par = sizeof(par) / sizeof(double);
+        if (oskar_string_to_array_d(line, num_par, par) < 1) continue;
+        if (oskar_station_num_elements(station) <= n)
+        {
+            oskar_station_resize(station, n + 256, status);
+            if (*status) break;
+        }
+        oskar_station_set_element_cable_length_error(station,
+                n, par[0], status);
+        ++n;
+    }
+
+    /* Consistency check with previous station size (should be the same as
+     * the number of elements loaded). */
+    if (!*status && n != old_size)
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+    free(line);
+    fclose(file);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* include guard */

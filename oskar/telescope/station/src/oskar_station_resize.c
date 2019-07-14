@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,10 +38,7 @@ extern "C" {
 void oskar_station_resize(oskar_Station* station, int num_elements,
         int* status)
 {
-    /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Resize arrays in the model. */
     oskar_mem_realloc(station->element_true_x_enu_metres, num_elements, status);
     oskar_mem_realloc(station->element_true_y_enu_metres, num_elements, status);
     oskar_mem_realloc(station->element_true_z_enu_metres, num_elements, status);
@@ -52,6 +49,7 @@ void oskar_station_resize(oskar_Station* station, int num_elements,
     oskar_mem_realloc(station->element_measured_z_enu_metres,
             num_elements, status);
     oskar_mem_realloc(station->element_weight, num_elements, status);
+    oskar_mem_realloc(station->element_cable_length_error, num_elements, status);
     oskar_mem_realloc(station->element_gain, num_elements, status);
     oskar_mem_realloc(station->element_gain_error, num_elements, status);
     oskar_mem_realloc(station->element_phase_offset_rad, num_elements, status);

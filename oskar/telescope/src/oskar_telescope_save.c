@@ -103,6 +103,9 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
         path = oskar_dir_get_path(dir_path, "mount_types.txt");
         oskar_station_save_mount_types(path, station, status);
         free(path);
+        path = oskar_dir_get_path(dir_path, "cable_length_error.txt");
+        oskar_station_save_cable_length_error(path, station, status);
+        free(path);
         if (!oskar_station_has_child(station))
         {
             path = oskar_dir_get_path(dir_path, "feed_angle_x.txt");

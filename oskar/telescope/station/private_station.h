@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,6 +87,7 @@ struct oskar_Station
     oskar_Mem* element_phase_offset_rad;      /* Per-element systematic phase offset, in radians (default 0.0) */
     oskar_Mem* element_phase_error_rad;       /* Standard deviation of per-element time-variable phase, in radians (default 0.0) */
     oskar_Mem* element_weight;                /* Element complex weight (set to 1.0, 0.0 unless using apodisation). */
+    oskar_Mem* element_cable_length_error;    /* Cable length error, in metres. */
     oskar_Mem* element_types;     /* Integer array of element types (default 0). */
     oskar_Mem* element_types_cpu; /* Integer array of element types guaranteed to be in CPU memory (default 0). */
     oskar_Mem* element_mount_types_cpu; /* Char array of element mount types guaranteed to be in CPU memory. */

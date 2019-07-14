@@ -27,12 +27,14 @@ set(station_SRC
     src/oskar_station_duplicate_first_child.c
     src/oskar_station_free.c
     src/oskar_station_load_apodisation.c
+    src/oskar_station_load_cable_length_error.c
     src/oskar_station_load_element_types.c
     src/oskar_station_load_feed_angle.c
     src/oskar_station_load_gain_phase.c
     src/oskar_station_load_layout.c
     src/oskar_station_load_mount_types.c
     src/oskar_station_load_permitted_beams.c
+    src/oskar_station_override_element_cable_length_errors.c
     src/oskar_station_override_element_feed_angle.c
     src/oskar_station_override_element_gains.c
     src/oskar_station_override_element_phases.c
@@ -42,6 +44,7 @@ set(station_SRC
     src/oskar_station_resize_element_types.c
     src/oskar_station_resize.c
     src/oskar_station_save_apodisation.c
+    src/oskar_station_save_cable_length_error.c
     src/oskar_station_save_element_types.c
     src/oskar_station_save_feed_angle.c
     src/oskar_station_save_gain_phase.c
@@ -49,6 +52,7 @@ set(station_SRC
     src/oskar_station_save_mount_types.c
     src/oskar_station_save_permitted_beams.c
     src/oskar_station_set_element_coords.c
+    src/oskar_station_set_element_cable_length_error.c
     src/oskar_station_set_element_feed_angle.c
     src/oskar_station_set_element_errors.c
     src/oskar_station_set_element_mount_type.c

@@ -32,6 +32,7 @@
 #include "utility/oskar_get_num_procs.h"
 #include "utility/oskar_thread.h"
 #include "telescope/private_TelescopeLoaderApodisation.h"
+#include "telescope/private_TelescopeLoaderCableLengthError.h"
 #include "telescope/private_TelescopeLoaderElementPattern.h"
 #include "telescope/private_TelescopeLoaderElementTypes.h"
 #include "telescope/private_TelescopeLoaderFeedAngle.h"
@@ -86,6 +87,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
     loaders.push_back(new TelescopeLoaderPosition);
     loaders.push_back(new TelescopeLoaderLayout);
     loaders.push_back(new TelescopeLoaderGainPhase);
+    loaders.push_back(new TelescopeLoaderCableLengthError);
     loaders.push_back(new TelescopeLoaderApodisation);
     loaders.push_back(new TelescopeLoaderFeedAngle);
     loaders.push_back(new TelescopeLoaderElementTypes);

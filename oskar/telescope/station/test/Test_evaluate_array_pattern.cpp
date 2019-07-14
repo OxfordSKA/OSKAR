@@ -149,6 +149,7 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
             oskar_station_element_measured_x_enu_metres_const(station),
             oskar_station_element_measured_y_enu_metres_const(station),
             oskar_station_element_measured_z_enu_metres_const(station),
+            oskar_station_element_cable_length_error_metres_const(station),
             wavenumber, beam_x, beam_y, beam_z, *weights, status);
     oskar_mem_free(l, status);
     oskar_mem_free(m, status);

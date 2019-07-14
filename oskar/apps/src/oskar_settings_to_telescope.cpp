@@ -201,6 +201,15 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
                     position_error_xy_m, status);
     }
 
+    /* Override station element cable length errors if required. */
+    double cable_length_error_m = s->to_double("cable_length_error_m", status);
+    if (cable_length_error_m > 0.0)
+    {
+        int seed = s->to_int("seed_cable_length_errors", status);
+        oskar_telescope_override_element_cable_length_errors(t,
+                (unsigned int) seed, 0.0, cable_length_error_m, status);
+    }
+
     /* Add variation to x-dipole orientations if required. */
     double x_rot_err = s->to_double("x_orientation_error_deg", status) * D2R;
     if (x_rot_err > 0.0)
