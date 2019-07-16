@@ -222,11 +222,11 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
 
         // Create all required default subtables.
 #ifdef OSKAR_HAVE_MPI
-	if (use_adios2)
+        if (use_adios2)
         {
             p->ms->createDefaultSubtables(*mpi_comm, Table::New);
-	}
-	else
+        }
+        else
 #endif // OSKAR_HAVE_MPI
         {
             p->ms->createDefaultSubtables(Table::New);
