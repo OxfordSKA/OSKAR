@@ -80,11 +80,12 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
 
 #ifdef OSKAR_HAVE_MPI
 /**
- * @brief Creates a new Measurement Set using the ADIOS2 storage manager.
+ * @brief Creates a new Measurement Set with an explicit MPI communicator,
+ * and possibly using the ADIOS2 storage manager.
  *
  * @details
  * Creates a new, empty Measurement Set with the given name. The DATA column
- * of the Measurement Set will be stored using the ADIOS2 storage manager.
+ * of the Measurement Set might be stored using the ADIOS2 storage manager.
  *
  * @param[in] file_name       The file name to use.
  * @param[in] app_name        The name of the application creating the MS.
@@ -97,13 +98,15 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
  * @param[in] write_autocorr  If set, write auto-correlation data.
  * @param[in] write_crosscorr If set, write cross-correlation data.
  * @param[in] mpi_comm        The MPI communicator to use with casacore
+ * @param[in] use_adios2      If set, ADIOS2 is used to store the DATA column
  */
 OSKAR_MS_EXPORT
-oskar_MeasurementSet* oskar_ms_create_adios2(const char* file_name,
+oskar_MeasurementSet* oskar_ms_create_mpi(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
         double freq_inc_hz, const struct baseline_mapping* baseline_map,
-        int write_autocorr, int write_crosscorr, MPI_Comm mpi_comm);
+        int write_autocorr, int write_crosscorr, MPI_Comm mpi_comm,
+        int use_adios2);
 #endif // OSKAR_HAVE_MPI
 
 #ifdef __cplusplus

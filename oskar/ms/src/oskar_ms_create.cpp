@@ -72,15 +72,15 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
 }
 
 #ifdef OSKAR_HAVE_MPI
-oskar_MeasurementSet* oskar_ms_create_adios2(const char* file_name,
+oskar_MeasurementSet* oskar_ms_create_mpi(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
         double freq_inc_hz, const struct baseline_mapping* baseline_map,
-        int write_autocorr, int write_crosscorr, MPI_Comm mpi_comm)
+        int write_autocorr, int write_crosscorr, MPI_Comm mpi_comm, int use_adios2)
 {
     return oskar_ms_create_impl(file_name, app_name, num_stations, num_channels,
         num_pols, freq_start_hz, freq_inc_hz, baseline_map, write_autocorr, write_crosscorr,
-        true, &mpi_comm);
+        use_adios2, &mpi_comm);
 }
 #endif // OSKAR_HAVE_MPI
 
@@ -190,7 +190,7 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
 
         // Create the Measurement Set.
 #ifdef OSKAR_HAVE_MPI
-        if (use_adios2)
+        if (mpi_comm)
         {
             p->ms = new MeasurementSet(*mpi_comm, tab, TableLock(TableLock::PermanentLocking));
         }
@@ -208,7 +208,7 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
                 descSource, Table::New);
 #ifdef OSKAR_HAVE_MPI
         Table sourceTable;
-        if (use_adios2)
+        if (mpi_comm)
         {
             sourceTable = Table(*mpi_comm, sourceSetup);
         }
@@ -222,7 +222,7 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
 
         // Create all required default subtables.
 #ifdef OSKAR_HAVE_MPI
-        if (use_adios2)
+        if (mpi_comm)
         {
             p->ms->createDefaultSubtables(*mpi_comm, Table::New);
         }

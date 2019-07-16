@@ -172,21 +172,21 @@ static PyObject* create(PyObject* self, PyObject* args)
         return 0;
     }
 
-    if (PyObject_IsTrue(use_adios2)) {
 #ifdef OSKAR_HAVE_MPI4PY
-        if (py_mpi_comm != Py_None) {
-            mpi_comm = PyMPIComm_Get(py_mpi_comm);
-            if (mpi_comm == NULL) return NULL;
-        }
-        else {
-            mpi_comm = &world;
-        }
+    if (py_mpi_comm != Py_None) {
+        mpi_comm = PyMPIComm_Get(py_mpi_comm);
+        if (mpi_comm == NULL) return NULL;
+    }
+    else {
+        mpi_comm = &world;
+    }
 #else
+    if (PyObject_IsTrue(use_adios2)) {
         PyErr_SetString(PyExc_RuntimeError,
             "ADIOS2 support requested but OSKAR was compiled without MPI support.");
         return NULL;
-#endif // OSKAR_HAVE_MPI4PY
     }
+#endif // OSKAR_HAVE_MPI4PY
 
     if (py_baselines != Py_None) {
         PyObject *iter = PyObject_GetIter(py_baselines);
@@ -237,15 +237,15 @@ static PyObject* create(PyObject* self, PyObject* args)
 
     /* Create the Measurement Set. */
 #ifdef OSKAR_HAVE_MPI4PY
-    if (PyObject_IsTrue(use_adios2))
-        h = oskar_ms_create_adios2(file_name, "Python script", num_stations,
-                num_channels, num_pols, freq_start_hz, freq_inc_hz,
-                mapping, write_autocorr, write_crosscor, *mpi_comm);
-    else
+    h = oskar_ms_create_mpi(file_name, "Python script", num_stations,
+            num_channels, num_pols, freq_start_hz, freq_inc_hz,
+            mapping, write_autocorr, write_crosscor,
+            *mpi_comm, PyObject_IsTrue(use_adios2));
+#else
+    h = oskar_ms_create(file_name, "Python script", num_stations,
+            num_channels, num_pols, freq_start_hz, freq_inc_hz,
+            mapping, write_autocorr, write_crosscor);
 #endif // OSKAR_HAVE_MPI4PY
-        h = oskar_ms_create(file_name, "Python script", num_stations,
-                num_channels, num_pols, freq_start_hz, freq_inc_hz,
-                mapping, write_autocorr, write_crosscor);
 
     if (mapping != NULL) {
         free(mapping->antennas);
