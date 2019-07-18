@@ -304,7 +304,9 @@ static PyObject* read_block(PyObject* self, PyObject* args)
         return 0;
 
     /* Read the data. */
+    Py_BEGIN_ALLOW_THREADS
     oskar_vis_block_read(h, hdr, b, index, &status);
+    Py_END_ALLOW_THREADS
 
     /* Check for errors. */
     if (status)
