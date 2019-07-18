@@ -110,9 +110,12 @@ class Telescope(object):
         """Overrides element cable length errors for all stations.
 
         Args:
-            std (float): Standard deviation of element cable length error.
-            seed (Optional[int]): Random generator seed. Default 1.
-            mean (Optional[float]): Mean element cable length error. Default 0.
+            std (float):
+                Standard deviation of element cable length error, in metres.
+            seed (Optional[int]):
+                Random generator seed. Default 1.
+            mean (Optional[float]):
+                Mean element cable length error, in metres. Default 0.
         """
         self.capsule_ensure()
         _telescope_lib.override_element_cable_length_errors(
