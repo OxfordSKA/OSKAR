@@ -2,10 +2,8 @@
 # -*- coding: utf-8 -*-
 """Installs the OSKAR Python bindings."""
 
-from os.path import join, isfile, dirname, splitext
 import os
 import platform
-from numpy import get_include
 try:
     from setuptools import setup, Extension
     from setuptools.command.build_ext import build_ext
@@ -32,12 +30,15 @@ MODULES = [
     ('_bda_utils', 'oskar_bda_utils.c')
 ]
 
-CHECKED_LIB = False
-CHECKED_INC = False
-
 
 class BuildExt(build_ext):
     """Class used to build OSKAR Python extensions. Inherits build_ext."""
+    def __init__(self, *args, **kwargs):
+        """Initialise."""
+        super().__init__(*args, **kwargs)
+        self._checked_lib = False
+        self._checked_inc = False
+
     @staticmethod
     def find_file(name, dir_paths):
         """Returns path of given file if it exists in the list of directories.
@@ -49,8 +50,8 @@ class BuildExt(build_ext):
         for directory in dir_paths:
             directory = directory.strip('\"')
             if os.path.exists(directory):
-                test_path = join(directory, name)
-                if isfile(test_path):
+                test_path = os.path.join(directory, name)
+                if os.path.isfile(test_path):
                     return test_path.strip('\"')
         return None
 
@@ -88,15 +89,14 @@ class BuildExt(build_ext):
         # For some reason, run() is sometimes called again after the build
         # has already happened.
         # Make sure not to fail the check the second time.
-        global CHECKED_LIB
-        if not CHECKED_LIB:
-            CHECKED_LIB = True
+        if not self._checked_lib:
+            self._checked_lib = True
             if os.getenv('OSKAR_LIB_DIR'):
                 self.library_dirs.append(os.getenv('OSKAR_LIB_DIR'))
             if platform.system() == 'Windows':
                 self.library_dirs.append('C:\\Program Files\\OSKAR\\lib')
-            for i, dir in enumerate(self.library_dirs):
-                self.library_dirs[i] = dir.strip('\"')
+            for i, test_dir in enumerate(self.library_dirs):
+                self.library_dirs[i] = test_dir.strip('\"')
             directory = self.dir_contains('oskar.', self.library_dirs)
             if not directory:
                 raise RuntimeError(
@@ -115,15 +115,15 @@ class BuildExt(build_ext):
                 self.libraries.append('oskar_ms')
 
         # Check we can find the OSKAR headers.
-        global CHECKED_INC
-        if not CHECKED_INC:
-            CHECKED_INC = True
+        if not self._checked_inc:
+            from numpy import get_include
+            self._checked_inc = True
             if os.getenv('OSKAR_INC_DIR'):
                 self.include_dirs.append(os.getenv('OSKAR_INC_DIR'))
             if platform.system() == 'Windows':
                 self.include_dirs.append('C:\\Program Files\\OSKAR\\include')
             header = self.find_file(
-                join('oskar', 'oskar_version.h'), self.include_dirs)
+                os.path.join('oskar', 'oskar_version.h'), self.include_dirs)
             if not header:
                 raise RuntimeError(
                     "Could not find oskar/oskar_version.h. "
@@ -131,10 +131,10 @@ class BuildExt(build_ext):
                     "this system, and either set the environment variable "
                     "OSKAR_INC_DIR, or set the include path to build_ext "
                     "using -I or --include-dirs")
-            self.include_dirs.insert(0, dirname(header))
+            self.include_dirs.insert(0, os.path.dirname(header))
             self.include_dirs.insert(0, get_include())
-            for i, dir in enumerate(self.include_dirs):
-                self.include_dirs[i] = dir.strip('\"')
+            for i, test_dir in enumerate(self.include_dirs):
+                self.include_dirs[i] = test_dir.strip('\"')
 
             # Check the version of OSKAR is compatible.
             version = self.get_oskar_version(header)
@@ -165,7 +165,8 @@ class BuildExt(build_ext):
 def get_oskarpy_version():
     """Get the version of oskarpy from the version file."""
     globals_ = {}
-    with open(join(dirname(__file__), 'oskar', '_version.py')) as file_handle:
+    this_dir = os.path.dirname(__file__)
+    with open(os.path.join(this_dir, 'oskar', '_version.py')) as file_handle:
         code = file_handle.read()
     # pylint: disable=exec-used
     exec(code, globals_)
@@ -177,12 +178,13 @@ EXTENSIONS = []
 for module in MODULES:
     if platform.system() == 'Windows' and 'measurement_set' in module[0]:
         continue
-    _, src_ext = splitext(module[1])
+    _, src_ext = os.path.splitext(module[1])
     extra_compile_args = []
-    if src_ext == ".c" and platform.system != 'Windows':
+    if src_ext == ".c" and platform.system() != 'Windows':
         extra_compile_args = ["-std=c99"]
     EXTENSIONS.append(Extension(
-        'oskar.' + module[0], sources=[join('oskar', 'src', module[1])],
+        'oskar.' + module[0],
+        sources=[os.path.join('oskar', 'src', module[1])],
         extra_compile_args=extra_compile_args))
 setup(
     name='oskarpy',
