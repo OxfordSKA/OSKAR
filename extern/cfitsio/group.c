@@ -20,7 +20,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#if defined(WIN32) || defined(__WIN32__)
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
 #include <direct.h>   /* defines the getcwd function on Windows PCs */
 #else
 #include <unistd.h>  /* needed for getcwd prototype on unix machines */

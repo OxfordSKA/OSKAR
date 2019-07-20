@@ -73,6 +73,10 @@ else()
         append_flags(CMAKE_C_FLAGS /TP)
         append_flags(CMAKE_CXX_FLAGS /TP)
 
+        # Exception handling.
+        append_flags(CMAKE_C_FLAGS /EHsc)
+        append_flags(CMAKE_CXX_FLAGS /EHsc)
+
         # Default to dynamically-linked runtime.
         if ("${MSVC_RUNTIME}" STREQUAL "")
             set (MSVC_RUNTIME "dynamic")
