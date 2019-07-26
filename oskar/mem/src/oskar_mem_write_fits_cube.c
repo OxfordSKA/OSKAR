@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 #include "math/oskar_cmath.h"
 #include "utility/oskar_file_exists.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <fitsio.h>
 #include <string.h>
 
@@ -45,11 +46,11 @@ extern "C" {
 #endif
 
 
-static void write_pixels(oskar_Mem* data, const char* filename,
+static void write_pixels(oskar_Mem* data, const char* filename, int i_hdu,
         int width, int height, int num_planes, int i_plane, int* status)
 {
     long naxes[3], firstpix[3], num_pix;
-    int dims_ok = 0;
+    int dims_ok = 0, num_hdus = 0;
     fitsfile* f = 0;
     if (*status) return;
     if (oskar_file_exists(filename))
@@ -78,8 +79,6 @@ static void write_pixels(oskar_Mem* data, const char* filename,
         naxes[1] = height;
         naxes[2] = num_planes;
         fits_create_file(&f, filename, status);
-        fits_create_img(f, oskar_mem_is_double(data) ? DOUBLE_IMG : FLOAT_IMG,
-                3, naxes, status);
     }
     if (*status || !f)
     {
@@ -87,6 +86,13 @@ static void write_pixels(oskar_Mem* data, const char* filename,
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
+    fits_get_num_hdus(f, &num_hdus, status);
+    if (i_hdu >= num_hdus)
+    {
+        fits_create_img(f, oskar_mem_is_double(data) ? DOUBLE_IMG : FLOAT_IMG,
+                3, naxes, status);
+    }
+    fits_movabs_hdu(f, i_hdu + 1, NULL, status);
     num_pix = width * height;
     firstpix[0] = 1;
     firstpix[1] = 1;
@@ -131,10 +137,7 @@ void oskar_mem_write_fits_cube(oskar_Mem* data, const char* root_name,
         int width, int height, int num_planes, int i_plane, int* status)
 {
     oskar_Mem *copy = 0, *ptr = 0;
-    size_t len, buf_len;
     char* fname;
-
-    /* Checks. */
     if (*status) return;
     if (oskar_mem_is_matrix(data))
     {
@@ -143,8 +146,8 @@ void oskar_mem_write_fits_cube(oskar_Mem* data, const char* root_name,
     }
 
     /* Construct the filename. */
-    len = strlen(root_name);
-    buf_len = 11 + len;
+    const size_t len = strlen(root_name);
+    const size_t buf_len = 11 + len;
     fname = (char*) calloc(buf_len, sizeof(char));
 
     /* Copy to host memory if necessary. */
@@ -155,6 +158,18 @@ void oskar_mem_write_fits_cube(oskar_Mem* data, const char* root_name,
         ptr = copy;
     }
 
+    /* Check filename extension. */
+    if ((len >= 5) && (
+            !strcmp(&(root_name[len-5]), ".fits") ||
+            !strcmp(&(root_name[len-5]), ".FITS") ))
+    {
+        SNPRINTF(fname, buf_len, "%s", root_name);
+    }
+    else
+    {
+        SNPRINTF(fname, buf_len, "%s.fits", root_name);
+    }
+
     /* Deal with complex data. */
     if (oskar_mem_is_complex(ptr))
     {
@@ -162,31 +177,22 @@ void oskar_mem_write_fits_cube(oskar_Mem* data, const char* root_name,
         temp = oskar_mem_create(oskar_mem_precision(ptr), OSKAR_CPU,
                 oskar_mem_length(ptr), status);
 
-        /* Extract the real part and write it. */
-        SNPRINTF(fname, buf_len, "%s_REAL.fits", root_name);
+        /* Extract the real part and write it to the first HDU. */
         convert_complex(ptr, temp, 0, status);
-        write_pixels(temp, fname, width, height, num_planes, i_plane, status);
+        write_pixels(temp, fname, 0,
+                width, height, num_planes, i_plane, status);
 
-        /* Extract the imaginary part and write it. */
-        SNPRINTF(fname, buf_len, "%s_IMAG.fits", root_name);
+        /* Extract the imaginary part and write it to the second HDU. */
         convert_complex(ptr, temp, 1, status);
-        write_pixels(temp, fname, width, height, num_planes, i_plane, status);
+        write_pixels(temp, fname, 1,
+                width, height, num_planes, i_plane, status);
         oskar_mem_free(temp, status);
     }
     else
     {
         /* No conversion needed. */
-        if ((len >= 5) && (
-                !strcmp(&(root_name[len-5]), ".fits") ||
-                !strcmp(&(root_name[len-5]), ".FITS") ))
-        {
-            SNPRINTF(fname, buf_len, "%s", root_name);
-        }
-        else
-        {
-            SNPRINTF(fname, buf_len, "%s.fits", root_name);
-        }
-        write_pixels(ptr, fname, width, height, num_planes, i_plane, status);
+        write_pixels(ptr, fname, 0,
+                width, height, num_planes, i_plane, status);
     }
     free(fname);
     oskar_mem_free(copy, status);

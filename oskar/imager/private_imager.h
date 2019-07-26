@@ -95,9 +95,9 @@ struct oskar_Imager
 
     /* W-projection imager data. */
     size_t ww_points;
-    int num_w_planes, conv_size_half;
+    int num_w_planes;
     double w_scale, ww_min, ww_max, ww_rms;
-    oskar_Mem *w_kernels, *w_support, *w_kernels_compact, *w_kernel_start;
+    oskar_Mem *w_support, *w_kernels_compact, *w_kernel_start;
 
     /* Memory allocated per GPU (array of DeviceData structures). */
     DeviceData* d;

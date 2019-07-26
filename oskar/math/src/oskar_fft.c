@@ -121,6 +121,7 @@ oskar_FFT* oskar_fft_create(int precision, int location, int num_dim,
 void oskar_fft_exec(oskar_FFT* h, oskar_Mem* data, int* status)
 {
     oskar_Mem *data_copy = 0, *data_ptr = data;
+    if (*status) return;
     if (oskar_mem_location(data) != h->location)
     {
         data_copy = oskar_mem_create_copy(data, h->location, status);

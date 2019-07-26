@@ -44,7 +44,10 @@ extern "C" {
  * Writes pixel data to a FITS image file.
  *
  * @details
- * Writes pixel data to a FITS image file (or two files, for complex data).
+ * Writes pixel data to a FITS image file.
+ *
+ * Complex data are written with the real and imaginary parts going to
+ * the first and second HDUs, respectively.
  *
  * Can be called multiple times with the same \p root_name to write
  * one plane at a time.

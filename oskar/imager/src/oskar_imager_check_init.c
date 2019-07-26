@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@ void oskar_imager_check_init(oskar_Imager* h, int* status)
     }
     case OSKAR_ALGORITHM_WPROJ:
     {
-        if (!h->w_kernels)
+        if (!h->w_kernels_compact)
             oskar_imager_init_wproj(h, status);
         break;
     }
