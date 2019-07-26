@@ -102,9 +102,10 @@ void oskar_imager_select_data(
         oskar_mem_scale_real(ww_out, inv_wavelength, 0, num_rows, status);
 
         /* Copy visibility data and weights if present. */
-        copy_vis_pol(num_rows, num_channels, num_pols,
-                c - start_chan, p, vis_in, weight_in,
-                vis_out, weight_out, 0, status);
+        copy_vis_pol(num_rows, num_channels, num_pols, c - start_chan, p,
+                (h->coords_only ? 0 : vis_in), weight_in,
+                (h->coords_only ? 0 : vis_out), weight_out,
+                0, status);
 
         /* Copy time centroids if present. */
         if (time_in && time_out)
@@ -138,9 +139,10 @@ void oskar_imager_select_data(
                     *num_out, num_rows, status);
 
             /* Copy visibility data and weights if present. */
-            copy_vis_pol(num_rows, num_channels, num_pols,
-                    c - start_chan, p, vis_in, weight_in,
-                    vis_out, weight_out, *num_out, status);
+            copy_vis_pol(num_rows, num_channels, num_pols, c - start_chan, p,
+                    (h->coords_only ? 0 : vis_in), weight_in,
+                    (h->coords_only ? 0 : vis_out), weight_out,
+                    *num_out, status);
 
             /* Copy time centroids if present. */
             if (time_in && time_out)
@@ -162,7 +164,7 @@ void copy_vis_pol(size_t num_rows, int num_channels, int num_pols,
 {
     size_t r;
     if (*status) return;
-    if (oskar_mem_precision(vis_out) == OSKAR_SINGLE)
+    if (oskar_mem_precision(weight_out) == OSKAR_SINGLE)
     {
         float* w_out;
         const float* w_in;
@@ -171,7 +173,7 @@ void copy_vis_pol(size_t num_rows, int num_channels, int num_pols,
         for (r = 0; r < num_rows; ++r)
             w_out[r] = w_in[num_pols * r + p];
 
-        if (vis_in)
+        if (vis_in && vis_out)
         {
             float2* v_out;
             const float2* v_in;
@@ -190,7 +192,7 @@ void copy_vis_pol(size_t num_rows, int num_channels, int num_pols,
         for (r = 0; r < num_rows; ++r)
             w_out[r] = w_in[num_pols * r + p];
 
-        if (vis_in)
+        if (vis_in && vis_out)
         {
             double2* v_out;
             const double2* v_in;

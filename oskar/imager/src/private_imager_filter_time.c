@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ void oskar_imager_filter_time(const oskar_Imager* h, size_t* num_vis,
         oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amp,
         oskar_Mem* weight, oskar_Mem* time_centroid, int* status)
 {
-    size_t i, n;
+    size_t i;
     double t, range[2], *time_centroid_;
 
     /* Return immediately if filtering is not enabled. */
@@ -54,20 +54,21 @@ void oskar_imager_filter_time(const oskar_Imager* h, size_t* num_vis,
     range[1] = (h->time_max_utc <= 0.0) ? (double) FLT_MAX : h->time_max_utc;
 
     /* Get the number of input points, and set the number selected to zero. */
-    n = *num_vis;
+    const size_t n = *num_vis;
     *num_vis = 0;
 
     /* Apply the time centroid filter. */
     time_centroid_ = oskar_mem_double(time_centroid, status);
     if (h->imager_prec == OSKAR_DOUBLE)
     {
+        double2* amp_ = 0;
         double *uu_, *vv_, *ww_, *weight_;
-        double2* amp_;
         uu_ = oskar_mem_double(uu, status);
         vv_ = oskar_mem_double(vv, status);
         ww_ = oskar_mem_double(ww, status);
-        amp_ = oskar_mem_double2(amp, status);
         weight_ = oskar_mem_double(weight, status);
+        if (!h->coords_only)
+            amp_ = oskar_mem_double2(amp, status);
 
         for (i = 0; i < n; ++i)
         {
@@ -77,22 +78,23 @@ void oskar_imager_filter_time(const oskar_Imager* h, size_t* num_vis,
                 uu_[*num_vis] = uu_[i];
                 vv_[*num_vis] = vv_[i];
                 ww_[*num_vis] = ww_[i];
-                amp_[*num_vis] = amp_[i];
                 weight_[*num_vis] = weight_[i];
                 time_centroid_[*num_vis] = t;
+                if (amp_) amp_[*num_vis] = amp_[i];
                 (*num_vis)++;
             }
         }
     }
     else
     {
+        float2* amp_ = 0;
         float *uu_, *vv_, *ww_, *weight_;
-        float2* amp_;
         uu_ = oskar_mem_float(uu, status);
         vv_ = oskar_mem_float(vv, status);
         ww_ = oskar_mem_float(ww, status);
-        amp_ = oskar_mem_float2(amp, status);
         weight_ = oskar_mem_float(weight, status);
+        if (!h->coords_only)
+            amp_ = oskar_mem_float2(amp, status);
 
         for (i = 0; i < n; ++i)
         {
@@ -102,9 +104,9 @@ void oskar_imager_filter_time(const oskar_Imager* h, size_t* num_vis,
                 uu_[*num_vis] = uu_[i];
                 vv_[*num_vis] = vv_[i];
                 ww_[*num_vis] = ww_[i];
-                amp_[*num_vis] = amp_[i];
                 weight_[*num_vis] = weight_[i];
                 time_centroid_[*num_vis] = t;
+                if (amp_) amp_[*num_vis] = amp_[i];
                 (*num_vis)++;
             }
         }

@@ -64,7 +64,7 @@ void oskar_imager_update_from_block(oskar_Imager* h,
     double time_start_mjd, time_inc_sec;
     oskar_Mem *weight = 0, *weight_ptr = 0, *time_centroid;
     oskar_Mem *scratch = 0;
-    const oskar_Mem* ptr;
+    const oskar_Mem* ptr = 0;
     if (*status) return;
 
     /* Check that cross-correlations exist. */
@@ -115,8 +115,10 @@ void oskar_imager_update_from_block(oskar_Imager* h,
                 time_start_mjd + (start_time + t + 0.5) * time_inc_sec,
                 t * num_baselines, num_baselines, status);
 
-    /* Swap baseline and channel dimensions. */
-    ptr = oskar_vis_block_cross_correlations_const(block);
+    if (!h->coords_only)
+    {
+        /* Swap baseline and channel dimensions. */
+        ptr = oskar_vis_block_cross_correlations_const(block);
 #define SWAP_LOOP \
         for (t = 0; t < num_times; ++t)                                  \
             for (c = 0; c < num_channels; ++c)                           \
@@ -153,6 +155,7 @@ void oskar_imager_update_from_block(oskar_Imager* h,
             ptr = scratch;
         }
 #undef SWAP_LOOP
+    }
 
     /* Update the imager with the data. */
     oskar_imager_update(h, num_rows, start_chan, end_chan, num_pols,
@@ -285,12 +288,15 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
                         h->uu_im, h->vv_im, h->ww_im);
 
             /* Overwrite visibilities if making PSF, or phase rotate. */
-            if (h->im_type == OSKAR_IMAGE_TYPE_PSF)
-                oskar_mem_set_value_real(h->vis_im, 1.0,
-                        0, oskar_mem_length(h->vis_im), status);
-            else if (h->direction_type == 'R' && !h->coords_only)
-                oskar_imager_rotate_vis(h, num_vis,
-                        h->uu_tmp, h->vv_tmp, h->ww_tmp, h->vis_im);
+            if (!h->coords_only)
+            {
+                if (h->im_type == OSKAR_IMAGE_TYPE_PSF)
+                    oskar_mem_set_value_real(h->vis_im, 1.0,
+                            0, oskar_mem_length(h->vis_im), status);
+                else if (h->direction_type == 'R')
+                    oskar_imager_rotate_vis(h, num_vis,
+                            h->uu_tmp, h->vv_tmp, h->ww_tmp, h->vis_im);
+            }
 
             /* Apply time and baseline length filters if required. */
             oskar_imager_filter_time(h, &num_vis, h->uu_im, h->vv_im,
