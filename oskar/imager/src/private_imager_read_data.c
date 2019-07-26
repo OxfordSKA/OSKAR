@@ -214,13 +214,13 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
     oskar_mem_set_value_real(weight, 1.0, 0, num_weights, status);
     if (num_channels_tot > 1)
         scratch = oskar_mem_create(oskar_vis_header_amp_type(hdr), OSKAR_CPU,
-                num_baselines * num_channels_tot * max_times_per_block, status);
+                num_baselines * max_times_per_block, status);
 
     /* Loop over visibility blocks. */
     block = oskar_vis_block_create_from_header(OSKAR_CPU, hdr, status);
     for (i_block = 0; i_block < num_blocks; ++i_block)
     {
-        int t;
+        int c, t;
         if (*status) break;
 
         /* Read the visibility data. */
@@ -240,51 +240,38 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
             oskar_mem_set_value_real(time_centroid,
                     time_start_mjd + (start_time + t + 0.5) * time_inc_sec,
                     t * num_baselines, num_baselines, status);
-
-        /* Swap baseline and channel dimensions. */
-        ptr = oskar_vis_block_cross_correlations(block);
-#define SWAP_LOOP \
-        for (t = 0; t < num_times; ++t)                                  \
-            for (c = 0; c < num_channels; ++c)                           \
-                for (b = 0; b < num_baselines; ++b)                      \
-                    for (p = 0; p < num_pols; ++p)                       \
-                    {                                                    \
-                        k = (num_pols * (num_baselines *                 \
-                                (num_channels * t + c) + b) + p) << 1;   \
-                        l = (num_pols * (num_channels *                  \
-                                (num_baselines * t + b) + c) + p) << 1;  \
-                        out[l] = in[k];                                  \
-                        out[l + 1] = in[k + 1];                          \
-                    }
-        if (num_channels != 1)
-        {
-            int b, c, p;
-            size_t k, l;
-            if (oskar_mem_precision(ptr) == OSKAR_SINGLE)
-            {
-                float *in, *out;
-                in  = oskar_mem_float(ptr, status);
-                out = oskar_mem_float(scratch, status);
-                SWAP_LOOP
-            }
-            else
-            {
-                double *in, *out;
-                in  = oskar_mem_double(ptr, status);
-                out = oskar_mem_double(scratch, status);
-                SWAP_LOOP
-            }
-            ptr = scratch;
-        }
-#undef SWAP_LOOP
+        oskar_timer_pause(h->tmr_read);
 
         /* Update the imager with the data. */
-        oskar_timer_pause(h->tmr_read);
-        oskar_imager_update(h, num_rows, start_chan, end_chan, num_pols,
-                oskar_vis_block_baseline_uu_metres(block),
-                oskar_vis_block_baseline_vv_metres(block),
-                oskar_vis_block_baseline_ww_metres(block),
-                ptr, weight, time_centroid, status);
+        ptr = oskar_vis_block_cross_correlations(block);
+        if (num_channels != 1)
+        {
+            for (c = 0; c < num_channels; ++c)
+            {
+                /* Update per channel. */
+                for (t = 0; t < num_times; ++t)
+                {
+                    oskar_mem_copy_contents(scratch, ptr,
+                            num_baselines * t,
+                            num_baselines * (num_channels * t + c),
+                            num_baselines, status);
+                }
+                oskar_imager_update(h, num_rows,
+                        start_chan + c, start_chan + c, num_pols,
+                        oskar_vis_block_baseline_uu_metres_const(block),
+                        oskar_vis_block_baseline_vv_metres_const(block),
+                        oskar_vis_block_baseline_ww_metres_const(block),
+                        scratch, weight, time_centroid, status);
+            }
+        }
+        else
+        {
+            oskar_imager_update(h, num_rows, start_chan, end_chan, num_pols,
+                    oskar_vis_block_baseline_uu_metres_const(block),
+                    oskar_vis_block_baseline_vv_metres_const(block),
+                    oskar_vis_block_baseline_ww_metres_const(block),
+                    ptr, weight, time_centroid, status);
+        }
         *percent_done = (int) round(100.0 * (
                 (i_block + 1) / (double)(num_blocks * num_files) +
                 i_file / (double)num_files));
