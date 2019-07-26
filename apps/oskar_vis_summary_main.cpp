@@ -70,7 +70,9 @@ int main(int argc, char **argv)
     if (!display_log && !display_settings && !display_stats && !display_header)
         display_header = true;
 
-    oskar_log_create(OSKAR_LOG_NONE, OSKAR_LOG_STATUS);
+    oskar_Log* log = 0;
+    oskar_log_set_file_priority(log, OSKAR_LOG_NONE);
+    oskar_log_set_term_priority(log, OSKAR_LOG_STATUS);
 
     // Loop over visibility files.
     for (int i = 0; i < num_files; ++i)
@@ -81,7 +83,7 @@ int main(int argc, char **argv)
         oskar_VisHeader* hdr = oskar_vis_header_read(h, &status);
         if (status)
         {
-            oskar_log_error("Error reading header from file '%s' (%s)\n",
+            oskar_log_error(log, "Error reading header from file '%s' (%s)\n",
                     filename, oskar_get_error_string(status));
             return status;
         }
@@ -95,30 +97,30 @@ int main(int argc, char **argv)
 
         if (display_header && !status)
         {
-            oskar_log_section('M', "Visibility Header");
-            oskar_log_value('M', 0, "File", "[%i/%i] %s",
+            oskar_log_section(log, 'M', "Visibility Header");
+            oskar_log_value(log, 'M', 0, "File", "[%i/%i] %s",
                     i+1, num_files, filename);
-            oskar_log_value('M', 0, "Amplitude type", "%s",
+            oskar_log_value(log, 'M', 0, "Amplitude type", "%s",
                     oskar_mem_data_type_string(oskar_vis_header_amp_type(hdr)));
-            oskar_log_value('M', 0, "Max. times per block", "%d",
+            oskar_log_value(log, 'M', 0, "Max. times per block", "%d",
                     max_times_per_block);
-            oskar_log_value('M', 0, "No. times total", "%d", num_times);
-            oskar_log_value('M', 0, "No. blocks", "%d", num_blocks);
-            oskar_log_value('M', 0, "No. channels", "%d",
+            oskar_log_value(log, 'M', 0, "No. times total", "%d", num_times);
+            oskar_log_value(log, 'M', 0, "No. blocks", "%d", num_blocks);
+            oskar_log_value(log, 'M', 0, "No. channels", "%d",
                     oskar_vis_header_num_channels_total(hdr));
-            oskar_log_value('M', 0, "No. stations", "%d", num_stations);
-            oskar_log_value('M', 0, "No. baselines", "%d", num_baselines);
-            oskar_log_value('M', 0, "Start frequency (MHz)", "%.6f",
+            oskar_log_value(log, 'M', 0, "No. stations", "%d", num_stations);
+            oskar_log_value(log, 'M', 0, "No. baselines", "%d", num_baselines);
+            oskar_log_value(log, 'M', 0, "Start frequency (MHz)", "%.6f",
                     oskar_vis_header_freq_start_hz(hdr) / 1.0e6);
-            oskar_log_value('M', 0, "Channel separation (MHz)", "%.6f",
+            oskar_log_value(log, 'M', 0, "Channel separation (MHz)", "%.6f",
                     oskar_vis_header_freq_inc_hz(hdr) / 1.0e6);
-            oskar_log_value('M', 0, "Channel bandwidth (Hz)", "%f",
+            oskar_log_value(log, 'M', 0, "Channel bandwidth (Hz)", "%f",
                     oskar_vis_header_channel_bandwidth_hz(hdr));
-            oskar_log_value('M', 0, "Start time (MJD, UTC)", "%f",
+            oskar_log_value(log, 'M', 0, "Start time (MJD, UTC)", "%f",
                     oskar_vis_header_time_start_mjd_utc(hdr));
-            oskar_log_value('M', 0, "Time increment (s)", "%f",
+            oskar_log_value(log, 'M', 0, "Time increment (s)", "%f",
                     oskar_vis_header_time_inc_sec(hdr));
-            oskar_log_value('M', 0, "Integration time (s)", "%f",
+            oskar_log_value(log, 'M', 0, "Integration time (s)", "%f",
                     oskar_vis_header_time_average_sec(hdr));
         }
 
@@ -157,7 +159,7 @@ int main(int argc, char **argv)
                 oskar_vis_block_read(blk, hdr, h, b, &status);
                 if (status)
                 {
-                    oskar_log_error("Error reading block %d: %s",
+                    oskar_log_error(log, "Error reading block %d: %s",
                             b, oskar_get_error_string(status));
                     return status;
                 }
@@ -188,34 +190,34 @@ int main(int argc, char **argv)
             oskar_vis_block_free(blk, &status);
 
             // Print statistics for the file.
-            oskar_log_section('M', "Visibility Statistics");
+            oskar_log_section(log, 'M', "Visibility Statistics");
             if (ac_cntr > 0)
             {
-                oskar_log_message('M', 0, "Stokes-I auto-correlations:");
-                oskar_log_message('M', 1, "Minimum : % 6.3e % +6.3ej Jy",
+                oskar_log_message(log, 'M', 0, "Stokes-I auto-correlations:");
+                oskar_log_message(log, 'M', 1, "Minimum : % 6.3e % +6.3ej Jy",
                         ac_min.x,  ac_min.y);
-                oskar_log_message('M', 1, "Maximum : % 6.3e % +6.3ej Jy",
+                oskar_log_message(log, 'M', 1, "Maximum : % 6.3e % +6.3ej Jy",
                         ac_max.x, ac_max.y);
-                oskar_log_message('M', 1, "Mean    : % 6.3e % +6.3ej Jy",
+                oskar_log_message(log, 'M', 1, "Mean    : % 6.3e % +6.3ej Jy",
                         ac_mean.x, ac_mean.y);
-                oskar_log_message('M', 1, "Std.dev.: % 6.3e Jy",
+                oskar_log_message(log, 'M', 1, "Std.dev.: % 6.3e Jy",
                         sqrt(ac_m2.x/ac_cntr));
-                oskar_log_message('M', 1, "Zeros   :  %i/%i (%.1f%%)",
+                oskar_log_message(log, 'M', 1, "Zeros   :  %i/%i (%.1f%%)",
                         ac_num_zero, ac_cntr,
                         ((double)ac_num_zero/ac_cntr)*100.0);
             }
             if (xc_cntr > 0)
             {
-                oskar_log_message('M', 0, "Stokes-I cross-correlations:");
-                oskar_log_message('M', 1, "Minimum : % 6.3e % +6.3ej Jy",
+                oskar_log_message(log, 'M', 0, "Stokes-I cross-correlations:");
+                oskar_log_message(log, 'M', 1, "Minimum : % 6.3e % +6.3ej Jy",
                         xc_min.x,  xc_min.y);
-                oskar_log_message('M', 1, "Maximum : % 6.3e % +6.3ej Jy",
+                oskar_log_message(log, 'M', 1, "Maximum : % 6.3e % +6.3ej Jy",
                         xc_max.x, xc_max.y);
-                oskar_log_message('M', 1, "Mean    : % 6.3e % +6.3ej Jy",
+                oskar_log_message(log, 'M', 1, "Mean    : % 6.3e % +6.3ej Jy",
                         xc_mean.x, xc_mean.y);
-                oskar_log_message('M', 1, "Std.dev.: % 6.3e Jy",
+                oskar_log_message(log, 'M', 1, "Std.dev.: % 6.3e Jy",
                         sqrt(xc_m2.x/xc_cntr));
-                oskar_log_message('M', 1, "Zeros   :  %i/%i (%.1f%%)",
+                oskar_log_message(log, 'M', 1, "Zeros   :  %i/%i (%.1f%%)",
                         xc_num_zero, xc_cntr,
                         ((double)xc_num_zero/xc_cntr)*100.0);
             }
@@ -251,7 +253,7 @@ int main(int argc, char **argv)
         oskar_vis_header_free(hdr, &status);
     } // End loop over visibility files.
 
-    oskar_log_free();
+    oskar_log_free(log);
     return status;
 }
 

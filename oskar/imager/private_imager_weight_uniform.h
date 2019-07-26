@@ -39,7 +39,7 @@ extern "C" {
 void oskar_imager_weight_uniform(size_t num_points, const oskar_Mem* uu,
         const oskar_Mem* vv, const oskar_Mem* weight_in, oskar_Mem* weight_out,
         double cell_size_rad, int grid_size, const oskar_Mem* weight_grid,
-        int* status);
+        size_t* num_skipped, int* status);
 
 #ifdef __cplusplus
 }

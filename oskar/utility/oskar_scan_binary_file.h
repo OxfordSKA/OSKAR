@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,7 +51,7 @@ extern "C" {
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_scan_binary_file(const char* filename, int* status);
+void oskar_scan_binary_file(const char* filename, oskar_Log* log, int* status);
 
 #ifdef __cplusplus
 }

@@ -162,7 +162,7 @@ size_t oskar_device_global_size(size_t num, size_t local_size)
 void oskar_device_init_cl(void)
 {
     int num_devices = 0;
-    oskar_log_section('S', "OpenCL device set-up");
+    oskar_log_section(0, 'S', "OpenCL device set-up");
     oskar_Device** devices = oskar_device_create_list(OSKAR_CL, &num_devices);
     for (int i = 0; i < (int)cl_devices_.size(); ++i)
         oskar_device_free(cl_devices_[i]);
@@ -266,7 +266,7 @@ void oskar_device_launch_kernel(const char* name, int location,
                     num_blocks, num_threads, arg_, shared_mem, 0);
         else
         {
-            oskar_log_error("Kernel '%s' has not been registered.", name);
+            oskar_log_error(0, "Kernel '%s' has not been registered.", name);
             *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
         }
 #else
@@ -287,7 +287,7 @@ void oskar_device_launch_kernel(const char* name, int location,
         if (iter != device->kern->kernel.end()) k = iter->second;
         if (!k)
         {
-            oskar_log_error("Kernel '%s' has not been registered.", name);
+            oskar_log_error(0, "Kernel '%s' has not been registered.", name);
             *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
             return;
         }
@@ -310,16 +310,16 @@ void oskar_device_launch_kernel(const char* name, int location,
                 0, NULL, NULL);
         if (error != CL_SUCCESS)
         {
-            oskar_log_error("Kernel '%s' launch failure (OpenCL error %d).",
+            oskar_log_error(0, "Kernel '%s' launch failure (OpenCL error %d).",
                     name, error);
             if (error == CL_INVALID_WORK_GROUP_SIZE)
             {
                 clGetKernelWorkGroupInfo(k, device->device_id_cl,
                         CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t),
                         &work_group_size, 0);
-                oskar_log_message('M', 1, "Local size is: (%zu, %zu, %zu)",
+                oskar_log_message(0, 'M', 1, "Local size is: (%zu, %zu, %zu)",
                         local_size[0], local_size[1], local_size[2]);
-                oskar_log_message('M', 1, "Allowed size for '%s' is %zu",
+                oskar_log_message(0, 'M', 1, "Allowed size for '%s' is %zu",
                         name, work_group_size);
             }
             *status = OSKAR_ERR_KERNEL_LAUNCH_FAILURE;
@@ -457,7 +457,7 @@ static unsigned char* oskar_device_binary_load_cl(
         program_source_len = (int) device->kern->src.length();
         program_crc = oskar_device_crc(device,
                 device->kern->src.c_str(), program_source_len);
-        oskar_log_message('S', 0, "Loading OpenCL program for %s",
+        oskar_log_message(0, 'S', 0, "Loading OpenCL program for %s",
                 device->name);
         oskar_Binary* file = oskar_binary_create(cache_name, 'r', &status);
         oskar_binary_read_ext(file, OSKAR_INT, device->name,
@@ -635,10 +635,10 @@ static void oskar_device_set_up_cl(oskar_Device* device)
         {
             const char* src_ptr[] = { src.c_str() };
             used_binary = 0;
-            oskar_log_message('S', 0,
+            oskar_log_message(0, 'S', 0,
                     "Building OpenCL program for %s, please wait...",
                     device->name);
-            oskar_log_message('S', 1, "Required on first run of a new "
+            oskar_log_message(0, 'S', 1, "Required on first run of a new "
                     "version, or if GPU drivers are updated.");
             device->program = clCreateProgramWithSource(device->context, 1,
                     src_ptr, 0, &error);
@@ -695,7 +695,7 @@ static void oskar_device_set_up_cl(oskar_Device* device)
                 device->device_id_cl, CL_QUEUE_PROFILING_ENABLE, &error);
         if (error != CL_SUCCESS) func = "clCreateCommandQueue";
     }
-    if (error || func) oskar_log_error("%s error (%d).", func, error);
+    if (error || func) oskar_log_error(0, "%s error (%d).", func, error);
 #endif
     free(program_binary);
 

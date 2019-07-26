@@ -102,7 +102,7 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
         offset_complex = 1;
     if (offset_complex < 0)
     {
-        oskar_log_error("Unknown spherical wave filename pattern '%s'",
+        oskar_log_error(0, "Unknown spherical wave filename pattern '%s'",
                 filename);
         *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
@@ -135,7 +135,7 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
         offset1 = 6 + offset_complex;
         break;
     default:
-        oskar_log_error("Unknown spherical wave filename pattern '%s'",
+        oskar_log_error(0, "Unknown spherical wave filename pattern '%s'",
                 filename);
         *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
@@ -247,7 +247,7 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
         }
         else
         {
-            oskar_log_error("Inconsistent number of coefficients for "
+            oskar_log_error(0, "Inconsistent number of coefficients for "
                     "spherical wave pattern (current=%d, expected=%d) in '%s",
                     l_max, data->l_max[i], filename);
             *status = OSKAR_ERR_DIMENSION_MISMATCH;
@@ -255,7 +255,7 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     }
     else
     {
-        oskar_log_error("Number of spherical wave coefficients loaded "
+        oskar_log_error(0, "Number of spherical wave coefficients loaded "
                 "(%d) does not match number required (%d) for closest value "
                 "of l_max=%d in '%s'",
                 n, (l_max + 1) * (l_max + 1) - 1, l_max, filename);

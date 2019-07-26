@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/oskar_settings_log.h"
 #include "apps/oskar_settings_to_interferometer.h"
 
 #include <cstdlib>
@@ -41,10 +42,12 @@ oskar_Interferometer* oskar_settings_to_interferometer(oskar::SettingsTree* s,
     s->clear_group();
 
     // Create and set up the interferometer simulator.
-    s->begin_group("simulator");
-    int prec = s->to_int("double_precision", status) ?
+    int prec = s->to_int("simulator/double_precision", status) ?
             OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_Interferometer* h = oskar_interferometer_create(prec, status);
+
+    // Set simulator settings.
+    s->begin_group("simulator");
     oskar_interferometer_set_max_sources_per_chunk(h,
             s->to_int("max_sources_per_chunk", status));
     oskar_interferometer_set_settings_path(h, s->file_name());
@@ -67,8 +70,10 @@ oskar_Interferometer* oskar_settings_to_interferometer(oskar::SettingsTree* s,
     else
         oskar_interferometer_set_num_devices(h,
                 s->to_int("num_devices", status));
-    oskar_log_set_keep_file(s->to_int("keep_log_file", status));
-    oskar_log_set_file_priority(s->to_int("write_status_to_log_file", status) ?
+    oskar_log_set_keep_file(oskar_interferometer_log(h),
+            s->to_int("keep_log_file", status));
+    oskar_log_set_file_priority(oskar_interferometer_log(h),
+            s->to_int("write_status_to_log_file", status) ?
                     OSKAR_LOG_STATUS : OSKAR_LOG_MESSAGE);
     s->end_group();
 

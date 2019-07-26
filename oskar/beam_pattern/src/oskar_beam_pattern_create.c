@@ -46,6 +46,7 @@ oskar_BeamPattern* oskar_beam_pattern_create(int precision, int* status)
     h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->mutex     = oskar_mutex_create();
     h->barrier   = oskar_barrier_create(0);
+    h->log       = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_WARNING);
 
     /* Get number of devices available, and device location. */
     oskar_device_set_require_double_precision(precision == OSKAR_DOUBLE);

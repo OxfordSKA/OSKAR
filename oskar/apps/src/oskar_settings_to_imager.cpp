@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/oskar_settings_log.h"
 #include "apps/oskar_settings_to_imager.h"
 
 #include <cstdlib>
@@ -41,12 +42,13 @@ oskar_Imager* oskar_settings_to_imager(oskar::SettingsTree* s,
     s->clear_group();
 
     // Create and set up the imager.
-    s->begin_group("image");
     oskar_Imager* h = oskar_imager_create(
-            s->to_int("double_precision", status) ?
+            s->to_int("image/double_precision", status) ?
             OSKAR_DOUBLE : OSKAR_SINGLE, status);
+    oskar_log_set_keep_file(oskar_imager_log(h), 0);
 
     // Set GPU IDs.
+    s->begin_group("image");
     if (!s->to_int("use_gpus", status))
         oskar_imager_set_gpus(h, 0, 0, status);
     else

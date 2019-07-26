@@ -31,6 +31,7 @@
 #include "imager/private_imager_read_data.h"
 #include "imager/private_imager_read_dims.h"
 #include "imager/oskar_imager.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -45,9 +46,11 @@ void oskar_imager_run(oskar_Imager* h,
         int num_output_images, oskar_Mem** output_images,
         int num_output_grids, oskar_Mem** output_grids, int* status)
 {
-    int i, num_files, percent_done = 0, percent_next = 10;
+    oskar_Timer* tmr;
     const char* filename;
-    if (*status) return;
+    int i, num_files, percent_done = 0, percent_next = 10;
+    if (*status || !h) return;
+    oskar_log_section(h->log, 'M', "Starting imager...");
 
     /* Check input file has been set. */
     num_files = h->num_files;
@@ -59,6 +62,8 @@ void oskar_imager_run(oskar_Imager* h,
 
     /* Clear imager cache. */
     oskar_imager_reset_cache(h, status);
+    tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    oskar_timer_resume(tmr);
 
     /* Read dimension sizes. */
     for (i = 0; i < num_files; ++i)
@@ -70,29 +75,31 @@ void oskar_imager_run(oskar_Imager* h,
         else
             oskar_imager_read_dims_vis(h, filename, status);
         if (*status)
-            oskar_log_error("Error opening file '%s'", filename);
+            oskar_log_error(h->log, "Error opening file '%s'", filename);
     }
 
     /* Check for errors. */
     if (*status)
     {
         oskar_imager_reset_cache(h, status);
+        oskar_timer_free(tmr);
         return;
     }
 
-    oskar_log_message('M', 0, "Using %d frequency channel(s)",
+    oskar_log_message(h->log, 'M', 0, "Using %d frequency channel(s)",
             h->num_sel_freqs);
     if (h->num_sel_freqs > 0)
-        oskar_log_message('M', 1, "Range %.3f MHz to %.3f MHz",
+        oskar_log_message(h->log, 'M', 1, "Range %.3f MHz to %.3f MHz",
                 h->sel_freqs[0] * 1e-6,
                 h->sel_freqs[h->num_sel_freqs - 1] * 1e-6);
 
     /* Check data ranges. */
     if (h->num_sel_freqs == 0)
     {
-        oskar_log_error("No data selected.");
+        oskar_log_error(h->log, "No data selected.");
         *status = OSKAR_ERR_OUT_OF_RANGE;
         oskar_imager_reset_cache(h, status);
+        oskar_timer_free(tmr);
         return;
     }
 
@@ -101,7 +108,7 @@ void oskar_imager_run(oskar_Imager* h,
             h->algorithm == OSKAR_ALGORITHM_WPROJ)
     {
         oskar_imager_set_coords_only(h, 1);
-        oskar_log_section('M', "Reading coordinates...");
+        oskar_log_section(h->log, 'M', "Reading coordinates...");
 
         /* Loop over input files. */
         for (i = 0; i < num_files; ++i)
@@ -109,7 +116,7 @@ void oskar_imager_run(oskar_Imager* h,
             /* Read coordinates and weights. */
             if (*status) break;
             filename = h->input_files[i];
-            oskar_log_message('M', 0, "Opening '%s'", filename);
+            oskar_log_message(h->log, 'M', 0, "Opening '%s'", filename);
             if (oskar_imager_is_ms(filename))
                 oskar_imager_read_coords_ms(h, filename, i, num_files,
                         &percent_done, &percent_next, status);
@@ -124,26 +131,27 @@ void oskar_imager_run(oskar_Imager* h,
     if (*status)
     {
         oskar_imager_reset_cache(h, status);
+        oskar_timer_free(tmr);
         return;
     }
 
     /* Initialise the algorithm. */
-    oskar_log_section('M', "Initialising algorithm...");
+    oskar_log_section(h->log, 'M', "Initialising algorithm...");
     oskar_imager_check_init(h, status);
     if (!*status)
     {
-        oskar_log_message('M', 0, "Plane size is %d x %d.",
+        oskar_log_message(h->log, 'M', 0, "Plane size is %d x %d.",
                 oskar_imager_plane_size(h), oskar_imager_plane_size(h));
         if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
         {
-            oskar_log_message('M', 0, "Baseline W values (wavelengths)");
-            oskar_log_message('M', 1, "Min: %.12e", h->ww_min);
-            oskar_log_message('M', 1, "Max: %.12e", h->ww_max);
-            oskar_log_message('M', 1, "RMS: %.12e", h->ww_rms);
-            oskar_log_message('M', 0, "Using %d W-planes.",
+            oskar_log_message(h->log, 'M', 0, "Baseline W values (wavelengths)");
+            oskar_log_message(h->log, 'M', 1, "Min: %.12e", h->ww_min);
+            oskar_log_message(h->log, 'M', 1, "Max: %.12e", h->ww_max);
+            oskar_log_message(h->log, 'M', 1, "RMS: %.12e", h->ww_rms);
+            oskar_log_message(h->log, 'M', 0, "Using %d W-planes.",
                     oskar_imager_num_w_planes(h));
         }
-        oskar_log_section('M', "Reading visibility data...");
+        oskar_log_section(h->log, 'M', "Reading visibility data...");
     }
 
     /* Loop over input files. */
@@ -153,7 +161,7 @@ void oskar_imager_run(oskar_Imager* h,
         /* Read visibility data. */
         if (*status) break;
         filename = h->input_files[i];
-        oskar_log_message('M', 0, "Opening '%s'", filename);
+        oskar_log_message(h->log, 'M', 0, "Opening '%s'", filename);
         if (oskar_imager_is_ms(filename))
             oskar_imager_read_data_ms(h, filename, i, num_files,
                     &percent_done, &percent_next, status);
@@ -166,12 +174,22 @@ void oskar_imager_run(oskar_Imager* h,
     if (*status)
     {
         oskar_imager_reset_cache(h, status);
+        oskar_timer_free(tmr);
         return;
     }
 
-    oskar_log_section('M', "Finalising %d image plane(s)...", h->num_planes);
+    oskar_log_section(h->log, 'M', "Finalising %d image plane(s)...",
+            h->num_planes);
     oskar_imager_finalise(h, num_output_images, output_images,
             num_output_grids, output_grids, status);
+
+    if (!*status)
+        oskar_log_message(h->log, 'M', 0, "Run completed in %.3f sec.",
+                oskar_timer_elapsed(tmr));
+    else
+        oskar_log_error(h->log, "Run failed with code %i: %s.", *status,
+                oskar_get_error_string(*status));
+    oskar_timer_free(tmr);
 }
 
 

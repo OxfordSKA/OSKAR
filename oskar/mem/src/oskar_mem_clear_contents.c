@@ -65,7 +65,7 @@ void oskar_mem_clear_contents(oskar_Mem* mem, int* status)
         clWaitForEvents(1, &event); /* This is required. */
         if (error != CL_SUCCESS)
         {
-            oskar_log_error("clEnqueueFillBuffer() error (%d)", error);
+            oskar_log_error(0, "clEnqueueFillBuffer() error (%d)", error);
             *status = OSKAR_ERR_INVALID_ARGUMENT;
         }
 #else

@@ -86,7 +86,7 @@ void oskar_beam_pattern_check_init(oskar_BeamPattern* h, int* status)
     /* Check that the telescope model has been set. */
     if (!h->tel)
     {
-        oskar_log_error("Telescope model not set.");
+        oskar_log_error(h->log, "Telescope model not set.");
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
     }
@@ -123,7 +123,7 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
      * reasonable file header. Replace newlines with zeros. */
     h->settings_log_length = 0;
     free(h->settings_log);
-    h->settings_log = oskar_log_file_data(&h->settings_log_length);
+    h->settings_log = oskar_log_file_data(h->log, &h->settings_log_length);
     for (j = 0; j < h->settings_log_length; ++j)
     {
         if (h->settings_log[j] == '\n') h->settings_log[j] = 0;
@@ -198,7 +198,7 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
     if (h->num_data_products == 0 && !*status)
     {
         *status = OSKAR_ERR_FILE_IO;
-        oskar_log_error("No output file(s) selected.");
+        oskar_log_error(h->log, "No output file(s) selected.");
     }
 }
 
@@ -648,7 +648,7 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
             {
                 if (h->num_active_stations < 2)
                 {
-                    oskar_log_error("Cannot create cross-power beam "
+                    oskar_log_error(h->log, "Cannot create cross-power beam "
                             "using less than two active stations.");
                     *status = OSKAR_ERR_INVALID_ARGUMENT;
                     break;

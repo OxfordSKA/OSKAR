@@ -50,7 +50,7 @@
  * settings.
  *
  * @param[in] s           A pointer to the settings tree.
- * @param[in,out] log     A pointer to the log to use (IGNORED).
+ * @param[in,out] log     A pointer to the log to use.
  * @param[in,out] status  Status return code.
  *
  * @return A handle to the new sky model.

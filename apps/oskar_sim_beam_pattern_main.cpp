@@ -53,21 +53,11 @@ int main(int argc, char** argv)
     const char* settings = opt.get_arg(0);
     int status = 0;
 
-    // Create the log if necessary.
-    if (!opt.is_set("--get") && !opt.is_set("--set"))
-    {
-        int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
-        oskar_log_create(OSKAR_LOG_MESSAGE, priority);
-        oskar_log_message('M', 0, "Running binary %s", argv[0]);
-        oskar_log_section('M', "Loading settings file '%s'", settings);
-    }
-
     // Load the settings file.
     SettingsTree* s = oskar_app_settings_tree(app, settings);
     if (!s)
     {
-        oskar_log_error("Failed to read settings file.");
-        oskar_log_free();
+        oskar_log_error(0, "Failed to read settings file '%s'", settings);
         return EXIT_FAILURE;
     }
 
@@ -83,55 +73,47 @@ int main(int argc, char** argv)
         const char* key = opt.get_arg(1);
         const char* val = opt.get_arg(2);
         bool ok = val ? s->set_value(key, val) : s->set_default(key);
-        if (!ok) oskar_log_error("Failed to set '%s'='%s'", key, val);
+        if (!ok) oskar_log_error(0, "Failed to set '%s'='%s'", key, val);
         SettingsTree::free(s);
         return ok ? 0 : EXIT_FAILURE;
     }
 
-    // Write settings to log.
-    oskar_settings_log(s);
+    // Set up the beam pattern simulator.
+    oskar_BeamPattern* sim = oskar_settings_to_beam_pattern(s, NULL, &status);
+    oskar_Log* log = oskar_beam_pattern_log(sim);
+    int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
+    oskar_log_set_term_priority(log, priority);
 
-    // Set up the telescope model and beam pattern simulator.
+    // Write settings to log.
+    oskar_settings_log(s, log);
+
+    // Warn about lack of GPUs.
     const char *warning_gpu = 0;
-    oskar_BeamPattern* sim = 0;
-    oskar_Telescope* tel = oskar_settings_to_telescope(s, NULL, &status);
+    if (s->to_int("simulator/use_gpus", &status) &&
+            oskar_beam_pattern_num_gpus(sim) == 0)
+    {
+        warning_gpu = "No GPU capability available.";
+        oskar_log_warning(log, warning_gpu);
+    }
+
+    // Set up the telescope model.
+    oskar_Telescope* tel = oskar_settings_to_telescope(s, log, &status);
     if (!tel || status)
-        oskar_log_error("Failed to set up telescope model: %s.",
+        oskar_log_error(log, "Failed to set up telescope model: %s.",
                 oskar_get_error_string(status));
     else
-    {
-        sim = oskar_settings_to_beam_pattern(s, NULL, &status);
         oskar_beam_pattern_set_telescope_model(sim, tel, &status);
-        if (s->to_int("simulator/use_gpus", &status) &&
-                oskar_beam_pattern_num_gpus(sim) == 0)
-        {
-            warning_gpu = "No GPU capability available.";
-            oskar_log_warning(warning_gpu);
-        }
-    }
     oskar_telescope_free(tel, &status);
 
     // Run simulation.
-    oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
-    oskar_timer_resume(tmr);
     oskar_beam_pattern_run(sim, &status);
-
-    // Check for errors.
-    if (!status)
-        oskar_log_message('M', 0, "Run completed in %.3f sec.",
-                oskar_timer_elapsed(tmr));
-    else
-        oskar_log_error("Run failed with code %i: %s.", status,
-                oskar_get_error_string(status));
 
     // Reiterate warnings.
     if (warning_gpu)
-        oskar_log_warning(warning_gpu);
+        oskar_log_warning(log, warning_gpu);
 
     // Free memory.
-    oskar_timer_free(tmr);
     oskar_beam_pattern_free(sim, &status);
-    oskar_log_free();
     SettingsTree::free(s);
     return status;
 }

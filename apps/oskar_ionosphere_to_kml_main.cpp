@@ -97,14 +97,16 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Create the log.
-    oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_STATUS);
-    oskar_log_message('M', 0, "Running binary %s", argv[0]);
+    // Set log parameters.
+    oskar_Log* log = 0;
+    oskar_log_set_file_priority(log, OSKAR_LOG_MESSAGE);
+    oskar_log_set_term_priority(log, OSKAR_LOG_STATUS);
+    oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
     const char* settings_file = opt.get_arg(0);
     oskar_Settings_old settings;
     oskar_settings_old_load(&settings, 0, settings_file, &status);
-    oskar_log_set_keep_file(settings.sim.keep_log_file);
+    oskar_log_set_keep_file(log, settings.sim.keep_log_file);
     oskar_Telescope* tel = oskar_settings_to_telescope(&settings, 0, &status);
 
     // Generate or load TEC screen image
@@ -130,7 +132,7 @@ int main(int argc, char** argv)
     // -------------------------------------------------------------------------
     status = evaluate_pp(&pp_lon, &pp_lat, settings, 0, tel);
     if (status)
-        oskar_log_error("XXX: %s.", oskar_get_error_string(status));
+        oskar_log_error(log, "XXX: %s.", oskar_get_error_string(status));
 
     // Write out KML
     // -------------------------------------------------------------------------
@@ -141,7 +143,7 @@ int main(int argc, char** argv)
     oskar_mem_free(TEC_screen, &status);
     oskar_mem_free(pp_lon, &status);
     oskar_mem_free(pp_lat, &status);
-    oskar_log_free();
+    oskar_log_free(log);
 }
 
 int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings_old& settings,

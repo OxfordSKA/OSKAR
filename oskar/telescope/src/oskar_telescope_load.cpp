@@ -55,13 +55,12 @@ using std::vector;
 static void load_directories(oskar_Telescope* telescope,
         const string& cwd, oskar_Station* station, int depth,
         const vector<oskar_TelescopeLoadAbstract*>& loaders,
-        map<string, string> filemap, int* status);
+        map<string, string> filemap, oskar_Log* log, int* status);
 
 extern "C"
 void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
         oskar_Log* log, int* status)
 {
-    (void) log;
     // Check if safe to proceed.
     if (*status) return;
 
@@ -99,10 +98,10 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
     // Load everything recursively from the telescope directory tree.
     map<string, string> filemap;
     load_directories(telescope, string(path), NULL, 0, loaders,
-            filemap, status);
+            filemap, log, status);
     if (*status)
     {
-        oskar_log_error("Failed to load telescope model (%s).",
+        oskar_log_error(log, "Failed to load telescope model (%s).",
                 oskar_get_error_string(*status));
     }
 
@@ -124,16 +123,18 @@ struct ThreadArgs
     const string* cwd;
     const vector<oskar_TelescopeLoadAbstract*>* loaders;
     map<string, string>* filemap;
-    int i_thread, num_threads, num_dirs, *status;
+    oskar_Log* log;
+    int *status, i_thread, num_threads, num_dirs;
     const char* const* children;
     ThreadArgs(oskar_Telescope* telescope,
             const string& cwd,
             const vector<oskar_TelescopeLoadAbstract*>& loaders,
-            map<string, string>& filemap, int i_thread, int num_threads,
-            int num_dirs, int* status, const char* const* children)
+            map<string, string>& filemap, oskar_Log* log, int* status,
+            int i_thread, int num_threads,
+            int num_dirs, const char* const* children)
     : telescope(telescope), cwd(&cwd), loaders(&loaders), filemap(&filemap),
-      i_thread(i_thread), num_threads(num_threads), num_dirs(num_dirs),
-      status(status), children(children) {}
+      log(log), status(status), i_thread(i_thread), num_threads(num_threads),
+      num_dirs(num_dirs), children(children) {}
 };
 typedef struct ThreadArgs ThreadArgs;
 
@@ -145,7 +146,7 @@ static void* thread_func(void* arg)
         load_directories(a->telescope,
                 oskar_TelescopeLoadAbstract::get_path(*(a->cwd),
                 a->children[i]), oskar_telescope_station(a->telescope, i), 1,
-                *(a->loaders), *(a->filemap), a->status);
+                *(a->loaders), *(a->filemap), a->log, a->status);
     }
     return 0;
 }
@@ -155,7 +156,7 @@ static void* thread_func(void* arg)
 static void load_directories(oskar_Telescope* telescope,
         const string& cwd, oskar_Station* station, int depth,
         const vector<oskar_TelescopeLoadAbstract*>& loaders,
-        map<string, string> filemap, int* status)
+        map<string, string> filemap, oskar_Log* log, int* status)
 {
     int num_dirs = 0;
     char** children = 0;
@@ -175,7 +176,7 @@ static void load_directories(oskar_Telescope* telescope,
             {
                 string s = string("Error in ") + loaders[i]->name() +
                         string(" in '") + cwd + string("'.");
-                oskar_log_error("%s", s.c_str());
+                oskar_log_error(log, "%s", s.c_str());
                 goto fail;
             }
         }
@@ -187,7 +188,7 @@ static void load_directories(oskar_Telescope* telescope,
             load_directories(telescope,
                     oskar_TelescopeLoadAbstract::get_path(cwd, children[0]),
                     oskar_telescope_station(telescope, 0), depth + 1,
-                    loaders, filemap, status);
+                    loaders, filemap, log, status);
 
             // Copy station 0 to all the others.
             oskar_telescope_duplicate_first_station(telescope, status);
@@ -208,8 +209,8 @@ static void load_directories(oskar_Telescope* telescope,
             // Use multi-threading for load at top level only.
             for (int i = 0; i < num_procs; ++i)
             {
-                args.push_back(ThreadArgs(telescope, cwd, loaders,
-                        filemap, i, num_procs, num_dirs, status, children));
+                args.push_back(ThreadArgs(telescope, cwd, loaders, filemap,
+                        log, status, i, num_procs, num_dirs, children));
             }
             for (int i = 0; i < num_procs; ++i)
             {
@@ -235,7 +236,7 @@ static void load_directories(oskar_Telescope* telescope,
             {
                 string s = string("Error in ") + loaders[i]->name() +
                         string(" in '") + cwd + string("'.");
-                oskar_log_error("%s", s.c_str());
+                oskar_log_error(log, "%s", s.c_str());
                 goto fail;
             }
         }
@@ -247,7 +248,7 @@ static void load_directories(oskar_Telescope* telescope,
             load_directories(telescope,
                     oskar_TelescopeLoadAbstract::get_path(cwd, children[0]),
                     oskar_station_child(station, 0), depth + 1, loaders,
-                    filemap, status);
+                    filemap, log, status);
 
             // Copy station 0 to all the others.
             oskar_station_duplicate_first_child(station, status);
@@ -268,7 +269,7 @@ static void load_directories(oskar_Telescope* telescope,
                 load_directories(telescope,
                         oskar_TelescopeLoadAbstract::get_path(cwd, children[i]),
                         oskar_station_child(station, i), depth + 1, loaders,
-                        filemap, status);
+                        filemap, log, status);
             }
         } // End check on number of directories.
     } // End check on depth.

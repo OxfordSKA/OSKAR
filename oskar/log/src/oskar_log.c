@@ -26,18 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "log/private_log.h"
 #include "log/oskar_log.h"
+#include "oskar_version.h"
 
-#include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
-#ifndef OSKAR_OS_WIN
+#ifdef OSKAR_OS_WIN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#else
 #include <sys/time.h>
 #include <unistd.h>
-#else
-#include <windows.h>
 #endif
 
 #ifdef __cplusplus
@@ -46,16 +48,73 @@ extern "C" {
 
 #define WRITE_TIMESTAMP 0
 
-static void print_entry(FILE* stream, char priority, char code, int depth,
-        const char* prefix, int width, const char* format, va_list args);
+struct oskar_Log
+{
+    int init;                         /* Initialisation flag. */
+    int keep_file;                    /* If true, log file will be kept. */
+    int file_priority, term_priority; /* Message priority filters. */
+    int value_width;                  /* Width of value message */
+    FILE* file;                       /* Log file handle. */
+    double timestamp_start;           /* Timestamp of log creation. */
+    char name[120];                   /* Log file pathname. */
+};
+
+#ifndef OSKAR_LOG_TYPEDEF_
+#define OSKAR_LOG_TYPEDEF_
+typedef struct oskar_Log oskar_Log;
+#endif /* OSKAR_LOG_TYPEDEF_ */
+
+
+static void init_log(oskar_Log* log);
+static void print_entry(oskar_Log* log, FILE* stream, char priority, char code,
+        int depth, const char* prefix, const char* format, va_list args);
 static int log_priority_level(char code);
-static int should_print_term_entry(char priority);
-static int should_print_file_entry(char priority);
 static char get_entry_code(char priority);
-static void write_log(oskar_Log* log, FILE* stream, char priority, char code,
+static void write_log(oskar_Log* log, int to_file, char priority, char code,
         int depth, const char* prefix, const char* format, va_list args);
 
-static oskar_Log log_ = {0, OSKAR_LOG_NONE, OSKAR_LOG_WARNING, 40, 0, 0, 0.0};
+/* Root logger. */
+static oskar_Log log_ = {
+        0, /* Init flag. */
+        0, /* Keep file. */
+        OSKAR_LOG_NONE, /* File message priority. */
+        OSKAR_LOG_WARNING, /* Terminal message priority. */
+        OSKAR_LOG_DEFAULT_VALUE_WIDTH, /* Value width. */
+        0, /* File pointer. */
+        0.0, /* Timestamp start. */
+        {0} /* File name. */
+};
+
+#if __STDC_VERSION__ >= 199901L || (defined(__cplusplus) && __cplusplus >= 201103L)
+#define SNPRINTF(BUF, SIZE, FMT, ...) snprintf(BUF, SIZE, FMT, __VA_ARGS__);
+#else
+#define SNPRINTF(BUF, SIZE, FMT, ...) sprintf(BUF, FMT, __VA_ARGS__);
+#endif
+
+
+static int oskar_log_file_exists(const char* filename)
+{
+    FILE* stream;
+    if (!filename || !*filename) return 0;
+    stream = fopen(filename, "r");
+    if (stream)
+    {
+        fclose(stream);
+        return 1;
+    }
+    return 0;
+}
+
+oskar_Log* oskar_log_create(int file_priority, int term_priority)
+{
+    oskar_Log* log = 0;
+    log = (oskar_Log*) calloc(1, sizeof(oskar_Log));
+    log->file_priority = file_priority;
+    log->term_priority = term_priority;
+    log->value_width = OSKAR_LOG_DEFAULT_VALUE_WIDTH;
+    log->timestamp_start = oskar_log_timestamp();
+    return log;
+}
 
 
 double oskar_log_timestamp()
@@ -81,22 +140,94 @@ double oskar_log_timestamp()
 }
 
 
-void oskar_log_error(const char* format, ...)
+void oskar_log_error(oskar_Log* log, const char* format, ...)
 {
     va_list args;
     const char code = 'E', priority = 'E', *prefix = "== ERROR";
     const int depth = OSKAR_LOG_INFO_PREFIX;
-    oskar_log_line(priority, ' ');
+    oskar_log_line(log, priority, ' ');
     va_start(args, format);
-    write_log(&log_, stderr, priority, code, depth, prefix, format, args);
+    write_log(log, 0, priority, code, depth, prefix, format, args);
     va_end(args);
-    if (log_.file)
+    va_start(args, format);
+    write_log(log, 1, priority, code, depth, prefix, format, args);
+    va_end(args);
+    oskar_log_line(log, priority, ' ');
+}
+
+
+char* oskar_log_file_data(oskar_Log* log, size_t* size)
+{
+    char* data = 0;
+    if (!size) return 0;
+    if (!log) log = &log_;
+
+    /* If log exists, then read the whole file. */
+    if (log->file)
     {
-        va_start(args, format);
-        write_log(&log_, log_.file, priority, code, depth, prefix, format, args);
-        va_end(args);
+        FILE* temp_handle = 0;
+
+        /* Determine the current size of the file. */
+        fflush(log->file);
+        temp_handle = fopen(log->name, "rb");
+        if (temp_handle)
+        {
+            fseek(temp_handle, 0, SEEK_END);
+            *size = ftell(temp_handle);
+
+            /* Read the file into memory. */
+            if (*size != 0)
+            {
+                size_t bytes_read = 0;
+                data = (char*) calloc(10 + *size * sizeof(char), 1);
+                if (data != 0)
+                {
+                    rewind(temp_handle);
+                    bytes_read = fread(data, 1, *size, temp_handle);
+                    if (bytes_read != *size)
+                    {
+                        free(data);
+                        data = 0;
+                    }
+                }
+            }
+            fclose(temp_handle);
+        }
     }
-    oskar_log_line(priority, ' ');
+
+    return data;
+}
+
+
+void oskar_log_free(oskar_Log* log)
+{
+    oskar_Log* ptr = log;
+    if (!ptr)
+        ptr = &log_; /* Select the root logger if NULL. */
+    else
+    {
+        char time_str[80];
+        const time_t unix_time = time(NULL);
+        struct tm* timeinfo = localtime(&unix_time);
+        strftime(time_str, sizeof(time_str),
+                "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
+        oskar_log_section(ptr, 'M', "OSKAR-%s ending at %s.",
+                OSKAR_VERSION_STR, time_str);
+    }
+    if (ptr->file) fclose(ptr->file);
+    ptr->file = 0;
+    if (!ptr->keep_file && strlen(ptr->name) > 0)
+    {
+        FILE* f = fopen(ptr->name, "r");
+        if (f)
+        {
+            fclose(f);
+            remove(ptr->name);
+        }
+    }
+    ptr->name[0] = 0;
+    ptr->init = 0;
+    free(log);
 }
 
 
@@ -114,156 +245,206 @@ static va_list create_empty_va_list()
 }
 #endif
 
-void oskar_log_line(char priority, char symbol)
+void oskar_log_line(oskar_Log* log, char priority, char symbol)
 {
     const char code = symbol, *format = 0, *prefix = 0;
     const int depth = OSKAR_LOG_LINE;
-    FILE* stream = (priority == 'E') ? stderr : stdout;
 #ifdef OSKAR_OS_WIN
     {
         va_list vl = create_empty_va_list();
-        write_log(&log_, stream, priority, code, depth, prefix, format, vl);
+        write_log(log, 0, priority, code, depth, prefix, format, vl);
         va_end(vl);
     }
-    if (log_.file)
-    {
-        va_list vl = create_empty_va_list();
-        write_log(&log_, log_.file, priority, code, depth, prefix, format, vl);
-        va_end(vl);
-    }
+    va_list vl = create_empty_va_list();
+    write_log(log, 1, priority, code, depth, prefix, format, vl);
+    va_end(vl);
 #else
     va_list vl;
-    write_log(&log_, stream, priority, code, depth, prefix, format, vl);
-    if (log_.file)
-    {
-        write_log(&log_, log_.file, priority, code, depth, prefix, format, vl);
-    }
+    write_log(log, 0, priority, code, depth, prefix, format, vl);
+    write_log(log, 1, priority, code, depth, prefix, format, vl);
 #endif
 }
 
 
-void oskar_log_message(char priority, int depth, const char* format, ...)
+void oskar_log_message(oskar_Log* log, char priority, int depth,
+        const char* format, ...)
 {
     va_list args;
     const char code = get_entry_code(priority), *prefix = 0;
-    FILE* stream = (priority == 'E') ? stderr : stdout;
     va_start(args, format);
-    write_log(&log_, stream, priority, code, depth, prefix, format, args);
+    write_log(log, 0, priority, code, depth, prefix, format, args);
     va_end(args);
-    if (log_.file)
-    {
-        va_start(args, format);
-        write_log(&log_, log_.file, priority, code, depth, prefix, format, args);
-        va_end(args);
-    }
+    va_start(args, format);
+    write_log(log, 1, priority, code, depth, prefix, format, args);
+    va_end(args);
 }
 
 
-void oskar_log_section(char priority, const char* format, ...)
+void oskar_log_section(oskar_Log* log, char priority, const char* format, ...)
 {
     va_list args;
     const char code = '=', *prefix = "== ";
     const int depth = OSKAR_LOG_SECTION;
-    FILE* stream = (priority == 'E') ? stderr : stdout;
-    oskar_log_line(priority, ' ');
+    oskar_log_line(log, priority, ' ');
     va_start(args, format);
-    write_log(&log_, stream, priority, code, depth, prefix, format, args);
+    write_log(log, 0, priority, code, depth, prefix, format, args);
     va_end(args);
-    if (log_.file)
-    {
-        va_start(args, format);
-        write_log(&log_, log_.file, priority, code, depth, prefix, format, args);
-        va_end(args);
-    }
-    oskar_log_line(priority, ' ');
+    va_start(args, format);
+    write_log(log, 1, priority, code, depth, prefix, format, args);
+    va_end(args);
+    oskar_log_line(log, priority, ' ');
 }
 
 
-void oskar_log_value(char priority, int depth,
+void oskar_log_value(oskar_Log* log, char priority, int depth,
         const char* prefix, const char* format, ...)
 {
     va_list args;
     const char code = get_entry_code(priority);
-    FILE* stream = (priority == 'E') ? stderr : stdout;
     /* Only depth codes > -1 are valid for value log entries */
     if (depth < -1) return;
     va_start(args, format);
-    write_log(&log_, stream, priority, code, depth, prefix, format, args);
+    write_log(log, 0, priority, code, depth, prefix, format, args);
     va_end(args);
-    if (log_.file)
-    {
-        va_start(args, format);
-        write_log(&log_, log_.file, priority, code, depth, prefix, format, args);
-        va_end(args);
-    }
+    va_start(args, format);
+    write_log(log, 1, priority, code, depth, prefix, format, args);
+    va_end(args);
 }
 
 
-void oskar_log_warning(const char* format, ...)
+void oskar_log_warning(oskar_Log* log, const char* format, ...)
 {
     va_list args;
     const char code = 'W', priority = 'W', *prefix = "== WARNING";
     const int depth = OSKAR_LOG_INFO_PREFIX;
-    oskar_log_line(priority, ' ');
+    oskar_log_line(log, priority, ' ');
     va_start(args, format);
-    write_log(&log_, stdout, priority, code, depth, prefix, format, args);
+    write_log(log, 0, priority, code, depth, prefix, format, args);
     va_end(args);
-    if (log_.file)
+    va_start(args, format);
+    write_log(log, 1, priority, code, depth, prefix, format, args);
+    va_end(args);
+    oskar_log_line(log, priority, ' ');
+}
+
+
+void oskar_log_set_keep_file(oskar_Log* log, int value)
+{
+    if (!log) log = &log_;
+    log->keep_file = value;
+}
+
+void oskar_log_set_file_priority(oskar_Log* log, int value)
+{
+    if (!log) log = &log_;
+    log->file_priority = value;
+}
+
+void oskar_log_set_term_priority(oskar_Log* log, int value)
+{
+    if (!log) log = &log_;
+    log->term_priority = value;
+}
+
+void oskar_log_set_value_width(oskar_Log* log, int value)
+{
+    if (!log) log = &log_;
+    log->value_width = value;
+}
+
+
+void init_log(oskar_Log* log)
+{
+    struct tm* timeinfo;
+    size_t buf_len = 0;
+    char *current_dir = 0, fname1[120], time_str[120];
+    int i = 0, n = 0;
+    log->init = 1;
+
+    /* Construct log file name root. */
+    const time_t unix_time = time(NULL);
+    timeinfo = localtime(&unix_time);
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
+    timeinfo->tm_mon += 1;
+    timeinfo->tm_year += 1900;
+    n = SNPRINTF(fname1, sizeof(fname1),
+            "oskar_%.4d-%.2d-%.2d_%.2d%.2d%.2d",
+            timeinfo->tm_year, timeinfo->tm_mon, timeinfo->tm_mday,
+            timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+    if (n < 0 || n >= (int)sizeof(fname1))
+        return;
+
+    /* Construct a unique log file name. */
+    do
     {
-        va_start(args, format);
-        write_log(&log_, log_.file, priority, code, depth, prefix, format, args);
-        va_end(args);
+        ++i;
+        if (i == 1)
+        {
+            n = SNPRINTF(log->name, sizeof(log->name), "%s.log", fname1);
+        }
+        else
+        {
+            n = SNPRINTF(log->name, sizeof(log->name), "%s_%d.log", fname1, i);
+        }
+        if (n < 0 || n >= (int)sizeof(log->name))
+            return;
     }
-    oskar_log_line(priority, ' ');
+    while (oskar_log_file_exists(log->name));
+
+    /* Open the log file if required. */
+    if (log->file_priority > OSKAR_LOG_NONE)
+        log->file = fopen(log->name, "a+");
+
+    /* Get the current working directory. */
+#ifdef OSKAR_OS_WIN
+    buf_len = GetCurrentDirectory(0, NULL);
+    current_dir = (char*) calloc(buf_len, sizeof(char));
+    GetCurrentDirectory((DWORD) buf_len, current_dir);
+#else
+    do
+    {
+        buf_len += 256;
+        current_dir = (char*) realloc(current_dir, buf_len);
+    }
+    while (getcwd(current_dir, buf_len) == NULL);
+#endif
+
+    /* Write standard header. */
+    oskar_log_section(log, 'M', "OSKAR-%s starting at %s.",
+            OSKAR_VERSION_STR, time_str);
+    oskar_log_message(log, 'M', 0, "Current dir is %s", current_dir);
+    free(current_dir);
+    if (log->file)
+        oskar_log_message(log, 'M', 0, "Logging to file %s", log->name);
+    else if (log->file_priority > OSKAR_LOG_NONE)
+        oskar_log_warning(log, "Log file could not be created.");
 }
 
 
-oskar_Log* oskar_log_handle(void)
-{
-    return &log_;
-}
-
-void oskar_log_set_keep_file(int value)
-{
-    log_.keep_file = value;
-}
-
-void oskar_log_set_file_priority(int value)
-{
-    log_.file_priority = value;
-}
-
-void oskar_log_set_term_priority(int value)
-{
-    log_.term_priority = value;
-}
-
-void oskar_log_set_value_width(int value)
-{
-    log_.value_width = value;
-}
-
-
-static void write_log(oskar_Log* log, FILE* stream, char priority, char code,
+static void write_log(oskar_Log* log, int to_file, char priority, char code,
         int depth, const char* prefix, const char* format, va_list args)
 {
+    if (!log) log = &log_;
+
     /* If both strings are NULL and not printing a line the entry is invalid */
     if (!format && !prefix && depth != OSKAR_LOG_LINE) return;
 
-    const int width = log->value_width;
-    const int is_file = (stream == stdout || stream == stderr) ? 0 : 1;
+    /* Check if the log needs to be initialised. */
+    if (!log->init) init_log(log);
+    const int priority_level = log_priority_level(priority);
 
-    /* Write the entry to the terminal */
-    if (!is_file && should_print_term_entry(priority))
+    /* Write the entry to the terminal or log file. */
+    if (!to_file && (priority_level <= log->term_priority))
     {
-        print_entry(stream, priority, code, depth, prefix, width, format, args);
+        FILE* stream = (priority == 'E' ? stderr : stdout);
+        print_entry(log, stream,
+                priority, code, depth, prefix, format, args);
         fflush(stream);
     }
-
-    /* Write the entry to the log file */
-    else if (is_file && log->file && should_print_file_entry(priority))
+    else if (to_file && (priority_level <= log->file_priority))
     {
-        print_entry(log->file, priority, code, depth, prefix, width, format, args);
+        print_entry(log, log->file,
+                priority, code, depth, prefix, format, args);
     }
 }
 
@@ -285,10 +466,12 @@ static char get_entry_code(char priority)
     return ' ';
 }
 
-static void print_entry(FILE* stream, char priority, char code, int depth,
-        const char* prefix, int width, const char* format, va_list args)
+static void print_entry(oskar_Log* log, FILE* stream, char priority, char code,
+        int depth, const char* prefix, const char* format, va_list args)
 {
     int i;
+    if (!stream) return;
+    const int width = log->value_width;
 
     /* Ensure code is a printable character. */
     if (code < 32) code += 48;
@@ -307,7 +490,7 @@ static void print_entry(FILE* stream, char priority, char code, int depth,
 
 #if WRITE_TIMESTAMP
     /* Print the timestamp. */
-    fprintf(stream, "%6.1f ", oskar_log_timestamp() - log_.timestamp_start);
+    fprintf(stream, "%6.1f ", oskar_log_timestamp() - log->timestamp_start);
 #endif
 
     /* Print leading whitespace and symbol for this depth. */
@@ -377,16 +560,6 @@ static int log_priority_level(char code)
         return OSKAR_LOG_NONE;
     };
     return OSKAR_LOG_NONE;
-}
-
-static int should_print_term_entry(char priority)
-{
-    return (log_priority_level(priority) <= log_.term_priority) ? 1 : 0;
-}
-
-static int should_print_file_entry(char priority)
-{
-    return (log_priority_level(priority) <= log_.file_priority) ? 1 : 0;
 }
 
 #ifdef __cplusplus

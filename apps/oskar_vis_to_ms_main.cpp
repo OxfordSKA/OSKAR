@@ -138,14 +138,14 @@ int main(int argc, char** argv)
     // Close the Measurement Set.
     oskar_ms_close(ms);
     if (error)
-        oskar_log_error(oskar_get_error_string(error));
+        oskar_log_error(0, oskar_get_error_string(error));
     return error;
 }
 #else
 // No Measurement Set support.
 int main(void)
 {
-    oskar_log_error("OSKAR was compiled without Measurement Set support.");
+    oskar_log_error(0, "OSKAR was compiled without Measurement Set support.");
     return EXIT_FAILURE;
 }
 #endif

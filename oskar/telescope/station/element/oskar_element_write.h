@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,8 +56,8 @@ extern "C" {
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_element_write(const oskar_Element* data,
-        const char* filename, int port, double freq_hz, int* status);
+void oskar_element_write(const oskar_Element* data, const char* filename,
+        int port, double freq_hz, oskar_Log* log, int* status);
 
 #ifdef __cplusplus
 }

@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -185,6 +186,18 @@ const char* oskar_imager_image_type(const oskar_Imager* h);
  */
 OSKAR_EXPORT
 char* const* oskar_imager_input_files(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the logger.
+ *
+ * @details
+ * Returns the logger.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+oskar_Log* oskar_imager_log(oskar_Imager* h);
 
 /**
  * @brief

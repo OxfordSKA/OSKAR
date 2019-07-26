@@ -57,21 +57,11 @@ int main(int argc, char** argv)
     const char* settings = opt.get_arg(0);
     int e = 0;
 
-    // Create the log if necessary.
-    if (!opt.is_set("--get") && !opt.is_set("--set"))
-    {
-        int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
-        oskar_log_create(OSKAR_LOG_MESSAGE, priority);
-        oskar_log_message('M', 0, "Running binary %s", argv[0]);
-        oskar_log_section('M', "Loading settings file '%s'", settings);
-    }
-
     // Load the settings file.
     SettingsTree* s = oskar_app_settings_tree(app, settings);
     if (!s)
     {
-        oskar_log_error("Failed to read settings file.");
-        oskar_log_free();
+        oskar_log_error(0, "Failed to read settings file '%s'", settings);
         return EXIT_FAILURE;
     }
 
@@ -87,14 +77,18 @@ int main(int argc, char** argv)
         const char* key = opt.get_arg(1);
         const char* val = opt.get_arg(2);
         bool ok = val ? s->set_value(key, val) : s->set_default(key);
-        if (!ok) oskar_log_error("Failed to set '%s'='%s'", key, val);
+        if (!ok) oskar_log_error(0, "Failed to set '%s'='%s'", key, val);
         SettingsTree::free(s);
         return ok ? 0 : EXIT_FAILURE;
     }
 
+    // Set log parameters.
+    int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
+    oskar_Log* log = oskar_log_create(OSKAR_LOG_MESSAGE, priority);
+
     // Write settings to log.
-    oskar_log_set_keep_file(0);
-    oskar_settings_log(s);
+    oskar_log_set_keep_file(log, 0);
+    oskar_settings_log(s, log);
 
     // Get the main settings.
     s->begin_group("element_fit");
@@ -117,8 +111,8 @@ int main(int argc, char** argv)
     if ((input_cst_file.empty() && input_scalar_file.empty()) ||
             output_dir.empty())
     {
-        oskar_log_error("Specify input and output file names.");
-        oskar_log_free();
+        oskar_log_error(log, "Specify input and output file names.");
+        oskar_log_free(log);
         SettingsTree::free(s);
         return EXIT_FAILURE;
     }
@@ -129,56 +123,58 @@ int main(int argc, char** argv)
     // Load the CST text file for the correct port, if specified (X=1, Y=2).
     if (!input_cst_file.empty())
     {
-        oskar_log_line('M', ' ');
-        oskar_log_message('M', 0, "Loading CST element pattern: %s",
+        oskar_log_line(log, 'M', ' ');
+        oskar_log_message(log, 'M', 0, "Loading CST element pattern: %s",
                 input_cst_file.c_str());
         oskar_element_load_cst(element, port, frequency_hz,
                 input_cst_file.c_str(), average_fractional_error,
                 average_fractional_error_factor_increase,
-                ignore_at_pole, ignore_below_horizon, &e);
+                ignore_at_pole, ignore_below_horizon, log, &e);
 
         // Construct the output file name based on the settings.
         if (port == 0)
         {
             string output = construct_element_pathname(output_dir, 1,
                     element_type_index, frequency_hz);
-            oskar_element_write(element, output.c_str(), 1, frequency_hz, &e);
+            oskar_element_write(element, output.c_str(), 1,
+                    frequency_hz, log, &e);
             output = construct_element_pathname(output_dir, 2,
                     element_type_index, frequency_hz);
-            oskar_element_write(element, output.c_str(), 2, frequency_hz, &e);
+            oskar_element_write(element, output.c_str(), 2,
+                    frequency_hz, log, &e);
         }
         else
         {
             string output = construct_element_pathname(output_dir, port,
                     element_type_index, frequency_hz);
             oskar_element_write(element, output.c_str(), port,
-                    frequency_hz, &e);
+                    frequency_hz, log, &e);
         }
     }
 
     // Load the scalar text file, if specified.
     if (!input_scalar_file.empty())
     {
-        oskar_log_message('M', 0, "Loading scalar element pattern: %s",
+        oskar_log_message(log, 'M', 0, "Loading scalar element pattern: %s",
                 input_scalar_file.c_str());
         oskar_element_load_scalar(element, frequency_hz,
                 input_scalar_file.c_str(), average_fractional_error,
                 average_fractional_error_factor_increase,
-                ignore_at_pole, ignore_below_horizon, &e);
+                ignore_at_pole, ignore_below_horizon, log, &e);
 
         // Construct the output file name based on the settings.
         string output = construct_element_pathname(output_dir, 0,
                 element_type_index, frequency_hz);
-        oskar_element_write(element, output.c_str(), 0, frequency_hz, &e);
+        oskar_element_write(element, output.c_str(), 0, frequency_hz, log, &e);
     }
 
     // Check for errors.
-    if (e) oskar_log_error("Run failed with code %i: %s.", e,
+    if (e) oskar_log_error(log, "Run failed with code %i: %s.", e,
             oskar_get_error_string(e));
 
     // Free memory.
     oskar_element_free(element, &e);
-    oskar_log_free();
+    oskar_log_free(log);
     SettingsTree::free(s);
     return e;
 }

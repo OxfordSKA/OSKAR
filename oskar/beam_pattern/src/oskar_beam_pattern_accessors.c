@@ -41,6 +41,12 @@ extern "C" {
 #endif
 
 
+oskar_Log* oskar_beam_pattern_log(oskar_BeamPattern* h)
+{
+    return h->log;
+}
+
+
 int oskar_beam_pattern_num_gpus(const oskar_BeamPattern* h)
 {
     return h ? h->num_gpus : 0;
@@ -136,7 +142,7 @@ void oskar_beam_pattern_set_gpus(oskar_BeamPattern* h, int num,
     {
         if (num > h->num_gpus_avail)
         {
-            oskar_log_error("More GPUs were requested than found.");
+            oskar_log_error(h->log, "More GPUs were requested than found.");
             *status = OSKAR_ERR_COMPUTE_DEVICES;
             return;
         }
@@ -266,7 +272,7 @@ void oskar_beam_pattern_set_telescope_model(oskar_BeamPattern* h,
     num_stations = oskar_telescope_num_stations(model);
     if (num_stations == 0)
     {
-        oskar_log_error("Telescope model is empty.");
+        oskar_log_error(h->log, "Telescope model is empty.");
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
     }
@@ -290,7 +296,7 @@ void oskar_beam_pattern_set_telescope_model(oskar_BeamPattern* h,
 
     /* Analyse the telescope model. */
     oskar_telescope_analyse(h->tel, status);
-    oskar_telescope_log_summary(h->tel, status);
+    oskar_telescope_log_summary(h->tel, h->log, status);
 }
 
 

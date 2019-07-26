@@ -54,21 +54,11 @@ int main(int argc, char** argv)
     const char* settings = opt.get_arg(0);
     int status = 0;
 
-    // Create the log if necessary.
-    if (!opt.is_set("--get") && !opt.is_set("--set"))
-    {
-        int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
-        oskar_log_create(OSKAR_LOG_MESSAGE, priority);
-        oskar_log_message('M', 0, "Running binary %s", argv[0]);
-        oskar_log_section('M', "Loading settings file '%s'", settings);
-    }
-
     // Load the settings file.
     SettingsTree* s = oskar_app_settings_tree(app, settings);
     if (!s)
     {
-        oskar_log_error("Failed to read settings file.");
-        oskar_log_free();
+        oskar_log_error(0, "Failed to read settings file '%s'", settings);
         return EXIT_FAILURE;
     }
 
@@ -84,7 +74,7 @@ int main(int argc, char** argv)
         const char* key = opt.get_arg(1);
         const char* val = opt.get_arg(2);
         bool ok = val ? s->set_value(key, val) : s->set_default(key);
-        if (!ok) oskar_log_error("Failed to set '%s'='%s'", key, val);
+        if (!ok) oskar_log_error(0, "Failed to set '%s'='%s'", key, val);
         SettingsTree::free(s);
         return ok ? 0 : EXIT_FAILURE;
     }
@@ -97,8 +87,7 @@ int main(int argc, char** argv)
                 s->to_string_list("image/input_vis_data", &n, &status);
         if (n == 0 || !files || !files[0] || !strlen(files[0]))
         {
-            oskar_log_error("No input file or output file has been set.");
-            oskar_log_free();
+            oskar_log_error(0, "No input file or output file has been set.");
             SettingsTree::free(s);
             return EXIT_FAILURE;
         }
@@ -107,34 +96,19 @@ int main(int argc, char** argv)
         s->set_value("image/root_path", fname.c_str(), false);
     }
 
-    // Write settings to log.
-    oskar_log_set_keep_file(0);
-    oskar_settings_log(s);
-
     // Set up the imager.
     oskar_Imager* imager = oskar_settings_to_imager(s, NULL, &status);
+    int priority = opt.is_set("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
+    oskar_log_set_term_priority(oskar_imager_log(imager), priority);
+
+    // Log settings.
+    oskar_settings_log(s, oskar_imager_log(imager));
 
     // Make the images.
-    oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
-    if (imager && !status)
-    {
-        oskar_log_section('M', "Starting imager...");
-        oskar_timer_resume(tmr);
-        oskar_imager_run(imager, 0, 0, 0, 0, &status);
-    }
-
-    // Check for errors.
-    if (!status)
-        oskar_log_message('M', 0, "Run completed in %.3f sec.",
-                oskar_timer_elapsed(tmr));
-    else
-        oskar_log_error("Run failed with code %i: %s.", status,
-                oskar_get_error_string(status));
+    oskar_imager_run(imager, 0, 0, 0, 0, &status);
 
     // Free memory.
-    oskar_timer_free(tmr);
     oskar_imager_free(imager, &status);
-    oskar_log_free();
     SettingsTree::free(s);
     return status;
 }

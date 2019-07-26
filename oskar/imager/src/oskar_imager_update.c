@@ -384,15 +384,19 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         case OSKAR_WEIGHTING_UNIFORM:
             oskar_imager_weight_uniform(num_vis, pu, pv, ph, h->weight_tmp,
                     h->cellsize_rad, oskar_imager_plane_size(h), weights_grid,
-                    status);
+                    &num_skipped, status);
             ph = h->weight_tmp;
             break;
         default:
             *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
             break;
         }
+        if (num_skipped > 0)
+            oskar_log_warning(h->log, "Skipped %lu visibility weights.",
+                    (unsigned long) num_skipped);
 
         /* Update the supplied plane with the supplied visibilities. */
+        num_skipped = 0;
         switch (h->algorithm)
         {
         case OSKAR_ALGORITHM_DFT_2D:
@@ -414,7 +418,7 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         }
 
         if (num_skipped > 0)
-            oskar_log_warning("Skipped %lu visibility points.",
+            oskar_log_warning(h->log, "Skipped %lu visibility points.",
                     (unsigned long) num_skipped);
     }
 
@@ -459,7 +463,7 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, size_t num_points,
                     (float) (h->cellsize_rad), grid_size, &num_skipped,
                     oskar_mem_float(weights_grid, status));
         if (num_skipped > 0)
-            oskar_log_warning("Skipped %lu visibility weights.",
+            oskar_log_warning(h->log, "Skipped %lu visibility weights.",
                     (unsigned long) num_skipped);
     }
 

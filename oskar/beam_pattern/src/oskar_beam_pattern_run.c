@@ -36,6 +36,7 @@
 #include "math/private_cond2_2x2.h"
 #include "utility/oskar_device.h"
 #include "utility/oskar_file_exists.h"
+#include "utility/oskar_get_error_string.h"
 #include "utility/oskar_get_memory_usage.h"
 #include "oskar_version.h"
 
@@ -88,6 +89,7 @@ typedef struct ThreadArgs ThreadArgs;
 void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 {
     int i;
+    oskar_Timer* tmr;
     oskar_Thread** threads = 0;
     ThreadArgs* args = 0;
     if (*status || !h) return;
@@ -95,13 +97,15 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
     /* Check root name exists. */
     if (!h->root_path)
     {
-        oskar_log_error("No output file name specified.");
+        oskar_log_error(h->log, "No output file name specified.");
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
 
     /* Initialise if required. */
     oskar_beam_pattern_check_init(h, status);
+    tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    oskar_timer_resume(tmr);
 
     /* Set up worker threads. */
     const int num_threads = h->num_devices + 1;
@@ -119,11 +123,11 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
     if (!*status)
     {
 #if defined(OSKAR_HAVE_CUDA) || defined(OSKAR_HAVE_OPENCL)
-        oskar_log_section('M', "Initial memory usage");
+        oskar_log_section(h->log, 'M', "Initial memory usage");
         for (i = 0; i < h->num_gpus; ++i)
-            oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i]);
+            oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);
 #endif
-        oskar_log_section('M', "Starting simulation...");
+        oskar_log_section(h->log, 'M', "Starting simulation...");
     }
 
     /* Set status code. */
@@ -152,17 +156,26 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
     if (!*status)
     {
 #if defined(OSKAR_HAVE_CUDA) || defined(OSKAR_HAVE_OPENCL)
-        oskar_log_section('M', "Final memory usage");
+        oskar_log_section(h->log, 'M', "Final memory usage");
         for (i = 0; i < h->num_gpus; ++i)
-            oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i]);
+            oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);
 #endif
         /* Record time taken. */
-        oskar_log_set_value_width(25);
+        oskar_log_set_value_width(h->log, 25);
         record_timing(h);
     }
 
     /* Finalise. */
     oskar_beam_pattern_reset_cache(h, status);
+
+    /* Check for errors. */
+    if (!*status)
+        oskar_log_message(h->log, 'M', 0, "Run completed in %.3f sec.",
+                oskar_timer_elapsed(tmr));
+    else
+        oskar_log_error(h->log, "Run failed with code %i: %s.", *status,
+                oskar_get_error_string(*status));
+    oskar_timer_free(tmr);
 }
 
 
@@ -338,7 +351,7 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
                     d->cross_power[i], 0, 0, chunk_size, status);
     }
     oskar_mutex_lock(h->mutex);
-    oskar_log_message('S', 1, "Chunk %*i/%i, "
+    oskar_log_message(h->log, 'S', 1, "Chunk %*i/%i, "
             "Time %*i/%i, Channel %*i/%i [Device %i]",
             disp_width(h->num_chunks), i_chunk+1, h->num_chunks,
             disp_width(h->num_time_steps), i_time+1, h->num_time_steps,
@@ -896,15 +909,15 @@ static void power_to_stokes_V(const oskar_Mem* power_in, const int offset,
 static void record_timing(oskar_BeamPattern* h)
 {
     int i;
-    oskar_log_section('M', "Simulation timing");
-    oskar_log_value('M', 0, "Total wall time", "%.3f s",
+    oskar_log_section(h->log, 'M', "Simulation timing");
+    oskar_log_value(h->log, 'M', 0, "Total wall time", "%.3f s",
             oskar_timer_elapsed(h->tmr_sim));
     for (i = 0; i < h->num_devices; ++i)
     {
-        oskar_log_value('M', 0, "Compute", "%.3f s [Device %i]",
+        oskar_log_value(h->log, 'M', 0, "Compute", "%.3f s [Device %i]",
                 oskar_timer_elapsed(h->d[i].tmr_compute), i);
     }
-    oskar_log_value('M', 0, "Write", "%.3f s",
+    oskar_log_value(h->log, 'M', 0, "Write", "%.3f s",
             oskar_timer_elapsed(h->tmr_write));
 }
 

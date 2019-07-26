@@ -89,7 +89,7 @@ int main(int argc, char** argv)
     oskar_mem_free(enu_z, &status);
     if (status)
     {
-        oskar_log_error(oskar_get_error_string(status));
+        oskar_log_error(0, oskar_get_error_string(status));
         return status;
     }
 

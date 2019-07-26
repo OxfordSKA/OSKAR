@@ -34,11 +34,15 @@
  */
 
 #include <oskar_global.h>
+#include <log/oskar_log.h>
 #include <telescope/oskar_telescope.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+OSKAR_EXPORT
+oskar_Log* oskar_beam_pattern_log(oskar_BeamPattern* h);
 
 OSKAR_EXPORT
 int oskar_beam_pattern_num_gpus(const oskar_BeamPattern* h);

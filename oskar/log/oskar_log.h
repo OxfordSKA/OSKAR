@@ -37,6 +37,7 @@
 
 #include <oskar_global.h>
 #include <stdarg.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,6 +74,17 @@ enum OSKAR_LOG_PRIORITY {
 };
 
 /**
+ * @brief
+ * Starts the log, creating a log file if necessary.
+ *
+ * @details
+ * This function starts the log and creates a new log file if necessary.
+ * The filename is generated based on the current date and time.
+ */
+OSKAR_EXPORT
+oskar_Log* oskar_log_create(int file_priority, int term_priority);
+
+/**
  * @brief Writes an error message to the log.
  *
  * @details
@@ -81,7 +93,23 @@ enum OSKAR_LOG_PRIORITY {
  * @param[in]     format Format string for printf().
  */
 OSKAR_EXPORT
-void oskar_log_error(const char* format, ...);
+void oskar_log_error(oskar_Log* log, const char* format, ...);
+
+/**
+ * @brief Returns current contents of log file.
+ */
+OSKAR_EXPORT
+char* oskar_log_file_data(oskar_Log* log, size_t* size);
+
+/**
+ * @brief
+ * Frees memory held in a log structure.
+ *
+ * @details
+ * This function frees memory held in a log structure and closes the log file.
+ */
+OSKAR_EXPORT
+void oskar_log_free(oskar_Log* log);
 
 /**
  * @brief Writes a character symbol line to the log.
@@ -99,7 +127,7 @@ void oskar_log_error(const char* format, ...);
  * @param[in]     symbol   Symbol to use for the line.
  */
 OSKAR_EXPORT
-void oskar_log_line(char priority, char symbol);
+void oskar_log_line(oskar_Log* log, char priority, char symbol);
 
 /**
  * @brief Writes a message log entry.
@@ -126,7 +154,8 @@ void oskar_log_line(char priority, char symbol);
  * @param[in]     format   Format string for printf().
  */
 OSKAR_EXPORT
-void oskar_log_message(char priority, int depth, const char* format, ...);
+void oskar_log_message(oskar_Log* log, char priority, int depth,
+        const char* format, ...);
 
 /**
  * @brief Writes a section-level message to the log.
@@ -144,7 +173,7 @@ void oskar_log_message(char priority, int depth, const char* format, ...);
  * @param[in]     format   Format string for printf().
  */
 OSKAR_EXPORT
-void oskar_log_section(char priority, const char* format, ...);
+void oskar_log_section(oskar_Log* log, char priority, const char* format, ...);
 
 /**
  * @brief Writes a key-value pair to the log.
@@ -180,7 +209,7 @@ void oskar_log_section(char priority, const char* format, ...);
  * @param[in]     format   Format string for printf().
  */
 OSKAR_EXPORT
-void oskar_log_value(char priority, int depth,
+void oskar_log_value(oskar_Log* log, char priority, int depth,
         const char* prefix, const char* format, ...);
 
 /**
@@ -192,22 +221,29 @@ void oskar_log_value(char priority, int depth,
  * @param[in]     format Format string for printf().
  */
 OSKAR_EXPORT
-void oskar_log_warning(const char* format, ...);
+void oskar_log_warning(oskar_Log* log, const char* format, ...);
 
 OSKAR_EXPORT
-oskar_Log* oskar_log_handle(void);
+void oskar_log_set_keep_file(oskar_Log* log, int value);
+
+/**
+ * @brief Sets the logging verbosity level for log files.
+ *
+ * @param[in] value Entries with priority below this will not be written.
+ */
+OSKAR_EXPORT
+void oskar_log_set_file_priority(oskar_Log* log, int value);
+
+/**
+ * @brief Sets the logging verbosity level when logging to the terminal.
+ *
+ * @param[in] value Entries with priority below this will not be printed.
+ */
+OSKAR_EXPORT
+void oskar_log_set_term_priority(oskar_Log* log, int value);
 
 OSKAR_EXPORT
-void oskar_log_set_keep_file(int value);
-
-OSKAR_EXPORT
-void oskar_log_set_file_priority(int value);
-
-OSKAR_EXPORT
-void oskar_log_set_term_priority(int value);
-
-OSKAR_EXPORT
-void oskar_log_set_value_width(int value);
+void oskar_log_set_value_width(oskar_Log* log, int value);
 
 OSKAR_EXPORT
 double oskar_log_timestamp(void);
@@ -215,9 +251,5 @@ double oskar_log_timestamp(void);
 #ifdef __cplusplus
 }
 #endif
-
-#include <log/oskar_log_create.h>
-#include <log/oskar_log_file_data.h>
-#include <log/oskar_log_free.h>
 
 #endif /* OSKAR_LOG_H_ */

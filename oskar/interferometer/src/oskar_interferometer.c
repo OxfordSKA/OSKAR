@@ -42,6 +42,7 @@
 #include "sky/oskar_sky.h"
 #include "telescope/oskar_telescope.h"
 #include "utility/oskar_device.h"
+#include "utility/oskar_get_error_string.h"
 #include "utility/oskar_get_memory_usage.h"
 #include "utility/oskar_get_num_procs.h"
 #include "utility/oskar_thread.h"
@@ -108,6 +109,7 @@ struct oskar_Interferometer
     int init_sky, work_unit_index;
     oskar_Mutex* mutex;
     oskar_Barrier* barrier;
+    oskar_Log* log;
 
     /* Sky model and telescope model. */
     int num_sources_total, num_sky_chunks;
@@ -141,7 +143,7 @@ static void set_up_device_data(oskar_Interferometer* h, int* status);
 static void set_up_vis_header(oskar_Interferometer* h, int* status);
 static void record_timing(oskar_Interferometer* h);
 static unsigned int disp_width(unsigned int value);
-static void system_mem_log(void);
+static void system_mem_log(oskar_Log* log);
 
 
 /* Public methods. */
@@ -153,7 +155,7 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
     /* Check that the telescope model has been set. */
     if (!h->tel)
     {
-        oskar_log_error("Telescope model not set.");
+        oskar_log_error(h->log, "Telescope model not set.");
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
     }
@@ -183,11 +185,11 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
         if (num_failed > 0)
         {
             if (h->zero_failed_gaussians)
-                oskar_log_warning("Gaussian ellipse solution failed "
+                oskar_log_warning(h->log, "Gaussian ellipse solution failed "
                         "for %i sources. These will have their fluxes "
                         "set to zero.", num_failed);
             else
-                oskar_log_warning("Gaussian ellipse solution failed "
+                oskar_log_warning(h->log, "Gaussian ellipse solution failed "
                         "for %i sources. These will be simulated "
                         "as point sources.", num_failed);
         }
@@ -196,6 +198,11 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
 
     /* Check that each compute device has been set up. */
     set_up_device_data(h, status);
+    if (!*status && !h->coords_only)
+        oskar_log_section(h->log, 'M', "Starting simulation...");
+
+    /* Start simulation timer. */
+    oskar_timer_start(h->tmr_sim);
 }
 
 
@@ -218,6 +225,7 @@ oskar_Interferometer* oskar_interferometer_create(int precision, int* status)
     h->t_w       = oskar_mem_create(precision, OSKAR_CPU, 0, status);
     h->mutex     = oskar_mutex_create();
     h->barrier   = oskar_barrier_create(0);
+    h->log       = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_WARNING);
 
     /* Get number of devices available, and device location. */
     oskar_device_set_require_double_precision(precision == OSKAR_DOUBLE);
@@ -291,6 +299,17 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
         oskar_vis_block_add_system_noise(b0, h->header, h->tel,
                 block_index, h->temp, status);
 
+    /* Print status message. */
+    if (!*status)
+    {
+        const int num_blocks = oskar_interferometer_num_vis_blocks(h);
+        oskar_log_message(h->log, 'S', 0, "Block %*i/%i (%3.0f%%) "
+                "complete. Simulation time elapsed: %.3f s",
+                disp_width(num_blocks), block_index + 1, num_blocks,
+                100.0 * (block_index + 1) / (double)num_blocks,
+                oskar_timer_elapsed(h->tmr_sim));
+    }
+
     /* Return a pointer to the block. */
     return b0;
 }
@@ -298,6 +317,68 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
 
 void oskar_interferometer_finalise(oskar_Interferometer* h, int* status)
 {
+    /* Record memory usage. */
+    if (!*status)
+    {
+        int i;
+        oskar_log_section(h->log, 'M', "Final memory usage");
+        for (i = 0; i < h->num_gpus; ++i)
+            oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);
+        system_mem_log(h->log);
+    }
+
+    /* If there are sources in the simulation and the station beam is not
+     * normalised to 1.0 at the phase centre, the values of noise RMS
+     * may give a very unexpected S/N ratio!
+     * The alternative would be to scale the noise to match the station
+     * beam gain but that would require knowledge of the station beam
+     * amplitude at the phase centre for each time and channel. */
+    if (oskar_telescope_noise_enabled(h->tel) && !*status)
+    {
+        int have_sources, amp_calibrated;
+        have_sources = (h->num_sky_chunks > 0 &&
+                oskar_sky_num_sources(h->sky_chunks[0]) > 0);
+        amp_calibrated = oskar_station_normalise_final_beam(
+                oskar_telescope_station_const(h->tel, 0));
+        if (have_sources && !amp_calibrated)
+        {
+            const char* a = "WARNING: System noise added to visibilities";
+            const char* b = "without station beam normalisation enabled.";
+            const char* c = "This will give an invalid signal to noise ratio.";
+            oskar_log_line(h->log, 'W', ' '); oskar_log_line(h->log, 'W', '*');
+            oskar_log_message(h->log, 'W', -1, a);
+            oskar_log_message(h->log, 'W', -1, b);
+            oskar_log_message(h->log, 'W', -1, c);
+            oskar_log_line(h->log, 'W', '*'); oskar_log_line(h->log, 'W', ' ');
+        }
+    }
+
+    /* Record times and summarise output files. */
+    if (!*status)
+    {
+        size_t log_size = 0;
+        char* log_data;
+        oskar_log_set_value_width(h->log, 25);
+        record_timing(h);
+        oskar_log_section(h->log, 'M', "Simulation complete");
+        oskar_log_message(h->log, 'M', 0, "Output(s):");
+        if (h->vis_name)
+            oskar_log_value(h->log, 'M', 1, "OSKAR binary file", "%s", h->vis_name);
+        if (h->ms_name)
+            oskar_log_value(h->log, 'M', 1, "Measurement Set", "%s", h->ms_name);
+
+        /* Write simulation log to the output files. */
+        log_data = oskar_log_file_data(h->log, &log_size);
+#ifndef OSKAR_NO_MS
+        if (h->ms)
+            oskar_ms_add_history(h->ms, "OSKAR_LOG", log_data, log_size);
+#endif
+        if (h->vis)
+            oskar_binary_write(h->vis, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
+                    OSKAR_TAG_RUN_LOG, 0, log_size, log_data, status);
+        free(log_data);
+    }
+
     oskar_interferometer_reset_cache(h, status);
 }
 
@@ -318,6 +399,7 @@ void oskar_interferometer_free(oskar_Interferometer* h, int* status)
     oskar_timer_free(h->tmr_write);
     oskar_mutex_free(h->mutex);
     oskar_barrier_free(h->barrier);
+    oskar_log_free(h->log);
     free(h->sky_chunks);
     free(h->gpu_ids);
     free(h->vis_name);
@@ -325,6 +407,12 @@ void oskar_interferometer_free(oskar_Interferometer* h, int* status)
     free(h->settings_path);
     free(h->d);
     free(h);
+}
+
+
+oskar_Log* oskar_interferometer_log(oskar_Interferometer* h)
+{
+    return h->log;
 }
 
 
@@ -381,7 +469,7 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
     if (!h->header)
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-        oskar_log_error("Simulator not initalised. "
+        oskar_log_error(h->log, "Simulator not initalised. "
                 "Call oskar_interferometer_check_init() first.");
         return;
     }
@@ -455,7 +543,7 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
         {
             if (*status) break;
             oskar_mutex_lock(h->mutex);
-            oskar_log_message('S', 1, "Time %*i/%i, "
+            oskar_log_message(h->log, 'S', 1, "Time %*i/%i, "
                     "Chunk %*i/%i, Channel %*i/%i [Device %i, %i sources]",
                     disp_width(total_times), sim_time_idx + 1, total_times,
                     disp_width(total_chunks), i_chunk + 1, total_chunks,
@@ -529,15 +617,7 @@ static void* run_blocks(void* arg)
         /* Barrier 1: Reset work unit index and print status. */
         oskar_barrier_wait(h->barrier);
         if (thread_id == 0)
-        {
             oskar_interferometer_reset_work_unit_index(h);
-            if (b < num_blocks && !*status)
-                oskar_log_message('S', 0, "Block %*i/%i (%3.0f%%) "
-                        "complete. Simulation time elapsed: %.3f s",
-                        disp_width(num_blocks), b+1, num_blocks,
-                        100.0 * (b+1) / (double)num_blocks,
-                        oskar_timer_elapsed(h->tmr_sim));
-        }
 
         /* Barrier 2: Synchronise before moving to the next block. */
         oskar_barrier_wait(h->barrier);
@@ -548,6 +628,7 @@ static void* run_blocks(void* arg)
 void oskar_interferometer_run(oskar_Interferometer* h, int* status)
 {
     int i, num_threads;
+    oskar_Timer* tmr;
     oskar_Thread** threads = 0;
     ThreadArgs* args = 0;
     if (*status || !h) return;
@@ -559,10 +640,10 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
 #endif
     )
     {
-        oskar_log_error("No output file specified.");
+        oskar_log_error(h->log, "No output file specified.");
 #ifdef OSKAR_NO_MS
         if (h->ms_name)
-            oskar_log_error(
+            oskar_log_error(h->log,
                     "OSKAR was compiled without Measurement Set support.");
 #endif
         *status = OSKAR_ERR_FILE_IO;
@@ -570,6 +651,8 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
     }
 
     /* Initialise if required. */
+    tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    oskar_timer_resume(tmr);
     oskar_interferometer_check_init(h, status);
 
     /* Set up worker threads. */
@@ -585,19 +668,6 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
         args[i].status = status;
     }
 
-    /* Record memory usage. */
-    if (!*status)
-    {
-        oskar_log_section('M', "Initial memory usage");
-        for (i = 0; i < h->num_gpus; ++i)
-            oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i]);
-        system_mem_log();
-        oskar_log_section('M', "Starting simulation...");
-    }
-
-    /* Start simulation timer. */
-    oskar_timer_start(h->tmr_sim);
-
     /* Start the worker threads. */
     oskar_interferometer_reset_work_unit_index(h);
     for (i = 0; i < num_threads; ++i)
@@ -612,69 +682,17 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
     free(threads);
     free(args);
 
-    /* Record memory usage. */
-    if (!*status)
-    {
-        oskar_log_section('M', "Final memory usage");
-        for (i = 0; i < h->num_gpus; ++i)
-            oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i]);
-        system_mem_log();
-    }
-
-    /* If there are sources in the simulation and the station beam is not
-     * normalised to 1.0 at the phase centre, the values of noise RMS
-     * may give a very unexpected S/N ratio!
-     * The alternative would be to scale the noise to match the station
-     * beam gain but that would require knowledge of the station beam
-     * amplitude at the phase centre for each time and channel. */
-    if (oskar_telescope_noise_enabled(h->tel) && !*status)
-    {
-        int have_sources, amp_calibrated;
-        have_sources = (h->num_sky_chunks > 0 &&
-                oskar_sky_num_sources(h->sky_chunks[0]) > 0);
-        amp_calibrated = oskar_station_normalise_final_beam(
-                oskar_telescope_station_const(h->tel, 0));
-        if (have_sources && !amp_calibrated)
-        {
-            const char* a = "WARNING: System noise added to visibilities";
-            const char* b = "without station beam normalisation enabled.";
-            const char* c = "This will give an invalid signal to noise ratio.";
-            oskar_log_line('W', ' '); oskar_log_line('W', '*');
-            oskar_log_message('W', -1, a);
-            oskar_log_message('W', -1, b);
-            oskar_log_message('W', -1, c);
-            oskar_log_line('W', '*'); oskar_log_line('W', ' ');
-        }
-    }
-
-    /* Record times and summarise output files. */
-    if (!*status)
-    {
-        size_t log_size = 0;
-        char* log_data;
-        oskar_log_set_value_width(25);
-        record_timing(h);
-        oskar_log_section('M', "Simulation complete");
-        oskar_log_message('M', 0, "Output(s):");
-        if (h->vis_name)
-            oskar_log_value('M', 1, "OSKAR binary file", "%s", h->vis_name);
-        if (h->ms_name)
-            oskar_log_value('M', 1, "Measurement Set", "%s", h->ms_name);
-
-        /* Write simulation log to the output files. */
-        log_data = oskar_log_file_data(&log_size);
-#ifndef OSKAR_NO_MS
-        if (h->ms)
-            oskar_ms_add_history(h->ms, "OSKAR_LOG", log_data, log_size);
-#endif
-        if (h->vis)
-            oskar_binary_write(h->vis, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
-                    OSKAR_TAG_RUN_LOG, 0, log_size, log_data, status);
-        free(log_data);
-    }
-
     /* Finalise. */
     oskar_interferometer_finalise(h, status);
+
+    /* Check for errors. */
+    if (!*status)
+        oskar_log_message(h->log, 'M', 0, "Run completed in %.3f sec.",
+                oskar_timer_elapsed(tmr));
+    else
+        oskar_log_error(h->log, "Run failed with code %i: %s.", *status,
+                oskar_get_error_string(*status));
+    oskar_timer_free(tmr);
 }
 
 
@@ -725,7 +743,7 @@ void oskar_interferometer_set_gpus(oskar_Interferometer* h, int num,
     {
         if (num > h->num_gpus_avail)
         {
-            oskar_log_error("More GPUs were requested than found.");
+            oskar_log_error(h->log, "More GPUs were requested than found.");
             *status = OSKAR_ERR_COMPUTE_DEVICES;
             return;
         }
@@ -839,9 +857,9 @@ void oskar_interferometer_set_sky_model(oskar_Interferometer* h,
     h->init_sky = 0;
 
     /* Print summary data. */
-    oskar_log_section('M', "Sky model summary");
-    oskar_log_value('M', 0, "Num. sources", "%d", h->num_sources_total);
-    oskar_log_value('M', 0, "Num. chunks", "%d", h->num_sky_chunks);
+    oskar_log_section(h->log, 'M', "Sky model summary");
+    oskar_log_value(h->log, 'M', 0, "Num. sources", "%d", h->num_sources_total);
+    oskar_log_value(h->log, 'M', 0, "Num. chunks", "%d", h->num_sky_chunks);
 }
 
 
@@ -853,7 +871,7 @@ void oskar_interferometer_set_telescope_model(oskar_Interferometer* h,
     /* Check the model is not empty. */
     if (oskar_telescope_num_stations(model) == 0)
     {
-        oskar_log_error("Telescope model is empty.");
+        oskar_log_error(h->log, "Telescope model is empty.");
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
     }
@@ -864,7 +882,7 @@ void oskar_interferometer_set_telescope_model(oskar_Interferometer* h,
 
     /* Analyse the telescope model. */
     oskar_telescope_analyse(h->tel, status);
-    oskar_telescope_log_summary(h->tel, status);
+    oskar_telescope_log_summary(h->tel, h->log, status);
 }
 
 
@@ -1203,7 +1221,7 @@ static void* init_device(void* arg)
 
 static void set_up_device_data(oskar_Interferometer* h, int* status)
 {
-    int i;
+    int i, init = 1;
     oskar_Thread** threads = 0;
     ThreadArgs* args = 0;
     if (*status) return;
@@ -1219,6 +1237,7 @@ static void set_up_device_data(oskar_Interferometer* h, int* status)
     args = (ThreadArgs*) calloc(num_devices, sizeof(ThreadArgs));
     for (i = 0; i < num_devices; ++i)
     {
+        if (h->d[i].tmr_compute) init = 0;
         args[i].h = h;
         args[i].d = &h->d[i];
         args[i].num_threads = num_devices;
@@ -1233,6 +1252,16 @@ static void set_up_device_data(oskar_Interferometer* h, int* status)
     }
     free(threads);
     free(args);
+
+    /* Record memory usage. */
+    if (!*status && init)
+    {
+        int i;
+        oskar_log_section(h->log, 'M', "Initial memory usage");
+        for (i = 0; i < h->num_gpus; ++i)
+            oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);
+        system_mem_log(h->log);
+    }
 }
 
 
@@ -1294,28 +1323,28 @@ static void record_timing(oskar_Interferometer* h)
     t_components = t_copy + t_clip + t_E + t_K + t_join + t_correlate;
 
     /* Record time taken. */
-    oskar_log_section('M', "Simulation timing");
-    oskar_log_value('M', 0, "Total wall time", "%.3f s",
+    oskar_log_section(h->log, 'M', "Simulation timing");
+    oskar_log_value(h->log, 'M', 0, "Total wall time", "%.3f s",
             oskar_timer_elapsed(h->tmr_sim));
     for (i = 0; i < h->num_devices; ++i)
-        oskar_log_value('M', 0, "Compute", "%.3f s [Device %i]",
+        oskar_log_value(h->log, 'M', 0, "Compute", "%.3f s [Device %i]",
                 compute_times[i], i);
-    oskar_log_value('M', 0, "Write", "%.3f s",
+    oskar_log_value(h->log, 'M', 0, "Write", "%.3f s",
             oskar_timer_elapsed(h->tmr_write));
-    oskar_log_message('M', 0, "Compute components:");
-    oskar_log_value('M', 1, "Copy", "%4.1f%%",
+    oskar_log_message(h->log, 'M', 0, "Compute components:");
+    oskar_log_value(h->log, 'M', 1, "Copy", "%4.1f%%",
             (t_copy / t_compute) * 100.0);
-    oskar_log_value('M', 1, "Horizon clip", "%4.1f%%",
+    oskar_log_value(h->log, 'M', 1, "Horizon clip", "%4.1f%%",
             (t_clip / t_compute) * 100.0);
-    oskar_log_value('M', 1, "Jones E", "%4.1f%%",
+    oskar_log_value(h->log, 'M', 1, "Jones E", "%4.1f%%",
             (t_E / t_compute) * 100.0);
-    oskar_log_value('M', 1, "Jones K", "%4.1f%%",
+    oskar_log_value(h->log, 'M', 1, "Jones K", "%4.1f%%",
             (t_K / t_compute) * 100.0);
-    oskar_log_value('M', 1, "Jones join", "%4.1f%%",
+    oskar_log_value(h->log, 'M', 1, "Jones join", "%4.1f%%",
             (t_join / t_compute) * 100.0);
-    oskar_log_value('M', 1, "Jones correlate", "%4.1f%%",
+    oskar_log_value(h->log, 'M', 1, "Jones correlate", "%4.1f%%",
             (t_correlate / t_compute) * 100.0);
-    oskar_log_value('M', 1, "Other", "%4.1f%%",
+    oskar_log_value(h->log, 'M', 1, "Other", "%4.1f%%",
             ((t_compute - t_components) / t_compute) * 100.0);
     free(compute_times);
 }
@@ -1329,7 +1358,7 @@ static unsigned int disp_width(unsigned int v)
 }
 
 
-static void system_mem_log(void)
+static void system_mem_log(oskar_Log* log)
 {
     size_t mem_total, mem_free, mem_used, gigabyte = 1024 * 1024 * 1024;
     size_t mem_resident;
@@ -1337,12 +1366,12 @@ static void system_mem_log(void)
     mem_resident = oskar_get_memory_usage();
     mem_free = oskar_get_free_physical_memory();
     mem_used = mem_total - mem_free;
-    oskar_log_message('M', 0, "System memory usage %.1f%% "
+    oskar_log_message(log, 'M', 0, "System memory usage %.1f%% "
             "(%.1f GB/%.1f GB) used.",
             100. * (double) mem_used / mem_total,
             (double) mem_used / gigabyte,
             (double) mem_total / gigabyte);
-    oskar_log_message('M', 0, "Memory used by simulator: %.1f MB",
+    oskar_log_message(log, 'M', 0, "Memory used by simulator: %.1f MB",
                       (double) mem_resident / (1024. * 1024.));
 }
 

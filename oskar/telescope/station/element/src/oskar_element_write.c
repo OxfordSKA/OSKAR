@@ -40,8 +40,8 @@ extern "C" {
 static void write_splines(oskar_Binary* h, const oskar_Splines* splines,
         int index, int* status);
 
-void oskar_element_write(const oskar_Element* data,
-        const char* filename, int port, double freq_hz, int* status)
+void oskar_element_write(const oskar_Element* data, const char* filename,
+        int port, double freq_hz, oskar_Log* log, int* status)
 {
     const oskar_Splines *h_re = 0, *h_im = 0, *v_re = 0, *v_im = 0;
     const oskar_Splines *scalar_re = 0, *scalar_im = 0;
@@ -93,7 +93,7 @@ void oskar_element_write(const oskar_Element* data,
     }
 
     /* If log exists, then write it out. */
-    log_data = oskar_log_file_data(&log_size);
+    log_data = oskar_log_file_data(log, &log_size);
     if (log_data)
     {
         oskar_binary_write(h, OSKAR_CHAR,

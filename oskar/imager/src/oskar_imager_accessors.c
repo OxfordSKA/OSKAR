@@ -142,6 +142,12 @@ char* const* oskar_imager_input_files(const oskar_Imager* h)
 }
 
 
+oskar_Log* oskar_imager_log(oskar_Imager* h)
+{
+    return h->log;
+}
+
+
 const char* oskar_imager_ms_column(const oskar_Imager* h)
 {
     return h->ms_column;

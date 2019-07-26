@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/oskar_settings_log.h"
 #include "apps/oskar_settings_to_beam_pattern.h"
 
 #include <cstdlib>
@@ -42,10 +43,15 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
     s->clear_group();
 
     // Create simulator and set values from settings.
-    s->begin_group("simulator");
-    int prec = s->to_int("double_precision", status) ?
+    int prec = s->to_int("simulator/double_precision", status) ?
             OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_BeamPattern* h = oskar_beam_pattern_create(prec, status);
+
+    // Write settings to log.
+    oskar_settings_log(s, oskar_beam_pattern_log(h));
+
+    // Set simulator settings.
+    s->begin_group("simulator");
     oskar_beam_pattern_set_max_chunk_size(h,
             s->to_int("max_sources_per_chunk", status));
     if (!s->to_int("use_gpus", status))
@@ -65,8 +71,10 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
         oskar_beam_pattern_set_num_devices(h, -1);
     else
         oskar_beam_pattern_set_num_devices(h, s->to_int("num_devices", status));
-    oskar_log_set_keep_file(s->to_int("keep_log_file", status));
-    oskar_log_set_file_priority(s->to_int("write_status_to_log_file", status) ?
+    oskar_log_set_keep_file(oskar_beam_pattern_log(h),
+            s->to_int("keep_log_file", status));
+    oskar_log_set_file_priority(oskar_beam_pattern_log(h),
+            s->to_int("write_status_to_log_file", status) ?
             OSKAR_LOG_STATUS : OSKAR_LOG_MESSAGE);
     s->end_group();
 

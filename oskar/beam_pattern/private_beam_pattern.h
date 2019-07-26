@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <log/oskar_log.h>
 #include <mem/oskar_mem.h>
 #include <telescope/oskar_telescope.h>
 #include <utility/oskar_timer.h>
@@ -105,6 +106,7 @@ struct oskar_BeamPattern
     /* State. */
     oskar_Mutex* mutex;
     oskar_Barrier* barrier;
+    oskar_Log* log;
     int i_global, status;
 
     /* Input data. */

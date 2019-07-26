@@ -27,6 +27,7 @@
  */
 
 #include <fitsio.h>
+#include <log/oskar_log.h>
 #include <math/oskar_fft.h>
 #include <mem/oskar_mem.h>
 #include <utility/oskar_thread.h>
@@ -74,6 +75,7 @@ struct oskar_Imager
     /* State. */
     int status, i_block;
     oskar_Mutex* mutex;
+    oskar_Log* log;
 
     /* Scratch data. */
     oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im, *weight_im, *time_im;

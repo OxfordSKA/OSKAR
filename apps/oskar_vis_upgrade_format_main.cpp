@@ -85,6 +85,6 @@ int main(int argc, char** argv)
     }
 
     if (error)
-        oskar_log_error(oskar_get_error_string(error));
+        oskar_log_error(0, oskar_get_error_string(error));
     return error;
 }

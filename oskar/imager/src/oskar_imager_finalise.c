@@ -117,30 +117,30 @@ void oskar_imager_finalise(oskar_Imager* h,
     }
 
     /* Record time taken. */
-    oskar_log_set_value_width(25);
-    oskar_log_section('M', "Imager timing");
-    oskar_log_value('M', 0, "Initialise", "%.3f s",
+    oskar_log_set_value_width(h->log, 25);
+    oskar_log_section(h->log, 'M', "Imager timing");
+    oskar_log_value(h->log, 'M', 0, "Initialise", "%.3f s",
             oskar_timer_elapsed(h->tmr_init));
-    oskar_log_value('M', 0, "Grid update", "%.3f s",
+    oskar_log_value(h->log, 'M', 0, "Grid update", "%.3f s",
             oskar_timer_elapsed(h->tmr_grid_update));
-    oskar_log_value('M', 0, "Grid finalise", "%.3f s",
+    oskar_log_value(h->log, 'M', 0, "Grid finalise", "%.3f s",
             oskar_timer_elapsed(h->tmr_grid_finalise));
-    oskar_log_value('M', 0, "Read visibility data", "%.3f s",
+    oskar_log_value(h->log, 'M', 0, "Read visibility data", "%.3f s",
             oskar_timer_elapsed(h->tmr_read));
-    oskar_log_value('M', 0, "Write image data", "%.3f s",
+    oskar_log_value(h->log, 'M', 0, "Write image data", "%.3f s",
             oskar_timer_elapsed(h->tmr_write));
-    oskar_log_section('M', "Imaging complete");
+    oskar_log_section(h->log, 'M', "Imaging complete");
     if (h->output_root)
     {
-        oskar_log_message('M', 0, "Output(s):");
+        oskar_log_message(h->log, 'M', 0, "Output(s):");
         for (i = 0; i < h->num_im_pols; ++i)
-            oskar_log_value('M', 1, "FITS file", "%s",
+            oskar_log_value(h->log, 'M', 1, "FITS file", "%s",
                     h->output_name[i]);
     }
 
     /* Write log to the output FITS files as HISTORY entries.
      * Replace newlines with zeros. */
-    log_data = oskar_log_file_data(&log_size);
+    log_data = oskar_log_file_data(h->log, &log_size);
     for (j = 0; j < log_size; ++j)
     {
         if (log_data[j] == '\n') log_data[j] = 0;

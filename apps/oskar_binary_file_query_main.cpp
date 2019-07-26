@@ -46,9 +46,9 @@ int main(int argc, char** argv)
 
     // Scan the file.
     int error = 0;
-    oskar_scan_binary_file(filename, &error);
+    oskar_scan_binary_file(filename, 0, &error);
     if (error)
-        oskar_log_error(oskar_get_error_string(error));
+        oskar_log_error(0, oskar_get_error_string(error));
 
     return error;
 }

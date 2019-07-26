@@ -29,7 +29,6 @@
 #include "vis/private_vis.h"
 #include "vis/oskar_vis.h"
 #include "binary/oskar_binary.h"
-#include "log/oskar_log.h"
 #include "vis/oskar_vis_header.h"
 #include "vis/oskar_vis_block.h"
 
@@ -45,8 +44,6 @@ void oskar_vis_write(const oskar_Vis* vis, const char* filename, int* status)
     int num_stations, num_times;
     double freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_sec;
     oskar_Binary* h = 0;
-    char* log_data = 0;
-    size_t log_size = 0;
     oskar_VisHeader* hdr = 0;
     oskar_VisBlock* blk = 0;
     oskar_Mem* xcorr = 0;
@@ -150,15 +147,6 @@ void oskar_vis_write(const oskar_Vis* vis, const char* filename, int* status)
 
         /* Write the block. */
         oskar_vis_block_write(blk, h, i, status);
-    }
-
-    /* If log exists, then write it out. */
-    log_data = oskar_log_file_data(&log_size);
-    if (log_data)
-    {
-        oskar_binary_write(h, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
-                OSKAR_TAG_RUN_LOG, 0, log_size, log_data, status);
-        free(log_data);
     }
 
     /* Release the handles. */

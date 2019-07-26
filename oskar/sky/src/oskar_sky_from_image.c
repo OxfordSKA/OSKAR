@@ -56,7 +56,7 @@ oskar_Sky* oskar_sky_from_image(int precision, const oskar_Mem* image,
     if (image_cellsize_deg == 0.0)
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
-        oskar_log_error("Unknown image pixel size. "
+        oskar_log_error(0, "Unknown image pixel size. "
                 "(Ensure all WCS headers are present.)");
         return 0;
     }

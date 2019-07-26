@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,7 +78,7 @@ OSKAR_EXPORT
 void oskar_element_load_cst(oskar_Element* data,
         int port, double freq_hz, const char* filename,
         double closeness, double closeness_inc, int ignore_at_poles,
-        int ignore_below_horizon, int* status);
+        int ignore_below_horizon, oskar_Log* log, int* status);
 
 #ifdef __cplusplus
 }

@@ -60,6 +60,7 @@ void oskar_imager_free(oskar_Imager* h, int* status)
     oskar_timer_free(h->tmr_read);
     oskar_timer_free(h->tmr_write);
     oskar_mutex_free(h->mutex);
+    oskar_log_free(h->log);
     oskar_imager_free_device_data(h, status);
     for (i = 0; i < h->num_files; ++i)
         free(h->input_files[i]);

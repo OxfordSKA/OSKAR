@@ -80,7 +80,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     if (num_stations < 1)
     {
         *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-        oskar_log_error("Telescope model is empty.");
+        oskar_log_error(log, "Telescope model is empty.");
         return t;
     }
 

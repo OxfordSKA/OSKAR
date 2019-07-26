@@ -45,12 +45,13 @@ extern "C" {
 
 static void fit_splines(oskar_Splines** splines_ptr, int n,
         oskar_Mem* theta, oskar_Mem* phi, oskar_Mem* data, oskar_Mem* weight,
-        double closeness, double closeness_inc, const char* name, int* status);
+        double closeness, double closeness_inc, const char* name,
+        oskar_Log* log, int* status);
 
 void oskar_element_load_cst(oskar_Element* data,
         int port, double freq_hz, const char* filename,
         double closeness, double closeness_inc, int ignore_at_poles,
-        int ignore_below_horizon, int* status)
+        int ignore_below_horizon, oskar_Log* log, int* status)
 {
     int i, n = 0;
     oskar_Splines **data_h_re = 0, **data_h_im = 0;
@@ -247,13 +248,13 @@ void oskar_element_load_cst(oskar_Element* data,
 
     /* Fit splines to the surface data. */
     fit_splines(data_h_re, n, theta, phi, h_re, weight,
-            closeness, closeness_inc, "H [real]", status);
+            closeness, closeness_inc, "H [real]", log, status);
     fit_splines(data_h_im, n, theta, phi, h_im, weight,
-            closeness, closeness_inc, "H [imag]", status);
+            closeness, closeness_inc, "H [imag]", log, status);
     fit_splines(data_v_re, n, theta, phi, v_re, weight,
-            closeness, closeness_inc, "V [real]", status);
+            closeness, closeness_inc, "V [real]", log, status);
     fit_splines(data_v_im, n, theta, phi, v_im, weight,
-            closeness, closeness_inc, "V [imag]", status);
+            closeness, closeness_inc, "V [imag]", log, status);
 
     /* Copy X to Y if both ports are the same. */
     if (port == 0)
@@ -289,7 +290,8 @@ void oskar_element_load_cst(oskar_Element* data,
 
 static void fit_splines(oskar_Splines** splines_ptr, int n,
         oskar_Mem* theta, oskar_Mem* phi, oskar_Mem* data, oskar_Mem* weight,
-        double closeness, double closeness_inc, const char* name, int* status)
+        double closeness, double closeness_inc, const char* name,
+        oskar_Log* log, int* status)
 {
     double avg_frac_error;
     if (*status) return;
@@ -298,16 +300,16 @@ static void fit_splines(oskar_Splines** splines_ptr, int n,
     oskar_Splines* splines = *splines_ptr;
     if (*status) return;
     avg_frac_error = closeness; /* Copy the fitting parameter. */
-    oskar_log_line('M', ' ');
-    oskar_log_message('M', 0, "Fitting surface %s...", name);
+    oskar_log_line(log, 'M', ' ');
+    oskar_log_message(log, 'M', 0, "Fitting surface %s...", name);
     oskar_splines_fit(splines, n, oskar_mem_double(theta, status),
             oskar_mem_double(phi, status), oskar_mem_double_const(data, status),
             oskar_mem_double_const(weight, status), OSKAR_SPLINES_SPHERICAL, 1,
             &avg_frac_error, closeness_inc, 1, 1e-14, status);
-    oskar_log_message('M', 1, "Surface fitted to %.4f average "
+    oskar_log_message(log, 'M', 1, "Surface fitted to %.4f average "
             "frac. error (s=%.2e).", avg_frac_error,
             oskar_splines_smoothing_factor(splines));
-    oskar_log_message('M', 1, "Number of knots (theta, phi) = (%d, %d).",
+    oskar_log_message(log, 'M', 1, "Number of knots (theta, phi) = (%d, %d).",
             oskar_splines_num_knots_x_theta(splines),
             oskar_splines_num_knots_y_phi(splines));
 }

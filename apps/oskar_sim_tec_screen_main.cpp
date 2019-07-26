@@ -64,13 +64,15 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
 
-    oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_STATUS);
-    oskar_log_message('M', 0, "Running binary %s", argv[0]);
+    oskar_Log* log = 0;
+    oskar_log_set_file_priority(log, OSKAR_LOG_MESSAGE);
+    oskar_log_set_term_priority(log, OSKAR_LOG_STATUS);
+    oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
     const char* settings_file = opt.get_arg(0);
     oskar_Settings_old settings;
     oskar_settings_old_load(&settings, 0, settings_file, &error);
-    oskar_log_set_keep_file(settings.sim.keep_log_file);
+    oskar_log_set_keep_file(log, settings.sim.keep_log_file);
 
     // Get settings.
     const oskar_SettingsIonosphere* MIM = &settings.ionosphere;
@@ -84,7 +86,7 @@ int main(int argc, char** argv)
     double tinc = settings.obs.dt_dump_days * 86400.0;
     if (!fname)
     {
-        oskar_log_error("No output file!");
+        oskar_log_error(log, "No output file!");
         return EXIT_FAILURE;
     }
 
@@ -111,8 +113,8 @@ int main(int argc, char** argv)
 
     // Check for errors.
     if (error)
-        oskar_log_error("Run failed: %s.", oskar_get_error_string(error));
-    oskar_log_free();
+        oskar_log_error(log, "Run failed: %s.", oskar_get_error_string(error));
+    oskar_log_free(log);
 
     return error;
 }

@@ -70,39 +70,36 @@ int main(int argc, char** argv)
     bool verbose = opt.is_set("-v") ? true : false;
     bool quiet   = opt.is_set("-q") ? true : false;
 
-    // Create the log.
+    // Set log parameters.
+    oskar_Log* log = 0;
     int file_priority = OSKAR_LOG_MESSAGE;
     int term_priority = OSKAR_LOG_STATUS;
     if (quiet) term_priority = OSKAR_LOG_WARNING;
     if (verbose) term_priority = OSKAR_LOG_DEBUG;
-    oskar_Log* log = 0;
-    oskar_log_create(file_priority, term_priority);
-    oskar_log_set_keep_file(false);
-    oskar_log_message('M', 0, "Running binary %s", argv[0]);
-    oskar_log_section('M', "Loading settings file '%s'",
-            settings.c_str());
+    oskar_log_set_file_priority(log, file_priority);
+    oskar_log_set_term_priority(log, term_priority);
+    oskar_log_set_keep_file(log, false);
 
     // Load the settings file.
     SettingsTree* s = oskar_app_settings_tree(app_s, settings.c_str());
     if (!s)
     {
-        oskar_log_error("Failed to read settings file.");
-        oskar_log_free();
+        oskar_log_error(0, "Failed to read settings file.");
         return EXIT_FAILURE;
     }
 
     // Write settings to log.
-    oskar_settings_log(s);
+    oskar_settings_log(s, log);
     if (!s->to_int("interferometer/noise/enable", &status))
     {
-        oskar_log_error("Noise addition disabled in the settings.");
-        oskar_log_free();
+        oskar_log_error(log, "Noise addition disabled in the settings.");
+        oskar_log_free(log);
         SettingsTree::free(s);
         return EXIT_FAILURE;
     }
 
     // Set up the telescope model.
-    oskar_Telescope* tel = oskar_settings_to_telescope(s, log, &status);
+    oskar_Telescope* tel = oskar_settings_to_telescope(s, 0, &status);
     oskar_telescope_analyse(tel, &status);
 
     // Create list of output vis file names.
@@ -113,7 +110,7 @@ int main(int argc, char** argv)
         string str = vis_filename_in[i];
         if (!oskar_file_exists(str.c_str()))
         {
-            oskar_log_error("Visibility file %s not found.", str.c_str());
+            oskar_log_error(log, "Visibility file %s not found.", str.c_str());
             status = OSKAR_ERR_FILE_IO;
             break;
         }
@@ -125,14 +122,15 @@ int main(int argc, char** argv)
     // Print a summary of what is about to happen.
     if (!status)
     {
-        oskar_log_line('D', ' ');
-        oskar_log_line('D', '-');
-        oskar_log_value('D', -1, "Number of input files", "%i", num_files);
+        oskar_log_line(log, 'D', ' ');
+        oskar_log_line(log, 'D', '-');
+        oskar_log_value(log, 'D', -1, "Number of input files", "%i", num_files);
         for (int i = 0; i < num_files; ++i)
-            oskar_log_message('D', 1, "%s", vis_filename_in[i]);
-        oskar_log_value('D', -1, "Settings file", "%s", settings.c_str());
-        oskar_log_value('D', -1, "Verbose", "%s", verbose ? "true" : "false");
-        oskar_log_line('D', '-');
+            oskar_log_message(log, 'D', 1, "%s", vis_filename_in[i]);
+        oskar_log_value(log, 'D', -1, "Settings file", "%s", settings.c_str());
+        oskar_log_value(log, 'D', -1,
+                "Verbose", "%s", verbose ? "true" : "false");
+        oskar_log_line(log, 'D', '-');
     }
 
     // Add uncorrelated noise to each of the visibility files.
@@ -141,8 +139,8 @@ int main(int argc, char** argv)
         if (status) break;
         const char* in_file = vis_filename_in[i];
         const char* out_file = vis_filename_out[i].c_str();
-        oskar_log_line('D', ' ');
-        oskar_log_value('D', -1, "Loading visibility file", "%s", in_file);
+        oskar_log_line(log, 'D', ' ');
+        oskar_log_value(log, 'D', -1, "Loading visibility file", "%s", in_file);
 
         // Load the input file and create the output file.
         oskar_Binary* h_in = oskar_binary_create(in_file, 'r', &status);
@@ -186,8 +184,8 @@ int main(int argc, char** argv)
     // Free telescope model.
     oskar_telescope_free(tel, &status);
     if (status)
-        oskar_log_error("Error: %s", oskar_get_error_string(status));
-    oskar_log_free();
+        oskar_log_error(log, "Error: %s", oskar_get_error_string(status));
+    oskar_log_free(log);
     SettingsTree::free(s);
     return status == 0 ? 0 : EXIT_FAILURE;
 }

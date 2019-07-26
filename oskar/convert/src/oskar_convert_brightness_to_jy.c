@@ -102,7 +102,7 @@ void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
     {
         if (beam_area_pixels == 0.0)
         {
-            oskar_log_error("Need beam area for maps in Jy/beam.");
+            oskar_log_error(0, "Need beam area for maps in Jy/beam.");
             *status = OSKAR_ERR_BAD_UNITS;
         }
         else

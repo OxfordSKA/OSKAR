@@ -34,9 +34,10 @@
  */
 
 #include <oskar_global.h>
+#include <log/oskar_log.h>
 #include <settings/oskar_SettingsTree.h>
 
 OSKAR_APPS_EXPORT
-void oskar_settings_log(const oskar::SettingsTree* tree);
+void oskar_settings_log(const oskar::SettingsTree* tree, oskar_Log* log);
 
 #endif /* OSKAR_SETTINGS_LOG_H_ */

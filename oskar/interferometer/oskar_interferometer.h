@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <log/oskar_log.h>
 #include <sky/oskar_sky.h>
 #include <telescope/oskar_telescope.h>
 #include <vis/oskar_vis_block.h>
@@ -67,6 +68,9 @@ void oskar_interferometer_finalise(oskar_Interferometer* h, int* status);
 
 OSKAR_EXPORT
 void oskar_interferometer_free(oskar_Interferometer* h, int* status);
+
+OSKAR_EXPORT
+oskar_Log* oskar_interferometer_log(oskar_Interferometer* h);
 
 OSKAR_EXPORT
 int oskar_interferometer_num_devices(const oskar_Interferometer* h);

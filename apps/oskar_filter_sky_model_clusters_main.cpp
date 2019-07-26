@@ -161,19 +161,21 @@ int main(int argc, char** argv)
     bool use_integrated_flux = opt.is_set("-i") ? true : false;
     const char* sky_file_to_filter = opt.get_arg(0);
     const char* sky_file_as_filter = opt.get_arg(1);
-    oskar_log_create(OSKAR_LOG_NONE, OSKAR_LOG_STATUS);
+    oskar_Log* log = 0;
+    oskar_log_set_file_priority(log, OSKAR_LOG_NONE);
+    oskar_log_set_term_priority(log, OSKAR_LOG_STATUS);
     if (!sky_file_as_filter)
     {
         use_integrated_flux = true;
         sky_file_as_filter = sky_file_to_filter;
-        oskar_log_message('M', 0,
+        oskar_log_message(log, 'M', 0,
                 "Setting filter sky model to input sky model.");
     }
-    oskar_log_message('M', 0, "Using %s flux values.",
+    oskar_log_message(log, 'M', 0, "Using %s flux values.",
             use_integrated_flux ? "integrated" : "peak");
-    oskar_log_message('M', 0, "Using threshold of %.1f %s.", threshold,
+    oskar_log_message(log, 'M', 0, "Using threshold of %.1f %s.", threshold,
             use_integrated_flux ? "Jy" : "Jy/beam");
-    oskar_log_message('M', 0, "Using %.1f sigma overlap.", sigma);
+    oskar_log_message(log, 'M', 0, "Using %.1f sigma overlap.", sigma);
 
     // Load the sky models.
     oskar_Sky* sky_to_filter = oskar_sky_load(sky_file_to_filter,
@@ -181,7 +183,7 @@ int main(int argc, char** argv)
     if (status)
     {
         oskar_sky_free(sky_to_filter, &status);
-        oskar_log_error("Cannot load sky model %s", sky_file_to_filter);
+        oskar_log_error(log, "Cannot load sky model %s", sky_file_to_filter);
         return EXIT_FAILURE;
     }
     oskar_Sky* sky_as_filter = oskar_sky_load(sky_file_as_filter,
@@ -190,13 +192,13 @@ int main(int argc, char** argv)
     {
         oskar_sky_free(sky_to_filter, &status);
         oskar_sky_free(sky_as_filter, &status);
-        oskar_log_error("Cannot load sky model %s", sky_file_as_filter);
+        oskar_log_error(log, "Cannot load sky model %s", sky_file_as_filter);
         return EXIT_FAILURE;
     }
     int num_input = oskar_sky_num_sources(sky_to_filter);
     if (num_input != oskar_sky_num_sources(sky_as_filter))
     {
-        oskar_log_error("Inconsistent sky model dimensions.");
+        oskar_log_error(log, "Inconsistent sky model dimensions.");
         oskar_sky_free(sky_to_filter, &status);
         oskar_sky_free(sky_as_filter, &status);
         return EXIT_FAILURE;
@@ -204,7 +206,7 @@ int main(int argc, char** argv)
     if (oskar_mem_different(oskar_sky_ra_rad_const(sky_to_filter),
             oskar_sky_ra_rad_const(sky_as_filter), num_input, &status))
     {
-        oskar_log_error("Inconsistent sky model RA coordinates.");
+        oskar_log_error(log, "Inconsistent sky model RA coordinates.");
         oskar_sky_free(sky_to_filter, &status);
         oskar_sky_free(sky_as_filter, &status);
         return EXIT_FAILURE;
@@ -212,7 +214,7 @@ int main(int argc, char** argv)
     if (oskar_mem_different(oskar_sky_dec_rad_const(sky_to_filter),
             oskar_sky_dec_rad_const(sky_as_filter), num_input, &status))
     {
-        oskar_log_error("Inconsistent sky model Dec coordinates.");
+        oskar_log_error(log, "Inconsistent sky model Dec coordinates.");
         oskar_sky_free(sky_to_filter, &status);
         oskar_sky_free(sky_as_filter, &status);
         return EXIT_FAILURE;
@@ -292,7 +294,7 @@ int main(int argc, char** argv)
     // Loop over input sources.
     vector< vector<int> > output_source_components;
     vector<int> components_removed;
-    oskar_log_message('M', 0, "Grouping using %d bins...", num_bins);
+    oskar_log_message(log, 'M', 0, "Grouping using %d bins...", num_bins);
     oskar_Timer* timer = oskar_timer_create(OSKAR_TIMER_NATIVE);
     oskar_timer_start(timer);
     for (int i = 0, progress = -num_input; i < num_input; ++i)
@@ -301,7 +303,7 @@ int main(int argc, char** argv)
         if ((num_input > 500) && (i > progress + num_input / 20))
         {
             progress = i;
-            oskar_log_message('M', 1, "%3.0f%% done after %6.1f sec.",
+            oskar_log_message(log, 'M', 1, "%3.0f%% done after %6.1f sec.",
                     100.0 * i / (num_input - 1),
                     oskar_timer_elapsed(timer));
         }
@@ -317,7 +319,7 @@ int main(int argc, char** argv)
         output_source_components.push_back(components);
     }
     int num_output = (int)output_source_components.size();
-    oskar_log_message('M', 1, "100%% done after %6.1f sec.",
+    oskar_log_message(log, 'M', 1, "100%% done after %6.1f sec.",
             oskar_timer_elapsed(timer));
     oskar_timer_free(timer);
 
@@ -328,7 +330,7 @@ int main(int argc, char** argv)
             counter += (int)output_source_components[i].size();
         if (num_input != counter)
         {
-            oskar_log_error("Inconsistent component counts: %d input, "
+            oskar_log_error(log, "Inconsistent component counts: %d input, "
                     "%d grouped.", num_input, counter);
             oskar_sky_free(sky_to_filter, &status);
             oskar_sky_free(sky_as_filter, &status);
@@ -336,7 +338,7 @@ int main(int argc, char** argv)
         }
         if (num_input != (int)components_removed.size())
         {
-            oskar_log_error("Inconsistent component counts: %d input, "
+            oskar_log_error(log, "Inconsistent component counts: %d input, "
                     "%d removed.",  num_input, (int)components_removed.size());
             oskar_sky_free(sky_to_filter, &status);
             oskar_sky_free(sky_as_filter, &status);
@@ -387,7 +389,7 @@ int main(int argc, char** argv)
     // Get all components in clusters above the flux threshold.
     vector<int> components_to_remove;
     {
-        oskar_log_message('M', 0, "Brightest source clusters "
+        oskar_log_message(log, 'M', 0, "Brightest source clusters "
                 "above %.0f %s:", threshold,
                 use_integrated_flux ? "Jy" : "Jy/beam");
         double total_integrated_flux = 0.0;
@@ -400,7 +402,7 @@ int main(int argc, char** argv)
             components_to_remove.insert(components_to_remove.end(),
                     output_source_components[s].begin(),
                     output_source_components[s].end());
-            oskar_log_message('M', 1, "Source %3d has %2d components "
+            oskar_log_message(log, 'M', 1, "Source %3d has %2d components "
                     "%s %.1f %s.", i, num_source_components,
                     use_integrated_flux ? "totalling" : "with peak",
                     output_source_I[s],
@@ -409,16 +411,16 @@ int main(int argc, char** argv)
             {
                 int c = output_source_components[s][j];
                 total_integrated_flux += sky_I[c];
-                oskar_log_message('M', 2, "Component %5d "
+                oskar_log_message(log, 'M', 2, "Component %5d "
                         "at (%7.3f, %7.3f) is %.1f Jy.", c,
                         sky_ra[c] * R2D, sky_dec[c] * R2D, sky_I[c]);
             }
         }
-        oskar_log_message('M', 0, "%d components from %d sources with "
+        oskar_log_message(log, 'M', 0, "%d components from %d sources with "
                 "source flux greater than %.0f %s",
                 (int)components_to_remove.size(), i, threshold,
                 use_integrated_flux ? "Jy" : "Jy/beam");
-        oskar_log_message('M', 1, "Total integrated flux from listed "
+        oskar_log_message(log, 'M', 1, "Total integrated flux from listed "
                 "components: %.1f Jy.", total_integrated_flux);
     }
 
@@ -441,7 +443,7 @@ int main(int argc, char** argv)
                     &status);
             if (status)
             {
-                oskar_log_error("Error setting source %d", j);
+                oskar_log_error(log, "Error setting source %d", j);
                 break;
             }
         }
@@ -455,25 +457,25 @@ int main(int argc, char** argv)
     double min_flux = 0.0, max_flux = 0.0, mean_flux = 0.0, std_flux = 0.0;
     oskar_mem_stats(oskar_sky_I_const(sky_out), num_output,
             &min_flux, &max_flux, &mean_flux, &std_flux, &status);
-    oskar_log_message('M', 0, "After filtering, (min, max, mean, std.dev) "
+    oskar_log_message(log, 'M', 0, "After filtering, (min, max, mean, std.dev) "
             "component fluxes are:");
-    oskar_log_message('M', -1, "%.3e, %.3e, %.3e, %.3e",
+    oskar_log_message(log, 'M', -1, "%.3e, %.3e, %.3e, %.3e",
             min_flux, max_flux, mean_flux, std_flux);
 
     // Save the output sky model.
     string outname(sky_file_to_filter);
     outname += "_filtered.osm";
-    oskar_log_message('M', 0, "Saving to '%s'", outname.c_str());
+    oskar_log_message(log, 'M', 0, "Saving to '%s'", outname.c_str());
     oskar_sky_save(outname.c_str(), sky_out, &status);
     if (status)
     {
-        oskar_log_error("Error saving file: %s",
+        oskar_log_error(log, "Error saving file: %s",
                 oskar_get_error_string(status));
         status = 0;
     }
 
     // Free memory.
-    oskar_log_free();
+    oskar_log_free(log);
     oskar_sky_free(sky_to_filter, &status);
     oskar_sky_free(sky_as_filter, &status);
     oskar_sky_free(sky_out, &status);

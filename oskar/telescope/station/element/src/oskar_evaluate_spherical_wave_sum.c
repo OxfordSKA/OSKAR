@@ -75,7 +75,7 @@ void oskar_evaluate_spherical_wave_sum(int num_points, const oskar_Mem* theta,
             break;
         case OSKAR_SINGLE_COMPLEX:
         case OSKAR_DOUBLE_COMPLEX:
-            oskar_log_error("Spherical wave patterns cannot be used "
+            oskar_log_error(0, "Spherical wave patterns cannot be used "
                     "in scalar mode");
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             break;
@@ -96,7 +96,7 @@ void oskar_evaluate_spherical_wave_sum(int num_points, const oskar_Mem* theta,
             k = "evaluate_spherical_wave_sum_double"; break;
         case OSKAR_SINGLE_COMPLEX:
         case OSKAR_DOUBLE_COMPLEX:
-            oskar_log_error("Spherical wave patterns cannot be used "
+            oskar_log_error(0, "Spherical wave patterns cannot be used "
                     "in scalar mode");
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             return;

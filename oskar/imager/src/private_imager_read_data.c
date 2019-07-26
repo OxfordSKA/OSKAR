@@ -142,7 +142,7 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
                 i_file / (double)num_files));
         if (percent_next && *percent_done >= *percent_next)
         {
-            oskar_log_message('S', -2, "%3d%% ...", *percent_done);
+            oskar_log_message(h->log, 'S', -2, "%3d%% ...", *percent_done);
             *percent_next = 10 + 10 * (*percent_done / 10);
         }
     }
@@ -160,7 +160,8 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
     (void) num_files;
     (void) percent_done;
     (void) percent_next;
-    oskar_log_error("OSKAR was compiled without Measurement Set support.");
+    oskar_log_error(h->log,
+            "OSKAR was compiled without Measurement Set support.");
     *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 #endif
 }
@@ -277,7 +278,7 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
                 i_file / (double)num_files));
         if (percent_next && *percent_done >= *percent_next)
         {
-            oskar_log_message('S', -2, "%3d%% ...", *percent_done);
+            oskar_log_message(h->log, 'S', -2, "%3d%% ...", *percent_done);
             *percent_next = 10 + 10 * (*percent_done / 10);
         }
     }

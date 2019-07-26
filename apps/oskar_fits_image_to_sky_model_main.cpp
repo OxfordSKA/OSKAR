@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     oskar_sky_save(opt.get_arg(1), sky, &error);
     if (error)
     {
-        oskar_log_error(oskar_get_error_string(error));
+        oskar_log_error(0, oskar_get_error_string(error));
         return error;
     }
 

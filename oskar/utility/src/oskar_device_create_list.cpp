@@ -156,7 +156,7 @@ static oskar_Device** oskar_device_create_list_cl(const char* device_type,
     if (num_platforms == 0) return device_list;
     if (error != CL_SUCCESS)
     {
-        oskar_log_error("clGetPlatformIDs error (%d).", error);
+        oskar_log_error(0, "clGetPlatformIDs error (%d).", error);
         return device_list;
     }
 

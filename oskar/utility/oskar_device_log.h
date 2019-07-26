@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,7 +49,7 @@ extern "C" {
  * @param[in] device    Device handle.
  */
 OSKAR_EXPORT
-void oskar_device_log_details(const oskar_Device* device);
+void oskar_device_log_details(const oskar_Device* device, oskar_Log* log);
 
 /**
  * @brief Log information about the memory on a device.
@@ -61,7 +62,7 @@ void oskar_device_log_details(const oskar_Device* device);
  * @param[in] id        Device ID.
  */
 OSKAR_EXPORT
-void oskar_device_log_mem(int location, int depth, int id);
+void oskar_device_log_mem(int location, int depth, int id, oskar_Log* log);
 
 #ifdef __cplusplus
 }

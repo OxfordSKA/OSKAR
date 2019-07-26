@@ -44,6 +44,7 @@ void oskar_beam_pattern_free(oskar_BeamPattern* h, int* status)
     oskar_timer_free(h->tmr_write);
     oskar_mutex_free(h->mutex);
     oskar_barrier_free(h->barrier);
+    oskar_log_free(h->log);
     free(h->d);
     free(h->root_path);
     free(h->sky_model_file);
