@@ -153,6 +153,117 @@ void oskar_imager_update_from_block(oskar_Imager* h,
 }
 
 
+static int compare_f(const void *p0, const void *p1)
+{
+    float w0 = fabs(**(const float* const*)p0);
+    float w1 = fabs(**(const float* const*)p1);
+    if (w0 > w1) return 1;
+    if (w0 < w1) return -1;
+    return 0;
+}
+
+static int compare_d(const void *p0, const void *p1)
+{
+    double w0 = fabs(**(const double* const*)p0);
+    double w1 = fabs(**(const double* const*)p1);
+    if (w0 > w1) return 1;
+    if (w0 < w1) return -1;
+    return 0;
+}
+
+static void oskar_imager_sort_by_abs_w(size_t num_vis,
+        oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amps,
+        oskar_Mem* weight, int* status)
+{
+    if (*status || num_vis == 0) return;
+    /* Based on:
+     * https://stackoverflow.com/questions/32948281/c-sort-two-arrays-the-same-way */
+    if (oskar_mem_precision(weight) == OSKAR_SINGLE)
+    {
+        size_t i;
+        float** ptr_w = (float**) calloc(num_vis, sizeof(float*));
+        float* uu_ = oskar_mem_float(uu, status);
+        float* vv_ = oskar_mem_float(vv, status);
+        float* ww_ = oskar_mem_float(ww, status);
+        float2* vis_ = oskar_mem_float2(amps, status);
+        float* weight_ = oskar_mem_float(weight, status);
+        for (i = 0; i < num_vis; ++i) ptr_w[i] = &ww_[i];
+        qsort(ptr_w, num_vis, sizeof(void*), compare_f);
+        for (i = 0; i < num_vis; ++i)
+        {
+            if (i != (size_t) (ptr_w[i] - ww_))
+            {
+                size_t j, k;
+                const float temp_u = uu_[i];
+                const float temp_v = vv_[i];
+                const float temp_w = ww_[i];
+                const float2 temp_vis = vis_[i];
+                const float temp_weight = weight_[i];
+                k = i;
+                while (i != (j = (size_t) (ptr_w[k] - ww_)))
+                {
+                    uu_[k] = uu_[j];
+                    vv_[k] = vv_[j];
+                    ww_[k] = ww_[j];
+                    vis_[k] = vis_[j];
+                    weight_[k] = weight_[j];
+                    ptr_w[k] = &ww_[k];
+                    k = j;
+                }
+                uu_[k] = temp_u;
+                vv_[k] = temp_v;
+                ww_[k] = temp_w;
+                vis_[k] = temp_vis;
+                weight_[k] = temp_weight;
+                ptr_w[k] = &ww_[k];
+            }
+        }
+        free(ptr_w);
+    }
+    else
+    {
+        size_t i;
+        double** ptr_w = (double**) calloc(num_vis, sizeof(double*));
+        double* uu_ = oskar_mem_double(uu, status);
+        double* vv_ = oskar_mem_double(vv, status);
+        double* ww_ = oskar_mem_double(ww, status);
+        double2* vis_ = oskar_mem_double2(amps, status);
+        double* weight_ = oskar_mem_double(weight, status);
+        for (i = 0; i < num_vis; ++i) ptr_w[i] = &ww_[i];
+        qsort(ptr_w, num_vis, sizeof(void*), compare_d);
+        for (i = 0; i < num_vis; ++i)
+        {
+            if (i != (size_t) (ptr_w[i] - ww_))
+            {
+                size_t j, k;
+                const double temp_u = uu_[i];
+                const double temp_v = vv_[i];
+                const double temp_w = ww_[i];
+                const double2 temp_vis = vis_[i];
+                const double temp_weight = weight_[i];
+                k = i;
+                while (i != (j = (size_t) (ptr_w[k] - ww_)))
+                {
+                    uu_[k] = uu_[j];
+                    vv_[k] = vv_[j];
+                    ww_[k] = ww_[j];
+                    vis_[k] = vis_[j];
+                    weight_[k] = weight_[j];
+                    ptr_w[k] = &ww_[k];
+                    k = j;
+                }
+                uu_[k] = temp_u;
+                vv_[k] = temp_v;
+                ww_[k] = temp_w;
+                vis_[k] = temp_vis;
+                weight_[k] = temp_weight;
+                ptr_w[k] = &ww_[k];
+            }
+        }
+        free(ptr_w);
+    }
+}
+
 void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
         int end_chan, int num_pols, const oskar_Mem* uu, const oskar_Mem* vv,
         const oskar_Mem* ww, const oskar_Mem* amps, const oskar_Mem* weight,
@@ -287,6 +398,11 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
                     h->ww_im, h->vis_im, h->weight_im, h->time_im, status);
             oskar_imager_filter_uv(h, &num_vis, h->uu_im, h->vv_im,
                     h->ww_im, h->vis_im, h->weight_im, status);
+
+            /* Sort visibility data by w coordinate. */
+            if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
+                oskar_imager_sort_by_abs_w(num_vis, h->uu_im, h->vv_im,
+                        h->ww_im, h->vis_im, h->weight_im, status);
 
             /* Get pointer to the image plane to update. */
             i_plane = h->num_im_pols * c + p;
