@@ -400,7 +400,7 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
                     h->ww_im, h->vis_im, h->weight_im, status);
 
             /* Sort visibility data by w coordinate. */
-            if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
+            if (h->algorithm == OSKAR_ALGORITHM_WPROJ && !h->coords_only)
                 oskar_imager_sort_by_abs_w(num_vis, h->uu_im, h->vv_im,
                         h->ww_im, h->vis_im, h->weight_im, status);
 
