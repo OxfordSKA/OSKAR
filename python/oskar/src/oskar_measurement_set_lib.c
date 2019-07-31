@@ -174,6 +174,7 @@ static PyObject* create(PyObject* self, PyObject* args)
 
 #ifdef OSKAR_HAVE_MPI4PY
     if (py_mpi_comm != Py_None) {
+        import_mpi4py();
         mpi_comm = PyMPIComm_Get(py_mpi_comm);
         if (mpi_comm == NULL) return NULL;
     }
@@ -751,9 +752,6 @@ static PyObject* moduleinit(void)
 PyMODINIT_FUNC PyInit__measurement_set_lib(void)
 {
     import_array();
-#if OSKAR_HAVE_MPI4PY
-    import_mpi4py();
-#endif // OSKAR_HAVE_MPI4PY
     return moduleinit();
 }
 #else
@@ -762,9 +760,6 @@ PyMODINIT_FUNC PyInit__measurement_set_lib(void)
 PyMODINIT_FUNC init_measurement_set_lib(void)
 {
     import_array();
-#if OSKAR_HAVE_MPI4PY
-    import_mpi4py();
-#endif // OSKAR_HAVE_MPI4PY
     moduleinit();
     return;
 }
