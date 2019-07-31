@@ -107,7 +107,7 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         for (i = 0; i < h->num_w_planes; ++i)
         {
             const int* supp = oskar_mem_int_const(h->w_support, status);
-            printf("Plane %d, support: %d\n", i, supp[i] * oversample);
+            printf("Plane %d, support: %d\n", i, supp[i]);
         }
     }
 #endif
@@ -322,7 +322,7 @@ static oskar_Mem* oskar_imager_evaluate_w_kernel_support_sizes(
     if (*status || !kernel_cube) return 0;
     w_support = oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_w_planes, status);
     supp = oskar_mem_int(w_support, status);
-    const double threshold = 1e-3 * norm_factor;
+    const double threshold = 1e-3 / norm_factor;
     const int prec = oskar_mem_precision(kernel_cube);
     const int conv_size = ((int) conv_size_half + 1) * 2;
     for (i = 0; i < num_w_planes; ++i)

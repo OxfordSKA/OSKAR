@@ -152,7 +152,7 @@ void oskar_imager_update_from_block(oskar_Imager* h,
     oskar_mem_free(time_centroid, status);
 }
 
-
+#if 0
 static int compare_f(const void *p0, const void *p1)
 {
     float w0 = fabs(**(const float* const*)p0);
@@ -263,6 +263,7 @@ static void oskar_imager_sort_by_abs_w(size_t num_vis,
         free(ptr_w);
     }
 }
+#endif
 
 void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
         int end_chan, int num_pols, const oskar_Mem* uu, const oskar_Mem* vv,
@@ -399,10 +400,12 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
             oskar_imager_filter_uv(h, &num_vis, h->uu_im, h->vv_im,
                     h->ww_im, h->vis_im, h->weight_im, status);
 
+#if 0
             /* Sort visibility data by w coordinate. */
             if (h->algorithm == OSKAR_ALGORITHM_WPROJ && !h->coords_only)
                 oskar_imager_sort_by_abs_w(num_vis, h->uu_im, h->vv_im,
                         h->ww_im, h->vis_im, h->weight_im, status);
+#endif
 
             /* Get pointer to the image plane to update. */
             i_plane = h->num_im_pols * c + p;
