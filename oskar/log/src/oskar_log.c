@@ -27,6 +27,7 @@
  */
 
 #include "log/oskar_log.h"
+#include "utility/oskar_lock_file.h"
 #include "oskar_version.h"
 
 #include <stdio.h>
@@ -90,20 +91,6 @@ static oskar_Log log_ = {
 #else
 #define SNPRINTF(BUF, SIZE, FMT, ...) sprintf(BUF, FMT, __VA_ARGS__);
 #endif
-
-
-static int oskar_log_file_exists(const char* filename)
-{
-    FILE* stream;
-    if (!filename || !*filename) return 0;
-    stream = fopen(filename, "r");
-    if (stream)
-    {
-        fclose(stream);
-        return 1;
-    }
-    return 0;
-}
 
 
 void oskar_log_close(oskar_Log* log, int write_message)
@@ -396,11 +383,16 @@ void init_log(oskar_Log* log)
         }
         if (n < 0 || n >= (int)sizeof(log->name))
             return;
+        if (i > 100)
+        {
+            log->name[0] = 0;
+            break;
+        }
     }
-    while (oskar_log_file_exists(log->name));
+    while (!oskar_lock_file(log->name));
 
     /* Open the log file if required. */
-    if (log->file_priority > OSKAR_LOG_NONE)
+    if (log->file_priority > OSKAR_LOG_NONE && strlen(log->name) > 0)
         log->file = fopen(log->name, "a+");
 
     /* Get the current working directory. */
