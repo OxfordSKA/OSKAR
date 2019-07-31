@@ -383,7 +383,7 @@ void init_log(oskar_Log* log)
         }
         if (n < 0 || n >= (int)sizeof(log->name))
             return;
-        if (i > 100)
+        if (i > 1000)
         {
             log->name[0] = 0;
             break;
@@ -391,9 +391,23 @@ void init_log(oskar_Log* log)
     }
     while (!oskar_lock_file(log->name));
 
-    /* Open the log file if required. */
-    if (log->file_priority > OSKAR_LOG_NONE && strlen(log->name) > 0)
-        log->file = fopen(log->name, "a+");
+    /* Open or remove the log file if required. */
+    if (strlen(log->name) > 0)
+    {
+        if (log->file_priority > OSKAR_LOG_NONE)
+        {
+            log->file = fopen(log->name, "a+");
+        }
+        else
+        {
+            FILE* f = fopen(log->name, "rb");
+            if (f)
+            {
+                fclose(f);
+                remove(log->name);
+            }
+        }
+    }
 
     /* Get the current working directory. */
 #ifdef OSKAR_OS_WIN
