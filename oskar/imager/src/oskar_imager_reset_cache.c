@@ -29,6 +29,7 @@
 #include "imager/private_imager.h"
 #include "imager/oskar_imager_reset_cache.h"
 #include "imager/private_imager_free_device_data.h"
+#include "log/oskar_log.h"
 #include "math/oskar_fft.h"
 #include <fitsio.h>
 
@@ -101,6 +102,17 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
 
     /* Clear the number of image planes. */
     h->num_planes = 0;
+
+    /* Clear the timers. */
+    oskar_timer_reset(h->tmr_grid_finalise);
+    oskar_timer_reset(h->tmr_grid_update);
+    oskar_timer_reset(h->tmr_init);
+    oskar_timer_reset(h->tmr_read);
+    oskar_timer_reset(h->tmr_write);
+    oskar_timer_start(h->tmr_overall);
+
+    /* Clear init flag. */
+    h->init = 0;
 }
 
 #ifdef __cplusplus

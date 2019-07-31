@@ -53,7 +53,7 @@ struct oskar_Imager
     char* output_name[4];
     fitsfile* fits_file[4];
     oskar_Timer *tmr_grid_update, *tmr_grid_finalise, *tmr_init;
-    oskar_Timer *tmr_read, *tmr_write;
+    oskar_Timer *tmr_read, *tmr_write, *tmr_overall;
 
     /* Settings parameters. */
     int imager_prec, num_devices, num_gpus_avail, dev_loc, num_gpus, *gpu_ids;
@@ -73,7 +73,7 @@ struct oskar_Imager
     double vis_freq_start_hz, freq_inc_hz;
 
     /* State. */
-    int status, i_block;
+    int init, status, i_block;
     oskar_Mutex* mutex;
     oskar_Log* log;
 

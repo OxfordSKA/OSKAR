@@ -43,34 +43,33 @@ extern "C" {
 void oskar_imager_check_init(oskar_Imager* h, int* status)
 {
     /* Don't initialise if we're in "coords only" mode. */
-    if (h->coords_only) return;
+    if (h->coords_only || h->init) return;
 
+    oskar_log_section(h->log, 'M', "Initialising algorithm...");
     oskar_timer_resume(h->tmr_init);
     switch (h->algorithm)
     {
     case OSKAR_ALGORITHM_DFT_2D:
     case OSKAR_ALGORITHM_DFT_3D:
     {
-        if (!h->l)
-            oskar_imager_init_dft(h, status);
+        oskar_imager_init_dft(h, status);
         break;
     }
     case OSKAR_ALGORITHM_FFT:
     {
-        if (!h->conv_func)
-            oskar_imager_init_fft(h, status);
+        oskar_imager_init_fft(h, status);
         break;
     }
     case OSKAR_ALGORITHM_WPROJ:
     {
-        if (!h->w_kernels_compact)
-            oskar_imager_init_wproj(h, status);
+        oskar_imager_init_wproj(h, status);
         break;
     }
     default:
         *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     }
     oskar_timer_pause(h->tmr_init);
+    h->init = 1;
 }
 
 #ifdef __cplusplus

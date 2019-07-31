@@ -75,6 +75,17 @@ enum OSKAR_LOG_PRIORITY {
 
 /**
  * @brief
+ * Closes the current log but does not destroy the handle.
+ *
+ * @details
+ * This function closes the log but does not destroy its handle.
+ * Subsequent log messages will be written to a new log file.
+ */
+OSKAR_EXPORT
+void oskar_log_close(oskar_Log* log, int write_message);
+
+/**
+ * @brief
  * Starts the log, creating a log file if necessary.
  *
  * @details

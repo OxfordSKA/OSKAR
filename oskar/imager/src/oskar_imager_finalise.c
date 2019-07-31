@@ -36,6 +36,7 @@
 #include "math/oskar_fftphase.h"
 #include "mem/oskar_mem.h"
 #include "utility/oskar_device.h"
+#include "utility/oskar_get_error_string.h"
 #include "utility/oskar_timer.h"
 
 #include <fitsio.h>
@@ -59,6 +60,9 @@ void oskar_imager_finalise(oskar_Imager* h,
     size_t j, log_size = 0, length = 0;
     char* log_data;
     if (*status || !h->planes) return;
+
+    oskar_log_section(h->log, 'M', "Finalising %d image plane(s)...",
+            h->num_planes);
 
     /* Adjust normalisation if required. */
     if (h->scale_norm_with_num_input_files)
@@ -137,6 +141,12 @@ void oskar_imager_finalise(oskar_Imager* h,
             oskar_log_value(h->log, 'M', 1, "FITS file", "%s",
                     h->output_name[i]);
     }
+    if (!*status)
+        oskar_log_message(h->log, 'M', 0, "Run completed in %.3f sec.",
+                oskar_timer_elapsed(h->tmr_overall));
+    else
+        oskar_log_error(h->log, "Run failed with code %i: %s.", *status,
+                oskar_get_error_string(*status));
 
     /* Write log to the output FITS files as HISTORY entries.
      * Replace newlines with zeros. */
@@ -165,6 +175,9 @@ void oskar_imager_finalise(oskar_Imager* h,
 
     /* Reset imager memory. */
     oskar_imager_reset_cache(h, status);
+
+    /* Close the log. */
+    oskar_log_close(h->log, 1);
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, The University of Oxford
+ * Copyright (c) 2017-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@ void oskar_imager_read_dims_ms(oskar_Imager* h, const char* filename,
     if (*status) return;
 
     /* Read the header. */
+    oskar_log_message(h->log, 'M', 0, "Opening Measurement Set '%s'", filename);
     ms = oskar_ms_open(filename);
     if (!ms)
     {
@@ -60,7 +61,8 @@ void oskar_imager_read_dims_ms(oskar_Imager* h, const char* filename,
     oskar_ms_close(ms);
 #else
     (void) filename;
-    oskar_log_error("OSKAR was compiled without Measurement Set support.");
+    oskar_log_error(h->log,
+            "OSKAR was compiled without Measurement Set support.");
     *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 #endif
 }
@@ -74,6 +76,7 @@ void oskar_imager_read_dims_vis(oskar_Imager* h, const char* filename,
     if (*status) return;
 
     /* Read the header. */
+    oskar_log_message(h->log, 'M', 0, "Opening '%s'", filename);
     vis_file = oskar_binary_create(filename, 'r', status);
     header = oskar_vis_header_read(vis_file, status);
     if (*status)

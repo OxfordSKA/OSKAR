@@ -56,6 +56,7 @@ void oskar_imager_read_coords_ms(oskar_Imager* h, const char* filename,
     if (*status) return;
 
     /* Read the header. */
+    oskar_log_message(h->log, 'M', 0, "Opening Measurement Set '%s'", filename);
     ms = oskar_ms_open(filename);
     if (!ms)
     {
@@ -166,6 +167,7 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
     if (*status) return;
 
     /* Read the header. */
+    oskar_log_message(h->log, 'M', 0, "Opening '%s'", filename);
     vis_file = oskar_binary_create(filename, 'r', status);
     hdr = oskar_vis_header_read(vis_file, status);
     if (*status)

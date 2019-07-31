@@ -51,6 +51,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     h->tmr_init = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_read = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    h->tmr_overall = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->mutex = oskar_mutex_create();
     h->log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_WARNING);
 

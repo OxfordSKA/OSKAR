@@ -637,6 +637,10 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
      * there's nothing more to do here. */
     if (h->coords_only || h->planes) return;
 
+    /* Record the plane size. */
+    oskar_log_message(h->log, 'M', 0, "Plane size is %d x %d.",
+            oskar_imager_plane_size(h), oskar_imager_plane_size(h));
+
     /* Allocate the image or visibility planes on the host. */
     h->planes = (oskar_Mem**) calloc(num_planes, sizeof(oskar_Mem*));
     h->plane_norm = (double*) calloc(num_planes, sizeof(double));

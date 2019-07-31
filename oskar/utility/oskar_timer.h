@@ -109,6 +109,18 @@ OSKAR_EXPORT
 void oskar_timer_pause(oskar_Timer* timer);
 
 /**
+ * @brief Resets a timer.
+ *
+ * @details
+ * Resets a timer back to its initial state.
+ * The timer is zeroed and paused.
+ *
+ * @param[in,out] timer Pointer to timer.
+ */
+OSKAR_EXPORT
+void oskar_timer_reset(oskar_Timer* timer);
+
+/**
  * @brief Resumes the timer.
  *
  * @details

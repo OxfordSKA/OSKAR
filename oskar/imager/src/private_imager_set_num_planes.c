@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,14 @@ void oskar_imager_set_num_planes(oskar_Imager* h, int* status)
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
+    else
+    {
+        oskar_log_message(h->log, 'M', 0, "Using %d frequency channel(s)",
+                h->num_sel_freqs);
+        oskar_log_message(h->log, 'M', 1, "Range %.3f MHz to %.3f MHz",
+                h->sel_freqs[0] * 1e-6,
+                h->sel_freqs[h->num_sel_freqs - 1] * 1e-6);
+    }
 
     /* Set image meta-data. */
     h->num_im_channels = h->chan_snaps ? h->num_sel_freqs : 1;
@@ -64,7 +72,6 @@ void oskar_imager_set_num_planes(oskar_Imager* h, int* status)
     }
     h->num_planes = h->num_im_channels * h->num_im_pols;
 }
-
 
 #ifdef __cplusplus
 }

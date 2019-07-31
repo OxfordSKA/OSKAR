@@ -190,6 +190,15 @@ void oskar_timer_pause(oskar_Timer* timer)
     timer->paused = 1;
 }
 
+void oskar_timer_reset(oskar_Timer* timer)
+{
+    oskar_mutex_lock(timer->mutex);
+    timer->paused = 1;
+    timer->start = 0.0;
+    timer->elapsed = 0.0;
+    oskar_mutex_unlock(timer->mutex);
+}
+
 void oskar_timer_resume(oskar_Timer* timer)
 {
     if (!timer->paused) return;

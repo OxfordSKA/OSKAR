@@ -105,6 +105,35 @@ static int oskar_log_file_exists(const char* filename)
     return 0;
 }
 
+
+void oskar_log_close(oskar_Log* log, int write_message)
+{
+    if (write_message && log->init)
+    {
+        char time_str[80];
+        const time_t unix_time = time(NULL);
+        struct tm* timeinfo = localtime(&unix_time);
+        strftime(time_str, sizeof(time_str),
+                "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
+        oskar_log_section(log, 'M', "OSKAR-%s ending at %s.",
+                OSKAR_VERSION_STR, time_str);
+    }
+    if (log->file) fclose(log->file);
+    log->file = 0;
+    if (!log->keep_file && strlen(log->name) > 0)
+    {
+        FILE* f = fopen(log->name, "r");
+        if (f)
+        {
+            fclose(f);
+            remove(log->name);
+        }
+    }
+    log->name[0] = 0;
+    log->init = 0;
+}
+
+
 oskar_Log* oskar_log_create(int file_priority, int term_priority)
 {
     oskar_Log* log = 0;
@@ -112,7 +141,6 @@ oskar_Log* oskar_log_create(int file_priority, int term_priority)
     log->file_priority = file_priority;
     log->term_priority = term_priority;
     log->value_width = OSKAR_LOG_DEFAULT_VALUE_WIDTH;
-    log->timestamp_start = oskar_log_timestamp();
     return log;
 }
 
@@ -201,33 +229,13 @@ char* oskar_log_file_data(oskar_Log* log, size_t* size)
 
 void oskar_log_free(oskar_Log* log)
 {
-    oskar_Log* ptr = log;
-    if (!ptr)
-        ptr = &log_; /* Select the root logger if NULL. */
+    if (!log)
+        oskar_log_close(&log_, 0);
     else
     {
-        char time_str[80];
-        const time_t unix_time = time(NULL);
-        struct tm* timeinfo = localtime(&unix_time);
-        strftime(time_str, sizeof(time_str),
-                "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
-        oskar_log_section(ptr, 'M', "OSKAR-%s ending at %s.",
-                OSKAR_VERSION_STR, time_str);
+        oskar_log_close(log, 1);
+        free(log);
     }
-    if (ptr->file) fclose(ptr->file);
-    ptr->file = 0;
-    if (!ptr->keep_file && strlen(ptr->name) > 0)
-    {
-        FILE* f = fopen(ptr->name, "r");
-        if (f)
-        {
-            fclose(f);
-            remove(ptr->name);
-        }
-    }
-    ptr->name[0] = 0;
-    ptr->init = 0;
-    free(log);
 }
 
 
@@ -410,6 +418,7 @@ void init_log(oskar_Log* log)
 #endif
 
     /* Write standard header. */
+    log->timestamp_start = oskar_log_timestamp();
     oskar_log_section(log, 'M', "OSKAR-%s starting at %s.",
             OSKAR_VERSION_STR, time_str);
     oskar_log_message(log, 'M', 0, "Current dir is %s", current_dir);
