@@ -35,7 +35,7 @@ class BuildExt(build_ext):
     """Class used to build OSKAR Python extensions. Inherits build_ext."""
     def __init__(self, *args, **kwargs):
         """Initialise."""
-        super().__init__(*args, **kwargs)
+        build_ext.__init__(self, *args, **kwargs)
         self._checked_lib = False
         self._checked_inc = False
 
