@@ -22,6 +22,11 @@ set(cfitsio_SRC
 )
 
 if (NOT WIN32)
+    # We need a thread-safe version of this library!
+    find_package(Threads REQUIRED)
+    include_directories(${PTHREADS_INCLUDE_DIR})
+    add_definitions(-D_REENTRANT)
+
     set(CFITSIO_FLAGS_RELEASE "-O3 -DNDEBUG -fPIC")
     set(CFITSIO_FLAGS_DEBUG "-g -fPIC")
 else()
