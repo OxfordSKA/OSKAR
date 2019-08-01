@@ -159,6 +159,7 @@ void oskar_imager_finalise(oskar_Imager* h,
     for (i = 0; i < h->num_im_pols; ++i)
     {
         const char* line = log_data;
+        if (!h->fits_file[i]) continue;
         length = log_size;
         for (; log_size > 0;)
         {
