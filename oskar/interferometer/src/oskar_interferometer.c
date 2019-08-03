@@ -358,14 +358,21 @@ void oskar_interferometer_finalise(oskar_Interferometer* h, int* status)
     {
         size_t log_size = 0;
         char* log_data;
+        if (h->num_sources_total < 32 && h->num_gpus > 0)
+            oskar_log_warning(h->log, "It may be faster to use CPU cores "
+                    "only, as the sky model contains fewer than 32 sources.");
         oskar_log_set_value_width(h->log, 25);
         record_timing(h);
         oskar_log_section(h->log, 'M', "Simulation complete");
         oskar_log_message(h->log, 'M', 0, "Output(s):");
         if (h->vis_name)
-            oskar_log_value(h->log, 'M', 1, "OSKAR binary file", "%s", h->vis_name);
+            oskar_log_value(h->log, 'M', 1,
+                    "OSKAR binary file", "%s", h->vis_name);
         if (h->ms_name)
-            oskar_log_value(h->log, 'M', 1, "Measurement Set", "%s", h->ms_name);
+            oskar_log_value(h->log, 'M', 1,
+                    "Measurement Set", "%s", h->ms_name);
+        oskar_log_message(h->log, 'M', 0, "Run completed in %.3f sec.",
+                oskar_timer_elapsed(h->tmr_sim));
 
         /* Write simulation log to the output files. */
         log_data = oskar_log_file_data(h->log, &log_size);
@@ -378,8 +385,17 @@ void oskar_interferometer_finalise(oskar_Interferometer* h, int* status)
                     OSKAR_TAG_RUN_LOG, 0, log_size, log_data, status);
         free(log_data);
     }
+    else
+    {
+        oskar_log_error(h->log, "Run failed with code %i: %s.", *status,
+                oskar_get_error_string(*status));
+    }
 
+    /* Reset cache. */
     oskar_interferometer_reset_cache(h, status);
+
+    /* Close the log. */
+    oskar_log_close(h->log, 1);
 }
 
 
@@ -458,9 +474,7 @@ void oskar_interferometer_reset_work_unit_index(oskar_Interferometer* h)
 void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
         int device_id, int* status)
 {
-    double obs_start_mjd, dt_dump_days;
-    int i_active, time_index_start, time_index_end;
-    int num_channels, num_times_block, total_chunks, total_times;
+    int time_index_start, time_index_end;
     DeviceData* d;
     if (*status) return;
 
@@ -479,22 +493,22 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
         oskar_device_set(h->dev_loc, h->gpu_ids[device_id], status);
 
     /* Clear the visibility block. */
-    i_active = block_index % 2; /* Index of the active buffer. */
+    const int i_active = block_index % 2; /* Index of the active buffer. */
     d = &(h->d[device_id]);
     oskar_timer_resume(d->tmr_compute);
     oskar_vis_block_clear(d->vis_block, status);
 
     /* Set the visibility block meta-data. */
-    total_chunks = h->num_sky_chunks;
-    num_channels = h->num_channels;
-    total_times = h->num_time_steps;
-    obs_start_mjd = h->time_start_mjd_utc;
-    dt_dump_days = h->time_inc_sec / 86400.0;
+    const int total_chunks = h->num_sky_chunks;
+    const int num_channels = h->num_channels;
+    const int total_times = h->num_time_steps;
+    const double obs_start_mjd = h->time_start_mjd_utc;
+    const double dt_dump_days = h->time_inc_sec / 86400.0;
     time_index_start = block_index * h->max_times_per_block;
     time_index_end = time_index_start + h->max_times_per_block - 1;
     if (time_index_end >= total_times)
         time_index_end = total_times - 1;
-    num_times_block = 1 + time_index_end - time_index_start;
+    const int num_times_block = 1 + time_index_end - time_index_start;
 
     /* Set the number of active times in the block. */
     oskar_vis_block_set_num_times(d->vis_block, num_times_block, status);
@@ -505,17 +519,17 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
     while (!h->coords_only)
     {
         oskar_Sky* sky;
-        int i_work_unit, i_chunk, i_time, i_channel, sim_time_idx;
+        int i_channel;
 
         oskar_mutex_lock(h->mutex);
-        i_work_unit = (h->work_unit_index)++;
+        const int i_work_unit = (h->work_unit_index)++;
         oskar_mutex_unlock(h->mutex);
         if ((i_work_unit >= num_times_block * total_chunks) || *status) break;
 
         /* Convert slice index to chunk/time index. */
-        i_chunk      = i_work_unit / num_times_block;
-        i_time       = i_work_unit - i_chunk * num_times_block;
-        sim_time_idx = time_index_start + i_time;
+        const int i_chunk      = i_work_unit / num_times_block;
+        const int i_time       = i_work_unit - i_chunk * num_times_block;
+        const int sim_time_idx = time_index_start + i_time;
 
         /* Copy sky chunk to device only if different from the previous one. */
         if (i_chunk != d->previous_chunk_index)
@@ -627,8 +641,7 @@ static void* run_blocks(void* arg)
 
 void oskar_interferometer_run(oskar_Interferometer* h, int* status)
 {
-    int i, num_threads;
-    oskar_Timer* tmr;
+    int i;
     oskar_Thread** threads = 0;
     ThreadArgs* args = 0;
     if (*status || !h) return;
@@ -651,12 +664,10 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
     }
 
     /* Initialise if required. */
-    tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
-    oskar_timer_resume(tmr);
     oskar_interferometer_check_init(h, status);
 
     /* Set up worker threads. */
-    num_threads = h->num_devices + 1;
+    const int num_threads = h->num_devices + 1;
     oskar_barrier_set_num_threads(h->barrier, num_threads);
     threads = (oskar_Thread**) calloc(num_threads, sizeof(oskar_Thread*));
     args = (ThreadArgs*) calloc(num_threads, sizeof(ThreadArgs));
@@ -684,15 +695,6 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
 
     /* Finalise. */
     oskar_interferometer_finalise(h, status);
-
-    /* Check for errors. */
-    if (!*status)
-        oskar_log_message(h->log, 'M', 0, "Run completed in %.3f sec.",
-                oskar_timer_elapsed(tmr));
-    else
-        oskar_log_error(h->log, "Run failed with code %i: %s.", *status,
-                oskar_get_error_string(*status));
-    oskar_timer_free(tmr);
 }
 
 
@@ -860,6 +862,9 @@ void oskar_interferometer_set_sky_model(oskar_Interferometer* h,
     oskar_log_section(h->log, 'M', "Sky model summary");
     oskar_log_value(h->log, 'M', 0, "Num. sources", "%d", h->num_sources_total);
     oskar_log_value(h->log, 'M', 0, "Num. chunks", "%d", h->num_sky_chunks);
+    if (h->num_sources_total < 32 && h->num_gpus > 0)
+        oskar_log_warning(h->log, "It may be faster to use CPU cores "
+                "only, as the sky model contains fewer than 32 sources.");
 }
 
 

@@ -46,9 +46,7 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
     int prec = s->to_int("simulator/double_precision", status) ?
             OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_BeamPattern* h = oskar_beam_pattern_create(prec, status);
-
-    // Write settings to log.
-    oskar_settings_log(s, oskar_beam_pattern_log(h));
+    oskar_Log* log_ = oskar_beam_pattern_log(h);
 
     // Set simulator settings.
     s->begin_group("simulator");
@@ -59,7 +57,11 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
     else
     {
         if (s->starts_with("cuda_device_ids", "all", status))
+        {
             oskar_beam_pattern_set_gpus(h, -1, 0, status);
+            if (oskar_beam_pattern_num_gpus(h) == 0)
+                oskar_log_warning(log_, "No GPU capability available.");
+        }
         else
         {
             const int* ids = s->to_int_list("cuda_device_ids", &size, status);
@@ -71,9 +73,8 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
         oskar_beam_pattern_set_num_devices(h, -1);
     else
         oskar_beam_pattern_set_num_devices(h, s->to_int("num_devices", status));
-    oskar_log_set_keep_file(oskar_beam_pattern_log(h),
-            s->to_int("keep_log_file", status));
-    oskar_log_set_file_priority(oskar_beam_pattern_log(h),
+    oskar_log_set_keep_file(log_, s->to_int("keep_log_file", status));
+    oskar_log_set_file_priority(log_,
             s->to_int("write_status_to_log_file", status) ?
             OSKAR_LOG_STATUS : OSKAR_LOG_MESSAGE);
     s->end_group();

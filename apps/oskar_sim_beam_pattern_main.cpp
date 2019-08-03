@@ -33,7 +33,6 @@
 #include "beam_pattern/oskar_beam_pattern.h"
 #include "log/oskar_log.h"
 #include "settings/oskar_option_parser.h"
-#include "utility/oskar_timer.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
 
@@ -87,15 +86,6 @@ int main(int argc, char** argv)
     // Write settings to log.
     oskar_settings_log(s, log);
 
-    // Warn about lack of GPUs.
-    const char *warning_gpu = 0;
-    if (s->to_int("simulator/use_gpus", &status) &&
-            oskar_beam_pattern_num_gpus(sim) == 0)
-    {
-        warning_gpu = "No GPU capability available.";
-        oskar_log_warning(log, warning_gpu);
-    }
-
     // Set up the telescope model.
     oskar_Telescope* tel = oskar_settings_to_telescope(s, log, &status);
     if (!tel || status)
@@ -107,10 +97,6 @@ int main(int argc, char** argv)
 
     // Run simulation.
     oskar_beam_pattern_run(sim, &status);
-
-    // Reiterate warnings.
-    if (warning_gpu)
-        oskar_log_warning(log, warning_gpu);
 
     // Free memory.
     oskar_beam_pattern_free(sim, &status);

@@ -176,6 +176,9 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
         oskar_log_error(h->log, "Run failed with code %i: %s.", *status,
                 oskar_get_error_string(*status));
     oskar_timer_free(tmr);
+
+    /* Close the log. */
+    oskar_log_close(h->log, 1);
 }
 
 

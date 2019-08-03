@@ -32,8 +32,6 @@
 #include "imager/oskar_imager.h"
 #include "log/oskar_log.h"
 #include "settings/oskar_option_parser.h"
-#include "utility/oskar_timer.h"
-#include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
 
 #include <cstdio>

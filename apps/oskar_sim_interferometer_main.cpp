@@ -34,7 +34,6 @@
 #include "log/oskar_log.h"
 #include "settings/oskar_option_parser.h"
 #include "interferometer/oskar_interferometer.h"
-#include "utility/oskar_timer.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_version_string.h"
 
@@ -80,8 +79,6 @@ int main(int argc, char** argv)
     }
 
     // Set up the interferometer simulator.
-    const char *warning_source_count = 0;
-    const char *warning_gpu = 0;
     oskar_Interferometer* sim =
             oskar_settings_to_interferometer(s, NULL, &status);
     oskar_Log* log = oskar_interferometer_log(sim);
@@ -105,38 +102,17 @@ int main(int argc, char** argv)
                     oskar_get_error_string(status));
     }
 
-    // Warn about lack of GPUs.
-    if (s->to_int("simulator/use_gpus", &status) &&
-            oskar_interferometer_num_gpus(sim) == 0)
-    {
-        warning_gpu = "No GPU capability available.";
-        oskar_log_warning(log, warning_gpu);
-    }
-
     // Set sky and telescope models.
     if (sky && tel)
     {
         oskar_interferometer_set_sky_model(sim, sky, &status);
         oskar_interferometer_set_telescope_model(sim, tel, &status);
-        if (oskar_sky_num_sources(sky) < 32 &&
-                oskar_interferometer_num_gpus(sim) > 0)
-        {
-            warning_source_count = "It may be faster to use CPU cores only, "
-                    "as the sky model contains fewer than 32 sources.";
-            oskar_log_warning(log, warning_source_count);
-        }
     }
     oskar_sky_free(sky, &status);
     oskar_telescope_free(tel, &status);
 
     // Run simulation.
     oskar_interferometer_run(sim, &status);
-
-    // Reiterate warnings.
-    if (warning_source_count)
-        oskar_log_warning(log, warning_source_count);
-    if (warning_gpu)
-        oskar_log_warning(log, warning_gpu);
 
     // Free memory.
     oskar_interferometer_free(sim, &status);

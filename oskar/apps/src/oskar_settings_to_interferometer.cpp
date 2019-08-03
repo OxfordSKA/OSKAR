@@ -45,6 +45,7 @@ oskar_Interferometer* oskar_settings_to_interferometer(oskar::SettingsTree* s,
     int prec = s->to_int("simulator/double_precision", status) ?
             OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_Interferometer* h = oskar_interferometer_create(prec, status);
+    oskar_Log* log_ = oskar_interferometer_log(h);
 
     // Set simulator settings.
     s->begin_group("simulator");
@@ -56,7 +57,11 @@ oskar_Interferometer* oskar_settings_to_interferometer(oskar::SettingsTree* s,
     else
     {
         if (s->starts_with("cuda_device_ids", "all", status))
+        {
             oskar_interferometer_set_gpus(h, -1, 0, status);
+            if (oskar_interferometer_num_gpus(h) == 0)
+                oskar_log_warning(log_, "No GPU capability available.");
+        }
         else
         {
             int size = 0;
@@ -70,9 +75,8 @@ oskar_Interferometer* oskar_settings_to_interferometer(oskar::SettingsTree* s,
     else
         oskar_interferometer_set_num_devices(h,
                 s->to_int("num_devices", status));
-    oskar_log_set_keep_file(oskar_interferometer_log(h),
-            s->to_int("keep_log_file", status));
-    oskar_log_set_file_priority(oskar_interferometer_log(h),
+    oskar_log_set_keep_file(log_, s->to_int("keep_log_file", status));
+    oskar_log_set_file_priority(log_,
             s->to_int("write_status_to_log_file", status) ?
                     OSKAR_LOG_STATUS : OSKAR_LOG_MESSAGE);
     s->end_group();
