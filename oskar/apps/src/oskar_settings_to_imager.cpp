@@ -111,6 +111,7 @@ oskar_Imager* oskar_settings_to_imager(oskar::SettingsTree* s,
         oskar_imager_set_num_w_planes(h,
                 s->to_int("wproj/num_w_planes", status));
     oskar_imager_set_fft_on_gpu(h, s->to_int("fft/use_gpu", status));
+    oskar_imager_set_grid_on_gpu(h, s->to_int("fft/grid_on_gpu", status));
     oskar_imager_set_generate_w_kernels_on_gpu(h,
             s->to_int("wproj/generate_w_kernels_on_gpu", status));
     if (s->first_letter("direction", status) == 'R')

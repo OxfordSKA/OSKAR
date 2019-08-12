@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2014-2017, The University of Oxford
+# Copyright (c) 2014-2019, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -210,6 +210,15 @@ class Imager(object):
         """
         self.capsule_ensure()
         return _imager_lib.generate_w_kernels_on_gpu(self._capsule)
+
+    def get_grid_on_gpu(self):
+        """Returns flag specifying whether to use the GPU for gridding.
+
+        Returns:
+            boolean: If true, use the GPU for gridding.
+        """
+        self.capsule_ensure()
+        return _imager_lib.grid_on_gpu(self._capsule)
 
     def get_image_size(self):
         """Returns the image side length, in pixels.
@@ -592,6 +601,15 @@ class Imager(object):
         _imager_lib.set_grid_kernel(self._capsule, kernel_type,
                                     support, oversample)
 
+    def set_grid_on_gpu(self, value):
+        """Sets whether to use the GPU for gridding.
+
+        Args:
+            value (boolean): If true, use the GPU for gridding.
+        """
+        self.capsule_ensure()
+        _imager_lib.set_grid_on_gpu(self._capsule, value)
+
     def set_image_size(self, size):
         """Sets image side length.
 
@@ -877,6 +895,7 @@ class Imager(object):
     freq_min_hz = property(get_freq_min_hz, set_freq_min_hz)
     generate_w_kernels_on_gpu = property(get_generate_w_kernels_on_gpu,
                                          set_generate_w_kernels_on_gpu)
+    grid_on_gpu = property(get_grid_on_gpu, set_grid_on_gpu)
     image_size = property(get_image_size, set_image_size)
     image_type = property(get_image_type, set_image_type)
     input_file = property(get_input_file, set_input_file)

@@ -1,7 +1,7 @@
 /* Copyright (c) 2018-2019, The University of Oxford. See LICENSE file. */
 
 #include "imager/define_grid_correction.h"
-#include "imager/define_grid_tile_grid_wproj.h"
+#include "imager/define_grid_tile_grid.h"
 #include "imager/define_grid_tile_utils.h"
 #include "imager/define_imager_generate_w_phase_screen.h"
 #include "utility/oskar_cuda_registrar.h"

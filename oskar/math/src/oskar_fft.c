@@ -30,6 +30,7 @@
 #include <cufft.h>
 #endif
 
+#include "log/oskar_log.h"
 #include "math/oskar_fft.h"
 #include "math/oskar_fftpack_cfft.h"
 #include "math/oskar_fftpack_cfft_f.h"
@@ -69,11 +70,17 @@ oskar_FFT* oskar_fft_create(int precision, int location, int num_dim,
     h->ensure_consistent_norm = 1;
     h->num_cells_total = (size_t) dim_size;
     for (i = 1; i < num_dim; ++i) h->num_cells_total *= (size_t) dim_size;
-    if (location == OSKAR_CPU)
+    if (location == OSKAR_CPU || (location & OSKAR_CL))
     {
         int len = 4 * dim_size +
                 2 * (int)(log((double)dim_size) / log(2.0)) + 8;
-        h->fftpack_wsave = oskar_mem_create(precision, location, len, status);
+        if (location & OSKAR_CL)
+        {
+            h->location = OSKAR_CPU;
+            oskar_log_warning(0,
+                    "OpenCL FFT not implemented; using CPU version instead.");
+        }
+        h->fftpack_wsave = oskar_mem_create(precision, OSKAR_CPU, len, status);
         if (num_dim == 1)
         {
             (void) batch_size_1d;
@@ -90,7 +97,7 @@ oskar_FFT* oskar_fft_create(int precision, int location, int num_dim,
         }
         else
             *status = OSKAR_ERR_INVALID_ARGUMENT;
-        h->fftpack_work = oskar_mem_create(precision, location,
+        h->fftpack_work = oskar_mem_create(precision, OSKAR_CPU,
                 2 * h->num_cells_total, status);
     }
     else if (location == OSKAR_GPU)
@@ -105,12 +112,6 @@ oskar_FFT* oskar_fft_create(int precision, int location, int num_dim,
                     ((precision == OSKAR_DOUBLE) ? CUFFT_Z2Z : CUFFT_C2C));
         else
             *status = OSKAR_ERR_INVALID_ARGUMENT;
-#endif
-    }
-    else if (location & OSKAR_CL)
-    {
-#ifdef OSKAR_HAVE_OPENCL
-        *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 #endif
     }
     else

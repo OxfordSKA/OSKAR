@@ -4,7 +4,7 @@
 
 set(imager_SRC
     define_grid_correction.h
-    define_grid_tile_grid_wproj.h
+    define_grid_tile_grid.h
     define_grid_tile_utils.h
     define_imager_generate_w_phase_screen.h
     src/oskar_grid_correction.c

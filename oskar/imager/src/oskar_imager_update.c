@@ -41,6 +41,7 @@
 #include "imager/private_imager_weight_radial.h"
 #include "imager/private_imager_weight_uniform.h"
 #include "log/oskar_log.h"
+#include "utility/oskar_device.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -411,7 +412,12 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
             i_plane = h->num_im_pols * c + p;
             if (!h->coords_only)
             {
-                plane = h->planes[i_plane];
+                if (h->grid_on_gpu && h->num_gpus > 0 && !(
+                        h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
+                        h->algorithm == OSKAR_ALGORITHM_DFT_3D))
+                    plane = h->d[0].planes[i_plane];
+                else
+                    plane = h->planes[i_plane];
             }
 
             /* Update this image plane with the visibilities. */
@@ -638,39 +644,45 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
     if (h->coords_only || h->planes) return;
 
     /* Record the plane size. */
+    const int plane_size = oskar_imager_plane_size(h);
+    const int plane_type = oskar_imager_plane_type(h);
+    const size_t num_cells = ((size_t) plane_size) * ((size_t) plane_size);
+    const size_t plane_mem = num_cells * oskar_mem_element_size(plane_type);
     oskar_log_message(h->log, 'M', 0, "Plane size is %d x %d.",
-            oskar_imager_plane_size(h), oskar_imager_plane_size(h));
+            plane_size, plane_size);
+    oskar_log_message(h->log, 'M', 0, "Allocating %d plane(s) of size "
+            "%.1f MB (%.1f MB total)", num_planes, plane_mem * 1e-6,
+            num_planes * plane_mem * 1e-6);
 
     /* Allocate the image or visibility planes on the host. */
     h->planes = (oskar_Mem**) calloc(num_planes, sizeof(oskar_Mem*));
     h->plane_norm = (double*) calloc(num_planes, sizeof(double));
-    const int plane_size = oskar_imager_plane_size(h);
-    const int plane_type = oskar_imager_plane_type(h);
     for (i = 0; i < num_planes; ++i)
         h->planes[i] = oskar_mem_create(plane_type, OSKAR_CPU,
-                plane_size * plane_size, status);
+                num_cells, status);
 
-#if 0
     /* Allocate visibility planes on the devices if required. */
-    if (h->num_gpus > 0 && !(
+    if (h->grid_on_gpu && h->num_gpus > 0 && !(
             h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
             h->algorithm == OSKAR_ALGORITHM_DFT_3D))
     {
         int j;
+        oskar_log_message(h->log, 'M', 0,
+                "Allocating device memory for visibility grids");
         for (j = 0; j < h->num_gpus; ++j)
         {
             DeviceData* d = &h->d[j];
             d->num_planes = num_planes;
             d->planes = (oskar_Mem**) calloc(num_planes, sizeof(oskar_Mem*));
+            oskar_device_set(h->dev_loc, h->gpu_ids[j], status);
             for (i = 0; i < num_planes; ++i)
             {
-                d->planes[i] = oskar_mem_create(plane_type, OSKAR_GPU,
-                        plane_size * plane_size, status);
+                d->planes[i] = oskar_mem_create(plane_type, h->dev_loc,
+                        num_cells, status);
                 oskar_mem_clear_contents(d->planes[i], status);
             }
         }
     }
-#endif
 
     /* Create FITS files for the planes if required. */
     oskar_imager_create_fits_files(h, status);

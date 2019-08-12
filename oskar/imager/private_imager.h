@@ -43,6 +43,9 @@ struct DeviceData
     int num_planes;
     oskar_Mem **planes;
 
+    /* FFT imager data. */
+    oskar_Mem *conv_func;
+
     /* W-projection imager data. */
     oskar_Mem *w_support, *w_kernels_compact, *w_kernel_start;
 };
@@ -58,7 +61,8 @@ struct oskar_Imager
     /* Settings parameters. */
     int imager_prec, num_devices, num_gpus_avail, dev_loc, num_gpus, *gpu_ids;
     int chan_snaps, im_type, num_im_channels, num_im_pols, pol_offset;
-    int algorithm, fft_on_gpu, image_size, use_stokes, support, oversample;
+    int algorithm, fft_on_gpu, grid_on_gpu;
+    int image_size, use_stokes, support, oversample;
     int generate_w_kernels_on_gpu, set_cellsize, set_fov, weighting;
     int num_files, scale_norm_with_num_input_files;
     char direction_type, kernel_type;
@@ -74,13 +78,13 @@ struct oskar_Imager
 
     /* State. */
     int init, status, i_block;
+    int coords_only; /* Set if doing a first pass for uniform weighting. */
     oskar_Mutex* mutex;
     oskar_Log* log;
 
     /* Scratch data. */
     oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im, *weight_im, *time_im;
     oskar_Mem *uu_tmp, *vv_tmp, *ww_tmp, *stokes, *weight_tmp;
-    int coords_only; /* Set if doing a first pass for uniform weighting. */
     int num_planes; /* For each output channel and polarisation. */
     double *plane_norm, delta_l, delta_m, delta_n, M[9];
     oskar_Mem **planes, **weights_grids;

@@ -146,9 +146,8 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     oskar_log_message(h->log, 'M', 0, "Convolution kernels use %.1f MB.",
             compacted_len * 1e-6);
 
-#if 0
-    /* Initialise device memory if required. */
-    if (h->num_gpus > 0)
+    /* Copy to device memory if required. */
+    if (h->grid_on_gpu && h->num_gpus > 0)
     {
         int i;
         if (h->num_devices < h->num_gpus)
@@ -169,7 +168,6 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
                     h->w_support, h->dev_loc, status);
         }
     }
-#endif
 }
 
 
@@ -259,7 +257,7 @@ static oskar_Mem* oskar_imager_evaluate_w_kernel_cube(oskar_Imager* h,
             OSKAR_CPU, conv_size * conv_size, status);
     screen_ptr = screen;
     const int fft_loc = (h->generate_w_kernels_on_gpu && h->num_gpus > 0) ?
-            OSKAR_GPU : OSKAR_CPU;
+            h->dev_loc : OSKAR_CPU;
     if (fft_loc != OSKAR_CPU)
     {
         oskar_device_set(h->dev_loc, h->gpu_ids[0], status);

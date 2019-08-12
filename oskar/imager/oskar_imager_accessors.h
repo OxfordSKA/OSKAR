@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -149,6 +149,18 @@ double oskar_imager_freq_min_hz(const oskar_Imager* h);
  */
 OSKAR_EXPORT
 int oskar_imager_generate_w_kernels_on_gpu(const oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the flag specifying whether to use the GPU for gridding.
+ *
+ * @details
+ * Returns the flag specifying whether to use the GPU for gridding.
+ *
+ * @param[in] h  Handle to imager.
+ */
+OSKAR_EXPORT
+int oskar_imager_grid_on_gpu(const oskar_Imager* h);
 
 /**
  * @brief
@@ -508,6 +520,19 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
 OSKAR_EXPORT
 void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
         int support, int oversample, int* status);
+
+/**
+ * @brief
+ * Sets whether to use the GPU for gridding.
+ *
+ * @details
+ * Sets whether to use the GPU for gridding.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      If true, use the GPU; if false, use the CPU.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_grid_on_gpu(oskar_Imager* h, int value);
 
 /**
  * @brief

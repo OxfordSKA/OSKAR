@@ -415,6 +415,29 @@ void oskar_device_set_require_double_precision(int flag)
     require_double_ = flag;
 }
 
+int oskar_device_supports_atomic64(int location)
+{
+    if (location == OSKAR_GPU) return 1;
+    if (location & OSKAR_CL)
+    {
+        if (cl_devices_.size() == 0) oskar_device_init_cl();
+        return current_device_ < cl_devices_.size() ?
+                (cl_devices_[current_device_]->supports_atomic64) : 0;
+    }
+    return 0;
+}
+
+int oskar_device_supports_double(int location)
+{
+    if (location == OSKAR_GPU) return 1;
+    if (location & OSKAR_CL)
+    {
+        if (cl_devices_.size() == 0) oskar_device_init_cl();
+        return current_device_ < cl_devices_.size() ?
+                (cl_devices_[current_device_]->supports_double) : 0;
+    }
+    return 0;
+}
 
 /****************************************************************************/
 /* Private functions */
@@ -590,14 +613,11 @@ static void oskar_device_set_up_cl(oskar_Device* device)
     if (device->supports_atomic32)
         headers.push_front("#pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics : enable\n");
     if (device->supports_double)
-    {
-        headers.push_front("#define PREFER_DOUBLE double\n");
         headers.push_front("#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n");
-    }
+    if (device->supports_double && device->supports_atomic64)
+        headers.push_front("#define PREFER_DOUBLE double\n");
     else
-    {
         headers.push_front("#define PREFER_DOUBLE float\n");
-    }
     std::string& src = device->kern->src;
     src.clear();
     for (size_t i = 0; i < headers.size(); ++i) src.append(headers[i]);

@@ -35,6 +35,7 @@
 #define ATOMIC_ADD_UPDATE_float(ARRAY, IDX, VAL) atomicAdd(&ARRAY[IDX], VAL);
 #define ATOMIC_ADD_UPDATE_int(  ARRAY, IDX, VAL) atomicAdd(&ARRAY[IDX], VAL);
 #define BARRIER __syncthreads()
+#define BARRIER_GLOBAL __syncthreads()
 #define DEVICE_FUNC __device__
 #define GLOBAL
 #define GLOBAL_IN( TYPE, NAME) const TYPE *const __restrict__ NAME
@@ -70,6 +71,8 @@
 #define LOOP_UNROLL DO_PRAGMA(unroll)
 #define MAKE_ZERO(FP, X) X = (FP)0
 #define MAKE_ZERO2(FP, X) X.x = X.y = (FP)0
+#define MUTEX_LOCK(MUTEX) while (atomicCAS((MUTEX), 0, 1) != 0)
+#define MUTEX_UNLOCK(MUTEX) atomicExch((MUTEX), 0)
 #define OSKAR_REGISTER_KERNEL(NAME) OSKAR_CUDA_KERNEL(NAME)
 #define ROUND_float(X) __float2int_rn(X)
 #define ROUND_double(X) __double2int_rn(X)
@@ -148,6 +151,7 @@
 
 #define ATOMIC_ADD_UPDATE_int(ARRAY, IDX, VAL) atomic_add(&ARRAY[IDX], VAL);
 #define BARRIER barrier(CLK_LOCAL_MEM_FENCE)
+#define BARRIER_GLOBAL barrier(CLK_GLOBAL_MEM_FENCE | CLK_LOCAL_MEM_FENCE)
 #define DEVICE_FUNC
 #define GLOBAL global
 #define GLOBAL_IN( TYPE, NAME) global const TYPE *const restrict NAME
@@ -180,6 +184,8 @@
 #define LOOP_UNROLL
 #define MAKE_ZERO(FP, X) X = M_CAT(convert_, FP)((int)(0))
 #define MAKE_ZERO2(FP, X) X = M_CAT(M_CAT(convert_, FP), 2)((int2)(0, 0))
+#define MUTEX_LOCK(MUTEX) while (atomic_cmpxchg((MUTEX), 0, 1) != 0)
+#define MUTEX_UNLOCK(MUTEX) atomic_xchg((MUTEX), 0)
 #define OSKAR_REGISTER_KERNEL(NAME)
 #define ROUND_float(X) (int)rint(X)
 #define ROUND_double(X) (int)rint(X)

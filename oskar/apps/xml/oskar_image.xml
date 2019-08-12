@@ -138,6 +138,11 @@
             <desc>If true, use the GPU to perform the FFT.</desc>
             <depends k="image/use_gpus" v="true"/>
         </s>
+        <s k="grid_on_gpu"><label>Use GPU for gridding</label>
+            <type name="bool" default="false"/>
+            <desc>If true, use the GPU to grid the visibility data.</desc>
+            <depends k="image/use_gpus" v="true"/>
+        </s>
         <s k="kernel_type"><label>Convolution kernel type</label>
         <type name="OptionList" default="Spheroidal">Spheroidal,Pillbox</type>
             <desc>The type of gridding kernel to use.</desc>

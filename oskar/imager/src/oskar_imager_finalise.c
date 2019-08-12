@@ -71,10 +71,42 @@ void oskar_imager_finalise(oskar_Imager* h,
             h->plane_norm[i] /= h->num_files;
     }
 
+    /* If gridding with multiple GPUs, copy grids to host and combine them. */
+    if (h->grid_on_gpu && h->num_gpus > 1 && !(
+            h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
+            h->algorithm == OSKAR_ALGORITHM_DFT_3D))
+    {
+        const size_t plane_size = (size_t) oskar_imager_plane_size(h);
+        const size_t num_cells = plane_size * plane_size;
+        oskar_Mem* temp = oskar_mem_create(oskar_imager_plane_type(h),
+                OSKAR_CPU, num_cells, status);
+        for (i = 0; i < h->num_planes; ++i)
+        {
+            int d;
+            for (d = 0; d < h->num_gpus; ++d)
+            {
+                oskar_device_set(h->dev_loc, h->gpu_ids[d], status);
+                if (d == 0)
+                    oskar_mem_copy(h->planes[i], h->d[d].planes[i], status);
+                else
+                {
+                    oskar_mem_copy(temp, h->d[d].planes[i], status);
+                    oskar_mem_add(h->planes[i], h->planes[i], temp,
+                            0, 0, 0, num_cells, status);
+                }
+            }
+        }
+        oskar_mem_free(temp, status);
+    }
+
     /* Copy grids to output grid planes if given. */
     for (i = 0; (i < h->num_planes) && (i < num_output_grids); ++i)
     {
         oskar_Mem *plane = h->planes[i];
+        if (h->grid_on_gpu && h->num_gpus == 1 && !(
+                h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
+                h->algorithm == OSKAR_ALGORITHM_DFT_3D))
+            plane = h->d[0].planes[i];
         if (!(output_grids[i]))
             output_grids[i] = oskar_mem_create(oskar_mem_type(plane),
                     OSKAR_CPU, 0, status);
@@ -87,17 +119,20 @@ void oskar_imager_finalise(oskar_Imager* h,
     if (h->fits_file[0] || output_images)
     {
         const size_t num_pix = (size_t)h->image_size * (size_t)h->image_size;
-        const int plane_size = oskar_imager_plane_size(h);
 
         /* Finalise all the planes. */
         for (i = 0; i < h->num_planes; ++i)
         {
             oskar_Mem *plane = h->planes[i];
+            if (h->grid_on_gpu && h->num_gpus == 1 && !(
+                    h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
+                    h->algorithm == OSKAR_ALGORITHM_DFT_3D))
+                plane = h->d[0].planes[i];
             oskar_imager_finalise_plane(h, plane, h->plane_norm[i], status);
             if (plane != h->planes[i])
                 oskar_mem_copy(h->planes[i], plane, status);
             oskar_imager_trim_image(h, h->planes[i],
-                    plane_size, h->image_size, status);
+                    oskar_imager_plane_size(h), h->image_size, status);
         }
 
         /* Copy images to output image planes if given. */
@@ -218,13 +253,13 @@ void oskar_imager_finalise_plane(oskar_Imager* h,
 
     /* Perform FFT shift of the input grid. */
     oskar_timer_resume(h->tmr_grid_finalise);
+    const int fft_loc = (h->fft_on_gpu && h->num_gpus > 0) ?
+            h->dev_loc : OSKAR_CPU;
+    if (fft_loc != OSKAR_CPU)
+        oskar_device_set(h->dev_loc, h->gpu_ids[0], status);
     oskar_fftphase(size, size, plane, status);
 
     /* Call FFT. */
-    const int fft_loc = (h->fft_on_gpu && h->num_gpus > 0) ?
-            OSKAR_GPU : OSKAR_CPU;
-    if (fft_loc != OSKAR_CPU)
-        oskar_device_set(h->dev_loc, h->gpu_ids[0], status);
     if (!h->fft)
         h->fft = oskar_fft_create(h->imager_prec, fft_loc, 2, size, 0, status);
     oskar_fft_exec(h->fft, plane, status);

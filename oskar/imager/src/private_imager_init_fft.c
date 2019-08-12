@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,10 +27,12 @@
  */
 
 #include "imager/private_imager.h"
+#include "imager/oskar_imager.h"
 
 #include "imager/private_imager_init_fft.h"
 #include "imager/oskar_grid_functions_spheroidal.h"
 #include "imager/oskar_grid_functions_pillbox.h"
+#include "utility/oskar_device.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,6 +65,23 @@ void oskar_imager_init_fft(oskar_Imager* h, int* status)
     oskar_mem_free(h->conv_func, status);
     h->conv_func = oskar_mem_convert_precision(tmp, h->imager_prec, status);
     oskar_mem_free(tmp, status);
+
+    /* Copy to device memory if required. */
+    if (h->grid_on_gpu && h->num_devices > 0)
+    {
+        int i;
+        if (h->num_devices < h->num_gpus)
+            oskar_imager_set_num_devices(h, h->num_gpus);
+        for (i = 0; i < h->num_gpus; ++i)
+        {
+            DeviceData* d = &h->d[i];
+            oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
+            if (*status) break;
+            oskar_mem_free(d->conv_func, status);
+            d->conv_func = oskar_mem_create_copy(h->conv_func,
+                    h->dev_loc, status);
+        }
+    }
 }
 
 #ifdef __cplusplus

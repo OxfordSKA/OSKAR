@@ -29,25 +29,17 @@
 #include "imager/private_imager.h"
 #include "imager/oskar_imager.h"
 
-#include "imager/define_grid_tile_grid_wproj.h"
+#include "imager/define_grid_tile_grid.h"
 #include "imager/private_imager_update_plane_wproj.h"
-#include "imager/oskar_grid_wproj.h"
 #include "imager/oskar_grid_wproj2.h"
 #include "math/oskar_prefix_sum.h"
 #include "utility/oskar_device.h"
 
 #include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define SAVE_INPUT_DAT 0
-#define SAVE_OUTPUT_DAT 0
-#define NEW_VERSION 1
 
 void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
@@ -65,7 +57,6 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
     if (*status) return;
     if (location == OSKAR_CPU)
     {
-#if NEW_VERSION
         if (type == OSKAR_DOUBLE)
             oskar_grid_wproj2_d(h->num_w_planes,
                     oskar_mem_int_const(h->w_support, status),
@@ -94,89 +85,14 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
                     h->cellsize_rad, h->w_scale,
                     grid_size, num_skipped, plane_norm,
                     oskar_mem_float(plane, status));
-#else
-        if (type == OSKAR_DOUBLE)
-            oskar_grid_wproj_d(h->num_w_planes,
-                    oskar_mem_int_const(h->w_support, status),
-                    h->oversample, h->conv_size_half,
-                    oskar_mem_double_const(h->w_kernels, status), num_vis,
-                    oskar_mem_double_const(uu, status),
-                    oskar_mem_double_const(vv, status),
-                    oskar_mem_double_const(ww, status),
-                    oskar_mem_double_const(amps, status),
-                    oskar_mem_double_const(weight, status),
-                    h->cellsize_rad, h->w_scale,
-                    grid_size, num_skipped, plane_norm,
-                    oskar_mem_double(plane, status));
-        else
-        {
-            char *fname = 0;
-#if SAVE_INPUT_DAT || SAVE_OUTPUT_DAT
-            fname = (char*) calloc(20 +
-                    h->input_root ? strlen(h->input_root) : 0, 1);
-#endif
-#if SAVE_INPUT_DAT
-            {
-                const float cellsize_rad_tmp = (const float) (h->cellsize_rad);
-                const float w_scale_tmp = (const float) (h->w_scale);
-                const size_t num_w_planes = (size_t) (h->num_w_planes);
-                FILE* f;
-                sprintf(fname, "%s_INPUT.dat", h->input_root);
-                f = fopen(fname, "wb");
-                fwrite(&num_w_planes, sizeof(size_t), 1, f);
-                fwrite(oskar_mem_void_const(h->w_support),
-                        sizeof(int), num_w_planes, f);
-                fwrite(&h->oversample, sizeof(int), 1, f);
-                fwrite(&h->conv_size_half, sizeof(int), 1, f);
-                fwrite(oskar_mem_void_const(h->w_kernels), 2 * sizeof(float),
-                        h->num_w_planes * h->conv_size_half * h->conv_size_half, f);
-                fwrite(&num_vis, sizeof(size_t), 1, f);
-                fwrite(oskar_mem_void_const(uu), sizeof(float), num_vis, f);
-                fwrite(oskar_mem_void_const(vv), sizeof(float), num_vis, f);
-                fwrite(oskar_mem_void_const(ww), sizeof(float), num_vis, f);
-                fwrite(oskar_mem_void_const(amps), 2 * sizeof(float), num_vis, f);
-                fwrite(oskar_mem_void_const(weight), sizeof(float), num_vis, f);
-                fwrite(&cellsize_rad_tmp, sizeof(float), 1, f);
-                fwrite(&w_scale_tmp, sizeof(float), 1, f);
-                fwrite(&grid_size, sizeof(int), 1, f);
-                fclose(f);
-            }
-#endif
-            oskar_grid_wproj_f(h->num_w_planes,
-                    oskar_mem_int_const(h->w_support, status),
-                    h->oversample, h->conv_size_half,
-                    oskar_mem_float_const(h->w_kernels, status), num_vis,
-                    oskar_mem_float_const(uu, status),
-                    oskar_mem_float_const(vv, status),
-                    oskar_mem_float_const(ww, status),
-                    oskar_mem_float_const(amps, status),
-                    oskar_mem_float_const(weight, status),
-                    (float) (h->cellsize_rad), (float) (h->w_scale),
-                    grid_size, num_skipped, plane_norm,
-                    oskar_mem_float(plane, status));
-#if SAVE_OUTPUT_DAT
-            {
-                FILE* f;
-                sprintf(fname, "%s_OUTPUT.dat", h->input_root);
-                f = fopen(fname, "wb");
-                fwrite(num_skipped, sizeof(size_t), 1, f);
-                fwrite(plane_norm, sizeof(double), 1, f);
-                fwrite(&grid_size, sizeof(int), 1, f);
-                fwrite(oskar_mem_void_const(plane), 2 * sizeof(float), num_cells, f);
-                fclose(f);
-            }
-#endif
-            free(fname);
-        }
-#endif /* new version */
     }
     else
     {
-        int count_skipped = 0, num_total = 0;
+        int count_skipped = 0, norm_type = 0, num_total = 0;
         size_t local_size[] = {1, 1, 1}, global_size[] = {1, 1, 1};
         oskar_Mem *d_uu, *d_vv, *d_ww, *d_vis, *d_weight;
         oskar_Mem *d_counter, *d_count_skipped, *d_norm;
-        oskar_Mem *d_num_points_in_tiles, *d_tile_offsets;
+        oskar_Mem *d_num_points_in_tiles, *d_tile_offsets, *d_tile_locks;
         oskar_Mem *sorted_uu, *sorted_vv, *sorted_ww;
         oskar_Mem *sorted_tile, *sorted_wt, *sorted_vis;
         DeviceData* d = &h->d[0];
@@ -184,13 +100,19 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
         const int vis_type = oskar_mem_type(amps);
         const int weight_type = oskar_mem_type(weight);
         const int is_dbl = oskar_type_is_double(vis_type);
-        const int norm_type = OSKAR_DOUBLE; /* FIXME(FD) Check device capability. */
         const int num_points = (int) num_vis;
         const int grid_centre = grid_size / 2;
         const double grid_scale = grid_size * h->cellsize_rad;
         const double w_scale = h->w_scale;
         const float grid_scale_f = (float) grid_scale;
         const float w_scale_f = (float) w_scale;
+
+        /* Get the normalisation type. */
+        if (oskar_device_supports_double(location) &&
+                oskar_device_supports_atomic64(location))
+            norm_type = OSKAR_DOUBLE;
+        else
+            norm_type = OSKAR_SINGLE;
 
         /* Define the tile size and number of tiles in each direction.
          * A tile consists of SHMSZ grid cells per thread in shared memory
@@ -215,6 +137,7 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
         assert(top_left_v <= 0);
 
         /* Allocate and set up scratch memory. */
+        oskar_device_set(location, h->gpu_ids[0], status);
         d_uu = oskar_mem_create_copy(uu, location, status);
         d_vv = oskar_mem_create_copy(vv, location, status);
         d_ww = oskar_mem_create_copy(ww, location, status);
@@ -227,10 +150,12 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
                 location, num_tiles, status);
         d_tile_offsets = oskar_mem_create(OSKAR_INT,
                 location, num_tiles + 1, status);
+        d_tile_locks = oskar_mem_create(OSKAR_INT, location, num_tiles, status);
         oskar_mem_clear_contents(d_counter, status);
         oskar_mem_clear_contents(d_count_skipped, status);
         oskar_mem_clear_contents(d_norm, status);
         oskar_mem_clear_contents(d_num_points_in_tiles, status);
+        oskar_mem_clear_contents(d_tile_locks, status);
         /* Don't need to clear d_tile_offsets, as it gets overwritten. */
 
         /* Count the number of elements in each tile. */
@@ -239,9 +164,9 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
         {
             const char* k = 0;
             if (oskar_type_is_single(vis_type))
-                k = "grid_tile_count_float";
+                k = "grid_tile_count_wproj_float";
             else if (oskar_type_is_double(vis_type))
-                k = "grid_tile_count_double";
+                k = "grid_tile_count_wproj_double";
             else
                 *status = OSKAR_ERR_BAD_DATA_TYPE;
             local_size[0] = 512;
@@ -282,8 +207,8 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
         oskar_mem_read_element(d_tile_offsets, num_tiles, &num_total, status);
         oskar_mem_read_element(d_count_skipped, 0, &count_skipped, status);
         *num_skipped = (size_t) count_skipped;
-        printf("Total points: %d (factor %.3f increase)\n", num_total,
-                (float)num_total / (float)num_points);
+        /*printf("Total points: %d (factor %.3f increase)\n", num_total,
+                (float)num_total / (float)num_points);*/
 
         /* Bucket sort the data into tiles. */
         sorted_uu = oskar_mem_create(coord_type, location, num_total, status);
@@ -295,9 +220,9 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
         {
             const char* k = 0;
             if (oskar_type_is_single(vis_type))
-                k = "grid_tile_bucket_sort_float";
+                k = "grid_tile_bucket_sort_wproj_float";
             else if (oskar_type_is_double(vis_type))
-                k = "grid_tile_bucket_sort_double";
+                k = "grid_tile_bucket_sort_wproj_double";
             else
                 *status = OSKAR_ERR_BAD_DATA_TYPE;
             local_size[0] = 128;
@@ -362,6 +287,7 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
                     {INT_SZ, &grid_centre},
                     {INT_SZ, &tile_size_u},
                     {INT_SZ, &tile_size_v},
+                    {INT_SZ, &num_tiles_u},
                     {INT_SZ, &top_left_u},
                     {INT_SZ, &top_left_v},
                     {INT_SZ, &num_total},
@@ -371,6 +297,7 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
                     {PTR_SZ, oskar_mem_buffer_const(sorted_vis)},
                     {PTR_SZ, oskar_mem_buffer_const(sorted_wt)},
                     {PTR_SZ, oskar_mem_buffer_const(sorted_tile)},
+                    {PTR_SZ, oskar_mem_buffer(d_tile_locks)},
                     {PTR_SZ, oskar_mem_buffer(d_counter)},
                     {PTR_SZ, oskar_mem_buffer(d_norm)},
                     {PTR_SZ, oskar_mem_buffer(plane)}
@@ -400,6 +327,7 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
         oskar_mem_free(d_norm, status);
         oskar_mem_free(d_num_points_in_tiles, status);
         oskar_mem_free(d_tile_offsets, status);
+        oskar_mem_free(d_tile_locks, status);
         oskar_mem_free(d_uu, status);
         oskar_mem_free(d_vv, status);
         oskar_mem_free(d_ww, status);

@@ -110,6 +110,12 @@ int oskar_imager_generate_w_kernels_on_gpu(const oskar_Imager* h)
 }
 
 
+int oskar_imager_grid_on_gpu(const oskar_Imager* h)
+{
+    return h->grid_on_gpu;
+}
+
+
 int oskar_imager_image_size(const oskar_Imager* h)
 {
     return h->image_size;
@@ -406,6 +412,12 @@ void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
     else if (!strncmp(type, "P", 1) || !strncmp(type, "p", 1))
         h->kernel_type = 'P';
     else *status = OSKAR_ERR_INVALID_ARGUMENT;
+}
+
+
+void oskar_imager_set_grid_on_gpu(oskar_Imager* h, int value)
+{
+    h->grid_on_gpu = value;
 }
 
 

@@ -395,6 +395,24 @@ static PyObject* generate_w_kernels_on_gpu(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* grid_on_gpu(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = (oskar_Imager*) get_handle(capsule, name))) return 0;
+#if OSKAR_VERSION > 0x020701
+    return Py_BuildValue("O", oskar_imager_grid_on_gpu(h) ? Py_True : Py_False);
+#else
+    (void) h;
+    PyErr_SetString(PyExc_RuntimeError,
+            "This function is not available in OSKAR " OSKAR_VERSION_STR ". "
+            "Please update to a newer version.");
+    return 0;
+#endif
+}
+
+
 static PyObject* image_size(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -883,6 +901,26 @@ static PyObject* set_grid_kernel(PyObject* self, PyObject* args)
         return 0;
     }
     return Py_BuildValue("");
+}
+
+
+static PyObject* set_grid_on_gpu(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    int value = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
+    if (!(h = (oskar_Imager*) get_handle(capsule, name))) return 0;
+#if OSKAR_VERSION > 0x020701
+    oskar_imager_set_grid_on_gpu(h, value);
+    return Py_BuildValue("");
+#else
+    (void) h;
+    PyErr_SetString(PyExc_RuntimeError,
+            "This function is not available in OSKAR " OSKAR_VERSION_STR ". "
+            "Please update to a newer version.");
+    return 0;
+#endif
 }
 
 
@@ -1756,6 +1794,8 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "freq_min_hz()"},
         {"generate_w_kernels_on_gpu", (PyCFunction)generate_w_kernels_on_gpu,
                 METH_VARARGS, "generate_w_kernels_on_gpu()"},
+        {"grid_on_gpu", (PyCFunction)grid_on_gpu,
+                METH_VARARGS, "grid_on_gpu()"},
         {"image_size", (PyCFunction)image_size, METH_VARARGS, "image_size()"},
         {"image_type", (PyCFunction)image_type, METH_VARARGS, "image_type()"},
         {"input_file", (PyCFunction)input_file, METH_VARARGS, "input_file()"},
@@ -1802,6 +1842,8 @@ static PyMethodDef methods[] =
                 METH_VARARGS, "set_generate_w_kernels_on_gpu(value)"},
         {"set_grid_kernel", (PyCFunction)set_grid_kernel,
                 METH_VARARGS, "set_grid_kernel(type, support, oversample)"},
+        {"set_grid_on_gpu", (PyCFunction)set_grid_on_gpu,
+                METH_VARARGS, "set_grid_on_gpu(value)"},
         {"set_image_size", (PyCFunction)set_image_size,
                 METH_VARARGS, "set_image_size(value)"},
         {"set_image_type", (PyCFunction)set_image_type,

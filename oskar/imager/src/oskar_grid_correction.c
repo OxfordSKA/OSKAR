@@ -84,7 +84,7 @@ void oskar_grid_correction(const int image_size,
                 (size_t) image_size, local_size[1]);
         const oskar_Arg args[] = {
                 {INT_SZ, &image_size},
-                {PTR_SZ, oskar_mem_buffer_const(corr_func)},
+                {PTR_SZ, oskar_mem_buffer_const(corr_func_ptr)},
                 {PTR_SZ, oskar_mem_buffer(complex_image)}
         };
         oskar_device_launch_kernel(k, location, 2, local_size, global_size,

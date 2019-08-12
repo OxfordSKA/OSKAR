@@ -46,6 +46,7 @@ void oskar_imager_free_device_data(oskar_Imager* h, int* status)
         if (!d) continue;
         if (i < h->num_gpus)
             oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
+        oskar_mem_free(d->conv_func, status);
         oskar_mem_free(d->w_support, status);
         oskar_mem_free(d->w_kernels_compact, status);
         oskar_mem_free(d->w_kernel_start, status);

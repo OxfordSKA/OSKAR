@@ -285,6 +285,32 @@ void oskar_device_set(int location, int id, int* status);
 OSKAR_EXPORT
 void oskar_device_set_require_double_precision(int flag);
 
+/**
+ * @brief
+ * Returns the flag specifying whether or not 64-bit atomics are supported.
+ *
+ * @details
+ * Returns the flag specifying whether or not 64-bit atomics are supported
+ * on the current device.
+ *
+ * @param[in] location       Enumerated location type.
+ */
+OSKAR_EXPORT
+int oskar_device_supports_atomic64(int location);
+
+/**
+ * @brief
+ * Returns the flag specifying whether or not double precision is supported.
+ *
+ * @details
+ * Returns the flag specifying whether or not double precision is supported
+ * on the current device.
+ *
+ * @param[in] location       Enumerated location type.
+ */
+OSKAR_EXPORT
+int oskar_device_supports_double(int location);
+
 #ifdef __cplusplus
 }
 #endif
