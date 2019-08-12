@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2017, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include <Python.h>
 
 #include <oskar.h>
+#include <oskar_version.h>
 #include <stdlib.h>
 #include <string.h>
 
