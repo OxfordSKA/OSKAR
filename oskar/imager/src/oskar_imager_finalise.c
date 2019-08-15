@@ -177,7 +177,7 @@ void oskar_imager_finalise(oskar_Imager* h,
     if (t_partition > 1e-3) oskar_log_value(h->log, 'M', 0,
             "Partition data", "%.3f s", t_partition);
     if (t_select > 0.0) oskar_log_value(h->log, 'M', 0,
-            "Select visibility data", "%.3f s", t_select);
+            "Select data", "%.3f s", t_select);
     if (t_rotate > 0.0) oskar_log_value(h->log, 'M', 0,
             "Rotate visibility data", "%.3f s", t_rotate);
     if (t_filter > 1e-3) oskar_log_value(h->log, 'M', 0,

@@ -44,6 +44,49 @@ void copy_vis_pol(size_t num_rows, int num_channels, int num_pols,
         oskar_Mem* vis_out, oskar_Mem* weight_out, size_t out_offset,
         int* status);
 
+#define BUNCHSIZE 8
+#define SCALE_OFFSET(I, SCALE) \
+        uu_o[r + I] = uu_i[r + I] * SCALE;\
+        vv_o[r + I] = vv_i[r + I] * SCALE;\
+        ww_o[r + I] = ww_i[r + I] * SCALE;\
+
+
+#define COPY_COORDS_CPU(FP, SCALE) {\
+    size_t r = 0, repeat, left;\
+    FP *uu_o, *vv_o, *ww_o;\
+    const FP *uu_i, *vv_i, *ww_i;\
+    uu_o = ((FP*) oskar_mem_void(uu_out)) + *num_out;\
+    vv_o = ((FP*) oskar_mem_void(vv_out)) + *num_out;\
+    ww_o = ((FP*) oskar_mem_void(ww_out)) + *num_out;\
+    uu_i = ((const FP*) oskar_mem_void_const(uu_in));\
+    vv_i = ((const FP*) oskar_mem_void_const(vv_in));\
+    ww_i = ((const FP*) oskar_mem_void_const(ww_in));\
+    repeat = num_rows / BUNCHSIZE;\
+    left = num_rows % BUNCHSIZE;\
+    while (repeat--) {\
+        SCALE_OFFSET(0, SCALE)\
+        SCALE_OFFSET(1, SCALE)\
+        SCALE_OFFSET(2, SCALE)\
+        SCALE_OFFSET(3, SCALE)\
+        SCALE_OFFSET(4, SCALE)\
+        SCALE_OFFSET(5, SCALE)\
+        SCALE_OFFSET(6, SCALE)\
+        SCALE_OFFSET(7, SCALE)\
+        r += BUNCHSIZE;\
+    }\
+    switch (left) {\
+    case 7: SCALE_OFFSET(6, SCALE)\
+    case 6: SCALE_OFFSET(5, SCALE)\
+    case 5: SCALE_OFFSET(4, SCALE)\
+    case 4: SCALE_OFFSET(3, SCALE)\
+    case 3: SCALE_OFFSET(2, SCALE)\
+    case 2: SCALE_OFFSET(1, SCALE)\
+    case 1: SCALE_OFFSET(0, SCALE)\
+    case 0: ;\
+    }\
+    }
+
+
 void oskar_imager_select_data(
         const oskar_Imager* h,
         size_t num_rows,
@@ -71,6 +114,8 @@ void oskar_imager_select_data(
     const double s = 0.05;
     const double df = h->freq_inc_hz != 0.0 ? h->freq_inc_hz : 1.0;
     const double f0 = h->vis_freq_start_hz;
+    const int location = oskar_mem_location(uu_in);
+    const int prec = oskar_mem_type(uu_in);
 
     /* Initialise. */
     if (*status) return;
@@ -91,15 +136,30 @@ void oskar_imager_select_data(
         c = (int) round((im_freq_hz - f0) / df);
         if (c < start_chan || c > end_chan) return;
         if (fabs((im_freq_hz - f0) - c * df) > s * df) return;
+        const double inv_wavelength = (f0 + c * df) / C0;
 
         /* Copy the baseline coordinates in wavelengths. */
-        const double inv_wavelength = (f0 + c * df) / C0;
-        oskar_mem_copy_contents(uu_out, uu_in, 0, 0, num_rows, status);
-        oskar_mem_copy_contents(vv_out, vv_in, 0, 0, num_rows, status);
-        oskar_mem_copy_contents(ww_out, ww_in, 0, 0, num_rows, status);
-        oskar_mem_scale_real(uu_out, inv_wavelength, 0, num_rows, status);
-        oskar_mem_scale_real(vv_out, inv_wavelength, 0, num_rows, status);
-        oskar_mem_scale_real(ww_out, inv_wavelength, 0, num_rows, status);
+        if (location == OSKAR_CPU)
+        {
+            if (prec == OSKAR_SINGLE)
+            {
+                const float inv_wavelength_f = (float) inv_wavelength;
+                COPY_COORDS_CPU(float, inv_wavelength_f)
+            }
+            else
+            {
+                COPY_COORDS_CPU(double, inv_wavelength)
+            }
+        }
+        else
+        {
+            oskar_mem_copy_contents(uu_out, uu_in, 0, 0, num_rows, status);
+            oskar_mem_copy_contents(vv_out, vv_in, 0, 0, num_rows, status);
+            oskar_mem_copy_contents(ww_out, ww_in, 0, 0, num_rows, status);
+            oskar_mem_scale_real(uu_out, inv_wavelength, 0, num_rows, status);
+            oskar_mem_scale_real(vv_out, inv_wavelength, 0, num_rows, status);
+            oskar_mem_scale_real(ww_out, inv_wavelength, 0, num_rows, status);
+        }
 
         /* Copy visibility data and weights if present. */
         copy_vis_pol(num_rows, num_channels, num_pols, c - start_chan, p,
@@ -122,21 +182,36 @@ void oskar_imager_select_data(
             c = (int) round((h->sel_freqs[i] - f0) / df);
             if (c < start_chan || c > end_chan) continue;
             if (fabs((h->sel_freqs[i] - f0) - c * df) > s * df) continue;
+            const double inv_wavelength = (f0 + c * df) / C0;
 
             /* Copy the baseline coordinates in wavelengths. */
-            const double inv_wavelength = (f0 + c * df) / C0;
-            oskar_mem_copy_contents(uu_out, uu_in,
-                    *num_out, 0, num_rows, status);
-            oskar_mem_copy_contents(vv_out, vv_in,
-                    *num_out, 0, num_rows, status);
-            oskar_mem_copy_contents(ww_out, ww_in,
-                    *num_out, 0, num_rows, status);
-            oskar_mem_scale_real(uu_out, inv_wavelength,
-                    *num_out, num_rows, status);
-            oskar_mem_scale_real(vv_out, inv_wavelength,
-                    *num_out, num_rows, status);
-            oskar_mem_scale_real(ww_out, inv_wavelength,
-                    *num_out, num_rows, status);
+            if (location == OSKAR_CPU)
+            {
+                if (prec == OSKAR_SINGLE)
+                {
+                    const float inv_wavelength_f = (float) inv_wavelength;
+                    COPY_COORDS_CPU(float, inv_wavelength_f)
+                }
+                else
+                {
+                    COPY_COORDS_CPU(double, inv_wavelength)
+                }
+            }
+            else
+            {
+                oskar_mem_copy_contents(uu_out, uu_in,
+                        *num_out, 0, num_rows, status);
+                oskar_mem_copy_contents(vv_out, vv_in,
+                        *num_out, 0, num_rows, status);
+                oskar_mem_copy_contents(ww_out, ww_in,
+                        *num_out, 0, num_rows, status);
+                oskar_mem_scale_real(uu_out, inv_wavelength,
+                        *num_out, num_rows, status);
+                oskar_mem_scale_real(vv_out, inv_wavelength,
+                        *num_out, num_rows, status);
+                oskar_mem_scale_real(ww_out, inv_wavelength,
+                        *num_out, num_rows, status);
+            }
 
             /* Copy visibility data and weights if present. */
             copy_vis_pol(num_rows, num_channels, num_pols, c - start_chan, p,
