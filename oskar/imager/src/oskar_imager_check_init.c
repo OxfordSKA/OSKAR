@@ -42,7 +42,20 @@ extern "C" {
 
 void oskar_imager_check_init(oskar_Imager* h, int* status)
 {
-    /* Don't initialise if we're in "coords only" mode. */
+    if (*status) return;
+
+    /* Allocate empty weights grids if required. */
+    if (!h->weights_grids && h->num_planes > 0)
+    {
+        int i;
+        h->weights_grids = (oskar_Mem**)
+                calloc(h->num_planes, sizeof(oskar_Mem*));
+        for (i = 0; i < h->num_planes; ++i)
+            h->weights_grids[i] = oskar_mem_create(h->imager_prec,
+                    OSKAR_CPU, 0, status);
+    }
+
+    /* Don't continue if we're in "coords only" mode. */
     if (h->coords_only || h->init) return;
 
     oskar_log_section(h->log, 'M', "Initialising algorithm...");
@@ -51,20 +64,14 @@ void oskar_imager_check_init(oskar_Imager* h, int* status)
     {
     case OSKAR_ALGORITHM_DFT_2D:
     case OSKAR_ALGORITHM_DFT_3D:
-    {
         oskar_imager_init_dft(h, status);
         break;
-    }
     case OSKAR_ALGORITHM_FFT:
-    {
         oskar_imager_init_fft(h, status);
         break;
-    }
     case OSKAR_ALGORITHM_WPROJ:
-    {
         oskar_imager_init_wproj(h, status);
         break;
-    }
     default:
         *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     }

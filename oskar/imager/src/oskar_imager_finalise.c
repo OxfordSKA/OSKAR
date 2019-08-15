@@ -156,18 +156,23 @@ void oskar_imager_finalise(oskar_Imager* h,
     }
 
     /* Record time taken. */
-    oskar_log_set_value_width(h->log, 25);
+    oskar_log_set_value_width(h->log, 28);
     oskar_log_section(h->log, 'M', "Imager timing");
     oskar_log_value(h->log, 'M', 0, "Initialise", "%.3f s",
             oskar_timer_elapsed(h->tmr_init));
+    oskar_log_value(h->log, 'M', 0, "Select visibility data", "%.3f s",
+            oskar_timer_elapsed(h->tmr_select));
     oskar_log_value(h->log, 'M', 0, "Grid update", "%.3f s",
             oskar_timer_elapsed(h->tmr_grid_update));
     oskar_log_value(h->log, 'M', 0, "Grid finalise", "%.3f s",
             oskar_timer_elapsed(h->tmr_grid_finalise));
-    oskar_log_value(h->log, 'M', 0, "Read visibility data", "%.3f s",
-            oskar_timer_elapsed(h->tmr_read));
-    oskar_log_value(h->log, 'M', 0, "Write image data", "%.3f s",
-            oskar_timer_elapsed(h->tmr_write));
+    const double t_read = oskar_timer_elapsed(h->tmr_read);
+    const double t_write = oskar_timer_elapsed(h->tmr_write);
+    if (t_read > 0.0)
+        oskar_log_value(h->log, 'M', 0,
+                "Read visibility data", "%.3f s", t_read);
+    if (t_write > 0.0)
+        oskar_log_value(h->log, 'M', 0, "Write image data", "%.3f s", t_write);
     oskar_log_section(h->log, 'M', "Imaging complete");
     if (h->output_root)
     {

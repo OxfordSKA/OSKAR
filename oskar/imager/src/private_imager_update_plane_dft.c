@@ -57,22 +57,34 @@ typedef struct ThreadArgs ThreadArgs;
 
 void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
-        double* plane_norm, int* status)
+        const oskar_Mem* amps, const oskar_Mem* weight, int i_plane,
+        oskar_Mem* plane, double* plane_norm, int* status)
 {
     size_t i, num_pixels;
+    oskar_Mem* plane_ptr;
     oskar_Thread** threads = 0;
     ThreadArgs* args = 0;
     if (*status) return;
 
     /* Check the image plane. */
+    plane_ptr = plane;
+    if (!plane_ptr)
+    {
+        if (h->planes)
+            plane_ptr = h->planes[i_plane];
+        else
+        {
+            *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+            return;
+        }
+    }
     num_pixels = (size_t) h->image_size;
     num_pixels *= num_pixels;
-    if (oskar_mem_precision(plane) != h->imager_prec)
+    if (oskar_mem_precision(plane_ptr) != h->imager_prec)
         *status = OSKAR_ERR_TYPE_MISMATCH;
-    if (oskar_mem_is_complex(plane) || oskar_mem_is_matrix(plane))
+    if (oskar_mem_is_complex(plane_ptr) || oskar_mem_is_matrix(plane_ptr))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
-    oskar_mem_ensure(plane, num_pixels, status);
+    oskar_mem_ensure(plane_ptr, num_pixels, status);
     if (*status) return;
 
     /* Set up worker threads. */
@@ -89,7 +101,7 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
         args[i].ww = ww;
         args[i].amp = amps;
         args[i].weight = weight;
-        args[i].plane = plane;
+        args[i].plane = plane_ptr;
     }
 
     /* Set status code. */

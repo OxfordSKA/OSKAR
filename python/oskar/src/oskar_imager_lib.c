@@ -1526,8 +1526,13 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
 
     /* Update the plane. */
     Py_BEGIN_ALLOW_THREADS
-    oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c,
-            weight_c, plane_c, &plane_norm, weights_grid_c, &status);
+#if OSKAR_VERSION > 0x020701
+    oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c, weight_c,
+            0, plane_c, &plane_norm, weights_grid_c, &status);
+#else
+    oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c, weight_c,
+            plane_c, &plane_norm, weights_grid_c, &status);
+#endif
     Py_END_ALLOW_THREADS
 
     /* Clean up. */
@@ -1705,8 +1710,13 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     {
         weights_grid = oskar_mem_create(type, OSKAR_CPU, num_cells, &status);
         oskar_imager_set_coords_only(h, 1);
+#if OSKAR_VERSION > 0x020701
+        oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, 0, weight_c,
+                0, 0, 0, weights_grid, &status);
+#else
         oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, 0, weight_c,
                 0, 0, weights_grid, &status);
+#endif
         oskar_imager_set_coords_only(h, 0);
     }
 
@@ -1716,8 +1726,13 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     /* Make the image. */
     plane = oskar_mem_create((dft ? type : (type | OSKAR_COMPLEX)), OSKAR_CPU,
             num_cells, &status);
+#if OSKAR_VERSION > 0x020701
+    oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c, weight_c,
+            0, plane, &norm, weights_grid, &status);
+#else
     oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c, weight_c,
             plane, &norm, weights_grid, &status);
+#endif
     oskar_imager_finalise_plane(h, plane, norm, &status);
     oskar_imager_trim_image(h, plane, plane_size, size, &status);
 

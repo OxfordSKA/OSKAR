@@ -359,7 +359,7 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
     {
         for (p = 0; p < h->num_im_pols; ++p)
         {
-            oskar_Mem *pu, *pv, *pw, *plane = 0;
+            oskar_Mem *pu, *pv, *pw;
             size_t num_vis = 0;
             if (*status) break;
 
@@ -369,11 +369,13 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
             {
                 pu = h->uu_tmp; pv = h->vv_tmp; pw = h->ww_tmp;
             }
+            oskar_timer_resume(h->tmr_select);
             oskar_imager_select_data(h, num_rows, start_chan, end_chan,
                     num_pols, u_in, v_in, w_in, amp_in, weight_in,
                     time_centroid, h->im_freqs[c], p,
                     &num_vis, pu, pv, pw, h->vis_im, h->weight_im,
                     h->time_im, status);
+            oskar_timer_pause(h->tmr_select);
 
             /* Skip if nothing was selected. */
             if (num_vis == 0) continue;
@@ -408,28 +410,11 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
                         h->ww_im, h->vis_im, h->weight_im, status);
 #endif
 
-            /* Get pointer to the image plane to update. */
-            i_plane = h->num_im_pols * c + p;
-            if (!h->coords_only)
-            {
-                if (h->grid_on_gpu && h->num_gpus > 0 && !(
-                        h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
-                        h->algorithm == OSKAR_ALGORITHM_DFT_3D))
-                    plane = h->d[0].planes[i_plane];
-                else
-                    plane = h->planes[i_plane];
-            }
-
             /* Update this image plane with the visibilities. */
-            if (h->coords_only)
-                oskar_imager_update_plane(h, num_vis, h->uu_im, h->vv_im,
-                        h->ww_im, 0, h->weight_im, 0, 0,
-                        h->weights_grids[i_plane], status);
-            else
-                oskar_imager_update_plane(h, num_vis, h->uu_im, h->vv_im,
-                        h->ww_im, h->vis_im, h->weight_im,
-                        plane, &h->plane_norm[i_plane],
-                        h->weights_grids[i_plane], status);
+            i_plane = h->num_im_pols * c + p;
+            oskar_imager_update_plane(h, num_vis, h->uu_im, h->vv_im,
+                    h->ww_im, (h->coords_only ? 0 : h->vis_im), h->weight_im,
+                    i_plane, 0, 0, h->weights_grids[i_plane], status);
         }
     }
 
@@ -443,8 +428,9 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
 
 void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
-        double* plane_norm, oskar_Mem* weights_grid, int* status)
+        const oskar_Mem* amps, const oskar_Mem* weight, int i_plane,
+        oskar_Mem* plane, double* plane_norm, oskar_Mem* weights_grid,
+        int* status)
 {
     oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
     const oskar_Mem *pu, *pv, *pw, *pa, *ph;
@@ -483,6 +469,7 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
     else
     {
         size_t num_skipped = 0;
+        double* plane_norm_ptr = plane_norm;
 
         /* Convert precision of visibility amplitudes if required. */
         pa = amps;
@@ -522,26 +509,27 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
 
         /* Update the supplied plane with the supplied visibilities. */
         num_skipped = 0;
+        if (!plane_norm_ptr && h->plane_norm)
+            plane_norm_ptr = &(h->plane_norm[i_plane]);
         switch (h->algorithm)
         {
         case OSKAR_ALGORITHM_DFT_2D:
         case OSKAR_ALGORITHM_DFT_3D:
             oskar_imager_update_plane_dft(h, num_vis, pu, pv, pw, pa, ph,
-                    plane, plane_norm, status);
+                    i_plane, plane, plane_norm_ptr, status);
             break;
         case OSKAR_ALGORITHM_FFT:
             oskar_imager_update_plane_fft(h, num_vis, pu, pv, pa, ph,
-                    plane, plane_norm, &num_skipped, status);
+                    i_plane, plane, plane_norm_ptr, &num_skipped, status);
             break;
         case OSKAR_ALGORITHM_WPROJ:
             oskar_imager_update_plane_wproj(h, num_vis, pu, pv, pw, pa, ph,
-                    plane, plane_norm, &num_skipped, status);
+                    i_plane, plane, plane_norm_ptr, &num_skipped, status);
             break;
         default:
             *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
             break;
         }
-
         if (num_skipped > 0)
             oskar_log_warning(h->log, "Skipped %lu visibility points.",
                     (unsigned long) num_skipped);
@@ -622,28 +610,17 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, size_t num_points,
     }
 }
 
-
 void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
 {
     int i;
     if (*status) return;
 
-    /* Allocate empty weights grids if required. */
-    const int num_planes = h->num_planes;
-    if (!h->weights_grids)
-    {
-        h->weights_grids = (oskar_Mem**)
-                calloc(num_planes, sizeof(oskar_Mem*));
-        for (i = 0; i < num_planes; ++i)
-            h->weights_grids[i] = oskar_mem_create(h->imager_prec,
-                    OSKAR_CPU, 0, status);
-    }
-
-    /* If we're in coordinate-only mode, or the planes already exist,
-     * there's nothing more to do here. */
+    /* Don't continue if we're in "coords only" mode or if planes are
+     * already allocated. */
     if (h->coords_only || h->planes) return;
 
     /* Record the plane size. */
+    const int num_planes = h->num_planes;
     const int plane_size = oskar_imager_plane_size(h);
     const int plane_type = oskar_imager_plane_type(h);
     const size_t num_cells = ((size_t) plane_size) * ((size_t) plane_size);
@@ -666,7 +643,8 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
             h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
             h->algorithm == OSKAR_ALGORITHM_DFT_3D))
     {
-        int j;
+        int j, norm_type;
+        const int loc = h->dev_loc;
         oskar_log_message(h->log, 'M', 0,
                 "Allocating device memory for visibility grids");
         for (j = 0; j < h->num_gpus; ++j)
@@ -674,13 +652,40 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
             DeviceData* d = &h->d[j];
             d->num_planes = num_planes;
             d->planes = (oskar_Mem**) calloc(num_planes, sizeof(oskar_Mem*));
-            oskar_device_set(h->dev_loc, h->gpu_ids[j], status);
+            oskar_device_set(loc, h->gpu_ids[j], status);
             for (i = 0; i < num_planes; ++i)
             {
-                d->planes[i] = oskar_mem_create(plane_type, h->dev_loc,
+                d->planes[i] = oskar_mem_create(plane_type, loc,
                         num_cells, status);
                 oskar_mem_clear_contents(d->planes[i], status);
             }
+
+            /* Get the normalisation type. */
+            if (oskar_device_supports_double(loc) &&
+                    oskar_device_supports_atomic64(loc))
+                norm_type = OSKAR_DOUBLE;
+            else
+                norm_type = OSKAR_SINGLE;
+
+            /* Define (empty) device arrays for scratch data. */
+            d->uu = oskar_mem_create(h->imager_prec, loc, 0, status);
+            d->vv = oskar_mem_create(h->imager_prec, loc, 0, status);
+            d->ww = oskar_mem_create(h->imager_prec, loc, 0, status);
+            d->vis = oskar_mem_create(plane_type, loc, 0, status);
+            d->weight = oskar_mem_create(h->imager_prec, loc, 0, status);
+            d->counter = oskar_mem_create(OSKAR_INT, loc, 1, status);
+            d->count_skipped = oskar_mem_create(OSKAR_INT, loc, 1, status);
+            d->norm = oskar_mem_create(norm_type, loc, 1, status);
+            d->num_points_in_tiles =
+                    oskar_mem_create(OSKAR_INT, loc, 0, status);
+            d->tile_offsets = oskar_mem_create(OSKAR_INT, loc, 0, status);
+            d->tile_locks = oskar_mem_create(OSKAR_INT, loc, 0, status);
+            d->sorted_uu = oskar_mem_create(h->imager_prec, loc, 0, status);
+            d->sorted_vv = oskar_mem_create(h->imager_prec, loc, 0, status);
+            d->sorted_ww = oskar_mem_create(OSKAR_INT, loc, 0, status);
+            d->sorted_wt = oskar_mem_create(h->imager_prec, loc, 0, status);
+            d->sorted_vis = oskar_mem_create(plane_type, loc, 0, status);
+            d->sorted_tile = oskar_mem_create(OSKAR_INT, loc, 0, status);
         }
     }
 

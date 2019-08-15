@@ -130,6 +130,7 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
  * @param[in]     ww            Visibility ww coordinates, in wavelengths.
  * @param[in]     amps          Visibility complex amplitudes.
  * @param[in]     weight        Visibility weights.
+ * @param[in]     i_plane       Internal plane index, used if \p plane is NULL.
  * @param[in,out] plane         Updated image or visibility plane.
  * @param[in,out] plane_norm    Updated required normalisation of plane.
  * @param[in,out] weights_grid  Grid of weights, updated if required.
@@ -138,8 +139,9 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
 OSKAR_EXPORT
 void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
-        double* plane_norm, oskar_Mem* weights_grid, int* status);
+        const oskar_Mem* amps, const oskar_Mem* weight, int i_plane,
+        oskar_Mem* plane, double* plane_norm, oskar_Mem* weights_grid,
+        int* status);
 
 #ifdef __cplusplus
 }

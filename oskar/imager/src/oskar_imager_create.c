@@ -49,6 +49,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     h->tmr_grid_finalise = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_grid_update = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_init = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    h->tmr_select = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_read = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_overall = oskar_timer_create(OSKAR_TIMER_NATIVE);

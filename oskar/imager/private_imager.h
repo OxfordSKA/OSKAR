@@ -40,6 +40,11 @@ extern "C" {
 /* Memory allocated per GPU. */
 struct DeviceData
 {
+    /* Scratch data. */
+    oskar_Mem *uu, *vv, *ww, *vis, *weight, *counter, *count_skipped;
+    oskar_Mem *norm, *num_points_in_tiles, *tile_offsets, *tile_locks;
+    oskar_Mem *sorted_uu, *sorted_vv, *sorted_ww;
+    oskar_Mem *sorted_wt, *sorted_vis, *sorted_tile;
     int num_planes;
     oskar_Mem **planes;
 
@@ -56,7 +61,7 @@ struct oskar_Imager
     char* output_name[4];
     fitsfile* fits_file[4];
     oskar_Timer *tmr_grid_update, *tmr_grid_finalise, *tmr_init;
-    oskar_Timer *tmr_read, *tmr_write, *tmr_overall;
+    oskar_Timer *tmr_select, *tmr_read, *tmr_write, *tmr_overall;
 
     /* Settings parameters. */
     int imager_prec, num_devices, num_gpus_avail, dev_loc, num_gpus, *gpu_ids;

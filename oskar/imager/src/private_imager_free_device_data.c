@@ -46,6 +46,24 @@ void oskar_imager_free_device_data(oskar_Imager* h, int* status)
         if (!d) continue;
         if (i < h->num_gpus)
             oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
+        oskar_mem_free(d->uu, status);
+        oskar_mem_free(d->vv, status);
+        oskar_mem_free(d->ww, status);
+        oskar_mem_free(d->vis, status);
+        oskar_mem_free(d->weight, status);
+        oskar_mem_free(d->counter, status);
+        oskar_mem_free(d->count_skipped, status);
+        oskar_mem_free(d->norm, status);
+        oskar_mem_free(d->num_points_in_tiles, status);
+        oskar_mem_free(d->tile_offsets, status);
+        oskar_mem_free(d->tile_locks, status);
+        oskar_mem_free(d->sorted_uu, status);
+        oskar_mem_free(d->sorted_vv, status);
+        oskar_mem_free(d->sorted_ww, status);
+        oskar_mem_free(d->sorted_wt, status);
+        oskar_mem_free(d->sorted_vis, status);
+        oskar_mem_free(d->sorted_tile, status);
+
         oskar_mem_free(d->conv_func, status);
         oskar_mem_free(d->w_support, status);
         oskar_mem_free(d->w_kernels_compact, status);

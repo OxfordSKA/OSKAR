@@ -57,6 +57,7 @@ void oskar_imager_free(oskar_Imager* h, int* status)
     oskar_timer_free(h->tmr_grid_finalise);
     oskar_timer_free(h->tmr_grid_update);
     oskar_timer_free(h->tmr_init);
+    oskar_timer_free(h->tmr_select);
     oskar_timer_free(h->tmr_read);
     oskar_timer_free(h->tmr_write);
     oskar_timer_free(h->tmr_overall);
