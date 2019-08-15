@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-void oskar_imager_rotate_coords(const oskar_Imager* h, size_t num_coords,
+void oskar_imager_rotate_coords(oskar_Imager* h, size_t num_coords,
         const oskar_Mem* uu_in, const oskar_Mem* vv_in, const oskar_Mem* ww_in,
         oskar_Mem* uu_out, oskar_Mem* vv_out, oskar_Mem* ww_out)
 {
@@ -45,6 +45,7 @@ void oskar_imager_rotate_coords(const oskar_Imager* h, size_t num_coords,
     const size_t num = num_coords;
 #endif
     const double *M = h->M;
+    oskar_timer_resume(h->tmr_rotate);
     if (oskar_mem_precision(uu_in) == OSKAR_SINGLE)
     {
         float *uu_o, *vv_o, *ww_o;
@@ -89,6 +90,7 @@ void oskar_imager_rotate_coords(const oskar_Imager* h, size_t num_coords,
             uu_o[i] = t0; vv_o[i] = t1; ww_o[i] = t2;
         }
     }
+    oskar_timer_pause(h->tmr_rotate);
 }
 
 #ifdef __cplusplus

@@ -63,7 +63,7 @@ extern "C" {
  * @param[out] ww_out       Output baseline WW coordinates.
  */
 OSKAR_EXPORT
-void oskar_imager_rotate_coords(const oskar_Imager* h, size_t num_coords,
+void oskar_imager_rotate_coords(oskar_Imager* h, size_t num_coords,
         const oskar_Mem* uu_in, const oskar_Mem* vv_in, const oskar_Mem* ww_in,
         oskar_Mem* uu_out, oskar_Mem* vv_out, oskar_Mem* ww_out);
 

@@ -61,7 +61,9 @@ struct oskar_Imager
     char* output_name[4];
     fitsfile* fits_file[4];
     oskar_Timer *tmr_grid_update, *tmr_grid_finalise, *tmr_init;
-    oskar_Timer *tmr_select, *tmr_read, *tmr_write, *tmr_overall;
+    oskar_Timer *tmr_select, *tmr_filter, *tmr_read, *tmr_write, *tmr_overall;
+    oskar_Timer *tmr_partition, *tmr_coord_scan, *tmr_rotate;
+    oskar_Timer *tmr_weights_grid, *tmr_weights_lookup;
 
     /* Settings parameters. */
     int imager_prec, num_devices, num_gpus_avail, dev_loc, num_gpus, *gpu_ids;

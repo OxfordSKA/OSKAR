@@ -36,7 +36,7 @@
 extern "C" {
 #endif
 
-void oskar_imager_rotate_vis(const oskar_Imager* h, size_t num_vis,
+void oskar_imager_rotate_vis(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu_in, const oskar_Mem* vv_in, const oskar_Mem* ww_in,
         oskar_Mem* amps)
 {
@@ -52,6 +52,7 @@ void oskar_imager_rotate_vis(const oskar_Imager* h, size_t num_vis,
     const double delta_n = h->delta_n;
     const double twopi = 2.0 * M_PI;
 
+    oskar_timer_resume(h->tmr_rotate);
     if (oskar_mem_precision(amps) == OSKAR_DOUBLE)
     {
         const double *u, *v, *w;
@@ -96,6 +97,7 @@ void oskar_imager_rotate_vis(const oskar_Imager* h, size_t num_vis,
             a[i].y = (float) im;
         }
     }
+    oskar_timer_pause(h->tmr_rotate);
 }
 
 #ifdef __cplusplus

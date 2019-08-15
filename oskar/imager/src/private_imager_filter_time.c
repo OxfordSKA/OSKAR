@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-void oskar_imager_filter_time(const oskar_Imager* h, size_t* num_vis,
+void oskar_imager_filter_time(oskar_Imager* h, size_t* num_vis,
         oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amp,
         oskar_Mem* weight, oskar_Mem* time_centroid, int* status)
 {
@@ -58,6 +58,7 @@ void oskar_imager_filter_time(const oskar_Imager* h, size_t* num_vis,
     *num_vis = 0;
 
     /* Apply the time centroid filter. */
+    oskar_timer_resume(h->tmr_filter);
     time_centroid_ = oskar_mem_double(time_centroid, status);
     if (h->imager_prec == OSKAR_DOUBLE)
     {
@@ -111,6 +112,7 @@ void oskar_imager_filter_time(const oskar_Imager* h, size_t* num_vis,
             }
         }
     }
+    oskar_timer_pause(h->tmr_filter);
 }
 
 #ifdef __cplusplus

@@ -62,7 +62,7 @@ extern "C" {
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_filter_time(const oskar_Imager* h, size_t* num_vis,
+void oskar_imager_filter_time(oskar_Imager* h, size_t* num_vis,
         oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amp,
         oskar_Mem* weight, oskar_Mem* time_centroid, int* status);
 

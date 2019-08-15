@@ -247,6 +247,7 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
         for (c = 0; c < num_channels; ++c)
         {
             /* Update per channel. */
+            oskar_timer_resume(h->tmr_partition);
             for (t = 0; t < num_times; ++t)
             {
                 oskar_mem_copy_contents(scratch,
@@ -255,6 +256,7 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
                         num_baselines * (num_channels * t + c),
                         num_baselines, status);
             }
+            oskar_timer_pause(h->tmr_partition);
             oskar_imager_update(h, num_rows,
                     start_chan + c, start_chan + c, num_pols,
                     oskar_vis_block_baseline_uu_metres_const(block),

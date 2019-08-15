@@ -69,7 +69,7 @@ extern "C" {
  * @param[in,out] amps      Complex visibility amplitudes.
  */
 OSKAR_EXPORT
-void oskar_imager_rotate_vis(const oskar_Imager* h, size_t num_vis,
+void oskar_imager_rotate_vis(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu_in, const oskar_Mem* vv_in, const oskar_Mem* ww_in,
         oskar_Mem* amps);
 

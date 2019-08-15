@@ -118,6 +118,7 @@ void oskar_imager_update_from_block(oskar_Imager* h,
         for (c = 0; c < num_channels; ++c)
         {
             /* Update per channel. */
+            oskar_timer_resume(h->tmr_partition);
             for (t = 0; t < num_times; ++t)
             {
                 oskar_mem_copy_contents(scratch,
@@ -126,6 +127,7 @@ void oskar_imager_update_from_block(oskar_Imager* h,
                         num_baselines * (num_channels * t + c),
                         num_baselines, status);
             }
+            oskar_timer_pause(h->tmr_partition);
             oskar_imager_update(h, num_rows,
                     start_chan + c, start_chan + c, num_pols,
                     oskar_vis_block_baseline_uu_metres_const(block),
@@ -435,7 +437,6 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
     oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
     const oskar_Mem *pu, *pv, *pw, *pa, *ph;
     if (*status || num_vis == 0) return;
-    oskar_timer_resume(h->tmr_grid_update);
 
     /* Convert precision of input data if required. */
     pu = uu; pv = vv; pw = ww; ph = weight;
@@ -489,14 +490,18 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
             /* Nothing to do. */
             break;
         case OSKAR_WEIGHTING_RADIAL:
+            oskar_timer_resume(h->tmr_weights_lookup);
             oskar_imager_weight_radial(num_vis, pu, pv, ph, h->weight_tmp,
                     status);
+            oskar_timer_pause(h->tmr_weights_lookup);
             ph = h->weight_tmp;
             break;
         case OSKAR_WEIGHTING_UNIFORM:
+            oskar_timer_resume(h->tmr_weights_lookup);
             oskar_imager_weight_uniform(num_vis, pu, pv, ph, h->weight_tmp,
                     h->cellsize_rad, oskar_imager_plane_size(h), weights_grid,
                     &num_skipped, status);
+            oskar_timer_pause(h->tmr_weights_lookup);
             ph = h->weight_tmp;
             break;
         default:
@@ -511,6 +516,7 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         num_skipped = 0;
         if (!plane_norm_ptr && h->plane_norm)
             plane_norm_ptr = &(h->plane_norm[i_plane]);
+        oskar_timer_resume(h->tmr_grid_update);
         switch (h->algorithm)
         {
         case OSKAR_ALGORITHM_DFT_2D:
@@ -530,6 +536,7 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
             *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
             break;
         }
+        oskar_timer_pause(h->tmr_grid_update);
         if (num_skipped > 0)
             oskar_log_warning(h->log, "Skipped %lu visibility points.",
                     (unsigned long) num_skipped);
@@ -541,7 +548,6 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
     oskar_mem_free(tw, status);
     oskar_mem_free(ta, status);
     oskar_mem_free(th, status);
-    oskar_timer_pause(h->tmr_grid_update);
 }
 
 
@@ -561,6 +567,7 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, size_t num_points,
         oskar_mem_ensure(weights_grid, (size_t) grid_size * grid_size, status);
         if (*status) return;
 
+        oskar_timer_resume(h->tmr_weights_grid);
         if (oskar_mem_precision(weights_grid) == OSKAR_DOUBLE)
             oskar_grid_weights_write_d(num_points,
                     oskar_mem_double_const(uu, status),
@@ -578,12 +585,14 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, size_t num_points,
         if (num_skipped > 0)
             oskar_log_warning(h->log, "Skipped %lu visibility weights.",
                     (unsigned long) num_skipped);
+        oskar_timer_pause(h->tmr_weights_grid);
     }
 
     /* Update baseline W minimum, maximum and RMS. */
     if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
     {
         size_t j;
+        oskar_timer_resume(h->tmr_coord_scan);
         if (oskar_mem_precision(ww) == OSKAR_DOUBLE)
         {
             const double *p = oskar_mem_double_const(ww, status);
@@ -607,6 +616,7 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, size_t num_points,
             }
         }
         h->ww_points += num_points;
+        oskar_timer_pause(h->tmr_coord_scan);
     }
 }
 

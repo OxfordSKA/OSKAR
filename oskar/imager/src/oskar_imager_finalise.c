@@ -158,21 +158,42 @@ void oskar_imager_finalise(oskar_Imager* h,
     /* Record time taken. */
     oskar_log_set_value_width(h->log, 28);
     oskar_log_section(h->log, 'M', "Imager timing");
-    oskar_log_value(h->log, 'M', 0, "Initialise", "%.3f s",
-            oskar_timer_elapsed(h->tmr_init));
-    oskar_log_value(h->log, 'M', 0, "Select visibility data", "%.3f s",
-            oskar_timer_elapsed(h->tmr_select));
-    oskar_log_value(h->log, 'M', 0, "Grid update", "%.3f s",
-            oskar_timer_elapsed(h->tmr_grid_update));
-    oskar_log_value(h->log, 'M', 0, "Grid finalise", "%.3f s",
-            oskar_timer_elapsed(h->tmr_grid_finalise));
+    const double t_scan = oskar_timer_elapsed(h->tmr_coord_scan);
+    const double t_init = oskar_timer_elapsed(h->tmr_init);
+    const double t_partition = oskar_timer_elapsed(h->tmr_partition);
+    const double t_select = oskar_timer_elapsed(h->tmr_select);
+    const double t_rotate = oskar_timer_elapsed(h->tmr_rotate);
+    const double t_filter = oskar_timer_elapsed(h->tmr_filter);
+    const double t_grid_update = oskar_timer_elapsed(h->tmr_grid_update);
+    const double t_wt_grid = oskar_timer_elapsed(h->tmr_weights_grid);
+    const double t_wt_lookup = oskar_timer_elapsed(h->tmr_weights_lookup);
+    const double t_grid_finalise = oskar_timer_elapsed(h->tmr_grid_finalise);
     const double t_read = oskar_timer_elapsed(h->tmr_read);
     const double t_write = oskar_timer_elapsed(h->tmr_write);
-    if (t_read > 0.0)
-        oskar_log_value(h->log, 'M', 0,
-                "Read visibility data", "%.3f s", t_read);
-    if (t_write > 0.0)
-        oskar_log_value(h->log, 'M', 0, "Write image data", "%.3f s", t_write);
+    if (t_scan > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Coordinate scan", "%.3f s", t_scan);
+    if (t_init > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Initialise", "%.3f s", t_init);
+    if (t_partition > 1e-3) oskar_log_value(h->log, 'M', 0,
+            "Partition data", "%.3f s", t_partition);
+    if (t_select > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Select visibility data", "%.3f s", t_select);
+    if (t_rotate > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Rotate visibility data", "%.3f s", t_rotate);
+    if (t_filter > 1e-3) oskar_log_value(h->log, 'M', 0,
+            "Filter visibility data", "%.3f s", t_filter);
+    if (t_grid_update > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Grid update", "%.3f s", t_grid_update);
+    if (t_wt_grid > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Weights grid", "%.3f s", t_wt_grid);
+    if (t_wt_lookup > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Weights lookup", "%.3f s", t_wt_lookup);
+    if (t_grid_finalise > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Grid finalise", "%.3f s", t_grid_finalise);
+    if (t_read > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Read visibility data", "%.3f s", t_read);
+    if (t_write > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Write image data", "%.3f s", t_write);
     oskar_log_section(h->log, 'M', "Imaging complete");
     if (h->output_root)
     {

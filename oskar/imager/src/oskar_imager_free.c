@@ -58,9 +58,15 @@ void oskar_imager_free(oskar_Imager* h, int* status)
     oskar_timer_free(h->tmr_grid_update);
     oskar_timer_free(h->tmr_init);
     oskar_timer_free(h->tmr_select);
+    oskar_timer_free(h->tmr_rotate);
+    oskar_timer_free(h->tmr_filter);
     oskar_timer_free(h->tmr_read);
     oskar_timer_free(h->tmr_write);
     oskar_timer_free(h->tmr_overall);
+    oskar_timer_free(h->tmr_partition);
+    oskar_timer_free(h->tmr_coord_scan);
+    oskar_timer_free(h->tmr_weights_grid);
+    oskar_timer_free(h->tmr_weights_lookup);
     oskar_mutex_free(h->mutex);
     oskar_log_free(h->log);
     oskar_imager_free_device_data(h, status);

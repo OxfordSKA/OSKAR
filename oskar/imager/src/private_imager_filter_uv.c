@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-void oskar_imager_filter_uv(const oskar_Imager* h, size_t* num_vis,
+void oskar_imager_filter_uv(oskar_Imager* h, size_t* num_vis,
         oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* amp,
         oskar_Mem* weight, int* status)
 {
@@ -57,6 +57,7 @@ void oskar_imager_filter_uv(const oskar_Imager* h, size_t* num_vis,
     *num_vis = 0;
 
     /* Apply the UV baseline length filter. */
+    oskar_timer_resume(h->tmr_filter);
     if (h->imager_prec == OSKAR_DOUBLE)
     {
         double2* amp_ = 0;
@@ -107,6 +108,7 @@ void oskar_imager_filter_uv(const oskar_Imager* h, size_t* num_vis,
             }
         }
     }
+    oskar_timer_pause(h->tmr_filter);
 }
 
 #ifdef __cplusplus
