@@ -147,7 +147,7 @@ void oskar_imager_select_data(
             /* Copy time centroids if present. */
             if (time_in && time_out)
             {
-                oskar_mem_ensure(time_out, num_rows * h->num_sel_freqs, status);
+                oskar_mem_ensure(time_out, num_rows * num_channels, status);
                 oskar_mem_copy_contents(time_out, time_in, *num_out, 0,
                         num_rows, status);
             }

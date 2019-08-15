@@ -344,16 +344,16 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
     /* Ensure work arrays are large enough. */
     max_num_vis = num_rows;
     if (!h->chan_snaps) max_num_vis *= (1 + end_chan - start_chan);
-    oskar_mem_realloc(h->uu_im, max_num_vis, status);
-    oskar_mem_realloc(h->vv_im, max_num_vis, status);
-    oskar_mem_realloc(h->ww_im, max_num_vis, status);
-    oskar_mem_realloc(h->vis_im, max_num_vis, status);
-    oskar_mem_realloc(h->weight_im, max_num_vis, status);
+    oskar_mem_ensure(h->uu_im, max_num_vis, status);
+    oskar_mem_ensure(h->vv_im, max_num_vis, status);
+    oskar_mem_ensure(h->ww_im, max_num_vis, status);
+    oskar_mem_ensure(h->vis_im, max_num_vis, status);
+    oskar_mem_ensure(h->weight_im, max_num_vis, status);
     if (h->direction_type == 'R')
     {
-        oskar_mem_realloc(h->uu_tmp, max_num_vis, status);
-        oskar_mem_realloc(h->vv_tmp, max_num_vis, status);
-        oskar_mem_realloc(h->ww_tmp, max_num_vis, status);
+        oskar_mem_ensure(h->uu_tmp, max_num_vis, status);
+        oskar_mem_ensure(h->vv_tmp, max_num_vis, status);
+        oskar_mem_ensure(h->ww_tmp, max_num_vis, status);
     }
 
     /* Loop over each image plane being made. */
@@ -361,22 +361,23 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
     {
         for (p = 0; p < h->num_im_pols; ++p)
         {
-            oskar_Mem *pu, *pv, *pw;
+            oskar_Mem *pu, *pv, *pw, *pt;
             size_t num_vis = 0;
             if (*status) break;
 
             /* Get all visibility data needed to update this plane. */
-            pu = h->uu_im; pv = h->vv_im; pw = h->ww_im;
+            pu = h->uu_im; pv = h->vv_im; pw = h->ww_im; pt = h->time_im;
             if (h->direction_type == 'R')
             {
                 pu = h->uu_tmp; pv = h->vv_tmp; pw = h->ww_tmp;
             }
+            if (h->time_min_utc <= 0.0 && h->time_max_utc <= 0.0) pt = 0;
             oskar_timer_resume(h->tmr_select);
             oskar_imager_select_data(h, num_rows, start_chan, end_chan,
                     num_pols, u_in, v_in, w_in, amp_in, weight_in,
                     time_centroid, h->im_freqs[c], p,
                     &num_vis, pu, pv, pw, h->vis_im, h->weight_im,
-                    h->time_im, status);
+                    pt, status);
             oskar_timer_pause(h->tmr_select);
 
             /* Skip if nothing was selected. */
@@ -401,7 +402,7 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
 
             /* Apply time and baseline length filters if required. */
             oskar_imager_filter_time(h, &num_vis, h->uu_im, h->vv_im,
-                    h->ww_im, h->vis_im, h->weight_im, h->time_im, status);
+                    h->ww_im, h->vis_im, h->weight_im, pt, status);
             oskar_imager_filter_uv(h, &num_vis, h->uu_im, h->vv_im,
                     h->ww_im, h->vis_im, h->weight_im, status);
 
