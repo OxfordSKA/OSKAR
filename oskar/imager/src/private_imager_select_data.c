@@ -164,42 +164,53 @@ void copy_vis_pol(size_t num_rows, int num_channels, int num_pols,
 {
     size_t r;
     if (*status) return;
-    if (oskar_mem_precision(weight_out) == OSKAR_SINGLE)
+    if (num_pols == 1 && num_channels == 1)
     {
-        float* w_out;
-        const float* w_in;
-        w_out = oskar_mem_float(weight_out, status) + out_offset;
-        w_in = oskar_mem_float_const(weight_in, status);
-        for (r = 0; r < num_rows; ++r)
-            w_out[r] = w_in[num_pols * r + p];
-
+        oskar_mem_copy_contents(weight_out, weight_in,
+                out_offset, 0, num_rows, status);
         if (vis_in && vis_out)
-        {
-            float2* v_out;
-            const float2* v_in;
-            v_out = oskar_mem_float2(vis_out, status) + out_offset;
-            v_in = oskar_mem_float2_const(vis_in, status);
-            for (r = 0; r < num_rows; ++r)
-                v_out[r] = v_in[num_pols * (num_channels * r + c) + p];
-        }
+            oskar_mem_copy_contents(vis_out, vis_in,
+                    out_offset, 0, num_rows, status);
     }
     else
     {
-        double* w_out;
-        const double* w_in;
-        w_out = oskar_mem_double(weight_out, status) + out_offset;
-        w_in = oskar_mem_double_const(weight_in, status);
-        for (r = 0; r < num_rows; ++r)
-            w_out[r] = w_in[num_pols * r + p];
-
-        if (vis_in && vis_out)
+        if (oskar_mem_precision(weight_out) == OSKAR_SINGLE)
         {
-            double2* v_out;
-            const double2* v_in;
-            v_out = oskar_mem_double2(vis_out, status) + out_offset;
-            v_in = oskar_mem_double2_const(vis_in, status);
+            float* w_out;
+            const float* w_in;
+            w_out = oskar_mem_float(weight_out, status) + out_offset;
+            w_in = oskar_mem_float_const(weight_in, status);
             for (r = 0; r < num_rows; ++r)
-                v_out[r] = v_in[num_pols * (num_channels * r + c) + p];
+                w_out[r] = w_in[num_pols * r + p];
+
+            if (vis_in && vis_out)
+            {
+                float2* v_out;
+                const float2* v_in;
+                v_out = oskar_mem_float2(vis_out, status) + out_offset;
+                v_in = oskar_mem_float2_const(vis_in, status);
+                for (r = 0; r < num_rows; ++r)
+                    v_out[r] = v_in[num_pols * (num_channels * r + c) + p];
+            }
+        }
+        else
+        {
+            double* w_out;
+            const double* w_in;
+            w_out = oskar_mem_double(weight_out, status) + out_offset;
+            w_in = oskar_mem_double_const(weight_in, status);
+            for (r = 0; r < num_rows; ++r)
+                w_out[r] = w_in[num_pols * r + p];
+
+            if (vis_in && vis_out)
+            {
+                double2* v_out;
+                const double2* v_in;
+                v_out = oskar_mem_double2(vis_out, status) + out_offset;
+                v_in = oskar_mem_double2_const(vis_in, status);
+                for (r = 0; r < num_rows; ++r)
+                    v_out[r] = v_in[num_pols * (num_channels * r + c) + p];
+            }
         }
     }
 }
