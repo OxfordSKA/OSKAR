@@ -38,8 +38,7 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value,
 {
     if (*status) return;
     const int location = mem->location;
-    const int precision = oskar_mem_precision(mem);
-    const float value_f = (float) value;
+    const int precision = oskar_type_precision(mem->type);
     if (oskar_type_is_complex(mem->type))
     {
         offset *= 2;
@@ -55,13 +54,14 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value,
         size_t i;
         if (precision == OSKAR_SINGLE)
         {
-            float *aa = (float*) mem->data;
-            for (i = 0; i < num_elements; ++i) aa[i + offset] *= value_f;
+            float *aa = ((float*) mem->data) + offset;
+            const float value_f = (float) value;
+            for (i = 0; i < num_elements; ++i) aa[i] *= value_f;
         }
         else if (precision == OSKAR_DOUBLE)
         {
-            double *aa = (double*) mem->data;
-            for (i = 0; i < num_elements; ++i) aa[i + offset] *= value;
+            double *aa = ((double*) mem->data) + offset;
+            for (i = 0; i < num_elements; ++i) aa[i] *= value;
         }
         else *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
@@ -70,6 +70,7 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value,
         size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
         const unsigned int n = (unsigned int) num_elements;
         const unsigned int off = (unsigned int) offset;
+        const float value_f = (float) value;
         const int is_dbl = (precision == OSKAR_DOUBLE);
         const char* k = 0;
         if (precision == OSKAR_SINGLE)      k = "mem_scale_float";
