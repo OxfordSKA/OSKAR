@@ -43,7 +43,9 @@ void oskar_imager_filter_uv(oskar_Imager* h, size_t* num_vis,
     double r, range[2];
 
     /* Return immediately if filtering is not enabled. */
-    if (h->uv_filter_min <= 0.0 && h->uv_filter_max < 0.0) return;
+    if (h->uv_filter_min <= 0.0 &&
+            (h->uv_filter_max < 0.0 || h->uv_filter_max > FLT_MAX))
+        return;
     if (*status) return;
 
     /* Get the range (squared, to avoid lots of square roots later). */
