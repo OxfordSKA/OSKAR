@@ -168,6 +168,10 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
             d->w_support = oskar_mem_create_copy(
                     h->w_support, h->dev_loc, status);
         }
+
+        /* No longer need kernels in host memory. */
+        oskar_mem_free(h->w_kernels_compact, status);
+        h->w_kernels_compact = 0;
     }
 }
 
