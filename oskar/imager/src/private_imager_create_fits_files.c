@@ -133,7 +133,7 @@ fitsfile* create_fits_file(const char* filename, int precision,
     fits_create_file(&f, filename, status);
     fits_create_img(f, (precision == OSKAR_DOUBLE ? DOUBLE_IMG : FLOAT_IMG),
             3, naxes, status);
-    fits_set_hdrsize(f, 120, status); /* Reserve some header space for log. */
+    fits_set_hdrsize(f, 160, status); /* Reserve some header space for log. */
     fits_write_date(f, status);
 
     /* Write axis headers. */
