@@ -209,7 +209,7 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
     /* Loop over visibility blocks. */
     for (i_block = 0; i_block < num_blocks; ++i_block)
     {
-        int t, dim_start_and_size[6];
+        int c, t, dim_start_and_size[6];
         if (*status) break;
 
         /* Read block metadata. */
@@ -224,7 +224,6 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
         const int start_chan   = dim_start_and_size[1];
         const int num_times    = dim_start_and_size[2];
         const int num_channels = dim_start_and_size[3];
-        const int end_chan     = start_chan + num_channels - 1;
         const size_t num_rows  = num_times * num_baselines;
 
         /* Fill in the time centroid values. */
@@ -243,8 +242,12 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
 
         /* Update the imager with the data. */
         oskar_timer_pause(h->tmr_read);
-        oskar_imager_update(h, num_rows, start_chan, end_chan,
-                num_pols, uu, vv, ww, 0, weight, time_centroid, status);
+        for (c = 0; c < num_channels; ++c)
+        {
+            /* Update per channel. */
+            oskar_imager_update(h, num_rows, start_chan + c, start_chan + c,
+                    num_pols, uu, vv, ww, 0, weight, time_centroid, status);
+        }
         *percent_done = (int) round(100.0 * (
                 (i_block + 1) / (double)(num_blocks * num_files) +
                 i_file / (double)num_files));

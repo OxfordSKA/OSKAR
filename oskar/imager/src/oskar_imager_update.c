@@ -359,7 +359,8 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
     oskar_mem_ensure(h->uu_im, max_num_vis, status);
     oskar_mem_ensure(h->vv_im, max_num_vis, status);
     oskar_mem_ensure(h->ww_im, max_num_vis, status);
-    oskar_mem_ensure(h->vis_im, max_num_vis, status);
+    if (!h->coords_only)
+        oskar_mem_ensure(h->vis_im, max_num_vis, status);
     oskar_mem_ensure(h->weight_im, max_num_vis, status);
     if (h->direction_type == 'R')
     {
