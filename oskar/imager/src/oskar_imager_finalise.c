@@ -82,7 +82,7 @@ void oskar_imager_finalise(oskar_Imager* h,
         oskar_Mem* temp = oskar_mem_create(oskar_imager_plane_type(h),
                 OSKAR_CPU, num_cells, status);
         oskar_log_message(h->log, 'M', 0,
-                "Stacking %d grids from %d devices...",
+                "Stacking %d grid(s) from %d devices...",
                 h->num_planes, h->num_gpus);
         oskar_timer_resume(h->tmr_grid_finalise);
         for (i = 0; i < h->num_planes; ++i)
@@ -100,6 +100,7 @@ void oskar_imager_finalise(oskar_Imager* h,
                             0, 0, 0, num_cells, status);
                 }
             }
+            oskar_mem_copy(h->d[0].planes[i], h->planes[i], status);
         }
         oskar_timer_pause(h->tmr_grid_finalise);
         oskar_mem_free(temp, status);
@@ -129,7 +130,7 @@ void oskar_imager_finalise(oskar_Imager* h,
         for (i = 0; i < h->num_planes; ++i)
         {
             oskar_Mem *plane = h->planes[i];
-            if (h->grid_on_gpu && h->num_gpus == 1 && !(
+            if (h->grid_on_gpu && h->num_gpus > 0 && !(
                     h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
                     h->algorithm == OSKAR_ALGORITHM_DFT_3D))
                 plane = h->d[0].planes[i];
@@ -172,7 +173,7 @@ void oskar_imager_finalise(oskar_Imager* h,
     const double t_scan = oskar_timer_elapsed(h->tmr_coord_scan);
     const double t_init = oskar_timer_elapsed(h->tmr_init);
     const double t_copy_convert = oskar_timer_elapsed(h->tmr_copy_convert);
-    const double t_select = oskar_timer_elapsed(h->tmr_select);
+    const double t_select_scale = oskar_timer_elapsed(h->tmr_select_scale);
     const double t_rotate = oskar_timer_elapsed(h->tmr_rotate);
     const double t_filter = oskar_timer_elapsed(h->tmr_filter);
     const double t_grid_update = oskar_timer_elapsed(h->tmr_grid_update);
@@ -187,8 +188,8 @@ void oskar_imager_finalise(oskar_Imager* h,
             "Initialise", "%.3f s", t_init);
     if (t_copy_convert > 0.0) oskar_log_value(h->log, 'M', 0,
             "Copy/convert data", "%.3f s", t_copy_convert);
-    if (t_select > 0.0) oskar_log_value(h->log, 'M', 0,
-            "Select data", "%.3f s", t_select);
+    if (t_select_scale > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Select/scale data", "%.3f s", t_select_scale);
     if (t_rotate > 0.0) oskar_log_value(h->log, 'M', 0,
             "Rotate visibility data", "%.3f s", t_rotate);
     if (t_filter > 1e-3) oskar_log_value(h->log, 'M', 0,

@@ -119,8 +119,10 @@ void oskar_device_log_mem(int location, int depth, int id, oskar_Log* log)
     const double megabyte = 1024. * 1024.;
     if (location == OSKAR_GPU)
     {
+        int status = 0;
         oskar_Device* device = oskar_device_create();
         device->index = id;
+        oskar_device_set(location, id, &status);
         oskar_device_get_info_cuda(device);
         const double mem_free  = (double) device->global_mem_free_size;
         const double mem_total = (double) device->global_mem_size;

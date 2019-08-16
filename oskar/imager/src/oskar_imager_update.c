@@ -384,13 +384,13 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
                 pu = h->uu_tmp; pv = h->vv_tmp; pw = h->ww_tmp;
             }
             if (h->time_min_utc <= 0.0 && h->time_max_utc <= 0.0) pt = 0;
-            oskar_timer_resume(h->tmr_select);
+            oskar_timer_resume(h->tmr_select_scale);
             oskar_imager_select_data(h, num_rows, start_chan, end_chan,
                     num_pols, u_in, v_in, w_in, amp_in, weight_in,
                     time_centroid, h->im_freqs[c], p,
                     &num_vis, pu, pv, pw, h->vis_im, h->weight_im,
                     pt, status);
-            oskar_timer_pause(h->tmr_select);
+            oskar_timer_pause(h->tmr_select_scale);
 
             /* Skip if nothing was selected. */
             if (num_vis == 0) continue;
