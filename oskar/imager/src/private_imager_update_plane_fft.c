@@ -62,7 +62,7 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, size_t num_vis,
         double* plane_norm, size_t* num_skipped, int* status)
 {
     if (*status) return;
-    if (!h->grid_on_gpu)
+    if (!h->grid_on_gpu || h->num_gpus == 0)
     {
         oskar_Mem* plane_ptr = plane;
         if (!plane_ptr)

@@ -37,6 +37,7 @@
 #include "mem/oskar_mem.h"
 #include "utility/oskar_device.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_get_memory_usage.h"
 #include "utility/oskar_timer.h"
 
 #include <fitsio.h>
@@ -80,6 +81,10 @@ void oskar_imager_finalise(oskar_Imager* h,
         const size_t num_cells = plane_size * plane_size;
         oskar_Mem* temp = oskar_mem_create(oskar_imager_plane_type(h),
                 OSKAR_CPU, num_cells, status);
+        oskar_log_message(h->log, 'M', 0,
+                "Stacking %d grids from %d devices...",
+                h->num_planes, h->num_gpus);
+        oskar_timer_resume(h->tmr_grid_finalise);
         for (i = 0; i < h->num_planes; ++i)
         {
             int d;
@@ -96,6 +101,7 @@ void oskar_imager_finalise(oskar_Imager* h,
                 }
             }
         }
+        oskar_timer_pause(h->tmr_grid_finalise);
         oskar_mem_free(temp, status);
     }
 
@@ -116,10 +122,9 @@ void oskar_imager_finalise(oskar_Imager* h,
     }
 
     /* Check if images are required. */
+    const size_t num_pix = (size_t)h->image_size * (size_t)h->image_size;
     if (h->fits_file[0] || output_images)
     {
-        const size_t num_pix = (size_t)h->image_size * (size_t)h->image_size;
-
         /* Finalise all the planes. */
         for (i = 0; i < h->num_planes; ++i)
         {
@@ -155,12 +160,18 @@ void oskar_imager_finalise(oskar_Imager* h,
         oskar_timer_pause(h->tmr_write);
     }
 
+    /* Record memory usage. */
+    oskar_log_section(h->log, 'M', "Memory usage");
+    for (i = 0; i < h->num_gpus; ++i)
+        oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);
+    oskar_log_mem(h->log);
+
     /* Record time taken. */
-    oskar_log_set_value_width(h->log, 28);
+    oskar_log_set_value_width(h->log, 30);
     oskar_log_section(h->log, 'M', "Imager timing");
     const double t_scan = oskar_timer_elapsed(h->tmr_coord_scan);
     const double t_init = oskar_timer_elapsed(h->tmr_init);
-    const double t_partition = oskar_timer_elapsed(h->tmr_partition);
+    const double t_copy_convert = oskar_timer_elapsed(h->tmr_copy_convert);
     const double t_select = oskar_timer_elapsed(h->tmr_select);
     const double t_rotate = oskar_timer_elapsed(h->tmr_rotate);
     const double t_filter = oskar_timer_elapsed(h->tmr_filter);
@@ -174,8 +185,8 @@ void oskar_imager_finalise(oskar_Imager* h,
             "Coordinate scan", "%.3f s", t_scan);
     if (t_init > 0.0) oskar_log_value(h->log, 'M', 0,
             "Initialise", "%.3f s", t_init);
-    if (t_partition > 1e-3) oskar_log_value(h->log, 'M', 0,
-            "Partition data", "%.3f s", t_partition);
+    if (t_copy_convert > 0.0) oskar_log_value(h->log, 'M', 0,
+            "Copy/convert data", "%.3f s", t_copy_convert);
     if (t_select > 0.0) oskar_log_value(h->log, 'M', 0,
             "Select data", "%.3f s", t_select);
     if (t_rotate > 0.0) oskar_log_value(h->log, 'M', 0,
@@ -194,17 +205,49 @@ void oskar_imager_finalise(oskar_Imager* h,
             "Read visibility data", "%.3f s", t_read);
     if (t_write > 0.0) oskar_log_value(h->log, 'M', 0,
             "Write image data", "%.3f s", t_write);
+
+    /* Record summary. */
     oskar_log_section(h->log, 'M', "Imaging complete");
-    if (h->output_root)
-    {
-        oskar_log_message(h->log, 'M', 0, "Output(s):");
-        for (i = 0; i < h->num_im_pols; ++i)
-            oskar_log_value(h->log, 'M', 1, "FITS file", "%s",
-                    h->output_name[i]);
-    }
     if (!*status)
+    {
+        if (h->num_vis_processed > 1e6)
+            oskar_log_value(h->log, 'M', 0,
+                    "Visibilities processed", "%.3f million",
+                    h->num_vis_processed * 1e-6);
+        else
+            oskar_log_value(h->log, 'M', 0,
+                    "Visibilities processed", "%lu",
+                    (unsigned long) (h->num_vis_processed));
+        if (h->num_w_planes > 0)
+            oskar_log_value(h->log, 'M', 0,
+                    "W-projection planes", "%d", h->num_w_planes);
+        if (h->fov_deg > 0.1)
+            oskar_log_value(h->log, 'M', 0,
+                    "Field of view [deg]", "%.1f", h->fov_deg);
+        else
+            oskar_log_value(h->log, 'M', 0,
+                    "Field of view [arcmin]", "%.1f", h->fov_deg * 60.0);
+        oskar_log_value(h->log, 'M', 0,
+                "Image dimension [pixels]", "%d", h->image_size);
+        if (h->num_files > 0)
+        {
+            oskar_log_message(h->log, 'M', 0, "Input(s):");
+            for (i = 0; i < h->num_files; ++i)
+                oskar_log_value(h->log, 'M', 1, "Visibility data", "%s",
+                        h->input_files[i]);
+        }
+        if (h->output_root)
+        {
+            oskar_log_message(h->log, 'M', 0, "Output(s):");
+            for (i = 0; i < h->num_im_pols; ++i)
+                oskar_log_value(h->log, 'M', 1, "FITS file", "%s (%.1f MB)",
+                        h->output_name[i],
+                        num_pix * h->num_im_channels *
+                        oskar_mem_element_size(h->imager_prec) / 1e6);
+        }
         oskar_log_message(h->log, 'M', 0, "Run completed in %.3f sec.",
                 oskar_timer_elapsed(h->tmr_overall));
+    }
     else
         oskar_log_error(h->log, "Run failed with code %i: %s.", *status,
                 oskar_get_error_string(*status));

@@ -62,7 +62,7 @@ struct oskar_Imager
     fitsfile* fits_file[4];
     oskar_Timer *tmr_grid_update, *tmr_grid_finalise, *tmr_init;
     oskar_Timer *tmr_select, *tmr_filter, *tmr_read, *tmr_write, *tmr_overall;
-    oskar_Timer *tmr_partition, *tmr_coord_scan, *tmr_rotate;
+    oskar_Timer *tmr_copy_convert, *tmr_coord_scan, *tmr_rotate;
     oskar_Timer *tmr_weights_grid, *tmr_weights_lookup;
 
     /* Settings parameters. */
@@ -88,6 +88,7 @@ struct oskar_Imager
     int coords_only; /* Set if doing a first pass for uniform weighting. */
     oskar_Mutex* mutex;
     oskar_Log* log;
+    size_t num_vis_processed;
 
     /* Scratch data. */
     oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im, *weight_im, *time_im;

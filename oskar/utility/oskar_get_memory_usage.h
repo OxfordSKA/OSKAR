@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <log/oskar_log.h>
 #include <stddef.h>
 
 #ifdef __cplusplus
@@ -76,6 +77,11 @@ size_t oskar_get_memory_usage(void);
 OSKAR_EXPORT
 void oskar_print_memory_info(void);
 
+/**
+ * @brief Writes current memory usage to the log.
+ */
+OSKAR_EXPORT
+void oskar_log_mem(oskar_Log* log);
 
 #ifdef __cplusplus
 }

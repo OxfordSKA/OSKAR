@@ -143,7 +143,6 @@ static void set_up_device_data(oskar_Interferometer* h, int* status);
 static void set_up_vis_header(oskar_Interferometer* h, int* status);
 static void record_timing(oskar_Interferometer* h);
 static unsigned int disp_width(unsigned int value);
-static void system_mem_log(oskar_Log* log);
 
 
 /* Public methods. */
@@ -324,7 +323,7 @@ void oskar_interferometer_finalise(oskar_Interferometer* h, int* status)
         oskar_log_section(h->log, 'M', "Final memory usage");
         for (i = 0; i < h->num_gpus; ++i)
             oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);
-        system_mem_log(h->log);
+        oskar_log_mem(h->log);
     }
 
     /* If there are sources in the simulation and the station beam is not
@@ -1265,7 +1264,7 @@ static void set_up_device_data(oskar_Interferometer* h, int* status)
         oskar_log_section(h->log, 'M', "Initial memory usage");
         for (i = 0; i < h->num_gpus; ++i)
             oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);
-        system_mem_log(h->log);
+        oskar_log_mem(h->log);
     }
 }
 
@@ -1360,24 +1359,6 @@ static unsigned int disp_width(unsigned int v)
     return (v >= 100000u) ? 6 : (v >= 10000u) ? 5 : (v >= 1000u) ? 4 :
             (v >= 100u) ? 3 : (v >= 10u) ? 2u : 1u;
     /* return v == 1u ? 1u : (unsigned)log10(v)+1 */
-}
-
-
-static void system_mem_log(oskar_Log* log)
-{
-    size_t mem_total, mem_free, mem_used, gigabyte = 1024 * 1024 * 1024;
-    size_t mem_resident;
-    mem_total = oskar_get_total_physical_memory();
-    mem_resident = oskar_get_memory_usage();
-    mem_free = oskar_get_free_physical_memory();
-    mem_used = mem_total - mem_free;
-    oskar_log_message(log, 'M', 0, "System memory usage %.1f%% "
-            "(%.1f GB/%.1f GB) used.",
-            100. * (double) mem_used / mem_total,
-            (double) mem_used / gigabyte,
-            (double) mem_total / gigabyte);
-    oskar_log_message(log, 'M', 0, "Memory used by simulator: %.1f MB",
-                      (double) mem_resident / (1024. * 1024.));
 }
 
 

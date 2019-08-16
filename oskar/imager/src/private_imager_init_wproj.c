@@ -136,7 +136,8 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     oskar_log_message(h->log, 'M', 1, "Min: %.12e", h->ww_min);
     oskar_log_message(h->log, 'M', 1, "Max: %.12e", h->ww_max);
     oskar_log_message(h->log, 'M', 1, "RMS: %.12e", h->ww_rms);
-    oskar_log_message(h->log, 'M', 0, "Using %d W-planes.", h->num_w_planes);
+    oskar_log_message(h->log, 'M', 0,
+            "Using %d W-projection planes.", h->num_w_planes);
     oskar_log_message(h->log, 'M', 0,
             "Convolution kernel support range %d to %d.",
             oskar_mem_int(h->w_support, status)[0],

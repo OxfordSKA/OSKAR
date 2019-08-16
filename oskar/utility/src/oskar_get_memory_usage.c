@@ -243,6 +243,23 @@ void oskar_print_memory_info(void)
             (unsigned long) (totalSwapMem/(1024*1024)));
 }
 
+void oskar_log_mem(oskar_Log* log)
+{
+    const size_t gigabyte = 1024 * 1024 * 1024;
+    const size_t mem_total = oskar_get_total_physical_memory();
+    const size_t mem_resident = oskar_get_memory_usage();
+    const size_t mem_free = oskar_get_free_physical_memory();
+    const size_t mem_used = mem_total - mem_free;
+    oskar_log_message(log, 'M', 0,
+            "System memory is %.1f%% (%.1f GB/%.1f GB) used.",
+            100. * (double) mem_used / mem_total,
+            (double) mem_used / gigabyte,
+            (double) mem_total / gigabyte);
+    oskar_log_message(log, 'M', 0,
+            "System memory used by current process: %.1f MB.",
+            (double) mem_resident / (1024. * 1024.));
+}
+
 #ifdef __cplusplus
 }
 #endif

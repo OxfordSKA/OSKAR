@@ -118,7 +118,7 @@ void oskar_imager_update_from_block(oskar_Imager* h,
         for (c = 0; c < num_channels; ++c)
         {
             /* Update per channel. */
-            oskar_timer_resume(h->tmr_partition);
+            oskar_timer_resume(h->tmr_copy_convert);
             for (t = 0; t < num_times; ++t)
             {
                 oskar_mem_copy_contents(scratch,
@@ -127,7 +127,7 @@ void oskar_imager_update_from_block(oskar_Imager* h,
                         num_baselines * (num_channels * t + c),
                         num_baselines, status);
             }
-            oskar_timer_pause(h->tmr_partition);
+            oskar_timer_pause(h->tmr_copy_convert);
             oskar_imager_update(h, num_rows,
                     start_chan + c, start_chan + c, num_pols,
                     oskar_vis_block_baseline_uu_metres_const(block),
@@ -309,35 +309,47 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
         amp_in = amps;
         if (oskar_mem_precision(amps) != h->imager_prec)
         {
+            oskar_timer_resume(h->tmr_copy_convert);
             ta = oskar_mem_convert_precision(amps, h->imager_prec, status);
+            oskar_timer_pause(h->tmr_copy_convert);
             amp_in = ta;
         }
 
         /* Convert linear polarisations to Stokes parameters if required. */
         if (h->use_stokes)
         {
+            oskar_timer_resume(h->tmr_copy_convert);
             oskar_imager_linear_to_stokes(amp_in, &h->stokes, status);
+            oskar_timer_pause(h->tmr_copy_convert);
             amp_in = h->stokes;
         }
     }
     if (oskar_mem_precision(uu) != h->imager_prec)
     {
+        oskar_timer_resume(h->tmr_copy_convert);
         tu = oskar_mem_convert_precision(uu, h->imager_prec, status);
+        oskar_timer_pause(h->tmr_copy_convert);
         u_in = tu;
     }
     if (oskar_mem_precision(vv) != h->imager_prec)
     {
+        oskar_timer_resume(h->tmr_copy_convert);
         tv = oskar_mem_convert_precision(vv, h->imager_prec, status);
+        oskar_timer_pause(h->tmr_copy_convert);
         v_in = tv;
     }
     if (oskar_mem_precision(ww) != h->imager_prec)
     {
+        oskar_timer_resume(h->tmr_copy_convert);
         tw = oskar_mem_convert_precision(ww, h->imager_prec, status);
+        oskar_timer_pause(h->tmr_copy_convert);
         w_in = tw;
     }
     if (oskar_mem_precision(weight) != h->imager_prec)
     {
+        oskar_timer_resume(h->tmr_copy_convert);
         th = oskar_mem_convert_precision(weight, h->imager_prec, status);
+        oskar_timer_pause(h->tmr_copy_convert);
         weight_in = th;
     }
 
@@ -443,22 +455,30 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
     pu = uu; pv = vv; pw = ww; ph = weight;
     if (oskar_mem_precision(uu) != h->imager_prec)
     {
+        oskar_timer_resume(h->tmr_copy_convert);
         tu = oskar_mem_convert_precision(uu, h->imager_prec, status);
+        oskar_timer_pause(h->tmr_copy_convert);
         pu = tu;
     }
     if (oskar_mem_precision(vv) != h->imager_prec)
     {
+        oskar_timer_resume(h->tmr_copy_convert);
         tv = oskar_mem_convert_precision(vv, h->imager_prec, status);
+        oskar_timer_pause(h->tmr_copy_convert);
         pv = tv;
     }
     if (oskar_mem_precision(ww) != h->imager_prec)
     {
+        oskar_timer_resume(h->tmr_copy_convert);
         tw = oskar_mem_convert_precision(ww, h->imager_prec, status);
+        oskar_timer_pause(h->tmr_copy_convert);
         pw = tw;
     }
     if (oskar_mem_precision(weight) != h->imager_prec)
     {
+        oskar_timer_resume(h->tmr_copy_convert);
         th = oskar_mem_convert_precision(weight, h->imager_prec, status);
+        oskar_timer_pause(h->tmr_copy_convert);
         ph = th;
     }
 
@@ -477,7 +497,9 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         pa = amps;
         if (oskar_mem_precision(amps) != h->imager_prec)
         {
+            oskar_timer_resume(h->tmr_copy_convert);
             ta = oskar_mem_convert_precision(amps, h->imager_prec, status);
+            oskar_timer_pause(h->tmr_copy_convert);
             pa = ta;
         }
 
@@ -538,6 +560,7 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
             break;
         }
         oskar_timer_pause(h->tmr_grid_update);
+        h->num_vis_processed += (num_vis - num_skipped);
         if (num_skipped > 0)
             oskar_log_warning(h->log, "Skipped %lu visibility points.",
                     (unsigned long) num_skipped);
@@ -639,7 +662,7 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
     oskar_log_message(h->log, 'M', 0, "Plane size is %d x %d.",
             plane_size, plane_size);
     oskar_log_message(h->log, 'M', 0, "Allocating %d plane(s) of size "
-            "%.1f MB (%.1f MB total)", num_planes, plane_mem * 1e-6,
+            "%.1f MB (%.1f MB total).", num_planes, plane_mem * 1e-6,
             num_planes * plane_mem * 1e-6);
 
     /* Allocate the image or visibility planes on the host. */
@@ -650,19 +673,21 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
                 num_cells, status);
 
     /* Allocate visibility planes on the devices if required. */
-    if (h->grid_on_gpu && h->num_gpus > 0 && !(
+    if (h->grid_on_gpu && !(
             h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
             h->algorithm == OSKAR_ALGORITHM_DFT_3D))
     {
         int j, norm_type;
         const int loc = h->dev_loc;
-        oskar_log_message(h->log, 'M', 0,
-                "Allocating device memory for visibility grids");
         for (j = 0; j < h->num_gpus; ++j)
         {
+            if (*status) break;
             DeviceData* d = &h->d[j];
             d->num_planes = num_planes;
             d->planes = (oskar_Mem**) calloc(num_planes, sizeof(oskar_Mem*));
+            oskar_log_message(h->log, 'M', 0,
+                    "Allocating memory on device %d for visibility grids.",
+                    h->gpu_ids[j]);
             oskar_device_set(loc, h->gpu_ids[j], status);
             for (i = 0; i < num_planes; ++i)
             {

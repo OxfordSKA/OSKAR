@@ -112,14 +112,15 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     oskar_timer_reset(h->tmr_read);
     oskar_timer_reset(h->tmr_write);
     oskar_timer_start(h->tmr_overall);
-    oskar_timer_reset(h->tmr_partition);
+    oskar_timer_reset(h->tmr_copy_convert);
     oskar_timer_reset(h->tmr_coord_scan);
     oskar_timer_reset(h->tmr_rotate);
     oskar_timer_reset(h->tmr_weights_grid);
     oskar_timer_reset(h->tmr_weights_lookup);
 
-    /* Clear init flag. */
+    /* Clear state. */
     h->init = 0;
+    h->num_vis_processed = 0;
 }
 
 #ifdef __cplusplus

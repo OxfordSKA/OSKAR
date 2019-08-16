@@ -63,7 +63,7 @@ void oskar_imager_free(oskar_Imager* h, int* status)
     oskar_timer_free(h->tmr_read);
     oskar_timer_free(h->tmr_write);
     oskar_timer_free(h->tmr_overall);
-    oskar_timer_free(h->tmr_partition);
+    oskar_timer_free(h->tmr_copy_convert);
     oskar_timer_free(h->tmr_coord_scan);
     oskar_timer_free(h->tmr_weights_grid);
     oskar_timer_free(h->tmr_weights_lookup);

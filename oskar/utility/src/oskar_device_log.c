@@ -125,7 +125,7 @@ void oskar_device_log_mem(int location, int depth, int id, oskar_Log* log)
         const double mem_free  = (double) device->global_mem_free_size;
         const double mem_total = (double) device->global_mem_size;
         oskar_log_message(log, 'M', depth,
-                "CUDA device %d [%s] memory is %.1f%% (%.1f/%.1f MiB) used.",
+                "CUDA device %d [%s] memory is %.1f%% (%.0f/%.0f MiB) used.",
                 id, device->name, 100. * (1. - (mem_free / mem_total)),
                 (mem_total - mem_free) / megabyte, mem_total / megabyte);
         oskar_device_free(device);
@@ -135,7 +135,7 @@ void oskar_device_log_mem(int location, int depth, int id, oskar_Log* log)
         const oskar_Device* device = oskar_device_cl(id);
         if (device)
             oskar_log_message(log, 'M', depth,
-                    "OpenCL device %d [%s] has %.1f MiB (max alloc. %.1f MiB).",
+                    "OpenCL device %d [%s] has %.0f MiB (max alloc. %.1f MiB).",
                     id, device->name, device->global_mem_size / megabyte,
                     device->max_mem_alloc_size / megabyte);
     }

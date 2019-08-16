@@ -55,7 +55,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     h->tmr_read = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_overall = oskar_timer_create(OSKAR_TIMER_NATIVE);
-    h->tmr_partition = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    h->tmr_copy_convert = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_coord_scan = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_weights_grid = oskar_timer_create(OSKAR_TIMER_NATIVE);
     h->tmr_weights_lookup = oskar_timer_create(OSKAR_TIMER_NATIVE);
