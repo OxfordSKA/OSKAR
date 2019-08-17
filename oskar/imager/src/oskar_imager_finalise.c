@@ -100,6 +100,7 @@ void oskar_imager_finalise(oskar_Imager* h,
                             0, 0, 0, num_cells, status);
                 }
             }
+            oskar_device_set(h->dev_loc, h->gpu_ids[0], status);
             oskar_mem_copy(h->d[0].planes[i], h->planes[i], status);
         }
         oskar_timer_pause(h->tmr_grid_finalise);
