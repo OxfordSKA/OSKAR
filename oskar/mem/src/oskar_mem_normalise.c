@@ -35,12 +35,12 @@
 extern "C" {
 #endif
 
-OSKAR_MEM_NORMALISE_REAL(    M_CAT(mem_norm_real_, float), float)
-OSKAR_MEM_NORMALISE_COMPLEX( M_CAT(mem_norm_complex_, float), float, float2)
-OSKAR_MEM_NORMALISE_MATRIX(  M_CAT(mem_norm_matrix_, float), float, float4c)
-OSKAR_MEM_NORMALISE_REAL(    M_CAT(mem_norm_real_, double), double)
-OSKAR_MEM_NORMALISE_COMPLEX( M_CAT(mem_norm_complex_, double), double, double2)
-OSKAR_MEM_NORMALISE_MATRIX(  M_CAT(mem_norm_matrix_, double), double, double4c)
+OSKAR_MEM_NORMALISE_REAL_CPU(    M_CAT(mem_norm_real_, float), float)
+OSKAR_MEM_NORMALISE_COMPLEX_CPU( M_CAT(mem_norm_complex_, float), float, float2)
+OSKAR_MEM_NORMALISE_MATRIX_CPU(  M_CAT(mem_norm_matrix_, float), float, float4c)
+OSKAR_MEM_NORMALISE_REAL_CPU(    M_CAT(mem_norm_real_, double), double)
+OSKAR_MEM_NORMALISE_COMPLEX_CPU( M_CAT(mem_norm_complex_, double), double, double2)
+OSKAR_MEM_NORMALISE_MATRIX_CPU(  M_CAT(mem_norm_matrix_, double), double, double4c)
 
 /*
  * For matrix types, return square root of autocorrelation:

@@ -48,6 +48,8 @@ set(mem_SRC
     src/oskar_mem_stats.c
     src/oskar_mem_write_fits_cube.c
     src/oskar_mem_write_healpix_fits.c
+    src/oskar_mem_cpu.cl
+    src/oskar_mem_gpu.cl
     src/oskar_mem.cl
 )
 

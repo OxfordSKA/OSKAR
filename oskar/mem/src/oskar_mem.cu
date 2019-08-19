@@ -16,6 +16,7 @@
 #define Real2 float2
 #define Real4c float4c
 #include "mem/src/oskar_mem.cl"
+#include "mem/src/oskar_mem_gpu.cl"
 #undef Real
 #undef Real2
 #undef Real4c
@@ -24,6 +25,7 @@
 #define Real2 double2
 #define Real4c double4c
 #include "mem/src/oskar_mem.cl"
+#include "mem/src/oskar_mem_gpu.cl"
 #undef Real
 #undef Real2
 #undef Real4c

@@ -76,7 +76,9 @@
 #define OSKAR_REGISTER_KERNEL(NAME) OSKAR_CUDA_KERNEL(NAME)
 #define ROUND_float(X) __float2int_rn(X)
 #define ROUND_double(X) __double2int_rn(X)
+#define RSQRT(X) rsqrt(X)
 #define SINCOS(X, S, C) sincos(X, &S, &C)
+#define THREADFENCE_BLOCK __threadfence_block()
 
 #if __CUDA_ARCH__ >= 600
 /* Native atomics. */
@@ -189,7 +191,9 @@
 #define OSKAR_REGISTER_KERNEL(NAME)
 #define ROUND_float(X) (int)rint(X)
 #define ROUND_double(X) (int)rint(X)
+#define RSQRT(X) rsqrt(X)
 #define SINCOS(X, S, C) S = sincos(X, &C)
+#define THREADFENCE_BLOCK mem_fence()
 #define WARP_BROADCAST(VAR, SRC_LANE) barrier(CLK_LOCAL_MEM_FENCE)
 #define WARP_DECL(X) local X
 
@@ -245,7 +249,9 @@
 #define OSKAR_REGISTER_KERNEL(NAME)
 #define ROUND_float(X) (int)roundf(X)
 #define ROUND_double(X) (int)round(X)
+#define RSQRT(X) (1 / sqrt(X))
 #define SINCOS(X, S, C) S = sin(X); C = cos(X)
+#define THREADFENCE_BLOCK
 
 #endif
 
