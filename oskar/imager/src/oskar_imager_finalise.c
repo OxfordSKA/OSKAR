@@ -32,6 +32,7 @@
 #include "imager/oskar_grid_correction.h"
 #include "imager/oskar_grid_functions_pillbox.h"
 #include "imager/oskar_grid_functions_spheroidal.h"
+#include "imager/private_imager_free_device_data.h"
 #include "math/oskar_fft.h"
 #include "math/oskar_fftphase.h"
 #include "mem/oskar_mem.h"
@@ -71,6 +72,10 @@ void oskar_imager_finalise(oskar_Imager* h,
         for (i = 0; i < h->num_planes; ++i)
             h->plane_norm[i] /= h->num_files;
     }
+
+    /* Clear convolution kernels and scratch arrays.
+     * Spare device memory may be needed for the FFT plan. */
+    oskar_imager_free_device_scratch_data(h, status);
 
     /* If gridding with multiple GPUs, copy grids to host and combine them. */
     if (h->grid_on_gpu && h->num_gpus > 1 && !(

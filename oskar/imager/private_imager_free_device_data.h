@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void oskar_imager_free_device_scratch_data(oskar_Imager* h, int* status);
 
 void oskar_imager_free_device_data(oskar_Imager* h, int* status);
 
