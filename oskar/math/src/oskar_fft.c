@@ -52,6 +52,45 @@ struct oskar_FFT
 #endif
 };
 
+#ifdef OSKAR_HAVE_CUDA
+static void print_cufft_error(cufftResult code)
+{
+    switch (code)
+    {
+    case CUFFT_INVALID_PLAN:
+        oskar_log_error(0, "Invalid CUFFT plan.");
+        break;
+    case CUFFT_ALLOC_FAILED:
+        oskar_log_error(0, "CUFFT memory allocation failed.");
+        break;
+    case CUFFT_INTERNAL_ERROR:
+        oskar_log_error(0, "CUFFT internal error.");
+        break;
+    case CUFFT_EXEC_FAILED:
+        oskar_log_error(0, "CUFFT exec failed.");
+        break;
+    case CUFFT_SETUP_FAILED:
+        oskar_log_error(0, "CUFFT setup failed.");
+        break;
+    case CUFFT_INVALID_SIZE:
+        oskar_log_error(0, "CUFFT invalid size.");
+        break;
+    case CUFFT_INVALID_VALUE:
+        oskar_log_error(0, "CUFFT invalid value.");
+        break;
+    case CUFFT_UNALIGNED_DATA:
+        oskar_log_error(0, "CUFFT unaligned data.");
+        break;
+    case CUFFT_NO_WORKSPACE:
+        oskar_log_error(0, "CUFFT no workspace.");
+        break;
+    default:
+        oskar_log_error(0, "CUFFT error, code %d", code);
+        break;
+    }
+}
+#endif
+
 oskar_FFT* oskar_fft_create(int precision, int location, int num_dim,
         int dim_size, int batch_size_1d, int* status)
 {
@@ -103,15 +142,21 @@ oskar_FFT* oskar_fft_create(int precision, int location, int num_dim,
     else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
+        cufftResult cufft_error_code = 0;
         if (num_dim == 1)
-            cufftPlan1d(&h->cufft_plan, dim_size,
+            cufft_error_code = cufftPlan1d(&h->cufft_plan, dim_size,
                     ((precision == OSKAR_DOUBLE) ? CUFFT_Z2Z : CUFFT_C2C),
                     batch_size_1d);
         else if (num_dim == 2)
-            cufftPlan2d(&h->cufft_plan, dim_size, dim_size,
+            cufft_error_code = cufftPlan2d(&h->cufft_plan, dim_size, dim_size,
                     ((precision == OSKAR_DOUBLE) ? CUFFT_Z2Z : CUFFT_C2C));
         else
             *status = OSKAR_ERR_INVALID_ARGUMENT;
+        if (cufft_error_code != CUFFT_SUCCESS)
+        {
+            *status = OSKAR_ERR_FFT_FAILED;
+            print_cufft_error(cufft_error_code);
+        }
 #endif
     }
     else
@@ -155,16 +200,22 @@ void oskar_fft_exec(oskar_FFT* h, oskar_Mem* data, int* status)
     else if (h->location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
+        cufftResult cufft_error_code = 0;
         if (h->precision == OSKAR_DOUBLE)
-            cufftExecZ2Z(h->cufft_plan,
+            cufft_error_code = cufftExecZ2Z(h->cufft_plan,
                     (cufftDoubleComplex*) oskar_mem_void(data_ptr),
                     (cufftDoubleComplex*) oskar_mem_void(data_ptr),
                     CUFFT_FORWARD);
         else
-            cufftExecC2C(h->cufft_plan,
+            cufft_error_code = cufftExecC2C(h->cufft_plan,
                     (cufftComplex*) oskar_mem_void(data_ptr),
                     (cufftComplex*) oskar_mem_void(data_ptr),
                     CUFFT_FORWARD);
+        if (cufft_error_code != CUFFT_SUCCESS)
+        {
+            *status = OSKAR_ERR_FFT_FAILED;
+            print_cufft_error(cufft_error_code);
+        }
 #endif
     }
     else

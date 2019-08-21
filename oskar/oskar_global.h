@@ -76,7 +76,8 @@ enum OSKAR_ERROR_CODES
     OSKAR_ERR_BAD_SKY_FILE                             = -29,
     OSKAR_ERR_BAD_POINTING_FILE                        = -30,
     OSKAR_ERR_BAD_COORD_FILE                           = -31,
-    OSKAR_ERR_BAD_GSM_FILE                             = -32
+    OSKAR_ERR_BAD_GSM_FILE                             = -32,
+    OSKAR_ERR_FFT_FAILED                               = -33
 
     /*
      * Codes -75 to -99 are reserved for settings errors.

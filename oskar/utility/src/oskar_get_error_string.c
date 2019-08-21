@@ -89,6 +89,7 @@ const char* oskar_get_error_string(int error)
     case OSKAR_ERR_BAD_POINTING_FILE:      return "bad pointing file";
     case OSKAR_ERR_BAD_COORD_FILE:         return "bad coordinate file";
     case OSKAR_ERR_BAD_GSM_FILE:           return "bad Global Sky Model file";
+    case OSKAR_ERR_FFT_FAILED:             return "FFT failed";
 
     /* OSKAR binary file errors. */
     case OSKAR_ERR_BINARY_OPEN_FAIL:       return "binary file open failed";
