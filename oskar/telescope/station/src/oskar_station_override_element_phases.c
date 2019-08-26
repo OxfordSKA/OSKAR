@@ -40,7 +40,7 @@ void oskar_station_override_element_phases(oskar_Station* s, unsigned int seed,
     int i;
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status || !s) return;
 
     /* Check location. */
     if (oskar_station_mem_location(s) != OSKAR_CPU)

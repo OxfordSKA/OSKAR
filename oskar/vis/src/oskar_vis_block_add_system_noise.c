@@ -50,6 +50,7 @@ static void oskar_get_station_std_dev_for_channel(oskar_Mem* station_std_dev,
     for (i = 0; i < num_stations; ++i)
     {
         const oskar_Station* station = oskar_telescope_station_const(tel, i);
+        if (!station) station = oskar_telescope_station_const(tel, 0);
         noise_freq = oskar_station_noise_freq_hz_const(station);
         noise_rms = oskar_station_noise_rms_jy_const(station);
         j = oskar_find_closest_match(frequency_hz, noise_freq, status);

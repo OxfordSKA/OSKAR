@@ -37,7 +37,7 @@ void oskar_station_override_element_time_variable_phases(oskar_Station* s,
         double phase_std, int* status)
 {
     int i;
-    if (*status) return;
+    if (*status || !s) return;
 
     /* Override element data only at last level. */
     if (oskar_station_has_child(s))

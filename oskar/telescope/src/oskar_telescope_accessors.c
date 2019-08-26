@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -348,8 +348,8 @@ static void oskar_telescope_set_gaussian_station_beam_p(oskar_Station* station,
     oskar_station_set_gaussian_beam_values(station, fwhm_rad, ref_freq_hz);
     if (oskar_station_has_child(station))
     {
-        int i, num_elements;
-        num_elements = oskar_station_num_elements(station);
+        int i;
+        const int num_elements = oskar_station_num_elements(station);
         for (i = 0; i < num_elements; ++i)
         {
             oskar_telescope_set_gaussian_station_beam_p(
@@ -376,6 +376,7 @@ void oskar_telescope_set_noise_freq_file(oskar_Telescope* model,
     if (*status) return;
     for (i = 0; i < model->num_stations; ++i)
     {
+        if (!model->station[i]) continue;
         oskar_mem_load_ascii(filename, 1, status,
                 oskar_station_noise_freq_hz(model->station[i]), "");
     }
@@ -404,6 +405,7 @@ void oskar_telescope_set_noise_freq(oskar_Telescope* model,
     for (i = 0; i < model->num_stations; ++i)
     {
         oskar_Mem* t;
+        if (!model->station[i]) continue;
         t = oskar_station_noise_freq_hz(model->station[i]);
         oskar_mem_realloc(t, num_channels, status);
         oskar_mem_copy(t, noise_freq_hz, status);
@@ -418,6 +420,7 @@ void oskar_telescope_set_noise_rms_file(oskar_Telescope* model,
     if (*status) return;
     for (i = 0; i < model->num_stations; ++i)
     {
+        if (!model->station[i]) continue;
         oskar_mem_load_ascii(filename, 1, status,
                 oskar_station_noise_rms_jy(model->station[i]), "");
     }
@@ -436,6 +439,7 @@ void oskar_telescope_set_noise_rms(oskar_Telescope* model,
     for (i = 0; i < model->num_stations; ++i)
     {
         s = model->station[i];
+        if (!s) continue;
         h = oskar_station_noise_rms_jy(s);
         num_channels = (int)oskar_mem_length(oskar_station_noise_freq_hz(s));
         if (num_channels == 0)

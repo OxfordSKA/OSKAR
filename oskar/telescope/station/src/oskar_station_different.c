@@ -42,6 +42,7 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
     int i, j, n;
 
     /* Check if safe to proceed. */
+    if (!a || !b) return 0;
     if (*status) return 1;
 
     /* Don't check the unique ID, for obvious reasons! */

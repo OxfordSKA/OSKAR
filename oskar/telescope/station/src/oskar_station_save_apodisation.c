@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ void oskar_station_save_apodisation(const char* filename,
     FILE* file;
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status || !station) return;
 
     /* Save the data. */
     file = fopen(filename, "w");

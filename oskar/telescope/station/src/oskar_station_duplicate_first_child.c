@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,8 @@ extern "C" {
 
 void oskar_station_duplicate_first_child(oskar_Station* station, int* status)
 {
-    int i = 0;
+    int i;
+    if (*status || !station) return;
 
     /* Copy the first station to the others. */
     for (i = 1; i < station->num_elements; ++i)

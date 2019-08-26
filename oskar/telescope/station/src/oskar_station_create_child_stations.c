@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ void oskar_station_create_child_stations(oskar_Station* station,
     int i, type, location;
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status || !station) return;
 
     /* Check that the memory isn't already allocated. */
     if (station->child)
@@ -51,8 +51,8 @@ void oskar_station_create_child_stations(oskar_Station* station,
     }
 
     /* Allocate memory for child station array. */
-    station->child = (oskar_Station**) malloc(
-            station->num_elements * sizeof(oskar_Station*));
+    station->child = (oskar_Station**) calloc(
+            station->num_elements, sizeof(oskar_Station*));
     if (!station->child)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;

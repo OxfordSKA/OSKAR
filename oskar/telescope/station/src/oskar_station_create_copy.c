@@ -46,7 +46,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     oskar_Station* model = 0;
 
     /* Check if safe to proceed. */
-    if (*status) return model;
+    if (*status || !src) return model;
 
     /* Create the new model. */
     model = oskar_station_create(oskar_station_precision(src), location,

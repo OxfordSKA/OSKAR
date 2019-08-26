@@ -178,7 +178,7 @@ void TelescopeLoaderElementPattern::load_fitted_data(int port,
 {
     size_t buflen = 0;
     char* buffer = 0;
-    if (*status) return;
+    if (*status || !station) return;
     for (size_t i = 0; i < keys.size(); ++i)
     {
         int ind = 0;
@@ -205,7 +205,7 @@ void TelescopeLoaderElementPattern::load_functional_data(int port,
 {
     size_t buflen = 0;
     char* buffer = 0;
-    if (*status) return;
+    if (*status || !station) return;
     for (size_t i = 0; i < keys.size(); ++i)
     {
         int ind = 0;
@@ -233,7 +233,7 @@ void TelescopeLoaderElementPattern::load_spherical_wave_data(
     char* buffer = 0;
     int num_tmp = 21;
     double* tmp = (double*) calloc((size_t) num_tmp, sizeof(double));
-    if (*status) return;
+    if (*status || !station) return;
     for (size_t i = 0; i < keys.size(); ++i)
     {
         int ind = 0;

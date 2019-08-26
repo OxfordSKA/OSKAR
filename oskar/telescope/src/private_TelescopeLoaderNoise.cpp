@@ -79,6 +79,7 @@ void TelescopeLoaderNoise::load(oskar_Telescope* telescope, const string& cwd,
             for (int i = 0; i < num_stations; ++i)
             {
                 oskar_Station* s = oskar_telescope_station(telescope, i);
+                if (!s) continue;
                 oskar_mem_copy(oskar_station_noise_freq_hz(s), freqs_, status);
                 set_noise_rms(s, filemap, status);
             }

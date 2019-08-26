@@ -38,7 +38,7 @@ extern "C" {
 void oskar_station_set_element_cable_length_error(oskar_Station* dst,
         int index, const double error_metres, int* status)
 {
-    if (*status) return;
+    if (*status || !dst) return;
     if (index >= dst->num_elements)
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;

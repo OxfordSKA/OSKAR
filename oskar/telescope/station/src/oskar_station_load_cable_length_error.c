@@ -45,7 +45,7 @@ void oskar_station_load_cable_length_error(oskar_Station* station,
     size_t bufsize = 0;
     int n = 0;
     FILE* file;
-    if (*status) return;
+    if (*status || !station) return;
     const int type = oskar_station_precision(station);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {

@@ -226,7 +226,7 @@ static void load_directories(oskar_Telescope* telescope,
     }
 
     // At some other depth.
-    else
+    else if (station)
     {
         // Load everything at this level.
         for (size_t i = 0; i < loaders.size(); ++i)

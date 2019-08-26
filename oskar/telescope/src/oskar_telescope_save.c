@@ -156,6 +156,7 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
                 oskar_station_child_const(station, i);
 
         /* Save this station. */
+        if (!s) continue;
         path = oskar_dir_get_path(dir_path, station_name);
         oskar_telescope_save_private(telescope, path, s, depth + 1, status);
         free(path);

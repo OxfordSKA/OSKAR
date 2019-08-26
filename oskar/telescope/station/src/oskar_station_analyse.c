@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ void oskar_station_analyse(oskar_Station* station,
     char* mount_type;
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status || !station) return;
 
     /* Check station model is in CPU-accessible memory. */
     if (oskar_station_mem_location(station) != OSKAR_CPU)

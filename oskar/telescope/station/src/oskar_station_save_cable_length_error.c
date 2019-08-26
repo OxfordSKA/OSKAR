@@ -40,7 +40,7 @@ void oskar_station_save_cable_length_error(const char* filename,
         const oskar_Station* station, int* status)
 {
     FILE* file;
-    if (*status) return;
+    if (*status || !station) return;
     file = fopen(filename, "w");
     if (!file)
     {

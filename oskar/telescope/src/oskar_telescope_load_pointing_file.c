@@ -174,7 +174,7 @@ static void set_coords(oskar_Station* station, int set_recursive,
         double lon, double lat, int* status)
 {
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status || !station) return;
 
     if (set_recursive)
     {

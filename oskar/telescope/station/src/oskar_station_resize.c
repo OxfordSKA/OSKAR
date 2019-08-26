@@ -38,7 +38,7 @@ extern "C" {
 void oskar_station_resize(oskar_Station* station, int num_elements,
         int* status)
 {
-    if (*status) return;
+    if (*status || !station) return;
     oskar_mem_realloc(station->element_true_x_enu_metres, num_elements, status);
     oskar_mem_realloc(station->element_true_y_enu_metres, num_elements, status);
     oskar_mem_realloc(station->element_true_z_enu_metres, num_elements, status);

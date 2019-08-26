@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ void oskar_station_override_element_feed_angle(oskar_Station* s,
     int i;
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status || !s) return;
 
     /* Check if there are child stations. */
     if (oskar_station_has_child(s))

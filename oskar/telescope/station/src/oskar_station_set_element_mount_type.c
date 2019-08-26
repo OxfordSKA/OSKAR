@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ void oskar_station_set_element_mount_type(oskar_Station* dst,
         int index, char element_type, int* status)
 {
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status || !dst) return;
 
     /* Check range. */
     if (index >= dst->num_elements)

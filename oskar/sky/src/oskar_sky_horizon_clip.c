@@ -85,6 +85,7 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
     for (i = 0; i < num_stations; ++i)
     {
         const oskar_Station* s = oskar_telescope_station_const(telescope, i);
+        if (!s) continue;
         oskar_update_horizon_mask(num_in, oskar_sky_l_const(in),
                 oskar_sky_m_const(in), oskar_sky_n_const(in),
                 ha0(oskar_station_lon_rad(s), ra0, gast), dec0,

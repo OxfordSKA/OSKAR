@@ -313,12 +313,16 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
     /* Generate beam for this pixel chunk, for all active stations. */
     for (i = 0; i < h->num_active_stations; ++i)
     {
+        const oskar_Station* station =
+                oskar_telescope_station_const(d->tel, h->station_ids[i]);
+        if (!station)
+            station = oskar_telescope_station_const(d->tel, 0);
         const int offset = i * chunk_size;
         oskar_evaluate_station_beam(chunk_size,
                 h->coord_type, d->x, d->y, d->z,
                 oskar_telescope_phase_centre_ra_rad(d->tel),
                 oskar_telescope_phase_centre_dec_rad(d->tel),
-                oskar_telescope_station_const(d->tel, h->station_ids[i]),
+                station,
                 d->work, i_time, freq_hz, gast, offset, d->jones_data, status);
         if (d->auto_power[I])
             oskar_evaluate_auto_power(chunk_size,

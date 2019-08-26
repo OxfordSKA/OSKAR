@@ -39,12 +39,13 @@ extern "C" {
 static void max_station_size_and_depth(const oskar_Station* s,
         int* max_elements, int* max_depth, int depth)
 {
-    int i, num_elements;
-    num_elements = oskar_station_num_elements(s);
+    if (!s) return;
+    const int num_elements = oskar_station_num_elements(s);
     *max_elements = num_elements > *max_elements ? num_elements : *max_elements;
     *max_depth = depth > *max_depth ? depth : *max_depth;
     if (oskar_station_has_child(s))
     {
+        int i;
         for (i = 0; i < num_elements; ++i)
         {
             max_station_size_and_depth(oskar_station_child_const(s, i),
@@ -57,6 +58,7 @@ static void max_station_size_and_depth(const oskar_Station* s,
 static void set_child_station_locations(oskar_Station* s,
         const oskar_Station* parent)
 {
+    if (!s) return;
     if (parent)
     {
         oskar_station_set_position(s,
@@ -107,17 +109,22 @@ void oskar_telescope_analyse(oskar_Telescope* model, int* status)
     if (*status) return;
 
     /* Check if we need to examine every station. */
-    if (finished_identical_station_check)
+    if (finished_identical_station_check &&
+            (num_stations > 1 && oskar_telescope_station(model, 1) != 0))
     {
         model->identical_stations = 0;
     }
     else
     {
         /* Check if the stations are different. */
+        const oskar_Station* station0 =
+                oskar_telescope_station_const(model, 0);
         for (i = 1; i < num_stations; ++i)
         {
-            if (oskar_station_different(oskar_telescope_station(model, 0),
-                    oskar_telescope_station(model, i), status))
+            const oskar_Station* station =
+                    oskar_telescope_station_const(model, i);
+            if (!station) continue;
+            if (oskar_station_different(station0, station, status))
             {
                 model->identical_stations = 0;
                 break;

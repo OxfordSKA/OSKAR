@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ void oskar_station_save_layout(const char* filename,
     const oskar_Mem *x_signal, *y_signal, *z_signal;
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status || !station) return;
 
     /* Check type and location. */
     type = oskar_station_precision(station);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ void oskar_station_set_element_errors(oskar_Station* dst,
         double phase_error, int* status)
 {
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status || !dst) return;
 
     /* Convert phases to radians */
     phase_offset *= M_PI / 180.0;

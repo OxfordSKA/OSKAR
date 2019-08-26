@@ -38,7 +38,7 @@ void oskar_station_override_element_cable_length_errors(oskar_Station* s,
         unsigned int seed, double mean_metres, double std_metres, int* status)
 {
     int i;
-    if (*status) return;
+    if (*status || !s) return;
     if (oskar_station_mem_location(s) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;

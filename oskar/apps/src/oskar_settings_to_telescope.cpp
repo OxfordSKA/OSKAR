@@ -243,7 +243,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
 
 void set_station_data(oskar_Station* station, SettingsTree* s, int* status)
 {
-    if (*status) return;
+    if (*status || !station) return;
     s->clear_group();
     oskar_station_set_normalise_final_beam(station,
             s->to_int("telescope/normalise_beams_at_phase_centre", status));
