@@ -142,7 +142,7 @@ oskar_FFT* oskar_fft_create(int precision, int location, int num_dim,
     else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        cufftResult cufft_error_code = 0;
+        cufftResult cufft_error_code = CUFFT_SUCCESS;
         if (num_dim == 1)
             cufft_error_code = cufftPlan1d(&h->cufft_plan, dim_size,
                     ((precision == OSKAR_DOUBLE) ? CUFFT_Z2Z : CUFFT_C2C),
@@ -200,7 +200,7 @@ void oskar_fft_exec(oskar_FFT* h, oskar_Mem* data, int* status)
     else if (h->location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        cufftResult cufft_error_code = 0;
+        cufftResult cufft_error_code = CUFFT_SUCCESS;
         if (h->precision == OSKAR_DOUBLE)
             cufft_error_code = cufftExecZ2Z(h->cufft_plan,
                     (cufftDoubleComplex*) oskar_mem_void(data_ptr),

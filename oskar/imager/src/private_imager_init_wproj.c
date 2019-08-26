@@ -441,7 +441,8 @@ static void oskar_imager_trim_and_save_kernel_cube(oskar_Imager* h,
     fname = (char*) calloc(80, sizeof(char));
     sprintf(fname, "oskar_w_kernel_cache_%04d.fits", num_w_planes);
     oskar_mem_write_fits_cube(kernel_cube, fname,
-            *conv_size_half, *conv_size_half, num_w_planes, -1, status);
+            (int) *conv_size_half, (int) *conv_size_half, num_w_planes, -1,
+            status);
 
     /* Write relevant imaging parameters as primary header keywords. */
     fits_open_file(&f, fname, READWRITE, status);
