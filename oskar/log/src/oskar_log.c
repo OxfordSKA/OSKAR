@@ -460,6 +460,7 @@ static void write_log(oskar_Log* log, int to_file, char priority, char code,
     {
         print_entry(log, log->file,
                 priority, code, depth, prefix, format, args);
+        fflush(log->file);
     }
 }
 
