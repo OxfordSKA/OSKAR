@@ -162,7 +162,10 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
     Vector<Double> timeRange(2, 0.0);
     p->msc->observation().schedule().put(0, corrSchedule);
     p->msc->observation().project().put(0, "");
-    p->msc->observation().observer().put(0, username);
+    if (username)
+        p->msc->observation().observer().put(0, username);
+    else
+        p->msc->observation().observer().put(0, "Unknown");
     p->msc->observation().telescopeName().put(0, app_name);
     p->msc->observation().timeRange().put(0, timeRange);
     oskar_ms_set_time_range(p);
