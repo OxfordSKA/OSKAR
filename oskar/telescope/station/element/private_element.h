@@ -67,6 +67,7 @@ struct oskar_Element
     oskar_Splines **scalar_re, **scalar_im;
 
     /* Spherical wave data. */
+    int *common_phi_coords;
     int *l_max;
     oskar_Mem **sph_wave;
 };

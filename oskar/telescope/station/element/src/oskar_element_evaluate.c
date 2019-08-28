@@ -97,9 +97,12 @@ void oskar_element_evaluate(
     if (oskar_mem_is_matrix(output))
     {
         if (oskar_element_has_spherical_wave_data(model, id))
-            oskar_evaluate_spherical_wave_sum(num_points, theta,
-                    phi_x, phi_y, model->l_max[id], model->sph_wave[id],
+        {
+            oskar_evaluate_spherical_wave_sum(num_points, theta, phi_x,
+                    (model->common_phi_coords[id] ? phi_x : phi_y),
+                    model->l_max[id], model->sph_wave[id],
                     offset_out, output, status);
+        }
         else
         {
             const int offset_out_real = offset_out * 8;

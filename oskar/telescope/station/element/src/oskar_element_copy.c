@@ -53,6 +53,7 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
     {
         dst->freqs_hz[i] = src->freqs_hz[i];
         dst->l_max[i] = src->l_max[i];
+        dst->common_phi_coords[i] = src->common_phi_coords[i];
         oskar_mem_copy(dst->filename_x[i], src->filename_x[i], status);
         oskar_mem_copy(dst->filename_y[i], src->filename_y[i], status);
         oskar_mem_copy(dst->filename_scalar[i], src->filename_scalar[i], status);

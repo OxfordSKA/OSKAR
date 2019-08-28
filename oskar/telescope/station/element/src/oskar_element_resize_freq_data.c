@@ -62,6 +62,7 @@ void oskar_element_resize_freq_data(oskar_Element* model, int size,
             model->scalar_im[i] = 0;
             model->sph_wave[i] = 0;
             model->l_max[i] = 0;
+            model->common_phi_coords[i] = 0;
         }
     }
     else if (size < old_size)
@@ -95,6 +96,8 @@ static void realloc_arrays(oskar_Element* e, int size)
     const size_t sz = size * sizeof(void*);
     e->freqs_hz = (double*) realloc(e->freqs_hz, size * sizeof(double));
     e->l_max = (int*) realloc(e->l_max, size * sizeof(int));
+    e->common_phi_coords = (int*) realloc(
+            e->common_phi_coords, size * sizeof(int));
     e->filename_x = (oskar_Mem**) realloc(e->filename_x, sz);
     e->filename_y = (oskar_Mem**) realloc(e->filename_y, sz);
     e->filename_scalar = (oskar_Mem**) realloc(e->filename_scalar, sz);

@@ -112,27 +112,35 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     /* Coefficient data stored as:
      * (x_te_re, x_te_im), (x_tm_re, x_tm_im),
      * (y_te_re, y_te_im), (y_tm_re, y_tm_im)   */
+    /* Separate patterns in each polarisation are already rotated,
+     * so use common phi coordinates when evaluating them. */
     switch (selector)
     {
     case OPTION_TE:
         offset1 = 0 + offset_complex;
         offset2 = 4 + offset_complex;
+        data->common_phi_coords[i] = 0;
         break;
     case OPTION_TM:
         offset1 = 2 + offset_complex;
         offset2 = 6 + offset_complex;
+        data->common_phi_coords[i] = 0;
         break;
     case OPTION_X | OPTION_TE:
         offset1 = 0 + offset_complex;
+        data->common_phi_coords[i] = 1;
         break;
     case OPTION_X | OPTION_TM:
         offset1 = 2 + offset_complex;
+        data->common_phi_coords[i] = 1;
         break;
     case OPTION_Y | OPTION_TE:
         offset1 = 4 + offset_complex;
+        data->common_phi_coords[i] = 1;
         break;
     case OPTION_Y | OPTION_TM:
         offset1 = 6 + offset_complex;
+        data->common_phi_coords[i] = 1;
         break;
     default:
         oskar_log_error(0, "Unknown spherical wave filename pattern '%s'",

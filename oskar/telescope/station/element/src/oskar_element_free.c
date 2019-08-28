@@ -58,6 +58,7 @@ void oskar_element_free(oskar_Element* data, int* status)
     }
     free(data->freqs_hz);
     free(data->l_max);
+    free(data->common_phi_coords);
     free(data->filename_x);
     free(data->filename_y);
     free(data->filename_scalar);
