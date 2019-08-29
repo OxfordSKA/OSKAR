@@ -596,9 +596,9 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
                 complex_to_phase(in, off, num_pol, num_pix, h->pix, status);
             else if (stokes_out == XY)
                 complex_to_phase(in, off + 1, num_pol, num_pix, h->pix, status);
-            else if (stokes_out == XY)
-                complex_to_phase(in, off + 2, num_pol, num_pix, h->pix, status);
             else if (stokes_out == YX)
+                complex_to_phase(in, off + 2, num_pol, num_pix, h->pix, status);
+            else if (stokes_out == YY)
                 complex_to_phase(in, off + 3, num_pol, num_pix, h->pix, status);
             else continue;
         }
