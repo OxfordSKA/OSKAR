@@ -198,13 +198,13 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
             oskar_type_is_matrix(oskar_vis_header_amp_type(hdr)) ? 4 : 1;
     const int num_weights = num_baselines * num_pols * max_times_per_block;
     const int num_blocks = oskar_vis_header_num_blocks(hdr);
+    const double freq_inc_hz = oskar_vis_header_freq_inc_hz(hdr);
+    const double freq_start_hz = oskar_vis_header_freq_start_hz(hdr);
     time_start_mjd = oskar_vis_header_time_start_mjd_utc(hdr) * 86400.0;
     time_inc_sec = oskar_vis_header_time_inc_sec(hdr);
 
     /* Set visibility meta-data. */
-    oskar_imager_set_vis_frequency(h,
-            oskar_vis_header_freq_start_hz(hdr),
-            oskar_vis_header_freq_inc_hz(hdr),
+    oskar_imager_set_vis_frequency(h, freq_start_hz, freq_inc_hz,
             oskar_vis_header_num_channels_total(hdr));
     oskar_imager_set_vis_phase_centre(h,
             oskar_vis_header_phase_centre_ra_deg(hdr),
@@ -247,22 +247,28 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
         for (c = 0; c < num_channels; ++c)
         {
             /* Update per channel. */
-            oskar_timer_resume(h->tmr_copy_convert);
-            for (t = 0; t < num_times; ++t)
+            const double freq_hz =
+                    freq_start_hz + (start_chan + c) * freq_inc_hz;
+            if (freq_hz >= h->freq_min_hz &&
+                    (freq_hz <= h->freq_max_hz || h->freq_max_hz == 0.0))
             {
-                oskar_mem_copy_contents(scratch,
-                        oskar_vis_block_cross_correlations(block),
-                        num_baselines * t,
-                        num_baselines * (num_channels * t + c),
-                        num_baselines, status);
+                oskar_timer_resume(h->tmr_copy_convert);
+                for (t = 0; t < num_times; ++t)
+                {
+                    oskar_mem_copy_contents(scratch,
+                            oskar_vis_block_cross_correlations(block),
+                            num_baselines * t,
+                            num_baselines * (num_channels * t + c),
+                            num_baselines, status);
+                }
+                oskar_timer_pause(h->tmr_copy_convert);
+                oskar_imager_update(h, num_rows,
+                        start_chan + c, start_chan + c, num_pols,
+                        oskar_vis_block_baseline_uu_metres_const(block),
+                        oskar_vis_block_baseline_vv_metres_const(block),
+                        oskar_vis_block_baseline_ww_metres_const(block),
+                        scratch, weight, time_centroid, status);
             }
-            oskar_timer_pause(h->tmr_copy_convert);
-            oskar_imager_update(h, num_rows,
-                    start_chan + c, start_chan + c, num_pols,
-                    oskar_vis_block_baseline_uu_metres_const(block),
-                    oskar_vis_block_baseline_vv_metres_const(block),
-                    oskar_vis_block_baseline_ww_metres_const(block),
-                    scratch, weight, time_centroid, status);
         }
         *percent_done = (int) round(100.0 * (
                 (i_block + 1) / (double)(num_blocks * num_files) +
