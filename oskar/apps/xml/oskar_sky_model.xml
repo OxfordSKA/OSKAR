@@ -40,12 +40,12 @@
             <desc>FITS file(s) to use as a sky model.</desc>
         </s>
         <s k="min_peak_fraction"><label>Minimum fraction of peak</label>
-            <type name="UnsignedDouble" default="0.02"/>
+            <type name="double" default="0.02"/>
             <desc>The minimum allowed pixel value, as a fraction of the
                 peak value in the image.</desc>
         </s>
         <s k="min_abs_val"><label>Minimum absolute value</label>
-            <type name="UnsignedDouble" default="0.0"/>
+            <type name="double" default="0.0"/>
             <desc>The minimum pixel value accepted, in units of the original
                 image.</desc>
         </s>
