@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,7 @@ public:
     Docs(QWidget *parent = 0);
 
 private:
-    static void add_doc(QString& html, const char* doc_name, const char* title,
-            const char* desc);
+    static void add_doc(QString& html, const char* title, const char* desc);
 };
 
 } /* namespace oskar */

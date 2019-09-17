@@ -97,13 +97,10 @@ The following documents are available:
 \section intro_faq FAQ
 
 This section attempts to address some frequently asked questions about OSKAR.
-If you have a question that is not answered here, please send it to
-oskar@oerc.ox.ac.uk and we will do our best to respond.
 
 -# <b>Which operating systems/platforms are supported?</b><br>
 OSKAR has been tested to compile and run correctly on various recent Linux
 distributions, and recent versions of macOS and Windows.
-If you encounter a problem with OSKAR, please report it to oskar@oerc.ox.ac.uk.
 
 -# <b>Does OSKAR require an NVIDIA GPU to work?</b><br>
 No, but simulations will probably run faster if an NVIDIA GPU is available.
@@ -144,9 +141,6 @@ GPU hardware.
 -# <b>Are pre-built binary packages of OSKAR available?</b><br>
 Binary installer packages are now available for macOS and Windows systems.
 On Linux, OSKAR still needs to be compiled from source.
-
--# <b>I found a bug!</b><br>
-Please let us know by sending an email to oskar@oerc.ox.ac.uk.
 
 
 \latexonly

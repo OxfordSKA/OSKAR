@@ -19,7 +19,7 @@ the Qt dependency satisfied. For details, see the install guide documentation.
 \subsection example_obtaining_setup_files Obtaining the Example Setup Files
 
 The data files used for this example can be downloaded from:<br>
-http://oskar.oerc.ox.ac.uk/
+https://github.com/OxfordSKA/OSKAR/releases
 
 This archive contains:
 

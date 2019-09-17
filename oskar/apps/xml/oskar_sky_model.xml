@@ -13,6 +13,7 @@
         <import filename="oskar_sky_model_filter.xml"/>
         <import filename="oskar_sky_model_extended_sources.xml"/>
     </s>
+    <!--
     <s k="gsm"><label>Global Sky Model (GSM) file settings</label>
         <s k="file"><label>GSM file</label>
             <type name="InputFile" default=""/>
@@ -31,9 +32,9 @@
             <type name="double" default="-0.7"/>
             <desc>The spectral index to give to each pixel.</desc>
         </s>
-        <import filename="oskar_sky_model_filter.xml"/>
-        <import filename="oskar_sky_model_extended_sources.xml"/>
+        Import filter and extended source settings here.
     </s>
+    -->
     <s k="fits_image"><label>FITS image file settings</label>
         <s k="file"><label>Input FITS file(s)</label>
             <type name="InputFileList" default=""/>

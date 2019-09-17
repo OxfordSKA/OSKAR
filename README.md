@@ -11,9 +11,7 @@ Please see INSTALL.md for a quick installation guide.
 A source code archive for Linux, and binary installer packages for
 macOS and Windows platforms are available to download from:
 
-    http://oskar.oerc.ox.ac.uk/
-
-Please email oskar@oerc.ox.ac.uk if you encounter problems using OSKAR.
+    https://github.com/OxfordSKA/OSKAR/releases
 
 OSKAR is licensed under the terms of the 3-clause BSD License.
 Please see LICENSE for details.

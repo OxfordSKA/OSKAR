@@ -5,7 +5,7 @@ OSKAR can be installed by following the steps described below.
 A source code archive for Linux, and binary installer packages for
 macOS and Windows platforms are available to download from:
 
-    http://oskar.oerc.ox.ac.uk/
+    https://github.com/OxfordSKA/OSKAR/releases
 
 
 # 2. Building OSKAR
@@ -119,18 +119,11 @@ build directory:
 
     $ ctest [--verbose]
 
-All the unit tests should pass. If any fail, please report this by copying
-the terminal output and sending it, together with a description of the
-hardware in your machine, your operating system version and your version of
-OSKAR, to the following email address:
-
-    oskar@oerc.ox.ac.uk
-
 ## 3.2 Running the Example Simulation
 
 With any fresh install of OSKAR, we recommend running the
 example simulation described in the documentation found at
 
-    http://oskar.oerc.ox.ac.uk/
+    https://github.com/OxfordSKA/OSKAR/releases
 
 to establish if a simple simulation behaves as expected.

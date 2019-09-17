@@ -206,8 +206,7 @@ setup(
         'Programming Language :: Python :: 3'
     ],
     author='University of Oxford',
-    author_email='oskar@oerc.ox.ac.uk',
-    url='https://github.com/OxfordSKA/OSKAR/tree/master/python',
+    url='https://github.com/OxfordSKA/OSKAR',
     license='BSD',
     install_requires=['numpy'],
     setup_requires=['numpy'],

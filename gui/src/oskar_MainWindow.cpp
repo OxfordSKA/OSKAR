@@ -194,7 +194,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     menuHelp->addAction(actAbout);
 
     // Create the network access manager to check the current version.
-    version_url_ = "http://oskar.oerc.ox.ac.uk/current_oskar_version.txt";
+    version_url_ = "/current_oskar_version.txt";
     net_ = new QNetworkAccessManager(this);
     connect(net_, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(processNetworkReply(QNetworkReply*)));
@@ -557,7 +557,7 @@ void MainWindow::appChanged(QString text)
     view_->resizeColumnToContents(0);
 
     // Check for updates.
-    if (!checked_update_) checkForUpdate();
+    //if (!checked_update_) checkForUpdate();
 }
 
 void MainWindow::setAppDir(bool hint)
@@ -656,9 +656,7 @@ void MainWindow::processNetworkReply(QNetworkReply* reply)
         msgBox.setIcon(QMessageBox::Information);
         msgBox.setTextFormat(Qt::RichText);
         msgBox.setText(QString("A newer version of OSKAR (%1) is "
-                "available to download at <br/>"
-                "<a href=\"http://oskar.oerc.ox.ac.uk/\">"
-                "http://oskar.oerc.ox.ac.uk</a>.").arg(currentVerString));
+                "available.").arg(currentVerString));
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.exec();
     }

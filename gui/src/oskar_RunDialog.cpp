@@ -206,10 +206,9 @@ void RunDialog::runCrashed()
     msgBox.setWindowTitle("OSKAR");
     msgBox.setIcon(QMessageBox::Critical);
     msgBox.setText("Oops! Sorry, OSKAR seems to have crashed.");
-    msgBox.setInformativeText("Please report this problem by sending an email "
-            "to the oskar@oerc.ox.ac.uk support address, and provide details "
-            "of your version of OSKAR, your hardware configuration, your run "
-            "log, and what you were trying to do at the time.");
+    msgBox.setInformativeText("Please report this problem to the OSKAR "
+            "developers, and describe the steps required to reproduce "
+            "the issue so we can investigate it.");
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.exec();
 }

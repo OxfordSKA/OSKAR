@@ -8,11 +8,6 @@
 
 \section theory_intro Introduction
 
-This document describes the methods that OSKAR uses to perform simulations,
-and all users of the software should read it carefully. If there are any
-problems, please notify us by sending an email to oskar@oerc.ox.ac.uk so
-that the simulation software can be updated.
-
 \subsection theory_interferometer_sim Interferometer Simulation
 
 OSKAR 2 uses the Radio Interferometer Measurement Equation of

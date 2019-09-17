@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 #include <QtWidgets/QTextBrowser>
 #include <QtWidgets/QVBoxLayout>
 
-static const char* root_url = "http://oskar.oerc.ox.ac.uk";
+static const char* root_url = "https://github.com/OxfordSKA/OSKAR/releases";
 
 namespace oskar {
 
@@ -55,49 +55,45 @@ Docs::Docs(QWidget *parent) : QDialog(parent)
     html.append(QString("<ul><li><a href=\"%1\">%2</a></li></ul>").
             arg(root_url).arg(root_url));
     html.append("</p>");
-    html.append("<p>");
-    html.append("Please email <a href=\"mailto:oskar@oerc.ox.ac.uk\">"
-            "oskar@oerc.ox.ac.uk</a> for general OSKAR queries.");
-    html.append("</p>");
     html.append("<p>The following PDF documents are available:</p>");
     html.append("<ol>");
 
-    add_doc(html, "OSKAR-Introduction.pdf",
+    add_doc(html,
             "Introduction & FAQ",
             "An introduction to the OSKAR package");
-    add_doc(html, "OSKAR-Release-Notes.pdf",
+    add_doc(html,
             "Release Notes",
             "Describes the changes in the current release of OSKAR");
-    add_doc(html, "OSKAR-Install.pdf",
+    add_doc(html,
             "Installation Guide",
             "Describes how to build and install OSKAR");
-    add_doc(html, "OSKAR-Example.pdf",
+    add_doc(html,
             "Example",
             "Describes how to run an example simulation and test that "
             "your version of OSKAR is working as intended");
-    add_doc(html, "OSKAR-Theory.pdf",
+    add_doc(html,
             "Theory of Operation",
             "Describes the theory of operation of OSKAR, its "
             "implementation of the measurement equation and its treatment of "
             "polarisation. Please read this document to verify that OSKAR "
             "works as you expect");
-    add_doc(html, "OSKAR-Apps.pdf",
+    add_doc(html,
             "Applications",
             "Describes the available OSKAR applications");
-    add_doc(html, "OSKAR-Sky-Model.pdf",
+    add_doc(html,
             "Sky Model",
             "Describes the format of the OSKAR sky model files");
-    add_doc(html, "OSKAR-Telescope-Model.pdf",
+    add_doc(html,
             "Telescope Model",
             "Describes the format of the OSKAR telescope model files and "
             "directories");
-    add_doc(html, "OSKAR-Pointing-File.pdf",
+    add_doc(html,
             "Pointing File",
             "Describes the format of OSKAR pointing files");
-    add_doc(html, "OSKAR-Settings.pdf",
+    add_doc(html,
             "Settings",
             "Describes the format of the OSKAR settings files");
-    add_doc(html, "OSKAR-Binary-File-Format.pdf",
+    add_doc(html,
             "Binary File Format",
             "Describes the format of binary files written by OSKAR applications");
 
@@ -122,13 +118,11 @@ Docs::Docs(QWidget *parent) : QDialog(parent)
     vLayoutMain->addWidget(buttons);
 }
 
-void Docs::add_doc(QString& html, const char* doc_name, const char* title,
-        const char* desc)
+void Docs::add_doc(QString& html, const char* title, const char* desc)
 {
     html.append("<p>");
     html.append("<li>&nbsp;");
-    html.append(QString("<a href=\"%1/sites/default/files/%2\">%3</a>").
-            arg(root_url).arg(doc_name).arg(title));
+    html.append(QString("%1").arg(title));
     html.append("<ul>");
     html.append(QString("<li>%1.</li>").arg(desc));
     html.append("</ul>");
