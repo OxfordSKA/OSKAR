@@ -182,14 +182,16 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         tab.bindColumn(MS::columnName(MS::SIGMA), sigmaStorageManager);
 
         // Create tiled column storage managers for DATA and FLAG columns.
-#ifdef OSKAR_HAVE_MPI
         if (use_adios2)
         {
+#ifdef OSKAR_HAVE_MPI
             Adios2StMan adiosStMan(*mpi_comm);
             tab.bindColumn(MS::columnName(MS::DATA), adiosStMan);
+#else
+            throw std::runtime_error("ADIOS2 support requested by OSKAR is compiled without MPI support");
+#endif // OSKAR_HAVE_MPI
         }
         else
-#endif // OSKAR_HAVE_MPI
         {
             IPosition dataTileShape(3, num_pols, num_channels, 2 * num_baselines);
             TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
