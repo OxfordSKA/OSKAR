@@ -247,7 +247,18 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
     }
     catch (const std::exception &e)
     {
-        fprintf(stderr, "Error creating Measurement Set: %s\n", e.what());
+        std::ostringstream os;
+        os << "Error creating Measurement Set: " << e.what();
+#ifdef OSKAR_HAVE_MPI
+        if (mpi_comm)
+        {
+            int rank, size;
+            MPI_Comm_rank(*mpi_comm, &rank);
+            MPI_Comm_size(*mpi_comm, &size);
+            os << ". MPI rank: " << rank + 1 << "/" << size;
+        }
+#endif
+        fprintf(stderr, "%s\n", os.str().c_str());
         oskar_ms_close(p);
         return 0;
     }
