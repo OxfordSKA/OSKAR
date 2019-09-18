@@ -85,6 +85,36 @@ oskar_MeasurementSet* oskar_ms_create_mpi(const char* file_name,
 #endif // OSKAR_HAVE_MPI
 
 
+static void standard_common_setup(
+    SetupNewTable &tab, unsigned int num_channels, unsigned int num_pols,
+    unsigned int num_baselines)
+{
+    // Create the default storage managers.
+    IncrementalStMan incrStorageManager("ISMData");
+    tab.bindAll(incrStorageManager);
+    StandardStMan stdStorageManager("SSMData", 32768, 32768);
+    tab.bindColumn(MS::columnName(MS::ANTENNA1), stdStorageManager);
+    tab.bindColumn(MS::columnName(MS::ANTENNA2), stdStorageManager);
+
+    // Create tiled column storage manager for UVW column.
+    IPosition uvwTileShape(2, 3, 2 * num_baselines);
+    TiledColumnStMan uvwStorageManager("TiledUVW", uvwTileShape);
+    tab.bindColumn(MS::columnName(MS::UVW), uvwStorageManager);
+
+    // Create tiled column storage managers for WEIGHT and SIGMA columns.
+    IPosition weightTileShape(2, num_pols, 2 * num_baselines);
+    TiledColumnStMan weightStorageManager("TiledWeight", weightTileShape);
+    tab.bindColumn(MS::columnName(MS::WEIGHT), weightStorageManager);
+    IPosition sigmaTileShape(2, num_pols, 2 * num_baselines);
+    TiledColumnStMan sigmaStorageManager("TiledSigma", sigmaTileShape);
+    tab.bindColumn(MS::columnName(MS::SIGMA), sigmaStorageManager);
+
+    // Create tiled column storage managers for FLAG column.
+    IPosition flagTileShape(3, num_pols, num_channels, 16 * num_baselines);
+    TiledColumnStMan flagStorageManager("TiledFlag", flagTileShape);
+    tab.bindColumn(MS::columnName(MS::FLAG), flagStorageManager);
+}
+
 oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         const char* app_name, unsigned int num_stations,
         unsigned int num_channels, unsigned int num_pols, double freq_start_hz,
@@ -160,32 +190,11 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         }
 
         SetupNewTable tab(file_name, desc, Table::New);
-
-        // Create the default storage managers.
-        IncrementalStMan incrStorageManager("ISMData");
-        tab.bindAll(incrStorageManager);
-        StandardStMan stdStorageManager("SSMData", 32768, 32768);
-        tab.bindColumn(MS::columnName(MS::ANTENNA1), stdStorageManager);
-        tab.bindColumn(MS::columnName(MS::ANTENNA2), stdStorageManager);
-
-        // Create tiled column storage manager for UVW column.
-        IPosition uvwTileShape(2, 3, 2 * num_baselines);
-        TiledColumnStMan uvwStorageManager("TiledUVW", uvwTileShape);
-        tab.bindColumn(MS::columnName(MS::UVW), uvwStorageManager);
-
-        // Create tiled column storage managers for WEIGHT and SIGMA columns.
-        IPosition weightTileShape(2, num_pols, 2 * num_baselines);
-        TiledColumnStMan weightStorageManager("TiledWeight", weightTileShape);
-        tab.bindColumn(MS::columnName(MS::WEIGHT), weightStorageManager);
-        IPosition sigmaTileShape(2, num_pols, 2 * num_baselines);
-        TiledColumnStMan sigmaStorageManager("TiledSigma", sigmaTileShape);
-        tab.bindColumn(MS::columnName(MS::SIGMA), sigmaStorageManager);
-
-        // Create tiled column storage managers for DATA and FLAG columns.
         if (use_adios2)
         {
 #ifdef OSKAR_HAVE_MPI
             Adios2StMan adiosStMan(*mpi_comm);
+            standard_common_setup(tab, num_channels, num_pols, num_baselines);
             tab.bindColumn(MS::columnName(MS::DATA), adiosStMan);
 #else
             throw std::runtime_error("ADIOS2 support requested by OSKAR is compiled without MPI support");
@@ -193,13 +202,12 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         }
         else
         {
+            standard_common_setup(tab, num_channels, num_pols, num_baselines);
+            // Create tiled column storage managers for DATA and FLAG columns.
             IPosition dataTileShape(3, num_pols, num_channels, 2 * num_baselines);
             TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
             tab.bindColumn(MS::columnName(MS::DATA), dataStorageManager);
         }
-        IPosition flagTileShape(3, num_pols, num_channels, 16 * num_baselines);
-        TiledColumnStMan flagStorageManager("TiledFlag", flagTileShape);
-        tab.bindColumn(MS::columnName(MS::FLAG), flagStorageManager);
 
         // Create the Measurement Set.
 #ifdef OSKAR_HAVE_MPI
