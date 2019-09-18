@@ -194,8 +194,13 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         {
 #ifdef OSKAR_HAVE_MPI
             Adios2StMan adiosStMan(*mpi_comm);
-            standard_common_setup(tab, num_channels, num_pols, num_baselines);
-            tab.bindColumn(MS::columnName(MS::DATA), adiosStMan);
+            if (std::getenv("ADIOS2_ALL_COLUMNS")) {
+                tab.bindAll(adiosStMan);
+            }
+            else {
+                standard_common_setup(tab, num_channels, num_pols, num_baselines);
+                tab.bindColumn(MS::columnName(MS::DATA), adiosStMan);
+            }
 #else
             throw std::runtime_error("ADIOS2 support requested by OSKAR is compiled without MPI support");
 #endif // OSKAR_HAVE_MPI
