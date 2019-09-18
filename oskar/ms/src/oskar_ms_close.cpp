@@ -42,6 +42,12 @@ void oskar_ms_close(oskar_MeasurementSet* p)
         delete p->msc;
     if (p->ms)
         delete p->ms;
+#ifdef OSKAR_HAVE_MPI
+    if (p->mpi_comm != MPI_COMM_NULL)
+    {
+        MPI_Comm_free(&p->mpi_comm);
+    }
+#endif
     free(p->a1);
     free(p->a2);
     free(p->app_name);

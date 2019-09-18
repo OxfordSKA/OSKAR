@@ -28,6 +28,10 @@
 
 #include <ms/MeasurementSets.h>
 
+#ifdef OSKAR_HAVE_MPI
+#include <mpi.h>
+#endif // OSKAR_HAVE_MPI */
+
 struct oskar_MeasurementSet
 {
     casacore::MeasurementSet* ms;   // Pointer to the Measurement Set.
@@ -40,6 +44,9 @@ struct oskar_MeasurementSet
     double freq_start_hz, freq_inc_hz;
     double phase_centre_ra, phase_centre_dec;
     double start_time, end_time, time_inc_sec;
+#ifdef OSKAR_HAVE_MPI
+    MPI_Comm mpi_comm;
+#endif /* OSKAR_HAVE_MPI */
 };
 #ifndef OSKAR_MEASUREMENT_SET_TYPEDEF_
 #define OSKAR_MEASUREMENT_SET_TYPEDEF_

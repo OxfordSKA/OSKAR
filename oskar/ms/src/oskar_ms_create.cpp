@@ -98,6 +98,17 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
     oskar_MeasurementSet* p = (oskar_MeasurementSet*)
             calloc(1, sizeof(oskar_MeasurementSet));
 
+#ifdef OSKAR_HAVE_MPI
+    if (mpi_comm)
+    {
+        MPI_Comm_dup(*mpi_comm, &p->mpi_comm);
+    }
+    else
+    {
+        p->mpi_comm = MPI_COMM_NULL;
+    }
+#endif // OSKAR_HAVE_MPI
+
     // Create the table descriptor and use it to set up a new main table.
     TableDesc desc = MS::requiredTableDesc();
     MS::addColumnToDesc(desc, MS::DATA, 2); // Visibilities (2D: pol, chan).
