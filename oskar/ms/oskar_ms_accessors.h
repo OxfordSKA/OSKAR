@@ -250,6 +250,13 @@ double oskar_ms_time_inc_sec(const oskar_MeasurementSet* p);
 OSKAR_MS_EXPORT
 double oskar_ms_time_start_mjd_utc(const oskar_MeasurementSet* p);
 
+/**
+ * @brief
+ * Returns whether this Measurement Set is running in rank 0
+ */
+OSKAR_MS_EXPORT
+int oskar_ms_is_rank_0(oskar_MeasurementSet* p);
+
 #ifdef __cplusplus
 }
 #endif

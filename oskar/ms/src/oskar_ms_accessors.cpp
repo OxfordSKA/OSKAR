@@ -218,6 +218,8 @@ void oskar_ms_set_time_range(oskar_MeasurementSet* p)
 {
     if (!p->msc) return;
 
+    if (!oskar_ms_is_rank_0(p)) return;
+
     // Get the old time range.
     Vector<Double> old_range(2, 0.0);
     p->msc->observation().timeRange().get(0, old_range);
@@ -244,3 +246,15 @@ double oskar_ms_time_start_mjd_utc(const oskar_MeasurementSet* p)
     return p->start_time / 86400.0;
 }
 
+int oskar_ms_is_rank_0(oskar_MeasurementSet* p)
+{
+#ifdef OSKAR_HAVE_MPI
+    if (p->mpi_comm != MPI_COMM_NULL)
+    {
+        int rank;
+        MPI_Comm_rank(p->mpi_comm, &rank);
+        return rank == 0;
+    }
+#endif // OSKAR_HAVE_MPI
+    return 1;
+}

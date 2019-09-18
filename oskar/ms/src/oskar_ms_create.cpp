@@ -263,12 +263,26 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
         return 0;
     }
 
+    // Set the private data.
+    p->num_pols = num_pols;
+    p->num_channels = num_channels;
+    p->num_stations = num_stations;
+    p->num_receptors = 2; // By default.
+    p->freq_start_hz = freq_start_hz;
+    p->freq_inc_hz = freq_inc_hz;
+    p->start_time = DBL_MAX;
+    p->end_time = -DBL_MAX;
+
+    // If in MPI mode let rank 0 write all metadata
+    if (!oskar_ms_is_rank_0(p))
+    {
+        return p;
+    }
+
     // Add a row to the OBSERVATION subtable.
     const char* username = getenv("USERNAME");
     if (!username)
         username = getenv("USER");
-    p->start_time = DBL_MAX;
-    p->end_time = -DBL_MAX;
     p->ms->observation().addRow();
     Vector<String> corrSchedule(1);
     Vector<Double> timeRange(2, 0.0);
@@ -306,13 +320,6 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
     String msg = String("Measurement Set created at ") + String(time_str);
     oskar_ms_add_history(p, app_name, msg.c_str(), msg.size());
 
-    // Set the private data.
-    p->num_pols = num_pols;
-    p->num_channels = num_channels;
-    p->num_stations = num_stations;
-    p->num_receptors = 2; // By default.
-    p->freq_start_hz = freq_start_hz;
-    p->freq_inc_hz = freq_inc_hz;
 
     // Fill the ANTENNA table.
     p->ms->antenna().addRow(num_stations);
