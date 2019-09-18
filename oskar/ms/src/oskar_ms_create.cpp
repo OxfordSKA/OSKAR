@@ -213,41 +213,34 @@ oskar_MeasurementSet* oskar_ms_create_impl(const char* file_name,
             p->ms = new MeasurementSet(tab, TableLock(TableLock::PermanentLocking));
         }
 
-        // Create SOURCE sub-table.
-        TableDesc descSource = MSSource::requiredTableDesc();
-        MSSource::addColumnToDesc(descSource, MSSource::REST_FREQUENCY);
-        MSSource::addColumnToDesc(descSource, MSSource::POSITION);
-        SetupNewTable sourceSetup(p->ms->sourceTableName(),
-                descSource, Table::New);
+        if (oskar_ms_is_rank_0(p))
+        {
+            // Create SOURCE sub-table.
+            TableDesc descSource = MSSource::requiredTableDesc();
+            MSSource::addColumnToDesc(descSource, MSSource::REST_FREQUENCY);
+            MSSource::addColumnToDesc(descSource, MSSource::POSITION);
+            SetupNewTable sourceSetup(p->ms->sourceTableName(),
+                    descSource, Table::New);
+            Table sourceTable;
+
 #ifdef OSKAR_HAVE_MPI
-        Table sourceTable;
-        if (mpi_comm)
-        {
-            sourceTable = Table(*mpi_comm, sourceSetup);
-        }
-        else
-#endif // OSKAR_HAVE_MPI
-        {
+            sourceTable = Table(MPI_COMM_SELF, sourceSetup);
+#else
             sourceTable = Table(sourceSetup);
-        }
-        p->ms->rwKeywordSet().defineTable(MS::keywordName(MS::SOURCE),
-                sourceTable);
-
-        // Create all required default subtables.
-#ifdef OSKAR_HAVE_MPI
-        if (mpi_comm)
-        {
-            p->ms->createDefaultSubtables(*mpi_comm, Table::New);
-        }
-        else
 #endif // OSKAR_HAVE_MPI
-        {
+            p->ms->rwKeywordSet().defineTable(MS::keywordName(MS::SOURCE),
+                    sourceTable);
+
+            // Create all required default subtables
+#ifdef OSKAR_HAVE_MPI
+            p->ms->createDefaultSubtables(MPI_COMM_SELF, Table::New);
+#else
             p->ms->createDefaultSubtables(Table::New);
+#endif // OSKAR_HAVE_MPI
+
+            p->msc = new MSColumns(*(p->ms));
         }
 
-        // Create the MSMainColumns and MSColumns objects for accessing data
-        // in the main table and subtables.
-        p->msc = new MSColumns(*(p->ms));
         p->msmc = new MSMainColumns(*(p->ms));
         p->app_name = (char*) realloc(p->app_name, strlen(app_name) + 1);
         strcpy(p->app_name, app_name);
