@@ -48,29 +48,25 @@ static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
 void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         int beam_coord_type, int* status)
 {
-    size_t num_pixels = 0;
-    int nside = 0;
-
-    /* Check if safe to proceed. */
+    size_t i = 0, num_pixels = 0;
     if (*status) return;
 
     /* If memory is already allocated, do nothing. */
     if (h->x) return;
 
     /* Calculate number of pixels if possible. */
-    if (h->coord_grid_type == 'B') /* Beam image */
+    switch (h->coord_grid_type)
     {
+    case 'B': /* Beam image */
         num_pixels = h->width * h->height;
-    }
-    else if (h->coord_grid_type == 'H') /* Healpix */
-    {
-        nside = h->nside;
-        num_pixels = 12 * nside * nside;
-    }
-    else if (h->coord_grid_type == 'S') /* Sky model */
+        break;
+    case 'H': /* Healpix */
+        num_pixels = 12 * h->nside * h->nside;
+        break;
+    case 'S': /* Sky model */
         num_pixels = 0;
-    else
-    {
+        break;
+    default:
         *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
     }
@@ -91,35 +87,35 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         case 'B': /* Beam image */
         {
             oskar_evaluate_image_lmn_grid(h->width, h->height,
-                    h->fov_deg[0]*(M_PI/180.0), h->fov_deg[1]*(M_PI/180.0), 1,
-                    h->x, h->y, h->z, status);
+                    h->fov_deg[0] * (M_PI / 180.0),
+                    h->fov_deg[1] * (M_PI / 180.0),
+                    1, h->x, h->y, h->z, status);
             break;
         }
         case 'H': /* Healpix */
         {
-            int num_points, type, i;
             double ra0 = 0.0, dec0 = 0.0;
             oskar_Mem *theta, *phi;
 
-            /* Generate theta and phi from nside. */
-            num_points = 12 * nside * nside;
-            type = oskar_mem_type(h->x);
-            theta = oskar_mem_create(type, OSKAR_CPU, num_points, status);
-            phi = oskar_mem_create(type, OSKAR_CPU, num_points, status);
-            oskar_convert_healpix_ring_to_theta_phi(nside, theta, phi, status);
+            /* Generate theta and phi. */
+            const int type = oskar_mem_type(h->x);
+            theta = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
+            phi = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
+            oskar_convert_healpix_ring_to_theta_phi(h->nside,
+                    theta, phi, status);
 
             /* Convert theta from polar angle to elevation. */
             if (type == OSKAR_DOUBLE)
             {
                 double* theta_ = oskar_mem_double(theta, status);
-                for (i = 0; i < num_points; ++i)
-                    theta_[i] = 90.0 - theta_[i];
+                for (i = 0; i < num_pixels; ++i)
+                    theta_[i] = (M_PI / 2.0) - theta_[i];
             }
             else if (type == OSKAR_SINGLE)
             {
                 float* theta_ = oskar_mem_float(theta, status);
-                for (i = 0; i < num_points; ++i)
-                    theta_[i] = 90.0f - theta_[i];
+                for (i = 0; i < num_pixels; ++i)
+                    theta_[i] = (float)(M_PI / 2.0) - theta_[i];
             }
             else
             {
@@ -144,7 +140,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
 
             /* Convert equatorial angles to direction cosines in the frame
              * of the beam phase centre. */
-            oskar_convert_lon_lat_to_relative_directions(num_points,
+            oskar_convert_lon_lat_to_relative_directions((int) num_pixels,
                     phi, theta, ra0, dec0, h->x, h->y, h->z, status);
 
             /* Free memory. */
@@ -155,17 +151,16 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         case 'S': /* Sky model */
         {
             oskar_Mem *ra, *dec;
-            int type = 0, num_points = 0;
-            type = oskar_mem_type(h->x);
+            const int type = oskar_mem_type(h->x);
             ra = oskar_mem_create(type, OSKAR_CPU, 0, status);
             dec = oskar_mem_create(type, OSKAR_CPU, 0, status);
             load_coords(ra, dec, h->sky_model_file, status);
-            num_points = (int) oskar_mem_length(ra);
-            oskar_mem_realloc(h->x, num_points, status);
-            oskar_mem_realloc(h->y, num_points, status);
-            oskar_mem_realloc(h->z, num_points, status);
+            num_pixels = oskar_mem_length(ra);
+            oskar_mem_realloc(h->x, num_pixels, status);
+            oskar_mem_realloc(h->y, num_pixels, status);
+            oskar_mem_realloc(h->z, num_pixels, status);
             oskar_convert_lon_lat_to_relative_directions(
-                    num_points, ra, dec,
+                    (int) num_pixels, ra, dec,
                     oskar_telescope_phase_centre_ra_rad(h->tel),
                     oskar_telescope_phase_centre_dec_rad(h->tel),
                     h->x, h->y, h->z, status);
@@ -199,17 +194,60 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         }
         case 'H': /* Healpix */
         {
-            int num_points, type;
             oskar_Mem *theta, *phi;
-            num_points = 12 * nside * nside;
-            type = oskar_mem_type(h->x);
-            theta = oskar_mem_create(type, OSKAR_CPU, num_points, status);
-            phi = oskar_mem_create(type, OSKAR_CPU, num_points, status);
-            oskar_convert_healpix_ring_to_theta_phi(nside, theta, phi, status);
-            oskar_convert_theta_phi_to_enu_directions(num_points,
+            const int type = oskar_mem_type(h->x);
+            theta = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
+            phi = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
+            oskar_convert_healpix_ring_to_theta_phi(h->nside,
+                    theta, phi, status);
+            oskar_convert_theta_phi_to_enu_directions((int) num_pixels,
                     theta, phi, h->x, h->y, h->z, status);
             oskar_mem_free(theta, status);
             oskar_mem_free(phi, status);
+            break;
+        }
+        case 'S': /* Sky model, horizon coordinates. */
+        {
+            oskar_Mem *az, *el;
+            const int type = oskar_mem_type(h->x);
+            az = oskar_mem_create(type, OSKAR_CPU, 0, status);
+            el = oskar_mem_create(type, OSKAR_CPU, 0, status);
+            load_coords(az, el, h->sky_model_file, status);
+            num_pixels = oskar_mem_length(az);
+
+            /* Convert (az, el) to (theta, phi). */
+            if (type == OSKAR_DOUBLE)
+            {
+                double* az_ = oskar_mem_double(az, status);
+                double* el_ = oskar_mem_double(el, status);
+                for (i = 0; i < num_pixels; ++i)
+                {
+                    az_[i] = (M_PI / 2.0) - az_[i]; /* phi = 90 - az. */
+                    el_[i] = (M_PI / 2.0) - el_[i]; /* theta = 90 - el. */
+                }
+            }
+            else if (type == OSKAR_SINGLE)
+            {
+                float* az_ = oskar_mem_float(az, status);
+                float* el_ = oskar_mem_float(el, status);
+                for (i = 0; i < num_pixels; ++i)
+                {
+                    az_[i] = (M_PI / 2.0) - az_[i]; /* phi = 90 - az. */
+                    el_[i] = (M_PI / 2.0) - el_[i]; /* theta = 90 - el. */
+                }
+            }
+            else
+            {
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+            }
+            oskar_mem_realloc(h->x, num_pixels, status);
+            oskar_mem_realloc(h->y, num_pixels, status);
+            oskar_mem_realloc(h->z, num_pixels, status);
+            oskar_convert_theta_phi_to_enu_directions(
+                    (int) num_pixels, el /* theta */, az /* phi */,
+                    h->x, h->y, h->z, status);
+            oskar_mem_free(az, status);
+            oskar_mem_free(el, status);
             break;
         }
         default:
@@ -228,21 +266,19 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
     }
 
     /* Set the number of pixels. */
-    h->num_pixels = (int) oskar_mem_length(h->x);
+    h->num_pixels = num_pixels;
 }
 
 static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
         const char* filename, int* status)
 {
-    int type = 0;
     FILE* file;
     char* line = 0;
     size_t n = 0, bufsize = 0;
-
     if (*status) return;
 
     /* Set initial size of coordinate arrays. */
-    type = oskar_mem_precision(lon);
+    const int type = oskar_mem_precision(lon);
     oskar_mem_realloc(lon, 100, status);
     oskar_mem_realloc(lat, 100, status);
 
@@ -257,15 +293,12 @@ static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
     /* Loop over lines in file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        /* Set defaults. */
-        /* Longitude, latitude. */
-        double par[] = {0., 0.};
-        size_t num_param = sizeof(par) / sizeof(double);
-        size_t num_required = 2, num_read = 0;
+        double par[] = {0., 0.}; /* (RA, Dec) or (Az, El). */
+        const size_t num_param = sizeof(par) / sizeof(double);
 
         /* Load coordinates. */
-        num_read = oskar_string_to_array_d(line, num_param, par);
-        if (num_read < num_required) continue;
+        const size_t num_read = oskar_string_to_array_d(line, num_param, par);
+        if (num_read < (size_t) 2) continue;
 
         /* Ensure enough space in arrays. */
         if (oskar_mem_length(lon) <= n)
@@ -275,16 +308,16 @@ static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
             if (*status) break;
         }
 
-        /* Store the coordinates. */
+        /* Store the coordinates in radians. */
         if (type == OSKAR_DOUBLE)
         {
-            oskar_mem_double(lon, status)[n] = par[0] * M_PI/180.0;
-            oskar_mem_double(lat, status)[n] = par[1] * M_PI/180.0;
+            oskar_mem_double(lon, status)[n] = par[0] * (M_PI / 180.0);
+            oskar_mem_double(lat, status)[n] = par[1] * (M_PI / 180.0);
         }
         else
         {
-            oskar_mem_float(lon, status)[n] = par[0] * M_PI/180.0;
-            oskar_mem_float(lat, status)[n] = par[1] * M_PI/180.0;
+            oskar_mem_float(lon, status)[n] = par[0] * (M_PI / 180.0);
+            oskar_mem_float(lat, status)[n] = par[1] * (M_PI / 180.0);
         }
 
         ++n;

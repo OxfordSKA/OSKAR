@@ -22,7 +22,6 @@
             entire sky.</desc>
     </s>
     <s k="coordinate_type"><label>Coordinate (grid) type</label>
-        <depends k="beam_pattern/coordinate_frame" v="Equatorial"/>
         <type name="OptionList" default="Beam image">
             Beam image, Sky model
         </type>
