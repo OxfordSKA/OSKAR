@@ -112,15 +112,21 @@ else()
     endif()
 endif ()
 
-# RPATH settings for macOS
-# See https://cmake.org/Wiki/CMake_RPATH_handling
+# RPATH settings.
+# See https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
 # ------------------------------------------------------------------------------
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if (APPLE)
     set(CMAKE_INSTALL_NAME_DIR "@rpath")
     list(APPEND CMAKE_INSTALL_RPATH
         "@loader_path/../${OSKAR_LIB_INSTALL_DIR}/")
-endif (APPLE)
+elseif (NOT WIN32)
+    list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
+            "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+    if ("${isSystemDir}" STREQUAL "-1")
+       list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+    endif()
+endif()
 
 # Set CUDA releated compiler flags.
 # --compiler-options or -Xcompiler: specify options directly to the compiler
