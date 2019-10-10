@@ -96,6 +96,10 @@ void oskar_beam_pattern_set_image_size(oskar_BeamPattern* h,
         int width, int height);
 
 OSKAR_EXPORT
+void oskar_beam_pattern_set_image_cellsize(oskar_BeamPattern* h,
+        double cellsize_arcsec);
+
+OSKAR_EXPORT
 void oskar_beam_pattern_set_image_fov(oskar_BeamPattern* h,
         double width_deg, double height_deg);
 

@@ -60,8 +60,8 @@ oskar_BeamPattern* oskar_beam_pattern_create(int precision, int* status)
     oskar_beam_pattern_set_stokes(h, "I");
     oskar_beam_pattern_set_coordinate_frame(h, 'E'); /* Equatorial. */
     oskar_beam_pattern_set_coordinate_type(h, 'B'); /* Beam image. */
-    oskar_beam_pattern_set_image_size(h, 256, 256);
     oskar_beam_pattern_set_image_fov(h, 2.0, 2.0);
+    oskar_beam_pattern_set_image_size(h, 256, 256);
     oskar_beam_pattern_set_separate_time_and_channel(h, 1);
     return h;
 }

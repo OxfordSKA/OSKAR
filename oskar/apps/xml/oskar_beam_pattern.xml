@@ -37,6 +37,12 @@
     <s k="beam_image"><label>Beam image</label>
         <desc>Image of the beam, centred on the phase centre.</desc>
         <depends k="beam_pattern/coordinate_type" v="Beam image"/>
+        <s k="specify_cellsize"><label>Specify cellsize</label>
+            <depends k="beam_pattern/coordinate_frame" v="Equatorial"/>
+            <type name="bool" default="false"/>
+            <desc>If set, specify cellsize;
+                otherwise, specify field of view.</desc>
+        </s>
         <s k="size" priority="1">
             <label>Image dimensions [pixels]</label>
             <type name="IntList" default="256"/>
@@ -51,11 +57,12 @@
                         direction.</li>
                 </ul></desc>
         </s>
-        <s k="fov_deg" priority="1">
-            <label>Field-of-view [deg]</label>
+        <s k="fov_deg">
+            <label>Field of view [deg]</label>
+            <depends k="beam_pattern/beam_image/specify_cellsize" v="false"/>
             <depends k="beam_pattern/coordinate_frame" v="Equatorial"/>
             <type name="DoubleList" default="2.0"/>
-            <desc>Field-of-view (FOV) in degrees (max 180.0). If a single value
+            <desc>Field of view (FOV) in degrees (max 180.0). If a single value
                 is specified, the image is assumed to have the same FOV along
                 each dimension.<br/>Example:
                 <ul>
@@ -65,6 +72,13 @@
                         2.0 degrees in Right Ascension, and 1.0 degrees in
                         Declination.</li>
                 </ul></desc>
+        </s>
+        <s k="cellsize_arcsec">
+            <label>Cellsize [arcsec]</label>
+            <depends k="beam_pattern/beam_image/specify_cellsize" v="true"/>
+            <depends k="beam_pattern/coordinate_frame" v="Equatorial"/>
+            <type name="UnsignedDouble" default="1.0"/>
+            <desc>The cell (pixel) size in arcseconds.</desc>
         </s>
     </s>
     <s k="sky_model"><label>Sky model</label>

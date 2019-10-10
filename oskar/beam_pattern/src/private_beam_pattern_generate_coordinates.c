@@ -266,7 +266,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
     }
 
     /* Set the number of pixels. */
-    h->num_pixels = num_pixels;
+    h->num_pixels = (int) num_pixels;
 }
 
 static void load_coords(oskar_Mem* lon, oskar_Mem* lat,

@@ -109,12 +109,22 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
         oskar_beam_pattern_set_image_size(h, image_size[0], image_size[0]);
     else if (size > 1)
         oskar_beam_pattern_set_image_size(h, image_size[0], image_size[1]);
-    const double* image_fov =
-            s->to_double_list("beam_image/fov_deg", &size, status);
-    if (size == 1)
-        oskar_beam_pattern_set_image_fov(h, image_fov[0], image_fov[0]);
-    else if (size > 1)
-        oskar_beam_pattern_set_image_fov(h, image_fov[0], image_fov[1]);
+    const int specify_cellsize =
+            s->to_int("beam_image/specify_cellsize", status);
+    if (specify_cellsize)
+    {
+        oskar_beam_pattern_set_image_cellsize(h,
+                s->to_double("beam_image/cellsize_arcsec", status));
+    }
+    else
+    {
+        const double* image_fov =
+                s->to_double_list("beam_image/fov_deg", &size, status);
+        if (size == 1)
+            oskar_beam_pattern_set_image_fov(h, image_fov[0], image_fov[0]);
+        else if (size > 1)
+            oskar_beam_pattern_set_image_fov(h, image_fov[0], image_fov[1]);
+    }
     oskar_beam_pattern_set_root_path(h,
             s->to_string("root_path", status));
     oskar_beam_pattern_set_sky_model_file(h,

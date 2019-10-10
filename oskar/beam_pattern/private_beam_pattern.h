@@ -97,7 +97,8 @@ struct oskar_BeamPattern
     int cross_power_amp_txt, cross_power_phase_txt, cross_power_raw_txt;
     int cross_power_amp_fits, cross_power_phase_fits, ixr_txt, ixr_fits;
     int average_time_and_channel, separate_time_and_channel, stokes[4];
-    double lon0, lat0, phase_centre_deg[2], fov_deg[2];
+    int set_cellsize;
+    double cellsize_rad, lon0, lat0, phase_centre_deg[2], fov_deg[2];
     double time_start_mjd_utc, time_inc_sec, length_sec;
     double freq_start_hz, freq_inc_hz;
     char average_single_axis, coord_frame_type, coord_grid_type;

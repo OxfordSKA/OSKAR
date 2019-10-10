@@ -29,6 +29,8 @@
 #include "beam_pattern/oskar_beam_pattern.h"
 #include "beam_pattern/private_beam_pattern.h"
 #include "beam_pattern/private_beam_pattern_free_device_data.h"
+#include "convert/oskar_convert_cellsize_to_fov.h"
+#include "convert/oskar_convert_fov_to_cellsize.h"
 #include "math/oskar_cmath.h"
 #include "utility/oskar_device.h"
 #include "utility/oskar_get_num_procs.h"
@@ -170,14 +172,41 @@ void oskar_beam_pattern_set_image_size(oskar_BeamPattern* h,
 {
     h->width = width;
     h->height = height;
+    if (h->set_cellsize)
+    {
+        h->fov_deg[0] = oskar_convert_cellsize_to_fov(
+                h->cellsize_rad, h->width) * (180.0 / M_PI);
+        h->fov_deg[1] = oskar_convert_cellsize_to_fov(
+                h->cellsize_rad, h->height) * (180.0 / M_PI);
+    }
+    else
+    {
+        h->cellsize_rad = oskar_convert_fov_to_cellsize(
+                h->fov_deg[0] * (M_PI / 180.0), h->width);
+    }
+}
+
+
+void oskar_beam_pattern_set_image_cellsize(oskar_BeamPattern* h,
+        double cellsize_arcsec)
+{
+    h->set_cellsize = 1;
+    h->cellsize_rad = (cellsize_arcsec / 3600.0) * (M_PI / 180.0);
+    h->fov_deg[0] = oskar_convert_cellsize_to_fov(
+            h->cellsize_rad, h->width) * (180.0 / M_PI);
+    h->fov_deg[1] = oskar_convert_cellsize_to_fov(
+            h->cellsize_rad, h->height) * (180.0 / M_PI);
 }
 
 
 void oskar_beam_pattern_set_image_fov(oskar_BeamPattern* h,
         double width_deg, double height_deg)
 {
+    h->set_cellsize = 0;
     h->fov_deg[0] = width_deg;
     h->fov_deg[1] = height_deg;
+    h->cellsize_rad = oskar_convert_fov_to_cellsize(
+            h->fov_deg[0] * (M_PI / 180.0), h->width);
 }
 
 
