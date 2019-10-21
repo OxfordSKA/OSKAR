@@ -160,20 +160,17 @@ void RunDialog::readProcess()
     if (output.size() > 0)
     {
         // Determine whether scrolling needs to happen.
-        bool scroll = false;
         QScrollBar* scrollBar = display_->verticalScrollBar();
-        if (scrollBar->value() == scrollBar->maximum())
-            scroll = true;
+        const int old_value = scrollBar->value();
+        const bool scroll = (old_value >= scrollBar->maximum() - 4);
 
-        // Append the output text.
-        QTextCursor cursor = display_->textCursor();
-        cursor.movePosition(QTextCursor::End);
-        display_->setTextCursor(cursor);
+        // Append the output text and set scroll bar position.
+        display_->moveCursor(QTextCursor::End);
         display_->insertPlainText(output);
-
-        // Scroll to bottom if necessary.
         if (scroll)
-            scrollBar->setValue(scrollBar->maximum());
+            display_->ensureCursorVisible();
+        else
+            scrollBar->setValue(old_value);
     }
 }
 
