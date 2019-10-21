@@ -88,6 +88,13 @@ size_t* oskar_ms_column_shape(const oskar_MeasurementSet* p, const char* column,
     if (!p->ms || !p->ms->tableDesc().isColumn(column)) return 0;
 
     const ColumnDesc& cdesc = p->ms->tableDesc().columnDesc(column);
+    if (cdesc.isScalar())
+    {
+        *ndim = 1;
+        t = (size_t*) calloc(*ndim, sizeof(size_t));
+        t[0] = 1;
+        return t;
+    }
     const IPosition& shape = cdesc.shape();
     if (shape.size() > 0)
     {
