@@ -46,6 +46,9 @@ extern "C" {
  * @details
  * Normalise array values using amplitude of specified element.
  *
+ * Note that the element at \p norm_index has to be treated as read-only,
+ * and is therefore not modified.
+ *
  * @param[in,out]  mem          Array to normalise.
  * @param[in]      offset       Start offset into array.
  * @param[in]      num_elements Number of elements to scale.

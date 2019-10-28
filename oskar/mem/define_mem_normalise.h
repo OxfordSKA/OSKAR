@@ -6,7 +6,8 @@
 {\
     const FP scal = ((FP)1) / a[idx];\
     KERNEL_LOOP_X(unsigned int, i, 0, n)\
-    a[offset + i] *= scal;\
+    const unsigned int j = offset + i;\
+    if (j != idx) a[j] *= scal;\
     KERNEL_LOOP_END\
 }\
 OSKAR_REGISTER_KERNEL(NAME)
@@ -19,7 +20,10 @@ OSKAR_REGISTER_KERNEL(NAME)
     const FP amp = val.x * val.x + val.y * val.y;\
     const FP scal = RSQRT(amp);\
     KERNEL_LOOP_X(unsigned int, i, 0, n)\
-    a[offset + i].x *= scal; a[offset + i].y *= scal;\
+    const unsigned int j = offset + i;\
+    if (j != idx) {\
+        a[j].x *= scal; a[j].y *= scal;\
+    }\
     KERNEL_LOOP_END\
 }\
 OSKAR_REGISTER_KERNEL(NAME)
@@ -36,10 +40,12 @@ OSKAR_REGISTER_KERNEL(NAME)
     const FP scal = RSQRT(amp);\
     KERNEL_LOOP_X(unsigned int, i, 0, n)\
     const unsigned int j = offset + i;\
-    a[j].a.x *= scal; a[j].a.y *= scal;\
-    a[j].b.x *= scal; a[j].b.y *= scal;\
-    a[j].c.x *= scal; a[j].c.y *= scal;\
-    a[j].d.x *= scal; a[j].d.y *= scal;\
+    if (j != idx) {\
+        a[j].a.x *= scal; a[j].a.y *= scal;\
+        a[j].b.x *= scal; a[j].b.y *= scal;\
+        a[j].c.x *= scal; a[j].c.y *= scal;\
+        a[j].d.x *= scal; a[j].d.y *= scal;\
+    }\
     KERNEL_LOOP_END\
 }\
 OSKAR_REGISTER_KERNEL(NAME)
@@ -50,9 +56,9 @@ OSKAR_REGISTER_KERNEL(NAME)
         GLOBAL_OUT(FP, a), const unsigned int idx)\
 {\
     const FP scal = ((FP)1) / a[idx];\
-    KERNEL_LOOP_X(unsigned int, i, 0, n)\
-    a[offset + i] *= scal;\
-    KERNEL_LOOP_END\
+    const unsigned int i = GLOBAL_ID_X;\
+    const unsigned int j = offset + i;\
+    if (i < n && j != idx) a[j] *= scal;\
 }\
 OSKAR_REGISTER_KERNEL(NAME)
 
@@ -67,9 +73,10 @@ OSKAR_REGISTER_KERNEL(NAME)
         scal = RSQRT(amp);\
     }\
     BARRIER;\
-    unsigned int i = GLOBAL_ID_X;\
-    if (i < n) {\
-        a[offset + i].x *= scal; a[offset + i].y *= scal;\
+    const unsigned int i = GLOBAL_ID_X;\
+    const unsigned int j = offset + i;\
+    if (i < n && j != idx) {\
+        a[j].x *= scal; a[j].y *= scal;\
     }\
 }\
 OSKAR_REGISTER_KERNEL(NAME)
@@ -88,9 +95,9 @@ OSKAR_REGISTER_KERNEL(NAME)
         scal = RSQRT(amp);\
     }\
     BARRIER;\
-    unsigned int i = GLOBAL_ID_X;\
-    if (i < n) {\
-        const unsigned int j = offset + i;\
+    const unsigned int i = GLOBAL_ID_X;\
+    const unsigned int j = offset + i;\
+    if (i < n && j != idx) {\
         a[j].a.x *= scal; a[j].a.y *= scal;\
         a[j].b.x *= scal; a[j].b.y *= scal;\
         a[j].c.x *= scal; a[j].c.y *= scal;\
