@@ -88,7 +88,7 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
 
     /* Load sky model data files. */
     load_osm(sky, s, ra0, dec0, log, status);
-    load_gsm(sky, s, ra0, dec0, log, status);
+    //load_gsm(sky, s, ra0, dec0, log, status);
     load_fits_image(sky, s, ra0, dec0, log, status);
     load_healpix_fits(sky, s, ra0, dec0, log, status);
 
