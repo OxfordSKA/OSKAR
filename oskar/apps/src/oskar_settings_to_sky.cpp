@@ -48,8 +48,10 @@ using oskar::SettingsTree;
 
 static void load_osm(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, oskar_Log* log, int* status);
+#if 0
 static void load_gsm(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, oskar_Log* log, int* status);
+#endif
 static void load_fits_image(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, oskar_Log* log, int* status);
 static void load_healpix_fits(oskar_Sky* sky, SettingsTree* s,
@@ -194,7 +196,7 @@ static void load_osm(oskar_Sky* sky, SettingsTree* s,
     s->end_group();
 }
 
-
+#if 0
 static void load_gsm(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, oskar_Log* log, int* status)
 {
@@ -241,7 +243,7 @@ static void load_gsm(oskar_Sky* sky, SettingsTree* s,
     }
     oskar_sky_free(t, status);
 }
-
+#endif
 
 static void load_fits_image(oskar_Sky* sky, SettingsTree* s,
         double ra0, double dec0, oskar_Log* log, int* status)
