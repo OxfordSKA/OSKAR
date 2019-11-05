@@ -6,6 +6,7 @@ set(station_SRC
     define_blank_below_horizon.h
     define_evaluate_element_weights_dft.h
     define_evaluate_element_weights_errors.h
+    define_evaluate_tec_screen.h
     define_evaluate_vla_beam_pbcor.h
     src/oskar_blank_below_horizon.c
     src/oskar_evaluate_beam_horizon_direction.c
@@ -13,6 +14,7 @@ set(station_SRC
     src/oskar_evaluate_element_weights_dft.c
     src/oskar_evaluate_element_weights_errors.c
     src/oskar_evaluate_element_weights.c
+    src/oskar_evaluate_tec_screen.c
     src/oskar_evaluate_station_beam_aperture_array.c
     src/oskar_evaluate_station_beam_gaussian.c
     src/oskar_evaluate_station_beam.c

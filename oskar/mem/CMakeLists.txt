@@ -37,6 +37,7 @@ set(mem_SRC
     src/oskar_mem_random_uniform.c
     src/oskar_mem_read_binary_raw.c
     src/oskar_mem_read_element.c
+    src/oskar_mem_read_fits.c
     src/oskar_mem_read_fits_image_plane.c
     src/oskar_mem_read_healpix_fits.c
     src/oskar_mem_realloc.c

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,51 +43,26 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
 {
     int i = 0;
     oskar_Telescope* telescope;
-
-    /* Check type and location. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;
     }
-
-    /* Allocate the data structure. */
     telescope = (oskar_Telescope*) calloc(1, sizeof(oskar_Telescope));
     if (!telescope)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
         return 0;
     }
-
-    /* Initialise private meta-data. */
     telescope->precision = type;
     telescope->mem_location = location;
-
-    /* Initialise the meta-data. */
     telescope->pol_mode = OSKAR_POL_MODE_FULL;
     telescope->num_stations = num_stations;
-    telescope->max_station_size = 0;
     telescope->max_station_depth = 1;
-    telescope->identical_stations = 0;
-    telescope->allow_station_beam_duplication = 0;
     telescope->enable_numerical_patterns = 1;
-    telescope->lon_rad = 0.0;
-    telescope->lat_rad = 0.0;
-    telescope->alt_metres = 0.0;
-    telescope->pm_x_rad = 0.0;
-    telescope->pm_y_rad = 0.0;
-    telescope->phase_centre_coord_type = 0;
-    telescope->phase_centre_ra_rad = 0.0;
-    telescope->phase_centre_dec_rad = 0.0;
-    telescope->channel_bandwidth_hz = 0.0;
-    telescope->time_average_sec = 0.0;
-    telescope->uv_filter_min = 0.0;
     telescope->uv_filter_max = FLT_MAX;
     telescope->uv_filter_units = OSKAR_METRES;
-    telescope->noise_enabled = 0;
     telescope->noise_seed = 1;
-
-    /* Initialise the coordinate arrays. */
     telescope->station_true_x_offset_ecef_metres =
             oskar_mem_create(type, location, num_stations, status);
     telescope->station_true_y_offset_ecef_metres =
@@ -112,18 +87,15 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
             oskar_mem_create(type, location, num_stations, status);
     telescope->station_measured_z_enu_metres =
             oskar_mem_create(type, location, num_stations, status);
-
-    /* Initialise the station structures. */
-    telescope->station = NULL;
-    if (num_stations > 0)
+    telescope->tec_screen_path =
+            oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
+if (num_stations > 0)
         telescope->station = (oskar_Station**) calloc(
                 num_stations, sizeof(oskar_Station*));
     for (i = 0; i < num_stations; ++i)
     {
         telescope->station[i] = oskar_station_create(type, location, 0, status);
     }
-
-    /* Return pointer to data structure. */
     return telescope;
 }
 

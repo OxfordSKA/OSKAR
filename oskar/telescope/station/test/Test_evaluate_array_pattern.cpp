@@ -110,7 +110,8 @@ static oskar_Station* set_up_station1(int num_x, int num_y,
     oskar_station_analyse(station, &dummy, status);
 
     /* Set meta-data. */
-    oskar_station_set_position(station, 0.0, 70.0 * M_PI / 180.0, 0.0);
+    oskar_station_set_position(station, 0.0, 70.0 * M_PI / 180.0, 0.0,
+            0.0, 0.0, 0.0);
     oskar_station_set_phase_centre(station, OSKAR_SPHERICAL_TYPE_EQUATORIAL,
             beam_ra_deg * M_PI / 180.0, beam_dec_deg * M_PI / 180.0);
     return station;

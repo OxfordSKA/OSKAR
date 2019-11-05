@@ -48,7 +48,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     }
 
     /* Allocate and initialise a station model structure. */
-    model = (oskar_Station*) malloc(sizeof(oskar_Station));
+    model = (oskar_Station*) calloc(1, sizeof(oskar_Station));
     if (!model)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
@@ -111,35 +111,16 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     /* Initialise common data. */
     model->station_type = OSKAR_STATION_TYPE_AA;
     model->normalise_final_beam = OSKAR_TRUE;
-    model->lon_rad = 0.0;
-    model->lat_rad = 0.0;
-    model->alt_metres = 0.0;
-    model->pm_x_rad = 0.0;
-    model->pm_y_rad = 0.0;
-    model->beam_lon_rad = 0.0;
-    model->beam_lat_rad = 0.0;
     model->beam_coord_type = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
     model->noise_freq_hz = oskar_mem_create(type, OSKAR_CPU, 0, status);
     model->noise_rms_jy = oskar_mem_create(type, OSKAR_CPU, 0, status);
 
-    /* Initialise Gaussian beam station data. */
-    model->gaussian_beam_fwhm_rad = 0.0;
-    model->gaussian_beam_reference_freq_hz = 0.0;
-
     /* Initialise aperture array data. */
-    model->identical_children = OSKAR_FALSE;
     model->num_elements = num_elements;
     model->num_element_types = 0;
-    model->normalise_array_pattern = OSKAR_FALSE;
     model->enable_array_pattern = OSKAR_TRUE;
     model->common_element_orientation = OSKAR_TRUE;
-    model->array_is_3d = OSKAR_FALSE;
-    model->apply_element_errors = OSKAR_FALSE;
-    model->apply_element_weight = OSKAR_FALSE;
     model->seed_time_variable_errors = 1;
-    model->child = 0;
-    model->element = 0;
-    model->num_permitted_beams = 0;
     if (num_elements > 0)
         memset(oskar_mem_void(model->element_mount_types_cpu), 'F',
                 num_elements);

@@ -1218,6 +1218,14 @@ static void* init_device(void* arg)
                 status);
         d->Z = 0;
         d->station_work = oskar_station_work_create(h->prec, dev_loc, status);
+        oskar_station_work_set_tec_screen_common_params(d->station_work,
+                oskar_telescope_ionosphere_screen_type(d->tel),
+                oskar_telescope_tec_screen_height_km(d->tel),
+                oskar_telescope_tec_screen_pixel_size_m(d->tel),
+                oskar_telescope_tec_screen_time_interval_sec(d->tel));
+        if (oskar_telescope_ionosphere_screen_type(d->tel) == 'E')
+            oskar_station_work_set_tec_screen_path(d->station_work,
+                    oskar_telescope_tec_screen_path(d->tel));
     }
     return 0;
 }

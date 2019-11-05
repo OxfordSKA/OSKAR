@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,8 +88,6 @@ void oskar_telescope_set_station_coords_ecef(oskar_Telescope* telescope,
         /* Convert station ECEF to station longitude, latitude, altitude. */
         oskar_convert_ecef_to_geodetic_spherical(1,
                 &ecef[3], &ecef[4], &ecef[5], &lon, &lat, &alt);
-        oskar_station_set_position(oskar_telescope_station(telescope, i),
-                lon, lat, alt);
 
         /* Convert station ECEF to horizon plane coordinates. */
         oskar_convert_ecef_to_enu(1, &ecef[0], &ecef[1], &ecef[2],
@@ -106,6 +104,8 @@ void oskar_telescope_set_station_coords_ecef(oskar_Telescope* telescope,
                 longitude_rad, latitude_rad, &ecef[3], &ecef[4], &ecef[5]);
 
         /* Store the offset geocentric and horizon plane coordinates. */
+        oskar_station_set_position(oskar_telescope_station(telescope, i),
+                lon, lat, alt, ecef[3], ecef[4], ecef[5]);
         oskar_telescope_set_station_coords(telescope, i, &ecef[0], &ecef[3],
                 &hor[0], &hor[3], status);
         if (*status) break;

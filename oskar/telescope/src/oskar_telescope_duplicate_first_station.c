@@ -48,6 +48,9 @@ void oskar_telescope_duplicate_first_station(oskar_Telescope* telescope,
         const double lon = oskar_station_lon_rad(telescope->station[i]);
         const double lat = oskar_station_lat_rad(telescope->station[i]);
         const double alt = oskar_station_alt_metres(telescope->station[i]);
+        const double x = oskar_station_offset_ecef_x(telescope->station[i]);
+        const double y = oskar_station_offset_ecef_y(telescope->station[i]);
+        const double z = oskar_station_offset_ecef_z(telescope->station[i]);
 
         /* Copy the first station if not duplicating the beam,
          * otherwise just free all the others. */
@@ -60,7 +63,8 @@ void oskar_telescope_duplicate_first_station(oskar_Telescope* telescope,
                     telescope->mem_location, status);
 
             /* Reinstate the coordinates. */
-            oskar_station_set_position(telescope->station[i], lon, lat, alt);
+            oskar_station_set_position(telescope->station[i],
+                    lon, lat, alt, x, y, z);
         }
     }
 }

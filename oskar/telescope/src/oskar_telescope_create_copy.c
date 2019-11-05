@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,6 +72,10 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     telescope->uv_filter_units = src->uv_filter_units;
     telescope->noise_enabled = src->noise_enabled;
     telescope->noise_seed = src->noise_seed;
+    telescope->ionosphere_screen_type = src->ionosphere_screen_type;
+    telescope->tec_screen_height_km = src->tec_screen_height_km;
+    telescope->tec_screen_pixel_size_m = src->tec_screen_pixel_size_m;
+    telescope->tec_screen_time_interval_sec = src->tec_screen_time_interval_sec;
 
     /* Copy the coordinates. */
     oskar_mem_copy(telescope->station_true_x_offset_ecef_metres,
@@ -98,6 +102,8 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
             src->station_measured_y_enu_metres, status);
     oskar_mem_copy(telescope->station_measured_z_enu_metres,
             src->station_measured_z_enu_metres, status);
+    oskar_mem_copy(telescope->tec_screen_path,
+            src->tec_screen_path, status);
 
     /* Copy each station. */
     telescope->station = (oskar_Station**) calloc(

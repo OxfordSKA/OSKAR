@@ -76,6 +76,21 @@ double oskar_station_alt_metres(const oskar_Station* model)
     return model ? model->alt_metres : 0.0;
 }
 
+double oskar_station_offset_ecef_x(const oskar_Station* model)
+{
+    return model ? model->offset_ecef[0] : 0.0;
+}
+
+double oskar_station_offset_ecef_y(const oskar_Station* model)
+{
+    return model ? model->offset_ecef[1] : 0.0;
+}
+
+double oskar_station_offset_ecef_z(const oskar_Station* model)
+{
+    return model ? model->offset_ecef[2] : 0.0;
+}
+
 double oskar_station_polar_motion_x_rad(const oskar_Station* model)
 {
     return model ? model->pm_x_rad : 0.0;
@@ -464,12 +479,16 @@ void oskar_station_set_normalise_final_beam(oskar_Station* model, int value)
 }
 
 void oskar_station_set_position(oskar_Station* model,
-        double longitude_rad, double latitude_rad, double altitude_m)
+        double longitude_rad, double latitude_rad, double altitude_m,
+        double offset_ecef_x, double offset_ecef_y, double offset_ecef_z)
 {
     if (!model) return;
     model->lon_rad = longitude_rad;
     model->lat_rad = latitude_rad;
     model->alt_metres = altitude_m;
+    model->offset_ecef[0] = offset_ecef_x;
+    model->offset_ecef[1] = offset_ecef_y;
+    model->offset_ecef[2] = offset_ecef_z;
 }
 
 void oskar_station_set_polar_motion(oskar_Station* model,

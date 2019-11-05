@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,13 @@ struct oskar_Telescope
     int uv_filter_units;         /* Unit of allowed UV distance (OSKAR_METRES or OSKAR_WAVELENGTHS). */
     int noise_enabled;           /* Flag set if thermal noise is enabled. */
     unsigned int noise_seed;     /* Random generator seed. */
+
+    /* Ionosphere parameters. */
+    int ionosphere_screen_type;
+    oskar_Mem* tec_screen_path;
+    double tec_screen_height_km;
+    double tec_screen_pixel_size_m;
+    double tec_screen_time_interval_sec;
 
     /* Station data. */
     int supplied_coord_type;                          /* Type of coordinates specified in telescope model. */

@@ -33,6 +33,8 @@
 #include "convert/oskar_convert_relative_directions_to_enu_directions.h"
 #include "convert/oskar_convert_enu_directions_to_relative_directions.h"
 
+#include <math.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -112,6 +114,26 @@ void oskar_evaluate_station_beam(int num_points,
     if (normalise)
         oskar_mem_normalise(out, 0, oskar_mem_length(out),
                 num_points - 1, status);
+
+    /* Evaluate the station (u,v) coordinates. */
+    const double ha0_rad = GAST - norm_ra_rad;
+    const double sin_ha0  = sin(ha0_rad);
+    const double cos_ha0  = cos(ha0_rad);
+    const double sin_dec0 = sin(norm_dec_rad);
+    const double cos_dec0 = cos(norm_dec_rad);
+    const double x_ = oskar_station_offset_ecef_x(station);
+    const double y_ = oskar_station_offset_ecef_y(station);
+    const double z_ = oskar_station_offset_ecef_z(station);
+    const double u = x_ * sin_ha0 + y_ * cos_ha0;
+    const double v = z_ * cos_dec0 - x_ * cos_ha0 - y_ * sin_ha0 * sin_dec0;
+
+    /* Evaluate the phase due to the TEC screen. */
+    const oskar_Mem* tec_phase = oskar_station_work_evaluate_tec_screen(work,
+            (int) num_points_orig, x, y, u, v, time_index, frequency_hz,
+            status);
+    if (tec_phase)
+        oskar_mem_multiply(out, tec_phase, out,
+                0, 0, 0, num_points_orig, status);
 
     /* Copy output beam data. */
     oskar_mem_copy_contents(beam, out, offset_out, 0, num_points_orig, status);

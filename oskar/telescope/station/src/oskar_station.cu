@@ -1,8 +1,9 @@
-/* Copyright (c) 2018, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2018-2019, The University of Oxford. See LICENSE file. */
 
 #include "telescope/station/define_blank_below_horizon.h"
 #include "telescope/station/define_evaluate_element_weights_dft.h"
 #include "telescope/station/define_evaluate_element_weights_errors.h"
+#include "telescope/station/define_evaluate_tec_screen.h"
 #include "telescope/station/define_evaluate_vla_beam_pbcor.h"
 #include "utility/oskar_cuda_registrar.h"
 #include "utility/oskar_kernel_macros.h"

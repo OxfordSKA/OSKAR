@@ -101,6 +101,15 @@ OSKAR_EXPORT
 double oskar_station_alt_metres(const oskar_Station* model);
 
 OSKAR_EXPORT
+double oskar_station_offset_ecef_x(const oskar_Station* model);
+
+OSKAR_EXPORT
+double oskar_station_offset_ecef_y(const oskar_Station* model);
+
+OSKAR_EXPORT
+double oskar_station_offset_ecef_z(const oskar_Station* model);
+
+OSKAR_EXPORT
 double oskar_station_polar_motion_x_rad(const oskar_Station* model);
 
 OSKAR_EXPORT
@@ -377,7 +386,8 @@ void oskar_station_set_normalise_final_beam(oskar_Station* model, int value);
  */
 OSKAR_EXPORT
 void oskar_station_set_position(oskar_Station* model,
-        double longitude_rad, double latitude_rad, double altitude_m);
+        double longitude_rad, double latitude_rad, double altitude_m,
+        double offset_ecef_x, double offset_ecef_y, double offset_ecef_z);
 
 /**
  * @brief

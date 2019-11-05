@@ -93,6 +93,21 @@ OSKAR_EXPORT
 oskar_Mem* oskar_station_work_enu_direction_z(oskar_StationWork* work);
 
 OSKAR_EXPORT
+void oskar_station_work_set_tec_screen_common_params(oskar_StationWork* work,
+        char screen_type, double screen_height_km, double screen_pixel_size_m,
+        double screen_time_interval_sec);
+
+OSKAR_EXPORT
+void oskar_station_work_set_tec_screen_path(oskar_StationWork* work,
+        const char* path);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_work_evaluate_tec_screen(oskar_StationWork* work,
+        int num_points, const oskar_Mem* l, const oskar_Mem* m,
+        double station_u_m, double station_v_m, int time_index,
+        double frequency_hz, int* status);
+
+OSKAR_EXPORT
 oskar_Mem* oskar_station_work_beam_out(oskar_StationWork* work,
         const oskar_Mem* output_beam, size_t length, int* status);
 

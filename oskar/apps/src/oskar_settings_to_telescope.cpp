@@ -35,6 +35,8 @@
 #include <limits.h>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <cctype>
 
 using oskar::SettingsTree;
 
@@ -230,6 +232,47 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
             oskar_station_override_element_feed_angle(
                     oskar_telescope_station(t, i), (unsigned int) seed, 0,
                     y_rot_err, 0.0, 0.0, status);
+    }
+
+    /* Set ionosphere parameters if enabled. */
+    s->clear_group();
+    s->begin_group("telescope");
+    const char* ionosphere_screen_type =
+            s->to_string("ionosphere_screen_type", status);
+    oskar_telescope_set_ionosphere_screen_type(t, ionosphere_screen_type);
+    if (std::toupper(ionosphere_screen_type[0]) == 'E')
+    {
+        s->begin_group("external_tec_screen");
+        const char* screen_path = s->to_string("input_fits_file", status);
+        if (strlen(screen_path) > 0)
+        {
+            int num_axes = 0;
+            int* axis_size = 0;
+            double* axis_inc = 0;
+            oskar_mem_read_fits(0, 0, 0, screen_path, 0, 0,
+                    &num_axes, &axis_size, &axis_inc, status);
+            oskar_telescope_set_tec_screen_path(t, screen_path);
+            oskar_telescope_set_tec_screen_height(t,
+                    s->to_double("screen_height_km", status));
+            const double pixel_size =
+                    s->to_double("screen_pixel_size_m", status);
+            const double time_interval =
+                    s->to_double("screen_time_interval_sec", status);
+            if (pixel_size > 0.0)
+                oskar_telescope_set_tec_screen_pixel_size(t, pixel_size);
+            else
+                oskar_telescope_set_tec_screen_pixel_size(t, axis_inc[0]);
+            if (time_interval > 0.0)
+                oskar_telescope_set_tec_screen_time_interval(t, time_interval);
+            else
+                oskar_telescope_set_tec_screen_time_interval(t, axis_inc[2]);
+            free(axis_size);
+            free(axis_inc);
+        }
+        else
+        {
+            *status = OSKAR_ERR_FILE_IO;
+        }
     }
 
     /* Apply pointing file override. */

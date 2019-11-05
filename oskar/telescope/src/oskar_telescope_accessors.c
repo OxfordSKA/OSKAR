@@ -31,6 +31,7 @@
 
 #include "math/oskar_cmath.h"
 
+#include <ctype.h>
 #include <string.h>
 
 #ifdef __cplusplus
@@ -94,6 +95,22 @@ double oskar_telescope_channel_bandwidth_hz(const oskar_Telescope* model)
     return model->channel_bandwidth_hz;
 }
 
+double oskar_telescope_tec_screen_height_km(const oskar_Telescope* model)
+{
+    return model->tec_screen_height_km;
+}
+
+double oskar_telescope_tec_screen_pixel_size_m(const oskar_Telescope* model)
+{
+    return model->tec_screen_pixel_size_m;
+}
+
+double oskar_telescope_tec_screen_time_interval_sec(
+        const oskar_Telescope* model)
+{
+    return model->tec_screen_time_interval_sec;
+}
+
 double oskar_telescope_time_average_sec(const oskar_Telescope* model)
 {
     return model->time_average_sec;
@@ -138,6 +155,11 @@ int oskar_telescope_allow_station_beam_duplication(
         const oskar_Telescope* model)
 {
     return model->allow_station_beam_duplication;
+}
+
+char oskar_telescope_ionosphere_screen_type(const oskar_Telescope* model)
+{
+    return (char) (model->ionosphere_screen_type);
 }
 
 int oskar_telescope_enable_numerical_patterns(const oskar_Telescope* model)
@@ -320,6 +342,11 @@ unsigned int oskar_telescope_noise_seed(const oskar_Telescope* model)
     return model->noise_seed;
 }
 
+const char* oskar_telescope_tec_screen_path(const oskar_Telescope* model)
+{
+    return oskar_mem_char_const(model->tec_screen_path);
+}
+
 
 /* Setters. */
 
@@ -327,6 +354,12 @@ void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model,
         int value)
 {
     model->allow_station_beam_duplication = value;
+}
+
+void oskar_telescope_set_ionosphere_screen_type(oskar_Telescope* model,
+        const char* type)
+{
+    model->ionosphere_screen_type = toupper(type[0]);
 }
 
 void oskar_telescope_set_enable_noise(oskar_Telescope* model,
@@ -517,6 +550,33 @@ void oskar_telescope_set_phase_centre(oskar_Telescope* model,
         oskar_telescope_set_station_phase_centre(model->station[i],
                 coord_type, ra_rad, dec_rad);
     }
+}
+
+void oskar_telescope_set_tec_screen_height(oskar_Telescope* model,
+        double height_km)
+{
+    model->tec_screen_height_km = height_km;
+}
+
+void oskar_telescope_set_tec_screen_pixel_size(oskar_Telescope* model,
+        double pixel_size_m)
+{
+    model->tec_screen_pixel_size_m = pixel_size_m;
+}
+
+void oskar_telescope_set_tec_screen_time_interval(oskar_Telescope* model,
+        double time_interval_sec)
+{
+    model->tec_screen_time_interval_sec = time_interval_sec;
+}
+
+void oskar_telescope_set_tec_screen_path(oskar_Telescope* model,
+        const char* path)
+{
+    int status = 0;
+    const size_t len = 1 + strlen(path);
+    oskar_mem_realloc(model->tec_screen_path, len, &status);
+    memcpy(oskar_mem_void(model->tec_screen_path), path, len);
 }
 
 void oskar_telescope_set_channel_bandwidth(oskar_Telescope* model,

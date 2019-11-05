@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,45 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PRIVATE_STATION_WORK_H_
-#define OSKAR_PRIVATE_STATION_WORK_H_
+#ifndef OSKAR_MEM_READ_FITS_H_
+#define OSKAR_MEM_READ_FITS_H_
 
-#include <mem/oskar_mem.h>
+/**
+ * @file oskar_mem_read_fits.h
+ */
 
-struct oskar_StationWork
-{
-    oskar_Mem* horizon_mask;     /* Integer. */
-    oskar_Mem* source_indices;   /* Integer. */
+#include <oskar_global.h>
 
-    oskar_Mem* enu_direction_x;  /* Real scalar. ENU direction cosine. */
-    oskar_Mem* enu_direction_y;  /* Real scalar. ENU direction cosine. */
-    oskar_Mem* enu_direction_z;  /* Real scalar. ENU direction cosine. */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    oskar_Mem* theta_modified;   /* Real scalar. */
-    oskar_Mem* phi_x;            /* Real scalar. */
-    oskar_Mem* phi_y;            /* Real scalar. */
-    oskar_Mem* weights;          /* Complex scalar. */
-    oskar_Mem* weights_error;    /* Complex scalar. */
-    oskar_Mem* array_pattern;    /* Complex scalar. */
-    oskar_Mem* beam_out_scratch; /* Output scratch array. */
+/**
+ * @brief
+ * Read pixel data from a FITS image file.
+ *
+ * @details
+ * Read pixel data from a FITS image file.
+ *
+ * If \p num_dims is 0, return only the axis dimensions.
+ * If \p num_dims is -1, read the entire cube.
+ *
+ * Note that \p axis_size and \p axis_inc are re-allocated internally,
+ * if necessary, and must be freed by the caller.
+ *
+ * @param[in,out] data            Array to fill.
+ * @param[in] offset              Output offset.
+ * @param[in] num_pixels          Number of pixels to read.
+ * @param[in] file_name           File name of FITS file to read.
+ * @param[in] num_index_dims      Number of dimensions in plane index.
+ * @param[in] start_index         Zero-based axis indices to read from.
+ * @param[in,out] num_axes        Number of dimensions in the cube.
+ * @param[in,out] axis_size       Size of each axis.
+ * @param[in,out] axis_inc        Increment of each axis.
+ * @param[in,out] status          Status return code.
+ */
+OSKAR_EXPORT
+void oskar_mem_read_fits(oskar_Mem* data, size_t offset, size_t num_pixels,
+        const char* file_name, int num_index_dims, const int* start_index,
+        int* num_axes, int** axis_size, double** axis_inc, int* status);
 
-    /* TEC screen. */
-    char screen_type;
-    int previous_time_index;
-    int screen_num_pixels_x, screen_num_pixels_y, screen_num_pixels_t;
-    double screen_height_km;
-    double screen_pixel_size_m;
-    double screen_time_interval_sec;
-    oskar_Mem *tec_screen_path, *tec_screen;
-    oskar_Mem *screen_output;
-
-    int num_depths;
-    oskar_Mem** beam;            /* For hierarchical stations. */
-};
-
-#ifndef OSKAR_STATION_WORK_TYPEDEF_
-#define OSKAR_STATION_WORK_TYPEDEF_
-typedef struct oskar_StationWork oskar_StationWork;
-#endif /* OSKAR_STATION_WORK_TYPEDEF_ */
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* include guard */

@@ -60,6 +60,9 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     /* Copy common station parameters. */
     model->station_type = src->station_type;
     model->normalise_final_beam = src->normalise_final_beam;
+    model->offset_ecef[0] = src->offset_ecef[0];
+    model->offset_ecef[1] = src->offset_ecef[1];
+    model->offset_ecef[2] = src->offset_ecef[2];
     model->lon_rad = src->lon_rad;
     model->lat_rad = src->lat_rad;
     model->alt_metres = src->alt_metres;

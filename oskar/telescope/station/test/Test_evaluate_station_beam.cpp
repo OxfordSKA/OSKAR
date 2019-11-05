@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,7 @@ TEST(evaluate_station_beam, test_array_pattern)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Set the station coordinates.
-    oskar_station_set_position(station, 0.0, M_PI / 2.0, 0.0);
+    oskar_station_set_position(station, 0.0, M_PI / 2.0, 0.0, 0.0, 0.0, 0.0);
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
     oskar_meshgrid_f(

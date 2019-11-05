@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
+ * Copyright (c) 2012-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,10 @@ static void set_child_station_locations(oskar_Station* s,
         oskar_station_set_position(s,
                 oskar_station_lon_rad(parent),
                 oskar_station_lat_rad(parent),
-                oskar_station_alt_metres(parent));
+                oskar_station_alt_metres(parent),
+                oskar_station_offset_ecef_x(parent),
+                oskar_station_offset_ecef_y(parent),
+                oskar_station_offset_ecef_z(parent));
     }
 
     /* Recursively set data for child stations. */

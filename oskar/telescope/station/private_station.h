@@ -50,6 +50,7 @@ struct oskar_Station
     /* Data common to all station types -------------------------------------*/
     int station_type;             /* Type of the station (enumerator). */
     int normalise_final_beam;     /* Flag to specify whether the station beam should be completely normalised. */
+    double offset_ecef[3];        /* Offset ECEF coordinates of the station, in metres. */
     double lon_rad;               /* Geodetic east longitude of station, in radians. */
     double lat_rad;               /* Geodetic latitude of station, in radians. */
     double alt_metres;            /* Altitude of station above ellipsoid, in metres. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, The University of Oxford
+ * Copyright (c) 2016-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include "math/oskar_cmath.h"
 #include "convert/oskar_convert_ecef_to_enu.h"
+#include "convert/oskar_convert_enu_to_offset_ecef.h"
 #include "convert/oskar_convert_geodetic_spherical_to_ecef.h"
 #include "telescope/oskar_telescope.h"
 
@@ -65,6 +66,7 @@ void oskar_telescope_set_station_coords_wgs84(oskar_Telescope* telescope,
         /* longitude, latitude, altitude */
         double wgs[] = {0.0, 0.0, 0.0};
         double ecef[] = {0.0, 0.0, 0.0};
+        double offset_ecef[] = {0.0, 0.0, 0.0};
         double hor[] = {0.0, 0.0, 0.0};
 
         /* Get coordinates from input arrays. */
@@ -75,16 +77,20 @@ void oskar_telescope_set_station_coords_wgs84(oskar_Telescope* telescope,
         /* Convert geodetic spherical to ECEF. */
         wgs[0] *= M_PI / 180.0;
         wgs[1] *= M_PI / 180.0;
-        oskar_station_set_position(oskar_telescope_station(telescope, i),
-                wgs[0], wgs[1], wgs[2]);
         oskar_convert_geodetic_spherical_to_ecef(1, &wgs[0], &wgs[1], &wgs[2],
                 &ecef[0], &ecef[1], &ecef[2]);
 
         /* Convert station ECEF to horizon plane coordinates. */
         oskar_convert_ecef_to_enu(1, &ecef[0], &ecef[1], &ecef[2],
                 longitude_rad, latitude_rad, altitude_m, &hor[0], &hor[1], &hor[2]);
+        oskar_convert_enu_to_offset_ecef_d(1, &hor[0], &hor[1], &hor[2],
+                longitude_rad, latitude_rad,
+                &offset_ecef[0], &offset_ecef[1], &offset_ecef[2]);
 
         /* Store the offset geocentric and horizon plane coordinates. */
+        oskar_station_set_position(oskar_telescope_station(telescope, i),
+                wgs[0], wgs[1], wgs[2],
+                offset_ecef[0], offset_ecef[1], offset_ecef[2]);
         oskar_telescope_set_station_coords(telescope, i, &ecef[0], &ecef[0],
                 &hor[0], &hor[0], status);
         if (*status) break;

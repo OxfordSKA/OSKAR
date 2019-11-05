@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -200,6 +200,49 @@ double oskar_telescope_channel_bandwidth_hz(const oskar_Telescope* model);
 
 /**
  * @brief
+ * Returns the TEC screen height, in km.
+ *
+ * @details
+ * Returns the TEC screen height, in km.
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The TEC screen height, in km.
+ */
+OSKAR_EXPORT
+double oskar_telescope_tec_screen_height_km(const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns the TEC screen pixel size, in metres.
+ *
+ * @details
+ * Returns the TEC screen pixel size, in metres.
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The TEC screen pixel size, in metres.
+ */
+OSKAR_EXPORT
+double oskar_telescope_tec_screen_pixel_size_m(const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns the TEC screen time interval, in seconds.
+ *
+ * @details
+ * Returns the TEC screen time interval, in seconds.
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The TEC screen time interval, in seconds.
+ */
+OSKAR_EXPORT
+double oskar_telescope_tec_screen_time_interval_sec(
+        const oskar_Telescope* model);
+
+/**
+ * @brief
  * Returns the time averaging interval in seconds.
  *
  * @details
@@ -343,6 +386,20 @@ int oskar_telescope_allow_station_beam_duplication(
  */
 OSKAR_EXPORT
 int oskar_telescope_enable_numerical_patterns(const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns the flag specifying whether an ionospheric phase screen is enabled.
+ *
+ * @details
+ * Returns the flag specifying whether an ionospheric phase screen is enabled.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return Flag specifying whether an ionospheric phase screen is enabled.
+ */
+OSKAR_EXPORT
+char oskar_telescope_ionosphere_screen_type(const oskar_Telescope* model);
 
 /**
  * @brief
@@ -791,6 +848,19 @@ int oskar_telescope_noise_enabled(const oskar_Telescope* model);
 OSKAR_EXPORT
 unsigned int oskar_telescope_noise_seed(const oskar_Telescope* model);
 
+/**
+ * @brief
+ * Returns the path to an externally-generated TEC screen.
+ *
+ * @details
+ * Returns the path to an externally-generated TEC screen.
+ *
+ * @param[in] model    Pointer to telescope model.
+ *
+ * @return The path to the TEC screen.
+ */
+OSKAR_EXPORT
+const char* oskar_telescope_tec_screen_path(const oskar_Telescope* model);
 
 /* Setters. */
 
@@ -807,6 +877,34 @@ unsigned int oskar_telescope_noise_seed(const oskar_Telescope* model);
 OSKAR_EXPORT
 void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model,
         int value);
+
+/**
+ * @brief
+ * Sets the channel bandwidth, used for bandwidth smearing.
+ *
+ * @details
+ * Sets the channel bandwidth, used for bandwidth smearing.
+ *
+ * @param[in] model            Pointer to telescope model.
+ * @param[in] bandwidth_hz     Channel bandwidth, in Hz.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_channel_bandwidth(oskar_Telescope* model,
+        double bandwidth_hz);
+
+/**
+ * @brief
+ * Sets the ionosphere screen type.
+ *
+ * @details
+ * Sets the ionosphere screen type.
+ *
+ * @param[in] model    Pointer to telescope model.
+ * @param[in] type     Type of screen to use (currently "None" or "External").
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_ionosphere_screen_type(oskar_Telescope* model,
+        const char* type);
 
 /**
  * @brief
@@ -921,6 +1019,78 @@ void oskar_telescope_set_noise_rms(oskar_Telescope* model,
 
 /**
  * @brief
+ * Sets the coordinates of the phase centre.
+ *
+ * @details
+ * Sets the right ascension and declination of the interferometer phase centre.
+ *
+ * @param[in] model       Pointer to telescope model.
+ * @param[in] coord_type  Coordinate type (ICRS or CIRS).
+ * @param[in] ra_rad      Right ascension in radians.
+ * @param[in] dec_rad     Declination in radians.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_phase_centre(oskar_Telescope* model,
+        int coord_type, double ra_rad, double dec_rad);
+
+/**
+ * @brief
+ * Sets the path to an externally-generated phase screen.
+ *
+ * @details
+ * Sets the path to an externally-generated phase screen.
+ *
+ * @param[in] model    Pointer to telescope model.
+ * @param[in] path     Path to FITS file to use as a phase screen.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_tec_screen_path(oskar_Telescope* model,
+        const char* path);
+
+/**
+ * @brief
+ * Sets the TEC screen height.
+ *
+ * @details
+ * Sets the TEC screen height.
+ *
+ * @param[in] model     Pointer to telescope model.
+ * @param[in] height_km TEC screen height, in km.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_tec_screen_height(oskar_Telescope* model,
+        double height_km);
+
+/**
+ * @brief
+ * Sets the TEC screen pixel size, in metres.
+ *
+ * @details
+ * Sets the TEC screen pixel size, in metres.
+ *
+ * @param[in] model     Pointer to telescope model.
+ * @param[in] pixel_size_m TEC screen pixel size, in metres.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_tec_screen_pixel_size(oskar_Telescope* model,
+        double pixel_size_m);
+
+/**
+ * @brief
+ * Sets the TEC screen time interval, in seconds.
+ *
+ * @details
+ * Sets the TEC screen time interval, in seconds.
+ *
+ * @param[in] model     Pointer to telescope model.
+ * @param[in] time_interval_sec TEC screen time interval, in seconds.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_tec_screen_time_interval(oskar_Telescope* model,
+        double time_interval_sec);
+
+/**
+ * @brief
  * Sets the geographic coordinates of the telescope centre.
  *
  * @details
@@ -934,6 +1104,21 @@ void oskar_telescope_set_noise_rms(oskar_Telescope* model,
 OSKAR_EXPORT
 void oskar_telescope_set_position(oskar_Telescope* model,
         double longitude_rad, double latitude_rad, double altitude_metres);
+
+/**
+ * @brief
+ * Sets the polarisation mode of the telescope.
+ *
+ * @details
+ * Sets the polarisation mode of the telescope.
+ *
+ * @param[in] model       Pointer to telescope model.
+ * @param[in] mode        Mode string ("Full" or "Scalar").
+ * @param[in,out] status  Status return code.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_pol_mode(oskar_Telescope* model, const char* mode,
+        int* status);
 
 /**
  * @brief
@@ -951,50 +1136,6 @@ void oskar_telescope_set_position(oskar_Telescope* model,
 OSKAR_EXPORT
 void oskar_telescope_set_polar_motion(oskar_Telescope* model,
         double pm_x_rad, double pm_y_rad);
-
-/**
- * @brief
- * Sets the coordinates of the phase centre.
- *
- * @details
- * Sets the right ascension and declination of the interferometer phase centre.
- *
- * @param[in] model       Pointer to telescope model.
- * @param[in] coord_type  Coordinate type (ICRS or CIRS).
- * @param[in] ra_rad      Right ascension in radians.
- * @param[in] dec_rad     Declination in radians.
- */
-OSKAR_EXPORT
-void oskar_telescope_set_phase_centre(oskar_Telescope* model,
-        int coord_type, double ra_rad, double dec_rad);
-
-/**
- * @brief
- * Sets the channel bandwidth, used for bandwidth smearing.
- *
- * @details
- * Sets the channel bandwidth, used for bandwidth smearing.
- *
- * @param[in] model            Pointer to telescope model.
- * @param[in] bandwidth_hz     Channel bandwidth, in Hz.
- */
-OSKAR_EXPORT
-void oskar_telescope_set_channel_bandwidth(oskar_Telescope* model,
-        double bandwidth_hz);
-
-/**
- * @brief
- * Sets the time average interval, used for time-average smearing.
- *
- * @details
- * Sets the time average interval, used for time-average smearing.
- *
- * @param[in] model            Pointer to telescope model.
- * @param[in] time_average_sec Time averaging interval, in seconds.
- */
-OSKAR_EXPORT
-void oskar_telescope_set_time_average(oskar_Telescope* model,
-        double time_average_sec);
 
 /**
  * @brief
@@ -1030,6 +1171,20 @@ void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type,
 
 /**
  * @brief
+ * Sets the time average interval, used for time-average smearing.
+ *
+ * @details
+ * Sets the time average interval, used for time-average smearing.
+ *
+ * @param[in] model            Pointer to telescope model.
+ * @param[in] time_average_sec Time averaging interval, in seconds.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_time_average(oskar_Telescope* model,
+        double time_average_sec);
+
+/**
+ * @brief
  * Sets the baseline UV range to evaluate.
  *
  * @details
@@ -1044,21 +1199,6 @@ void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type,
 OSKAR_EXPORT
 void oskar_telescope_set_uv_filter(oskar_Telescope* model,
         double uv_filter_min, double uv_filter_max, const char* units,
-        int* status);
-
-/**
- * @brief
- * Sets the polarisation mode of the telescope.
- *
- * @details
- * Sets the polarisation mode of the telescope.
- *
- * @param[in] model       Pointer to telescope model.
- * @param[in] mode        Mode string ("Full" or "Scalar").
- * @param[in,out] status  Status return code.
- */
-OSKAR_EXPORT
-void oskar_telescope_set_pol_mode(oskar_Telescope* model, const char* mode,
         int* status);
 
 #ifdef __cplusplus

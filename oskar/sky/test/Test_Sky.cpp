@@ -547,7 +547,7 @@ TEST(SkyModel, horizon_clip)
     for (int i = 0; i < n_stations; ++i)
     {
         oskar_station_set_position(oskar_telescope_station(telescope, i),
-                0.0, (90.0 - i * 0.0001) * deg2rad, 0.0);
+                0.0, (90.0 - i * 0.0001) * deg2rad, 0.0, 0.0, 0.0, 0.0);
     }
 
     // Horizon clip on CPU.

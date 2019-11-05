@@ -10,15 +10,6 @@
             data. See the accompanying documentation for a description
             of an OSKAR telescope model directory.</desc>
     </s>
-    <s k="station_type" priority="1"><label>Station type</label>
-        <type name="OptionList" default="A">
-            Aperture array,Isotropic beam,Gaussian beam,VLA (PBCOR)
-        </type>
-        <desc>The type of each station in the interferometer. A simple,
-            time-invariant Gaussian station beam can be used instead of an
-            aperture array beam if required for testing. All station beam
-            effects can be disabled by selecting 'Isotropic beam'.</desc>
-    </s>
     <s k="normalise_beams_at_phase_centre" priority="1">
         <label>Normalise beams at phase centre</label>
         <type name="bool" default="true"/>
@@ -26,6 +17,16 @@
             at the interferometer phase centre to precisely 1.0 for each time
             snapshot. This effectively performs an amplitude calibration for
             a source at the phase centre.</desc>
+    </s>
+    <s k="allow_station_beam_duplication" priority="1">
+        <label>Allow station beam duplication</label>
+        <type name="bool" default="false" />
+        <desc>If enabled, and if all stations are identical, all station beam
+            responses will be copied from the first. This can reduce the
+            simulation time, but <b>when using a telescope model with long
+            baselines, source positions will not shift with respect to each
+            station's horizon if this option is enabled.</b> This setting has
+            no effect if all stations are not identical.</desc>
     </s>
     <s k="pol_mode" priority="1">
         <label>Polarisation mode</label>
@@ -38,17 +39,15 @@
             simulated. <b>Note that scalar mode can be significantly faster.</b>
         </desc>
     </s>
-    <s k="allow_station_beam_duplication" priority="1">
-        <label>Allow station beam duplication</label>
-        <type name="bool" default="false" />
-        <desc>If enabled, and if all stations are identical, all station beam
-            responses will be copied from the first. This can reduce the
-            simulation time, but <b>when using a telescope model with long
-            baselines, source positions will not shift with respect to each
-            station's horizon if this option is enabled.</b> This setting has
-            no effect if all stations are not identical.</desc>
+    <s k="station_type" priority="1"><label>Station type</label>
+        <type name="OptionList" default="A">
+            Aperture array,Isotropic beam,Gaussian beam,VLA (PBCOR)
+        </type>
+        <desc>The type of each station in the interferometer. A simple,
+            time-invariant Gaussian station beam can be used instead of an
+            aperture array beam if required for testing. All station beam
+            effects can be disabled by selecting 'Isotropic beam'.</desc>
     </s>
-
     <!-- Aperture array settings group -->
     <s k="aperture_array">
         <label>Aperture array settings</label>
@@ -56,8 +55,6 @@
         <import filename="oskar_telescope_AA_array.xml" />
         <import filename="oskar_telescope_AA_element.xml" />
     </s>
-
-    <!-- Gaussian beam telescope settings group -->
     <s k="gaussian_beam">
         <label>Gaussian station beam settings</label>
         <depends k="telescope/station_type" v="Gaussian beam" />
@@ -74,6 +71,37 @@
             <label>Reference frequency [Hz]</label>
             <type name="double" default="0.0" />
             <desc>The reference frequency of the specified FWHM, in Hz.</desc>
+        </s>
+    </s>
+    <s k="ionosphere_screen_type">
+        <label>Ionosphere screen type</label>
+        <type name="OptionList" default="None">None,External</type>
+        <desc>Type of ionospheric phase screen to use.</desc>
+    </s>
+    <s k="external_tec_screen">
+        <label>External TEC screen</label>
+        <desc>External ionospheric TEC screen parameters.</desc>
+        <depends k="telescope/ionosphere_screen_type" v="External" />
+        <s k="input_fits_file"><label>Input FITS file</label>
+            <type name="InputFile"/>
+            <desc>Path to a FITS file written by AOtools to use
+               as a TEC screen.</desc>
+        </s>
+        <s k="screen_height_km">
+            <label>Screen height [km]</label>
+            <type name="UnsignedDouble" default="300" />
+            <desc>Height of ionospheric screen, in kilometres.</desc>
+        </s>
+        <s k="screen_pixel_size_m">
+            <label>Screen pixel size [m]</label>
+            <type name="DoubleRangeExt" default="file">0,MAX,file</type>
+            <desc>Pixel size of ionospheric screen, in metres.</desc>
+        </s>
+        <s k="screen_time_interval_sec">
+            <label>Screen time interval [sec]</label>
+            <type name="DoubleRangeExt" default="file">0,MAX,file</type>
+            <desc>Time interval between ionospheric screens,
+                in seconds.</desc>
         </s>
     </s>
 

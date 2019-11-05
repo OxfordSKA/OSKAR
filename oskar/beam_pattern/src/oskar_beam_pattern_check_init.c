@@ -604,6 +604,14 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
             d->z    = oskar_mem_create(h->prec, dev_loc, 1 + max_src, status);
             d->tel  = oskar_telescope_create_copy(h->tel, dev_loc, status);
             d->work = oskar_station_work_create(h->prec, dev_loc, status);
+            oskar_station_work_set_tec_screen_common_params(d->work,
+                    oskar_telescope_ionosphere_screen_type(d->tel),
+                    oskar_telescope_tec_screen_height_km(d->tel),
+                    oskar_telescope_tec_screen_pixel_size_m(d->tel),
+                    oskar_telescope_tec_screen_time_interval_sec(d->tel));
+            if (oskar_telescope_ionosphere_screen_type(d->tel) == 'E')
+                oskar_station_work_set_tec_screen_path(d->work,
+                        oskar_telescope_tec_screen_path(d->tel));
         }
 
         /* Host memory. */

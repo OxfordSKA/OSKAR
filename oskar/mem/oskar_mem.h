@@ -96,6 +96,7 @@ enum OSKAR_MEM_LOCATION
 #include <mem/oskar_mem_random_uniform.h>
 #include <mem/oskar_mem_read_binary_raw.h>
 #include <mem/oskar_mem_read_element.h>
+#include <mem/oskar_mem_read_fits.h>
 #include <mem/oskar_mem_read_fits_image_plane.h>
 #include <mem/oskar_mem_read_healpix_fits.h>
 #include <mem/oskar_mem_realloc.h>
