@@ -5,7 +5,7 @@
         const FP lon0_rad, const FP cos_lat0, const FP sin_lat0,\
         GLOBAL_OUT(FP, l), GLOBAL_OUT(FP, m), GLOBAL_OUT(FP, n))\
 {\
-    KERNEL_LOOP_PAR_X(int, i, 0, num)\
+    KERNEL_LOOP_X(int, i, 0, num)\
     FP sin_lon, cos_lon, sin_lat, cos_lat;\
     const FP lon = lon_rad[i] - lon0_rad, lat = lat_rad[i];\
     SINCOS(lon, sin_lon, cos_lon);\
