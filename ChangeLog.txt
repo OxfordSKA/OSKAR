@@ -4,13 +4,24 @@
 
     * Fixed display of timing information when using GPU devices.
 
+    * Fixed compilation and installation on versions of Ubuntu >= 18.04.
+
     * Added optimised versions of cross-correlation kernels.
 
-    * Refuse to load FITS images with an unknown pixel size.
+    * Added GPU-capable gridder to imager.
 
-    * Fixed compilation on Ubuntu 18.04.
+    * Added experimental OpenCL support.
+
+    * Added capability to use externally-generated spherical wave
+      element patterns.
+
+    * Added option to use an externally-generated ionospheric TEC screen.
 
     * Added option to ignore baseline W-components.
+
+    * Added option to evaluate station beams at specified horizon coordinates.
+
+    * Refuse to load FITS images with an unknown pixel size.
 
 2017-10-31  OSKAR-2.7.0
 
