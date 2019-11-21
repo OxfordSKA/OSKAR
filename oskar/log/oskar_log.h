@@ -82,7 +82,7 @@ enum OSKAR_LOG_PRIORITY {
  * Subsequent log messages will be written to a new log file.
  */
 OSKAR_EXPORT
-void oskar_log_close(oskar_Log* log, int write_message);
+void oskar_log_close(oskar_Log* log);
 
 /**
  * @brief

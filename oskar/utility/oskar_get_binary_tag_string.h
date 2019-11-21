@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2019, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,35 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SCAN_BINARY_FILE_H_
-#define OSKAR_SCAN_BINARY_FILE_H_
+#ifndef OSKAR_GET_BINARY_TAG_STRING_H_
+#define OSKAR_GET_BINARY_TAG_STRING_H_
 
 /**
- * @file oskar_scan_binary_file.h
+ * @file oskar_get_binary_tag_string.h
  */
 
 #include <oskar_global.h>
-#include <log/oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Summarises the contents of an OSKAR binary file.
+ * @brief Returns a string describing the binary tag values.
  *
  * @details
- * This function summarises the given binary file and writes details of the
- * tags it contains to the log.
+ * Returns a string describing the binary tag values.
  *
- * @param[in] filename     Name of binary file.
- * @param[in,out] status   Status return code.
+ * @param[in] group Enumerated tag group.
+ * @param[in] tag   Enumerated tag within group.
+ *
+ * @return String describing the enumerated values.
  */
 OSKAR_EXPORT
-void oskar_scan_binary_file(const char* filename, oskar_Log* log, int* status);
+const char* oskar_get_binary_tag_string(char group, char tag);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SCAN_BINARY_FILE_H_ */
+#endif /* include guard */

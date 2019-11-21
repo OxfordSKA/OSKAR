@@ -394,7 +394,7 @@ void oskar_interferometer_finalise(oskar_Interferometer* h, int* status)
     oskar_interferometer_reset_cache(h, status);
 
     /* Close the log. */
-    oskar_log_close(h->log, 1);
+    oskar_log_close(h->log);
 }
 
 

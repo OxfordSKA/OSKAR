@@ -289,7 +289,7 @@ void oskar_imager_finalise(oskar_Imager* h,
     oskar_imager_reset_cache(h, status);
 
     /* Close the log. */
-    oskar_log_close(h->log, 1);
+    oskar_log_close(h->log);
 }
 
 

@@ -251,21 +251,26 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
             double* axis_inc = 0;
             oskar_mem_read_fits(0, 0, 0, screen_path, 0, 0,
                     &num_axes, &axis_size, &axis_inc, status);
-            oskar_telescope_set_tec_screen_path(t, screen_path);
-            oskar_telescope_set_tec_screen_height(t,
-                    s->to_double("screen_height_km", status));
-            const double pixel_size =
-                    s->to_double("screen_pixel_size_m", status);
-            const double time_interval =
-                    s->to_double("screen_time_interval_sec", status);
-            if (pixel_size > 0.0)
-                oskar_telescope_set_tec_screen_pixel_size(t, pixel_size);
-            else
-                oskar_telescope_set_tec_screen_pixel_size(t, axis_inc[0]);
-            if (time_interval > 0.0)
-                oskar_telescope_set_tec_screen_time_interval(t, time_interval);
-            else
-                oskar_telescope_set_tec_screen_time_interval(t, axis_inc[2]);
+            if (!*status)
+            {
+                oskar_telescope_set_tec_screen_path(t, screen_path);
+                oskar_telescope_set_tec_screen_height(t,
+                        s->to_double("screen_height_km", status));
+                const double pixel_size =
+                        s->to_double("screen_pixel_size_m", status);
+                const double time_interval =
+                        s->to_double("screen_time_interval_sec", status);
+                if (pixel_size > 0.0)
+                    oskar_telescope_set_tec_screen_pixel_size(t, pixel_size);
+                else
+                    oskar_telescope_set_tec_screen_pixel_size(t, axis_inc[0]);
+                if (time_interval > 0.0)
+                    oskar_telescope_set_tec_screen_time_interval(t,
+                            time_interval);
+                else
+                    oskar_telescope_set_tec_screen_time_interval(t,
+                            axis_inc[2]);
+            }
             free(axis_size);
             free(axis_inc);
         }

@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     oskar::OptionParser opt("oskar_vis_summary", oskar_version_string());
     opt.add_required("OSKAR visibility file");
     opt.add_flag("-l", "Display the simulation log.", false, "--log");
-    opt.add_flag("-s", "Display the simulation settings file.", false, "--settings");
+    opt.add_flag("-s", "Display the simulation settings file.", false, "--opts");
     opt.add_flag("-t", "Display visibility statistics.", false, "--stats");
     opt.add_flag("-a", "Display header.", false, "--header");
     if (!opt.check_options(argc, argv)) return OSKAR_ERR_INVALID_ARGUMENT;

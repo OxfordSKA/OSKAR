@@ -12,13 +12,13 @@ set(utility_SRC
     src/oskar_device.cpp
     src/oskar_dir.c
     src/oskar_file_exists.c
+    src/oskar_get_binary_tag_string.c
     src/oskar_get_error_string.c
     src/oskar_get_memory_usage.c
     src/oskar_get_num_procs.c
     src/oskar_getline.c
     src/oskar_lock_file.c
     src/oskar_thread.c
-    src/oskar_scan_binary_file.c
     src/oskar_string_to_array.c
     src/oskar_timer.c
     src/oskar_version_string.c

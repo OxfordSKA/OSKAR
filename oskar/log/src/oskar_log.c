@@ -55,6 +55,7 @@ struct oskar_Log
     int keep_file;                    /* If true, log file will be kept. */
     int file_priority, term_priority; /* Message priority filters. */
     int value_width;                  /* Width of value message */
+    int write_header;                 /* If true, write standard headers. */
     FILE* file;                       /* Log file handle. */
     double timestamp_start;           /* Timestamp of log creation. */
     char name[120];                   /* Log file pathname. */
@@ -81,6 +82,7 @@ static oskar_Log log_ = {
         OSKAR_LOG_NONE, /* File message priority. */
         OSKAR_LOG_WARNING, /* Terminal message priority. */
         OSKAR_LOG_DEFAULT_VALUE_WIDTH, /* Value width. */
+        0, /* Write standard headers. */
         0, /* File pointer. */
         0.0, /* Timestamp start. */
         {0} /* File name. */
@@ -93,9 +95,9 @@ static oskar_Log log_ = {
 #endif
 
 
-void oskar_log_close(oskar_Log* log, int write_message)
+void oskar_log_close(oskar_Log* log)
 {
-    if (write_message && log->init)
+    if (log->write_header && log->init)
     {
         char time_str[80];
         const time_t unix_time = time(NULL);
@@ -128,6 +130,7 @@ oskar_Log* oskar_log_create(int file_priority, int term_priority)
     log->file_priority = file_priority;
     log->term_priority = term_priority;
     log->value_width = OSKAR_LOG_DEFAULT_VALUE_WIDTH;
+    log->write_header = 1;
     return log;
 }
 
@@ -217,10 +220,10 @@ char* oskar_log_file_data(oskar_Log* log, size_t* size)
 void oskar_log_free(oskar_Log* log)
 {
     if (!log)
-        oskar_log_close(&log_, 0);
+        oskar_log_close(&log_);
     else
     {
-        oskar_log_close(log, 1);
+        oskar_log_close(log);
         free(log);
     }
 }
@@ -425,9 +428,12 @@ void init_log(oskar_Log* log)
 
     /* Write standard header. */
     log->timestamp_start = oskar_log_timestamp();
-    oskar_log_section(log, 'M', "OSKAR-%s starting at %s.",
-            OSKAR_VERSION_STR, time_str);
-    oskar_log_message(log, 'M', 0, "Current dir is %s", current_dir);
+    if (log->write_header)
+    {
+        oskar_log_section(log, 'M', "OSKAR-%s starting at %s.",
+                OSKAR_VERSION_STR, time_str);
+        oskar_log_message(log, 'M', 0, "Current dir is %s", current_dir);
+    }
     free(current_dir);
     if (log->file)
         oskar_log_message(log, 'M', 0, "Logging to file %s", log->name);

@@ -178,7 +178,7 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
     oskar_timer_free(tmr);
 
     /* Close the log. */
-    oskar_log_close(h->log, 1);
+    oskar_log_close(h->log);
 }
 
 
