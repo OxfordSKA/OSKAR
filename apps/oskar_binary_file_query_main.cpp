@@ -144,7 +144,7 @@ static void scan_file(const char* filename, oskar_Log* log, int* status)
             const int max_string_length = 40;
             const char* fmt = "%s: %.*s";
             for (c = 0; c < bytes && c < oskar_mem_length(temp); ++c)
-                if (data[c] < 32) data[c] = ' ';
+                if (data[c] < 32 && data[c] != 0) data[c] = ' ';
             if (bytes > max_string_length) fmt = "%s: %.*s ...";
             oskar_log_message(log, p, depth, fmt, label,
                     max_string_length, oskar_mem_char(temp));
