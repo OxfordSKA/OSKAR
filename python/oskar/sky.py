@@ -305,15 +305,6 @@ class Sky(object):
             precision)
         return t
 
-    def get_num_sources(self):
-        """Returns the number of sources in the sky model.
-
-        Returns:
-            int: Number of sources in the sky model.
-        """
-        self.capsule_ensure()
-        return _sky_lib.num_sources(self._capsule)
-
     @classmethod
     def load(cls, filename, precision='double'):
         """Loads data from a text file and returns it as a new sky model.
@@ -355,4 +346,13 @@ class Sky(object):
 
     # Properties
     capsule = property(capsule_get, capsule_set)
-    num_sources = property(get_num_sources)
+
+    @property
+    def num_sources(self):
+        """Returns the number of sources in the sky model.
+
+        Type
+            int
+        """
+        self.capsule_ensure()
+        return _sky_lib.num_sources(self._capsule)

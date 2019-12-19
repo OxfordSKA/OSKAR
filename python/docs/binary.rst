@@ -1,6 +1,9 @@
 
-Binary Data Files
-=================
+Binary Files
+============
+
+Class Methods
+-------------
 
 .. autoclass:: oskar.Binary
    :members:

@@ -94,8 +94,9 @@ class Telescope(object):
         prior to calling this method, as it affects how data are loaded.
 
         Specifically, the following methods must be called BEFORE this one:
-            set_pol_mode()
-            set_enable_numerical_patterns()
+
+        - set_pol_mode()
+        - set_enable_numerical_patterns()
 
         Args:
             dir_name (str): Path to telescope model directory to load.

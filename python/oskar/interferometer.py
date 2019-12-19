@@ -396,9 +396,6 @@ class Interferometer(object):
     def write_block(self, block, block_index):
         """Writes a finalised visibility block.
 
-        This method should be called after a call to finalise_block()
-        with the same block index.
-
         Args:
             block (oskar.VisBlock): The block to write.
             block_index (int): The simulation block index to write.

@@ -1,3 +1,4 @@
+.. _quickstart:
 
 Quick Start
 ===========
@@ -93,3 +94,16 @@ be uninstalled using:
    pip uninstall oskarpy
 
 This does not uninstall OSKAR itself, only the Python interface to it.
+
+
+Usage
++++++
+
+Once the OSKAR Python bindings have been installed, use:
+
+.. code-block:: python
+
+   import oskar
+
+in your Python script to access the classes in this package.
+The :ref:`example scripts <example_scripts>` may be helpful.

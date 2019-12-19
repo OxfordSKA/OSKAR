@@ -2,6 +2,12 @@
 Imager
 ======
 
+Example Usage
+-------------
+
+Class Methods
+-------------
+
 .. autoclass:: oskar.Imager
    :members:
    :special-members: __init__
