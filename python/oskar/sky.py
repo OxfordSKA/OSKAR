@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2016, The University of Oxford
+# Copyright (c) 2016-2019, The University of Oxford
 # All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,7 @@ import math
 import numpy
 try:
     from . import _sky_lib
-except ImportError as e:
-    print("Import error: " + str(e))
+except ImportError:
     _sky_lib = None
 
 

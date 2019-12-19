@@ -34,11 +34,11 @@ import math
 import numpy
 try:
     from . import _imager_lib
-except ImportError as e:
-    print("Import error: " + str(e))
+except ImportError:
     _imager_lib = None
 
-
+# pylint: disable=useless-object-inheritance,too-many-public-methods
+# pylint: disable=invalid-name
 class Imager(object):
     """This class provides a Python interface to the OSKAR imager."""
 
@@ -63,6 +63,419 @@ class Imager(object):
             img = settings.to_imager()
             self._capsule = img.capsule
         self._precision = precision
+
+    @property
+    def algorithm(self):
+        """Returns or sets the algorithm used by the imager.
+        Currently one of 'FFT', 'DFT 2D', 'DFT 3D' or 'W-projection'.
+
+        Type
+            str
+        """
+        self.capsule_ensure()
+        return _imager_lib.algorithm(self._capsule)
+
+    @algorithm.setter
+    def algorithm(self, value):
+        self.set_algorithm(value)
+
+    @property
+    def cellsize_arcsec(self):
+        """Returns or sets the cell (pixel) size, in arcsec.
+
+        After setting this property, changing the image size
+        will change the field of view.
+
+        Type
+            float
+        """
+        self.capsule_ensure()
+        return _imager_lib.cellsize(self._capsule)
+
+    @cellsize_arcsec.setter
+    def cellsize_arcsec(self, value):
+        self.set_cellsize(value)
+
+    @property
+    def channel_snapshots(self):
+        """Returns or sets the flag to image channels separately.
+
+        Type
+            boolean
+        """
+        self.capsule_ensure()
+        return _imager_lib.channel_snapshots(self._capsule)
+
+    @channel_snapshots.setter
+    def channel_snapshots(self, value):
+        self.set_channel_snapshots(value)
+
+    @property
+    def coords_only(self):
+        """Returns or sets the flag to use coordinates only.
+
+        Set this property when using uniform weighting or W-projection.
+        The grids of weights can only be used once they are fully populated,
+        so this method puts the imager into a mode where it only updates its
+        internal weights grids when calling update().
+
+        This should only be used after setting all imager options.
+
+        Turn this mode off when processing visibilities,
+        otherwise they will be ignored.
+
+        Type
+            boolean
+        """
+        self.capsule_ensure()
+        return _imager_lib.coords_only(self._capsule)
+
+    @coords_only.setter
+    def coords_only(self, value):
+        self.set_coords_only(value)
+
+    @property
+    def fft_on_gpu(self):
+        """Returns or sets the flag to use the GPU for FFTs.
+
+        Type
+            boolean
+        """
+        self.capsule_ensure()
+        return _imager_lib.fft_on_gpu(self._capsule)
+
+    @fft_on_gpu.setter
+    def fft_on_gpu(self, value):
+        self.set_fft_on_gpu(value)
+
+    @property
+    def fov_deg(self):
+        """Returns or sets the image field-of-view, in degrees.
+
+        After setting this property, changing the image size
+        will change the image resolution.
+
+        Type
+            float
+        """
+        self.capsule_ensure()
+        return _imager_lib.fov(self._capsule)
+
+    @fov_deg.setter
+    def fov_deg(self, value):
+        self.set_fov(value)
+
+    @property
+    def freq_max_hz(self):
+        """Returns or sets the maximum frequency of visibility data to image.
+
+        A value less than or equal to zero means no maximum.
+
+        Type
+            float
+        """
+        self.capsule_ensure()
+        return _imager_lib.freq_max_hz(self._capsule)
+
+    @freq_max_hz.setter
+    def freq_max_hz(self, value):
+        self.set_freq_max_hz(value)
+
+    @property
+    def freq_min_hz(self):
+        """Returns or sets the minimum frequency of visibility data to image.
+
+        Type
+            float
+        """
+        self.capsule_ensure()
+        return _imager_lib.freq_min_hz(self._capsule)
+
+    @freq_min_hz.setter
+    def freq_min_hz(self, value):
+        self.set_freq_min_hz(value)
+
+    @property
+    def generate_w_kernels_on_gpu(self):
+        """Returns or sets the flag to use the GPU to generate kernels
+        for W-projection.
+
+        Type
+            boolean
+        """
+        self.capsule_ensure()
+        return _imager_lib.generate_w_kernels_on_gpu(self._capsule)
+
+    @generate_w_kernels_on_gpu.setter
+    def generate_w_kernels_on_gpu(self, value):
+        self.set_generate_w_kernels_on_gpu(value)
+
+    @property
+    def grid_on_gpu(self):
+        """Returns or sets the flag to use the GPU for gridding.
+
+        Type
+            boolean
+        """
+        self.capsule_ensure()
+        return _imager_lib.grid_on_gpu(self._capsule)
+
+    @grid_on_gpu.setter
+    def grid_on_gpu(self, value):
+        self.set_grid_on_gpu(value)
+
+    @property
+    def image_size(self):
+        """Returns or sets the image side length in pixels.
+
+        Type
+            int
+        """
+        self.capsule_ensure()
+        return _imager_lib.image_size(self._capsule)
+
+    @image_size.setter
+    def image_size(self, value):
+        self.set_image_size(value)
+
+    @property
+    def image_type(self):
+        """Returns or sets the image (polarisation) type.
+
+        Either 'STOKES', 'I', 'Q', 'U', 'V',
+        'LINEAR', 'XX', 'XY', 'YX', 'YY' or 'PSF'.
+
+        Type
+            str
+        """
+        self.capsule_ensure()
+        return _imager_lib.image_type(self._capsule)
+
+    @image_type.setter
+    def image_type(self, value):
+        self.set_image_type(value)
+
+    @property
+    def input_file(self):
+        """Returns or sets the input visibility file or Measurement Set.
+
+        Type
+            str
+        """
+        self.capsule_ensure()
+        return _imager_lib.input_file(self._capsule)
+
+    @input_file.setter
+    def input_file(self, value):
+        self.set_input_file(value)
+
+    @property
+    def ms_column(self):
+        """Returns or sets the data column to use from a Measurement Set.
+
+        Type
+            str
+        """
+        self.capsule_ensure()
+        return _imager_lib.ms_column(self._capsule)
+
+    @ms_column.setter
+    def ms_column(self, value):
+        self.set_ms_column(value)
+
+    @property
+    def num_w_planes(self):
+        """Returns or sets the number of W-projection planes to use,
+        if using W-projection.
+
+        A number less than or equal to zero means 'automatic'.
+
+        Type
+            int
+        """
+        self.capsule_ensure()
+        return _imager_lib.num_w_planes(self._capsule)
+
+    @num_w_planes.setter
+    def num_w_planes(self, value):
+        self.set_num_w_planes(value)
+
+    @property
+    def output_root(self):
+        """Returns or sets the root path of output images.
+
+        Type
+            str
+        """
+        self.capsule_ensure()
+        return _imager_lib.output_root(self._capsule)
+
+    @output_root.setter
+    def output_root(self, value):
+        self.set_output_root(value)
+
+    @property
+    def plane_size(self):
+        """Returns the required plane side length.
+
+        This may be different to the image size, for example
+        if using W-projection.
+        It will only be valid after a call to check_init().
+
+        Type
+            int
+        """
+        self.capsule_ensure()
+        return _imager_lib.plane_size(self._capsule)
+
+    @property
+    def root_path(self):
+        """Returns or sets the root path of output images.
+
+        Type
+            str
+        """
+        self.capsule_ensure()
+        return _imager_lib.output_root(self._capsule)
+
+    @root_path.setter
+    def root_path(self, value):
+        self.set_output_root(value)
+
+    @property
+    def scale_norm_with_num_input_files(self):
+        """Returns or sets the option to scale image normalisation with
+        the number of files.
+
+        Set this to true if the different files represent multiple
+        sky model components observed with the same telescope configuration
+        and observation parameters.
+        Set this to false if the different files represent multiple
+        observations of the same sky with different telescope configurations
+        or observation parameters.
+
+        Type
+            boolean
+        """
+        self.capsule_ensure()
+        return _imager_lib.scale_norm_with_num_input_files(self._capsule)
+
+    @scale_norm_with_num_input_files.setter
+    def scale_norm_with_num_input_files(self, value):
+        self.set_scale_norm_with_num_input_files(value)
+
+    @property
+    def size(self):
+        """Returns or sets the image side length in pixels.
+
+        Type
+            int
+        """
+        self.capsule_ensure()
+        return _imager_lib.size(self._capsule)
+
+    @size.setter
+    def size(self, value):
+        self.set_size(value)
+
+    @property
+    def time_max_utc(self):
+        """Returns or sets the maximum time of visibility data to image.
+
+        A value less than or equal to zero means no maximum.
+        The value is given as MJD(UTC).
+
+        Type
+            float
+        """
+        self.capsule_ensure()
+        return _imager_lib.time_max_utc(self._capsule)
+
+    @time_max_utc.setter
+    def time_max_utc(self, value):
+        self.set_time_max_utc(value)
+
+    @property
+    def time_min_utc(self):
+        """Returns or sets the minimum time of visibility data to image.
+
+        The value is given as MJD(UTC).
+
+        Type
+            float
+        """
+        self.capsule_ensure()
+        return _imager_lib.time_min_utc(self._capsule)
+
+    @time_min_utc.setter
+    def time_min_utc(self, value):
+        self.set_time_min_utc(value)
+
+    @property
+    def uv_filter_max(self):
+        """Returns or sets the maximum UV baseline length to image,
+        in wavelengths.
+
+        A value less than zero means no maximum
+        (i.e. all baseline lengths are allowed).
+
+        Type
+            float
+        """
+        self.capsule_ensure()
+        return _imager_lib.uv_filter_max(self._capsule)
+
+    @uv_filter_max.setter
+    def uv_filter_max(self, value):
+        self.set_uv_filter_max(value)
+
+    @property
+    def uv_filter_min(self):
+        """Returns or sets the minimum UV baseline length to image,
+        in wavelengths.
+
+        Type
+            float
+        """
+        self.capsule_ensure()
+        return _imager_lib.uv_filter_min(self._capsule)
+
+    @uv_filter_min.setter
+    def uv_filter_min(self, value):
+        self.set_uv_filter_min(value)
+
+    @property
+    def weighting(self):
+        """Returns or sets the type of visibility weighting to use.
+
+        Either 'Natural', 'Radial' or 'Uniform'.
+
+        Type
+            str
+        """
+        self.capsule_ensure()
+        return _imager_lib.weighting(self._capsule)
+
+    @weighting.setter
+    def weighting(self, value):
+        self.set_weighting(value)
+
+    @property
+    def wprojplanes(self):
+        """Returns or sets the number of W-projection planes to use,
+        if using W-projection.
+
+        A number less than or equal to zero means 'automatic'.
+
+        Type
+            int
+        """
+        self.capsule_ensure()
+        return _imager_lib.num_w_planes(self._capsule)
+
+    @wprojplanes.setter
+    def wprojplanes(self, value):
+        self.set_num_w_planes(value)
 
     def capsule_ensure(self):
         """Ensures the C capsule exists."""
@@ -125,227 +538,6 @@ class Imager(object):
         """
         self.capsule_ensure()
         _imager_lib.finalise_plane(self._capsule, plane, plane_norm)
-
-    def get_algorithm(self):
-        """Returns a string describing the imager algorithm.
-
-        Returns:
-            str: The imager algorithm.
-        """
-        self.capsule_ensure()
-        return _imager_lib.algorithm(self._capsule)
-
-    def get_cellsize(self):
-        """Returns the image cell (pixel) size.
-
-        Returns:
-            float: The cell size, in arcsec.
-        """
-        self.capsule_ensure()
-        return _imager_lib.cellsize(self._capsule)
-
-    def get_channel_snapshots(self):
-        """Returns the flag specifying whether to image each channel separately.
-
-        Returns:
-            boolean: If true, image each channel index separately;
-                if false, use frequency synthesis.
-        """
-        self.capsule_ensure()
-        return _imager_lib.channel_snapshots(self._capsule)
-
-    def get_coords_only(self):
-        """Returns flag specifying whether imager is in coordinate-only mode.
-
-        Returns:
-            boolean: If true, imager is in coordinate-only mode.
-        """
-        self.capsule_ensure()
-        return _imager_lib.coords_only(self._capsule)
-
-    def get_fft_on_gpu(self):
-        """Returns flag specifying whether to use the GPU for FFTs.
-
-        Returns:
-            boolean: If true, use the GPU for FFTs.
-        """
-        self.capsule_ensure()
-        return _imager_lib.fft_on_gpu(self._capsule)
-
-    def get_fov(self):
-        """Returns the image field-of-view, in degrees.
-
-        Returns:
-            float: The image field-of-view, in degrees.
-        """
-        self.capsule_ensure()
-        return _imager_lib.fov(self._capsule)
-
-    def get_freq_max_hz(self):
-        """Returns the maximum frequency of visibility data to image.
-
-        Returns:
-            float: The maximum frequency of visibility data to image, in Hz.
-        """
-        self.capsule_ensure()
-        return _imager_lib.freq_max_hz(self._capsule)
-
-    def get_freq_min_hz(self):
-        """Returns the minimum frequency of visibility data to image.
-
-        Returns:
-            float: The minimum frequency of visibility data to image, in Hz.
-        """
-        self.capsule_ensure()
-        return _imager_lib.freq_min_hz(self._capsule)
-
-    def get_generate_w_kernels_on_gpu(self):
-        """Returns flag specifying whether to use the GPU to generate W-kernels.
-
-        Returns:
-            boolean: If true, use the GPU to generate W-kernels.
-        """
-        self.capsule_ensure()
-        return _imager_lib.generate_w_kernels_on_gpu(self._capsule)
-
-    def get_grid_on_gpu(self):
-        """Returns flag specifying whether to use the GPU for gridding.
-
-        Returns:
-            boolean: If true, use the GPU for gridding.
-        """
-        self.capsule_ensure()
-        return _imager_lib.grid_on_gpu(self._capsule)
-
-    def get_image_size(self):
-        """Returns the image side length, in pixels.
-
-        Returns:
-            int: The image side length, in pixels.
-        """
-        self.capsule_ensure()
-        return _imager_lib.image_size(self._capsule)
-
-    def get_image_type(self):
-        """Returns a string describing the image (polarisation) type.
-
-        Returns:
-            str: The image (polarisation) type.
-        """
-        self.capsule_ensure()
-        return _imager_lib.image_type(self._capsule)
-
-    def get_input_file(self):
-        """Returns a string containing the input file name.
-
-        Returns:
-            str: The input file name.
-        """
-        self.capsule_ensure()
-        return _imager_lib.input_file(self._capsule)
-
-    def get_ms_column(self):
-        """Returns a string containing the Measurement Set column to use.
-
-        Returns:
-            str: The column name.
-        """
-        self.capsule_ensure()
-        return _imager_lib.ms_column(self._capsule)
-
-    def get_num_w_planes(self):
-        """Returns the number of W-planes used.
-
-        Returns:
-            int: The number of W-planes used.
-        """
-        self.capsule_ensure()
-        return _imager_lib.num_w_planes(self._capsule)
-
-    def get_output_root(self):
-        """Returns a string containing the output root file name.
-
-        Returns:
-            str: The output root file name.
-        """
-        self.capsule_ensure()
-        return _imager_lib.output_root(self._capsule)
-
-    def get_plane_size(self):
-        """Returns the required plane size.
-
-        This may be different to the image size, for example if using
-        W-projection. It will only be valid after a call to check_init().
-
-        Returns:
-            int: Plane side length.
-        """
-        self.capsule_ensure()
-        return _imager_lib.plane_size(self._capsule)
-
-    def get_scale_norm_with_num_input_files(self):
-        """Returns the option to scale image normalisation by the number of
-        input files.
-
-        Returns:
-            boolean: The option value (true or false).
-        """
-        self.capsule_ensure()
-        return _imager_lib.scale_norm_with_num_input_files(self._capsule)
-
-    def get_size(self):
-        """Returns the image side length, in pixels.
-
-        Returns:
-            int: The image side length, in pixels.
-        """
-        self.capsule_ensure()
-        return _imager_lib.size(self._capsule)
-
-    def get_time_max_utc(self):
-        """Returns the maximum time of visibility data to include in the image.
-
-        Returns:
-            float: The maximum time of visibility data, as MJD(UTC).
-        """
-        self.capsule_ensure()
-        return _imager_lib.time_max_utc(self._capsule)
-
-    def get_time_min_utc(self):
-        """Returns the minimum time of visibility data to include in the image.
-
-        Returns:
-            float: The minimum time of visibility data, as MJD(UTC).
-        """
-        self.capsule_ensure()
-        return _imager_lib.time_min_utc(self._capsule)
-
-    def get_uv_filter_max(self):
-        """Returns the maximum UV baseline length to image, in wavelengths.
-
-        Returns:
-            float: Maximum UV baseline length to image, in wavelengths.
-        """
-        self.capsule_ensure()
-        return _imager_lib.uv_filter_max(self._capsule)
-
-    def get_uv_filter_min(self):
-        """Returns the minimum UV baseline length to image, in wavelengths.
-
-        Returns:
-            float: Minimum UV baseline length to image, in wavelengths.
-        """
-        self.capsule_ensure()
-        return _imager_lib.uv_filter_min(self._capsule)
-
-    def get_weighting(self):
-        """Returns a string describing the weighting scheme.
-
-        Returns:
-            str: The weighting scheme.
-        """
-        self.capsule_ensure()
-        return _imager_lib.weighting(self._capsule)
 
     def reset_cache(self):
         """Low-level function to reset the imager's internal memory.
@@ -421,13 +613,13 @@ class Imager(object):
         the grid cube can be accessed using the 'grids' key.
 
         Args:
-            uu (float, array-like, shape (n,)):
+            uu (Optional[float, array-like, shape (n,)]):
                 Time-baseline ordered uu coordinates, in metres.
-            vv (float, array-like, shape (n,)):
+            vv (Optional[float, array-like, shape (n,)]):
                 Time-baseline ordered vv coordinates, in metres.
-            ww (float, array-like, shape (n,)):
+            ww (Optional[float, array-like, shape (n,)]):
                 Time-baseline ordered ww coordinates, in metres.
-            amps (complex float, array-like, shape (m,)):
+            amps (Optional[complex float, array-like, shape (m,)]):
                 Baseline visibility amplitudes. Length as described above.
             weight (Optional[float, array-like, shape (p,)]):
                 Visibility weights. Length as described above.
@@ -874,46 +1066,6 @@ class Imager(object):
                                         weight, plane, plane_norm,
                                         weights_grid)
 
-    # Properties.
-    algorithm = property(get_algorithm, set_algorithm)
-    capsule = property(capsule_get, capsule_set)
-    cell = property(get_cellsize, set_cellsize)
-    cellsize = property(get_cellsize, set_cellsize)
-    cellsize_arcsec = property(get_cellsize, set_cellsize)
-    cell_size = property(get_cellsize, set_cellsize)
-    cell_size_arcsec = property(get_cellsize, set_cellsize)
-    channel_snapshots = property(get_channel_snapshots,
-                                 set_channel_snapshots)
-    coords_only = property(get_coords_only, set_coords_only)
-    fft_on_gpu = property(get_fft_on_gpu, set_fft_on_gpu)
-    fov = property(get_fov, set_fov)
-    fov_deg = property(get_fov, set_fov)
-    freq_max_hz = property(get_freq_max_hz, set_freq_max_hz)
-    freq_min_hz = property(get_freq_min_hz, set_freq_min_hz)
-    generate_w_kernels_on_gpu = property(get_generate_w_kernels_on_gpu,
-                                         set_generate_w_kernels_on_gpu)
-    grid_on_gpu = property(get_grid_on_gpu, set_grid_on_gpu)
-    image_size = property(get_image_size, set_image_size)
-    image_type = property(get_image_type, set_image_type)
-    input_file = property(get_input_file, set_input_file)
-    input_files = property(get_input_file, set_input_file)
-    input_vis_data = property(get_input_file, set_input_file)
-    ms_column = property(get_ms_column, set_ms_column)
-    num_w_planes = property(get_num_w_planes, set_num_w_planes)
-    output_root = property(get_output_root, set_output_root)
-    plane_size = property(get_plane_size)
-    root_path = property(get_output_root, set_output_root)
-    scale_norm_with_num_input_files = \
-        property(get_scale_norm_with_num_input_files,
-                 set_scale_norm_with_num_input_files)
-    size = property(get_size, set_size)
-    time_max_utc = property(get_time_max_utc, set_time_max_utc)
-    time_min_utc = property(get_time_min_utc, set_time_min_utc)
-    uv_filter_max = property(get_uv_filter_max, set_uv_filter_max)
-    uv_filter_min = property(get_uv_filter_min, set_uv_filter_min)
-    weighting = property(get_weighting, set_weighting)
-    wprojplanes = property(get_num_w_planes, set_num_w_planes)
-
     @staticmethod
     def cellsize_to_fov(cellsize_rad, size):
         """Convert image cellsize and size along one dimension in pixels to FoV.
@@ -1041,8 +1193,8 @@ class Imager(object):
             size (int): Size of the grid / image
 
         Returns:
-            tupple(gx, gy): where gx and gy are the pixel coordinates of each
-            grid cell. gx and gy are 2d arrays of dimensions size x size.
+            tuple: The tuple elements gx and gy are the pixel coordinates of
+            each grid cell. gx and gy are 2D arrays of dimensions size by size.
         """
         x = numpy.arange(-size // 2, size // 2) * grid_cellsize
         gx, gy = numpy.meshgrid(-x, x)
@@ -1057,9 +1209,9 @@ class Imager(object):
             im_size: Image size in pixels.
 
         Returns:
-            tupple (l, m): where l and m are the coordinates of each
+            tuple: The tuple elements l and m are the coordinates of each
             image pixel in the l (x) and m (y) directions. l and m are
-            2d arrays of dimensions im_size by im_size
+            2D arrays of dimensions im_size by im_size
         """
         cell_size_rad = Imager.fov_to_cellsize(math.radians(fov_deg), im_size)
         cell_size_lm = math.sin(cell_size_rad)
@@ -1072,6 +1224,8 @@ class Imager(object):
                    algorithm='FFT', weight=None, wprojplanes=0):
         """Makes an image from visibility data.
 
+        Convenience static function.
+
         Args:
             uu (float, array-like, shape (n,)):
                 Baseline uu coordinates, in wavelengths.
@@ -1081,8 +1235,10 @@ class Imager(object):
                 Baseline ww coordinates, in wavelengths.
             amps (complex float, array-like, shape (n,)):
                 Baseline visibility amplitudes.
-            fov_deg (float): Image field of view, in degrees.
-            size (int):      Image size along one dimension, in pixels.
+            fov_deg (float):
+                Image field of view, in degrees.
+            size (int):
+                Image size along one dimension, in pixels.
             weighting (Optional[str]):
                 Either 'Natural', 'Radial' or 'Uniform'.
             algorithm (Optional[str]):
@@ -1095,11 +1251,20 @@ class Imager(object):
                 It will not be less than 16.
 
         Returns:
-            array: Image as a 2D numpy array.
-                Data are ordered as in FITS image.
+            numpy.ndarray: Image as a 2D numpy array.
+            Data are ordered as in FITS image.
         """
         if _imager_lib is None:
             raise RuntimeError("OSKAR library not found.")
         return _imager_lib.make_image(uu, vv, ww, amps, fov_deg, size,
                                       weighting, algorithm, weight,
                                       wprojplanes)
+
+    capsule = property(capsule_get, capsule_set)
+    cell = property(cellsize_arcsec, set_cellsize)
+    cellsize = property(cellsize_arcsec, set_cellsize)
+    cell_size = property(cellsize_arcsec, set_cellsize)
+    cell_size_arcsec = property(cellsize_arcsec, set_cellsize)
+    fov = property(fov_deg, set_fov)
+    input_files = property(input_file, set_input_file)
+    input_vis_data = property(input_file, set_input_file)
