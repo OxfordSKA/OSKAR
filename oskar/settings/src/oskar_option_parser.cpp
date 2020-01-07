@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, The University of Oxford
+ * Copyright (c) 2018-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ OptionParser::OptionParser(const char* title, const char* ver,
     p->footer =
             "\n" + string(79, '-') + "\n"
             "OSKAR (version " + ver + ")\n"
-            "Copyright (c) 2019, The University of Oxford.\n"
+            "Copyright (c) 2020, The University of Oxford.\n"
             "This program is free and without warranty.\n"
             "" + string(79, '-') + "\n";
     set_version(ver, false);

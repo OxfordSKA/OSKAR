@@ -84,7 +84,7 @@
         <depends k="telescope/ionosphere_screen_type" v="External" />
         <s k="input_fits_file"><label>Input FITS file</label>
             <type name="InputFile"/>
-            <desc>Path to a FITS file written by AOtools to use
+            <desc>Path to a FITS file written by ARatmospy to use
                as a TEC screen.</desc>
         </s>
         <s k="screen_height_km">
@@ -94,15 +94,17 @@
         </s>
         <s k="screen_pixel_size_m">
             <label>Screen pixel size [m]</label>
-            <type name="DoubleRangeExt" default="file">0,MAX,file</type>
+            <type name="DoubleRangeExt" default="file">0,MAX,file,file</type>
             <desc>Pixel size of ionospheric screen, in metres.</desc>
         </s>
+        <!--
         <s k="screen_time_interval_sec">
             <label>Screen time interval [sec]</label>
-            <type name="DoubleRangeExt" default="file">0,MAX,file</type>
+            <type name="DoubleRangeExt" default="file">0,MAX,file,file</type>
             <desc>Time interval between ionospheric screens,
                 in seconds.</desc>
         </s>
+        -->
     </s>
 
     <!--

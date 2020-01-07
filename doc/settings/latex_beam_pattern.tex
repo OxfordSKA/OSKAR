@@ -82,6 +82,16 @@ Beam
 \\
 \hline
 
+beam\_image/specify\_cellsize
+&
+{If set, specify cellsize; otherwise, specify field of view.}
+&
+Bool
+&
+false
+\\
+\hline
+
 beam\_image/size
 &
 {Image dimensions. If a single value is specified, the image is assumed to have the same number of pixels along each dimension.
@@ -102,7 +112,7 @@ CSV integer list
 
 beam\_image/fov\_deg
 &
-{Field-of-view (FOV) in degrees (max 180.0). If a single value is specified, the image is assumed to have the same FOV along each dimension.
+{Field of view (FOV) in degrees (max 180.0). If a single value is specified, the image is assumed to have the same FOV along each dimension.
 \vspace{8pt}\par\noindent Example: 
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
 \vspace{8pt}
@@ -115,6 +125,16 @@ beam\_image/fov\_deg
 Double, or CSV list of doubles.
 &
 2.0
+\\
+\hline
+
+beam\_image/cellsize\_arcsec
+&
+{The cell (pixel) size in arcseconds.}
+&
+Unsigned double
+&
+1.0
 \\
 \hline
 

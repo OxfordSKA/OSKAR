@@ -105,106 +105,6 @@ Double
 \\
 \hline
 
-gsm/file
-&
-{Path to a Global Sky Model file, pixellated using the HEALPix RING scheme. This option can be used to load a GSM data file produced from software written by Angelica de Oliveira-Costa, available at http://space.mit.edu/angelica/gsm/}
-&
-Path name
-&
-
-\\
-\hline
-
-gsm/freq\_hz
-&
-{Frequency at which to apply the conversion from brightness temperature to Jy/pixel.}
-&
-Unsigned double
-&
-408e6
-\\
-\hline
-
-gsm/spectral\_index
-&
-{The spectral index to give to each pixel.}
-&
-Double
-&
--0.7
-\\
-\hline
-
-gsm/filter/flux\_min
-&
-{Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
-&
-{Double $\geq$ -MAX, `min' or `max'}
-&
-min
-\\
-\hline
-
-gsm/filter/flux\_max
-&
-{Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
-&
-{Double $\geq$ -MAX, `min' or `max'}
-&
-max
-\\
-\hline
-
-gsm/filter/radius\_inner\_deg
-&
-{Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
-&
-Double in range 0 $\leq$ $x$ $\leq$ 180
-&
-0.0
-\\
-\hline
-
-gsm/filter/radius\_outer\_deg
-&
-{Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
-&
-Double in range 0 $\leq$ $x$ $\leq$ 180
-&
-180.0
-\\
-\hline
-
-gsm/extended\_sources/FWHM\_major
-&
-{Major axis FWHM override of all sources in this group, in arc seconds.}
-&
-Unsigned double
-&
-0.0
-\\
-\hline
-
-gsm/extended\_sources/FWHM\_minor
-&
-{Minor axis FWHM override of all sources in this group, in arc seconds.}
-&
-Unsigned double
-&
-0.0
-\\
-\hline
-
-gsm/extended\_sources/position\_angle
-&
-{Position angle override of all extended sources in this group (from North to East), in degrees.}
-&
-Double
-&
-0.0
-\\
-\hline
-
 fits\_image/file
 &
 {FITS file(s) to use as a sky model.}
@@ -219,7 +119,7 @@ fits\_image/min\_peak\_fraction
 &
 {The minimum allowed pixel value, as a fraction of the peak value in the image.}
 &
-Unsigned double
+Double
 &
 0.02
 \\
@@ -229,7 +129,7 @@ fits\_image/min\_abs\_val
 &
 {The minimum pixel value accepted, in units of the original image.}
 &
-Unsigned double
+Double
 &
 0.0
 \\

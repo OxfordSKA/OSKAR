@@ -35,23 +35,6 @@ Path name
 \\
 \hline
 
-station\_type
-&
-{The type of each station in the interferometer. A simple, time-invariant Gaussian station beam can be used instead of an aperture array beam if required for testing. All station beam effects can be disabled by selecting `Isotropic beam'.}
-&
-{One of the following:}
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
-\vspace{4pt}\item {Aperture array}
-\item {Isotropic beam}
-\item {Gaussian beam}
-\item {VLA (PBCOR)}
-\end{itemize}
-}
-&
-Aperture
-\\
-\hline
-
 normalise\_beams\_at\_phase\_centre
 &
 {If \textbf{true}, then scale the amplitude of every station beam at the interferometer phase centre to precisely 1.0 for each time snapshot. This effectively performs an amplitude calibration for a source at the phase centre.}
@@ -59,6 +42,16 @@ normalise\_beams\_at\_phase\_centre
 Bool
 &
 true
+\\
+\hline
+
+allow\_station\_beam\_duplication
+&
+{If enabled, and if all stations are identical, all station beam responses will be copied from the first. This can reduce the simulation time, but \textbf{when using a telescope model with long baselines, source positions will not shift with respect to each station's horizon if this option is enabled.} This setting has no effect if all stations are not identical.}
+&
+Bool
+&
+false
 \\
 \hline
 
@@ -77,13 +70,20 @@ Full
 \\
 \hline
 
-allow\_station\_beam\_duplication
+station\_type
 &
-{If enabled, and if all stations are identical, all station beam responses will be copied from the first. This can reduce the simulation time, but \textbf{when using a telescope model with long baselines, source positions will not shift with respect to each station's horizon if this option is enabled.} This setting has no effect if all stations are not identical.}
+{The type of each station in the interferometer. A simple, time-invariant Gaussian station beam can be used instead of an aperture array beam if required for testing. All station beam effects can be disabled by selecting `Isotropic beam'.}
 &
-Bool
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Aperture array}
+\item {Isotropic beam}
+\item {Gaussian beam}
+\item {VLA (PBCOR)}
+\end{itemize}
+}
 &
-false
+Aperture
 \\
 \hline
 
@@ -99,7 +99,7 @@ true
 
 aperture\_array/array\_pattern/normalise
 &
-{If true, the amplitude of each station beam will be divided by the number of antennas in the station; if false, then this normalisation is not performed. Note, however, that global beam normalisation is still possible by enabling the option labeled \textit{'Normalise beams at phase centre'}.}
+{If true, the amplitude of each station beam will be divided by the number of antennas in the station; if false, then this normalisation is not performed. Note, however, that global beam normalisation is still possible by enabling the option labelled \textit{'Normalise beams at phase centre'.}}
 &
 Bool
 &
@@ -167,6 +167,16 @@ Double
 \\
 \hline
 
+aperture\_array/array\_pattern/element/cable\_length\_error\_m
+&
+{Element cable length error standard deviation, in metres. If set, this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
 aperture\_array/array\_pattern/element/x\_orientation\_error\_deg
 &
 {The standard deviation of the antenna X-dipole orientation error. If set, this will override the contents of the station files.}
@@ -227,6 +237,16 @@ Integer $\geq$ 1, or `time'
 \\
 \hline
 
+aperture\_array/array\_pattern/element/seed\_cable\_length\_errors
+&
+{Random number generator seed used for antenna cable length error distribution.}
+&
+Integer $\geq$ 1, or `time'
+&
+1
+\\
+\hline
+
 aperture\_array/array\_pattern/element/seed\_x\_orientation\_error
 &
 {Random number generator seed used for antenna X dipole orientation error distribution.}
@@ -264,7 +284,6 @@ aperture\_array/element\_pattern/functional\_type
 {One of the following:}
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
 \vspace{4pt}\item {Dipole}
-\item {Geometric dipole}
 \item {Isotropic (unpolarised)}
 \end{itemize}
 }
@@ -351,6 +370,51 @@ gaussian\_beam/ref\_freq\_hz
 Double
 &
 0.0
+\\
+\hline
+
+ionosphere\_screen\_type
+&
+{Type of ionospheric phase screen to use.}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {None}
+\item {External}
+\end{itemize}
+}
+&
+None
+\\
+\hline
+
+external\_tec\_screen/input\_fits\_file
+&
+{Path to a FITS file written by ARatmospy to use as a TEC screen.}
+&
+Path name
+&
+None
+\\
+\hline
+
+external\_tec\_screen/screen\_height\_km
+&
+{Height of ionospheric screen, in kilometres.}
+&
+Unsigned double
+&
+300
+\\
+\hline
+
+external\_tec\_screen/screen\_pixel\_size\_m
+&
+{Pixel size of ionospheric screen, in metres.}
+&
+{Double $\geq$ 0, `file' or `file'}
+&
+file
 \\
 \hline
 

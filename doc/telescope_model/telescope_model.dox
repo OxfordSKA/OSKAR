@@ -3,7 +3,7 @@
 \page telescope_model Telescope Model
 
 \latexonly
-\def \docversion{8}
+\def \docversion{9}
 \endlatexonly
 
 \section telescope_intro Introduction
@@ -162,15 +162,21 @@ Per-element gain and phase offsets and errors.<br>
 <b>Required:</b> No.<br>
 <b>Allowed locations:</b> Station directory.
 
-\par apodisation.txt | apodization.txt
-Per-element complex apodisation weight.<br>
-<b>See</b> \ref telescope_element_apodisation <br>
+\par cable_length_error.txt
+Per-element cable length errors.<br>
+<b>See</b> \ref telescope_element_cable_length_errors <br>
 <b>Required:</b> No.<br>
 <b>Allowed locations:</b> Station directory.
 
 \latexonly
 \newpage
 \endlatexonly
+
+\par apodisation.txt | apodization.txt
+Per-element complex apodisation weight.<br>
+<b>See</b> \ref telescope_element_apodisation <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
 
 \par feed_angle.txt | feed_angle_x.txt | feed_angle_y.txt
 Per-element and per-polarisation feed angles.<br>
@@ -199,6 +205,12 @@ Permitted station beam directions relative to mounting platform.<br>
 \par element_pattern_fit_*.bin
 Fitted element X-or Y-dipole responses for the station, as a function of frequency.<br>
 <b>See</b> \ref telescope_element_patterns_numerical <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Any. (Inherited.)
+
+\par element_pattern_spherical_wave_*.txt
+Fitted spherical wave element coefficient data, as a function of frequency.<br>
+<b>See</b> \ref telescope_element_patterns_spherical_wave <br>
 <b>Required:</b> No.<br>
 <b>Allowed locations:</b> Any. (Inherited.)
 
@@ -378,6 +390,17 @@ where \f$ G_{\rm error} \f$ and \f$ \phi_{\rm error} \f$ are pseudo-random
 values picked, at each time-step, from Gaussian distributions with standard
 deviations \f$ G_{\rm std} \f$  and \f$ \phi_{\rm std} \f$ respectively.
 
+\section telescope_element_cable_length_errors Element Cable Length Error Files
+
+In each station directory, there may be optionally a "cable_length_error.txt"
+file to specify the per-element cable length errors in metres.
+
+In order, the parameter columns are:
+
+| Column | Description
+| ------ | --------------------------------------------------------------
+| 1      | Cable length error, in metres.
+
 \section telescope_element_apodisation Element Apodisation Files
 
 In each station directory, there may be optionally an "apodisation.txt"
@@ -538,6 +561,40 @@ FITS image of the element pattern (created by evaluating the fitted
 coefficients) by making an image of the station beam from a single-element
 station.
 
+\subsection telescope_element_patterns_spherical_wave Spherical Wave Element Patterns
+
+Since OSKAR 2.7.5, spherical wave coefficients can be used to represent
+element patterns. Coefficients should be supplied in text files in the
+telescope or station model folders, with the following naming convention:
+
+\verbatim
+element_pattern_spherical_wave_[x|y]_[te|tm]_[re|im]_
+    <element type index>_<frequency in MHz>.txt
+\endverbatim
+
+<b>The element type index should be 0 unless there is more than one type of
+element in the station</b> (as specified in the station's "element_types.txt"),
+and the frequency is the frequency in MHz for which
+the element pattern data are valid.
+The frequency nearest to the current observing frequency is used when
+evaluating the response.
+
+Separate files are needed both for the real and imaginary parts and the
+TE and TM modes. The X and Y labels are optional,
+and can be used if the two polarisations are different.
+
+For example, <tt>element_pattern_spherical_wave_x_te_re_0_100.txt</tt> would
+contain the real part of the coefficients for the TE mode for the first
+type of X-polarised antenna at 100 MHz.
+
+Each line in each file contains all the data for one order of theta
+(one value of \f$l\f$, starting at \f$l=1\f$);
+the number of lines in the files gives the maximum order in theta to
+use (\f$l_{\rm max}\f$), and the number of terms on each
+line is \f$2 l_{\rm max} + 1\f$.
+Only the first \f$2 l + 1\f$ terms on each line are used, but each line
+also needs trailing zeros for values \f$l < l_{\rm max}\f$.
+
 <!-- Not yet implemented
 \subsection telescope_element_patterns_functional Functional Element Patterns
 
@@ -674,15 +731,16 @@ character are treated as comments, and empty lines are ignored.
 0.2
 \endverbatim
 
-<!--
+
 \latexonly
 \vskip 1cm
 \endlatexonly
--->
 
+<!--
 \latexonly
 \newpage
 \endlatexonly
+-->
 
 
 <b>Revision History</b>
@@ -721,12 +779,16 @@ character are treated as comments, and empty lines are ignored.
     <td>[2.7.0] Added description of required new "position.txt" file.
     Added description of optional "layout_wgs84.txt" file.
     Added description of Ludwig-3 format element data files.
+    </td></tr>
+<tr><td>9</td><td>2020-01-06</td>
+    <td>[2.7.5] Added description of optional cable length errors and
+    spherical wave element pattern files.
+    </td></tr>
 <!-- Not yet implemented
     Updated description of feed angle specification to include
     the remaining two Euler angles. Added description of new "mount_type.txt"
     and "element_pattern*.txt" files.
 -->
-    </td></tr>
 </table>
 
 */

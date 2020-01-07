@@ -6,36 +6,6 @@ import re
 import csv
 
 
-# http://stackoverflow.com/questions/8845456/how-can-i-do-replace-a-child-elements-in-elementtree
-def process_import_nodes(xmlFile):
-    # print ''
-    # print '** INFO: Reading xml file:', xmlFile,'**'
-    xmlFH = open(xmlFile, 'r')
-    xmlStr = xmlFH.read()
-    xmlFH.close()
-    et = ET.fromstring(xmlStr)
-    parent_map = dict((c, p) for p in et.getiterator() for c in p)
-    # ref: http://stackoverflow.com/questions/2170610/access-elementtree-node-parent-node/2170994
-    importList = et.findall('.//import[@filename]')
-    for importPlaceholder in importList:
-        old_dir = os.getcwd()
-        new_dir = os.path.dirname(importPlaceholder.attrib['filename'])
-        shallPushd = os.path.exists(new_dir)
-        if shallPushd:
-            # print "  pushd: %s" %(new_dir)
-            os.chdir(new_dir)  # pushd (for relative linking)
-        # Recursing to import element from file reference
-        importedElement = process_import_nodes(os.path.basename(importPlaceholder.attrib['filename']))
-        # element replacement
-        parent = parent_map[importPlaceholder]
-        index = parent._children.index(importPlaceholder)
-        parent._children[index] = importedElement
-        if shallPushd:
-            # print "  popd: %s" %(old_dir)
-            os.chdir(old_dir)  # popd
-    return et
-
-
 def get_attribute(node, allowed_keys, toupper=True):
     if node is None:
         return None
@@ -76,7 +46,7 @@ def get_type_params(node):
         return None
     if '"' in params_:
         x = csv.reader([params_], skipinitialspace=True)
-        params_ = x.next()
+        params_ = next(x)
     else:
         params_ = params_.split(',')
     return params_
@@ -118,7 +88,7 @@ def set_default_value_latex(node, latex_file):
                 default_ = format_double_string(default_)
             except ValueError:
                 options_ = get_type_params(type_)
-                print options_[2:], default_
+                print(options_[2:], default_)
                 if default_ not in options_[2:]:
                     raise RuntimeError('Invalid default on DoubleRangeExt')
 
@@ -137,7 +107,6 @@ def set_default_value_latex(node, latex_file):
                     tmp = option.split()
                     default_ = tmp[0]
                     break
-            # print default_
 
     latex_file.write('%s\n' % default_)
 
@@ -165,7 +134,7 @@ def set_allowed_values_latex(node, latex_file):
         allowed_values_ = 'Unsigned double'
 
     elif type_name_ == 'RANDOMSEED':
-        allowed_values_ = "Integer $\geq$ 1, or `time'"
+        allowed_values_ = r"Integer $\geq$ 1, or `time'"
 
     elif type_name_ == 'INTRANGE':
         params_ = get_type_params(type_)
@@ -175,7 +144,7 @@ def set_allowed_values_latex(node, latex_file):
             # allowed_values_ = r'\textcolor{red}{Integer $\geq$ %s}' % (a)
             allowed_values_ = r'Integer $\geq$ %s' % (a)
         else:
-            allowed_values_ = 'Integer in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
+            allowed_values_ = r'Integer in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
 
     elif type_name_ == 'INTRANGEEXT':
         params_ = get_type_params(type_)
@@ -186,7 +155,7 @@ def set_allowed_values_latex(node, latex_file):
             allowed_values_ = r"{Integer $\geq$ %s, or `%s'}" % (a, c)
         else:
             allowed_values_ = \
-                "Integer in range %s $\leq$ $x$ $\leq$ %s, or `%s'" % (a, b, c)
+                r"Integer in range %s $\leq$ $x$ $\leq$ %s, or `%s'" % (a, b, c)
 
     elif type_name_ == 'DOUBLERANGE':
         params_ = get_type_params(type_)
@@ -200,7 +169,7 @@ def set_allowed_values_latex(node, latex_file):
             allowed_values_ = r'{Double $\geq$ %s}' % (a)
         else:
             allowed_values_ = \
-                'Double in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
+                r'Double in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
 
     elif type_name_ == 'DOUBLERANGEEXT':
         params_ = get_type_params(type_)
@@ -212,7 +181,7 @@ def set_allowed_values_latex(node, latex_file):
             allowed_values_ = r"{Double $\geq$ %s, `%s' or `%s'}" % (a, c, d)
         else:
             allowed_values_ = \
-                    "Double in range %s $\leq$ $x$ $\leq$ %s, `%s' or `%s'" \
+                    r"Double in range %s $\leq$ $x$ $\leq$ %s, `%s' or `%s'" \
                     % (a, b, c, d)
 
     elif type_name_ == 'INPUTFILELIST':
@@ -326,9 +295,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
 
     # =============== Top level group =========================================
     if type_node_ is None and depth == 1:
-        # print '%s<G> key:%s' % ('  '*depth, key_)
-        print ''
-        print '***** [GROUP %s] *****' % (key_)
+        print('***** [GROUP %s] *****' % (key_))
 
         html_file = '@PROJECT_SOURCE_DIR@/doc/settings/html_simulator_settings_test.html'
         filename_ = '@PROJECT_SOURCE_DIR@/doc/settings/latex_%s.tex' % (key_)
@@ -359,16 +326,16 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
         dox_file.write(r'All settings keys in this group are prefixed with <tt>')
         dox_file.write(key_ + r'/</tt>.' + '\n')
         dox_file.write('\n')
-        head, tail = os.path.split(filename_)
+        _, tail = os.path.split(filename_)
         dox_file.write(r'\latexinclude ' + tail + '\n')
-        head, tail = os.path.split(html_file)
+        _, tail = os.path.split(html_file)
         dox_file.write(r'\htmlinclude  ' + tail + '\n')
         dox_file.close()
 
         # Create the latex table file for the settings group.
         # ----------------------------------------------------------------------
 
-        print 'New table file: %s' % filename_
+        print('New table file: %s' % filename_)
         latex_file_ = open(filename_, 'w')
 
         latex_file_.write('%\n')
@@ -415,7 +382,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
             latex_file_.write(r'\endlastfoot'+'\n')
 
         else:
-            latex_file_.write('\hline\n')
+            latex_file_.write(r'\hline\n')
             latex_file_.write(r'\rowcolor{lightgray}' + '\n')
             # latex_file_.write(r'{\textbf{ID}}&' + '\n')
             latex_file_.write(r'{\textbf{Key}}&' + '\n')
@@ -437,12 +404,10 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
             full_key = key_
 
         # >>>>> Key <<<<<<
-        # print ''
-        # print '%s<S> key:%s [%s]' % ('  '*depth, key_, full_key)
         if type_node_ is None:
-            print '[---]%s%s' % (' '*depth, full_key)
+            print('[---]%s%s' % (' '*depth, full_key))
         else:
-            print '[%03i]%s%s' % (count, ' '*depth, full_key)
+            print('[%03i]%s%s' % (count, ' '*depth, full_key))
 
 #             if len(full_key.split('/'))%2 == 1:
 #                 latex_file.write(r'  \rowcolor{lightgray}'+'\n')
@@ -469,7 +434,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
 #                     else:
 #                         latex_file.write('\n')
 #             else:
-            latex_key = latex_key.replace('_', '\_')
+            latex_key = latex_key.replace('_', r'\_')
             # latex_file.write(latex_key + ' ' +str(len(latex_key)) +'\n')
 
             # TODO put footnote symbol for required keywords
@@ -487,7 +452,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
             for child_ in node:
                 if child_.tag == 'desc' or child_.tag == 'description':
                     # Extract the contents of the description tag as a string.
-                    desc_ = ET.tostring(child_, method="xml")
+                    desc_ = ET.tostring(child_, method="xml").decode()
                     desc_ = desc_.replace('<desc>', '')
                     desc_ = desc_.replace('</desc>', '')
                     desc_ = desc_.replace('<description>', '')
@@ -506,11 +471,6 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
 #                         desc_ += format_tag.text
 #                         desc_ += r'</' + format_tag.tag + r'>'
 #                         desc_ += format_tag.tail
-# #                     num_format_tags = len(list(child_))
-# #                     if num_format_tags >= 1:
-# #                         print "text:[",child_.text,"]"
-# #                         print "tail:[",child_.tail,"]"
-# #                         print "desc:[",desc_,"]"
 
                     latex_desc_ = desc_
                     pattern = re.compile(r'\s+')
@@ -592,7 +552,7 @@ def recurse_tree(node, key=None, depth=0, count=0, latex_file=None):
         # For the last settings table have to close it here.
         # if depth == 1 and child_ == node[-1]:
         if depth == 1 and latex_file:
-            print 'Closing latex table'
+            print('Closing latex table')
             # latex_file.write('\caption{Caption...}\n')
             # latex_file.write(r'\footnotetext[1]{Required setting.}'+'\n')
             latex_file.write(r'\end{longtable}'+'\n')
@@ -607,23 +567,15 @@ def recurse_tree(node, key=None, depth=0, count=0, latex_file=None):
 
 if __name__ == "__main__":
 
-    # filename = '@PROJECT_BINARY_DIR@/oskar/apps/xml/oskar.xml'
     dox_filename = '@PROJECT_SOURCE_DIR@/doc/settings/settings_tables.txt'
     if os.path.isfile(dox_filename):
         os.remove(dox_filename)
-
-#     xml = process_import_nodes(filename)
-#     #print ET.tostring(xml)
-#     # print type(xml)
-#     #print '---------------------------------'
-#     #print '<%s>' % xml.tag
 
     filename = '@PROJECT_BINARY_DIR@/oskar/apps/xml/oskar_all.xml'
     fh_ = open(filename, 'r')
     xmlStr = fh_.read()
     fh_.close()
     xml = ET.fromstring(xmlStr)
-
     recurse_tree(xml)
 
     # Create the settings.dox file.

@@ -4,7 +4,7 @@
 
 \section release_notes_intro Introduction
 
-OSKAR 2.7.0 is the current version of the OSKAR interferometry and beamforming
+OSKAR 2.7.5 is the current version of the OSKAR interferometry and beamforming
 simulation package.
 
 The function of these release notes is to summarise changes and new
@@ -16,49 +16,21 @@ The changes for the current release are listed below. For earlier releases
 please refer to older revisions of this document or the
 <tt>ChangeLog.txt</tt> file in the OSKAR source tree.
 
-\subsection version_2_7_0 Version 2.7.0
+\subsection version_2_7_5 Version 2.7.5
 
-2017-10-31  OSKAR-2.7.0
+2020-01-07  OSKAR-2.7.5
 
-- Removed telescope longitude, latitude and altitude from settings file.
-      These are now specified using "position.txt" in the telescope model.
-- Made CUDA an optional dependency, and added option to specify whether
-      or not to use GPUs for simulations. This makes it possible to run
-      inside a virtual machine if necessary.
-- Removed Qt dependency from all command line applications, and updated
-      the GUI to use Qt 5.
-- Changed GUI to only display settings for the selected application and to
-      remember the last settings file used for each application.
-- Added option to change current working directory from GUI.
-- Removed oskar_settings_set, as it was unable to check whether settings
-      were being set correctly. Settings files can now be updated using
-      the --set command line option of the required application.
-- Added option to specify the number of compute devices used for
-      simulations (CPU cores and/or GPU cards).
-- Added Python interface.
-- Re-wrote oskar_imager application to allow use of multiple GPUs
-      when using a DFT. Visibility data are now loaded in blocks to reduce
-      memory usage.
-- Added option to use a 3D DFT to make images.
-- Added option to use gridding and FFT to make images that are
-      consistent with those from CASA.
-- Added option to use W-projection to make images that are
-      consistent with those from CASA.
-- Added option to use natural, radial or uniform visibility weighting
-      when making images.
-- Added option to imager to filter input by UV baseline length,
-      in wavelengths.
-- Fix to ensure pixel coordinates are consistent between
-      the DFT and FFT algorithms.
-- Added options to specify grid kernel parameters.
-- Added option to perform imaging in single or double precision,
-      regardless of the precision of the input data.
-- Added capability to use multiple visibility files as input to the imager,
-      with option to scale image normalisation accordingly.
-- Allowed visibility data to be read from a specified column of a
-      Measurement Set.
-- Allowed negative source fluxes.
-- Allowed FITS images to be read if they have a diagonal CD matrix
-      instead of CDELT* values.
+- Fixed crash when manually specifying which CUDA device to use.
+- Fixed display of timing information when using GPU devices.
+- Fixed compilation and installation on versions of Ubuntu >= 18.04.
+- Added optimised versions of cross-correlation kernels.
+- Added GPU-capable gridder to imager.
+- Added experimental OpenCL support.
+- Added option to specify cable length errors.
+- Added capability to use externally-generated spherical wave element patterns.
+- Added option to use an externally-generated ionospheric TEC screen.
+- Added option to ignore baseline W-components.
+- Added option to evaluate station beams at specified horizon coordinates.
+- Refuse to load FITS images with an unknown pixel size.
 
 */

@@ -1,4 +1,4 @@
-2019-XX-YY  OSKAR-2.7.4
+2020-01-07  OSKAR-2.7.5
 
     * Fixed crash when manually specifying which CUDA device to use.
 
@@ -11,6 +11,8 @@
     * Added GPU-capable gridder to imager.
 
     * Added experimental OpenCL support.
+
+    * Added option to specify cable length errors.
 
     * Added capability to use externally-generated spherical wave
       element patterns.

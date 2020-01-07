@@ -51,7 +51,7 @@ max\_time\_samples\_per\_block
 &
 Unsigned integer
 &
-10
+8
 \\
 \hline
 
@@ -269,6 +269,16 @@ Path name
 force\_polarised\_ms
 &
 {If \textbf{True}, always write the Measurment Set in polarised format even if the simulation was run in the single polarisation `Scalar' (or Stokes-I) mode. If \textbf{False}, the size of the polarisation dimension in the the Measurement Set will be determined by the simulation mode.}
+&
+Bool
+&
+false
+\\
+\hline
+
+ignore\_w\_components
+&
+{If enabled, baseline W-coordinate component values will be set to 0. \textbf{This will disable W-smearing. Use only if you know what you're doing!}}
 &
 Bool
 &
