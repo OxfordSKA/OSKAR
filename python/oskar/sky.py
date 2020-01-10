@@ -158,7 +158,11 @@ class Sky(object):
             raise RuntimeError("Capsule is not of type oskar_Sky.")
 
     def create_copy(self):
-        """Creates a copy of the sky model."""
+        """Creates a copy of the sky model.
+
+        Returns:
+            oskar.Sky: A copy of the sky model.
+        """
         self.capsule_ensure()
         t = Sky()
         t.capsule = _sky_lib.create_copy(self._capsule)
@@ -215,6 +219,9 @@ class Sky(object):
             array (float, array-like): Input array.
             precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the sky model.
+
+        Returns:
+            oskar.Sky: The new sky model.
         """
         if _sky_lib is None:
             raise RuntimeError("OSKAR library not found.")
@@ -249,6 +256,9 @@ class Sky(object):
                 Spectral index value to give to each pixel.
             precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the sky model.
+
+        Returns:
+            oskar.Sky: The new sky model.
         """
         if _sky_lib is None:
             raise RuntimeError("OSKAR library not found.")
@@ -274,6 +284,9 @@ class Sky(object):
             seed (int):           Random generator seed.
             precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the sky model.
+
+        Returns:
+            oskar.Sky: The new sky model.
         """
         if _sky_lib is None:
             raise RuntimeError("OSKAR library not found.")
@@ -296,6 +309,9 @@ class Sky(object):
             seed (int):              Random generator seed.
             precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the sky model.
+
+        Returns:
+            oskar.Sky: The new sky model.
         """
         if _sky_lib is None:
             raise RuntimeError("OSKAR library not found.")
@@ -313,6 +329,9 @@ class Sky(object):
             filename (str): Name of file to load.
             precision (Optional[str]): Either 'double' or 'single' to specify
                 the numerical precision of the sky model.
+
+        Returns:
+            oskar.Sky: The new sky model.
         """
         if _sky_lib is None:
             raise RuntimeError("OSKAR library not found.")
