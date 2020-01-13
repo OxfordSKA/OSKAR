@@ -63,12 +63,15 @@ if (Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Network_FOUND)
         get_target_property(QtGui_location Qt5::Gui LOCATION)
         get_target_property(QtWidgets_location Qt5::Widgets LOCATION)
         get_target_property(QtNetwork_location Qt5::Network LOCATION)
+        get_target_property(QtWin_location Qt5::QWindowsIntegrationPlugin LOCATION)
+        get_target_property(QtWinStyle_location Qt5::QWindowsVistaStylePlugin LOCATION)
         install(FILES ${QtCore_location} ${QtGui_location}
             ${QtWidgets_location} ${QtNetwork_location}
             DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
-        get_target_property(QtWin_location Qt5::QWindowsIntegrationPlugin LOCATION)
         install(FILES ${QtWin_location}
             DESTINATION ${OSKAR_BIN_INSTALL_DIR}/platforms COMPONENT runtime)
+        install(FILES ${QtWinStyle_location}
+            DESTINATION ${OSKAR_BIN_INSTALL_DIR}/styles COMPONENT runtime)
         #foreach (plugin ${Qt5Gui_PLUGINS})
         #    get_target_property(_loc ${plugin} LOCATION)
         #    message("${plugin} is at ${_loc}")
