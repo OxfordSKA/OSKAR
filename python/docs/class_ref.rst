@@ -10,7 +10,7 @@ Once the OSKAR Python bindings have been installed, use:
 
 in your Python script to access the classes in this package.
 The :ref:`example scripts <example_scripts>` may be a helpful place to look
-for an overview.
+for an overview of what is possible.
 
 
 Input Data & Settings

@@ -23,6 +23,10 @@ and values can be assigned or read from this. Note that all parameter values
 are stored as strings, and should be converted using Python's ``str()``
 function if required.
 
+Use the :meth:`from_dict() <oskar.SettingsTree.from_dict()>` and
+:meth:`to_dict() <oskar.SettingsTree.to_dict()>` methods to convert between
+a Python dictionary and a :class:`oskar.SettingsTree` if required.
+
 Example Usage
 -------------
 

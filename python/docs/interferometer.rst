@@ -2,7 +2,12 @@
 Interferometer
 ==============
 
-Use this class to run interferometry simulations from Python using OSKAR.
+Use the :class:`oskar.Interferometer` class to run interferometry simulations
+from Python using OSKAR.
+It requires a model of the sky, a model of the telescope and the observation
+parameters as inputs, and it produces a set of simulated visibility data
+and (u,v,w) coordinates as outputs.
+
 The most basic way to use this class is as follows:
 
 1. Create a :class:`oskar.SettingsTree` object for the

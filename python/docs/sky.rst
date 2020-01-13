@@ -2,9 +2,9 @@
 Sky Model
 =========
 
-This class can be used to create an OSKAR sky model from Python.
-The sky model can be thought of as simply a table of source data, where
-each row of the table contains parameters for a single source.
+The :class:`oskar.Sky` class can be used to create an OSKAR sky model from
+Python. The sky model can be thought of as simply a table of source data,
+where each row of the table contains parameters for a single source.
 The sky model table format is described in the
 `sky model documentation <https://github.com/OxfordSKA/OSKAR/releases>`_
 and a summary of the columns is also included below for convenience.

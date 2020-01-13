@@ -85,6 +85,8 @@ class Imager(object):
 
         After setting this property, changing the image size
         will change the field of view.
+        Can be used instead of
+        :meth:`fov_deg() <oskar.Imager.fov_deg()>` if required.
 
         Type
             float
@@ -99,6 +101,8 @@ class Imager(object):
     @property
     def channel_snapshots(self):
         """Returns or sets the flag to image channels separately.
+
+        By default, this is false.
 
         Type
             boolean
@@ -138,6 +142,8 @@ class Imager(object):
     def fft_on_gpu(self):
         """Returns or sets the flag to use the GPU for FFTs.
 
+        By default, this is false.
+
         Type
             boolean
         """
@@ -154,6 +160,8 @@ class Imager(object):
 
         After setting this property, changing the image size
         will change the image resolution.
+        Can be used instead of
+        :meth:`cellsize_arcsec() <oskar.Imager.cellsize_arcsec()>` if required.
 
         Type
             float
@@ -200,6 +208,8 @@ class Imager(object):
         """Returns or sets the flag to use the GPU to generate kernels
         for W-projection.
 
+        By default, this is true.
+
         Type
             boolean
         """
@@ -213,6 +223,8 @@ class Imager(object):
     @property
     def grid_on_gpu(self):
         """Returns or sets the flag to use the GPU for gridding.
+
+        By default, this is false.
 
         Type
             boolean
@@ -244,6 +256,8 @@ class Imager(object):
 
         Either 'STOKES', 'I', 'Q', 'U', 'V',
         'LINEAR', 'XX', 'XY', 'YX', 'YY' or 'PSF'.
+
+        By default, this is 'I' (for Stokes I only).
 
         Type
             str
@@ -353,6 +367,8 @@ class Imager(object):
         Set this to false if the different files represent multiple
         observations of the same sky with different telescope configurations
         or observation parameters.
+
+        By default, this is false.
 
         Type
             boolean

@@ -4,4 +4,9 @@ Example Scripts
 ===============
 
 Some simple examples that show how to use the OSKAR Python interface
-are given here **[will be added]**.
+are given here.
+
+.. toctree::
+   :maxdepth: 2
+
+   example_beam_error_spot_frequencies
