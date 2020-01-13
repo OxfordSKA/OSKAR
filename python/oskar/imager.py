@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2014-2019, The University of Oxford
+# Copyright (c) 2014-2020, The University of Oxford
 # All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,139 @@ except ImportError:
 # pylint: disable=useless-object-inheritance,too-many-public-methods
 # pylint: disable=invalid-name
 class Imager(object):
-    """This class provides a Python interface to the OSKAR imager."""
+    """This class provides a Python interface to the OSKAR imager.
+
+    The :class:`oskar.Imager` class allows basic (dirty) images to be made
+    from simulated visibility data, either from data files on disk, from
+    numpy arrays in memory, or from :class:`oskar.VisBlock` objects.
+
+    There are three stages required to make an image:
+
+    1. Create and set-up an imager.
+    2. Update the imager with visibility data, possibly multiple times.
+    3. Finalise the imager to generate the image.
+
+    The last two stages can be combined for ease of use if required, simply by
+    calling the :meth:`run() <oskar.Imager.run()>` method with no arguments.
+
+    To set up the imager from Python, create an instance of the class and set
+    the imaging options using a :class:`oskar.SettingsTree` created for the
+    ``oskar_imager`` application, and/or set properties on the class itself.
+    These include:
+
+    - :meth:`algorithm <oskar.Imager.algorithm>` and
+      :meth:`weighting <oskar.Imager.weighting>`
+    - :meth:`cellsize_arcsec <oskar.Imager.cellsize_arcsec>` or
+      :meth:`fov_deg <oskar.Imager.fov_deg>`
+    - :meth:`channel_snapshots <oskar.Imager.channel_snapshots>`
+    - :meth:`fft_on_gpu <oskar.Imager.fft_on_gpu>` and
+      :meth:`grid_on_gpu <oskar.Imager.grid_on_gpu>`
+    - :meth:`image_size <oskar.Imager.image_size>`
+    - :meth:`image_type <oskar.Imager.image_type>`
+
+    To optionally filter the input visibility data, use:
+
+    - :meth:`freq_max_hz <oskar.Imager.freq_max_hz>` and
+      :meth:`freq_min_hz <oskar.Imager.freq_min_hz>` to exclude visibilities
+      based on frequency.
+    - :meth:`time_max_utc <oskar.Imager.time_max_utc>` and
+      :meth:`time_min_utc <oskar.Imager.time_min_utc>` to exclude visibilities
+      based on time.
+    - :meth:`uv_filter_max <oskar.Imager.uv_filter_max>` and
+      :meth:`uv_filter_min <oskar.Imager.uv_filter_min>` to exclude
+      visibilities based on their (u,v)-baseline length in wavelengths.
+
+    To specify input and/or output files, use
+    :meth:`input_file <oskar.Imager.input_file>` and
+    :meth:`output_root <oskar.Imager.output_root>`.
+
+    For convenience, the :meth:`set() <oskar.Imager.set>` method can be used
+    to set multiple properties at once using ``kwargs``.
+
+    Off-phase-centre imaging is supported. Use the
+    :meth:`set_direction() <oskar.Imager.set_direction>` method to centre the
+    image around different coordinates if required.
+
+    When imaging visibility data from a file, it is sufficient simply to call
+    the :meth:`run() <oskar.Imager.run>` method with no arguments.
+    However, it is often necessary to process visibility data prior to imaging
+    it (perhaps by subtracting model visibilities), and for this reason it may
+    be more useful to pass the visibility data to the imager explicitly either
+    via parameters to :meth:`run() <oskar.Imager.run>` (which will also
+    finalise the image) or using the :meth:`update() <oskar.Imager.update>`
+    method (which may be called multiple times if necessary).
+    The convenience method
+    :meth:`update_from_block() <oskar.Imager.update_from_block>` can be used
+    instead if visibility data are contained within a :class:`oskar.VisBlock`.
+
+    If passing numpy arrays to :meth:`run() <oskar.Imager.run>` or
+    :meth:`update() <oskar.Imager.update>`, be sure to set the frequency and
+    phase centre first using
+    :meth:`set_vis_frequency() <oskar.Imager.set_vis_frequency>` and
+    :meth:`set_vis_phase_centre() <oskar.Imager.set_vis_phase_centre>`.
+
+    After all visibilities have been processed using
+    :meth:`update() <oskar.Imager.update>` or
+    :meth:`update_from_block() <oskar.Imager.update_from_block>`, call
+    :meth:`finalise() <oskar.Imager.finalise>` to generate the image.
+    The images and/or gridded visibilities can be returned directly to
+    Python as numpy arrays if required.
+
+    Note that uniform weighting requires all visibility coordinates to be
+    known in advance. To allow for this, set the
+    :meth:`coords_only <oskar.Imager.coords_only>` property to ``True`` to
+    switch the imager into a "coordinates-only" mode before calling
+    :meth:`update() <oskar.Imager.update>`. Once all the coordinates have been
+    read, set :meth:`coords_only <oskar.Imager.coords_only>` to ``False``,
+    initialise the imager by calling
+    :meth:`check_init() <oskar.Imager.check_init>` and then call
+    :meth:`update() <oskar.Imager.update>` again.
+    (This is done automatically if using :meth:`run() <oskar.Imager.run>`
+    instead.)
+
+    Examples:
+
+        >>> # Generate some data to process.
+        >>> import numpy
+        >>> n = 100000  # Number of visibility points.
+        >>> # This will generate a filled circular aperture.
+        >>> t = 2 * numpy.pi * numpy.random.random(n)
+        >>> r = 50e3 * numpy.sqrt(numpy.random.random(n))
+        >>> uu = r * numpy.cos(t)
+        >>> vv = r * numpy.sin(t)
+        >>> ww = numpy.zeros_like(uu)
+        >>> vis = numpy.ones(n, dtype='c16')  # Point source at phase centre.
+
+        To make an image using supplied (u,v,w) coordinates and visibilities,
+        and return the image to Python:
+
+        >>> # (continued from previous section)
+        >>> imager = oskar.Imager()
+        >>> imager.fov_deg = 0.1             # 0.1 degrees across.
+        >>> imager.image_size = 256          # 256 pixels across.
+        >>> imager.set_vis_frequency(100e6)  # 100 MHz, single channel data.
+        >>> imager.update(uu, vv, ww, vis)
+        >>> data = imager.finalise(return_images=1)
+        >>> image = data['images'][0]
+
+        To plot the image using matplotlib:
+
+        >>> # (continued from previous section)
+        >>> import matplotlib.pyplot as plt
+        >>> plt.imshow(image)
+        >>> plt.show()
+
+        .. figure:: example_image1.png
+           :width: 640px
+           :align: center
+           :height: 480px
+           :alt: An example image of a point source,
+                 generated using a filled aperture and plotted using matplotlib
+
+           An example image of a point source,
+           generated using a filled aperture and plotted using matplotlib.
+
+    """
 
     def __init__(self, precision=None, settings=None):
         """Creates an OSKAR imager.
@@ -69,6 +201,24 @@ class Imager(object):
         """Returns or sets the algorithm used by the imager.
         Currently one of 'FFT', 'DFT 2D', 'DFT 3D' or 'W-projection'.
 
+        The default is 'FFT', which corresponds to basic but quick 2D gridding,
+        ignoring baseline w-components.
+        DFT-based methods are (**very, very!**) slow but more accurate.
+        The 'DFT 3D' option can be used to make a "perfect" undistorted
+        dirty image, but should only be considered for use with small data sets.
+
+        Use 'W-projection' (or your favourite other imaging tool -
+        there are many!) to avoid distortions caused by imaging wide fields
+        of view using non-coplanar baselines.
+        The implementation of W-projection in OSKAR produces results consistent
+        with dirty images from CASA, although the GPU version in OSKAR is
+        considerably faster for large visibility data sets: use
+        :meth:`grid_on_gpu <oskar.Imager.grid_on_gpu>` (and optionally
+        :meth:`fft_on_gpu <oskar.Imager.fft_on_gpu>`) to enable it,
+        but ensure you have enough GPU memory available for the size
+        of image you are making, as an extra copy of the grid
+        will be made by the FFT library.
+
         Type
             str
         """
@@ -83,10 +233,10 @@ class Imager(object):
     def cellsize_arcsec(self):
         """Returns or sets the cell (pixel) size, in arcsec.
 
-        After setting this property, changing the image size
-        will change the field of view.
-        Can be used instead of
-        :meth:`fov_deg() <oskar.Imager.fov_deg()>` if required.
+        After setting this property, changing the
+        :meth:`image size <oskar.Imager.image_size>`
+        will change the field of view. Can be used instead of
+        :meth:`fov_deg <oskar.Imager.fov_deg>` if required.
 
         Type
             float
@@ -121,7 +271,8 @@ class Imager(object):
         Set this property when using uniform weighting or W-projection.
         The grids of weights can only be used once they are fully populated,
         so this method puts the imager into a mode where it only updates its
-        internal weights grids when calling update().
+        internal weights grids when calling
+        :meth:`update() <oskar.Imager.update>`.
 
         This should only be used after setting all imager options.
 
@@ -158,10 +309,10 @@ class Imager(object):
     def fov_deg(self):
         """Returns or sets the image field-of-view, in degrees.
 
-        After setting this property, changing the image size
-        will change the image resolution.
-        Can be used instead of
-        :meth:`cellsize_arcsec() <oskar.Imager.cellsize_arcsec()>` if required.
+        After setting this property, changing the
+        :meth:`image size <oskar.Imager.image_size>`
+        will change the image resolution. Can be used instead of
+        :meth:`cellsize_arcsec <oskar.Imager.cellsize_arcsec>` if required.
 
         Type
             float
@@ -334,7 +485,8 @@ class Imager(object):
 
         This may be different to the image size, for example
         if using W-projection.
-        It will only be valid after a call to check_init().
+        It will only be valid after a call to
+        :meth:`check_init() <oskar.Imager.check_init>`.
 
         Type
             int
@@ -464,7 +616,7 @@ class Imager(object):
     def weighting(self):
         """Returns or sets the type of visibility weighting to use.
 
-        Either 'Natural', 'Radial' or 'Uniform'.
+        Either 'Natural', 'Radial' or 'Uniform'. The default is 'Natural'.
 
         Type
             str
@@ -530,10 +682,15 @@ class Imager(object):
         of numpy arrays, if required.
         The image cube can be accessed using the 'images' key, and
         the grid cube can be accessed using the 'grids' key.
+        Use e.g. ['images'][0] to access the first image.
 
         Args:
             return_images (Optional[int]): Number of image planes to return.
             return_grids (Optional[int]): Number of grid planes to return.
+
+        Returns:
+            dict: Python dictionary containing two keys, 'images' and 'grids',
+            which are themselves arrays.
         """
         self.capsule_ensure()
         return _imager_lib.finalise(self._capsule, return_images, return_grids)
@@ -542,7 +699,8 @@ class Imager(object):
         """Finalises an image plane.
 
         This is a low-level function that is used to finalise
-        gridded visibilities when used in conjunction with update_plane().
+        gridded visibilities when used in conjunction with
+        :meth:`update_plane() <oskar.Imager.update_plane>`.
 
         The image can be obtained by taking the real part of the plane after
         this function returns.
@@ -558,7 +716,8 @@ class Imager(object):
     def reset_cache(self):
         """Low-level function to reset the imager's internal memory.
 
-        This is used to clear any data added using update().
+        This is used to clear any data added using
+        :meth:`update() <oskar.Imager.update>`.
         """
         self.capsule_ensure()
         _imager_lib.reset_cache(self._capsule)
@@ -567,8 +726,9 @@ class Imager(object):
         """Rotates baseline coordinates to the new phase centre (if set).
 
         Prior to calling this method, the new phase centre must be set first
-        using set_direction(), and then the original phase centre
-        must be set using set_vis_phase_centre().
+        using :meth:`set_direction() <oskar.Imager.set_direction>`,
+        and then the original phase centre must be set using
+        :meth:`set_vis_phase_centre() <oskar.Imager.set_vis_phase_centre>`.
         Note that the order of these calls is important.
 
         Args:
@@ -583,8 +743,9 @@ class Imager(object):
         """Phase-rotates visibility amplitudes to the new phase centre (if set).
 
         Prior to calling this method, the new phase centre must be set first
-        using set_direction(), and then the original phase centre
-        must be set using set_vis_phase_centre().
+        using :meth:`set_direction() <oskar.Imager.set_direction>`,
+        and then the original phase centre must be set using
+        :meth:`set_vis_phase_centre() <oskar.Imager.set_vis_phase_centre>`.
         Note that the order of these calls is important.
 
         Note that the coordinates (uu_in, vv_in, ww_in) correspond to the
@@ -610,9 +771,12 @@ class Imager(object):
 
         Visibilities will be used either from the input file or
         Measurement Set, if one is set, or from the supplied arrays.
-        If using a file, the input filename must be set using set_input_file().
+        If using a file, the input filename must be set using
+        :meth:`input_file <oskar.Imager.input_file>`.
         If using arrays, the visibility meta-data must be set prior to calling
-        this method using set_vis_* methods.
+        this method using
+        :meth:`set_vis_frequency() <oskar.Imager.set_vis_frequency>` and
+        :meth:`set_vis_phase_centre() <oskar.Imager.set_vis_phase_centre>`.
 
         The visibility amplitude data dimension order must be:
         (slowest) time/baseline, channel, polarisation (fastest).
@@ -627,6 +791,7 @@ class Imager(object):
         of numpy arrays, if required.
         The image cube can be accessed using the 'images' key, and
         the grid cube can be accessed using the 'grids' key.
+        Use e.g. ['images'][0] to access the first image.
 
         Args:
             uu (Optional[float, array-like, shape (n,)]):
@@ -649,6 +814,10 @@ class Imager(object):
                 Number of polarisations in the visibility block. Default 1.
             return_images (Optional[int]): Number of image planes to return.
             return_grids (Optional[int]): Number of grid planes to return.
+
+        Returns:
+            dict: Python dictionary containing two keys, 'images' and 'grids',
+            which are themselves arrays.
         """
         self.capsule_ensure()
         if uu is None:
@@ -977,8 +1146,10 @@ class Imager(object):
                start_channel=0, end_channel=0, num_pols=1):
         """Runs imager for supplied visibilities, applying optional selection.
 
-        The visibility meta-data must be set prior to calling this method
-        using set_vis_* methods.
+        The visibility meta-data must be set prior to calling
+        this method using
+        :meth:`set_vis_frequency() <oskar.Imager.set_vis_frequency>` and
+        :meth:`set_vis_phase_centre() <oskar.Imager.set_vis_phase_centre>`.
 
         The visibility amplitude data dimension order must be:
         (slowest) time/baseline, channel, polarisation (fastest).
@@ -992,7 +1163,8 @@ class Imager(object):
         The time_centroid parameter may be None if time filtering is not
         required.
 
-        Call finalise() to finalise the images after calling this function.
+        Call :meth:`finalise() <oskar.Imager.finalise>` to finalise the images
+        after calling this function.
 
         Args:
             uu (float, array-like, shape (n,)):
@@ -1021,7 +1193,8 @@ class Imager(object):
     def update_from_block(self, header, block):
         """Runs imager for visibility block, applying optional selection.
 
-        Call finalise() to finalise the images after calling this function.
+        Call :meth:`finalise() <oskar.Imager.finalise>` to finalise the images
+        after calling this function.
 
         Args:
             header (oskar.VisHeader): OSKAR visibility header.
@@ -1052,8 +1225,8 @@ class Imager(object):
 
         If the weight parameter is None, the weights will be treated as all 1.
 
-        Call finalise_plane() to finalise the image after calling this
-        function.
+        Call :meth:`finalise_plane() <oskar.Imager.finalise_plane>` to finalise
+        the image after calling this function.
 
         Args:
             uu (float, array-like, shape (n,)):

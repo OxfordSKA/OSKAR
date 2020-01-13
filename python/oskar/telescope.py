@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2016-2019, The University of Oxford
+# Copyright (c) 2016-2020, The University of Oxford
 # All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -34,13 +34,58 @@ import math
 import numpy
 try:
     from . import _telescope_lib
-except ImportError as err:
-    print("Import error: " + str(err))
+except ImportError:
     _telescope_lib = None
 
-
+# pylint: disable=useless-object-inheritance
 class Telescope(object):
     """This class provides a Python interface to an OSKAR telescope model.
+
+    A telescope model contains the parameters and data used to describe a
+    telescope configuration, primarily station and element coordinate data.
+
+    Telescope models used by OSKAR are stored in a directory structure, which
+    is fully described in the
+    `telescope model documentation <https://github.com/OxfordSKA/OSKAR/releases>`_.
+    The :class:`oskar.Telescope` class can be used to load a telescope model
+    (using the :meth:`load() <oskar.Telescope.load()>` method) and, to a
+    limited extent, override parts of it once it has been loaded: however,
+    most users will probably wish to simply load a new telescope model.
+
+    Note that the :class:`oskar.Telescope` class **does not need to be used**
+    if it is sufficient to use only the :class:`oskar.SettingsTree` to
+    set up the simulations. (If so, this page can be safely ignored!)
+
+    If required, element-level data can be overridden (in memory only) once
+    the telescope model has been loaded using the methods:
+
+    - :meth:`override_element_cable_length_errors() <oskar.Telescope.override_element_cable_length_errors()>`
+    - :meth:`override_element_gains() <oskar.Telescope.override_element_gains()>`
+    - :meth:`override_element_phases() <oskar.Telescope.override_element_phases()>`
+
+    The phase centre of the telescope should be set using the
+    :meth:`set_phase_centre() <oskar.Telescope.set_phase_centre()>` method.
+
+    Examples:
+
+        To load a telescope model stored in the directory ``telescope.tm``:
+
+        >>> tel = oskar.Telescope()
+        >>> tel.load('telescope.tm')
+
+        To create a telescope model using parameters from a
+        :class:`oskar.SettingsTree`:
+
+        >>> settings = oskar.SettingsTree('oskar_sim_interferometer')
+        >>> # Set up all required parameters here...
+        >>> params = {
+                'telescope': {
+                    'input_directory': 'telescope.tm'
+                }
+            }
+        >>> settings.from_dict(params)
+        >>> tel = oskar.Telescope(settings=settings)
+
     """
 
     def __init__(self, precision=None, settings=None):

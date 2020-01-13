@@ -352,7 +352,7 @@ Beam errors at spot frequencies
         axis_gain = [0.005, 0.01, 0.02, 0.04, 0.08, 0.16, 0.32, 0.64]
 
         # GLEAM + A-team sky model simulations.
-        plot_only = True
+        plot_only = False
         run_set('GLEAM_A-team', base_settings,
                 fields, axis_freq, axis_gain, plot_only)
 

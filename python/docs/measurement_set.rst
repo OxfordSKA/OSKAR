@@ -2,9 +2,6 @@
 Measurement Set
 ===============
 
-Class Methods
--------------
-
 .. autoclass:: oskar.MeasurementSet
    :members:
    :special-members: __init__

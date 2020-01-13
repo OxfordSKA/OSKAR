@@ -2,9 +2,6 @@
 Binary Files
 ============
 
-Class Methods
--------------
-
 .. autoclass:: oskar.Binary
    :members:
    :special-members: __init__

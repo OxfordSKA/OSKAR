@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017, The University of Oxford
+# Copyright (c) 2017-2020, The University of Oxford
 # All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,25 @@
 from __future__ import absolute_import, print_function
 try:
     from . import _binary_lib
-except ImportError as e:
-    print("Import error: " + str(e))
+except ImportError:
     _binary_lib = None
 
-
+# pylint: disable=useless-object-inheritance
 class Binary(object):
-    """This class provides a Python interface to an OSKAR binary data file."""
+    """This class provides a Python interface to an OSKAR binary data file.
+
+    The :class:`oskar.Binary` class provides a low-level interface to allow
+    binary data files written by OSKAR to be read from Python using its
+    :meth:`read() <oskar.Binary.read>` method.
+
+    See the
+    `binary file documentation <https://github.com/OxfordSKA/OSKAR/releases>`_
+    for details on the binary file format used by OSKAR if you need it.
+    To read visibility data into Python, it is recommended to use the (much)
+    more convenient :meth:`oskar.VisBlock.read` method instead,
+    and this page can be safely ignored!
+
+    """
 
     def __init__(self, filename, mode=b'r'):
         """Constructs a handle to a binary data file.

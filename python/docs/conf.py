@@ -56,3 +56,5 @@ html_static_path = ['_static']
 
 pygments_style = 'sphinx'
 autodoc_member_order = 'bysource'
+html4_writer = True
+html_show_sourcelink = False

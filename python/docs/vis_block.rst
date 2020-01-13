@@ -2,9 +2,6 @@
 Visibility Block
 ================
 
-Class Methods
--------------
-
 .. autoclass:: oskar.VisBlock
    :members:
    :exclude-members: capsule, capsule_ensure, capsule_get, capsule_set,

@@ -2,9 +2,6 @@
 Visibility Header
 =================
 
-Class Methods
--------------
-
 .. autoclass:: oskar.VisHeader
    :members:
    :exclude-members: capsule, capsule_ensure, capsule_get, capsule_set,

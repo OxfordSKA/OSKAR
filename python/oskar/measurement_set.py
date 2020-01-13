@@ -37,7 +37,103 @@ except ImportError:
 
 
 class MeasurementSet(object):
-    """This class provides a Python interface to a Measurement Set."""
+    """This class provides a Python interface to a CASA Measurement Set.
+
+    The :class:`oskar.MeasurementSet` class can be used to read data from
+    and write data to a CASA Measurement Set.
+    The `casacore library <https://github.com/casacore/casacore>`_ is used
+    for this interface, so it must be available when OSKAR is compiled for
+    this to work.
+
+    The Measurement Set format is extremely flexible, and casacore provides a
+    complete and comprehensive interface to use it fully.
+    However, in many cases a simpler interface is sufficient and may be
+    easier to use. This class can be used to read and write Measurement Sets
+    containing only a single spectral window (but potentially multiple channels)
+    and a single field - this includes all Measurement Sets written by OSKAR.
+
+    Create or open a Measurement Set using the
+    :meth:`create() <oskar.MeasurementSet.create>` and
+    :meth:`open() <oskar.MeasurementSet.open>` methods, respectively.
+    Both return a new :class:`oskar.MeasurementSet` object.
+
+    Once opened, to read data from the Measurement Set:
+
+    - the :meth:`read_column() <oskar.MeasurementSet.read_column>` method
+      can be used to read any named column of data from the main table;
+    - the :meth:`read_vis()  <oskar.MeasurementSet.read_vis>` convenience
+      method can be used to read visibility data from one of the data columns
+      in the main table;
+    - the :meth:`read_coords()  <oskar.MeasurementSet.read_coords>` convenience
+      method can be used to read baseline (u,v,w) coordinates from the
+      main table.
+
+    Once created, to write data to a Measurement Set:
+
+    - the :meth:`write_vis()  <oskar.MeasurementSet.write_vis>`
+      method can be used to write visibility data to the DATA column;
+    - the :meth:`write_coords()  <oskar.MeasurementSet.write_coords>`
+      method can be used to write time and baseline coordinates to the
+      main table.
+      (The baseline order is implicit, so the antenna indices will be
+      written automatically.)
+
+    Examples:
+
+        To write a Measurement Set from Python:
+
+        .. code-block:: python
+
+            import numpy
+
+            filename = "test1.ms"
+
+            # Define data dimensions.
+            num_pols = 4
+            num_channels = 2
+            num_stations = 3
+            num_times = 4
+            num_baselines = num_stations * (num_stations - 1) // 2
+            ref_freq_hz = 100e6
+            freq_inc_hz = 100e3
+            exposure_sec = 1.0
+            interval_sec = 1.0
+
+            # Data to write are stored as numpy arrays.
+            uu = numpy.zeros([num_baselines])
+            vv = numpy.zeros_like(uu)
+            ww = numpy.zeros_like(uu)
+            vis = numpy.zeros([num_times, num_channels,
+                               num_baselines, num_pols], dtype='c8')
+
+            # Create the empty Measurement Set.
+            ms = oskar.MeasurementSet.create(filename, num_stations,
+                                             num_channels, num_pols,
+                                             ref_freq_hz, freq_inc_hz)
+
+            # Set phase centre.
+            ra_rad = numpy.pi / 4
+            dec_rad = -numpy.pi / 4
+            ms.set_phase_centre(ra_rad, dec_rad)
+
+            # Write data one block at a time.
+            for t in range(num_times):
+                # Dummy data to write.
+                time_stamp = 51544.5 * 86400.0 + t
+                uu[:] = 1e0 * t + 1
+                vv[:] = 1e1 * t + 2
+                ww[:] = 1e2 * t + 3
+                for c in range(num_channels):
+                    for b in range(num_baselines):
+                        vis[t, c, b, :] = (t * 10 + b) + 1j * (c + 1)
+
+                # Write coordinates and visibilities.
+                start_row = t * num_baselines
+                ms.write_coords(start_row, num_baselines, uu, vv, ww,
+                                exposure_sec, interval_sec, time_stamp)
+                ms.write_vis(start_row, 0, num_channels, num_baselines, vis[t, ...])
+
+    """
 
     def __init__(self):
         """The default constructor does nothing. Use create() or open()."""

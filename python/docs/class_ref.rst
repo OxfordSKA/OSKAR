@@ -12,6 +12,9 @@ in your Python script to access the classes in this package.
 The :ref:`example scripts <example_scripts>` may be a helpful place to look
 for an overview of what is possible.
 
+All processing-intensive methods on OSKAR Python classes will release the
+Global Interpreter Lock (GIL) when called, so that other Python threads may
+run concurrently.
 
 Input Data & Settings
 ---------------------
