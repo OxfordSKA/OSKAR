@@ -9,5 +9,5 @@ are given here.
 .. toctree::
    :maxdepth: 2
 
-   example_simple_test
+   example_hello_world
    example_beam_error_spot_frequencies

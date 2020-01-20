@@ -3,6 +3,11 @@
 Beam errors at spot frequencies
 ===============================
 
+This script demonstrates how the OSKAR Python interface can be used to
+run simulations that compare telescope models.
+
+
+
 .. code-block:: python
 
     #!/usr/bin/env python3

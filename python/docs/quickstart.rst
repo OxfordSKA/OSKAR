@@ -3,6 +3,14 @@
 Quick Start
 ===========
 
+Those using the Docker, Kubernetes or Singularity container
+runtime environments may wish to skip straight to the page on
+:ref:`containers`.
+
+The rest of this page describes how to install the OSKAR Python
+bindings natively.
+
+
 Installation
 ++++++++++++
 

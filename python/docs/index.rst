@@ -18,8 +18,18 @@ See the :ref:`quickstart` guide for installation instructions.
    :caption: Contents:
 
    quickstart
-   class_ref
+   containers
    examples
+   class_ref
+
+OSKAR is made available under the 3-clause BSD License.
+Please see the :ref:`license` page for details of third-party software
+used by OSKAR.
+
+.. toctree::
+   :maxdepth: 2
+
+   license
 
 Indices and tables
 ==================

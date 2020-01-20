@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Runs an OSKAR application or Python script in a container using Kubernetes.
+#
+# Usage:
+#
+#     oskar_run_k8s <application> <args> ...
+#
+# This script runs a Kubernetes Job using "kubectl create".
+# The application inside the container is run as the current user,
+# and the current directory is mounted into it so that data files
+# can be easily read and written by the application.
+#
+# All command line arguments to the script will be passed to the application.
+#
+# Examples:
+#
+#     To run the 'oskar_sim_interferometer' application
+#     with a parameter file 'sim.ini' and data files in the
+#     current directory, use:
+#
+#         oskar_run_k8s oskar_sim_interferometer sim.ini
+#
+#     To run an OSKAR Python script in the current directory
+#     called 'hello-world.py', use:
+#
+#         oskar_run_k8s python3 hello-world.py
+#
+#     (For convenience the container includes the astropy, matplotlib,
+#     numpy and oskar Python modules. To use other ones, you can build a
+#     new container based on this one.)
+#
+cat <<END | kubectl create -f -
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: oskar-
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 60
+  template:
+    spec:
+      containers:
+      - name: oskar-container
+        image: docker.io/fdulwich/oskar-python3:latest
+        imagePullPolicy: IfNotPresent
+        workingDir: /data
+        volumeMounts:
+        - mountPath: /data
+          name: host-storage
+        args:
+`for var in "$@"; do echo "        - \"$var\""; done`
+        env:
+        - name: LOCAL_USER_ID
+          value: "`id -u $USER`"
+        resources:
+          limits:
+            nvidia.com/gpu: 4 # requesting 4 GPUs
+      restartPolicy: Never
+      volumes:
+      - name: host-storage
+        hostPath:
+          path: $PWD
+          type: Directory
+END
