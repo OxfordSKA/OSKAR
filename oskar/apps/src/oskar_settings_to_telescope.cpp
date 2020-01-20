@@ -258,16 +258,16 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
                         s->to_double("screen_height_km", status));
                 const double pixel_size =
                         s->to_double("screen_pixel_size_m", status);
-                const double time_interval =
-                        s->to_double("screen_time_interval_sec", status);
+                /*const double time_interval =
+                        s->to_double("screen_time_interval_sec", status);*/
                 if (pixel_size > 0.0)
                     oskar_telescope_set_tec_screen_pixel_size(t, pixel_size);
                 else
                     oskar_telescope_set_tec_screen_pixel_size(t, axis_inc[0]);
-                if (time_interval > 0.0)
+                /*if (time_interval > 0.0)
                     oskar_telescope_set_tec_screen_time_interval(t,
                             time_interval);
-                else
+                else*/
                     oskar_telescope_set_tec_screen_time_interval(t,
                             axis_inc[2]);
             }

@@ -21,10 +21,10 @@ endif()
 project(OSKAR CXX C)
 
 # === Project version.
-set(OSKAR_VERSION_ID "0x020705")
+set(OSKAR_VERSION_ID "0x020706")
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 7)
-set(OSKAR_VERSION_PATCH 5)
+set(OSKAR_VERSION_PATCH 6)
 set(OSKAR_VERSION_SUFFIX "")
 
 # === Add local CMake module path.
