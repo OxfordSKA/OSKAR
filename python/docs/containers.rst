@@ -18,11 +18,11 @@ given in the :ref:`container_singularity` section.
 .. note::
 
   These containers are intended for use only on Linux systems (optionally)
-  with NVIDIA GPUs, as they make use of the `nvidia/cuda` base image.
+  with NVIDIA GPUs, as they use the `nvidia/cuda` base image.
   However, they will also run on Linux systems without GPUs attached.
 
   On the host system, GPU drivers supporting CUDA 10.1 or later must be
-  installed in order to use these containers, if using GPUs.
+  installed in order to use these containers with GPUs.
 
 
 .. toctree::

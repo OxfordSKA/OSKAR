@@ -75,7 +75,7 @@ passing in the ``LOCAL_USER_ID`` environment variable. Use the command line
 arguments to the script to specify what should be run inside the container.
 
 For example, if the helper script is saved as ``oskar_run_k8s``, the example
-Python script ``hello-world.py`` could be run simply using:
+Python script ``hello-world.py`` could be run using:
 
 .. code-block:: bash
 
