@@ -1,0 +1,26 @@
+Bootstrap: localimage
+From: OSKAR-base-dep.sif
+Stage: one
+
+%post
+    apt update && apt install -y --no-install-recommends \
+        cmake \
+        cuda-cudart-dev-10-1 \
+        cuda-cufft-dev-10-1 \
+        cuda-nvcc-10-1 \
+        git \
+        liblapack-dev
+    mkdir -p /home/build
+    cd /home/build
+    git clone https://github.com/OxfordSKA/OSKAR.git OSKAR.git
+    cmake OSKAR.git/
+    make -j16 && make install
+
+Bootstrap: localimage
+From: OSKAR-base-dep.sif
+Stage: two
+
+%files from one
+    /usr/local/bin/oskar* /usr/local/bin/
+    /usr/local/lib/* /usr/local/lib/
+    /usr/local/include/oskar /usr/local/include/oskar
