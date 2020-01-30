@@ -1,0 +1,16 @@
+CUDA license
+============
+
+The End-User License Agreement (EULA) that covers use of the NVIDIA CUDA
+toolkit is available at the following URL:
+
+https://docs.nvidia.com/cuda/eula/
+
+OSKAR may link to the CUDA Runtime Library and CUDA FFT Library.
+
+The CUDA Runtime Library and CUDA FFT Library are copyrighted by and are
+property of NVIDIA Corporation.
+
+As per the terms in Attachment A of the NVIDIA EULA, binary package
+installers may redistribute copies of the CUDA Runtime Library
+and CUDA FFT Library.

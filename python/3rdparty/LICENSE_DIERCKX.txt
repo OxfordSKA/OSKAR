@@ -1,0 +1,7 @@
+DIERCKX license
+===============
+
+Copyright (c) Paul Dierckx, 1993
+
+Reference:
+Paul Dierckx, Curve and Surface Fitting with Splines, Oxford University Press, 1993

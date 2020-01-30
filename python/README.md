@@ -1,5 +1,15 @@
 # The OSKAR Python Interface
 
+The OSKAR package has been designed to produce simulated visibility data from
+radio telescopes containing aperture arrays. The software is written
+mainly in C and offers GPU acceleration using CUDA or OpenCL. The Python
+bindings to OSKAR make it easy to run simulations using Python scripts.
+
+Documentation for the OSKAR Python bindings can be found by following the link
+on the [simulation tools page](https://developer.skatelescope.org/projects/sim-tools/en/latest/)
+of the SKA Developer Portal.
+
+
 ## Installation
 
 ### Linux and macOS
@@ -88,8 +98,3 @@ pip uninstall oskarpy
 
 (This does not uninstall OSKAR itself, only the Python interface to it.)
 
-## Notes
-
-- Both Python 2.7 and Python 3 are supported.
-- Some examples showing how the Python interface can be used are shown
-  in `examples/sim*` and `examples/spead`.
