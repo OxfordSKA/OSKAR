@@ -6,13 +6,35 @@ OSKAR has been designed to produce simulated visibility data from radio
 telescopes containing aperture arrays, such as those envisaged for the
 Square Kilometre Array.
 
-A source code archive for Linux, and pre-built binary packages for
-macOS and Windows platforms are available to download from
+A source code archive, and pre-built binary packages for Linux (using
+Singularity), macOS and Windows platforms are available to download from
 
 - [https://github.com/OxfordSKA/OSKAR/releases](https://github.com/OxfordSKA/OSKAR/releases)
 
 OSKAR is licensed under the terms of the 3-clause BSD License.
 Please see the [LICENSE](LICENSE) file for details.
+
+### Singularity image
+
+A pre-built [Singularity](https://sylabs.io/singularity/) SIF container image
+is available for Linux which can be used to run OSKAR command line
+applications or Python scripts directly, without needing to compile or install
+anything. For Singularity 3.0 or later, an application or script can be run
+using the downloaded [container](https://github.com/OxfordSKA/OSKAR/releases)
+with the `singularity exec` command, which takes the form:
+
+    $ singularity exec [flags] <container_path> <app_name> <arguments>...
+
+Use the `--nv` flag to enable NVIDIA GPU support in Singularity, if
+applicable. As an example, to run the application `oskar_sim_interferometer`
+with a parameter file `settings.ini` and a container image file
+`OSKAR-Python3.sif` (both in the current directory) on a GPU use:
+
+    $ singularity exec --nv ./OSKAR-Python3.sif oskar_sim_interferometer settings.ini
+
+Similarly, to run a Python script `sim_script.py` that uses OSKAR:
+
+    $ singularity exec --nv ./OSKAR-Python3.sif python3 sim_script.py
 
 ### Dependencies
 
@@ -55,7 +77,7 @@ When running the 'cmake' command a number of options can be specified:
     * -DCUDA_ARCH="<arch>" (default: all)
         Sets the target architecture for the compilation of CUDA device code.
         <arch> must be one of either: 1.3, 2.0, 2.1, 3.0, 3.2, 3.5, 3.7,
-                                      5.0, 5.2, 6.0, 6.1, 6.2, 7.0, 7.2, 7.5
+                                      5.0, 5.2, 6.0, 6.1, 6.2, 7.0, 7.5
                                       or ALL.
         ALL is for all currently supported architectures (>= 3.0).
         Separate multiple architectures using semi-colons, if required.
