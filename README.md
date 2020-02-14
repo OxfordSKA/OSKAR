@@ -26,15 +26,26 @@ with the `singularity exec` command, which takes the form:
     $ singularity exec [flags] <container_path> <app_name> <arguments>...
 
 Use the `--nv` flag to enable NVIDIA GPU support in Singularity, if
-applicable. As an example, to run the application `oskar_sim_interferometer`
+applicable.
+
+Note also that Singularity will mount the home directory into the container by
+default, unless configured otherwise. If you have packages installed in your
+home area that should be kept isolated from those in the container (for
+example, because of conflicting packages or Python versions, or if you see
+other errors caused by trying to load wrong versions of shared libraries when
+starting the container) then it may be necessary to disable this either by
+using the `--no-home` flag, or re-bind the home directory in the container
+to somewhere other than your actual $HOME using the `-H` flag.
+
+As an example, to run the application `oskar_sim_interferometer`
 with a parameter file `settings.ini` and a container image file
 `OSKAR-Python3.sif` (both in the current directory) on a GPU use:
 
-    $ singularity exec --nv ./OSKAR-Python3.sif oskar_sim_interferometer settings.ini
+    $ singularity exec --no-home --nv ./OSKAR-Python3.sif oskar_sim_interferometer settings.ini
 
 Similarly, to run a Python script `sim_script.py` that uses OSKAR:
 
-    $ singularity exec --nv ./OSKAR-Python3.sif python3 sim_script.py
+    $ singularity exec --no-home --nv ./OSKAR-Python3.sif python3 sim_script.py
 
 ### Dependencies
 
