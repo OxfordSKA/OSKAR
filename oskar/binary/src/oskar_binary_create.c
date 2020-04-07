@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,11 @@ static void oskar_binary_read_header(FILE* stream, oskar_BinaryHeader* header,
 static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,
         int* status);
 
+#ifdef _MSC_VER
+#define FTELL _ftelli64
+#else
+#define FTELL ftello
+#endif
 
 oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
 {
@@ -63,7 +68,11 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
             return 0;
         }
         oskar_binary_read_header(stream, &header, status);
-        if (*status) return 0;
+        if (*status)
+        {
+            fclose(stream);
+            return 0;
+        }
     }
     else if (mode == 'w')
     {
@@ -86,7 +95,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
 
         /* Write header only if the file is empty. */
         fseek(stream, 0, SEEK_END);
-        if (ftell(stream) == 0)
+        if (FTELL(stream) == 0)
             oskar_binary_write_header(stream, &header, status);
     }
     else
@@ -96,28 +105,12 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
     }
 
     /* Allocate index and store the stream handle. */
-    handle = (oskar_Binary*) malloc(sizeof(oskar_Binary));
+    handle = (oskar_Binary*) calloc(1, sizeof(oskar_Binary));
     handle->stream = stream;
     handle->open_mode = mode;
-    handle->query_search_start = 0;
 
     /* Create the CRC lookup tables. */
     handle->crc_data = oskar_crc_create(OSKAR_CRC_32C);
-
-    /* Initialise tag index. */
-    handle->num_chunks = 0;
-    handle->extended = 0;
-    handle->data_type = 0;
-    handle->id_group = 0;
-    handle->id_tag = 0;
-    handle->name_group = 0;
-    handle->name_tag = 0;
-    handle->user_index = 0;
-    handle->payload_offset_bytes = 0;
-    handle->payload_size_bytes = 0;
-    handle->block_size_bytes = 0;
-    handle->crc = 0;
-    handle->crc_header = 0;
 
     /* Store the contents of the header for later use. */
     handle->bin_version = header.bin_version;
@@ -132,7 +125,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         oskar_BinaryTag tag;
         unsigned long crc;
         int format_version, element_size;
-        size_t memcpy_size = 0;
+        size_t block_size = 0, memcpy_size = 0;
 
         /* Try to read a tag, and end the loop if unsuccessful. */
         if (fread(&tag, sizeof(oskar_BinaryTag), 1, stream) != 1)
@@ -209,7 +202,6 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         handle->user_index[i] = 0;
         handle->payload_offset_bytes[i] = 0;
         handle->payload_size_bytes[i] = 0;
-        handle->block_size_bytes[i] = 0;
         handle->crc[i] = 0;
         handle->crc_header[i] = 0;
 
@@ -230,12 +222,12 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
 
         /* Store the number of bytes in the block in native byte order. */
         memcpy_size = MIN(sizeof(size_t), sizeof(tag.size_bytes));
-        memcpy(&handle->block_size_bytes[i], tag.size_bytes, memcpy_size);
+        memcpy(&block_size, tag.size_bytes, memcpy_size);
         if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
-            oskar_endian_swap(&handle->block_size_bytes[i], sizeof(size_t));
+            oskar_endian_swap(&block_size, sizeof(size_t));
 
         /* Set payload size to block size, minus 4 bytes if CRC-32 present. */
-        handle->payload_size_bytes[i] = handle->block_size_bytes[i];
+        handle->payload_size_bytes[i] = block_size;
         handle->payload_size_bytes[i] -= (tag.flags & (1 << 6) ? 4 : 0);
 
         /* Check if the tag is extended. */
@@ -266,12 +258,22 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         }
 
         /* Store the current stream pointer as the payload offset. */
-        handle->payload_offset_bytes[i] = ftell(stream);
+        const int64_t cur_pos = (int64_t) FTELL(stream);
+        if (cur_pos == -1)
+        {
+            *status = OSKAR_ERR_BINARY_READ_FAIL;
+            break;
+        }
+        handle->payload_offset_bytes[i] = cur_pos;
 
         /* Increment stream pointer by payload size. */
-        if (fseek(stream, (long int) handle->payload_size_bytes[i], SEEK_CUR))
+#ifdef _MSC_VER
+        if (_fseeki64(stream, handle->payload_size_bytes[i], SEEK_CUR))
+#else
+        if (fseeko(stream, (off_t) handle->payload_size_bytes[i], SEEK_CUR))
+#endif
         {
-            *status = OSKAR_ERR_BINARY_FILE_INVALID;
+            *status = OSKAR_ERR_BINARY_SEEK_FAIL;
             break;
         }
 
@@ -281,7 +283,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         {
             if (fread(&handle->crc[i], 4, 1, stream) != 1)
             {
-                *status = OSKAR_ERR_BINARY_FILE_INVALID;
+                *status = OSKAR_ERR_BINARY_READ_FAIL;
                 break;
             }
 
@@ -302,20 +304,18 @@ static void oskar_binary_resize(oskar_Binary* handle, int m)
     handle->data_type = (int*) realloc(handle->data_type, m * sizeof(int));
     handle->id_group = (int*) realloc(handle->id_group, m * sizeof(int));
     handle->id_tag = (int*) realloc(handle->id_tag, m * sizeof(int));
-    handle->name_group = (char**) realloc(handle->name_group,
-            m * sizeof(char*));
+    handle->name_group = (char**) realloc(
+            handle->name_group, m * sizeof(char*));
     handle->name_tag = (char**) realloc(handle->name_tag, m * sizeof(char*));
     handle->user_index = (int*) realloc(handle->user_index, m * sizeof(int));
-    handle->payload_offset_bytes = (long*) realloc(handle->payload_offset_bytes,
-            m * sizeof(long));
-    handle->payload_size_bytes = (size_t*) realloc(handle->payload_size_bytes,
-            m * sizeof(size_t));
-    handle->block_size_bytes = (size_t*) realloc(handle->block_size_bytes,
-            m * sizeof(size_t));
-    handle->crc = (unsigned long*) realloc(handle->crc,
-            m * sizeof(unsigned long));
-    handle->crc_header = (unsigned long*) realloc(handle->crc_header,
-            m * sizeof(unsigned long));
+    handle->payload_offset_bytes = (int64_t*) realloc(
+            handle->payload_offset_bytes, m * sizeof(int64_t));
+    handle->payload_size_bytes = (size_t*) realloc(
+            handle->payload_size_bytes, m * sizeof(size_t));
+    handle->crc = (unsigned long*) realloc(
+            handle->crc, m * sizeof(unsigned long));
+    handle->crc_header = (unsigned long*) realloc(
+            handle->crc_header, m * sizeof(unsigned long));
 }
 
 static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,

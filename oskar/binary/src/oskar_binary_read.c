@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,8 +70,13 @@ void oskar_binary_read_block(oskar_Binary* handle,
     }
 
     /* Copy the data out of the stream. */
-    if (fseek(handle->stream,
+#ifdef _MSC_VER
+    if (_fseeki64(handle->stream,
             handle->payload_offset_bytes[chunk_index], SEEK_SET) != 0)
+#else
+    if (fseeko(handle->stream,
+            (off_t) handle->payload_offset_bytes[chunk_index], SEEK_SET) != 0)
+#endif
     {
         *status = OSKAR_ERR_BINARY_SEEK_FAIL;
         return;

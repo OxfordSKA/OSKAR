@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <binary/oskar_crc.h>
 
 #ifdef __cplusplus
@@ -184,9 +185,8 @@ struct oskar_Binary
     char** name_group;          /* Tag group name. */
     char** name_tag;            /* Tag name. */
     int* user_index;            /* Tag index. */
-    long* payload_offset_bytes; /* Payload offset from start of file. */
+    int64_t* payload_offset_bytes; /* Payload offset from start of file. */
     size_t* payload_size_bytes; /* Payload size.*/
-    size_t* block_size_bytes;   /* Total block size. */
     unsigned long* crc;         /* CRC-32C code. */
     unsigned long* crc_header;  /* CRC-32C code of payload identifier. */
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +37,6 @@ extern "C" {
 void oskar_binary_free(oskar_Binary* handle)
 {
     int i;
-
-    /* Check if structure exists. */
     if (!handle) return;
 
     /* Close the file. */
@@ -62,7 +60,6 @@ void oskar_binary_free(oskar_Binary* handle)
     free(handle->user_index);
     free(handle->payload_offset_bytes);
     free(handle->payload_size_bytes);
-    free(handle->block_size_bytes);
     free(handle->crc);
     free(handle->crc_header);
 

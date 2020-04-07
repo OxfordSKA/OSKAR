@@ -1,4 +1,4 @@
-#! CMake initialisation.
+# CMake initialisation.
 cmake_minimum_required(VERSION 3.1)
 if (POLICY CMP0045)
     cmake_policy(SET CMP0045 NEW)
@@ -7,24 +7,25 @@ if (POLICY CMP0068)
     cmake_policy(SET CMP0068 OLD)
 endif()
 
-#! Declare the CMake project.
+# Declare the CMake project.
 project(oskar_binary C)
 
-#! Set the OSKAR binary version used to version dynamic libraries.
-set(OSKAR_BINARY_VERSION "2")
+# Set the OSKAR binary version used to version dynamic libraries.
+set(OSKAR_BINARY_VERSION "2.1")
 
-#! Set the name of the library.
+# Set the name of the library.
 set(libname ${PROJECT_NAME})
 
-#! If OSKAR_VERSION_STR is not defined, we are building as stand-alone library.
+# If OSKAR_VERSION_STR is not defined, we are building as stand-alone library.
 if (NOT OSKAR_VERSION_STR)
     set(STANDALONE_BUILD ON)
 endif()
+add_definitions(-D_FILE_OFFSET_BITS=64)
 
-#! Macros for building oskar_binary as a standalone library.
+# Macros for building oskar_binary as a standalone library.
 if (STANDALONE_BUILD)
 
-    #! Build type detection.
+    # Build type detection.
     if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
         get_filename_component(dirname ${CMAKE_BINARY_DIR} NAME)
         if (${dirname} MATCHES "dbg" OR ${dirname} MATCHES "debug")
@@ -34,30 +35,31 @@ if (STANDALONE_BUILD)
         endif()
     endif()
 
-    #! Enable the ctest framework.
+    # Enable the ctest framework.
     enable_testing()
 
-    #! Compiler options for standalone mode.
+    # Compiler options for standalone mode.
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
     if ("${CMAKE_C_COMPILER_ID}" MATCHES ".*Clang.*" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-show-option")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Wextra")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -pedantic")
     endif()
     include_directories(${PROJECT_SOURCE_DIR})
 
-    #! Set install locations for standalone mode.
+    # Set install locations for standalone mode.
     if (NOT OSKAR_LIB_INSTALL_DIR)
         set(OSKAR_LIB_INSTALL_DIR "lib")
     endif()
     if (NOT OSKAR_INCLUDE_INSTALL_DIR)
-        set(OSKAR_INCLUDE_INSTALL_DIR "include/oskar_binary")
+        set(OSKAR_INCLUDE_INSTALL_DIR "include/oskar/binary")
     endif()
 
 endif(STANDALONE_BUILD)
 
-#! Declare build and install targets for the library.
+# Declare build and install targets for the library.
 file(GLOB ${libname}_SRC src/*.c)
 add_library(${libname} ${${libname}_SRC})
 set_target_properties(${libname} PROPERTIES
@@ -69,10 +71,10 @@ install(TARGETS ${libname}
     RUNTIME DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime
 )
 
-#! Add unit tests / examples.
+# Add unit tests / examples.
 add_subdirectory(test)
 
-#! Install headers and packaging macros.
+# Install headers and packaging macros.
 if (STANDALONE_BUILD)
     file(GLOB ${libname}_H oskar*.h) # Public headers only (start with oskar_)
     install(FILES ${${libname}_H} DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
@@ -94,5 +96,3 @@ if (STANDALONE_BUILD)
         COMMENT "Packaging Source files"
         VERBATIM)
 endif(STANDALONE_BUILD)
-
-
