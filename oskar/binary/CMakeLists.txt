@@ -21,6 +21,9 @@ if (NOT OSKAR_VERSION_STR)
     set(STANDALONE_BUILD ON)
 endif()
 add_definitions(-D_FILE_OFFSET_BITS=64)
+if (NOT WIN32)
+    add_definitions(-D_POSIX_C_SOURCE=200808L)
+endif()
 
 # Macros for building oskar_binary as a standalone library.
 if (STANDALONE_BUILD)
