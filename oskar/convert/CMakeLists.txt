@@ -13,6 +13,7 @@ set(${name}_SRC
     define_convert_ludwig3_to_theta_phi_components.h
     define_convert_relative_directions_to_enu_directions.h
     define_convert_station_uvw_to_baseline_uvw.h
+    define_convert_theta_phi_to_ludwig3_components.h
     src/oskar_convert_apparent_ha_dec_to_enu_directions.c # Deprecated
     src/oskar_convert_apparent_ra_dec_to_az_el.c # Deprecated
     src/oskar_convert_apparent_ra_dec_to_enu_directions.c # Deprecated
@@ -47,6 +48,7 @@ set(${name}_SRC
     src/oskar_convert_station_uvw_to_baseline_uvw.c
     src/oskar_convert_theta_phi_to_enu_directions.c
     src/oskar_convert_theta_phi_to_healpix_ring.c
+    src/oskar_convert_theta_phi_to_ludwig3_components.c
     src/oskar_convert_xyz_to_lon_lat.c
     src/oskar_convert.cl
     src/oskar_evaluate_diurnal_aberration.c
