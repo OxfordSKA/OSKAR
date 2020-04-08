@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum.h"
 #include "convert/oskar_convert_enu_directions_to_theta_phi.h"
 #include "convert/oskar_convert_ludwig3_to_theta_phi_components.h"
+#include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
 #include "math/oskar_find_closest_match.h"
 
 #include "math/oskar_cmath.h"
@@ -143,6 +144,8 @@ void oskar_element_evaluate(
                         phi_y, frequency_hz, dipole_length_m,
                         4, offset_out_cplx + 2, output, status);
         }
+        oskar_convert_theta_phi_to_ludwig3_components(num_points,
+                phi_x, phi_y, offset_out, output, status);
     }
     else /* Scalar response. */
     {

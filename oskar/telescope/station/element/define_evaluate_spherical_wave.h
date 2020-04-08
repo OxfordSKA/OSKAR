@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2019-2020, The University of Oxford. See LICENSE file. */
 
 /* Spherical wave evaluation method based on Matlab code by
  * Christophe Craeye, Quentin Gueuning and Eloy de Lera Acedo.
@@ -78,10 +78,11 @@ KERNEL(NAME) (\
             }\
         }\
     }\
-    pattern[i + offset].a = Xt;\
-    pattern[i + offset].b = Xp;\
-    pattern[i + offset].c = Yt;\
-    pattern[i + offset].d = Yp;\
+    /* For some reason all components must be reversed in the matrix. */\
+    pattern[i + offset].a = Yp;\
+    pattern[i + offset].b = Yt;\
+    pattern[i + offset].c = Xp;\
+    pattern[i + offset].d = Xt;\
     KERNEL_LOOP_END\
 }\
 OSKAR_REGISTER_KERNEL(NAME)
