@@ -700,8 +700,8 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
 void oskar_interferometer_set_coords_only(oskar_Interferometer* h, int value,
         int* status)
 {
+    (void)status;
     h->coords_only = value;
-    oskar_interferometer_check_init(h, status);
 }
 
 
