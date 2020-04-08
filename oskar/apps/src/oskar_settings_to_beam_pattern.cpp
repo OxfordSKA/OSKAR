@@ -146,6 +146,12 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
     s->begin_group("beam_pattern");
     oskar_beam_pattern_set_auto_power_fits(h,
             s->to_int("station_outputs/fits_image/auto_power", status));
+    oskar_beam_pattern_set_auto_power_phase_fits(h,
+            s->to_int("station_outputs/fits_image/auto_power_phase", status));
+    oskar_beam_pattern_set_auto_power_real_fits(h,
+            s->to_int("station_outputs/fits_image/auto_power_real", status));
+    oskar_beam_pattern_set_auto_power_imag_fits(h,
+            s->to_int("station_outputs/fits_image/auto_power_imag", status));
     oskar_beam_pattern_set_auto_power_text(h,
             s->to_int("station_outputs/text_file/auto_power", status));
     oskar_beam_pattern_set_voltage_amp_fits(h,
@@ -167,6 +173,10 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
                     status));
     oskar_beam_pattern_set_cross_power_phase_text(h,
             s->to_int("telescope_outputs/text_file/cross_power_phase", status));
+    oskar_beam_pattern_set_cross_power_real_fits(h,
+            s->to_int("telescope_outputs/fits_image/cross_power_real", status));
+    oskar_beam_pattern_set_cross_power_imag_fits(h,
+            s->to_int("telescope_outputs/fits_image/cross_power_imag", status));
     oskar_beam_pattern_set_cross_power_raw_text(h,
             s->to_int("telescope_outputs/text_file/cross_power_raw_complex",
                     status));

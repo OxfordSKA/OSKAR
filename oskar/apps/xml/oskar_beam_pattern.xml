@@ -195,6 +195,24 @@
                 <desc>If true, save each total intensity (auto-correlation)
                     beam in FITS image files.</desc>
             </s>
+            <s k="auto_power_phase">
+                <label>Auto-correlation phase power pattern</label>
+                <type name="bool" default="false"/>
+                <desc>If true, save the phase of each total intensity
+                    (auto-correlation) beam in FITS image files.</desc>
+            </s>
+            <s k="auto_power_real">
+                <label>Auto-correlation power pattern (real)</label>
+                <type name="bool" default="false"/>
+                <desc>If true, save the real part of each total intensity
+                    (auto-correlation) beam in FITS image files.</desc>
+            </s>
+            <s k="auto_power_imag">
+                <label>Auto-correlation power pattern (imag)</label>
+                <type name="bool" default="false"/>
+                <desc>If true, save the imaginary part of each total intensity
+                    (auto-correlation) beam in FITS image files.</desc>
+            </s>
             <!-- <s k="ixr">
                 <label>Intrinsic cross-polarisation ratio (IXR)</label>
                 <depends k="telescope/pol_mode" v="Full"/>
@@ -244,6 +262,20 @@
                 <desc>If true, save the average cross-power beam phase
                     response from all specified stations in FITS
                     image files.</desc>
+            </s>
+            <s k="cross_power_real">
+                <label>Cross-correlation power pattern (real)</label>
+                <type name="bool" default="false"/>
+                <desc>If true, save the real part of the average
+                    cross-power beam response from all specified stations in
+                    FITS image files.</desc>
+            </s>
+            <s k="cross_power_imag">
+                <label>Cross-correlation power pattern (imag)</label>
+                <type name="bool" default="false"/>
+                <desc>If true, save the imaginary part of the average
+                    cross-power beam response from all specified stations in
+                    FITS image files.</desc>
             </s>
         </s>
     </s>

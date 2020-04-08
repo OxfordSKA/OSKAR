@@ -51,6 +51,18 @@ OSKAR_EXPORT
 void oskar_beam_pattern_set_auto_power_fits(oskar_BeamPattern* h, int flag);
 
 OSKAR_EXPORT
+void oskar_beam_pattern_set_auto_power_phase_fits(oskar_BeamPattern* h,
+        int flag);
+
+OSKAR_EXPORT
+void oskar_beam_pattern_set_auto_power_real_fits(oskar_BeamPattern* h,
+        int flag);
+
+OSKAR_EXPORT
+void oskar_beam_pattern_set_auto_power_imag_fits(oskar_BeamPattern* h,
+        int flag);
+
+OSKAR_EXPORT
 void oskar_beam_pattern_set_auto_power_text(oskar_BeamPattern* h, int flag);
 
 OSKAR_EXPORT
@@ -75,6 +87,14 @@ void oskar_beam_pattern_set_cross_power_phase_fits(oskar_BeamPattern* h,
 
 OSKAR_EXPORT
 void oskar_beam_pattern_set_cross_power_phase_text(oskar_BeamPattern* h,
+        int flag);
+
+OSKAR_EXPORT
+void oskar_beam_pattern_set_cross_power_real_fits(oskar_BeamPattern* h,
+        int flag);
+
+OSKAR_EXPORT
+void oskar_beam_pattern_set_cross_power_imag_fits(oskar_BeamPattern* h,
         int flag);
 
 OSKAR_EXPORT

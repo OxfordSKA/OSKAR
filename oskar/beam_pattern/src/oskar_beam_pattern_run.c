@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,6 +64,10 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
 static void complex_to_amp(const oskar_Mem* complex_in, const int offset,
         const int stride, const int num_points, oskar_Mem* output, int* status);
 static void complex_to_phase(const oskar_Mem* complex_in, const int offset,
+        const int stride, const int num_points, oskar_Mem* output, int* status);
+static void complex_to_real(const oskar_Mem* complex_in, const int offset,
+        const int stride, const int num_points, oskar_Mem* output, int* status);
+static void complex_to_imag(const oskar_Mem* complex_in, const int offset,
         const int stride, const int num_points, oskar_Mem* output, int* status);
 static void jones_to_ixr(const oskar_Mem* complex_in, const int offset,
         const int num_points, oskar_Mem* output, int* status);
@@ -609,10 +613,9 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
         {
             off = i_station * num_pix; /* Station offset. */
             if (off < 0 || chunk_desc == CROSS_POWER_DATA) off = 0;
-            if (chunk_desc == CROSS_POWER_DATA && dp == AUTO_POWER)
+            if (chunk_desc == CROSS_POWER_DATA && (dp & AUTO_POWER))
                 continue;
-            if (chunk_desc == AUTO_POWER_DATA &&
-                    (dp == CROSS_POWER_AMP || dp == CROSS_POWER_PHASE))
+            if (chunk_desc == AUTO_POWER_DATA && (dp & CROSS_POWER))
                 continue;
             if (stokes_out == I)
                 power_to_stokes_I(in, off, num_pix, h->ctemp, status);
@@ -623,10 +626,14 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
             else if (stokes_out == V)
                 power_to_stokes_V(in, off, num_pix, h->ctemp, status);
             else continue;
-            if (dp == AUTO_POWER || dp == CROSS_POWER_AMP)
+            if (dp & AMP)
                 complex_to_amp(h->ctemp, 0, 1, num_pix, h->pix, status);
-            else if (dp == CROSS_POWER_PHASE)
+            else if (dp & PHASE)
                 complex_to_phase(h->ctemp, 0, 1, num_pix, h->pix, status);
+            else if (dp & REAL)
+                complex_to_real(h->ctemp, 0, 1, num_pix, h->pix, status);
+            else if (dp & IMAG)
+                complex_to_imag(h->ctemp, 0, 1, num_pix, h->pix, status);
             else continue;
         }
         else continue;
@@ -711,6 +718,52 @@ static void complex_to_phase(const oskar_Mem* complex_in, const int offset,
             j = i * stride;
             out[i] = atan2(in[j].y, in[j].x);
         }
+    }
+}
+
+
+static void complex_to_real(const oskar_Mem* complex_in, const int offset,
+        const int stride, const int num_points, oskar_Mem* output, int* status)
+{
+    int i;
+    if (oskar_mem_precision(output) == OSKAR_SINGLE)
+    {
+        float *out;
+        const float2* in;
+        in = oskar_mem_float2_const(complex_in, status) + offset;
+        out = oskar_mem_float(output, status);
+        for (i = 0; i < num_points; ++i) out[i] = in[i * stride].x;
+    }
+    else
+    {
+        double *out;
+        const double2* in;
+        in = oskar_mem_double2_const(complex_in, status) + offset;
+        out = oskar_mem_double(output, status);
+        for (i = 0; i < num_points; ++i) out[i] = in[i * stride].x;
+    }
+}
+
+
+static void complex_to_imag(const oskar_Mem* complex_in, const int offset,
+        const int stride, const int num_points, oskar_Mem* output, int* status)
+{
+    int i;
+    if (oskar_mem_precision(output) == OSKAR_SINGLE)
+    {
+        float *out;
+        const float2* in;
+        in = oskar_mem_float2_const(complex_in, status) + offset;
+        out = oskar_mem_float(output, status);
+        for (i = 0; i < num_points; ++i) out[i] = in[i * stride].y;
+    }
+    else
+    {
+        double *out;
+        const double2* in;
+        in = oskar_mem_double2_const(complex_in, status) + offset;
+        out = oskar_mem_double(output, status);
+        for (i = 0; i < num_points; ++i) out[i] = in[i * stride].y;
     }
 }
 

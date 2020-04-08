@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
+ * Copyright (c) 2016-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,27 @@ void oskar_beam_pattern_set_auto_power_fits(oskar_BeamPattern* h, int flag)
 }
 
 
+void oskar_beam_pattern_set_auto_power_phase_fits(oskar_BeamPattern* h,
+        int flag)
+{
+    h->auto_power_phase_fits = flag;
+}
+
+
+void oskar_beam_pattern_set_auto_power_real_fits(oskar_BeamPattern* h,
+        int flag)
+{
+    h->auto_power_real_fits = flag;
+}
+
+
+void oskar_beam_pattern_set_auto_power_imag_fits(oskar_BeamPattern* h,
+        int flag)
+{
+    h->auto_power_imag_fits = flag;
+}
+
+
 void oskar_beam_pattern_set_auto_power_text(oskar_BeamPattern* h, int flag)
 {
     h->auto_power_txt = flag;
@@ -116,6 +137,18 @@ void oskar_beam_pattern_set_cross_power_phase_text(oskar_BeamPattern* h,
         int flag)
 {
     h->cross_power_phase_txt = flag;
+}
+
+
+void oskar_beam_pattern_set_cross_power_real_fits(oskar_BeamPattern* h, int flag)
+{
+    h->cross_power_real_fits = flag;
+}
+
+
+void oskar_beam_pattern_set_cross_power_imag_fits(oskar_BeamPattern* h, int flag)
+{
+    h->cross_power_imag_fits = flag;
 }
 
 

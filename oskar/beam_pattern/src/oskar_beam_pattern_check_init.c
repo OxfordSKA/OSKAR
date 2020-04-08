@@ -215,15 +215,26 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
         /* Text file. */
         for (i = I; i <= V; ++i)
             for (o = I; (o <= V) && h->stokes[i] && h->auto_power_txt; ++o)
-                new_text_file(h, AUTO_POWER, i, o, s, ta, ca, status);
+                new_text_file(h, AUTO_POWER_AMP, i, o, s, ta, ca, status);
 
         /* Can only create images if coordinates are on a grid. */
         if (h->coord_grid_type != 'B') continue;
 
         /* FITS file. */
         for (i = I; i <= V; ++i)
-            for (o = I; (o <= V) && h->stokes[i] && h->auto_power_fits; ++o)
-                new_fits_file(h, AUTO_POWER, i, o, s, ta, ca, status);
+        {
+            for (o = I; (o <= V) && h->stokes[i]; ++o)
+            {
+                if (h->auto_power_fits)
+                    new_fits_file(h, AUTO_POWER_AMP, i, o, s, ta, ca, status);
+                if (h->auto_power_phase_fits)
+                    new_fits_file(h, AUTO_POWER_PHASE, i, o, s, ta, ca, status);
+                if (h->auto_power_real_fits)
+                    new_fits_file(h, AUTO_POWER_REAL, i, o, s, ta, ca, status);
+                if (h->auto_power_imag_fits)
+                    new_fits_file(h, AUTO_POWER_IMAG, i, o, s, ta, ca, status);
+            }
+        }
     }
 
     /* Text file. */
@@ -253,6 +264,10 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
                 new_fits_file(h, CROSS_POWER_AMP, i, o, -1, ta, ca, status);
             if (h->cross_power_phase_fits)
                 new_fits_file(h, CROSS_POWER_PHASE, i, o, -1, ta, ca, status);
+            if (h->cross_power_real_fits)
+                new_fits_file(h, CROSS_POWER_REAL, i, o, -1, ta, ca, status);
+            if (h->cross_power_imag_fits)
+                new_fits_file(h, CROSS_POWER_IMAG, i, o, -1, ta, ca, status);
         }
     }
 }
@@ -525,10 +540,15 @@ static const char* data_type_to_string(int type)
     case RAW_COMPLEX:                return "RAW_COMPLEX";
     case AMP:                        return "AMP";
     case PHASE:                      return "PHASE";
-    case AUTO_POWER:                 return "AUTO_POWER";
+    case AUTO_POWER_AMP:             return "AUTO_POWER_AMP";
+    case AUTO_POWER_PHASE:           return "AUTO_POWER_PHASE";
+    case AUTO_POWER_REAL:            return "AUTO_POWER_REAL";
+    case AUTO_POWER_IMAG:            return "AUTO_POWER_IMAG";
     case CROSS_POWER_RAW_COMPLEX:    return "CROSS_POWER_RAW_COMPLEX";
     case CROSS_POWER_AMP:            return "CROSS_POWER_AMP";
     case CROSS_POWER_PHASE:          return "CROSS_POWER_PHASE";
+    case CROSS_POWER_REAL:           return "CROSS_POWER_REAL";
+    case CROSS_POWER_IMAG:           return "CROSS_POWER_IMAG";
     case IXR:                        return "IXR";
     default:                         return "";
     }
@@ -566,10 +586,13 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
     raw_data = h->ixr_txt || h->ixr_fits ||
             h->voltage_raw_txt || h->voltage_amp_txt || h->voltage_phase_txt ||
             h->voltage_amp_fits || h->voltage_phase_fits;
-    auto_power = h->auto_power_fits || h->auto_power_txt;
+    auto_power = h->auto_power_txt || h->auto_power_fits ||
+            h->auto_power_phase_fits ||
+            h->auto_power_real_fits || h->auto_power_imag_fits;
     cross_power = h->cross_power_raw_txt ||
             h->cross_power_amp_fits || h->cross_power_phase_fits ||
-            h->cross_power_amp_txt || h->cross_power_phase_txt;
+            h->cross_power_amp_txt || h->cross_power_phase_txt ||
+            h->cross_power_real_fits || h->cross_power_imag_fits;
 
     /* Expand the number of devices to the number of selected GPUs,
      * if required. */

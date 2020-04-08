@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
+ * Copyright (c) 2016-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,10 +92,15 @@ struct oskar_BeamPattern
     int num_time_steps, num_channels, num_chunks;
     int pol_mode, width, height, num_pixels, nside;
     int num_active_stations, *station_ids;
-    int voltage_amp_txt, voltage_phase_txt, voltage_raw_txt, auto_power_txt;
-    int voltage_amp_fits, voltage_phase_fits, auto_power_fits;
+    int voltage_amp_txt, voltage_phase_txt, voltage_raw_txt;
+    int voltage_amp_fits, voltage_phase_fits;
+    int auto_power_txt;
+    int auto_power_fits, auto_power_phase_fits;
+    int auto_power_real_fits, auto_power_imag_fits;
     int cross_power_amp_txt, cross_power_phase_txt, cross_power_raw_txt;
-    int cross_power_amp_fits, cross_power_phase_fits, ixr_txt, ixr_fits;
+    int cross_power_amp_fits, cross_power_phase_fits;
+    int cross_power_real_fits, cross_power_imag_fits;
+    int ixr_txt, ixr_fits;
     int average_time_and_channel, separate_time_and_channel, stokes[4];
     int set_cellsize;
     double cellsize_rad, lon0, lat0, phase_centre_deg[2], fov_deg[2];
@@ -139,14 +144,23 @@ typedef struct oskar_BeamPattern oskar_BeamPattern;
 
 enum OSKAR_BEAM_PATTERN_DATA_PRODUCT_TYPE
 {
-    RAW_COMPLEX,
-    AMP,
-    PHASE,
-    AUTO_POWER,
-    CROSS_POWER_RAW_COMPLEX,
-    CROSS_POWER_AMP,
-    CROSS_POWER_PHASE,
-    IXR
+    RAW_COMPLEX = 0,
+    AMP         = 1,
+    PHASE       = 2,
+    REAL        = 4,
+    IMAG        = 8,
+    AUTO_POWER  = 16,
+    CROSS_POWER = 32,
+    IXR         = 64,
+    AUTO_POWER_AMP          = AUTO_POWER  | AMP,
+    AUTO_POWER_PHASE        = AUTO_POWER  | PHASE,
+    AUTO_POWER_REAL         = AUTO_POWER  | REAL,
+    AUTO_POWER_IMAG         = AUTO_POWER  | IMAG,
+    CROSS_POWER_RAW_COMPLEX = CROSS_POWER | RAW_COMPLEX,
+    CROSS_POWER_AMP         = CROSS_POWER | AMP,
+    CROSS_POWER_PHASE       = CROSS_POWER | PHASE,
+    CROSS_POWER_REAL        = CROSS_POWER | REAL,
+    CROSS_POWER_IMAG        = CROSS_POWER | IMAG
 };
 
 enum OSKAR_BEAM_DATA_TYPE
