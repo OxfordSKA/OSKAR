@@ -16,7 +16,6 @@ set(USER_DOC_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/sky_model
     ${CMAKE_CURRENT_SOURCE_DIR}/telescope_model
     ${CMAKE_CURRENT_SOURCE_DIR}/pointing_file
-    #${CMAKE_CURRENT_SOURCE_DIR}/matlab
     ${CMAKE_CURRENT_SOURCE_DIR}/settings
     ${CMAKE_CURRENT_SOURCE_DIR}/binary_file
 )
@@ -90,16 +89,6 @@ add_doc(
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
     LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
     LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
-
-# MATLAB
-#add_doc(
-#    DOC_NAME     matlab
-#    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-MATLAB-Interface.pdf
-#    TARGET_NAME  doc_single
-#    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/matlab
-#    TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-#    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
-#    LATEX_FOOTER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_footer.tex)
 
 # Pointing file
 add_doc(

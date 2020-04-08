@@ -3,23 +3,57 @@
 \page install_guide Installation Guide
 
 \latexonly
-\def \docversion{9}
+\def \docversion{10}
 \endlatexonly
 
 \section install_intro Introduction
 
 OSKAR can be installed by following the steps described below.
-A source code archive for Linux, and binary installer packages for
-macOS and Windows platforms are available to download from:<br/>
+A source code archive, and pre-built binary packages for Linux (using
+Singularity), macOS and Windows platforms are available to download from
 https://github.com/OxfordSKA/OSKAR/releases
 
 \subsection install_linux Linux
 
-\subsubsection install_linux_install Installation
+\subsubsection install_linux_singularity Singularity Image for Linux
 
-To install the OSKAR package on a Linux system, you will need to compile it
-from source. Ensure the dependencies have been installed as described
-in \ref install_deps "Dependencies" (below).
+A pre-built Singularity (https://sylabs.io/singularity/) SIF container image
+is available for Linux which can be used to run OSKAR command line
+applications or Python scripts directly, without needing to compile or install
+anything. For Singularity 3.0 or later, an application or script can be run
+using the downloaded container with the `singularity exec` command,
+which takes the form:
+
+    $ singularity exec [flags] <container_path> <app_name> <arguments>...
+
+Use the `--nv` flag to enable NVIDIA GPU support in Singularity, if
+applicable.
+
+Note also that Singularity will mount the home directory into the container by
+default, unless configured otherwise. If you have packages installed in your
+home area that should be kept isolated from those in the container (for
+example, because of conflicting packages or Python versions, or if you see
+other errors caused by trying to load wrong versions of shared libraries when
+starting the container) then it may be necessary to disable this either by
+using the `--no-home` flag, or re-bind the home directory in the container
+to somewhere other than your actual $HOME using the `-H` flag.
+
+As an example, to run the application `oskar_sim_interferometer`
+with a parameter file `settings.ini` and a container image file
+`OSKAR-Python3.sif` (both in the current directory) on a GPU use:
+
+    $ singularity exec --no-home --nv ./OSKAR-Python3.sif \
+          oskar_sim_interferometer settings.ini
+
+Similarly, to run a Python script `sim_script.py` that uses OSKAR:
+
+    $ singularity exec --no-home --nv ./OSKAR-Python3.sif python3 sim_script.py
+
+\subsubsection install_linux_install Installation on Linux
+
+To install the OSKAR package on a Linux system that does not have Docker or
+Singularity, you will need to compile it from source. Ensure the dependencies
+have been installed as described in \ref install_deps "Dependencies" (below).
 Then download the archive and follow the short steps
 in \ref install_build_commands "Build Commands".
 
@@ -28,7 +62,11 @@ Drivers can often be installed from your distribution's repository,
 but may not always support the latest hardware.
 NVIDIA drivers can be downloaded from https://www.geforce.com/drivers
 
-\subsubsection install_linux_uninstall Uninstallation
+\latexonly
+\clearpage
+\endlatexonly
+
+\subsubsection install_linux_uninstall Uninstallation on Linux
 
 To remove the OSKAR package on Linux, delete the applications, libraries and
 headers installed by the <code>make install</code> step.
@@ -40,7 +78,7 @@ By default, these will be placed in:
 
 \subsection install_macos macOS
 
-\subsubsection install_macos_install Installation
+\subsubsection install_macos_install Installation on macOS
 
 To install the OSKAR package on macOS, download and open the disk image (DMG)
 file and drag the OSKAR.app bundle to your /Applications folder.
@@ -51,19 +89,16 @@ If using a GPU on macOS, please ensure you have an up-to-date driver for it.
 NVIDIA drivers for macOS can be downloaded from
 http://www.nvidia.com/object/mac-driver-archive.html
 
-\subsubsection install_macos_uninstall Uninstallation
+\subsubsection install_macos_uninstall Uninstallation on macOS
 
 To remove the OSKAR package on macOS, delete the OSKAR.app bundle from
 your /Applications folder, and delete symbolic links to the applications
 by typing <code>rm -f /usr/local/bin/oskar*</code> from a terminal prompt.
 
-\latexonly
-\newpage
-\endlatexonly
 
 \subsection install_windows Windows
 
-\subsubsection install_windows_install Installation
+\subsubsection install_windows_install Installation on Windows
 
 To install the OSKAR package on 64-bit Windows, download and run the
 installer executable and follow the on-screen instructions.
@@ -73,10 +108,14 @@ Desktop or Start Menu.
 If using a GPU on Windows, please ensure you have an up-to-date driver for it.
 NVIDIA drivers can be downloaded from https://www.geforce.com/drivers
 
-\subsubsection install_windows_uninstall Uninstallation
+\subsubsection install_windows_uninstall Uninstallation on Windows
 
 To remove the OSKAR package on Windows, uninstall it from the list of
 software in Control Panel in the usual way.
+
+\latexonly
+\clearpage
+\endlatexonly
 
 \section install_build Building OSKAR
 
@@ -84,37 +123,37 @@ This section describes the steps needed to build and install OSKAR from source.
 
 \subsection install_deps Dependencies
 
-If GPU acceleration is required, an NVIDIA GPU with CUDA 7.0 or later
-(and associated NVIDIA CUDA driver) must be installed.
-If the graphical user interface (GUI) is required, Qt must also be installed.
-Additionally, the casacore libraries must be present if Measurement Sets
-are to be exported. Note that these dependencies are required only if
-building from source, not if using a pre-built package.
+If hardware acceleration is required, be sure to install appropriate GPU
+drivers which are supported by the hardware manufacturer. Third-party graphics
+drivers are unlikely to work.
+
+When building from source, the only required dependency is
+CMake (https://cmake.org).
+All other dependencies are optional, but functionality will be
+limited if these are not found by CMake.
+<b>Note that these dependencies are required only if building from source</b>,
+not if using a pre-built package.
 
 The dependencies are:
 
-- CMake (https://cmake.org), version >= 3.1
-- [Optional] NVIDIA CUDA <br/>(https://developer.nvidia.com/cuda-downloads), version >= 7.0
-- [Optional] Qt 5 (https://www.qt.io)
-- [Optional] casacore (https://github.com/casacore/casacore), version >= 2.0.0
+- CMake >= 3.1 (https://cmake.org)
+- [Optional] CUDA >= 7.0 <br/>(https://developer.nvidia.com/cuda-downloads) or OpenCL
+- [Optional] Qt 5 (https://qt.io)
+- [Optional] casacore >= 2.0 (https://github.com/casacore/casacore)
 
 \subsection install_build_commands Build Commands
 
 To build OSKAR, ensure the required dependencies are installed,
 open a terminal and give the following commands:
 
-\code
-$ mkdir build
-$ cd build
-$ cmake [OPTIONS] ../top/level/source/folder
-$ make -j8
-\endcode
+    $ mkdir build
+    $ cd build
+    $ cmake [OPTIONS] ../top/level/source/folder
+    $ make -j8
 
 OSKAR can then be installed with:
 
-\code
-$ make install
-\endcode
+    $ make install
 
 You may need to run this command as root, unless you change the default
 install location as described in the next section.
@@ -125,7 +164,7 @@ When running the 'cmake' command a number of build options can be specified.
 These are as listed below.
 - <tt><b>-DCUDA_ARCH="<arch>"</b></tt> (default: all)
   - Sets the target architecture for the compilation of CUDA device code
-  - \<arch\> must be one of either: 1.3, 2.0, 2.1, 3.0, 3.2, 3.5, 3.7, 5.0, 5.2, 6.0, 6.1, 6.2, 7.0, 7.2, 7.5 or ALL
+  - \<arch\> must be one of either: 1.3, 2.0, 2.1, 3.0, 3.2, 3.5, 3.7, 5.0, 5.2, 6.0, 6.1, 6.2, 7.0, 7.5 or ALL
   - ALL is for all Kepler, Maxwell, Pascal, Volta and Turing architectures (>= 3.0).
   - Multiple architectures can be specified by separating them with semi-colons.
 
@@ -135,12 +174,12 @@ These are as listed below.
 \subsubsection install_build_advanced Advanced Build Options
 
 - <tt><b>-DCASACORE_LIB_DIR=\<path\></b></tt> (default: searches the system library paths)
-  - Specifies a custom path in which to look for the CasaCore libraries (libcasa_ms.so and others).
-  - Note: This should only be used if the CasaCore library in the system library path can't be used to build OSKAR.
+  - Specifies a custom path in which to look for the casacore libraries (libcasa_ms.so and others).
+  - Note: This should only be used if the casacore library in the system library path can't be used to build OSKAR.
 
 - <tt><b>-DCASACORE_INC_DIR=\<path\></b></tt> (default: searches the system include paths)
-  - Specifies a custom path in which to look for the CasaCore library headers. This is the path to the top level casacore include folder.
-  - Note: This should only be used if the CasaCore headers in the system include path can't be used to build OSKAR.
+  - Specifies a custom path in which to look for the casacore library headers. This is the path to the top level casacore include folder.
+  - Note: This should only be used if the casacore headers in the system include path can't be used to build OSKAR.
 
 - <tt><b>-DCMAKE_PREFIX_PATH=\<path\></b></tt> (default: None)
   - Specifies a location in which to search for Qt 5. For example, if
@@ -155,6 +194,7 @@ These are as listed below.
 
 - <tt><b>-DFIND_OPENCL=ON|OFF</b></tt> (default: OFF)
   - Can be used to tell the build system not to find or link against OpenCL.
+  - OpenCL support in OSKAR is currently experimental.
 
 - <tt><b>-DNVCC_COMPILER_BINDIR=\<path\></b></tt> (default: None)
   - Specifies a nvcc compiler binary directory override. See nvcc help.
@@ -169,10 +209,17 @@ These are as listed below.
   - If ON enables the display of diagnostic build information when running CMake.
 
 
-\subsection install_build_qt Custom (Non-System) Qt Installations
+\latexonly
+\clearpage
+\endlatexonly
 
-If Qt 5 cannot be found from the default system paths, make sure to set
-CMAKE_PREFIX_PATH as described above.
+\section install_python Python Interface
+
+After installing OSKAR, the Python interface to it can be installed to
+make it easier to use from Python scripts.
+Straightforward instructions for installation with `pip` can be found in the
+`python` subdirectory of the source distribution.
+
 
 \section install_test Testing the Installation
 
@@ -181,15 +228,12 @@ CMAKE_PREFIX_PATH as described above.
 The unit test binaries can be run by typing the following command from the
 build directory:
 
-\code
-$ ctest [--verbose]
-\endcode
+    $ ctest [--verbose]
 
 \subsection install_test_example Running the Example Simulation
 
-With any fresh install of OSKAR, we recommend running the
-\ref example "example simulation" to check that a simple simulation
-runs as expected.
+The \ref example "example simulation" described in the documentation can be
+run to check that a simple simulation behaves as expected.
 
 \latexonly
 \vskip 1cm
@@ -201,14 +245,14 @@ runs as expected.
 <tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
 <tr><td>1</td><td>2012-04-23</td><td>Creation.</td></tr>
 <tr><td>2</td><td>2012-06-13</td>
-    <td>Added description of new CMAKE build flags specifying the location
+    <td>Added description of new CMake build flags specifying the location
     of custom library search paths for LAPACK, CBLAS and CFITSIO.
-    Added note on using custom (non-system) Qt4 installations.</td></tr>
+    Added note on using custom (non-system) Qt 4 installations.</td></tr>
 <tr><td>3</td><td>2012-06-19</td>
-    <td>Added description of new CMAKE flags for specifying the location of
-    CPPUNIT and CasaCore added in OSKAR-2.0.3-beta.</td></tr>
+    <td>Added description of new CMake flags for specifying the location of
+    CppUnit and casacore added in OSKAR-2.0.3-beta.</td></tr>
 <tr><td>4</td><td>2013-04-12</td>
-    <td>Added description of MATLAB_ROOT CMAKE variable.</td></tr>
+    <td>Added description of MATLAB_ROOT CMake variable.</td></tr>
 <tr><td>5</td><td>2013-11-14</td>
     <td>Updated for version 2.3.0. Removed CppUnit dependency.
     Unit tests now use the Google testing framework, which is included in
@@ -231,6 +275,9 @@ runs as expected.
     <td>Rearranged sections to clarify that dependencies are only
     required when building from source.
     Added options to not find (or link against) OpenCL.</td></tr>
+<tr><td>10</td><td>2020-04-07</td>
+    <td>Added notes on installing the Python interface and use of the
+    Singularity image, to be consistent with README file.</td></tr>
 </table>
 
 */

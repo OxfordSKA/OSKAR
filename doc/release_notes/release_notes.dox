@@ -4,7 +4,7 @@
 
 \section release_notes_intro Introduction
 
-OSKAR 2.7.5 is the current version of the OSKAR interferometry and beamforming
+OSKAR 2.7.6 is the current version of the OSKAR interferometry and beamforming
 simulation package.
 
 The function of these release notes is to summarise changes and new
@@ -15,6 +15,12 @@ features, and highlight any known issues.
 The changes for the current release are listed below. For earlier releases
 please refer to older revisions of this document or the
 <tt>ChangeLog.txt</tt> file in the OSKAR source tree.
+
+\subsection version_2_7_6 Version 2.7.6
+
+2020-01-20  OSKAR-2.7.6
+
+- Fix load of TEC screen settings.
 
 \subsection version_2_7_5 Version 2.7.5
 

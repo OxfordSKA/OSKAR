@@ -3,7 +3,7 @@
 \mainpage Introduction
 
 \latexonly
-\def \docversion{9}
+\def \docversion{10}
 \endlatexonly
 
 \section intro_intro What is OSKAR?
@@ -59,7 +59,8 @@ Below is a summary of the current features of the OSKAR package.
 
 \section intro_docs Getting Started
 
-The following documents are available:
+The following documents are available
+from https://github.com/OxfordSKA/OSKAR/releases:
 
 - \ref install_guide "Installation Guide"<br>
   Describes how to build and install OSKAR.
@@ -129,18 +130,19 @@ However, as modern GPUs have thousands of processing cores, there must be
 enough work to do to keep the GPU occupied in this way. If your sky model
 contains only 100 sources, you may be using only a few percent of the
 available hardware, so performance will be relatively poor when using small
-sky models like this. It will probably be faster to use CPU cores only for
+sky models like this. It may be faster to use CPU cores only for
 sky models containing fewer than 32 sources.
 
 -# <b>Is OpenCL supported?</b><br>
 OpenCL support in OSKAR is currently experimental.
-The oskar_imager application does not work using OpenCL at the moment, but
-test simulations have been run successfully using AMD, Intel and NVIDIA
-GPU hardware.
+Test simulations have been run successfully using OpenCL with AMD, Intel
+and NVIDIA GPU hardware, but the oskar_imager application does not work
+fully using OpenCL at the moment.
 
 -# <b>Are pre-built binary packages of OSKAR available?</b><br>
-Binary installer packages are now available for macOS and Windows systems.
-On Linux, OSKAR still needs to be compiled from source.
+Both Docker and Singularity container images are provided for Linux,
+and binary installer packages are now available for macOS and Windows systems.
+These can be downloaded from https://github.com/OxfordSKA/OSKAR/releases
 
 
 \latexonly
@@ -497,6 +499,9 @@ IN THE SOFTWARE.
 <tr><td>9</td><td>2019-05-17</td>
     <td>Updated FAQ to address current state of OpenCL support
     in OSKAR.</td></tr>
+<tr><td>10</td><td>2020-04-07</td>
+    <td>Updated FAQ to mention Singularity and Docker images
+    for Linux.</td></tr>
 </table>
 
 */
