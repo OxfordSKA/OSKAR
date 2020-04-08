@@ -86,6 +86,12 @@ if (CASACORE_FOUND)
             set(CMAKE_INSTALL_NAME_DIR "@rpath")
             list(APPEND CMAKE_INSTALL_RPATH
                 "@loader_path/../${OSKAR_LIB_INSTALL_DIR}/")
+        else()
+            list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
+                    "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+            if ("${isSystemDir}" STREQUAL "-1")
+                list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+            endif()
         endif()
         if ("${CMAKE_CXX_COMPILER_ID}" MATCHES ".*Clang.*")
             if (FORCE_LIBSTDC++)
