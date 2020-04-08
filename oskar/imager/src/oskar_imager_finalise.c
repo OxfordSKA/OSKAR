@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
+ * Copyright (c) 2016-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,8 +61,18 @@ void oskar_imager_finalise(oskar_Imager* h,
     int c, p, i;
     size_t j, log_size = 0, length = 0;
     char* log_data;
-    if (*status || !h->planes) return;
 
+    /* Report any error. */
+    if (*status)
+    {
+        oskar_log_error(h->log, "Run failed with code %i: %s.", *status,
+                oskar_get_error_string(*status));
+        oskar_imager_reset_cache(h, status);
+        oskar_log_close(h->log);
+        return;
+    }
+
+    if (!h->planes) return;
     oskar_log_section(h->log, 'M', "Finalising %d image plane(s)...",
             h->num_planes);
 
