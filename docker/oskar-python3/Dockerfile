@@ -8,7 +8,7 @@ RUN apt update && apt install -y --no-install-recommends \
     git \
     python3-dev \
     python3-pip
-RUN pip3 install astropy numpy matplotlib && \
+RUN pip3 install -U astropy numpy matplotlib setuptools && \
     pip3 install 'git+https://github.com/OxfordSKA/OSKAR.git@master#egg=oskarpy&subdirectory=python'
 
 # Copy into a minimal image.

@@ -8,7 +8,7 @@ Stage: one
         git \
         python3-dev \
         python3-pip
-    pip3 install astropy numpy matplotlib && \
+    pip3 install -U astropy numpy matplotlib setuptools && \
     pip3 install 'git+https://github.com/OxfordSKA/OSKAR.git@master#egg=oskarpy&subdirectory=python'
 
 Bootstrap: localimage
