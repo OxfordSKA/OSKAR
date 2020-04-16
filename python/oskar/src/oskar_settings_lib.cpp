@@ -113,22 +113,18 @@ static PyObject* iterate_dict(PyObject* dict,
         if (PyDict_Check(value))
             (void) iterate_dict(value, h, key, abort);
         else
-#if PY_MAJOR_VERSION >= 3
-        if (PyUnicode_Check(value))
-#else
-        if (PyString_Check(value))
-#endif
         {
+            PyObject* pystr;
             const char *k, *v, *parent = 0, *key_ptr = 0;
             char *full_key = 0;
+
+            /* Get the fully-qualified key. */
 #if PY_MAJOR_VERSION >= 3
             k = PyUnicode_AsUTF8(key);
-            v = PyUnicode_AsUTF8(value);
             if (parent_key)
                 parent = PyUnicode_AsUTF8(parent_key);
 #else
             k = PyString_AsString(key);
-            v = PyString_AsString(value);
             if (parent_key)
                 parent = PyString_AsString(parent_key);
 #endif
@@ -140,22 +136,42 @@ static PyObject* iterate_dict(PyObject* dict,
                 key_ptr = full_key;
                 sprintf(full_key, "%s%c%s", parent, h->separator(), k);
             }
-            if (!h->set_value(key_ptr, v))
+
+            /* Try to convert the value to a string. */
+            pystr = PyObject_Str(value);
+            if (!abort && !pystr)
+            {
+                PyErr_Format(PyExc_RuntimeError,
+                        "Could not convert value for '%s' to a Python string",
+                        key_ptr);
+                abort = true;
+            }
+            else
+            {
+#if PY_MAJOR_VERSION >= 3
+                v = PyUnicode_AsUTF8(pystr);
+#else
+                v = PyString_AsString(pystr);
+#endif
+            }
+            if (!abort && !v)
+            {
+                PyErr_Format(PyExc_RuntimeError,
+                        "Could not convert value for '%s' to a C string",
+                        key_ptr);
+                abort = true;
+            }
+
+            /* Try to set the value. */
+            if (!abort && !h->set_value(key_ptr, v))
             {
                 PyErr_Format(PyExc_RuntimeError,
                         "Could not set '%s'='%s'", key_ptr, v);
                 abort = true;
-                free(full_key);
-                return 0;
             }
             free(full_key);
-        }
-        else
-        {
-            PyErr_SetString(PyExc_RuntimeError, "Dictionary values must be "
-                    "strings or sub-dictionaries (not numbers!).");
-            abort = true;
-            return 0;
+            Py_XDECREF(pystr);
+            if (abort) return 0;
         }
     }
     return abort ? 0 : Py_BuildValue("");

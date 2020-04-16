@@ -63,8 +63,8 @@ class SettingsTree(object):
     much like a standard Python dictionary: data access is provided using the
     square-bracket ``[]`` dereference operator using the key name,
     and values can be assigned or read from this. Note that all parameter
-    values are stored as strings, and should be converted using Python's
-    ``str()`` function if required.
+    values are stored as strings, and will be converted using Python's
+    ``str()`` function as needed.
 
     Use the :meth:`from_dict() <oskar.SettingsTree.from_dict()>` and
     :meth:`to_dict() <oskar.SettingsTree.to_dict()>` methods to convert
@@ -72,13 +72,12 @@ class SettingsTree(object):
 
     Examples:
 
-        To set a parameter value (note the explicit string conversion):
+        To set a parameter value:
 
         .. code-block:: python
 
            settings = oskar.SettingsTree('oskar_sim_interferometer')
-           start_frequency_hz = 100e6
-           settings['observation/start_frequency_hz'] = str(start_frequency_hz)
+           settings['observation/start_frequency_hz'] = 100e6
 
         To create a :class:`oskar.SettingsTree` from a Python dictionary
         (note that keys can be either flat or nested: for a flat dictionary,
@@ -92,23 +91,23 @@ class SettingsTree(object):
                'simulator': {
                    'double_precision': 'true',
                    'use_gpus': 'true',
-                   'max_sources_per_chunk': '23000'
+                   'max_sources_per_chunk': 23000
                },
                'observation' : {
-                   'length': '14400.0',
-                   'start_frequency_hz': '132e6',
-                   'frequency_inc_hz': '100e3',
-                   'num_channels': '160',
-                   'num_time_steps': '240'
+                   'length': 14400.0,
+                   'start_frequency_hz': 132e6,
+                   'frequency_inc_hz': 100e3,
+                   'num_channels': 160,
+                   'num_time_steps': 240
                },
                'telescope': {
                    'input_directory': '/path/to/telescope/model',
                    'pol_mode': 'Scalar'
                },
                'interferometer': {
-                   'channel_bandwidth_hz': '100e3',
-                   'time_average_sec': '1.0',
-                   'max_time_samples_per_block': '4'
+                   'channel_bandwidth_hz': 100e3,
+                   'time_average_sec': 1.0,
+                   'max_time_samples_per_block': 4
                }
            }
            settings.from_dict(python_dict)
@@ -162,7 +161,7 @@ class SettingsTree(object):
             write (boolean):
                 If true, also write the value to the file. Default True.
         """
-        _settings_lib.set_value(self._capsule, key, value, write)
+        _settings_lib.set_value(self._capsule, key, str(value), write)
 
     def to_dict(self, include_defaults=False):
         """Returns a Python dictionary containing the current settings.
@@ -245,4 +244,4 @@ class SettingsTree(object):
             key (str): Settings key.
             value (str): Settings value.
         """
-        _settings_lib.set_value(self._capsule, key, value, True)
+        _settings_lib.set_value(self._capsule, key, str(value), True)
