@@ -1,4 +1,5 @@
 [![GitHub release](https://img.shields.io/github/release/OxfordSKA/OSKAR.svg?style=flat-square)](https://github.com/OxfordSKA/OSKAR/releases)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3758491.svg)](https://doi.org/10.5281/zenodo.3758491)
 
 # OSKAR: A GPU-accelerated simulator for the Square Kilometre Array
 
