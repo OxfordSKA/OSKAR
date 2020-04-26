@@ -28,16 +28,16 @@
 
 #include "gui/oskar_About.h"
 
-#include <QtGui/QFont>
-#include <QtGui/QTextDocument>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QTextBrowser>
-#include <QtWidgets/QSizePolicy>
-#include <QtWidgets/QVBoxLayout>
+#include <QApplication>
+#include <QDialogButtonBox>
+#include <QFont>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QSizePolicy>
+#include <QTextBrowser>
+#include <QTextDocument>
+#include <QVBoxLayout>
 
 namespace oskar {
 

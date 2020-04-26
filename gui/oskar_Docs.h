@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef OSKAR_DOCS_H_
 #define OSKAR_DOCS_H_
 
-#include <QtWidgets/QDialog>
+#include <QDialog>
 
 namespace oskar {
 

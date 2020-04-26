@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef OSKAR_DOUBLE_SPIN_BOX_H_
 #define OSKAR_DOUBLE_SPIN_BOX_H_
 
-#include <QtWidgets/QAbstractSpinBox>
+#include <QAbstractSpinBox>
 
 class QDoubleValidator;
 

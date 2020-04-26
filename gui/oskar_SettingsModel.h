@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,11 @@
 #ifndef OSKAR_SETTINGS_MODEL_H_
 #define OSKAR_SETTINGS_MODEL_H_
 
-#include <QtCore/QAbstractItemModel>
-#include <QtCore/QDateTime>
-#include <QtCore/QString>
-#include <QtCore/QSortFilterProxyModel>
+#include <QAbstractItemModel>
+#include <QDateTime>
+#include <QString>
+#include <QSortFilterProxyModel>
+#include <QIcon>
 
 class QModelIndex;
 class QStringList;
@@ -92,6 +93,7 @@ private:
     void reset_group_(const SettingsNode* node);
 
     SettingsTree* settings_;
+    QIcon iconOpen_, iconSave_;
     QString filename_;
     QDateTime lastModified_;
     bool displayKey_;

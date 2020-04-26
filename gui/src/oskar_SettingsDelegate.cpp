@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,17 +32,18 @@
 #include "settings/oskar_SettingsItem.h"
 #include "settings/oskar_SettingsValue.h"
 
-#include <QtCore/QEvent>
-#include <QtCore/QModelIndex>
-#include <QtGui/QClipboard>
-#include <QtGui/QMouseEvent>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QDateTimeEdit>
-#include <QtWidgets/QFileDialog>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QSpinBox>
+#include <QApplication>
+#include <QClipboard>
+#include <QComboBox>
+#include <QDateTimeEdit>
+#include <QEvent>
+#include <QFileDialog>
+#include <QLineEdit>
+#include <QMenu>
+#include <QModelIndex>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QSpinBox>
 
 #include <cstdio>
 #include <climits>
@@ -60,8 +61,7 @@ SettingsDelegate::SettingsDelegate(QWidget* view, QObject* parent)
 }
 
 QWidget* SettingsDelegate::createEditor(QWidget* parent,
-                                        const QStyleOptionViewItem& /*option*/,
-                                        const QModelIndex& index) const
+        const QStyleOptionViewItem& /*option*/, const QModelIndex& index) const
 {
     // Get the setting type.
     int type = index.model()->data(index, SettingsModel::TypeRole).toInt();
@@ -222,9 +222,8 @@ QWidget* SettingsDelegate::createEditor(QWidget* parent,
 }
 
 bool SettingsDelegate::editorEvent(QEvent* event,
-                                   QAbstractItemModel* mod,
-                                   const QStyleOptionViewItem& option,
-                                   const QModelIndex& index)
+        QAbstractItemModel* mod, const QStyleOptionViewItem& option,
+        const QModelIndex& index)
 {
     // Get item type and value.
     int type = index.model()->data(index, SettingsModel::TypeRole).toInt();
@@ -236,9 +235,8 @@ bool SettingsDelegate::editorEvent(QEvent* event,
     {
         if (type == SettingsValue::INPUT_DIRECTORY)
         {
-            QString name = QFileDialog::getExistingDirectory(view_,
-                                                             "Select directory",
-                                                             value.toString());
+            QString name = QFileDialog::getExistingDirectory(
+                    view_, "Select directory", value.toString());
             if (!name.isNull())
             {
                 name = QDir::current().relativeFilePath(name);
@@ -249,9 +247,8 @@ bool SettingsDelegate::editorEvent(QEvent* event,
         }
         else if (type == SettingsValue::INPUT_FILE)
         {
-            QString name = QFileDialog::getOpenFileName(view_,
-                                                        "Input file name",
-                                                        value.toString());
+            QString name = QFileDialog::getOpenFileName(
+                    view_, "Input file name", value.toString());
             if (!name.isNull())
             {
                 name = QDir::current().relativeFilePath(name);
@@ -266,14 +263,12 @@ bool SettingsDelegate::editorEvent(QEvent* event,
             QString dir;
             if (!list.isEmpty())
                 dir = list[0];
-            list = QFileDialog::getOpenFileNames(view_,
-                                                 "Input file name(s)",
-                                                 dir);
+            list = QFileDialog::getOpenFileNames(
+                    view_, "Input file name(s)", dir);
             if (!list.isEmpty())
             {
-                for (int i = 0; i < list.size(); ++i) {
+                for (int i = 0; i < list.size(); ++i)
                     list[i] = QDir::current().relativeFilePath(list[i]);
-                }
                 mod->setData(index, list, Qt::EditRole);
             }
             event->accept();
@@ -281,9 +276,8 @@ bool SettingsDelegate::editorEvent(QEvent* event,
         }
         else if (type == SettingsValue::OUTPUT_FILE)
         {
-            QString name = QFileDialog::getSaveFileName(view_,
-                                                        "Output file name",
-                                                        value.toString());
+            QString name = QFileDialog::getSaveFileName(
+                    view_, "Output file name", value.toString());
             if (!name.isNull())
             {
                 name = QDir::current().relativeFilePath(name);
@@ -300,16 +294,19 @@ bool SettingsDelegate::editorEvent(QEvent* event,
     {
         QMouseEvent* mouseEvent = (QMouseEvent*)event;
         if (mouseEvent->button() == Qt::RightButton &&
-                        item_type != SettingsItem::LABEL)
+                item_type != SettingsItem::LABEL)
         {
+            // Get model index to value.
+            QModelIndex valueIndex = index.sibling(index.row(), 1);
+
             // Set up the context menu.
             QMenu menu;
             QString strResetValue = "Reset";
             QString strCopyKey = "Copy setting key";
 
             // Add reset action if value is not null.
-            QVariant val = mod->data(index, SettingsModel::ValueRole);
-            if (!val.isNull() && index.column() == 1)
+            QVariant val = mod->data(valueIndex, SettingsModel::ValueRole);
+            if (!val.isNull())
                 menu.addAction(strResetValue);
 
             menu.addAction(strCopyKey);
@@ -318,27 +315,28 @@ bool SettingsDelegate::editorEvent(QEvent* event,
             QAction* action = menu.exec(mouseEvent->globalPos());
 
             // Check which action was selected.
-            if (action && action->text() == strResetValue) {
-                mod->setData(index, mod->data(index,
+            if (action && action->text() == strResetValue)
+            {
+                mod->setData(valueIndex, mod->data(valueIndex,
                         SettingsModel::DefaultRole), Qt::EditRole);
             }
-            else if (action && action->text() == strCopyKey) {
-                QVariant key = mod->data(index, SettingsModel::KeyRole);
+            else if (action && action->text() == strCopyKey)
+            {
+                QVariant key = mod->data(valueIndex, SettingsModel::KeyRole);
                 QApplication::clipboard()->setText(key.toString());
             }
             event->accept();
             return true;
         }
         else if (mouseEvent->button() == Qt::RightButton &&
-                        item_type == SettingsItem::LABEL)
+                item_type == SettingsItem::LABEL)
         {
             QMenu menu;
             QString strResetGroup = "Reset Group";
             menu.addAction(strResetGroup);
             QAction* action = menu.exec(mouseEvent->globalPos());
-            if (action && action->text() == strResetGroup) {
+            if (action && action->text() == strResetGroup)
                 mod->setData(index, QVariant(), SettingsModel::ResetGroupRole);
-            }
             event->accept();
             return true;
         }
@@ -348,7 +346,7 @@ bool SettingsDelegate::editorEvent(QEvent* event,
 }
 
 void SettingsDelegate::setEditorData(QWidget* editor,
-                                     const QModelIndex& index) const
+        const QModelIndex& index) const
 {
     // Get the setting type.
     int type = index.model()->data(index, SettingsModel::TypeRole).toInt();
@@ -441,8 +439,7 @@ void SettingsDelegate::setEditorData(QWidget* editor,
 }
 
 void SettingsDelegate::setModelData(QWidget* editor,
-                                    QAbstractItemModel* model,
-                                    const QModelIndex& index) const
+        QAbstractItemModel* model, const QModelIndex& index) const
 {
     // Get the setting type.
     int type = index.model()->data(index, SettingsModel::TypeRole).toInt();
@@ -573,8 +570,7 @@ void SettingsDelegate::setModelData(QWidget* editor,
 }
 
 void SettingsDelegate::updateEditorGeometry(QWidget* editor,
-                                            const QStyleOptionViewItem& option,
-                                            const QModelIndex& /*index*/) const
+        const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const
 {
     editor->setGeometry(option.rect);
 }

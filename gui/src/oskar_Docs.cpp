@@ -28,11 +28,11 @@
 
 #include "gui/oskar_Docs.h"
 
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QTextBrowser>
-#include <QtWidgets/QVBoxLayout>
+#include <QApplication>
+#include <QDialogButtonBox>
+#include <QGroupBox>
+#include <QTextBrowser>
+#include <QVBoxLayout>
 
 static const char* root_url = "https://github.com/OxfordSKA/OSKAR/releases";
 

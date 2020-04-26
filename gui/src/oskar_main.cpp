@@ -29,7 +29,7 @@
 #include "settings/oskar_option_parser.h"
 #include "gui/oskar_MainWindow.h"
 
-#include <QtWidgets/QApplication>
+#include <QApplication>
 
 int main(int argc, char** argv)
 {

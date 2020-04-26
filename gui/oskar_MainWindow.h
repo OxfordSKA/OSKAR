@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,9 @@
 #ifndef OSKAR_MAIN_WINDOW_H_
 #define OSKAR_MAIN_WINDOW_H_
 
-#include <QtWidgets/QMainWindow>
-#include <QtCore/QString>
-#include <QtCore/QHash>
+#include <QMainWindow>
+#include <QString>
+#include <QHash>
 
 class QComboBox;
 class QLineEdit;

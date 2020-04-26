@@ -28,17 +28,17 @@
 
 #include "gui/oskar_RunDialog.h"
 
-#include <QtCore/QFileInfo>
-#include <QtCore/QSettings>
-#include <QtGui/QCloseEvent>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QScrollBar>
-#include <QtWidgets/QTextEdit>
-#include <QtWidgets/QVBoxLayout>
+#include <QCheckBox>
+#include <QCloseEvent>
+#include <QDialogButtonBox>
+#include <QFileInfo>
+#include <QLabel>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QScrollBar>
+#include <QSettings>
+#include <QTextEdit>
+#include <QVBoxLayout>
 
 namespace oskar {
 

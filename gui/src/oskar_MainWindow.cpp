@@ -38,25 +38,25 @@
 #include "settings/oskar_SettingsFileHandlerIni.h"
 #include "settings/oskar_SettingsTree.h"
 
-#include <QtCore/QProcess>
-#include <QtCore/QTimer>
-#include <QtCore/QSettings>
-#include <QtGui/QCloseEvent>
-#include <QtGui/QKeySequence>
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkReply>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QAction>
-#include <QtWidgets/QComboBox>
-#include <QtWidgets/QFileDialog>
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QMenuBar>
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QVBoxLayout>
+#include <QAction>
+#include <QApplication>
+#include <QCloseEvent>
+#include <QComboBox>
+#include <QFileDialog>
+#include <QGridLayout>
+#include <QKeySequence>
+#include <QLabel>
+#include <QLineEdit>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QProcess>
+#include <QPushButton>
+#include <QSettings>
+#include <QTimer>
+#include <QVBoxLayout>
 
 #include <exception>
 
@@ -127,6 +127,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     view_->setModel(modelProxy_);
     view_->setItemDelegate(delegate);
     view_->resizeColumnToContents(0);
+    view_->setUniformRowHeights(true);
     v_layout->addLayout(gridLayout);
     v_layout->addWidget(view_);
     connect(model_, SIGNAL(fileReloaded()), view_, SLOT(fileReloaded()));

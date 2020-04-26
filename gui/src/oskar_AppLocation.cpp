@@ -28,12 +28,12 @@
 
 #include "gui/oskar_AppLocation.h"
 
-#include <QtCore/QDir>
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QFileDialog>
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QPushButton>
+#include <QDialogButtonBox>
+#include <QDir>
+#include <QFileDialog>
+#include <QGridLayout>
+#include <QLineEdit>
+#include <QPushButton>
 
 namespace oskar {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,10 +28,11 @@
 
 #include "gui/oskar_SettingsView.h"
 #include "gui/oskar_SettingsModel.h"
-#include <QtCore/QSettings>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QScrollBar>
-#include <QtWidgets/QMessageBox>
+#include <QApplication>
+#include <QMouseEvent>
+#include <QMessageBox>
+#include <QSettings>
+#include <QScrollBar>
 
 namespace oskar {
 
@@ -137,6 +138,21 @@ void SettingsView::fileReloaded()
     msgBox.setInformativeText("It has now been re-loaded.");
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.exec();
+}
+
+void SettingsView::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    QModelIndex index = indexAt(event->pos());
+    QModelIndex sibling = index.sibling(index.row(), 1);
+    if (model()->flags(sibling) & Qt::ItemIsEditable)
+    {
+        setCurrentIndex(sibling);
+        edit(sibling, QAbstractItemView::DoubleClicked, event);
+    }
+    else
+    {
+        QTreeView::mouseDoubleClickEvent(event);
+    }
 }
 
 void SettingsView::saveRestoreExpanded(const QModelIndex& parent,

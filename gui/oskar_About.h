@@ -29,7 +29,7 @@
 #ifndef OSKAR_ABOUT_H_
 #define OSKAR_ABOUT_H_
 
-#include <QtWidgets/QDialog>
+#include <QDialog>
 
 namespace oskar {
 

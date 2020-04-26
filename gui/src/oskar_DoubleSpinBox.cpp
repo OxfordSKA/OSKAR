@@ -28,10 +28,10 @@
 
 #include "gui/oskar_DoubleSpinBox.h"
 #include "settings/oskar_settings_utility_string.h"
-#include <QtGui/QDoubleValidator>
-#include <QtGui/QFocusEvent>
-#include <QtGui/QKeyEvent>
-#include <QtWidgets/QLineEdit>
+#include <QDoubleValidator>
+#include <QFocusEvent>
+#include <QKeyEvent>
+#include <QLineEdit>
 #include <cfloat>
 #include <cmath>
 #include <cstdio>

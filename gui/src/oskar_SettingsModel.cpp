@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,15 +32,16 @@
 #include "settings/oskar_SettingsNode.h"
 #include "settings/oskar_SettingsKey.h"
 #include "settings/oskar_SettingsValue.h"
-#include <QtGui/QFontMetrics>
-#include <QtGui/QIcon>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QModelIndex>
-#include <QtCore/QSize>
-#include <QtCore/QStringList>
-#include <QtCore/QVariant>
-#include <QtWidgets/QApplication>
+#include <QApplication>
+#include <QFile>
+#include <QFileInfo>
+#include <QFontMetrics>
+#include <QIcon>
+#include <QModelIndex>
+#include <QPalette>
+#include <QSize>
+#include <QStringList>
+#include <QVariant>
 
 using namespace std;
 
@@ -49,6 +50,8 @@ namespace oskar {
 SettingsModel::SettingsModel(SettingsTree* settings, QObject* parent)
 : QAbstractItemModel(parent),
   settings_(settings),
+  iconOpen_(QIcon(":/icons/open.png")),
+  iconSave_(QIcon(":/icons/save.png")),
   lastModified_(QDateTime::currentDateTime()),
   displayKey_(false)
 {
@@ -89,16 +92,14 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
     {
     case Qt::ForegroundRole:
     {
-        bool disabled = !settings_->dependencies_satisfied(key);
-        if (disabled)
-            return QColor(Qt::lightGray);
-        else if (settings_->is_critical(key))
+        QPalette palette = QApplication::palette((QWidget*) 0);
+        if (!settings_->dependencies_satisfied(key))
+            return palette.color(QPalette::Disabled, QPalette::Text);
+        if (settings_->is_critical(key))
             return QColor(Qt::white);
-        else if (node->value_or_child_set())
-            return QColor(Qt::blue);
-        else if (node->is_required())
-            return QColor(Qt::red);
-        return QColor(64, 64, 64);
+        if (node->value_or_child_set())
+            return palette.color(QPalette::Normal, QPalette::Link);
+        return palette.color(QPalette::Normal, QPalette::Text);
     }
     case Qt::BackgroundRole:
     {
@@ -127,6 +128,12 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
 //                        node->value().type_name()) + "]");
         }
         return tooltip;
+    }
+    case Qt::EditRole:
+    {
+        if (node->item_type() == SettingsItem::SETTING)
+            return QString(node->value());
+        break;
     }
     case KeyRole:
         return QString(key);
@@ -206,24 +213,14 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
     {
         switch (role)
         {
+        case Qt::SizeHintRole:
+        {
+            int width = QApplication::fontMetrics().width(
+                    QString(node->label())) + 20;
+            return QSize(width, 26);
+        }
         case Qt::DisplayRole:
             return displayKey_ ? QString(key) : QString(node->label());
-        case Qt::DecorationRole:
-        {
-            // Note: Maybe icons should be disabled unless there is an icon
-            // for everything. This would avoid indentation level problems with
-            // option trees of depth greater than 1.
-            //
-            // Alternatively, figure out how to move the icon to the
-            // right-hand end of the label?
-            if (type == SettingsValue::INPUT_FILE ||
-                    type == SettingsValue::INPUT_FILE_LIST ||
-                    type == SettingsValue::INPUT_DIRECTORY)
-                return QIcon(":/icons/open.png");
-            else if (type == SettingsValue::OUTPUT_FILE)
-                return QIcon(":/icons/save.png");
-            break;
-        }
         default:
             break;
         }
@@ -233,7 +230,6 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
         switch (role)
         {
         case Qt::DisplayRole:
-        case Qt::EditRole:
         {
             if (node->item_type() == SettingsItem::SETTING)
                 return QString(node->value());
@@ -245,11 +241,15 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
                 return value.get<Bool>().value() ? Qt::Checked : Qt::Unchecked;
             break;
         }
-        case Qt::SizeHintRole:
+        case Qt::DecorationRole:
         {
-            int width = QApplication::fontMetrics().width(
-                    QString(node->label())) + 10;
-            return QSize(width, 26);
+            if (type == SettingsValue::INPUT_FILE ||
+                    type == SettingsValue::INPUT_FILE_LIST ||
+                    type == SettingsValue::INPUT_DIRECTORY)
+                return iconOpen_;
+            else if (type == SettingsValue::OUTPUT_FILE)
+                return iconSave_;
+            break;
         }
         default:
             break;

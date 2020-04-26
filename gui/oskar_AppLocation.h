@@ -29,7 +29,7 @@
 #ifndef OSKAR_APP_LOCATION_H_
 #define OSKAR_APP_LOCATION_H_
 
-#include <QtWidgets/QDialog>
+#include <QDialog>
 
 class QLineEdit;
 

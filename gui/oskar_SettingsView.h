@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,9 @@
 #ifndef OSKAR_SETTINGS_VIEW_H_
 #define OSKAR_SETTINGS_VIEW_H_
 
-#include <QtWidgets/QTreeView>
+#include <QTreeView>
+
+class QMouseEvent;
 
 namespace oskar {
 
@@ -55,6 +57,9 @@ private slots:
     void updateAfterCollapsed(const QModelIndex& index);
     void focusChanged(QWidget* old, QWidget* now);
     void fileReloaded();
+
+protected:
+    virtual void mouseDoubleClickEvent(QMouseEvent* event);
 
 private:
     void saveRestoreExpanded(const QModelIndex& parent, QStringList& list,

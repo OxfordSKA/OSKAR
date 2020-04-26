@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
 #ifndef OSKAR_RUN_DIALOG_H_
 #define OSKAR_RUN_DIALOG_H_
 
-#include <QtWidgets/QDialog>
-#include <QtCore/QProcess>
+#include <QDialog>
+#include <QProcess>
 
 class QAbstractButton;
 class QCheckBox;
