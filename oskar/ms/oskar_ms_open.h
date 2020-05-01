@@ -48,6 +48,15 @@ extern "C" {
 OSKAR_MS_EXPORT
 oskar_MeasurementSet* oskar_ms_open(const char* filename);
 
+/**
+ * @brief Opens an existing Measurement Set in read-only mode.
+ *
+ * @details
+ * Opens an existing Measurement Set.
+ */
+OSKAR_MS_EXPORT
+oskar_MeasurementSet* oskar_ms_open_ro(const char* filename);
+
 #ifdef __cplusplus
 }
 #endif

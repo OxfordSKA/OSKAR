@@ -232,17 +232,18 @@ class MeasurementSet(object):
         return _measurement_set_lib.phase_centre_dec_rad(self._capsule)
 
     @classmethod
-    def open(cls, file_name):
+    def open(cls, file_name, readonly=False):
         """Opens an existing Measurement Set with the given name.
 
         Args:
             file_name (str):      File name of the Measurement Set to open.
+            readonly  (bool):     Open the Measurement Set in read-only mode.
         """
         if _measurement_set_lib is None:
             raise RuntimeError(
                 "OSKAR was compiled without Measurement Set support.")
         t = MeasurementSet()
-        t.capsule = _measurement_set_lib.open(file_name)
+        t.capsule = _measurement_set_lib.open(file_name, readonly)
         return t
 
     def read_column(self, column, start_row, num_rows):
