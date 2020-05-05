@@ -35,17 +35,13 @@
 extern "C" {
 #endif
 
-void oskar_station_save_mount_types(const char* filename,
-        const oskar_Station* station, int* status)
+void oskar_station_save_mount_types(const oskar_Station* station,
+        const char* filename, int* status)
 {
     FILE* file;
-    int i, num_elements;
+    int i;
     const char* type;
-
-    /* Check if safe to proceed. */
     if (*status || !station) return;
-
-    /* Save the data. */
     file = fopen(filename, "w");
     if (!file)
     {
@@ -53,7 +49,7 @@ void oskar_station_save_mount_types(const char* filename,
         return;
     }
     type = oskar_station_element_mount_types_const(station);
-    num_elements = oskar_station_num_elements(station);
+    const int num_elements = oskar_station_num_elements(station);
     for (i = 0; i < num_elements; ++i) fprintf(file, "%c\n", type[i]);
     fclose(file);
 }

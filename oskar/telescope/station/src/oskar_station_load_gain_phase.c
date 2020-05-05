@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
 extern "C" {
 #endif
 
-void oskar_station_load_gain_phase(oskar_Station* station, const char* filename,
-        int* status)
+void oskar_station_load_gain_phase(oskar_Station* station, int feed,
+        const char* filename, int* status)
 {
     /* Declare the line buffer and counter. */
     char* line = NULL;
@@ -88,7 +88,7 @@ void oskar_station_load_gain_phase(oskar_Station* station, const char* filename,
         }
 
         /* Store the data (note the different order of the parameters!). */
-        oskar_station_set_element_errors(station, n,
+        oskar_station_set_element_errors(station, feed, n,
                 par[0], par[2], par[1], par[3], status);
 
         /* Increment element counter. */

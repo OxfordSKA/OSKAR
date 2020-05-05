@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,16 +33,28 @@ using std::map;
 using std::string;
 
 static const char* gain_phase_file = "gain_phase.txt";
+static const char* gain_phase_x_file = "gain_phase_x.txt";
+static const char* gain_phase_y_file = "gain_phase_y.txt";
 
 void TelescopeLoaderGainPhase::load(oskar_Station* station,
         const string& cwd, int /*num_subdirs*/, int /*depth*/,
         map<string, string>& /*filemap*/, int* status)
 {
-    // Check for presence of "gain_phase.txt".
+    // Check for presence of gain and phase errors.
     if (oskar_dir_file_exists(cwd.c_str(), gain_phase_file))
     {
-        oskar_station_load_gain_phase(station,
+        oskar_station_load_gain_phase(station, 0,
                 get_path(cwd, gain_phase_file).c_str(), status);
+    }
+    if (oskar_dir_file_exists(cwd.c_str(), gain_phase_x_file))
+    {
+        oskar_station_load_gain_phase(station, 0,
+                get_path(cwd, gain_phase_x_file).c_str(), status);
+    }
+    if (oskar_dir_file_exists(cwd.c_str(), gain_phase_y_file))
+    {
+        oskar_station_load_gain_phase(station, 1,
+                get_path(cwd, gain_phase_y_file).c_str(), status);
     }
 }
 

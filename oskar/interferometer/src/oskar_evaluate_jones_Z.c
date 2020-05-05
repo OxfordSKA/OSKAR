@@ -181,18 +181,18 @@ static void evaluate_station_ECEF_coords(
     const void *x_, *y_, *z_;
 
     x_ = oskar_mem_void_const(
-            oskar_telescope_station_true_x_offset_ecef_metres_const(telescope));
+            oskar_telescope_station_true_offset_ecef_metres_const(telescope, 0));
     y_ = oskar_mem_void_const(
-            oskar_telescope_station_true_y_offset_ecef_metres_const(telescope));
+            oskar_telescope_station_true_offset_ecef_metres_const(telescope, 1));
     z_ = oskar_mem_void_const(
-            oskar_telescope_station_true_z_offset_ecef_metres_const(telescope));
+            oskar_telescope_station_true_offset_ecef_metres_const(telescope, 2));
     station = oskar_telescope_station_const(telescope, stationID);
     lon = oskar_station_lon_rad(station);
     lat = oskar_station_lat_rad(station);
     alt = oskar_station_alt_metres(station);
 
     if (oskar_mem_type(
-            oskar_telescope_station_true_x_offset_ecef_metres_const(telescope)) ==
+            oskar_telescope_station_true_offset_ecef_metres_const(telescope, 0)) ==
             OSKAR_DOUBLE)
     {
         st_x = ((const double*)x_)[stationID];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, The University of Oxford
+ * Copyright (c) 2014-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,20 +38,16 @@ extern "C" {
 
 #define R2D (180.0 / M_PI)
 
-void oskar_station_save_gain_phase(const char* filename,
-        const oskar_Station* station, int* status)
+void oskar_station_save_gain_phase(const oskar_Station* station, int feed,
+        const char* filename, int* status)
 {
-    int i, location, type, num_elements;
+    int i;
     FILE* file;
     const oskar_Mem *gain, *gain_error, *phase, *phase_error;
-
-    /* Check if safe to proceed. */
     if (*status || !station) return;
-
-    /* Check type and location. */
-    type = oskar_station_precision(station);
-    location = oskar_station_mem_location(station);
-    num_elements = oskar_station_num_elements(station);
+    const int type = oskar_station_precision(station);
+    const int location = oskar_station_mem_location(station);
+    const int num_elements = oskar_station_num_elements(station);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -62,22 +58,16 @@ void oskar_station_save_gain_phase(const char* filename,
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
-
-    /* Get pointers to the arrays. */
-    gain = oskar_station_element_gain_const(station);
-    gain_error = oskar_station_element_gain_error_const(station);
-    phase = oskar_station_element_phase_offset_rad_const(station);
-    phase_error = oskar_station_element_phase_error_rad_const(station);
-
-    /* Open the file. */
+    gain = oskar_station_element_gain_const(station, feed);
+    gain_error = oskar_station_element_gain_error_const(station, feed);
+    phase = oskar_station_element_phase_offset_rad_const(station, feed);
+    phase_error = oskar_station_element_phase_error_rad_const(station, feed);
     file = fopen(filename, "w");
     if (!file)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-
-    /* Save the station data. */
     if (type == OSKAR_DOUBLE)
     {
         const double *gain_, *gain_error_, *phase_, *phase_error_;
@@ -108,8 +98,6 @@ void oskar_station_save_gain_phase(const char* filename,
                     gain_error_[i], phase_error_[i] * R2D);
         }
     }
-
-    /* Close the file. */
     fclose(file);
 }
 

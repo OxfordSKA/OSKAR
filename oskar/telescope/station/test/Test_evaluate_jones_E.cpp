@@ -112,14 +112,14 @@ TEST(evaluate_jones_E, evaluate_e)
                 station_dim);
         oskar_meshgrid_f(
                 oskar_mem_float(
-                        oskar_station_element_measured_x_enu_metres(s), &error),
+                        oskar_station_element_measured_enu_metres(s, 0, 0), &error),
                 oskar_mem_float(
-                        oskar_station_element_measured_y_enu_metres(s), &error),
+                        oskar_station_element_measured_enu_metres(s, 0, 1), &error),
                 &x_pos[0], station_dim, &x_pos[0], station_dim);
-        oskar_mem_copy(oskar_station_element_true_x_enu_metres(s),
-                oskar_station_element_measured_x_enu_metres(s), &error);
-        oskar_mem_copy(oskar_station_element_true_y_enu_metres(s),
-                oskar_station_element_measured_y_enu_metres(s), &error);
+        oskar_mem_copy(oskar_station_element_true_enu_metres(s, 0, 0),
+                oskar_station_element_measured_enu_metres(s, 0, 0), &error);
+        oskar_mem_copy(oskar_station_element_true_enu_metres(s, 0, 1),
+                oskar_station_element_measured_enu_metres(s, 0, 1), &error);
     }
     oskar_telescope_set_station_ids(tel_cpu);
     oskar_telescope_set_phase_centre(tel_cpu,

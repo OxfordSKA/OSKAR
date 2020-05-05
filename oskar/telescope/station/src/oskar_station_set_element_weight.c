@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,21 @@
 extern "C" {
 #endif
 
-void oskar_station_set_element_weight(oskar_Station* dst,
+void oskar_station_set_element_weight(oskar_Station* station, int feed,
         int index, double re, double im, int* status)
 {
-    if (*status || !dst) return;
-    oskar_mem_set_element_real(dst->element_weight, 2*index + 0, re, status);
-    oskar_mem_set_element_real(dst->element_weight, 2*index + 1, im, status);
+    oskar_Mem* ptr;
+    if (*status || !station) return;
+    ptr = station->element_weight[feed];
+    if (!ptr)
+    {
+        station->element_weight[feed] = oskar_mem_create(
+                station->precision | OSKAR_COMPLEX,
+                station->mem_location, station->num_elements, status);
+        ptr = station->element_weight[feed];
+    }
+    oskar_mem_set_element_real(ptr, 2*index + 0, re, status);
+    oskar_mem_set_element_real(ptr, 2*index + 1, im, status);
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,18 +41,13 @@ void oskar_telescope_free(oskar_Telescope* telescope, int* status)
     if (!telescope) return;
 
     /* Free the arrays. */
-    oskar_mem_free(telescope->station_true_x_offset_ecef_metres, status);
-    oskar_mem_free(telescope->station_true_y_offset_ecef_metres, status);
-    oskar_mem_free(telescope->station_true_z_offset_ecef_metres, status);
-    oskar_mem_free(telescope->station_true_x_enu_metres, status);
-    oskar_mem_free(telescope->station_true_y_enu_metres, status);
-    oskar_mem_free(telescope->station_true_z_enu_metres, status);
-    oskar_mem_free(telescope->station_measured_x_offset_ecef_metres, status);
-    oskar_mem_free(telescope->station_measured_y_offset_ecef_metres, status);
-    oskar_mem_free(telescope->station_measured_z_offset_ecef_metres, status);
-    oskar_mem_free(telescope->station_measured_x_enu_metres, status);
-    oskar_mem_free(telescope->station_measured_y_enu_metres, status);
-    oskar_mem_free(telescope->station_measured_z_enu_metres, status);
+    for (i = 0; i < 3; ++i)
+    {
+        oskar_mem_free(telescope->station_true_offset_ecef_metres[i], status);
+        oskar_mem_free(telescope->station_true_enu_metres[i], status);
+        oskar_mem_free(telescope->station_measured_offset_ecef_metres[i], status);
+        oskar_mem_free(telescope->station_measured_enu_metres[i], status);
+    }
     oskar_mem_free(telescope->tec_screen_path, status);
 
     /* Free each station. */

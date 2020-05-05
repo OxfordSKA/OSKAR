@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, The University of Oxford
+ * Copyright (c) 2019-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,19 +35,28 @@
 extern "C" {
 #endif
 
-void oskar_station_set_element_cable_length_error(oskar_Station* dst,
-        int index, const double error_metres, int* status)
+void oskar_station_set_element_cable_length_error(oskar_Station* station,
+        int feed, int index, const double error_metres, int* status)
 {
-    if (*status || !dst) return;
-    if (index >= dst->num_elements)
+    oskar_Mem* ptr;
+    if (*status || !station) return;
+    if (index >= station->num_elements || feed > 1)
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
-    if (dst->mem_location == OSKAR_CPU)
+    const int type = station->precision;
+    const int loc = station->mem_location;
+    ptr = station->element_cable_length_error[feed];
+    if (!ptr)
     {
-        void *cable = oskar_mem_void(dst->element_cable_length_error);
-        const int type = dst->precision;
+        station->element_cable_length_error[feed] = oskar_mem_create(
+                type, loc, station->num_elements, status);
+        ptr = station->element_cable_length_error[feed];
+    }
+    if (loc == OSKAR_CPU)
+    {
+        void *cable = oskar_mem_void(ptr);
         if (type == OSKAR_DOUBLE)
         {
             ((double*)cable)[index] = error_metres;
@@ -61,8 +70,7 @@ void oskar_station_set_element_cable_length_error(oskar_Station* dst,
     }
     else
     {
-        oskar_mem_set_element_real(dst->element_cable_length_error,
-                index, error_metres, status);
+        oskar_mem_set_element_real(ptr, index, error_metres, status);
     }
 }
 

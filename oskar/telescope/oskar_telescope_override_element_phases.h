@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, The University of Oxford
+ * Copyright (c) 2019-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,14 +51,15 @@ extern "C" {
  *
  * The telescope model must be in CPU-accessible memory.
  *
- * @param[in,out] t          Telescope model to modify.
+ * @param[in,out] t          Telescope model to update.
+ * @param[in] feed           Feed index (0 = X, 1 = Y).
  * @param[in] seed           Random generator seed.
  * @param[in] phase_std_rad  Standard deviation of element phase, in radians.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
 void oskar_telescope_override_element_phases(oskar_Telescope* t,
-        unsigned int seed, double phase_std_rad, int* status);
+        int feed, unsigned int seed, double phase_std_rad, int* status);
 
 #ifdef __cplusplus
 }

@@ -6,7 +6,6 @@ set(math_SRC
     define_dft_c2r.h
     define_dftw_c2c.h
     define_dftw_m2m.h
-    define_dftw_o2c.h
     define_fftphase.h
     define_gaussian_circular.h
     define_legendre_polynomial.h

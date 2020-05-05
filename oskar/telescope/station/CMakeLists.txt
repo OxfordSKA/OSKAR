@@ -13,7 +13,6 @@ set(station_SRC
     src/oskar_evaluate_pierce_points.c
     src/oskar_evaluate_element_weights_dft.c
     src/oskar_evaluate_element_weights_errors.c
-    src/oskar_evaluate_element_weights.c
     src/oskar_evaluate_tec_screen.c
     src/oskar_evaluate_station_beam_aperture_array.c
     src/oskar_evaluate_station_beam_gaussian.c
@@ -27,6 +26,7 @@ set(station_SRC
     src/oskar_station_create.c
     src/oskar_station_different.c
     src/oskar_station_duplicate_first_child.c
+    src/oskar_station_evaluate_element_weights.c
     src/oskar_station_free.c
     src/oskar_station_load_apodisation.c
     src/oskar_station_load_cable_length_error.c

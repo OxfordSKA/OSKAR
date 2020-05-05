@@ -149,7 +149,8 @@ class Telescope(object):
         self.capsule_ensure()
         _telescope_lib.load(self._capsule, dir_name)
 
-    def override_element_cable_length_errors(self, std, seed=1, mean=0.0):
+    def override_element_cable_length_errors(
+            self, std, seed=1, mean=0.0, feed=0):
         """Overrides element cable length errors for all stations.
 
         Args:
@@ -159,31 +160,36 @@ class Telescope(object):
                 Random generator seed. Default 1.
             mean (Optional[float]):
                 Mean element cable length error, in metres. Default 0.
+            feed (Optional[int]):
+                Feed index (0 = X, 1 = Y). Default 0.
         """
         self.capsule_ensure()
         _telescope_lib.override_element_cable_length_errors(
-            self._capsule, seed, mean, std)
+            self._capsule, feed, seed, mean, std)
 
-    def override_element_gains(self, mean, std, seed=1):
+    def override_element_gains(self, mean, std, seed=1, feed=0):
         """Overrides element gains for all stations in a telescope model.
 
         Args:
             mean (float): Mean element gain.
             std (float): Standard deviation of element gain.
             seed (Optional[int]): Random generator seed. Default 1.
+            feed (Optional[int]): Feed index (0 = X, 1 = Y). Default 0.
         """
         self.capsule_ensure()
-        _telescope_lib.override_element_gains(self._capsule, seed, mean, std)
+        _telescope_lib.override_element_gains(
+            self._capsule, feed, seed, mean, std)
 
-    def override_element_phases(self, std_deg, seed=1):
+    def override_element_phases(self, std_deg, seed=1, feed=0):
         """Overrides element phases for all stations in a telescope model.
 
         Args:
             std_deg (float): Standard deviation of element phase, in degrees.
             seed (Optional[int]): Random generator seed. Default 1.
+            feed (Optional[int]): Feed index (0 = X, 1 = Y). Default 0.
         """
         self.capsule_ensure()
-        _telescope_lib.override_element_phases(self._capsule, seed,
+        _telescope_lib.override_element_phases(self._capsule, feed, seed,
                                                math.radians(std_deg))
 
     def get_identical_stations(self):

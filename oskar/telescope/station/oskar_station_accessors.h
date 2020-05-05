@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -165,6 +165,9 @@ OSKAR_EXPORT
 int oskar_station_common_element_orientation(const oskar_Station* model);
 
 OSKAR_EXPORT
+int oskar_station_common_pol_beams(const oskar_Station* model);
+
+OSKAR_EXPORT
 int oskar_station_array_is_3d(const oskar_Station* model);
 
 OSKAR_EXPORT
@@ -177,111 +180,77 @@ OSKAR_EXPORT
 unsigned int oskar_station_seed_time_variable_errors(const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_element_x_alpha_rad(const oskar_Station* model,
-        int index);
+double oskar_station_element_euler_index_rad(
+        const oskar_Station* model, int feed, int dim, int index);
 
 OSKAR_EXPORT
-double oskar_station_element_x_beta_rad(const oskar_Station* model,
-        int index);
+oskar_Mem* oskar_station_element_euler_rad(
+        oskar_Station* model, int feed, int dim);
 
 OSKAR_EXPORT
-double oskar_station_element_x_gamma_rad(const oskar_Station* model,
-        int index);
+const oskar_Mem* oskar_station_element_euler_rad_const(
+        const oskar_Station* model, int feed, int dim);
 
 OSKAR_EXPORT
-double oskar_station_element_y_alpha_rad(const oskar_Station* model,
-        int index);
+oskar_Mem* oskar_station_element_true_enu_metres(
+        oskar_Station* model, int feed, int dim);
 
 OSKAR_EXPORT
-double oskar_station_element_y_beta_rad(const oskar_Station* model,
-        int index);
+const oskar_Mem* oskar_station_element_true_enu_metres_const(
+        const oskar_Station* model, int feed, int dim);
 
 OSKAR_EXPORT
-double oskar_station_element_y_gamma_rad(const oskar_Station* model,
-        int index);
+oskar_Mem* oskar_station_element_measured_enu_metres(
+        oskar_Station* model, int feed, int dim);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_true_x_enu_metres(oskar_Station* model);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_true_x_enu_metres_const(
-        const oskar_Station* model);
-
-OSKAR_EXPORT
-oskar_Mem* oskar_station_element_true_y_enu_metres(oskar_Station* model);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_true_y_enu_metres_const(
-        const oskar_Station* model);
-
-OSKAR_EXPORT
-oskar_Mem* oskar_station_element_true_z_enu_metres(oskar_Station* model);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_true_z_enu_metres_const(
-        const oskar_Station* model);
-
-OSKAR_EXPORT
-oskar_Mem* oskar_station_element_measured_x_enu_metres(oskar_Station* model);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_measured_x_enu_metres_const(
-        const oskar_Station* model);
-
-OSKAR_EXPORT
-oskar_Mem* oskar_station_element_measured_y_enu_metres(oskar_Station* model);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_measured_y_enu_metres_const(
-        const oskar_Station* model);
-
-OSKAR_EXPORT
-oskar_Mem* oskar_station_element_measured_z_enu_metres(oskar_Station* model);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_measured_z_enu_metres_const(
-        const oskar_Station* model);
+const oskar_Mem* oskar_station_element_measured_enu_metres_const(
+        const oskar_Station* model, int feed, int dim);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_station_element_cable_length_error_metres(
-        oskar_Station* model);
+        oskar_Station* model, int feed);
 
 OSKAR_EXPORT
 const oskar_Mem* oskar_station_element_cable_length_error_metres_const(
-        const oskar_Station* model);
+        const oskar_Station* model, int feed);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_gain(oskar_Station* model);
+oskar_Mem* oskar_station_element_gain(oskar_Station* model, int feed);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_gain_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_gain_const(
+        const oskar_Station* model, int feed);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_gain_error(oskar_Station* model);
+oskar_Mem* oskar_station_element_gain_error(oskar_Station* model, int feed);
 
 OSKAR_EXPORT
 const oskar_Mem* oskar_station_element_gain_error_const(
-        const oskar_Station* model);
+        const oskar_Station* model, int feed);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_phase_offset_rad(oskar_Station* model);
+oskar_Mem* oskar_station_element_phase_offset_rad(
+        oskar_Station* model, int feed);
 
 OSKAR_EXPORT
 const oskar_Mem* oskar_station_element_phase_offset_rad_const(
-        const oskar_Station* model);
+        const oskar_Station* model, int feed);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_phase_error_rad(oskar_Station* model);
+oskar_Mem* oskar_station_element_phase_error_rad(
+        oskar_Station* model, int feed);
 
 OSKAR_EXPORT
 const oskar_Mem* oskar_station_element_phase_error_rad_const(
-        const oskar_Station* model);
+        const oskar_Station* model, int feed);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_weight(oskar_Station* model);
+oskar_Mem* oskar_station_element_weight(oskar_Station* model, int feed);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_weight_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_weight_const(
+        const oskar_Station* model, int feed);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_station_element_types(oskar_Station* model);
@@ -483,4 +452,4 @@ void oskar_station_set_seed_time_variable_errors(oskar_Station* model,
 }
 #endif
 
-#endif /* OSKAR_STATION_ACCESSORS_H_ */
+#endif /* include guard */

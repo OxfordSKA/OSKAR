@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -194,142 +194,52 @@ const oskar_Station* oskar_telescope_station_const(
 
 /* Coordinate arrays. */
 
-oskar_Mem* oskar_telescope_station_measured_x_offset_ecef_metres(
-        oskar_Telescope* model)
+oskar_Mem* oskar_telescope_station_measured_offset_ecef_metres(
+        oskar_Telescope* model, int dim)
 {
-    return model->station_measured_x_offset_ecef_metres;
+    return model->station_measured_offset_ecef_metres[dim];
 }
 
-const oskar_Mem* oskar_telescope_station_measured_x_offset_ecef_metres_const(
-        const oskar_Telescope* model)
+const oskar_Mem* oskar_telescope_station_measured_offset_ecef_metres_const(
+        const oskar_Telescope* model, int dim)
 {
-    return model->station_measured_x_offset_ecef_metres;
+    return model->station_measured_offset_ecef_metres[dim];
 }
 
-oskar_Mem* oskar_telescope_station_measured_y_offset_ecef_metres(
-        oskar_Telescope* model)
+oskar_Mem* oskar_telescope_station_measured_enu_metres(
+        oskar_Telescope* model, int dim)
 {
-    return model->station_measured_y_offset_ecef_metres;
+    return model->station_measured_enu_metres[dim];
 }
 
-const oskar_Mem* oskar_telescope_station_measured_y_offset_ecef_metres_const(
-        const oskar_Telescope* model)
+const oskar_Mem* oskar_telescope_station_measured_enu_metres_const(
+        const oskar_Telescope* model, int dim)
 {
-    return model->station_measured_y_offset_ecef_metres;
+    return model->station_measured_enu_metres[dim];
 }
 
-oskar_Mem* oskar_telescope_station_measured_z_offset_ecef_metres(
-        oskar_Telescope* model)
+oskar_Mem* oskar_telescope_station_true_offset_ecef_metres(
+        oskar_Telescope* model, int dim)
 {
-    return model->station_measured_z_offset_ecef_metres;
+    return model->station_true_offset_ecef_metres[dim];
 }
 
-const oskar_Mem* oskar_telescope_station_measured_z_offset_ecef_metres_const(
-        const oskar_Telescope* model)
+const oskar_Mem* oskar_telescope_station_true_offset_ecef_metres_const(
+        const oskar_Telescope* model, int dim)
 {
-    return model->station_measured_z_offset_ecef_metres;
+    return model->station_true_offset_ecef_metres[dim];
 }
 
-oskar_Mem* oskar_telescope_station_measured_x_enu_metres(oskar_Telescope* model)
+oskar_Mem* oskar_telescope_station_true_enu_metres(
+        oskar_Telescope* model, int dim)
 {
-    return model->station_measured_x_enu_metres;
+    return model->station_true_enu_metres[dim];
 }
 
-const oskar_Mem* oskar_telescope_station_measured_x_enu_metres_const(
-        const oskar_Telescope* model)
+const oskar_Mem* oskar_telescope_station_true_enu_metres_const(
+        const oskar_Telescope* model, int dim)
 {
-    return model->station_measured_x_enu_metres;
-}
-
-oskar_Mem* oskar_telescope_station_measured_y_enu_metres(oskar_Telescope* model)
-{
-    return model->station_measured_y_enu_metres;
-}
-
-const oskar_Mem* oskar_telescope_station_measured_y_enu_metres_const(
-        const oskar_Telescope* model)
-{
-    return model->station_measured_y_enu_metres;
-}
-
-oskar_Mem* oskar_telescope_station_measured_z_enu_metres(oskar_Telescope* model)
-{
-    return model->station_measured_z_enu_metres;
-}
-
-const oskar_Mem* oskar_telescope_station_measured_z_enu_metres_const(
-        const oskar_Telescope* model)
-{
-    return model->station_measured_z_enu_metres;
-}
-
-oskar_Mem* oskar_telescope_station_true_x_offset_ecef_metres(
-        oskar_Telescope* model)
-{
-    return model->station_true_x_offset_ecef_metres;
-}
-
-const oskar_Mem* oskar_telescope_station_true_x_offset_ecef_metres_const(
-        const oskar_Telescope* model)
-{
-    return model->station_true_x_offset_ecef_metres;
-}
-
-oskar_Mem* oskar_telescope_station_true_y_offset_ecef_metres(
-        oskar_Telescope* model)
-{
-    return model->station_true_y_offset_ecef_metres;
-}
-
-const oskar_Mem* oskar_telescope_station_true_y_offset_ecef_metres_const(
-        const oskar_Telescope* model)
-{
-    return model->station_true_y_offset_ecef_metres;
-}
-
-oskar_Mem* oskar_telescope_station_true_z_offset_ecef_metres(
-        oskar_Telescope* model)
-{
-    return model->station_true_z_offset_ecef_metres;
-}
-
-const oskar_Mem* oskar_telescope_station_true_z_offset_ecef_metres_const(
-        const oskar_Telescope* model)
-{
-    return model->station_true_z_offset_ecef_metres;
-}
-
-oskar_Mem* oskar_telescope_station_true_x_enu_metres(oskar_Telescope* model)
-{
-    return model->station_true_x_enu_metres;
-}
-
-const oskar_Mem* oskar_telescope_station_true_x_enu_metres_const(
-        const oskar_Telescope* model)
-{
-    return model->station_true_x_enu_metres;
-}
-
-oskar_Mem* oskar_telescope_station_true_y_enu_metres(oskar_Telescope* model)
-{
-    return model->station_true_y_enu_metres;
-}
-
-const oskar_Mem* oskar_telescope_station_true_y_enu_metres_const(
-        const oskar_Telescope* model)
-{
-    return model->station_true_y_enu_metres;
-}
-
-oskar_Mem* oskar_telescope_station_true_z_enu_metres(oskar_Telescope* model)
-{
-    return model->station_true_z_enu_metres;
-}
-
-const oskar_Mem* oskar_telescope_station_true_z_enu_metres_const(
-        const oskar_Telescope* model)
-{
-    return model->station_true_z_enu_metres;
+    return model->station_true_enu_metres[dim];
 }
 
 int oskar_telescope_noise_enabled(const oskar_Telescope* model)

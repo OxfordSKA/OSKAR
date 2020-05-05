@@ -131,8 +131,8 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
     src_a = oskar_sky_gaussian_a_const(sky);
     src_b = oskar_sky_gaussian_b_const(sky);
     src_c = oskar_sky_gaussian_c_const(sky);
-    x = oskar_telescope_station_true_x_offset_ecef_metres_const(tel);
-    y = oskar_telescope_station_true_y_offset_ecef_metres_const(tel);
+    x = oskar_telescope_station_true_offset_ecef_metres_const(tel, 0);
+    y = oskar_telescope_station_true_offset_ecef_metres_const(tel, 1);
 
     /* Select kernel. */
     if (location == OSKAR_CPU)

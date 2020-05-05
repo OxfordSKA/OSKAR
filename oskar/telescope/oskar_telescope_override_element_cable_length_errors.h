@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, The University of Oxford
+ * Copyright (c) 2019-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,8 @@ extern "C" {
  *
  * The telescope model must be in CPU-accessible memory.
  *
- * @param[in,out] t          Telescope model to modify.
+ * @param[in,out] t          Telescope model to update.
+ * @param[in] feed           Feed index (0 = X, 1 = Y).
  * @param[in] seed           Random generator seed.
  * @param[in] mean_metres    Mean element cable length error.
  * @param[in] std_metres     Standard deviation of element cable length error.
@@ -59,7 +60,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_telescope_override_element_cable_length_errors(oskar_Telescope* t,
-        unsigned int seed, double mean_metres, double std_metres, int* status);
+        int feed, unsigned int seed, double mean_metres, double std_metres,
+        int* status);
 
 #ifdef __cplusplus
 }

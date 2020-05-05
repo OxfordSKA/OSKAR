@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,18 +47,19 @@ extern "C" {
  * This function sets the complex weight of the specified element in the
  * station model, transferring data to the GPU if necessary.
  *
- * @param[in] dst        Station model structure to copy into.
+ * @param[in] station    Station model to update.
+ * @param[in] feed       Feed index (0 = X, 1 = Y).
  * @param[in] index      Element array index to set.
  * @param[in] re         Element weight (real).
  * @param[in] im         Element weight (imag).
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_set_element_weight(oskar_Station* dst,
+void oskar_station_set_element_weight(oskar_Station* station, int feed,
         int index, double re, double im, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_SET_ELEMENT_WEIGHT_H_ */
+#endif /* include guard */

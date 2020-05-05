@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,21 +34,45 @@ using std::string;
 
 static const char* apodisation_file = "apodisation.txt";
 static const char* apodization_file = "apodization.txt";
+static const char* apodisation_x_file = "apodisation_x.txt";
+static const char* apodization_x_file = "apodization_x.txt";
+static const char* apodisation_y_file = "apodisation_y.txt";
+static const char* apodization_y_file = "apodization_y.txt";
 
 void TelescopeLoaderApodisation::load(oskar_Station* station,
         const string& cwd, int /*num_subdirs*/, int /*depth*/,
         map<string, string>& /*filemap*/, int* status)
 {
-    // Check for presence of "apodisation.txt" or "apodization.txt".
+    // Check for presence of apodisation files.
     if (oskar_dir_file_exists(cwd.c_str(), apodisation_file))
     {
-        oskar_station_load_apodisation(station,
+        oskar_station_load_apodisation(station, 0,
                 get_path(cwd, apodisation_file).c_str(), status);
     }
     else if (oskar_dir_file_exists(cwd.c_str(), apodization_file))
     {
-        oskar_station_load_apodisation(station,
+        oskar_station_load_apodisation(station, 0,
                 get_path(cwd, apodization_file).c_str(), status);
+    }
+    if (oskar_dir_file_exists(cwd.c_str(), apodisation_x_file))
+    {
+        oskar_station_load_apodisation(station, 0,
+                get_path(cwd, apodisation_x_file).c_str(), status);
+    }
+    else if (oskar_dir_file_exists(cwd.c_str(), apodization_x_file))
+    {
+        oskar_station_load_apodisation(station, 0,
+                get_path(cwd, apodization_x_file).c_str(), status);
+    }
+    if (oskar_dir_file_exists(cwd.c_str(), apodisation_y_file))
+    {
+        oskar_station_load_apodisation(station, 1,
+                get_path(cwd, apodisation_y_file).c_str(), status);
+    }
+    else if (oskar_dir_file_exists(cwd.c_str(), apodization_y_file))
+    {
+        oskar_station_load_apodisation(station, 1,
+                get_path(cwd, apodization_y_file).c_str(), status);
     }
 }
 

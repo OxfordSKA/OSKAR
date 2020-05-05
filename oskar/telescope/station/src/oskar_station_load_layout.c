@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,8 @@
 extern "C" {
 #endif
 
-void oskar_station_load_layout(oskar_Station* station, const char* filename,
-        int* status)
+void oskar_station_load_layout(oskar_Station* station, int feed,
+        const char* filename, int* status)
 {
     /* Declare the line buffer and counter. */
     char* line = NULL;
@@ -76,7 +76,7 @@ void oskar_station_load_layout(oskar_Station* station, const char* filename,
         /* Declare parameter array. */
         /* x, y, z, delta x, delta y, delta z */
         double par[] = {0., 0., 0., 0., 0., 0.};
-        size_t num_par = sizeof(par) / sizeof(double);
+        const size_t num_par = sizeof(par) / sizeof(double);
 
         /* Load element data. */
         if (oskar_string_to_array_d(line, num_par, par) < 2) continue;
@@ -94,7 +94,8 @@ void oskar_station_load_layout(oskar_Station* station, const char* filename,
         par[5] += par[2];
 
         /* Store the data. */
-        oskar_station_set_element_coords(station, n, &par[0], &par[3], status);
+        oskar_station_set_element_coords(station, feed, n,
+                &par[0], &par[3], status);
 
         /* Increment element counter. */
         ++n;
@@ -113,7 +114,7 @@ void oskar_station_load_layout(oskar_Station* station, const char* filename,
     }
 
     /* Free the line buffer and close the file. */
-    if (line) free(line);
+    free(line);
     fclose(file);
 }
 

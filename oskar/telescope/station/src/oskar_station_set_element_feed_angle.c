@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,41 +36,23 @@
 extern "C" {
 #endif
 
-void oskar_station_set_element_feed_angle(oskar_Station* dst, int x_pol,
+void oskar_station_set_element_feed_angle(oskar_Station* station, int feed,
         int index, double alpha_deg, double beta_deg, double gamma_deg,
         int* status)
 {
     const double deg2rad = M_PI / 180.0;
-
-    /* Check if safe to proceed. */
-    if (*status || !dst) return;
-
-    /* Check range. */
-    if (index >= dst->num_elements)
+    if (*status || !station) return;
+    if (index >= station->num_elements || feed > 1)
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
-
-    /* Store the data. */
-    if (x_pol)
-    {
-        oskar_mem_double(dst->element_x_alpha_cpu, status)[index] =
-                alpha_deg * deg2rad;
-        oskar_mem_double(dst->element_x_beta_cpu, status)[index] =
-                beta_deg * deg2rad;
-        oskar_mem_double(dst->element_x_gamma_cpu, status)[index] =
-                gamma_deg * deg2rad;
-    }
-    else
-    {
-        oskar_mem_double(dst->element_y_alpha_cpu, status)[index] =
-                alpha_deg * deg2rad;
-        oskar_mem_double(dst->element_y_beta_cpu, status)[index] =
-                beta_deg * deg2rad;
-        oskar_mem_double(dst->element_y_gamma_cpu, status)[index] =
-                gamma_deg * deg2rad;
-    }
+    oskar_mem_double(station->element_euler_cpu[feed][0], status)[index] =
+            alpha_deg * deg2rad;
+    oskar_mem_double(station->element_euler_cpu[feed][1], status)[index] =
+            beta_deg * deg2rad;
+    oskar_mem_double(station->element_euler_cpu[feed][2], status)[index] =
+            gamma_deg * deg2rad;
 }
 
 #ifdef __cplusplus

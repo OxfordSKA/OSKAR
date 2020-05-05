@@ -172,7 +172,7 @@ void TelescopeLoaderElementPattern::load_element_patterns(
     load_functional_data(2, station, keys_y, paths_y, status);
 }
 
-void TelescopeLoaderElementPattern::load_fitted_data(int port,
+void TelescopeLoaderElementPattern::load_fitted_data(int feed,
         oskar_Station* station, const vector<string>& keys,
         const vector<string>& paths, int* status)
 {
@@ -194,12 +194,12 @@ void TelescopeLoaderElementPattern::load_fitted_data(int port,
         if (oskar_station_num_element_types(station) < ind + 1)
             oskar_station_resize_element_types(station, ind + 1, status);
         oskar_element_read(oskar_station_element(station, ind), path.c_str(),
-                port, freq, status);
+                feed, freq, status);
     }
     free(buffer);
 }
 
-void TelescopeLoaderElementPattern::load_functional_data(int port,
+void TelescopeLoaderElementPattern::load_functional_data(int feed,
         oskar_Station* station, const vector<string>& keys,
         const vector<string>& paths, int* status)
 {
@@ -220,7 +220,7 @@ void TelescopeLoaderElementPattern::load_functional_data(int port,
         if (oskar_station_num_element_types(station) < ind + 1)
             oskar_station_resize_element_types(station, ind + 1, status);
         oskar_element_load(oskar_station_element(station, ind), path.c_str(),
-                port == 1 ? 1 : 0, status);
+                feed == 1 ? 1 : 0, status);
     }
     free(buffer);
 }

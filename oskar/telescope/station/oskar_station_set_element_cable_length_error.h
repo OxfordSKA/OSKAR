@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, The University of Oxford
+ * Copyright (c) 2019-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,14 +47,15 @@ extern "C" {
  * This function sets the cable length error of the specified element in
  * the station model, transferring data to the GPU if necessary.
  *
- * @param[in] dst              Station model structure to update.
+ * @param[in,out] station      Station model to update.
+ * @param[in] feed             Feed index (0 = X, 1 = Y).
  * @param[in] index            Element array index to set.
  * @param[in] error_metres     Cable length error, in metres.
  * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_set_element_cable_length_error(oskar_Station* dst,
-        int index, const double error_metres, int* status);
+void oskar_station_set_element_cable_length_error(oskar_Station* station,
+        int feed, int index, const double error_metres, int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -180,6 +180,11 @@ int oskar_station_common_element_orientation(const oskar_Station* model)
     return model ? model->common_element_orientation : 0;
 }
 
+int oskar_station_common_pol_beams(const oskar_Station* model)
+{
+    return model ? model->common_pol_beams : 0;
+}
+
 int oskar_station_array_is_3d(const oskar_Station* model)
 {
     return model ? model->array_is_3d : 0;
@@ -200,183 +205,173 @@ unsigned int oskar_station_seed_time_variable_errors(const oskar_Station* model)
     return model ? model->seed_time_variable_errors : 0u;
 }
 
-double oskar_station_element_x_alpha_rad(const oskar_Station* model,
-        int index)
+double oskar_station_element_euler_index_rad(
+        const oskar_Station* model, int feed, int dim, int index)
 {
-    if (!model) return 0.0;
-    return ((const double*)
-            oskar_mem_void_const(model->element_x_alpha_cpu))[index];
+    const oskar_Mem* ptr;
+    if (!model || feed > 1 || dim > 2) return 0.0;
+    ptr = model->element_euler_cpu[feed][dim];
+    if (!ptr) ptr = model->element_euler_cpu[0][dim];
+    return ptr ? ((const double*) oskar_mem_void_const(ptr))[index] : 0.0;
 }
 
-double oskar_station_element_x_beta_rad(const oskar_Station* model,
-        int index)
+oskar_Mem* oskar_station_element_euler_rad(
+        oskar_Station* model, int feed, int dim)
 {
-    if (!model) return 0.0;
-    return ((const double*)
-            oskar_mem_void_const(model->element_x_beta_cpu))[index];
+    oskar_Mem* ptr;
+    if (!model || feed > 1 || dim > 2) return 0;
+    ptr = model->element_euler_cpu[feed][dim];
+    return ptr ? ptr : model->element_euler_cpu[0][dim];
 }
 
-double oskar_station_element_x_gamma_rad(const oskar_Station* model,
-        int index)
+const oskar_Mem* oskar_station_element_euler_rad_const(
+        const oskar_Station* model, int feed, int dim)
 {
-    if (!model) return 0.0;
-    return ((const double*)
-            oskar_mem_void_const(model->element_x_gamma_cpu))[index];
+    const oskar_Mem* ptr;
+    if (!model || feed > 1 || dim > 2) return 0;
+    ptr = model->element_euler_cpu[feed][dim];
+    return ptr ? ptr : model->element_euler_cpu[0][dim];
 }
 
-double oskar_station_element_y_alpha_rad(const oskar_Station* model,
-        int index)
+oskar_Mem* oskar_station_element_true_enu_metres(
+        oskar_Station* model, int feed, int dim)
 {
-    if (!model) return 0.0;
-    return ((const double*)
-            oskar_mem_void_const(model->element_y_alpha_cpu))[index];
+    oskar_Mem* ptr;
+    if (!model || feed > 1 || dim > 2) return 0;
+    ptr = model->element_true_enu_metres[feed][dim];
+    return ptr ? ptr : model->element_true_enu_metres[0][dim];
 }
 
-double oskar_station_element_y_beta_rad(const oskar_Station* model,
-        int index)
+const oskar_Mem* oskar_station_element_true_enu_metres_const(
+        const oskar_Station* model, int feed, int dim)
 {
-    if (!model) return 0.0;
-    return ((const double*)
-            oskar_mem_void_const(model->element_y_beta_cpu))[index];
+    const oskar_Mem* ptr;
+    if (!model || feed > 1 || dim > 2) return 0;
+    ptr = model->element_true_enu_metres[feed][dim];
+    return ptr ? ptr : model->element_true_enu_metres[0][dim];
 }
 
-double oskar_station_element_y_gamma_rad(const oskar_Station* model,
-        int index)
+oskar_Mem* oskar_station_element_measured_enu_metres(
+        oskar_Station* model, int feed, int dim)
 {
-    if (!model) return 0.0;
-    return ((const double*)
-            oskar_mem_void_const(model->element_y_gamma_cpu))[index];
+    oskar_Mem* ptr;
+    if (!model || feed > 1 || dim > 2) return 0;
+    ptr = model->element_measured_enu_metres[feed][dim];
+    return ptr ? ptr : model->element_measured_enu_metres[0][dim];
 }
 
-oskar_Mem* oskar_station_element_true_x_enu_metres(oskar_Station* model)
+const oskar_Mem* oskar_station_element_measured_enu_metres_const(
+        const oskar_Station* model, int feed, int dim)
 {
-    return model ? model->element_true_x_enu_metres : 0;
-}
-
-const oskar_Mem* oskar_station_element_true_x_enu_metres_const(
-        const oskar_Station* model)
-{
-    return model ? model->element_true_x_enu_metres : 0;
-}
-
-oskar_Mem* oskar_station_element_true_y_enu_metres(oskar_Station* model)
-{
-    return model ? model->element_true_y_enu_metres : 0;
-}
-
-const oskar_Mem* oskar_station_element_true_y_enu_metres_const(
-        const oskar_Station* model)
-{
-    return model ? model->element_true_y_enu_metres : 0;
-}
-
-oskar_Mem* oskar_station_element_true_z_enu_metres(oskar_Station* model)
-{
-    return model ? model->element_true_z_enu_metres : 0;
-}
-
-const oskar_Mem* oskar_station_element_true_z_enu_metres_const(
-        const oskar_Station* model)
-{
-    return model ? model->element_true_z_enu_metres : 0;
-}
-
-oskar_Mem* oskar_station_element_measured_x_enu_metres(oskar_Station* model)
-{
-    return model ? model->element_measured_x_enu_metres : 0;
-}
-
-const oskar_Mem* oskar_station_element_measured_x_enu_metres_const(
-        const oskar_Station* model)
-{
-    return model ? model->element_measured_x_enu_metres : 0;
-}
-
-oskar_Mem* oskar_station_element_measured_y_enu_metres(oskar_Station* model)
-{
-    return model ? model->element_measured_y_enu_metres : 0;
-}
-
-const oskar_Mem* oskar_station_element_measured_y_enu_metres_const(
-        const oskar_Station* model)
-{
-    return model ? model->element_measured_y_enu_metres : 0;
-}
-
-oskar_Mem* oskar_station_element_measured_z_enu_metres(oskar_Station* model)
-{
-    return model ? model->element_measured_z_enu_metres : 0;
-}
-
-const oskar_Mem* oskar_station_element_measured_z_enu_metres_const(
-        const oskar_Station* model)
-{
-    return model ? model->element_measured_z_enu_metres : 0;
+    const oskar_Mem* ptr;
+    if (!model || feed > 1 || dim > 2) return 0;
+    ptr = model->element_measured_enu_metres[feed][dim];
+    return ptr ? ptr : model->element_measured_enu_metres[0][dim];
 }
 
 oskar_Mem* oskar_station_element_cable_length_error_metres(
-        oskar_Station* model)
+        oskar_Station* model, int feed)
 {
-    return model ? model->element_cable_length_error : 0;
+    oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_cable_length_error[feed];
+    return ptr ? ptr : model->element_cable_length_error[0];
 }
 
 const oskar_Mem* oskar_station_element_cable_length_error_metres_const(
-        const oskar_Station* model)
+        const oskar_Station* model, int feed)
 {
-    return model ? model->element_cable_length_error : 0;
+    const oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_cable_length_error[feed];
+    return ptr ? ptr : model->element_cable_length_error[0];
 }
 
-oskar_Mem* oskar_station_element_gain(oskar_Station* model)
+oskar_Mem* oskar_station_element_gain(oskar_Station* model, int feed)
 {
-    return model ? model->element_gain : 0;
+    oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_gain[feed];
+    return ptr ? ptr : model->element_gain[0];
 }
 
-const oskar_Mem* oskar_station_element_gain_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_gain_const(
+        const oskar_Station* model, int feed)
 {
-    return model ? model->element_gain : 0;
+    const oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_gain[feed];
+    return ptr ? ptr : model->element_gain[0];
 }
 
-oskar_Mem* oskar_station_element_gain_error(oskar_Station* model)
+oskar_Mem* oskar_station_element_gain_error(oskar_Station* model, int feed)
 {
-    return model ? model->element_gain_error : 0;
+    oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_gain_error[feed];
+    return ptr ? ptr : model->element_gain_error[0];
 }
 
 const oskar_Mem* oskar_station_element_gain_error_const(
-        const oskar_Station* model)
+        const oskar_Station* model, int feed)
 {
-    return model ? model->element_gain_error : 0;
+    const oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_gain_error[feed];
+    return ptr ? ptr : model->element_gain_error[0];
 }
 
-oskar_Mem* oskar_station_element_phase_offset_rad(oskar_Station* model)
+oskar_Mem* oskar_station_element_phase_offset_rad(
+        oskar_Station* model, int feed)
 {
-    return model ? model->element_phase_offset_rad : 0;
+    oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_phase_offset_rad[feed];
+    return ptr ? ptr : model->element_phase_offset_rad[0];
 }
 
 const oskar_Mem* oskar_station_element_phase_offset_rad_const(
-        const oskar_Station* model)
+        const oskar_Station* model, int feed)
 {
-    return model ? model->element_phase_offset_rad : 0;
+    const oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_phase_offset_rad[feed];
+    return ptr ? ptr : model->element_phase_offset_rad[0];
 }
 
-oskar_Mem* oskar_station_element_phase_error_rad(oskar_Station* model)
+oskar_Mem* oskar_station_element_phase_error_rad(
+        oskar_Station* model, int feed)
 {
-    return model ? model->element_phase_error_rad : 0;
+    oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_phase_error_rad[feed];
+    return ptr ? ptr : model->element_phase_error_rad[0];
 }
 
 const oskar_Mem* oskar_station_element_phase_error_rad_const(
-        const oskar_Station* model)
+        const oskar_Station* model, int feed)
 {
-    return model ? model->element_phase_error_rad : 0;
+    const oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_phase_error_rad[feed];
+    return ptr ? ptr : model->element_phase_error_rad[0];
 }
 
-oskar_Mem* oskar_station_element_weight(oskar_Station* model)
+oskar_Mem* oskar_station_element_weight(oskar_Station* model, int feed)
 {
-    return model ? model->element_weight : 0;
+    oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_weight[feed];
+    return ptr ? ptr : model->element_weight[0];
 }
 
-const oskar_Mem* oskar_station_element_weight_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_weight_const(
+        const oskar_Station* model, int feed)
 {
-    return model ? model->element_weight : 0;
+    const oskar_Mem* ptr;
+    if (!model || feed > 1) return 0;
+    ptr = model->element_weight[feed];
+    return ptr ? ptr : model->element_weight[0];
 }
 
 oskar_Mem* oskar_station_element_types(oskar_Station* model)

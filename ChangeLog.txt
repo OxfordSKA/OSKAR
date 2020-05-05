@@ -1,6 +1,8 @@
-2020-04-08  OSKAR-2.7.7
+2020-XX-YY  OSKAR-2.8.0
 
     * Use Ludwig-3 (instead of theta/phi) system to evaluate antenna responses.
+
+    * Add capability to use different element data for X and Y polarisations.
 
 2020-01-20  OSKAR-2.7.6
 

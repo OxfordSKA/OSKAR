@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,10 @@ using std::string;
 
 static const char* layout_file = "layout.txt";
 static const char* layout_enu_file = "layout_enu.txt";
+static const char* layout_x_file = "layout_x.txt";
+static const char* layout_enu_x_file = "layout_enu_x.txt";
+static const char* layout_y_file = "layout_y.txt";
+static const char* layout_enu_y_file = "layout_enu_y.txt";
 static const char* layout_ecef_file = "layout_ecef.txt";
 static const char* layout_wgs84_file = "layout_wgs84.txt";
 
@@ -107,21 +111,40 @@ void TelescopeLoaderLayout::load(oskar_Station* station,
     // Check for presence of station layout file.
     if (oskar_dir_file_exists(cwd.c_str(), layout_file))
     {
-        oskar_station_load_layout(station,
+        oskar_station_load_layout(station, 0,
                 get_path(cwd, layout_file).c_str(), status);
     }
     else if (oskar_dir_file_exists(cwd.c_str(), layout_enu_file))
     {
-        oskar_station_load_layout(station,
+        oskar_station_load_layout(station, 0,
                 get_path(cwd, layout_enu_file).c_str(), status);
     }
-    else
+
+    if (oskar_dir_file_exists(cwd.c_str(), layout_x_file))
     {
-        // If station hasn't already been sized, return an error.
-        if (oskar_station_num_elements(station) == 0)
-            *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
-        return;
+        oskar_station_load_layout(station, 0,
+                get_path(cwd, layout_x_file).c_str(), status);
     }
+    else if (oskar_dir_file_exists(cwd.c_str(), layout_enu_x_file))
+    {
+        oskar_station_load_layout(station, 0,
+                get_path(cwd, layout_enu_x_file).c_str(), status);
+    }
+
+    if (oskar_dir_file_exists(cwd.c_str(), layout_y_file))
+    {
+        oskar_station_load_layout(station, 1,
+                get_path(cwd, layout_y_file).c_str(), status);
+    }
+    else if (oskar_dir_file_exists(cwd.c_str(), layout_enu_y_file))
+    {
+        oskar_station_load_layout(station, 1,
+                get_path(cwd, layout_enu_y_file).c_str(), status);
+    }
+
+    // If station hasn't already been sized, return an error.
+    if (oskar_station_num_elements(station) == 0)
+        *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
 
     // Check if this is the last level.
     if (num_subdirs > 0)

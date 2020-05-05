@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, The University of Oxford
+ * Copyright (c) 2019-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,13 @@ extern "C" {
 #endif
 
 void oskar_telescope_override_element_phases(oskar_Telescope* t,
-        unsigned int seed, double phase_std_rad, int* status)
+        int feed, unsigned int seed, double phase_std_rad, int* status)
 {
     int i;
     const int num_stations = oskar_telescope_num_stations(t);
     for (i = 0; i < num_stations; ++i)
         oskar_station_override_element_phases(oskar_telescope_station(t, i),
-                seed, phase_std_rad, status);
+                feed, seed, phase_std_rad, status);
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ extern "C" {
 
 /**
  * @brief
- * Overrides element dipole orientations in a station model.
+ * Overrides element feed orientations in a station model.
  *
  * @details
  * This function overrides element orientations in a station model using the
@@ -51,21 +51,21 @@ extern "C" {
  *
  * The station model must be in CPU-accessible memory.
  *
- * @param[in,out] s            Station model structure to modify.
+ * @param[in,out] station      Station model to update.
+ * @param[in] feed             Feed index (0 = X, 1 = Y).
  * @param[in] seed             Random generator seed.
- * @param[in] x_pol            If true, override X dipole angles; else Y dipole.
  * @param[in] alpha_error_rad  Standard deviation of Euler angle, in radians.
  * @param[in] beta_error_rad   Standard deviation of Euler angle, in radians.
  * @param[in] gamma_error_rad  Standard deviation of Euler angle, in radians.
  * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_override_element_feed_angle(oskar_Station* s,
-        unsigned int seed, int x_pol, double alpha_error_rad,
+void oskar_station_override_element_feed_angle(oskar_Station* station,
+        int feed, unsigned int seed, double alpha_error_rad,
         double beta_error_rad, double gamma_error_rad, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_OVERRIDE_ELEMENT_FEED_ANGLE_H_ */
+#endif /* include guard */

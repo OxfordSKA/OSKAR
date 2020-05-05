@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,28 +38,32 @@ extern "C" {
 void oskar_station_resize(oskar_Station* station, int num_elements,
         int* status)
 {
+    int feed, dim;
     if (*status || !station) return;
-    oskar_mem_realloc(station->element_true_x_enu_metres, num_elements, status);
-    oskar_mem_realloc(station->element_true_y_enu_metres, num_elements, status);
-    oskar_mem_realloc(station->element_true_z_enu_metres, num_elements, status);
-    oskar_mem_realloc(station->element_measured_x_enu_metres,
-            num_elements, status);
-    oskar_mem_realloc(station->element_measured_y_enu_metres,
-            num_elements, status);
-    oskar_mem_realloc(station->element_measured_z_enu_metres,
-            num_elements, status);
-    oskar_mem_realloc(station->element_weight, num_elements, status);
-    oskar_mem_realloc(station->element_cable_length_error, num_elements, status);
-    oskar_mem_realloc(station->element_gain, num_elements, status);
-    oskar_mem_realloc(station->element_gain_error, num_elements, status);
-    oskar_mem_realloc(station->element_phase_offset_rad, num_elements, status);
-    oskar_mem_realloc(station->element_phase_error_rad, num_elements, status);
-    oskar_mem_realloc(station->element_x_alpha_cpu, num_elements, status);
-    oskar_mem_realloc(station->element_x_beta_cpu, num_elements, status);
-    oskar_mem_realloc(station->element_x_gamma_cpu, num_elements, status);
-    oskar_mem_realloc(station->element_y_alpha_cpu, num_elements, status);
-    oskar_mem_realloc(station->element_y_beta_cpu, num_elements, status);
-    oskar_mem_realloc(station->element_y_gamma_cpu, num_elements, status);
+    for (feed = 0; feed < 2; feed++)
+    {
+        for (dim = 0; dim < 3; dim++)
+        {
+            oskar_mem_realloc(station->element_true_enu_metres[feed][dim],
+                    num_elements, status);
+            oskar_mem_realloc(station->element_measured_enu_metres[feed][dim],
+                    num_elements, status);
+            oskar_mem_realloc(station->element_euler_cpu[feed][dim],
+                    num_elements, status);
+        }
+        oskar_mem_realloc(station->element_weight[feed],
+                num_elements, status);
+        oskar_mem_realloc(station->element_cable_length_error[feed],
+                num_elements, status);
+        oskar_mem_realloc(station->element_gain[feed],
+                num_elements, status);
+        oskar_mem_realloc(station->element_gain_error[feed],
+                num_elements, status);
+        oskar_mem_realloc(station->element_phase_offset_rad[feed],
+                num_elements, status);
+        oskar_mem_realloc(station->element_phase_error_rad[feed],
+                num_elements, status);
+    }
     oskar_mem_realloc(station->element_types, num_elements, status);
     oskar_mem_realloc(station->element_types_cpu, num_elements, status);
     oskar_mem_realloc(station->element_mount_types_cpu, num_elements, status);
@@ -71,11 +75,16 @@ void oskar_station_resize(oskar_Station* station, int num_elements,
         offset = station->num_elements;
         num_new = num_elements - offset;
 
-        /* Must set default element weight, gain and orientation. */
-        oskar_mem_set_value_real(station->element_gain,
-                1.0, offset, num_new, status);
-        oskar_mem_set_value_real(station->element_weight,
-                1.0, offset, num_new, status);
+        /* Must set default element weight and gain. */
+        for (feed = 0; feed < 2; feed++)
+        {
+            if (station->element_gain[feed])
+                oskar_mem_set_value_real(station->element_gain[feed],
+                        1.0, offset, num_new, status);
+            if (station->element_weight[feed])
+                oskar_mem_set_value_real(station->element_weight[feed],
+                        1.0, offset, num_new, status);
+        }
         memset(oskar_mem_char(station->element_mount_types_cpu) + offset,
                 'F', num_new);
     }

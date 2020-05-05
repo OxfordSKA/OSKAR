@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, The University of Oxford
+ * Copyright (c) 2014-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,15 +36,11 @@
 extern "C" {
 #endif
 
-void oskar_station_save_apodisation(const char* filename,
-        const oskar_Station* station, int* status)
+void oskar_station_save_apodisation(const oskar_Station* station, int feed,
+        const char* filename, int* status)
 {
     FILE* file;
-
-    /* Check if safe to proceed. */
     if (*status || !station) return;
-
-    /* Save the data. */
     file = fopen(filename, "w");
     if (!file)
     {
@@ -52,7 +48,7 @@ void oskar_station_save_apodisation(const char* filename,
         return;
     }
     oskar_mem_save_ascii(file, 1, 0, oskar_station_num_elements(station),
-            status, oskar_station_element_weight_const(station));
+            status, oskar_station_element_weight_const(station, feed));
     fclose(file);
 }
 

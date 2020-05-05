@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, The University of Oxford
+ * Copyright (c) 2019-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,15 +51,17 @@ extern "C" {
  *
  * The station model must be in CPU-accessible memory.
  *
- * @param[in,out] s          Station model structure to modify.
+ * @param[in,out] station    Station model to update.
+ * @param[in] feed           Feed index (0 = X, 1 = Y).
  * @param[in] seed           Random generator seed.
  * @param[in] mean_metres    Mean element cable length error.
  * @param[in] std_metres     Standard deviation of element cable length error.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_override_element_cable_length_errors(oskar_Station* s,
-        unsigned int seed, double mean_metres, double std_metres, int* status);
+void oskar_station_override_element_cable_length_errors(oskar_Station* station,
+        int feed, unsigned int seed, double mean_metres, double std_metres,
+        int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,10 +49,10 @@ public:
 private:
     void load_element_patterns(oskar_Station* station,
             const std::map<std::string, std::string>& filemap, int* status);
-    void load_fitted_data(int port, oskar_Station* station,
+    void load_fitted_data(int feed, oskar_Station* station,
             const std::vector<std::string>& keys,
             const std::vector<std::string>& paths, int* status);
-    void load_functional_data(int port, oskar_Station* station,
+    void load_functional_data(int feed, oskar_Station* station,
             const std::vector<std::string>& keys,
             const std::vector<std::string>& paths, int* status);
     void load_spherical_wave_data(oskar_Station* station,

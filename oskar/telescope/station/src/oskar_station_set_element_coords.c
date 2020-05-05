@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,15 +35,15 @@
 extern "C" {
 #endif
 
-void oskar_station_set_element_coords(oskar_Station* dst,
+void oskar_station_set_element_coords(oskar_Station* station, int feed,
         int index, const double measured_enu[3], const double true_enu[3],
         int* status)
 {
-    /* Check if safe to proceed. */
-    if (*status || !dst) return;
+    int dim, num_dim = 2;
+    if (*status || !station) return;
 
     /* Check range. */
-    if (index >= dst->num_elements)
+    if (index >= station->num_elements || feed > 1)
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
@@ -51,57 +51,54 @@ void oskar_station_set_element_coords(oskar_Station* dst,
 
     /* Check if any z component is nonzero, and set 3D flag if so. */
     if (measured_enu[2] != 0.0 || true_enu[2] != 0.0)
-        dst->array_is_3d = OSKAR_TRUE;
-
-    if (oskar_station_mem_location(dst) == OSKAR_CPU)
     {
-        int type;
-        void *xw, *yw, *zw, *xs, *ys, *zs;
+        station->array_is_3d = OSKAR_TRUE;
+        num_dim = 3;
+    }
 
-        /* Get raw pointers. */
-        xw = oskar_mem_void(dst->element_measured_x_enu_metres);
-        yw = oskar_mem_void(dst->element_measured_y_enu_metres);
-        zw = oskar_mem_void(dst->element_measured_z_enu_metres);
-        xs = oskar_mem_void(dst->element_true_x_enu_metres);
-        ys = oskar_mem_void(dst->element_true_y_enu_metres);
-        zs = oskar_mem_void(dst->element_true_z_enu_metres);
-
-        type = oskar_station_precision(dst);
-        if (type == OSKAR_DOUBLE)
+    const int type = station->precision;
+    const int loc = station->mem_location;
+    for (dim = 0; dim < num_dim; dim++)
+    {
+        oskar_Mem *ptr_meas, *ptr_true;
+        ptr_meas = station->element_measured_enu_metres[feed][dim];
+        ptr_true = station->element_true_enu_metres[feed][dim];
+        if (!ptr_meas)
         {
-            ((double*)xw)[index] = measured_enu[0];
-            ((double*)yw)[index] = measured_enu[1];
-            ((double*)zw)[index] = measured_enu[2];
-            ((double*)xs)[index] = true_enu[0];
-            ((double*)ys)[index] = true_enu[1];
-            ((double*)zs)[index] = true_enu[2];
+            station->element_measured_enu_metres[feed][dim] =
+                    oskar_mem_create(type, loc, station->num_elements, status);
+            ptr_meas = station->element_measured_enu_metres[feed][dim];
         }
-        else if (type == OSKAR_SINGLE)
+        if (!ptr_true)
         {
-            ((float*)xw)[index] = (float)measured_enu[0];
-            ((float*)yw)[index] = (float)measured_enu[1];
-            ((float*)zw)[index] = (float)measured_enu[2];
-            ((float*)xs)[index] = (float)true_enu[0];
-            ((float*)ys)[index] = (float)true_enu[1];
-            ((float*)zs)[index] = (float)true_enu[2];
+            station->element_true_enu_metres[feed][dim] =
+                    oskar_mem_create(type, loc, station->num_elements, status);
+            ptr_true = station->element_true_enu_metres[feed][dim];
+        }
+        if (loc == OSKAR_CPU)
+        {
+            if (type == OSKAR_DOUBLE)
+            {
+                ((double*)oskar_mem_void(ptr_meas))[index] = measured_enu[dim];
+                ((double*)oskar_mem_void(ptr_true))[index] = true_enu[dim];
+            }
+            else if (type == OSKAR_SINGLE)
+            {
+                const float meas_enu_f = (float)(measured_enu[dim]);
+                const float true_enu_f = (float)(true_enu[dim]);
+                ((float*)oskar_mem_void(ptr_meas))[index] = meas_enu_f;
+                ((float*)oskar_mem_void(ptr_true))[index] = true_enu_f;
+            }
+            else
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
         else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-    }
-    else
-    {
-        oskar_mem_set_element_real(dst->element_measured_x_enu_metres,
-                index, measured_enu[0], status);
-        oskar_mem_set_element_real(dst->element_measured_y_enu_metres,
-                index, measured_enu[1], status);
-        oskar_mem_set_element_real(dst->element_measured_z_enu_metres,
-                index, measured_enu[2], status);
-        oskar_mem_set_element_real(dst->element_true_x_enu_metres,
-                index, true_enu[0], status);
-        oskar_mem_set_element_real(dst->element_true_y_enu_metres,
-                index, true_enu[1], status);
-        oskar_mem_set_element_real(dst->element_true_z_enu_metres,
-                index, true_enu[2], status);
+        {
+            oskar_mem_set_element_real(ptr_meas,
+                    index, measured_enu[dim], status);
+            oskar_mem_set_element_real(ptr_true,
+                    index, true_enu[dim], status);
+        }
     }
 }
 

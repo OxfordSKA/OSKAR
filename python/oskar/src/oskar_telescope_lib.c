@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
+ * Copyright (c) 2016-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -170,11 +170,23 @@ static PyObject* override_element_cable_length_errors(
 {
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
-    int seed = 0, status = 0;
+    int feed = 0, seed = 0, status = 0;
     double mean = 0.0, std = 0.0;
-    if (!PyArg_ParseTuple(args, "Oidd", &capsule, &seed, &mean, &std)) return 0;
+    if (!PyArg_ParseTuple(args, "Oiidd", &capsule, &feed, &seed, &mean, &std))
+        return 0;
     if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
-#if OSKAR_VERSION > 0x020701
+#if OSKAR_VERSION >= 0x020800
+    oskar_telescope_override_element_cable_length_errors(h, feed, seed,
+            mean, std, &status);
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_telescope_override_element_cable_length_errors() failed "
+                "with code %d (%s).", status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+#elif OSKAR_VERSION > 0x020701
     oskar_telescope_override_element_cable_length_errors(h, seed,
             mean, std, &status);
     if (status)
@@ -200,11 +212,22 @@ static PyObject* override_element_gains(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
-    int seed = 0, status = 0;
+    int feed = 0, seed = 0, status = 0;
     double mean = 0.0, std = 0.0;
-    if (!PyArg_ParseTuple(args, "Oidd", &capsule, &seed, &mean, &std)) return 0;
+    if (!PyArg_ParseTuple(args, "Oiidd", &capsule, &feed, &seed, &mean, &std))
+        return 0;
     if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
-#if OSKAR_VERSION > 0x020701
+#if OSKAR_VERSION >= 0x020800
+    oskar_telescope_override_element_gains(h, feed, seed, mean, std, &status);
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_telescope_override_element_gains() failed "
+                "with code %d (%s).", status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+#elif OSKAR_VERSION > 0x020701
     oskar_telescope_override_element_gains(h, seed, mean, std, &status);
     if (status)
     {
@@ -229,11 +252,22 @@ static PyObject* override_element_phases(PyObject* self, PyObject* args)
 {
     oskar_Telescope* h = 0;
     PyObject* capsule = 0;
-    int seed = 0, status = 0;
+    int feed = 0, seed = 0, status = 0;
     double std_rad = 0.0;
-    if (!PyArg_ParseTuple(args, "Oid", &capsule, &seed, &std_rad)) return 0;
+    if (!PyArg_ParseTuple(args, "Oiid", &capsule, &feed, &seed, &std_rad))
+        return 0;
     if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
-#if OSKAR_VERSION > 0x020701
+#if OSKAR_VERSION >= 0x020800
+    oskar_telescope_override_element_phases(h, feed, seed, std_rad, &status);
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_telescope_override_element_phases() failed "
+                "with code %d (%s).", status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+#elif OSKAR_VERSION > 0x020701
     oskar_telescope_override_element_phases(h, seed, std_rad, &status);
     if (status)
     {
@@ -762,11 +796,11 @@ static PyMethodDef methods[] =
         {"override_element_cable_length_errors",
                 (PyCFunction)override_element_cable_length_errors,
                 METH_VARARGS,
-                "override_element_cable_length_errors(seed, mean, std)"},
+                "override_element_cable_length_errors(feed, seed, mean, std)"},
         {"override_element_gains", (PyCFunction)override_element_gains,
-                METH_VARARGS, "override_element_gains(seed, mean, std)"},
+                METH_VARARGS, "override_element_gains(feed, seed, mean, std)"},
         {"override_element_phases", (PyCFunction)override_element_phases,
-                METH_VARARGS, "override_element_phases(seed, std)"},
+                METH_VARARGS, "override_element_phases(feed, seed, std)"},
         {"set_allow_station_beam_duplication",
                 (PyCFunction)set_allow_station_beam_duplication,
                 METH_VARARGS, "set_allow_station_beam_duplication(value)"},

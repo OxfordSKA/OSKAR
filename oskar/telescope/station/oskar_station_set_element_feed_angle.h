@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,8 @@ extern "C" {
  * This function sets the feed angle of the specified element in the
  * station model.
  *
- * @param[in] dst        Station model structure to copy into.
- * @param[in] x_pol      If set, set data for x polarisation, otherwise y.
+ * @param[in] station    Station model structure to copy into.
+ * @param[in] feed       Feed index to use (0 = X, 1 = Y).
  * @param[in] index      Element array index to set.
  * @param[in] alpha_deg  Euler angle, in degrees.
  * @param[in] beta_deg   Euler angle, in degrees.
@@ -56,7 +56,7 @@ extern "C" {
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_set_element_feed_angle(oskar_Station* dst, int x_dipole,
+void oskar_station_set_element_feed_angle(oskar_Station* station, int feed,
         int index, double alpha_deg, double beta_deg, double gamma_deg,
         int* status);
 
@@ -64,4 +64,4 @@ void oskar_station_set_element_feed_angle(oskar_Station* dst, int x_dipole,
 }
 #endif
 
-#endif /* OSKAR_STATION_SET_ELEMENT_FEED_ANGLE_H_ */
+#endif /* include guard */

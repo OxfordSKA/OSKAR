@@ -44,7 +44,7 @@ static void read_splines(oskar_Element* data, oskar_Binary* h,
         oskar_Splines** splines_ptr, int index, int* status);
 
 void oskar_element_read(oskar_Element* data, const char* filename,
-        int port, double freq_hz, int* status)
+        int feed, double freq_hz, int* status)
 {
     oskar_Splines **h_re = 0, **h_im = 0, **v_re = 0, **v_im = 0;
     oskar_Splines **scalar_re = 0, **scalar_im = 0;
@@ -71,14 +71,14 @@ void oskar_element_read(oskar_Element* data, const char* filename,
     /* Store the frequency. */
     data->freqs_hz[i] = freq_hz;
 
-    /* Get pointers to surface data based on port number and frequency index. */
-    if (port == 0)
+    /* Get pointers to surface data based on feed number and frequency index. */
+    if (feed == 0)
     {
         scalar_re = &data->scalar_re[i];
         scalar_im = &data->scalar_im[i];
         filename_ptr = &data->filename_scalar[i];
     }
-    else if (port == 1)
+    else if (feed == 1)
     {
         h_re = &data->x_h_re[i];
         h_im = &data->x_h_im[i];
@@ -86,7 +86,7 @@ void oskar_element_read(oskar_Element* data, const char* filename,
         v_im = &data->x_v_im[i];
         filename_ptr = &data->filename_x[i];
     }
-    else if (port == 2)
+    else if (feed == 2)
     {
         h_re = &data->y_h_re[i];
         h_im = &data->y_h_im[i];
@@ -117,7 +117,7 @@ void oskar_element_read(oskar_Element* data, const char* filename,
         return;
     }
 
-    if (port == 0)
+    if (feed == 0)
     {
         /* Check the surface type (scalar). */
         if (surface_type != OSKAR_ELEMENT_SURFACE_TYPE_SCALAR)

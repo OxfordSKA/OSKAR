@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, The University of Oxford
+ * Copyright (c) 2014-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,21 +36,17 @@
 extern "C" {
 #endif
 
-void oskar_station_save_layout(const char* filename,
-        const oskar_Station* station, int* status)
+void oskar_station_save_layout(const oskar_Station* station, int feed,
+        const char* filename, int* status)
 {
-    int i, location, type, num_elements;
+    int i;
     FILE* file;
     const oskar_Mem *x_weights, *y_weights, *z_weights;
     const oskar_Mem *x_signal, *y_signal, *z_signal;
-
-    /* Check if safe to proceed. */
     if (*status || !station) return;
-
-    /* Check type and location. */
-    type = oskar_station_precision(station);
-    location = oskar_station_mem_location(station);
-    num_elements = oskar_station_num_elements(station);
+    const int type = oskar_station_precision(station);
+    const int location = oskar_station_mem_location(station);
+    const int num_elements = oskar_station_num_elements(station);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -61,24 +57,18 @@ void oskar_station_save_layout(const char* filename,
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
-
-    /* Get pointers to the arrays. */
-    x_weights = oskar_station_element_measured_x_enu_metres_const(station);
-    y_weights = oskar_station_element_measured_y_enu_metres_const(station);
-    z_weights = oskar_station_element_measured_z_enu_metres_const(station);
-    x_signal = oskar_station_element_true_x_enu_metres_const(station);
-    y_signal = oskar_station_element_true_y_enu_metres_const(station);
-    z_signal = oskar_station_element_true_z_enu_metres_const(station);
-
-    /* Open the file. */
+    x_weights = oskar_station_element_measured_enu_metres_const(station, feed, 0);
+    y_weights = oskar_station_element_measured_enu_metres_const(station, feed, 1);
+    z_weights = oskar_station_element_measured_enu_metres_const(station, feed, 2);
+    x_signal = oskar_station_element_true_enu_metres_const(station, feed, 0);
+    y_signal = oskar_station_element_true_enu_metres_const(station, feed, 1);
+    z_signal = oskar_station_element_true_enu_metres_const(station, feed, 2);
     file = fopen(filename, "w");
     if (!file)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-
-    /* Save the station data. */
     fprintf(file, "# Number of elements  = %i\n", num_elements);
     fprintf(file, "# Longitude [radians] = %f\n", station->lon_rad);
     fprintf(file, "# Latitude [radians]  = %f\n", station->lat_rad);
@@ -121,8 +111,6 @@ void oskar_station_save_layout(const char* filename,
                     x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z));
         }
     }
-
-    /* Close the file. */
     fclose(file);
 }
 

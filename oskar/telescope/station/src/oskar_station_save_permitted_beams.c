@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, The University of Oxford
+ * Copyright (c) 2014-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,38 +40,29 @@
 extern "C" {
 #endif
 
-void oskar_station_save_permitted_beams(const char* filename,
-        const oskar_Station* station, int* status)
+void oskar_station_save_permitted_beams(const oskar_Station* station,
+        const char* filename, int* status)
 {
-    /* Declare the line buffer and counter. */
     FILE* file;
     const double *az, *el;
-    int i, num_beams;
-
-    /* Check if safe to proceed. */
+    int i;
     if (*status || !station) return;
-
-    /* Open the file. */
     file = fopen(filename, "w");
     if (!file)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-
-    /* Get pointers to arrays. */
     az = oskar_mem_double_const(
             oskar_station_permitted_beam_az_rad_const(station), status);
     el = oskar_mem_double_const(
             oskar_station_permitted_beam_el_rad_const(station), status);
-    num_beams = oskar_station_num_permitted_beams(station);
+    const int num_beams = oskar_station_num_permitted_beams(station);
     for (i = 0; i < num_beams; ++i)
     {
         fprintf(file, "%.6f %.6f\n", az[i] * 180.0 / M_PI,
                 el[i] * 180.0 / M_PI);
     }
-
-    /* Close the file. */
     fclose(file);
 }
 

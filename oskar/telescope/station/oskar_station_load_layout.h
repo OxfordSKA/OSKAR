@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,15 +63,16 @@ extern "C" {
  * geographic North, and the z-axis to the local zenith.
  *
  * @param[out] station   Pointer to destination data structure to fill.
+ * @param[in] feed       Feed index (0 = X, 1 = Y).
  * @param[in] filename   Name of the data file to load.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_load_layout(oskar_Station* station, const char* filename,
-        int* status);
+void oskar_station_load_layout(oskar_Station* station, int feed,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_LOAD_LAYOUT_H_ */
+#endif /* include guard */

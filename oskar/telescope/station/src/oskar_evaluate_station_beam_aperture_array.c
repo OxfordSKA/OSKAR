@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #include "telescope/station/oskar_evaluate_station_beam_aperture_array.h"
 
 #include "telescope/station/oskar_evaluate_beam_horizon_direction.h"
-#include "telescope/station/oskar_evaluate_element_weights.h"
+#include "telescope/station/oskar_station_evaluate_element_weights.h"
 #include "telescope/station/element/oskar_element_evaluate.h"
 #include "telescope/station/oskar_blank_below_horizon.h"
 #include "telescope/station/private_station_work.h"
@@ -87,21 +87,20 @@ static void oskar_evaluate_station_beam_aperture_array_private(
         int depth, int offset_out, oskar_Mem* beam, int* status)
 {
     double beam_x, beam_y, beam_z;
-    oskar_Mem *weights, *weights_error, *signal;
-    oskar_Mem *theta, *phi_x, *phi_y, *array;
+    oskar_Mem *signal, *theta, *phi_x, *phi_y;
+    const oskar_Mem* element_types_ptr = 0;
     int i;
     if (*status) return;
 
+    const double wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
+    const int is_3d         = oskar_station_array_is_3d(s);
     const int normalise     = oskar_station_normalise_array_pattern(s);
     const int num_elements  = oskar_station_num_elements(s);
-    const int is_3d         = oskar_station_array_is_3d(s);
-    const double wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
-    weights       = work->weights;
-    weights_error = work->weights_error;
+    const int num_feeds     = (oskar_station_common_pol_beams(s) ||
+            !oskar_mem_is_matrix(beam)) ? 1 : 2;
     theta         = work->theta_modified;
     phi_x         = work->phi_x;
     phi_y         = work->phi_y;
-    array         = work->array_pattern;
 
     /* Compute direction cosines for the beam for this station. */
     oskar_evaluate_beam_horizon_direction(&beam_x, &beam_y, &beam_z, s,
@@ -110,44 +109,28 @@ static void oskar_evaluate_station_beam_aperture_array_private(
     /* Evaluate beam if there are no child stations. */
     if (!oskar_station_has_child(s))
     {
-        /* Check if array pattern and element pattern are separable. */
-        const oskar_Element* element0 = oskar_station_element_const(s, 0);
-        if (oskar_station_num_element_types(s) == 1 &&
-                (oskar_station_common_element_orientation(s) ||
-                        oskar_element_is_isotropic(element0)) )
+        /* Check if element types can be used to evaluate the beam. */
+        const int num_element_types = oskar_station_num_element_types(s);
+        if (oskar_station_common_element_orientation(s))
         {
-            oskar_element_evaluate(element0,
-                    oskar_station_element_x_alpha_rad(s, 0) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
-                    oskar_station_element_y_alpha_rad(s, 0),
-                    offset_points, num_points, x, y, z, frequency_hz,
-                    theta, phi_x, phi_y, offset_out, beam, status);
-            if (oskar_station_enable_array_pattern(s))
-            {
-                oskar_evaluate_element_weights(weights, weights_error,
-                        wavenumber, s, beam_x, beam_y, beam_z,
-                        time_index, status);
-                oskar_dftw(normalise, num_elements, wavenumber, weights,
-                        oskar_station_element_true_x_enu_metres_const(s),
-                        oskar_station_element_true_y_enu_metres_const(s),
-                        oskar_station_element_true_z_enu_metres_const(s),
-                        offset_points, num_points, x, y, (is_3d ? z : 0), 0,
-                        0, array, status);
-                oskar_mem_multiply(beam, beam, array,
-                        offset_out, offset_out, 0, num_points, status);
-            }
+            /* Evaluate element patterns for each element type. */
+            element_types_ptr = oskar_station_element_types_const(s);
+            signal = oskar_station_work_beam(work, beam,
+                    num_element_types * num_points, 0, status);
+            for (i = 0; i < num_element_types; ++i)
+                oskar_element_evaluate(
+                        oskar_station_element_const(s, i),
+                        oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
+                        oskar_station_element_euler_index_rad(s, 1, 0, 0),
+                        offset_points, num_points, x, y, z, frequency_hz,
+                        theta, phi_x, phi_y, i * num_points, signal, status);
         }
         else
         {
-            /* Can't separate array and element evaluation. */
-            if (!oskar_station_enable_array_pattern(s))
-            {
-                *status = OSKAR_ERR_SETTINGS_TELESCOPE;
-                return;
-            }
+            /* Evaluate element patterns for each element. */
+            const int* element_type = oskar_station_element_types_cpu_const(s);
             signal = oskar_station_work_beam(work, beam,
                     num_elements * num_points, 0, status);
-            const int* element_type = oskar_station_element_types_cpu_const(s);
-            const int num_element_types = oskar_station_num_element_types(s);
             for (i = 0; i < num_elements; ++i)
             {
                 if (element_type[i] >= num_element_types)
@@ -157,20 +140,41 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                 }
                 oskar_element_evaluate(
                         oskar_station_element_const(s, element_type[i]),
-                        oskar_station_element_x_alpha_rad(s, i) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
-                        oskar_station_element_y_alpha_rad(s, i),
+                        oskar_station_element_euler_index_rad(s, 0, 0, i) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
+                        oskar_station_element_euler_index_rad(s, 1, 0, i),
                         offset_points, num_points, x, y, z, frequency_hz,
                         theta, phi_x, phi_y, i * num_points, signal, status);
             }
-            oskar_evaluate_element_weights(weights, weights_error,
-                    wavenumber, s, beam_x, beam_y, beam_z,
-                    time_index, status);
-            oskar_dftw(normalise, num_elements, wavenumber, weights,
-                    oskar_station_element_true_x_enu_metres_const(s),
-                    oskar_station_element_true_y_enu_metres_const(s),
-                    oskar_station_element_true_z_enu_metres_const(s),
-                    offset_points, num_points, x, y, (is_3d ? z : 0), signal,
-                    offset_out, beam, status);
+        }
+        if (oskar_station_enable_array_pattern(s))
+        {
+            for (i = 0; i < num_feeds; ++i)
+            {
+                const int eval_x = (i == 0 || num_feeds == 1) ? 1 : 0;
+                const int eval_y = (i == 1 || num_feeds == 1) ? 1 : 0;
+                oskar_station_evaluate_element_weights(s, i, wavenumber,
+                        beam_x, beam_y, beam_z, time_index,
+                        work->weights, work->weights_scratch, status);
+                oskar_dftw(normalise, num_elements, wavenumber, work->weights,
+                        oskar_station_element_true_enu_metres_const(s, i, 0),
+                        oskar_station_element_true_enu_metres_const(s, i, 1),
+                        oskar_station_element_true_enu_metres_const(s, i, 2),
+                        offset_points, num_points, x, y, (is_3d ? z : 0),
+                        element_types_ptr, signal, eval_x, eval_y,
+                        offset_out, beam, status);
+            }
+        }
+        else
+        {
+            if (oskar_station_num_element_types(s) == 1)
+                oskar_mem_copy_contents(beam, signal,
+                        offset_out, 0, num_points, status);
+            else
+            {
+                /* Can't separate array and element pattern evaluation. */
+                *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+                return;
+            }
         }
         oskar_blank_below_horizon(offset_points, num_points, z,
                 offset_out, beam, status);
@@ -202,14 +206,20 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                         num_points, x, y, z, time_index, gast, frequency_hz,
                         depth + 1, i * num_points, signal, status);
         }
-        oskar_evaluate_element_weights(weights, weights_error, wavenumber,
-                s, beam_x, beam_y, beam_z, time_index, status);
-        oskar_dftw(normalise, num_elements, wavenumber, weights,
-                oskar_station_element_true_x_enu_metres_const(s),
-                oskar_station_element_true_y_enu_metres_const(s),
-                oskar_station_element_true_z_enu_metres_const(s),
-                offset_points, num_points, x, y, (is_3d ? z : 0), signal,
-                offset_out, beam, status);
+        for (i = 0; i < num_feeds; ++i)
+        {
+            const int eval_x = (i == 0 || num_feeds == 1) ? 1 : 0;
+            const int eval_y = (i == 1 || num_feeds == 1) ? 1 : 0;
+            oskar_station_evaluate_element_weights(s, i, wavenumber,
+                    beam_x, beam_y, beam_z, time_index,
+                    work->weights, work->weights_scratch, status);
+            oskar_dftw(normalise, num_elements, wavenumber, work->weights,
+                    oskar_station_element_true_enu_metres_const(s, i, 0),
+                    oskar_station_element_true_enu_metres_const(s, i, 1),
+                    oskar_station_element_true_enu_metres_const(s, i, 2),
+                    offset_points, num_points, x, y, (is_3d ? z : 0), 0,
+                    signal, eval_x, eval_y, offset_out, beam, status);
+        }
     }
 }
 

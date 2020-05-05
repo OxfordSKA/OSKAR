@@ -25,39 +25,6 @@
     <s k="element">
         <label>Element settings (overrides)</label>
         <depends k="telescope/aperture_array/array_pattern/enable" v="true" />
-        <s k="gain">
-            <label>Element gain</label>
-            <type name="double" default="0.0" />
-            <desc>Mean element amplitude gain factor. If set (and
-                &amp;gt; 0.0), this will override the contents of the
-                station files.</desc>
-        </s>
-        <s k="gain_error_fixed">
-            <label>Element gain std.dev. (systematic)</label>
-            <type name="double" default="0.0" />
-            <desc>Systematic element amplitude gain standard deviation.
-                If set, this will override the contents of the station
-                files.</desc>
-        </s>
-        <s k="gain_error_time">
-            <label>Element gain std.dev. (time-variable)</label>
-            <type name="double" default="0.0" />
-            <desc>Time-variable element amplitude gain standard
-                deviation. If set, this will override the contents of
-                the station files.</desc>
-        </s>
-        <s k="phase_error_fixed_deg">
-            <label>Element phase std.dev. (systematic) [deg]</label>
-            <type name="double" default="0.0" />
-            <desc>Systematic element phase standard deviation. If set,
-                this will override the contents of the station files.</desc>
-        </s>
-        <s k="phase_error_time_deg">
-            <label>Element phase std.dev. (time-variable) [deg]</label>
-            <type name="double" default="0.0" />
-            <desc>Time-variable element phase standard deviation. If set,
-                this will override the contents of the station files.</desc>
-        </s>
         <s k="position_error_xy_m">
             <label>Element (x,y) position std.dev. [m]</label>
             <type name="double" default="0.0" />
@@ -65,44 +32,99 @@
                 uncertainties. If set, this will override the contents
                 of the station files.</desc>
         </s>
-        <s k="cable_length_error_m">
-            <label>Element cable length error std.dev. [m]</label>
+        <s k="x_gain">
+            <label>X element gain</label>
+            <type name="double" default="0.0" />
+            <desc>Mean element amplitude gain factor. If set (and
+                &amp;gt; 0.0), this will override the contents of the
+                station files.</desc>
+        </s>
+        <s k="y_gain">
+            <label>Y element gain</label>
+            <type name="double" default="0.0" />
+            <desc>Mean element amplitude gain factor. If set (and
+                &amp;gt; 0.0), this will override the contents of the
+                station files.</desc>
+        </s>
+        <s k="x_gain_error_fixed">
+            <label>X element gain std.dev. (systematic)</label>
+            <type name="double" default="0.0" />
+            <desc>Systematic element amplitude gain standard deviation.
+                If set, this will override the contents of the station
+                files.</desc>
+        </s>
+        <s k="y_gain_error_fixed">
+            <label>Y element gain std.dev. (systematic)</label>
+            <type name="double" default="0.0" />
+            <desc>Systematic element amplitude gain standard deviation.
+                If set, this will override the contents of the station
+                files.</desc>
+        </s>
+        <s k="x_gain_error_time">
+            <label>X element gain std.dev. (time-variable)</label>
+            <type name="double" default="0.0" />
+            <desc>Time-variable element amplitude gain standard
+                deviation. If set, this will override the contents of
+                the station files.</desc>
+        </s>
+        <s k="y_gain_error_time">
+            <label>Y element gain std.dev. (time-variable)</label>
+            <type name="double" default="0.0" />
+            <desc>Time-variable element amplitude gain standard
+                deviation. If set, this will override the contents of
+                the station files.</desc>
+        </s>
+        <s k="x_phase_error_fixed_deg">
+            <label>X element phase std.dev. (systematic) [deg]</label>
+            <type name="double" default="0.0" />
+            <desc>Systematic element phase standard deviation. If set,
+                this will override the contents of the station files.</desc>
+        </s>
+        <s k="y_phase_error_fixed_deg">
+            <label>Y element phase std.dev. (systematic) [deg]</label>
+            <type name="double" default="0.0" />
+            <desc>Systematic element phase standard deviation. If set,
+                this will override the contents of the station files.</desc>
+        </s>
+        <s k="x_phase_error_time_deg">
+            <label>X element phase std.dev. (time-variable) [deg]</label>
+            <type name="double" default="0.0" />
+            <desc>Time-variable element phase standard deviation. If set,
+                this will override the contents of the station files.</desc>
+        </s>
+        <s k="y_phase_error_time_deg">
+            <label>Y element phase std.dev. (time-variable) [deg]</label>
+            <type name="double" default="0.0" />
+            <desc>Time-variable element phase standard deviation. If set,
+                this will override the contents of the station files.</desc>
+        </s>
+        <s k="x_cable_length_error_m">
+            <label>X element cable length error std.dev. [m]</label>
+            <type name="double" default="0.0" />
+            <desc>Element cable length error standard deviation, in metres.
+                If set, this will override the contents of the station files.
+            </desc>
+        </s>
+        <s k="y_cable_length_error_m">
+            <label>Y element cable length error std.dev. [m]</label>
             <type name="double" default="0.0" />
             <desc>Element cable length error standard deviation, in metres.
                 If set, this will override the contents of the station files.
             </desc>
         </s>
         <s k="x_orientation_error_deg">
-            <label>Element X-dipole orientation std.dev. [deg]</label>
+            <label>X element orientation std.dev. [deg]</label>
             <type name="double" default="0.0" />
-            <desc>The standard deviation of the antenna X-dipole
+            <desc>The standard deviation of the element
                 orientation error. If set, this will override the
                 contents of the station files.</desc>
         </s>
         <s k="y_orientation_error_deg">
-            <label>Element Y-dipole orientation std.dev. [deg]</label>
+            <label>Y element orientation std.dev. [deg]</label>
             <type name="double" default="0.0" />
-            <desc>The standard deviation of the antenna Y-dipole
+            <desc>The standard deviation of the element
                 orientation error. If set, this will override the
                 contents of the station files.</desc>
-        </s>
-        <s k="seed_gain_errors">
-            <label>Random seed (systematic gain errors)</label>
-            <type name="RandomSeed" default="1" />
-            <desc>Random number generator seed used for systematic gain
-                error distribution.</desc>
-        </s>
-        <s k="seed_phase_errors">
-            <label>Random seed (systematic phase errors)</label>
-            <type name="RandomSeed" default="1" />
-            <desc>Random number generator seed used for systematic
-                phase error distribution.</desc>
-        </s>
-        <s k="seed_time_variable_errors">
-            <label>Random seed (time-variable errors)</label>
-            <type name="RandomSeed" default="1" />
-            <desc>Random number generator seed used for time variable
-                error distributions.</desc>
         </s>
         <s k="seed_position_xy_errors">
             <label>Random seed (x,y position errors)</label>
@@ -110,22 +132,58 @@
             <desc>Random number generator seed used for antenna
                 xy-position error distribution.</desc>
         </s>
-        <s k="seed_cable_length_errors">
-            <label>Random seed (cable length errors)</label>
+        <s k="seed_time_variable_errors">
+            <label>Random seed (time-variable errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>Random number generator seed used for time variable
+                error distributions.</desc>
+        </s>
+        <s k="seed_x_gain_errors">
+            <label>Random seed (X systematic gain errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>Random number generator seed used for systematic gain
+                error distribution.</desc>
+        </s>
+        <s k="seed_y_gain_errors">
+            <label>Random seed (Y systematic gain errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>Random number generator seed used for systematic gain
+                error distribution.</desc>
+        </s>
+        <s k="seed_x_phase_errors">
+            <label>Random seed (X systematic phase errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>Random number generator seed used for systematic
+                phase error distribution.</desc>
+        </s>
+        <s k="seed_y_phase_errors">
+            <label>Random seed (Y systematic phase errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>Random number generator seed used for systematic
+                phase error distribution.</desc>
+        </s>
+        <s k="seed_x_cable_length_errors">
+            <label>Random seed (X cable length errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>Random number generator seed used for antenna
+                cable length error distribution.</desc>
+        </s>
+        <s k="seed_y_cable_length_errors">
+            <label>Random seed (Y cable length errors)</label>
             <type name="RandomSeed" default="1" />
             <desc>Random number generator seed used for antenna
                 cable length error distribution.</desc>
         </s>
         <s k="seed_x_orientation_error">
-            <label>Random seed (X-dipole orientation errors)</label>
+            <label>Random seed (X orientation errors)</label>
             <type name="RandomSeed" default="1" />
-            <desc>Random number generator seed used for antenna X dipole
+            <desc>Random number generator seed used for antenna X
                 orientation error distribution.</desc>
         </s>
         <s k="seed_y_orientation_error">
-            <label>Random seed (Y-dipole orientation errors)</label>
+            <label>Random seed (Y orientation errors)</label>
             <type name="RandomSeed" default="1" />
-            <desc>Random number generator seed used for antenna Y dipole
+            <desc>Random number generator seed used for antenna Y
                 orientation error distribution.</desc>
         </s>
     </s> <!-- END: Array element override settings -->

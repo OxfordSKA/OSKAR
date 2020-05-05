@@ -242,13 +242,13 @@ void benchmark(int num_stations, int num_sources, int type,
     oskar_mem_random_range(v, 1.0, 5.0, status);
     oskar_mem_random_range(w, 1.0, 5.0, status);
     oskar_mem_random_range(
-            oskar_telescope_station_true_x_offset_ecef_metres(tel),
+            oskar_telescope_station_true_offset_ecef_metres(tel, 0),
             0.1, 1000.0, status);
     oskar_mem_random_range(
-            oskar_telescope_station_true_y_offset_ecef_metres(tel),
+            oskar_telescope_station_true_offset_ecef_metres(tel, 1),
             0.1, 1000.0, status);
     oskar_mem_random_range(
-            oskar_telescope_station_true_z_offset_ecef_metres(tel),
+            oskar_telescope_station_true_offset_ecef_metres(tel, 2),
             0.1, 1000.0, status);
     oskar_mem_random_range(oskar_sky_I(sky), 1.0, 2.0, status);
     oskar_mem_random_range(oskar_sky_Q(sky), 0.1, 1.0, status);

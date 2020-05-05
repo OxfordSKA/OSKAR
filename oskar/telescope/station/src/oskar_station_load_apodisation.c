@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-void oskar_station_load_apodisation(oskar_Station* station,
+void oskar_station_load_apodisation(oskar_Station* station, int feed,
         const char* filename, int* status)
 {
     /* Declare the line buffer and counter. */
@@ -88,7 +88,8 @@ void oskar_station_load_apodisation(oskar_Station* station,
         }
 
         /* Store the data. */
-        oskar_station_set_element_weight(station, n, par[0], par[1], status);
+        oskar_station_set_element_weight(
+                station, feed, n, par[0], par[1], status);
 
         /* Increment element counter. */
         ++n;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,9 @@ oskar_StationWork* oskar_station_work_create(int type,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Initialise members. */
+    const int complex_type = type | OSKAR_COMPLEX;
+    work->weights = oskar_mem_create(complex_type, location, 0, status);
+    work->weights_scratch = oskar_mem_create(complex_type, location, 0, status);
     work->horizon_mask = oskar_mem_create(OSKAR_INT, location, 0, status);
     work->source_indices = oskar_mem_create(OSKAR_INT, location, 0, status);
     work->theta_modified = oskar_mem_create(type, location, 0, status);
@@ -56,16 +59,9 @@ oskar_StationWork* oskar_station_work_create(int type,
     work->enu_direction_x = oskar_mem_create(type, location, 0, status);
     work->enu_direction_y = oskar_mem_create(type, location, 0, status);
     work->enu_direction_z = oskar_mem_create(type, location, 0, status);
-    work->weights = oskar_mem_create((type | OSKAR_COMPLEX),
-            location, 0, status);
-    work->weights_error = oskar_mem_create((type | OSKAR_COMPLEX),
-            location, 0, status);
-    work->array_pattern = oskar_mem_create((type | OSKAR_COMPLEX),
-            location, 0, status);
     work->tec_screen = oskar_mem_create(type, location, 0, status);
     work->tec_screen_path = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
-    work->screen_output = oskar_mem_create(type | OSKAR_COMPLEX,
-            location, 0, status);
+    work->screen_output = oskar_mem_create(complex_type, location, 0, status);
     work->screen_type = 'N'; /* None */
     work->previous_time_index = -1;
     return work;
@@ -75,6 +71,8 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
 {
     int i;
     if (!work) return;
+    oskar_mem_free(work->weights, status);
+    oskar_mem_free(work->weights_scratch, status);
     oskar_mem_free(work->horizon_mask, status);
     oskar_mem_free(work->source_indices, status);
     oskar_mem_free(work->theta_modified, status);
@@ -83,9 +81,6 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
     oskar_mem_free(work->enu_direction_x, status);
     oskar_mem_free(work->enu_direction_y, status);
     oskar_mem_free(work->enu_direction_z, status);
-    oskar_mem_free(work->weights, status);
-    oskar_mem_free(work->weights_error, status);
-    oskar_mem_free(work->array_pattern, status);
     oskar_mem_free(work->beam_out_scratch, status);
     oskar_mem_free(work->tec_screen, status);
     oskar_mem_free(work->tec_screen_path, status);

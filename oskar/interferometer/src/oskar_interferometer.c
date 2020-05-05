@@ -276,9 +276,9 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
     if (oskar_vis_block_has_cross_correlations(b0))
     {
         const oskar_Mem *x, *y, *z;
-        x = oskar_telescope_station_measured_x_offset_ecef_metres_const(h->tel);
-        y = oskar_telescope_station_measured_y_offset_ecef_metres_const(h->tel);
-        z = oskar_telescope_station_measured_z_offset_ecef_metres_const(h->tel);
+        x = oskar_telescope_station_measured_offset_ecef_metres_const(h->tel, 0);
+        y = oskar_telescope_station_measured_offset_ecef_metres_const(h->tel, 1);
+        z = oskar_telescope_station_measured_offset_ecef_metres_const(h->tel, 2);
         oskar_convert_ecef_to_uvw(
                 oskar_telescope_num_stations(h->tel), x, y, z,
                 oskar_telescope_phase_centre_ra_rad(h->tel),
@@ -996,9 +996,9 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     /* Evaluate station u,v,w coordinates. */
     ra0 = oskar_telescope_phase_centre_ra_rad(d->tel);
     dec0 = oskar_telescope_phase_centre_dec_rad(d->tel);
-    x = oskar_telescope_station_true_x_offset_ecef_metres_const(d->tel);
-    y = oskar_telescope_station_true_y_offset_ecef_metres_const(d->tel);
-    z = oskar_telescope_station_true_z_offset_ecef_metres_const(d->tel);
+    x = oskar_telescope_station_true_offset_ecef_metres_const(d->tel, 0);
+    y = oskar_telescope_station_true_offset_ecef_metres_const(d->tel, 1);
+    z = oskar_telescope_station_true_offset_ecef_metres_const(d->tel, 2);
     oskar_convert_ecef_to_station_uvw(num_stations, x, y, z, ra0, dec0, gast,
             0, 0, d->u, d->v, d->w, status);
 
@@ -1134,13 +1134,13 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
             oskar_telescope_lat_rad(h->tel) * rad2deg,
             oskar_telescope_alt_metres(h->tel));
     oskar_mem_copy(oskar_vis_header_station_x_offset_ecef_metres(h->header),
-            oskar_telescope_station_true_x_offset_ecef_metres_const(h->tel),
+            oskar_telescope_station_true_offset_ecef_metres_const(h->tel, 0),
             status);
     oskar_mem_copy(oskar_vis_header_station_y_offset_ecef_metres(h->header),
-            oskar_telescope_station_true_y_offset_ecef_metres_const(h->tel),
+            oskar_telescope_station_true_offset_ecef_metres_const(h->tel, 1),
             status);
     oskar_mem_copy(oskar_vis_header_station_z_offset_ecef_metres(h->header),
-            oskar_telescope_station_true_z_offset_ecef_metres_const(h->tel),
+            oskar_telescope_station_true_offset_ecef_metres_const(h->tel, 2),
             status);
 }
 

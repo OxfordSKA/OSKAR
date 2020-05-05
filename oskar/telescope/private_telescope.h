@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,26 +63,18 @@ struct oskar_Telescope
     double tec_screen_time_interval_sec;
 
     /* Station data. */
-    int supplied_coord_type;                          /* Type of coordinates specified in telescope model. */
-    int num_stations;                                 /* Number of stations in the model. */
-    oskar_Station** station;                          /* Array of station structure handles. */
-    oskar_Mem* station_true_x_offset_ecef_metres;     /* True station x-coordinates, in metres (offset ECEF). */
-    oskar_Mem* station_true_y_offset_ecef_metres;     /* True station y-coordinates, in metres (offset ECEF). */
-    oskar_Mem* station_true_z_offset_ecef_metres;     /* True station z-coordinates, in metres (offset ECEF). */
-    oskar_Mem* station_true_x_enu_metres;             /* True station x-coordinate, in metres (horizon). */
-    oskar_Mem* station_true_y_enu_metres;             /* True station y-coordinate, in metres (horizon). */
-    oskar_Mem* station_true_z_enu_metres;             /* True station z-coordinate, in metres (horizon). */
-    oskar_Mem* station_measured_x_offset_ecef_metres; /* Measured station x-coordinates, in metres (offset ECEF). */
-    oskar_Mem* station_measured_y_offset_ecef_metres; /* Measured station y-coordinates, in metres (offset ECEF). */
-    oskar_Mem* station_measured_z_offset_ecef_metres; /* Measured station z-coordinates, in metres (offset ECEF). */
-    oskar_Mem* station_measured_x_enu_metres;         /* Measured station x-coordinate, in metres (horizon). */
-    oskar_Mem* station_measured_y_enu_metres;         /* Measured station y-coordinate, in metres (horizon). */
-    oskar_Mem* station_measured_z_enu_metres;         /* Measured station z-coordinate, in metres (horizon). */
-    int max_station_size;                             /* Maximum station size (number of elements) */
-    int max_station_depth;                            /* Maximum station depth. */
-    int identical_stations;                           /* True if all stations are identical. */
-    int allow_station_beam_duplication;               /* True if station beam duplication is allowed. */
-    int enable_numerical_patterns;                    /* True if numerical element patterns are enabled. */
+    int supplied_coord_type;                           /* Type of coordinates specified in telescope model. */
+    int num_stations;                                  /* Number of stations in the model. */
+    oskar_Station** station;                           /* Array of station structure handles. */
+    oskar_Mem* station_true_offset_ecef_metres[3];     /* True station coordinates, in metres (offset ECEF). */
+    oskar_Mem* station_true_enu_metres[3];             /* True station coordinate, in metres (horizon). */
+    oskar_Mem* station_measured_offset_ecef_metres[3]; /* Measured station coordinates, in metres (offset ECEF). */
+    oskar_Mem* station_measured_enu_metres[3];         /* Measured station coordinate, in metres (horizon). */
+    int max_station_size;                              /* Maximum station size (number of elements) */
+    int max_station_depth;                             /* Maximum station depth. */
+    int identical_stations;                            /* True if all stations are identical. */
+    int allow_station_beam_duplication;                /* True if station beam duplication is allowed. */
+    int enable_numerical_patterns;                     /* True if numerical element patterns are enabled. */
 };
 
 #ifndef OSKAR_TELESCOPE_TYPEDEF_

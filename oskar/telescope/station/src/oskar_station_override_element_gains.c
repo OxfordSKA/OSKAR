@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,44 +34,46 @@
 extern "C" {
 #endif
 
-void oskar_station_override_element_gains(oskar_Station* s, unsigned int seed,
-        double gain_mean, double gain_std, int* status)
+void oskar_station_override_element_gains(oskar_Station* station, int feed,
+        unsigned int seed, double gain_mean, double gain_std, int* status)
 {
     int i;
-
-    /* Check if safe to proceed. */
-    if (*status || !s) return;
-
-    /* Check location. */
-    if (oskar_station_mem_location(s) != OSKAR_CPU)
+    if (*status || !station) return;
+    if (oskar_station_mem_location(station) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
-
-    /* Check if there are child stations. */
-    if (oskar_station_has_child(s))
+    const int num = station->num_elements;
+    if (oskar_station_has_child(station))
     {
         /* Recursive call to find the last level (i.e. the element data). */
-        for (i = 0; i < s->num_elements; ++i)
+        for (i = 0; i < num; ++i)
         {
-            oskar_station_override_element_gains(oskar_station_child(s, i),
-                    seed, gain_mean, gain_std, status);
+            oskar_station_override_element_gains(
+                    oskar_station_child(station, i),
+                    feed, seed, gain_mean, gain_std, status);
         }
     }
     else
     {
         /* Override element data at last level. */
+        oskar_Mem* ptr;
         double r[2];
-        int type, id;
-        type = oskar_station_precision(s);
-        id = oskar_station_unique_id(s);
+        const int type = oskar_station_precision(station);
+        const int id = oskar_station_unique_id(station);
+        ptr = station->element_gain[feed];
+        if (!ptr)
+        {
+            station->element_gain[feed] = oskar_mem_create(
+                    type, station->mem_location, num, status);
+            ptr = station->element_gain[feed];
+        }
         if (gain_mean <= 0.0) gain_mean = 1.0;
         if (type == OSKAR_DOUBLE)
         {
-            double* gain;
-            gain = oskar_mem_double(s->element_gain, status);
-            for (i = 0; i < s->num_elements; ++i)
+            double* gain = oskar_mem_double(ptr, status);
+            for (i = 0; i < num; ++i)
             {
                 oskar_random_gaussian2(seed, i, id, r);
                 gain[i] = gain_mean + gain_std * r[0];
@@ -79,9 +81,8 @@ void oskar_station_override_element_gains(oskar_Station* s, unsigned int seed,
         }
         else if (type == OSKAR_SINGLE)
         {
-            float* gain;
-            gain = oskar_mem_float(s->element_gain, status);
-            for (i = 0; i < s->num_elements; ++i)
+            float* gain = oskar_mem_float(ptr, status);
+            for (i = 0; i < num; ++i)
             {
                 oskar_random_gaussian2(seed, i, id, r);
                 gain[i] = gain_mean + gain_std * r[0];

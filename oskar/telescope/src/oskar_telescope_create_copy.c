@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,30 +78,17 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     telescope->tec_screen_time_interval_sec = src->tec_screen_time_interval_sec;
 
     /* Copy the coordinates. */
-    oskar_mem_copy(telescope->station_true_x_offset_ecef_metres,
-            src->station_true_x_offset_ecef_metres, status);
-    oskar_mem_copy(telescope->station_true_y_offset_ecef_metres,
-            src->station_true_y_offset_ecef_metres, status);
-    oskar_mem_copy(telescope->station_true_z_offset_ecef_metres,
-            src->station_true_z_offset_ecef_metres, status);
-    oskar_mem_copy(telescope->station_true_x_enu_metres,
-            src->station_true_x_enu_metres, status);
-    oskar_mem_copy(telescope->station_true_y_enu_metres,
-            src->station_true_y_enu_metres, status);
-    oskar_mem_copy(telescope->station_true_z_enu_metres,
-            src->station_true_z_enu_metres, status);
-    oskar_mem_copy(telescope->station_measured_x_offset_ecef_metres,
-            src->station_measured_x_offset_ecef_metres, status);
-    oskar_mem_copy(telescope->station_measured_y_offset_ecef_metres,
-            src->station_measured_y_offset_ecef_metres, status);
-    oskar_mem_copy(telescope->station_measured_z_offset_ecef_metres,
-            src->station_measured_z_offset_ecef_metres, status);
-    oskar_mem_copy(telescope->station_measured_x_enu_metres,
-            src->station_measured_x_enu_metres, status);
-    oskar_mem_copy(telescope->station_measured_y_enu_metres,
-            src->station_measured_y_enu_metres, status);
-    oskar_mem_copy(telescope->station_measured_z_enu_metres,
-            src->station_measured_z_enu_metres, status);
+    for (i = 0; i < 3; ++i)
+    {
+        oskar_mem_copy(telescope->station_true_offset_ecef_metres[i],
+                src->station_true_offset_ecef_metres[i], status);
+        oskar_mem_copy(telescope->station_true_enu_metres[i],
+                src->station_true_enu_metres[i], status);
+        oskar_mem_copy(telescope->station_measured_offset_ecef_metres[i],
+                src->station_measured_offset_ecef_metres[i], status);
+        oskar_mem_copy(telescope->station_measured_enu_metres[i],
+                src->station_measured_enu_metres[i], status);
+    }
     oskar_mem_copy(telescope->tec_screen_path,
             src->tec_screen_path, status);
 

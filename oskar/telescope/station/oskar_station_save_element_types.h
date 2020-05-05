@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,11 +51,11 @@ extern "C" {
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_save_element_types(const char* filename,
-        const oskar_Station* station, int* status);
+void oskar_station_save_element_types(const oskar_Station* station,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_SAVE_ELEMENT_TYPES_H_ */
+#endif /* include guard */

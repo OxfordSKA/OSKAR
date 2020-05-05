@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,21 +47,22 @@ extern "C" {
  * This function sets the amplitude and phase errors of the specified element
  * in the station model, transferring data to the GPU if necessary.
  *
- * @param[in] dst           Station model structure to copy into.
- * @param[in] index         Element array index to set.
- * @param[in] gain          Element gain.
- * @param[in] gain_error    Element gain error.
- * @param[in] phase_offset  Element phase offset, in degrees.
- * @param[in] phase_error   Element phase error, in degrees.
- * @param[in,out] status    Status return code.
+ * @param[in,out] station       Station model to update.
+ * @param[in] feed              Feed index (0 = X, 1 = Y).
+ * @param[in] index             Element index to set.
+ * @param[in] gain              Element gain.
+ * @param[in] gain_error        Element gain error.
+ * @param[in] phase_offset_deg  Element phase offset, in degrees.
+ * @param[in] phase_error_deg   Element phase error, in degrees.
+ * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_set_element_errors(oskar_Station* dst,
-        int index, double gain, double gain_error, double phase_offset,
-        double phase_error, int* status);
+void oskar_station_set_element_errors(oskar_Station* station, int feed,
+        int index, double gain, double gain_error, double phase_offset_deg,
+        double phase_error_deg, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_SET_ELEMENT_ERRORS_H_ */
+#endif /* include guard */

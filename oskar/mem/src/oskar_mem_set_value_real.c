@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double value,
             double *v;
             v = (double*)(mem->data) + offset;
             for (i = 0; i < num_elements; ++i) v[i] = value;
-            break;
+            return;
         }
         case OSKAR_DOUBLE_COMPLEX:
         {
@@ -62,7 +62,7 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double value,
                 v[i].x = value;
                 v[i].y = 0.0;
             }
-            break;
+            return;
         }
         case OSKAR_DOUBLE_COMPLEX_MATRIX:
         {
@@ -74,14 +74,14 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double value,
             d.c.x = d.c.y = 0.0;
             d.d.x = value; d.d.y = 0.0;
             for (i = 0; i < num_elements; ++i) v[i] = d;
-            break;
+            return;
         }
         case OSKAR_SINGLE:
         {
             float *v;
             v = (float*)(mem->data) + offset;
             for (i = 0; i < num_elements; ++i) v[i] = value_f;
-            break;
+            return;
         }
         case OSKAR_SINGLE_COMPLEX:
         {
@@ -92,7 +92,7 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double value,
                 v[i].x = value_f;
                 v[i].y = 0.0f;
             }
-            break;
+            return;
         }
         case OSKAR_SINGLE_COMPLEX_MATRIX:
         {
@@ -104,11 +104,11 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double value,
             d.c.x = d.c.y = 0.0f;
             d.d.x = value_f; d.d.y = 0.0f;
             for (i = 0; i < num_elements; ++i) v[i] = d;
-            break;
+            return;
         }
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
-            break;
+            return;
         }
     }
     else

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,22 +48,17 @@ extern "C" {
  * space-separated text file. Each line contains data for one element
  * of the station.
  *
- * The file may have the following columns, in the following order:
- * - Element amplitude gain factor (default 1).
- * - Element phase offset in degrees (default 0).
- * - Element amplitude gain error (default 0).
- * - Element phase error in degrees (default 0).
- *
  * @param[out] station   Pointer to destination data structure to fill.
+ * @param[in] feed       Feed index (0 = X, 1 = Y).
  * @param[in] filename   Name of the data file to load.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_load_apodisation(oskar_Station* station,
+void oskar_station_load_apodisation(oskar_Station* station, int feed,
         const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_LOAD_APODISATION_H_ */
+#endif /* include guard */

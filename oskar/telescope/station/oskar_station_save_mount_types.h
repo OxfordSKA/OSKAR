@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,16 +46,16 @@ extern "C" {
  * This function writes element mount type data from the station model to an
  * ASCII file.
  *
- * @param[in] filename   Pathname of file to write.
  * @param[in] station    Station model to write.
+ * @param[in] filename   Pathname of file to write.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_save_mount_types(const char* filename,
-        const oskar_Station* station, int* status);
+void oskar_station_save_mount_types(const oskar_Station* station,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_SAVE_MOUNT_TYPES_H_ */
+#endif /* include guard */

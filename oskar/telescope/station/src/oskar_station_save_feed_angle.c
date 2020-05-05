@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,47 +39,28 @@ extern "C" {
 
 #define R2D (180.0 / M_PI)
 
-void oskar_station_save_feed_angle(const char* filename,
-        const oskar_Station* station, int x_pol, int* status)
+void oskar_station_save_feed_angle(const oskar_Station* station,
+        int feed, const char* filename, int* status)
 {
-    int i, num_elements;
+    int i;
     FILE* file;
     const double *a, *b, *c;
-
-    /* Check if safe to proceed. */
     if (*status || !station) return;
-
-    /* Get pointers to the arrays. */
-    if (x_pol)
-    {
-        a = oskar_mem_double_const(station->element_x_alpha_cpu, status);
-        b = oskar_mem_double_const(station->element_x_beta_cpu, status);
-        c = oskar_mem_double_const(station->element_x_gamma_cpu, status);
-    }
-    else
-    {
-        a = oskar_mem_double_const(station->element_y_alpha_cpu, status);
-        b = oskar_mem_double_const(station->element_y_beta_cpu, status);
-        c = oskar_mem_double_const(station->element_y_gamma_cpu, status);
-    }
-
-    /* Open the file. */
+    a = oskar_mem_double_const(station->element_euler_cpu[feed][0], status);
+    b = oskar_mem_double_const(station->element_euler_cpu[feed][1], status);
+    c = oskar_mem_double_const(station->element_euler_cpu[feed][2], status);
     file = fopen(filename, "w");
     if (!file)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-
-    /* Save the data. */
-    num_elements = oskar_station_num_elements(station);
+    const int num_elements = oskar_station_num_elements(station);
     for (i = 0; i < num_elements; ++i)
     {
         fprintf(file, "% 14.6f % 14.6f % 14.6f\n",
                 a[i] * R2D, b[i] * R2D, c[i] * R2D);
     }
-
-    /* Close the file. */
     fclose(file);
 }
 

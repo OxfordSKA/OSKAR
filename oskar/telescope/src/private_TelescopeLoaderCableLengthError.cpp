@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, The University of Oxford
+ * Copyright (c) 2019-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,16 +33,28 @@ using std::map;
 using std::string;
 
 static const char* cable_length_error_file = "cable_length_error.txt";
+static const char* cable_length_error_x_file = "cable_length_error_x.txt";
+static const char* cable_length_error_y_file = "cable_length_error_y.txt";
 
 void TelescopeLoaderCableLengthError::load(oskar_Station* station,
         const string& cwd, int /*num_subdirs*/, int /*depth*/,
         map<string, string>& /*filemap*/, int* status)
 {
-    // Check for presence of "cable_length_error.txt".
+    // Check for presence of cable length error files.
     if (oskar_dir_file_exists(cwd.c_str(), cable_length_error_file))
     {
-        oskar_station_load_cable_length_error(station,
+        oskar_station_load_cable_length_error(station, 0,
                 get_path(cwd, cable_length_error_file).c_str(), status);
+    }
+    if (oskar_dir_file_exists(cwd.c_str(), cable_length_error_x_file))
+    {
+        oskar_station_load_cable_length_error(station, 0,
+                get_path(cwd, cable_length_error_x_file).c_str(), status);
+    }
+    if (oskar_dir_file_exists(cwd.c_str(), cable_length_error_y_file))
+    {
+        oskar_station_load_cable_length_error(station, 1,
+                get_path(cwd, cable_length_error_y_file).c_str(), status);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,12 +62,12 @@ void oskar_telescope_save_layout(const oskar_Telescope* telescope,
     }
 
     /* Get pointers to the arrays. */
-    x_weights = oskar_telescope_station_measured_x_enu_metres_const(telescope);
-    y_weights = oskar_telescope_station_measured_y_enu_metres_const(telescope);
-    z_weights = oskar_telescope_station_measured_z_enu_metres_const(telescope);
-    x_signal = oskar_telescope_station_true_x_enu_metres_const(telescope);
-    y_signal = oskar_telescope_station_true_y_enu_metres_const(telescope);
-    z_signal = oskar_telescope_station_true_z_enu_metres_const(telescope);
+    x_weights = telescope->station_measured_enu_metres[0];
+    y_weights = telescope->station_measured_enu_metres[1];
+    z_weights = telescope->station_measured_enu_metres[2];
+    x_signal = telescope->station_true_enu_metres[0];
+    y_signal = telescope->station_true_enu_metres[1];
+    z_signal = telescope->station_true_enu_metres[2];
 
     /* Open the file. */
     file = fopen(filename, "w");

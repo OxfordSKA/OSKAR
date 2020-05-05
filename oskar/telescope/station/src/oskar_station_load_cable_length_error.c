@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, The University of Oxford
+ * Copyright (c) 2019-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-void oskar_station_load_cable_length_error(oskar_Station* station,
+void oskar_station_load_cable_length_error(oskar_Station* station, int feed,
         const char* filename, int* status)
 {
     char* line = NULL;
@@ -69,7 +69,7 @@ void oskar_station_load_cable_length_error(oskar_Station* station,
             oskar_station_resize(station, n + 256, status);
             if (*status) break;
         }
-        oskar_station_set_element_cable_length_error(station,
+        oskar_station_set_element_cable_length_error(station, feed,
                 n, par[0], status);
         ++n;
     }

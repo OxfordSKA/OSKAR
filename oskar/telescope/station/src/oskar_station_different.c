@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,7 @@ extern "C" {
 int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
         int* status)
 {
-    int i, j, n;
-
-    /* Check if safe to proceed. */
+    int i, j, n, feed, dim;
     if (!a || !b) return 0;
     if (*status) return 1;
 
@@ -61,6 +59,7 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
             a->normalise_array_pattern != b->normalise_array_pattern ||
             a->enable_array_pattern != b->enable_array_pattern ||
             a->common_element_orientation != b->common_element_orientation ||
+            a->common_pol_beams != b->common_pol_beams ||
             a->array_is_3d != b->array_is_3d ||
             a->apply_element_errors != b->apply_element_errors ||
             a->apply_element_weight != b->apply_element_weight ||
@@ -86,56 +85,38 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
         return 1;
     if (oskar_mem_different(a->noise_rms_jy, b->noise_rms_jy, 0, status))
         return 1;
-    if (oskar_mem_different(a->element_measured_x_enu_metres,
-            b->element_measured_x_enu_metres, n, status))
+    for (feed = 0; feed < 2; feed++)
+    {
+        for (dim = 0; dim < 3; dim++)
+        {
+            if (oskar_mem_different(a->element_measured_enu_metres[feed][dim],
+                    b->element_measured_enu_metres[feed][dim], n, status))
+                return 1;
+            if (oskar_mem_different(a->element_true_enu_metres[feed][dim],
+                    b->element_true_enu_metres[feed][dim], n, status))
+                return 1;
+            if (oskar_mem_different(a->element_euler_cpu[feed][dim],
+                    b->element_euler_cpu[feed][dim], n, status))
+                return 1;
+        }
+        if (oskar_mem_different(a->element_gain[feed],
+                b->element_gain[feed], n, status))
+            return 1;
+        if (oskar_mem_different(a->element_phase_offset_rad[feed],
+                b->element_phase_offset_rad[feed], n, status))
+            return 1;
+        if (oskar_mem_different(a->element_weight[feed],
+                b->element_weight[feed], n, status))
+            return 1;
+        if (oskar_mem_different(a->element_cable_length_error[feed],
+                b->element_cable_length_error[feed], n, status))
+            return 1;
+    }
+    if (oskar_mem_different(a->element_types,
+            b->element_types, n, status))
         return 1;
-    if (oskar_mem_different(a->element_measured_y_enu_metres,
-            b->element_measured_y_enu_metres, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_measured_z_enu_metres,
-            b->element_measured_z_enu_metres, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_true_x_enu_metres,
-            b->element_true_x_enu_metres, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_true_y_enu_metres,
-            b->element_true_y_enu_metres, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_true_z_enu_metres,
-            b->element_true_z_enu_metres, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_gain, b->element_gain, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_phase_offset_rad,
-            b->element_phase_offset_rad, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_weight, b->element_weight, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_cable_length_error,
-            b->element_cable_length_error, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_x_alpha_cpu,
-            b->element_x_alpha_cpu, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_x_beta_cpu,
-            b->element_x_beta_cpu, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_x_gamma_cpu,
-            b->element_x_gamma_cpu, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_y_alpha_cpu,
-            b->element_y_alpha_cpu, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_y_beta_cpu,
-            b->element_y_beta_cpu, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_y_gamma_cpu,
-            b->element_y_gamma_cpu, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_types, b->element_types, n, status))
-        return 1;
-    if (oskar_mem_different(a->element_types_cpu, b->element_types_cpu, n,
-            status))
+    if (oskar_mem_different(a->element_types_cpu,
+            b->element_types_cpu, n, status))
         return 1;
     if (oskar_mem_different(a->element_mount_types_cpu,
             b->element_mount_types_cpu, n, status))

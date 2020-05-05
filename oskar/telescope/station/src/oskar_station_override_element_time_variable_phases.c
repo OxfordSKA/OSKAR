@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,20 +33,31 @@
 extern "C" {
 #endif
 
-void oskar_station_override_element_time_variable_phases(oskar_Station* s,
-        double phase_std, int* status)
+void oskar_station_override_element_time_variable_phases(
+        oskar_Station* station, int feed, double phase_std_rad, int* status)
 {
     int i;
-    if (*status || !s) return;
+    if (*status || !station) return;
 
     /* Override element data only at last level. */
-    if (oskar_station_has_child(s))
-        for (i = 0; i < s->num_elements; ++i)
+    if (oskar_station_has_child(station))
+        for (i = 0; i < station->num_elements; ++i)
             oskar_station_override_element_time_variable_phases(
-                    oskar_station_child(s, i), phase_std, status);
+                    oskar_station_child(station, i),
+                    feed, phase_std_rad, status);
     else
-        oskar_mem_set_value_real(s->element_phase_error_rad,
-                phase_std, 0, s->num_elements, status);
+    {
+        oskar_Mem* ptr = station->element_phase_error_rad[feed];
+        if (!ptr)
+        {
+            station->element_phase_error_rad[feed] = oskar_mem_create(
+                    station->precision, station->mem_location,
+                    station->num_elements, status);
+            ptr = station->element_phase_error_rad[feed];
+        }
+        oskar_mem_set_value_real(ptr,
+                phase_std_rad, 0, station->num_elements, status);
+    }
 }
 
 #ifdef __cplusplus

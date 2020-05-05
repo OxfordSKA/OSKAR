@@ -71,8 +71,8 @@ TEST(evaluate_station_beam, test_array_pattern)
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
     oskar_meshgrid_f(
-            oskar_mem_float(oskar_station_element_measured_x_enu_metres(station), &error),
-            oskar_mem_float(oskar_station_element_measured_y_enu_metres(station), &error),
+            oskar_mem_float(oskar_station_element_measured_enu_metres(station, 0, 0), &error),
+            oskar_mem_float(oskar_station_element_measured_enu_metres(station, 0, 1), &error),
             x_pos, station_dim, x_pos, station_dim);
     free(x_pos);
 
@@ -126,8 +126,8 @@ TEST(evaluate_station_beam, test_array_pattern)
             num_pixels, d_l, d_m, d_n, gast, frequency, work, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
     double xyz[] = {0., 0., 1.};
-    oskar_station_set_element_coords(station_gpu, 0, xyz, xyz, &error);
-    oskar_station_set_element_coords(station_gpu, 0, xyz, xyz, &error);
+    oskar_station_set_element_coords(station_gpu, 0, 0, xyz, xyz, &error);
+    oskar_station_set_element_coords(station_gpu, 0, 0, xyz, xyz, &error);
     ASSERT_EQ(1, oskar_station_array_is_3d(station_gpu));
     oskar_evaluate_station_beam_aperture_array(beam_pattern, station_gpu,
             num_pixels, d_l, d_m, d_n, gast, frequency, work, 0, &error);

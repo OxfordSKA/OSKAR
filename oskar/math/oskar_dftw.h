@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, The University of Oxford
+ * Copyright (c) 2017-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,19 +48,25 @@ extern "C" {
  * This function performs a DFT using the supplied weights array.
  *
  * The transform may be either 2D or 3D. If either \p z_in or \p z_out
- * is NULL on input, the transform will be done in 2D.
+ * is NULL, the transform will be done in 2D.
  *
  * The wavelength used to compute the supplied wavenumber must be in the
  * same units as the input positions (e.g. metres).
  *
- * If the \p data parameter is NULL, then all input values will
- * be implicitly assumed to be real, with value 1.0. If not NULL,
- * the \p data array must be complex and of size \p num_out * \p num_in.
+ * The \p data array must be of complex or complex matrix type,
+ * and of size \p num_out * \p num_in (maximum).
  * It is accessed in such a way that the output dimension must be the
  * fastest varying.
  *
+ * The \p data_idx array is optional.
+ * If supplied, it must be of length \p num_in and will be used to
+ * indirectly address the second dimension of the input \p data array
+ * for the given input index.
+ * If omitted (NULL), the indexing is implicit and the size of the second
+ * dimension of the \p data array must be \p num_in.
+ *
  * The computed points are returned in the \p output array.
- * These are the complex values for each output position.
+ * These are the complex (or complex matrix) values for each output position.
  *
  * @param[in] normalise        If true, divide output values by \p num_in.
  * @param[in] num_in           Number of input points.
@@ -74,7 +80,10 @@ extern "C" {
  * @param[in] x_out            Array of output 1/x positions.
  * @param[in] y_out            Array of output 1/y positions.
  * @param[in] z_out            Array of output 1/z positions.
+ * @param[in] data_idx         Optional input data indices (see note, above).
  * @param[in] data             Input data (see note, above).
+ * @param[in] eval_x           For matrix data, evaluate X components if true.
+ * @param[in] eval_y           For matrix data, evaluate Y components if true.
  * @param[in] offset_out       Start offset into output data array.
  * @param[out] output          Output data (see note, above).
  * @param[in,out] status       Status return code.
@@ -93,7 +102,10 @@ void oskar_dftw(
         const oskar_Mem* x_out,
         const oskar_Mem* y_out,
         const oskar_Mem* z_out,
+        const oskar_Mem* data_idx,
         const oskar_Mem* data,
+        int eval_x,
+        int eval_y,
         int offset_out,
         oskar_Mem* output,
         int* status);

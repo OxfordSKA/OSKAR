@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
 
 struct oskar_StationWork
 {
+    oskar_Mem* weights;          /* Complex scalar. */
+    oskar_Mem* weights_scratch;  /* Complex scalar. */
     oskar_Mem* horizon_mask;     /* Integer. */
     oskar_Mem* source_indices;   /* Integer. */
 
@@ -43,9 +45,6 @@ struct oskar_StationWork
     oskar_Mem* theta_modified;   /* Real scalar. */
     oskar_Mem* phi_x;            /* Real scalar. */
     oskar_Mem* phi_y;            /* Real scalar. */
-    oskar_Mem* weights;          /* Complex scalar. */
-    oskar_Mem* weights_error;    /* Complex scalar. */
-    oskar_Mem* array_pattern;    /* Complex scalar. */
     oskar_Mem* beam_out_scratch; /* Output scratch array. */
 
     /* TEC screen. */

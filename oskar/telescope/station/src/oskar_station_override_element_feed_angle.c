@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,42 +35,37 @@
 extern "C" {
 #endif
 
-void oskar_station_override_element_feed_angle(oskar_Station* s,
-        unsigned int seed, int x_pol, double alpha_error_rad,
+void oskar_station_override_element_feed_angle(oskar_Station* station,
+        int feed, unsigned int seed, double alpha_error_rad,
         double beta_error_rad, double gamma_error_rad, int* status)
 {
     int i;
-
-    /* Check if safe to proceed. */
-    if (*status || !s) return;
-
-    /* Check if there are child stations. */
-    if (oskar_station_has_child(s))
+    if (*status || !station) return;
+    const int num = oskar_station_num_elements(station);
+    if (oskar_station_has_child(station))
     {
         /* Recursive call to find the last level (i.e. the element data). */
-        for (i = 0; i < s->num_elements; ++i)
+        for (i = 0; i < num; ++i)
         {
             oskar_station_override_element_feed_angle(
-                    oskar_station_child(s, i), seed, x_pol,
+                    oskar_station_child(station, i), feed, seed,
                     alpha_error_rad, beta_error_rad, gamma_error_rad, status);
         }
     }
     else
     {
         /* Override element data at last level. */
-        int id;
         double *a, *b, *c, r[4];
-        oskar_Mem *alpha, *beta, *gamma;
 
         /* Get pointer to the X or Y element orientation data. */
-        alpha = x_pol ? s->element_x_alpha_cpu : s->element_y_alpha_cpu;
-        beta  = x_pol ? s->element_x_beta_cpu : s->element_y_beta_cpu;
-        gamma = x_pol ? s->element_x_gamma_cpu : s->element_y_gamma_cpu;
-        a = oskar_mem_double(alpha, status);
-        b = oskar_mem_double(beta, status);
-        c = oskar_mem_double(gamma, status);
-        id = oskar_station_unique_id(s);
-        for (i = 0; i < s->num_elements; ++i)
+        a = oskar_mem_double(
+                oskar_station_element_euler_rad(station, feed, 0), status);
+        b = oskar_mem_double(
+                oskar_station_element_euler_rad(station, feed, 1), status);
+        c = oskar_mem_double(
+                oskar_station_element_euler_rad(station, feed, 2), status);
+        const int id = oskar_station_unique_id(station);
+        for (i = 0; i < num; ++i)
         {
             /* Generate random numbers from Gaussian distribution. */
             oskar_random_gaussian4(seed, i, id, 0, 0, r);

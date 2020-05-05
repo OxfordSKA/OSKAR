@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,6 @@ extern "C" {
 void oskar_telescope_resize(oskar_Telescope* telescope, int size, int* status)
 {
     int i, old_size = 0;
-
-    /* Check if safe to proceed. */
     if (*status) return;
 
     /* Get the old size. */
@@ -61,8 +59,8 @@ void oskar_telescope_resize(oskar_Telescope* telescope, int size, int* status)
         for (i = old_size; i < size; ++i)
         {
             telescope->station[i] = oskar_station_create(
-                    oskar_mem_type(telescope->station_true_x_offset_ecef_metres),
-                    oskar_mem_location(telescope->station_true_x_offset_ecef_metres),
+                    oskar_mem_type(telescope->station_true_offset_ecef_metres[0]),
+                    oskar_mem_location(telescope->station_true_offset_ecef_metres[0]),
                     0, status);
         }
     }
@@ -83,30 +81,17 @@ void oskar_telescope_resize(oskar_Telescope* telescope, int size, int* status)
     }
 
     /* Resize the remaining arrays. */
-    oskar_mem_realloc(telescope->station_true_x_offset_ecef_metres,
-            size, status);
-    oskar_mem_realloc(telescope->station_true_y_offset_ecef_metres,
-            size, status);
-    oskar_mem_realloc(telescope->station_true_z_offset_ecef_metres,
-            size, status);
-    oskar_mem_realloc(telescope->station_true_x_enu_metres,
-            size, status);
-    oskar_mem_realloc(telescope->station_true_y_enu_metres,
-            size, status);
-    oskar_mem_realloc(telescope->station_true_z_enu_metres,
-            size, status);
-    oskar_mem_realloc(telescope->station_measured_x_offset_ecef_metres,
-            size, status);
-    oskar_mem_realloc(telescope->station_measured_y_offset_ecef_metres,
-            size, status);
-    oskar_mem_realloc(telescope->station_measured_z_offset_ecef_metres,
-            size, status);
-    oskar_mem_realloc(telescope->station_measured_x_enu_metres,
-            size, status);
-    oskar_mem_realloc(telescope->station_measured_y_enu_metres,
-            size, status);
-    oskar_mem_realloc(telescope->station_measured_z_enu_metres,
-            size, status);
+    for (i = 0; i < 3; ++i)
+    {
+        oskar_mem_realloc(telescope->station_true_offset_ecef_metres[i],
+                size, status);
+        oskar_mem_realloc(telescope->station_true_enu_metres[i],
+                size, status);
+        oskar_mem_realloc(telescope->station_measured_offset_ecef_metres[i],
+                size, status);
+        oskar_mem_realloc(telescope->station_measured_enu_metres[i],
+                size, status);
+    }
 
     /* Store the new size. */
     telescope->num_stations = size;

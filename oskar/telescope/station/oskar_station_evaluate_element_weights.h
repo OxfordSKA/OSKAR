@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_H_
-#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_H_
+#ifndef OSKAR_STATION_EVALUATE_ELEMENT_WEIGHTS_H_
+#define OSKAR_STATION_EVALUATE_ELEMENT_WEIGHTS_H_
 
 /**
- * @file oskar_evaluate_element_weights.h
+ * @file oskar_station_evaluate_element_weights.h
  */
 
 #include <oskar_global.h>
@@ -52,27 +52,28 @@ extern "C" {
  * - Systematic and random gain and phase variations.
  * - User-supplied apodisation weights.
  *
- * The \p weights and \p weights_error arrays are resized to hold the weights
+ * The \p weights and \p weights_scratch arrays are resized to hold the weights
  * if necessary.
  *
- * @param[in,out] weights       Output array of beamforming weights.
- * @param[in,out] weights_error Work array, for calculating the weights error.
- * @param[in] wavenumber        Wavenumber (2 pi / wavelength).
- * @param[in] station           Pointer to station model.
- * @param[in] x_beam            Beam direction cosine, horizontal x-component.
- * @param[in] y_beam            Beam direction cosine, horizontal y-component.
- * @param[in] z_beam            Beam direction cosine, horizontal z-component.
- * @param[in] time_index        Time index of simulation.
- * @param[in,out] status        Status return code.
+ * @param[in] station             Station model.
+ * @param[in] feed                Feed index (0 = X, 1 = Y).
+ * @param[in] wavenumber          Wavenumber (2 pi / wavelength).
+ * @param[in] x_beam              Beam direction cosine, horizontal x-component.
+ * @param[in] y_beam              Beam direction cosine, horizontal y-component.
+ * @param[in] z_beam              Beam direction cosine, horizontal z-component.
+ * @param[in] time_index          Time index of simulation.
+ * @param[in,out] weights         Output array of beamforming weights.
+ * @param[in,out] weights_scratch Work array, for calculating the weights error.
+ * @param[in,out] status          Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_element_weights(oskar_Mem* weights,
-        oskar_Mem* weights_error, double wavenumber,
-        const oskar_Station* station, double x_beam, double y_beam,
-        double z_beam, int time_index, int* status);
+void oskar_station_evaluate_element_weights(const oskar_Station* station,
+        int feed, double wavenumber, double x_beam, double y_beam,
+        double z_beam, int time_index, oskar_Mem* weights,
+        oskar_Mem* weights_scratch, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_ELEMENT_WEIGHTS_H_ */
+#endif /* include guard */

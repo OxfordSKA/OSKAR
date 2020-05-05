@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, The University of Oxford
+ * Copyright (c) 2019-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,12 +47,13 @@ extern "C" {
  * station model to an ASCII file.
  *
  * @param[in] filename   Pathname of file to write.
+ * @param[in] feed       Feed index (0 = X, 1 = Y).
  * @param[in] station    Station model to write.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_save_cable_length_error(const char* filename,
-        const oskar_Station* station, int* status);
+void oskar_station_save_cable_length_error(const oskar_Station* station,
+        int feed, const char* filename, int* status);
 
 #ifdef __cplusplus
 }

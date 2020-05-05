@@ -126,7 +126,7 @@ TEST(telescope_model_load_save, test_1_level)
             xyz[0] = 10.0 * i + 1.0 * j;
             xyz[1] = 20.0 * i + 1.0 * j;
             xyz[2] = 30.0 * i + 1.0 * j;
-            oskar_station_set_element_coords(st, j, xyz, xyz, &err);
+            oskar_station_set_element_coords(st, 0, j, xyz, xyz, &err);
             ASSERT_EQ(0, err) << oskar_get_error_string(err);
         }
     }
@@ -155,52 +155,30 @@ TEST(telescope_model_load_save, test_1_level)
             oskar_telescope_alt_metres(telescope2), 1e-10);
 
     double max_, avg_;
-    oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_true_x_enu_metres(telescope),
-            oskar_telescope_station_true_x_enu_metres(telescope2),
-            0, &max_, &avg_, 0, &err);
-    ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    EXPECT_LT(max_, 1e-5);
-    EXPECT_LT(avg_, 1e-5);
-    oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_true_y_enu_metres(telescope),
-            oskar_telescope_station_true_y_enu_metres(telescope2),
-            0, &max_, &avg_, 0, &err);
-    ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    EXPECT_LT(max_, 1e-5);
-    EXPECT_LT(avg_, 1e-5);
-    oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_true_z_enu_metres(telescope),
-            oskar_telescope_station_true_z_enu_metres(telescope2),
-            0, &max_, &avg_, 0, &err);
-    ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    EXPECT_LT(max_, 1e-5);
-    EXPECT_LT(avg_, 1e-5);
+    for (int dim = 0; dim < 3; dim++)
+    {
+        oskar_mem_evaluate_relative_error(
+                oskar_telescope_station_true_enu_metres(telescope, dim),
+                oskar_telescope_station_true_enu_metres(telescope2, dim),
+                0, &max_, &avg_, 0, &err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
+        EXPECT_LT(max_, 1e-5);
+        EXPECT_LT(avg_, 1e-5);
+    }
     for (int i = 0; i < num_stations; ++i)
     {
         oskar_Station* st1 = oskar_telescope_station(telescope, i);
         oskar_Station* st2 = oskar_telescope_station(telescope2, i);
-        oskar_mem_evaluate_relative_error(
-                oskar_station_element_measured_x_enu_metres(st1),
-                oskar_station_element_measured_x_enu_metres(st2),
-                0, &max_, &avg_, 0, &err);
-        ASSERT_EQ(0, err) << oskar_get_error_string(err);
-        EXPECT_LT(max_, 1e-5);
-        EXPECT_LT(avg_, 1e-5);
-        oskar_mem_evaluate_relative_error(
-                oskar_station_element_measured_y_enu_metres(st1),
-                oskar_station_element_measured_y_enu_metres(st2),
-                0, &max_, &avg_, 0, &err);
-        ASSERT_EQ(0, err) << oskar_get_error_string(err);
-        EXPECT_LT(max_, 1e-5);
-        EXPECT_LT(avg_, 1e-5);
-        oskar_mem_evaluate_relative_error(
-                oskar_station_element_measured_z_enu_metres(st1),
-                oskar_station_element_measured_z_enu_metres(st2),
-                0, &max_, &avg_, 0, &err);
-        ASSERT_EQ(0, err) << oskar_get_error_string(err);
-        EXPECT_LT(max_, 1e-5);
-        EXPECT_LT(avg_, 1e-5);
+        for (int dim = 0; dim < 3; dim++)
+        {
+            oskar_mem_evaluate_relative_error(
+                    oskar_station_element_measured_enu_metres(st1, 0, dim),
+                    oskar_station_element_measured_enu_metres(st2, 0, dim),
+                    0, &max_, &avg_, 0, &err);
+            ASSERT_EQ(0, err) << oskar_get_error_string(err);
+            EXPECT_LT(max_, 1e-5);
+            EXPECT_LT(avg_, 1e-5);
+        }
     }
 
     // Remove test directory.
@@ -250,7 +228,7 @@ TEST(telescope_model_load_save, test_2_level)
             xyz[0] = 10.0 * i + 1.0 * j;
             xyz[1] = 20.0 * i + 1.0 * j;
             xyz[2] = 30.0 * i + 1.0 * j;
-            oskar_station_set_element_coords(st, j, xyz, xyz, &err);
+            oskar_station_set_element_coords(st, 0, j, xyz, xyz, &err);
             ASSERT_EQ(0, err) << oskar_get_error_string(err);
             oskar_station_resize(oskar_station_child(st, j), num_elements, &err);
             ASSERT_EQ(0, err) << oskar_get_error_string(err);
@@ -260,7 +238,7 @@ TEST(telescope_model_load_save, test_2_level)
                 xyz[0] = 100.0 * i + 10.0 * j + 1.0 * k;
                 xyz[1] = 200.0 * i + 10.0 * j + 1.0 * k;
                 xyz[2] = 300.0 * i + 10.0 * j + 1.0 * k;
-                oskar_station_set_element_coords(oskar_station_child(st, j),
+                oskar_station_set_element_coords(oskar_station_child(st, j), 0,
                         k, xyz, xyz, &err);
                 ASSERT_EQ(0, err) << oskar_get_error_string(err);
             }
@@ -292,78 +270,45 @@ TEST(telescope_model_load_save, test_2_level)
             oskar_telescope_alt_metres(telescope2), 1e-10);
 
     double max_, avg_ = 0.0;
-    oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_true_x_enu_metres(telescope),
-            oskar_telescope_station_true_x_enu_metres(telescope2),
-            0, &max_, &avg_, 0, &err);
-    ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    EXPECT_LT(max_, 1e-5);
-    EXPECT_LT(avg_, 1e-5);
-    oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_true_y_enu_metres(telescope),
-            oskar_telescope_station_true_y_enu_metres(telescope2),
-            0, &max_, &avg_, 0, &err);
-    ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    EXPECT_LT(max_, 1e-5);
-    EXPECT_LT(avg_, 1e-5);
-    oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_true_z_enu_metres(telescope),
-            oskar_telescope_station_true_z_enu_metres(telescope2),
-            0, &max_, &avg_, 0, &err);
-    ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    EXPECT_LT(max_, 1e-5);
-    EXPECT_LT(avg_, 1e-5);
+    for (int dim = 0; dim < 3; dim++)
+    {
+        oskar_mem_evaluate_relative_error(
+                oskar_telescope_station_true_enu_metres(telescope, dim),
+                oskar_telescope_station_true_enu_metres(telescope2, dim),
+                0, &max_, &avg_, 0, &err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
+        EXPECT_LT(max_, 1e-5);
+        EXPECT_LT(avg_, 1e-5);
+    }
     for (int i = 0; i < num_stations; ++i)
     {
         oskar_Station* s1 = oskar_telescope_station(telescope, i);
         oskar_Station* s2 = oskar_telescope_station(telescope2, i);
-        oskar_mem_evaluate_relative_error(
-                oskar_station_element_measured_x_enu_metres(s1),
-                oskar_station_element_measured_x_enu_metres(s2),
-                0, &max_, &avg_, 0, &err);
-        ASSERT_EQ(0, err) << oskar_get_error_string(err);
-        EXPECT_LT(max_, 1e-5);
-        EXPECT_LT(avg_, 1e-5);
-        oskar_mem_evaluate_relative_error(
-                oskar_station_element_measured_y_enu_metres(s1),
-                oskar_station_element_measured_y_enu_metres(s2),
-                0, &max_, &avg_, 0, &err);
-        ASSERT_EQ(0, err) << oskar_get_error_string(err);
-        EXPECT_LT(max_, 1e-5);
-        EXPECT_LT(avg_, 1e-5);
-        oskar_mem_evaluate_relative_error(
-                oskar_station_element_measured_z_enu_metres(s1),
-                oskar_station_element_measured_z_enu_metres(s2),
-                0, &max_, &avg_, 0, &err);
-        ASSERT_EQ(0, err) << oskar_get_error_string(err);
-        EXPECT_LT(max_, 1e-5);
-        EXPECT_LT(avg_, 1e-5);
+        for (int dim = 0; dim < 3; dim++)
+        {
+            oskar_mem_evaluate_relative_error(
+                    oskar_station_element_measured_enu_metres(s1, 0, dim),
+                    oskar_station_element_measured_enu_metres(s2, 0, dim),
+                    0, &max_, &avg_, 0, &err);
+            ASSERT_EQ(0, err) << oskar_get_error_string(err);
+            EXPECT_LT(max_, 1e-5);
+            EXPECT_LT(avg_, 1e-5);
+        }
 
         for (int j = 0; j < num_tiles; ++j)
         {
             oskar_Station *c1 = oskar_station_child(s1, j);
             oskar_Station *c2 = oskar_station_child(s2, j);
-            oskar_mem_evaluate_relative_error(
-                    oskar_station_element_measured_x_enu_metres(c1),
-                    oskar_station_element_measured_x_enu_metres(c2),
-                    0, &max_, &avg_, 0, &err);
-            ASSERT_EQ(0, err) << oskar_get_error_string(err);
-            EXPECT_LT(max_, 1e-5);
-            EXPECT_LT(avg_, 1e-5);
-            oskar_mem_evaluate_relative_error(
-                    oskar_station_element_measured_y_enu_metres(c1),
-                    oskar_station_element_measured_y_enu_metres(c2),
-                    0, &max_, &avg_, 0, &err);
-            ASSERT_EQ(0, err) << oskar_get_error_string(err);
-            EXPECT_LT(max_, 1e-5);
-            EXPECT_LT(avg_, 1e-5);
-            oskar_mem_evaluate_relative_error(
-                    oskar_station_element_measured_z_enu_metres(c1),
-                    oskar_station_element_measured_z_enu_metres(c2),
-                    0, &max_, &avg_, 0, &err);
-            ASSERT_EQ(0, err) << oskar_get_error_string(err);
-            EXPECT_LT(max_, 1e-5);
-            EXPECT_LT(avg_, 1e-5);
+            for (int dim = 0; dim < 3; dim++)
+            {
+                oskar_mem_evaluate_relative_error(
+                        oskar_station_element_measured_enu_metres(c1, 0, dim),
+                        oskar_station_element_measured_enu_metres(c2, 0, dim),
+                        0, &max_, &avg_, 0, &err);
+                ASSERT_EQ(0, err) << oskar_get_error_string(err);
+                EXPECT_LT(max_, 1e-5);
+                EXPECT_LT(avg_, 1e-5);
+            }
         }
     }
 
@@ -381,78 +326,45 @@ TEST(telescope_model_load_save, test_2_level)
     EXPECT_NEAR(oskar_telescope_alt_metres(telescope),
             oskar_telescope_alt_metres(telescope3), 1e-10);
 
-    oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_true_x_enu_metres(telescope),
-            oskar_telescope_station_true_x_enu_metres(telescope3),
-            0, &max_, &avg_, 0, &err);
-    ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    EXPECT_LT(max_, 1e-5);
-    EXPECT_LT(avg_, 1e-5);
-    oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_true_y_enu_metres(telescope),
-            oskar_telescope_station_true_y_enu_metres(telescope3),
-            0, &max_, &avg_, 0, &err);
-    ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    EXPECT_LT(max_, 1e-5);
-    EXPECT_LT(avg_, 1e-5);
-    oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_true_z_enu_metres(telescope),
-            oskar_telescope_station_true_z_enu_metres(telescope3),
-            0, &max_, &avg_, 0, &err);
-    ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    EXPECT_LT(max_, 1e-5);
-    EXPECT_LT(avg_, 1e-5);
+    for (int dim = 0; dim < 3; dim++)
+    {
+        oskar_mem_evaluate_relative_error(
+                oskar_telescope_station_true_enu_metres(telescope, dim),
+                oskar_telescope_station_true_enu_metres(telescope3, dim),
+                0, &max_, &avg_, 0, &err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
+        EXPECT_LT(max_, 1e-5);
+        EXPECT_LT(avg_, 1e-5);
+    }
     for (int i = 0; i < num_stations; ++i)
     {
         oskar_Station* s1 = oskar_telescope_station(telescope, i);
         oskar_Station* s3 = oskar_telescope_station(telescope3, i);
-        oskar_mem_evaluate_relative_error(
-                oskar_station_element_measured_x_enu_metres(s1),
-                oskar_station_element_measured_x_enu_metres(s3),
-                0, &max_, &avg_, 0, &err);
-        ASSERT_EQ(0, err) << oskar_get_error_string(err);
-        EXPECT_LT(max_, 1e-5);
-        EXPECT_LT(avg_, 1e-5);
-        oskar_mem_evaluate_relative_error(
-                oskar_station_element_measured_y_enu_metres(s1),
-                oskar_station_element_measured_y_enu_metres(s3),
-                0, &max_, &avg_, 0, &err);
-        ASSERT_EQ(0, err) << oskar_get_error_string(err);
-        EXPECT_LT(max_, 1e-5);
-        EXPECT_LT(avg_, 1e-5);
-        oskar_mem_evaluate_relative_error(
-                oskar_station_element_measured_z_enu_metres(s1),
-                oskar_station_element_measured_z_enu_metres(s3),
-                0, &max_, &avg_, 0, &err);
-        ASSERT_EQ(0, err) << oskar_get_error_string(err);
-        EXPECT_LT(max_, 1e-5);
-        EXPECT_LT(avg_, 1e-5);
+        for (int dim = 0; dim < 3; dim++)
+        {
+            oskar_mem_evaluate_relative_error(
+                    oskar_station_element_measured_enu_metres(s1, 0, dim),
+                    oskar_station_element_measured_enu_metres(s3, 0, dim),
+                    0, &max_, &avg_, 0, &err);
+            ASSERT_EQ(0, err) << oskar_get_error_string(err);
+            EXPECT_LT(max_, 1e-5);
+            EXPECT_LT(avg_, 1e-5);
+        }
 
         for (int j = 0; j < num_tiles; ++j)
         {
             oskar_Station *c1 = oskar_station_child(s1, j);
             oskar_Station *c3 = oskar_station_child(s3, j);
-            oskar_mem_evaluate_relative_error(
-                    oskar_station_element_measured_x_enu_metres(c1),
-                    oskar_station_element_measured_x_enu_metres(c3),
-                    0, &max_, &avg_, 0, &err);
-            ASSERT_EQ(0, err) << oskar_get_error_string(err);
-            EXPECT_LT(max_, 1e-5);
-            EXPECT_LT(avg_, 1e-5);
-            oskar_mem_evaluate_relative_error(
-                    oskar_station_element_measured_y_enu_metres(c1),
-                    oskar_station_element_measured_y_enu_metres(c3),
-                    0, &max_, &avg_, 0, &err);
-            ASSERT_EQ(0, err) << oskar_get_error_string(err);
-            EXPECT_LT(max_, 1e-5);
-            EXPECT_LT(avg_, 1e-5);
-            oskar_mem_evaluate_relative_error(
-                    oskar_station_element_measured_z_enu_metres(c1),
-                    oskar_station_element_measured_z_enu_metres(c3),
-                    0, &max_, &avg_, 0, &err);
-            ASSERT_EQ(0, err) << oskar_get_error_string(err);
-            EXPECT_LT(max_, 1e-5);
-            EXPECT_LT(avg_, 1e-5);
+            for (int dim = 0; dim < 3; dim++)
+            {
+                oskar_mem_evaluate_relative_error(
+                        oskar_station_element_measured_enu_metres(c1, 0, dim),
+                        oskar_station_element_measured_enu_metres(c3, 0, dim),
+                        0, &max_, &avg_, 0, &err);
+                ASSERT_EQ(0, err) << oskar_get_error_string(err);
+                EXPECT_LT(max_, 1e-5);
+                EXPECT_LT(avg_, 1e-5);
+            }
         }
     }
 

@@ -184,9 +184,9 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings_old& sett
     double screen_height_m = settings.ionosphere.TID->height_km * 1000.0;
 
     const void *x_, *y_, *z_;
-    x_ = oskar_mem_void_const(oskar_telescope_station_true_x_offset_ecef_metres_const(tel));
-    y_ = oskar_mem_void_const(oskar_telescope_station_true_y_offset_ecef_metres_const(tel));
-    z_ = oskar_mem_void_const(oskar_telescope_station_true_z_offset_ecef_metres_const(tel));
+    x_ = oskar_mem_void_const(oskar_telescope_station_true_offset_ecef_metres_const(tel, 0));
+    y_ = oskar_mem_void_const(oskar_telescope_station_true_offset_ecef_metres_const(tel, 1));
+    z_ = oskar_mem_void_const(oskar_telescope_station_true_offset_ecef_metres_const(tel, 2));
 
     num_times = 1; // XXX restriction made to match image.
     for (int t = 0; t < num_times; ++t)
@@ -385,25 +385,25 @@ void evaluate_station_beam_pp(const oskar_Telescope* tel, int stationID,
     if (type == OSKAR_DOUBLE)
     {
         st_x = (oskar_mem_double_const(
-                oskar_telescope_station_true_x_offset_ecef_metres_const(tel),
+                oskar_telescope_station_true_offset_ecef_metres_const(tel, 0),
                 status))[stationID];
         st_y = (oskar_mem_double_const(
-                oskar_telescope_station_true_y_offset_ecef_metres_const(tel),
+                oskar_telescope_station_true_offset_ecef_metres_const(tel, 1),
                 status))[stationID];
         st_z = (oskar_mem_double_const(
-                oskar_telescope_station_true_z_offset_ecef_metres_const(tel),
+                oskar_telescope_station_true_offset_ecef_metres_const(tel, 2),
                 status))[stationID];
     }
     else
     {
         st_x = (double)(oskar_mem_float_const(
-                oskar_telescope_station_true_x_offset_ecef_metres_const(tel),
+                oskar_telescope_station_true_offset_ecef_metres_const(tel, 0),
                 status))[stationID];
         st_y = (double)(oskar_mem_float_const(
-                oskar_telescope_station_true_y_offset_ecef_metres_const(tel),
+                oskar_telescope_station_true_offset_ecef_metres_const(tel, 1),
                 status))[stationID];
         st_z = (double)(oskar_mem_float_const(
-                oskar_telescope_station_true_z_offset_ecef_metres_const(tel),
+                oskar_telescope_station_true_offset_ecef_metres_const(tel, 2),
                 status))[stationID];
     }
     oskar_convert_offset_ecef_to_ecef(1, &st_x, &st_y, &st_z, st_lon,

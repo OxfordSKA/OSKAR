@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,28 +37,25 @@ extern "C" {
 
 void oskar_station_free(oskar_Station* model, int* status)
 {
-    int i = 0;
+    int i, feed, dim;
     if (!model) return;
 
     /* Free the element data. */
-    oskar_mem_free(model->element_true_x_enu_metres, status);
-    oskar_mem_free(model->element_true_y_enu_metres, status);
-    oskar_mem_free(model->element_true_z_enu_metres, status);
-    oskar_mem_free(model->element_measured_x_enu_metres, status);
-    oskar_mem_free(model->element_measured_y_enu_metres, status);
-    oskar_mem_free(model->element_measured_z_enu_metres, status);
-    oskar_mem_free(model->element_weight, status);
-    oskar_mem_free(model->element_cable_length_error, status);
-    oskar_mem_free(model->element_gain, status);
-    oskar_mem_free(model->element_gain_error, status);
-    oskar_mem_free(model->element_phase_offset_rad, status);
-    oskar_mem_free(model->element_phase_error_rad, status);
-    oskar_mem_free(model->element_x_alpha_cpu, status);
-    oskar_mem_free(model->element_x_beta_cpu, status);
-    oskar_mem_free(model->element_x_gamma_cpu, status);
-    oskar_mem_free(model->element_y_alpha_cpu, status);
-    oskar_mem_free(model->element_y_beta_cpu, status);
-    oskar_mem_free(model->element_y_gamma_cpu, status);
+    for (feed = 0; feed < 2; feed++)
+    {
+        for (dim = 0; dim < 3; dim++)
+        {
+            oskar_mem_free(model->element_true_enu_metres[feed][dim], status);
+            oskar_mem_free(model->element_measured_enu_metres[feed][dim], status);
+            oskar_mem_free(model->element_euler_cpu[feed][dim], status);
+        }
+        oskar_mem_free(model->element_weight[feed], status);
+        oskar_mem_free(model->element_cable_length_error[feed], status);
+        oskar_mem_free(model->element_gain[feed], status);
+        oskar_mem_free(model->element_gain_error[feed], status);
+        oskar_mem_free(model->element_phase_offset_rad[feed], status);
+        oskar_mem_free(model->element_phase_error_rad[feed], status);
+    }
     oskar_mem_free(model->element_types, status);
     oskar_mem_free(model->element_types_cpu, status);
     oskar_mem_free(model->element_mount_types_cpu, status);

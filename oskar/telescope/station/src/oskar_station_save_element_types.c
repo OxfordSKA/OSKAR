@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, The University of Oxford
+ * Copyright (c) 2014-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,15 +35,11 @@
 extern "C" {
 #endif
 
-void oskar_station_save_element_types(const char* filename,
-        const oskar_Station* station, int* status)
+void oskar_station_save_element_types(const oskar_Station* station,
+        const char* filename, int* status)
 {
     FILE* file;
-
-    /* Check if safe to proceed. */
     if (*status || !station) return;
-
-    /* Save the data. */
     file = fopen(filename, "w");
     if (!file)
     {

@@ -36,8 +36,8 @@
 extern "C" {
 #endif
 
-void oskar_station_save_cable_length_error(const char* filename,
-        const oskar_Station* station, int* status)
+void oskar_station_save_cable_length_error(const oskar_Station* station,
+        int feed, const char* filename, int* status)
 {
     FILE* file;
     if (*status || !station) return;
@@ -49,7 +49,7 @@ void oskar_station_save_cable_length_error(const char* filename,
     }
     oskar_mem_save_ascii(file, 1, 0, oskar_station_num_elements(station),
             status,
-            oskar_station_element_cable_length_error_metres_const(station));
+            oskar_station_element_cable_length_error_metres_const(station, feed));
     fclose(file);
 }
 

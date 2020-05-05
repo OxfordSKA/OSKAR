@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -155,43 +155,6 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     s->clear_group();
     s->begin_group("telescope/aperture_array/array_pattern/element");
 
-    /* Override station element systematic/fixed gain errors if required. */
-    double gain = s->to_double("gain", status);
-    double gain_err_fixed = s->to_double("gain_error_fixed", status);
-    if (gain > 0.0 || gain_err_fixed > 0.0)
-    {
-        int seed = s->to_int("seed_gain_errors", status);
-        oskar_telescope_override_element_gains(t, (unsigned int) seed,
-                gain, gain_err_fixed, status);
-    }
-
-    /* Override station element time-variable gain errors if required. */
-    double gain_err_time = s->to_double("gain_error_time", status);
-    if (gain_err_time > 0.0)
-    {
-        for (int i = 0; i < num_stations; ++i)
-            oskar_station_override_element_time_variable_gains(
-                    oskar_telescope_station(t, i), gain_err_time, status);
-    }
-
-    /* Override station element systematic/fixed phase errors if required. */
-    double phase_err_fixed = s->to_double("phase_error_fixed_deg", status) * D2R;
-    if (phase_err_fixed > 0.0)
-    {
-        int seed = s->to_int("seed_phase_errors", status);
-        oskar_telescope_override_element_phases(t, (unsigned int) seed,
-                phase_err_fixed, status);
-    }
-
-    /* Override station element time-variable phase errors if required. */
-    double phase_err_time = s->to_double("phase_error_time_deg", status) * D2R;
-    if (phase_err_time > 0.0)
-    {
-        for (int i = 0; i < num_stations; ++i)
-            oskar_station_override_element_time_variable_phases(
-                    oskar_telescope_station(t, i), phase_err_time, status);
-    }
-
     /* Override station element position errors if required. */
     double position_error_xy_m = s->to_double("position_error_xy_m", status);
     if (position_error_xy_m > 0.0)
@@ -199,39 +162,93 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         int seed = s->to_int("seed_position_xy_errors", status);
         for (int i = 0; i < num_stations; ++i)
             oskar_station_override_element_xy_position_errors(
-                    oskar_telescope_station(t, i), (unsigned int) seed,
-                    position_error_xy_m, status);
+                    oskar_telescope_station(t, i),
+                    0, (unsigned int) seed, position_error_xy_m, status);
     }
 
-    /* Override station element cable length errors if required. */
-    double cable_length_error_m = s->to_double("cable_length_error_m", status);
-    if (cable_length_error_m > 0.0)
-    {
-        int seed = s->to_int("seed_cable_length_errors", status);
-        oskar_telescope_override_element_cable_length_errors(t,
-                (unsigned int) seed, 0.0, cable_length_error_m, status);
-    }
+    const char* k_gain[] = {
+            "x_gain", "y_gain"};
+    const char* k_gain_fixed[] = {
+            "x_gain_error_fixed", "y_gain_error_fixed"};
+    const char* k_gain_time[] = {
+            "x_gain_error_time", "y_gain_error_time"};
+    const char* k_seed_gain[] = {
+            "seed_x_gain_errors", "seed_y_gain_errors"};
+    const char* k_phase_fixed[] = {
+            "x_phase_error_fixed_deg", "y_phase_error_fixed_deg"};
+    const char* k_phase_time[] = {
+            "x_phase_error_time_deg", "y_phase_error_time_deg"};
+    const char* k_seed_phase[] = {
+            "seed_x_phase_errors", "seed_y_phase_errors"};
+    const char* k_cable[] = {
+            "x_cable_length_error_m", "y_cable_length_error_m"};
+    const char* k_seed_cable[] = {
+            "seed_x_cable_length_errors", "seed_y_cable_length_errors"};
+    const char* k_rot[] = {
+            "x_orientation_error_deg", "y_orientation_error_deg"};
+    const char* k_rot_seed[] = {
+            "seed_x_orientation_error", "seed_y_orientation_error"};
 
-    /* Add variation to x-dipole orientations if required. */
-    double x_rot_err = s->to_double("x_orientation_error_deg", status) * D2R;
-    if (x_rot_err > 0.0)
+    for (int feed = 0; feed < 2; feed++)
     {
-        int seed = s->to_int("seed_x_orientation_error", status);
-        for (int i = 0; i < num_stations; ++i)
-            oskar_station_override_element_feed_angle(
-                    oskar_telescope_station(t, i), (unsigned int) seed, 1,
-                    x_rot_err, 0.0, 0.0, status);
-    }
+        /* Override station element systematic/fixed gain errors if required. */
+        double gain = s->to_double(k_gain[feed], status);
+        double gain_fixed = s->to_double(k_gain_fixed[feed], status);
+        if (gain > 0.0 || gain_fixed > 0.0)
+        {
+            int seed = s->to_int(k_seed_gain[feed], status);
+            oskar_telescope_override_element_gains(t,
+                    feed, (unsigned int) seed, gain, gain_fixed, status);
+        }
 
-    /* Add variation to y-dipole orientations if required. */
-    double y_rot_err = s->to_double("y_orientation_error_deg", status) * D2R;
-    if (y_rot_err > 0.0)
-    {
-        int seed = s->to_int("seed_y_orientation_error", status);
-        for (int i = 0; i < num_stations; ++i)
-            oskar_station_override_element_feed_angle(
-                    oskar_telescope_station(t, i), (unsigned int) seed, 0,
-                    y_rot_err, 0.0, 0.0, status);
+        /* Override station element time-variable gain errors if required. */
+        double gain_time = s->to_double(k_gain_time[feed], status);
+        if (gain_time > 0.0)
+        {
+            for (int i = 0; i < num_stations; ++i)
+                oskar_station_override_element_time_variable_gains(
+                        oskar_telescope_station(t, i),
+                        feed, gain_time, status);
+        }
+
+        /* Override station element systematic/fixed phase errors if required. */
+        double phase_fixed = s->to_double(k_phase_fixed[feed], status) * D2R;
+        if (phase_fixed > 0.0)
+        {
+            int seed = s->to_int(k_seed_phase[feed], status);
+            oskar_telescope_override_element_phases(t,
+                    feed, (unsigned int) seed, phase_fixed, status);
+        }
+
+        /* Override station element time-variable phase errors if required. */
+        double phase_time = s->to_double(k_phase_time[feed], status) * D2R;
+        if (phase_time > 0.0)
+        {
+            for (int i = 0; i < num_stations; ++i)
+                oskar_station_override_element_time_variable_phases(
+                        oskar_telescope_station(t, i),
+                        feed, phase_time, status);
+        }
+
+        /* Override station element cable length errors if required. */
+        double cable_length_error = s->to_double(k_cable[feed], status);
+        if (cable_length_error > 0.0)
+        {
+            int seed = s->to_int(k_seed_cable[feed], status);
+            oskar_telescope_override_element_cable_length_errors(t,
+                    feed, (unsigned int) seed, 0.0, cable_length_error, status);
+        }
+
+        /* Add variation to element orientations if required. */
+        double rot_err = s->to_double(k_rot[feed], status) * D2R;
+        if (rot_err > 0.0)
+        {
+            int seed = s->to_int(k_rot_seed[feed], status);
+            for (int i = 0; i < num_stations; ++i)
+                oskar_station_override_element_feed_angle(
+                        oskar_telescope_station(t, i),
+                        feed, (unsigned int) seed, rot_err, 0.0, 0.0, status);
+        }
     }
 
     /* Set ionosphere parameters if enabled. */

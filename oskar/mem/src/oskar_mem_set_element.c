@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, The University of Oxford
+ * Copyright (c) 2014-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,29 +42,45 @@ void oskar_mem_set_element_real(oskar_Mem* mem, size_t index,
         double val, int* status)
 {
     if (*status) return;
-    const float val_f = (float) val;
     const int precision = oskar_type_precision(mem->type);
     const int location = mem->location;
     if (location == OSKAR_CPU)
     {
-        if (precision == OSKAR_DOUBLE)
+        switch (precision)
+        {
+        case OSKAR_DOUBLE:
             ((double*)(mem->data))[index] = val;
-        else if (precision == OSKAR_SINGLE)
-            ((float*)(mem->data))[index] = val_f;
-        else
+            return;
+        case OSKAR_SINGLE:
+            ((float*)(mem->data))[index] = (float) val;
+            return;
+        default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
     }
     else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        if (precision == OSKAR_DOUBLE)
+        switch (precision)
+        {
+        case OSKAR_DOUBLE:
+        {
             cudaMemcpy((double*)(mem->data) + index, &val, sizeof(double),
                     cudaMemcpyHostToDevice);
-        else if (precision == OSKAR_SINGLE)
+            return;
+        }
+        case OSKAR_SINGLE:
+        {
+            const float val_f = (float) val;
             cudaMemcpy((float*)(mem->data) + index, &val_f, sizeof(float),
                     cudaMemcpyHostToDevice);
-        else
+            return;
+        }
+        default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -74,6 +90,7 @@ void oskar_mem_set_element_real(oskar_Mem* mem, size_t index,
 #ifdef OSKAR_HAVE_OPENCL
         const size_t bytes = oskar_mem_element_size(mem->type);
         const size_t offset = bytes * index;
+        const float val_f = (float) val;
         const void* ptr;
         if (precision == OSKAR_DOUBLE)
             ptr = &val;

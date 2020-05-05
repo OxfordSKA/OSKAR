@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,31 +73,23 @@ struct oskar_Station
     int normalise_array_pattern;  /* True if the station beam should be normalised by the number of antennas. */
     int enable_array_pattern;     /* True if the array factor should be evaluated. */
     int common_element_orientation; /* True if elements share a common orientation (auto determined). */
+    int common_pol_beams;         /* True if beams for both polarisations can be formed in the same way (auto determined). */
     int array_is_3d;              /* True if array is 3-dimensional (auto determined; default false). */
     int apply_element_errors;     /* True if element gain and phase errors should be applied (auto determined; default false). */
     int apply_element_weight;     /* True if weights should be modified by user-supplied complex beamforming weights (auto determined; default false). */
-    unsigned int seed_time_variable_errors;   /* Seed for time variable errors. */
-    oskar_Mem* element_true_x_enu_metres;     /* True horizon element x-coordinates, in metres, towards East. */
-    oskar_Mem* element_true_y_enu_metres;     /* True horizon element y-coordinates, in metres, towards North. */
-    oskar_Mem* element_true_z_enu_metres;     /* True horizon element z-coordinates, in metres, towards the zenith. */
-    oskar_Mem* element_measured_x_enu_metres; /* Measured horizon element x-coordinates, in metres, towards East. */
-    oskar_Mem* element_measured_y_enu_metres; /* Measured horizon element y-coordinates, in metres, towards North. */
-    oskar_Mem* element_measured_z_enu_metres; /* Measured horizon element z-coordinates, in metres, towards the zenith. */
-    oskar_Mem* element_gain;                  /* Per-element gain factor (default 1.0) */
-    oskar_Mem* element_gain_error;            /* Standard deviation of per-element time-variable gain factor (default 0.0) */
-    oskar_Mem* element_phase_offset_rad;      /* Per-element systematic phase offset, in radians (default 0.0) */
-    oskar_Mem* element_phase_error_rad;       /* Standard deviation of per-element time-variable phase, in radians (default 0.0) */
-    oskar_Mem* element_weight;                /* Element complex weight (set to 1.0, 0.0 unless using apodisation). */
-    oskar_Mem* element_cable_length_error;    /* Cable length error, in metres. */
+    unsigned int seed_time_variable_errors;       /* Seed for time variable errors. */
+    oskar_Mem* element_true_enu_metres[2][3];     /* True horizon element ENU coordinates, in metres. */
+    oskar_Mem* element_measured_enu_metres[2][3]; /* Measured horizon element ENU coordinates, in metres. */
+    oskar_Mem* element_gain[2];                   /* Element gain factor (default 1.0) */
+    oskar_Mem* element_gain_error[2];             /* Standard deviation of per-element time-variable gain factor (default 0.0) */
+    oskar_Mem* element_phase_offset_rad[2];       /* Element systematic phase offset, in radians (default 0.0) */
+    oskar_Mem* element_phase_error_rad[2];        /* Standard deviation of per-element time-variable phase, in radians (default 0.0) */
+    oskar_Mem* element_weight[2];                 /* Element complex weight (set to 1.0, 0.0 unless using apodisation). */
+    oskar_Mem* element_cable_length_error[2];     /* Element cable length error, in metres. */
+    oskar_Mem* element_euler_cpu[2][3];           /* Element Euler angles, guaranteed to be in CPU memory. */
     oskar_Mem* element_types;     /* Integer array of element types (default 0). */
     oskar_Mem* element_types_cpu; /* Integer array of element types guaranteed to be in CPU memory (default 0). */
     oskar_Mem* element_mount_types_cpu; /* Char array of element mount types guaranteed to be in CPU memory. */
-    oskar_Mem* element_x_alpha_cpu; /* X element Euler angle orientation, guaranteed to be in CPU memory. */
-    oskar_Mem* element_x_beta_cpu;  /* X element Euler angle orientation, guaranteed to be in CPU memory. */
-    oskar_Mem* element_x_gamma_cpu; /* X element Euler angle orientation, guaranteed to be in CPU memory. */
-    oskar_Mem* element_y_alpha_cpu; /* Y element Euler angle orientation, guaranteed to be in CPU memory. */
-    oskar_Mem* element_y_beta_cpu;  /* Y element Euler angle orientation, guaranteed to be in CPU memory. */
-    oskar_Mem* element_y_gamma_cpu; /* Y element Euler angle orientation, guaranteed to be in CPU memory. */
     oskar_Station** child;        /* Array of child station handles (pointer is NULL if none). */
     oskar_Element** element;      /* Array of element models per element type (pointer is NULL if there are child stations). */
 

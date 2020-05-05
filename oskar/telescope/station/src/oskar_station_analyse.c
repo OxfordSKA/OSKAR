@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,10 @@ extern "C" {
 void oskar_station_analyse(oskar_Station* station,
         int* finished_identical_station_check, int* status)
 {
-    int i, type;
-    double *x_alpha, *x_beta, *x_gamma, *y_alpha, *y_beta, *y_gamma;
-    char* mount_type;
-
-    /* Check if safe to proceed. */
+    int i, num_feeds_to_check = 1, feed;
     if (*status || !station) return;
+    const int type = oskar_station_precision(station);
+    const int num_elements = station->num_elements;
 
     /* Check station model is in CPU-accessible memory. */
     if (oskar_station_mem_location(station) != OSKAR_CPU)
@@ -52,101 +50,162 @@ void oskar_station_analyse(oskar_Station* station,
         return;
     }
 
-    /* Get type. */
-    type = oskar_station_precision(station);
-
     /* Set default station flags. */
     station->array_is_3d = 0;
     station->apply_element_errors = 0;
     station->apply_element_weight = 0;
     station->common_element_orientation = 1;
+    station->common_pol_beams = 1;
 
-    /* Analyse orientations separately (always double precision). */
-    mount_type = oskar_mem_char(station->element_mount_types_cpu);
-    x_alpha = oskar_mem_double(station->element_x_alpha_cpu, status);
-    x_beta  = oskar_mem_double(station->element_x_beta_cpu, status);
-    x_gamma = oskar_mem_double(station->element_x_gamma_cpu, status);
-    y_alpha = oskar_mem_double(station->element_y_alpha_cpu, status);
-    y_beta  = oskar_mem_double(station->element_y_beta_cpu, status);
-    y_gamma = oskar_mem_double(station->element_y_gamma_cpu, status);
-    for (i = 1; i < station->num_elements; ++i)
+    /* Check orientations in both polarisations. */
+    for (feed = 0; feed < 2; feed++)
     {
-        if (mount_type[i] != mount_type[0] ||
-                x_alpha[i] != x_alpha[0] ||
-                x_beta[i] != x_beta[0] ||
-                x_gamma[i] != x_gamma[0] ||
-                y_alpha[i] != y_alpha[0] ||
-                y_beta[i] != y_beta[0] ||
-                y_gamma[i] != y_gamma[0])
+        const double *alpha, *beta, *gamma;
+        char* mount_type;
+
+        /* Analyse orientations separately (always double precision). */
+        mount_type = oskar_mem_char(station->element_mount_types_cpu);
+        alpha = oskar_mem_double_const(
+                oskar_station_element_euler_rad_const(station, feed, 0), status);
+        beta  = oskar_mem_double_const(
+                oskar_station_element_euler_rad_const(station, feed, 1), status);
+        gamma = oskar_mem_double_const(
+                oskar_station_element_euler_rad_const(station, feed, 2), status);
+        for (i = 1; i < num_elements; ++i)
         {
-            station->common_element_orientation = 0;
-            break;
+            if (mount_type[i] != mount_type[0] ||
+                    alpha[i] != alpha[0] ||
+                    beta[i] != beta[0] ||
+                    gamma[i] != gamma[0])
+            {
+                station->common_element_orientation = 0;
+                break;
+            }
         }
     }
 
-    if (type == OSKAR_DOUBLE)
+    /* Check presence of any second polarisation data used for beamforming. */
+    if (station->element_cable_length_error[1])
     {
-        double *z_true, *z_meas, *amp, *amp_err, *phase, *phase_err;
-        double2 *weights;
-        z_true    = oskar_mem_double(station->element_true_z_enu_metres, status);
-        z_meas    = oskar_mem_double(station->element_measured_z_enu_metres, status);
-        amp       = oskar_mem_double(station->element_gain, status);
-        amp_err   = oskar_mem_double(station->element_gain_error, status);
-        phase     = oskar_mem_double(station->element_phase_offset_rad, status);
-        phase_err = oskar_mem_double(station->element_phase_error_rad, status);
-        weights   = oskar_mem_double2(station->element_weight, status);
-
-        for (i = 0; i < station->num_elements; ++i)
+        station->common_pol_beams = 0;
+    }
+    if (station->element_true_enu_metres[1][0] ||
+            station->element_measured_enu_metres[1][0] ||
+            station->element_gain[1] ||
+            station->element_gain_error[1] ||
+            station->element_phase_offset_rad[1] ||
+            station->element_phase_error_rad[1] ||
+            station->element_weight[1])
+    {
+        station->common_pol_beams = 0;
+        num_feeds_to_check = 2;
+    }
+    for (feed = 0; feed < num_feeds_to_check; feed++)
+    {
+        if (type == OSKAR_DOUBLE)
         {
-            if (z_true[i] != 0.0 || z_meas[i] != 0.0)
+            double *z_true, *z_meas, *amp, *amp_err, *phase, *phase_err;
+            double2 *weights;
+            z_true    = (double*) oskar_mem_void(
+                    oskar_station_element_true_enu_metres(station, feed, 2));
+            z_meas    = (double*) oskar_mem_void(
+                    oskar_station_element_measured_enu_metres(station, feed, 2));
+            amp       = (double*) oskar_mem_void(
+                    oskar_station_element_gain(station, feed));
+            amp_err   = (double*) oskar_mem_void(
+                    oskar_station_element_gain_error(station, feed));
+            phase     = (double*) oskar_mem_void(
+                    oskar_station_element_phase_offset_rad(station, feed));
+            phase_err = (double*) oskar_mem_void(
+                    oskar_station_element_phase_error_rad(station, feed));
+            weights   = (double2*) oskar_mem_void(
+                    oskar_station_element_weight(station, feed));
+
+            for (i = 0; i < num_elements; ++i)
             {
-                station->array_is_3d = 1;
+                if (z_true[i] != 0.0 || z_meas[i] != 0.0)
+                {
+                    station->array_is_3d = 1;
+                    break;
+                }
             }
-            if (amp[i] != 1.0 || phase[i] != 0.0)
+            for (i = 0; i < num_elements; ++i)
             {
-                station->apply_element_errors = 1;
+                if (amp[i] != 1.0 || phase[i] != 0.0)
+                {
+                    station->apply_element_errors = 1;
+                    break;
+                }
             }
-            if (amp_err[i] != 0.0 || phase_err[i] != 0.0)
+            for (i = 0; i < num_elements; ++i)
             {
-                station->apply_element_errors = 1;
-                *finished_identical_station_check = 1;
+                if (amp_err[i] != 0.0 || phase_err[i] != 0.0)
+                {
+                    station->apply_element_errors = 1;
+                    *finished_identical_station_check = 1;
+                    break;
+                }
             }
-            if (weights[i].x != 1.0 || weights[i].y != 0.0)
+            for (i = 0; i < num_elements; ++i)
             {
-                station->apply_element_weight = 1;
+                if (weights[i].x != 1.0 || weights[i].y != 0.0)
+                {
+                    station->apply_element_weight = 1;
+                    break;
+                }
             }
         }
-    }
-    else if (type == OSKAR_SINGLE)
-    {
-        float *z_true, *z_meas, *amp, *amp_err, *phase, *phase_err;
-        float2 *weights;
-        z_true    = oskar_mem_float(station->element_true_z_enu_metres, status);
-        z_meas    = oskar_mem_float(station->element_measured_z_enu_metres, status);
-        amp       = oskar_mem_float(station->element_gain, status);
-        amp_err   = oskar_mem_float(station->element_gain_error, status);
-        phase     = oskar_mem_float(station->element_phase_offset_rad, status);
-        phase_err = oskar_mem_float(station->element_phase_error_rad, status);
-        weights   = oskar_mem_float2(station->element_weight, status);
-
-        for (i = 0; i < station->num_elements; ++i)
+        else if (type == OSKAR_SINGLE)
         {
-            if (z_true[i] != 0.0 || z_meas[i] != 0.0)
+            float *z_true, *z_meas, *amp, *amp_err, *phase, *phase_err;
+            float2 *weights;
+            z_true    = (float*) oskar_mem_void(
+                    oskar_station_element_true_enu_metres(station, feed, 2));
+            z_meas    = (float*) oskar_mem_void(
+                    oskar_station_element_measured_enu_metres(station, feed, 2));
+            amp       = (float*) oskar_mem_void(
+                    oskar_station_element_gain(station, feed));
+            amp_err   = (float*) oskar_mem_void(
+                    oskar_station_element_gain_error(station, feed));
+            phase     = (float*) oskar_mem_void(
+                    oskar_station_element_phase_offset_rad(station, feed));
+            phase_err = (float*) oskar_mem_void(
+                    oskar_station_element_phase_error_rad(station, feed));
+            weights   = (float2*) oskar_mem_void(
+                    oskar_station_element_weight(station, feed));
+
+            for (i = 0; i < num_elements; ++i)
             {
-                station->array_is_3d = 1;
+                if (z_true[i] != 0.0 || z_meas[i] != 0.0)
+                {
+                    station->array_is_3d = 1;
+                    break;
+                }
             }
-            if (amp[i] != 1.0f || phase[i] != 0.0)
+            for (i = 0; i < num_elements; ++i)
             {
-                station->apply_element_errors = 1;
+                if (amp[i] != 1.0 || phase[i] != 0.0)
+                {
+                    station->apply_element_errors = 1;
+                    break;
+                }
             }
-            if (amp_err[i] != 0.0 || phase_err[i] != 0.0)
+            for (i = 0; i < num_elements; ++i)
             {
-                station->apply_element_errors = 1;
-                *finished_identical_station_check = 1;
+                if (amp_err[i] != 0.0 || phase_err[i] != 0.0)
+                {
+                    station->apply_element_errors = 1;
+                    *finished_identical_station_check = 1;
+                    break;
+                }
             }
-            if (weights[i].x != 1.0f || weights[i].y != 0.0)
+            for (i = 0; i < num_elements; ++i)
             {
-                station->apply_element_weight = 1;
+                if (weights[i].x != 1.0 || weights[i].y != 0.0)
+                {
+                    station->apply_element_weight = 1;
+                    break;
+                }
             }
         }
     }
@@ -155,7 +214,7 @@ void oskar_station_analyse(oskar_Station* station,
     if (oskar_station_has_child(station))
     {
         /* Recursively analyse all child stations. */
-        for (i = 0; i < station->num_elements; ++i)
+        for (i = 0; i < num_elements; ++i)
         {
             oskar_station_analyse(oskar_station_child(station, i),
                     finished_identical_station_check, status);
@@ -170,7 +229,7 @@ void oskar_station_analyse(oskar_Station* station,
         {
             /* Check if child stations are identical. */
             station->identical_children = 1;
-            for (i = 1; i < station->num_elements; ++i)
+            for (i = 1; i < num_elements; ++i)
             {
                 if (oskar_station_different(
                         oskar_station_child_const(station, 0),

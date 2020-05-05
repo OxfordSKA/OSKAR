@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@ extern "C" {
 oskar_Station* oskar_station_create(int type, int location, int num_elements,
         int* status)
 {
+    int feed, dim;
     oskar_Station* model;
 
     /* Check the type and location. */
@@ -56,47 +57,41 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     }
 
     /* Initialise station meta data. */
-    model->unique_id = 0;
     model->precision = type;
     model->mem_location = location;
 
-    /* Initialise the memory. */
-    model->element_true_x_enu_metres =
-            oskar_mem_create(type, location, num_elements, status);
-    model->element_true_y_enu_metres =
-            oskar_mem_create(type, location, num_elements, status);
-    model->element_true_z_enu_metres =
-            oskar_mem_create(type, location, num_elements, status);
-    model->element_measured_x_enu_metres =
-            oskar_mem_create(type, location, num_elements, status);
-    model->element_measured_y_enu_metres =
-            oskar_mem_create(type, location, num_elements, status);
-    model->element_measured_z_enu_metres =
-            oskar_mem_create(type, location, num_elements, status);
-    model->element_weight =
-            oskar_mem_create(type | OSKAR_COMPLEX, location, num_elements, status);
-    model->element_cable_length_error =
-            oskar_mem_create(type, location, num_elements, status);
-    model->element_gain =
-            oskar_mem_create(type, location, num_elements, status);
-    model->element_gain_error =
-            oskar_mem_create(type, location, num_elements, status);
-    model->element_phase_offset_rad =
-            oskar_mem_create(type, location, num_elements, status);
-    model->element_phase_error_rad =
-            oskar_mem_create(type, location, num_elements, status);
-    model->element_x_alpha_cpu =
-            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
-    model->element_x_beta_cpu =
-            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
-    model->element_x_gamma_cpu =
-            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
-    model->element_y_alpha_cpu =
-            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
-    model->element_y_beta_cpu =
-            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
-    model->element_y_gamma_cpu =
-            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
+    /* Create arrays. */
+    for (feed = 0; feed < 1; feed++)
+    {
+        for (dim = 0; dim < 3; dim++)
+        {
+            model->element_true_enu_metres[feed][dim] =
+                    oskar_mem_create(type, location, num_elements, status);
+            model->element_measured_enu_metres[feed][dim] =
+                    oskar_mem_create(type, location, num_elements, status);
+        }
+        model->element_weight[feed] =
+                oskar_mem_create(type | OSKAR_COMPLEX,
+                        location, num_elements, status);
+        model->element_cable_length_error[feed] =
+                oskar_mem_create(type, location, num_elements, status);
+        model->element_gain[feed] =
+                oskar_mem_create(type, location, num_elements, status);
+        model->element_gain_error[feed] =
+                oskar_mem_create(type, location, num_elements, status);
+        model->element_phase_offset_rad[feed] =
+                oskar_mem_create(type, location, num_elements, status);
+        model->element_phase_error_rad[feed] =
+                oskar_mem_create(type, location, num_elements, status);
+    }
+    for (feed = 0; feed < 2; feed++)
+    {
+        for (dim = 0; dim < 3; dim++)
+        {
+            model->element_euler_cpu[feed][dim] = oskar_mem_create(
+                    OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
+        }
+    }
     model->element_types =
             oskar_mem_create(OSKAR_INT, location, num_elements, status);
     model->element_types_cpu =
@@ -117,13 +112,19 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
 
     /* Initialise aperture array data. */
     model->num_elements = num_elements;
-    model->num_element_types = 0;
     model->enable_array_pattern = OSKAR_TRUE;
     model->common_element_orientation = OSKAR_TRUE;
+    model->common_pol_beams = OSKAR_TRUE;
     model->seed_time_variable_errors = 1;
     if (num_elements > 0)
+    {
+        oskar_mem_set_value_real(model->element_gain[0],
+                1.0, 0, num_elements, status);
+        oskar_mem_set_value_real(model->element_weight[0],
+                1.0, 0, num_elements, status);
         memset(oskar_mem_void(model->element_mount_types_cpu), 'F',
                 num_elements);
+    }
 
     /* Return pointer to station model. */
     return model;

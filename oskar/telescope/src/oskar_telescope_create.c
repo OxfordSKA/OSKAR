@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,33 +63,20 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->uv_filter_max = FLT_MAX;
     telescope->uv_filter_units = OSKAR_METRES;
     telescope->noise_seed = 1;
-    telescope->station_true_x_offset_ecef_metres =
-            oskar_mem_create(type, location, num_stations, status);
-    telescope->station_true_y_offset_ecef_metres =
-            oskar_mem_create(type, location, num_stations, status);
-    telescope->station_true_z_offset_ecef_metres =
-            oskar_mem_create(type, location, num_stations, status);
-    telescope->station_true_x_enu_metres =
-            oskar_mem_create(type, location, num_stations, status);
-    telescope->station_true_y_enu_metres =
-            oskar_mem_create(type, location, num_stations, status);
-    telescope->station_true_z_enu_metres =
-            oskar_mem_create(type, location, num_stations, status);
-    telescope->station_measured_x_offset_ecef_metres =
-            oskar_mem_create(type, location, num_stations, status);
-    telescope->station_measured_y_offset_ecef_metres =
-            oskar_mem_create(type, location, num_stations, status);
-    telescope->station_measured_z_offset_ecef_metres =
-            oskar_mem_create(type, location, num_stations, status);
-    telescope->station_measured_x_enu_metres =
-            oskar_mem_create(type, location, num_stations, status);
-    telescope->station_measured_y_enu_metres =
-            oskar_mem_create(type, location, num_stations, status);
-    telescope->station_measured_z_enu_metres =
-            oskar_mem_create(type, location, num_stations, status);
+    for (i = 0; i < 3; ++i)
+    {
+        telescope->station_true_offset_ecef_metres[i] =
+                oskar_mem_create(type, location, num_stations, status);
+        telescope->station_true_enu_metres[i] =
+                oskar_mem_create(type, location, num_stations, status);
+        telescope->station_measured_offset_ecef_metres[i] =
+                oskar_mem_create(type, location, num_stations, status);
+        telescope->station_measured_enu_metres[i] =
+                oskar_mem_create(type, location, num_stations, status);
+    }
     telescope->tec_screen_path =
             oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
-if (num_stations > 0)
+    if (num_stations > 0)
         telescope->station = (oskar_Station**) calloc(
                 num_stations, sizeof(oskar_Station*));
     for (i = 0; i < num_stations; ++i)

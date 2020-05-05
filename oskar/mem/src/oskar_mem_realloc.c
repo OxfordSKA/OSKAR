@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ extern "C" {
 
 void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
 {
-    if (*status) return;
+    if (*status || !mem) return;
 
     /* Check if the structure owns the memory it points to. */
     if (mem->owner == 0)

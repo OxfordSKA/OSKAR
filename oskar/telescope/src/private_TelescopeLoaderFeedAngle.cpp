@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,18 +44,18 @@ void TelescopeLoaderFeedAngle::load(oskar_Station* station,
     if (oskar_dir_file_exists(cwd.c_str(), feed_angle_file))
     {
         string f = get_path(cwd, feed_angle_file);
-        oskar_station_load_feed_angle(station, f.c_str(), 1, status);
-        oskar_station_load_feed_angle(station, f.c_str(), 0, status);
+        oskar_station_load_feed_angle(station, 0, f.c_str(), status);
+        oskar_station_load_feed_angle(station, 1, f.c_str(), status);
     }
     if (oskar_dir_file_exists(cwd.c_str(), feed_angle_file_x))
     {
-        oskar_station_load_feed_angle(station,
-                get_path(cwd, feed_angle_file_x).c_str(), 1, status);
+        oskar_station_load_feed_angle(station, 0,
+                get_path(cwd, feed_angle_file_x).c_str(), status);
     }
     if (oskar_dir_file_exists(cwd.c_str(), feed_angle_file_y))
     {
-        oskar_station_load_feed_angle(station,
-                get_path(cwd, feed_angle_file_y).c_str(), 0, status);
+        oskar_station_load_feed_angle(station, 1,
+                get_path(cwd, feed_angle_file_y).c_str(), status);
     }
 }
 

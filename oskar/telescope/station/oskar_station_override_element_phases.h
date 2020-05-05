@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,17 +51,18 @@ extern "C" {
  *
  * The station model must be in CPU-accessible memory.
  *
- * @param[in,out] s          Station model structure to modify.
+ * @param[in,out] station    Station model to update.
+ * @param[in] feed           Feed index (0 = X, 1 = Y).
  * @param[in] seed           Random generator seed.
  * @param[in] phase_std_rad  Standard deviation of element phase, in radians.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_override_element_phases(oskar_Station* s, unsigned int seed,
-        double phase_std_rad, int* status);
+void oskar_station_override_element_phases(oskar_Station* station, int feed,
+        unsigned int seed, double phase_std_rad, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_OVERRIDE_ELEMENT_PHASES_H_ */
+#endif /* include guard */

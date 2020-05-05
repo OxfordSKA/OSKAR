@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
 extern "C" {
 #endif
 
-void oskar_station_load_feed_angle(oskar_Station* station,
-        const char* filename, int x_pol, int* status)
+void oskar_station_load_feed_angle(oskar_Station* station, int feed,
+        const char* filename, int* status)
 {
     /* Declare the line buffer and counter. */
     char* line = NULL;
@@ -87,7 +87,7 @@ void oskar_station_load_feed_angle(oskar_Station* station,
         }
 
         /* Store the data. */
-        oskar_station_set_element_feed_angle(station, x_pol, n,
+        oskar_station_set_element_feed_angle(station, feed, n,
                 par[0], par[1], par[2], status);
 
         /* Increment element counter. */
