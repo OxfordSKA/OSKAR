@@ -37,7 +37,7 @@
 
 using namespace casacore;
 
-oskar_MeasurementSet* oskar_ms_open(const char* filename)
+static oskar_MeasurementSet* _oskar_ms_open(const char* filename, bool readonly)
 {
     oskar_MeasurementSet* p = (oskar_MeasurementSet*)
             calloc(1, sizeof(oskar_MeasurementSet));
@@ -45,8 +45,14 @@ oskar_MeasurementSet* oskar_ms_open(const char* filename)
     try
     {
         // Create the MeasurementSet. Storage managers are recreated as needed.
-        p->ms = new MeasurementSet(filename,
-                TableLock(TableLock::PermanentLocking), Table::Update);
+        TableLock::LockOption lock = TableLock::PermanentLocking;
+        Table::TableOption mode = Table::Update;
+        if (readonly)
+        {
+            lock = TableLock::NoLocking;
+            mode = Table::Old;
+        }
+        p->ms = new MeasurementSet(filename, lock, mode);
 
         // Create the MSMainColumns and MSColumns objects for accessing data
         // in the main table and subtables.
@@ -123,4 +129,14 @@ oskar_MeasurementSet* oskar_ms_open(const char* filename)
     p->end_time = range[1];
 
     return p;
+}
+
+oskar_MeasurementSet* oskar_ms_open(const char* filename)
+{
+    return _oskar_ms_open(filename, false);
+}
+
+oskar_MeasurementSet* oskar_ms_open_readonly(const char* filename)
+{
+    return _oskar_ms_open(filename, true);
 }
