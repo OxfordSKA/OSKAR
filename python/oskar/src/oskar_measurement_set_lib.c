@@ -269,7 +269,7 @@ static PyObject* open(PyObject* self, PyObject* args)
     PyObject *readonly;
     if (!PyArg_ParseTuple(args, "sO", &file_name, &readonly)) return 0;
     if (PyObject_IsTrue(readonly))
-        h = oskar_ms_open_ro(file_name);
+        h = oskar_ms_open_readonly(file_name);
     else
         h = oskar_ms_open(file_name);
 

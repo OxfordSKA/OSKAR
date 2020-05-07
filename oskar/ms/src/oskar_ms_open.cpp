@@ -136,7 +136,7 @@ oskar_MeasurementSet* oskar_ms_open(const char* filename)
     return _oskar_ms_open(filename, false);
 }
 
-oskar_MeasurementSet* oskar_ms_open_ro(const char* filename)
+oskar_MeasurementSet* oskar_ms_open_readonly(const char* filename)
 {
     return _oskar_ms_open(filename, true);
 }

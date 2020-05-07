@@ -55,7 +55,7 @@ oskar_MeasurementSet* oskar_ms_open(const char* filename);
  * Opens an existing Measurement Set.
  */
 OSKAR_MS_EXPORT
-oskar_MeasurementSet* oskar_ms_open_ro(const char* filename);
+oskar_MeasurementSet* oskar_ms_open_readonly(const char* filename);
 
 #ifdef __cplusplus
 }
