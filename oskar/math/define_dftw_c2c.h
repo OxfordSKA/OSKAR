@@ -18,6 +18,7 @@
         const int       eval_y,\
         const int       offset_out,\
         GLOBAL_OUT(FP2, output),\
+        const FP        norm_factor,\
         const int       max_in_chunk\
 
 #define OSKAR_DFTW_C2C_GPU(NAME, IS_3D, FP, FP2) KERNEL(NAME) (\
@@ -69,6 +70,8 @@
             }\
         } BARRIER;\
     }\
+    out.x *= norm_factor;\
+    out.y *= norm_factor;\
     if (i_out < num_out) output[i_out + offset_out] = out;\
 }\
 OSKAR_REGISTER_KERNEL(NAME)
@@ -98,6 +101,8 @@ OSKAR_REGISTER_KERNEL(NAME)
         out.x += in.x * re; out.x -= in.y * im;\
         out.y += in.y * re; out.y += in.x * im;\
     }\
+    out.x *= norm_factor;\
+    out.y *= norm_factor;\
     output[i_out + offset_out] = out;\
     KERNEL_LOOP_END\
 }\

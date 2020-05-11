@@ -79,12 +79,16 @@ void oskar_dftw(
         oskar_Mem* output,
         int* status)
 {
+    double norm_factor;
+    float norm_factor_f;
     if (*status) return;
     const int location = oskar_mem_location(output);
     const int type = oskar_mem_precision(output);
     const int is_dbl = oskar_mem_is_double(output);
     const int is_3d = (z_in != NULL && z_out != NULL);
     const int is_matrix = oskar_mem_is_matrix(output);
+    norm_factor = normalise ? 1.0 / num_in : 1.0;
+    norm_factor_f = (float) norm_factor;
     if (!oskar_mem_is_complex(output) || !oskar_mem_is_complex(weights_in) ||
             oskar_mem_is_matrix(weights_in))
     {
@@ -154,7 +158,7 @@ void oskar_dftw(
                             data_idx_p,
                             oskar_mem_double2_const(data, status),
                             eval_x, eval_y, offset_out,
-                            oskar_mem_double2(output, status), 0);
+                            oskar_mem_double2(output, status), norm_factor, 0);
                 else
                     dftw_m2m_3d_float(num_in, (float)wavenumber,
                             oskar_mem_float2_const(weights_in, status),
@@ -168,7 +172,7 @@ void oskar_dftw(
                             data_idx_p,
                             oskar_mem_float2_const(data, status),
                             eval_x, eval_y, offset_out,
-                            oskar_mem_float2(output, status), 0);
+                            oskar_mem_float2(output, status), norm_factor_f, 0);
             }
             else
             {
@@ -183,7 +187,7 @@ void oskar_dftw(
                             data_idx_p,
                             oskar_mem_double2_const(data, status),
                             eval_x, eval_y, offset_out,
-                            oskar_mem_double2(output, status), 0);
+                            oskar_mem_double2(output, status), norm_factor, 0);
                 else
                     dftw_m2m_2d_float(num_in, (float)wavenumber,
                             oskar_mem_float2_const(weights_in, status),
@@ -195,7 +199,7 @@ void oskar_dftw(
                             data_idx_p,
                             oskar_mem_float2_const(data, status),
                             eval_x, eval_y, offset_out,
-                            oskar_mem_float2(output, status), 0);
+                            oskar_mem_float2(output, status), norm_factor_f, 0);
             }
         }
         else
@@ -215,7 +219,7 @@ void oskar_dftw(
                             data_idx_p,
                             oskar_mem_double2_const(data, status),
                             eval_x, eval_y, offset_out,
-                            oskar_mem_double2(output, status), 0);
+                            oskar_mem_double2(output, status), norm_factor, 0);
                 else
                     dftw_c2c_3d_float(num_in, (float)wavenumber,
                             oskar_mem_float2_const(weights_in, status),
@@ -229,7 +233,7 @@ void oskar_dftw(
                             data_idx_p,
                             oskar_mem_float2_const(data, status),
                             eval_x, eval_y, offset_out,
-                            oskar_mem_float2(output, status), 0);
+                            oskar_mem_float2(output, status), norm_factor_f, 0);
             }
             else
             {
@@ -244,7 +248,7 @@ void oskar_dftw(
                             data_idx_p,
                             oskar_mem_double2_const(data, status),
                             eval_x, eval_y, offset_out,
-                            oskar_mem_double2(output, status), 0);
+                            oskar_mem_double2(output, status), norm_factor, 0);
                 else
                     dftw_c2c_2d_float(num_in, (float)wavenumber,
                             oskar_mem_float2_const(weights_in, status),
@@ -256,7 +260,7 @@ void oskar_dftw(
                             data_idx_p,
                             oskar_mem_float2_const(data, status),
                             eval_x, eval_y, offset_out,
-                            oskar_mem_float2(output, status), 0);
+                            oskar_mem_float2(output, status), norm_factor_f, 0);
             }
         }
     }
@@ -319,6 +323,8 @@ void oskar_dftw(
                 {INT_SZ, &eval_y},
                 {INT_SZ, &offset_out},
                 {PTR_SZ, oskar_mem_buffer(output)},
+                {is_dbl ? DBL_SZ : FLT_SZ,
+                        is_dbl ? (void*)&norm_factor : (void*)&norm_factor_f},
                 {INT_SZ, &max_in_chunk}
         };
         oskar_device_launch_kernel(k, location, 1, local_size, global_size,
@@ -326,6 +332,4 @@ void oskar_dftw(
                 sizeof(arg_size_local) / sizeof(size_t), arg_size_local,
                 status);
     }
-    if (normalise)
-        oskar_mem_scale_real(output, 1. / num_in, offset_out, num_out, status);
 }

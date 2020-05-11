@@ -18,6 +18,7 @@
         const int       eval_y,\
         const int       offset_out,\
         GLOBAL_OUT(FP2, output),\
+        const FP        norm_factor,\
         const int       max_in_chunk\
 
 #define OSKAR_DFTW_M2M_GPU(NAME, IS_3D, FP, FP2) KERNEL(NAME) (\
@@ -86,10 +87,18 @@
     if (i_out < num_out) {\
         const int j = 4 * (i_out + offset_out);\
         if (eval_x) {\
+            out_xx.x *= norm_factor;\
+            out_xx.y *= norm_factor;\
+            out_xy.x *= norm_factor;\
+            out_xy.y *= norm_factor;\
             output[j + 0] = out_xx;\
             output[j + 1] = out_xy;\
         }\
         if (eval_y) {\
+            out_yx.x *= norm_factor;\
+            out_yx.y *= norm_factor;\
+            out_yy.x *= norm_factor;\
+            out_yy.y *= norm_factor;\
             output[j + 2] = out_yx;\
             output[j + 3] = out_yy;\
         }\
@@ -138,10 +147,18 @@ OSKAR_REGISTER_KERNEL(NAME)
     }\
     const int j = 4 * (i_out + offset_out);\
     if (eval_x) {\
+        out_xx.x *= norm_factor;\
+        out_xx.y *= norm_factor;\
+        out_xy.x *= norm_factor;\
+        out_xy.y *= norm_factor;\
         output[j + 0] = out_xx;\
         output[j + 1] = out_xy;\
     }\
     if (eval_y) {\
+        out_yx.x *= norm_factor;\
+        out_yx.y *= norm_factor;\
+        out_yy.x *= norm_factor;\
+        out_yy.y *= norm_factor;\
         output[j + 2] = out_yx;\
         output[j + 3] = out_yy;\
     }\
