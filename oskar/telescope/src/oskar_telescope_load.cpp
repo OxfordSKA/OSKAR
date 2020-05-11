@@ -67,6 +67,8 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
     // Check that the telescope directory has been set and exists.
     if (!path || !oskar_dir_exists(path))
     {
+        oskar_log_error(log,
+                "Telescope model directory '%s' does not exist.", path);
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
