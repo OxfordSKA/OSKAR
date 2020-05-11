@@ -11,8 +11,9 @@ except ImportError:
     from distutils.core import setup, Extension
     from distutils.command.build_ext import build_ext
 
-# Define the version of OSKAR this is compatible with.
-OSKAR_COMPATIBILITY_VERSION = '2.7'
+# Define the versions of OSKAR this is compatible with.
+OSKAR_COMPATIBILITY_VERSION_MIN = '0x020700'
+OSKAR_COMPATIBILITY_VERSION_MAX = '0x0208FF'
 
 # Define the extension modules to build.
 MODULES = [
@@ -75,11 +76,28 @@ class BuildExt(build_ext):
     @staticmethod
     def get_oskar_version(version_file):
         """Returns the version of OSKAR found on the system."""
+        version_num = None
+        version_str = None
         with open(version_file) as file_handle:
             for line in file_handle:
-                if 'define OSKAR_VERSION_STR' in line:
-                    return (line.split()[2]).replace('"', '')
-        return None
+                if 'define OSKAR_VERSION_STR ' in line:
+                    version_str = (line.split()[2]).replace('"', '')
+                elif 'define OSKAR_VERSION ' in line:
+                    version_num = int(line.split()[2], base=16)
+        return (version_num, version_str)
+
+    @staticmethod
+    def check_oskar_version(version_num, version_str):
+        """Checks the version of OSKAR found is compatible."""
+        if version_num < int(OSKAR_COMPATIBILITY_VERSION_MIN, base=16) or \
+                version_num > int(OSKAR_COMPATIBILITY_VERSION_MAX, base=16):
+            raise RuntimeError(
+                "The version of OSKAR found is not compatible with oskarpy. "
+                "Found OSKAR %s (require %s < version < %s)." % (
+                    version_str,
+                    OSKAR_COMPATIBILITY_VERSION_MIN,
+                    OSKAR_COMPATIBILITY_VERSION_MAX)
+            )
 
     def run(self):
         """Overridden method. Runs the build.
@@ -138,12 +156,7 @@ class BuildExt(build_ext):
 
             # Check the version of OSKAR is compatible.
             version = self.get_oskar_version(header)
-            if not version.startswith(OSKAR_COMPATIBILITY_VERSION):
-                raise RuntimeError(
-                    "The version of OSKAR found is not compatible with "
-                    "oskarpy. Found OSKAR %s, but require OSKAR %s." % (
-                        version, OSKAR_COMPATIBILITY_VERSION)
-                )
+            self.check_oskar_version(*version)
         build_ext.run(self)
 
     def build_extension(self, ext):
