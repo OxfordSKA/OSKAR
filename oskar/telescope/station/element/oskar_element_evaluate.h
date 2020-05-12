@@ -49,6 +49,7 @@ extern "C" {
  * positions.
  *
  * @param[in] model         Pointer to element model structure.
+ * @param[in] normalise     If true, normalise pattern to value at zenith.
  * @param[in] orientation_x Azimuth of X dipole in radians.
  * @param[in] orientation_y Azimuth of Y dipole in radians.
  * @param[in] offset_points Start offset into input coordinate arrays.
@@ -67,6 +68,7 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_element_evaluate(
         const oskar_Element* model,
+        int normalise,
         double orientation_x,
         double orientation_y,
         int offset_points,
@@ -86,4 +88,4 @@ void oskar_element_evaluate(
 }
 #endif
 
-#endif /* OSKAR_ELEMENT_EVALUATE_H_ */
+#endif /* include guard */

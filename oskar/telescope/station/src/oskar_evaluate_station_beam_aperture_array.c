@@ -94,13 +94,14 @@ static void oskar_evaluate_station_beam_aperture_array_private(
 
     const double wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
     const int is_3d         = oskar_station_array_is_3d(s);
-    const int normalise     = oskar_station_normalise_array_pattern(s);
+    const int norm_array    = oskar_station_normalise_array_pattern(s);
+    const int norm_element  = oskar_station_normalise_element_pattern(s);
     const int num_elements  = oskar_station_num_elements(s);
     const int num_feeds     = (oskar_station_common_pol_beams(s) ||
             !oskar_mem_is_matrix(beam)) ? 1 : 2;
-    theta         = work->theta_modified;
-    phi_x         = work->phi_x;
-    phi_y         = work->phi_y;
+    theta = work->theta_modified;
+    phi_x = work->phi_x;
+    phi_y = work->phi_y;
 
     /* Compute direction cosines for the beam for this station. */
     oskar_evaluate_beam_horizon_direction(&beam_x, &beam_y, &beam_z, s,
@@ -116,10 +117,11 @@ static void oskar_evaluate_station_beam_aperture_array_private(
             /* Evaluate element patterns for each element type. */
             element_types_ptr = oskar_station_element_types_const(s);
             signal = oskar_station_work_beam(work, beam,
-                    num_element_types * num_points, 0, status);
+                    num_element_types * (num_points + 1), 0, status);
             for (i = 0; i < num_element_types; ++i)
                 oskar_element_evaluate(
                         oskar_station_element_const(s, i),
+                        norm_element,
                         oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, 0),
                         offset_points, num_points, x, y, z, frequency_hz,
@@ -130,7 +132,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
             /* Evaluate element patterns for each element. */
             const int* element_type = oskar_station_element_types_cpu_const(s);
             signal = oskar_station_work_beam(work, beam,
-                    num_elements * num_points, 0, status);
+                    num_elements * (num_points + 1), 0, status);
             for (i = 0; i < num_elements; ++i)
             {
                 if (element_type[i] >= num_element_types)
@@ -140,6 +142,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                 }
                 oskar_element_evaluate(
                         oskar_station_element_const(s, element_type[i]),
+                        norm_element,
                         oskar_station_element_euler_index_rad(s, 0, 0, i) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, i),
                         offset_points, num_points, x, y, z, frequency_hz,
@@ -155,7 +158,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                 oskar_station_evaluate_element_weights(s, i, wavenumber,
                         beam_x, beam_y, beam_z, time_index,
                         work->weights, work->weights_scratch, status);
-                oskar_dftw(normalise, num_elements, wavenumber, work->weights,
+                oskar_dftw(norm_array, num_elements, wavenumber, work->weights,
                         oskar_station_element_true_enu_metres_const(s, i, 0),
                         oskar_station_element_true_enu_metres_const(s, i, 1),
                         oskar_station_element_true_enu_metres_const(s, i, 2),
@@ -213,7 +216,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
             oskar_station_evaluate_element_weights(s, i, wavenumber,
                     beam_x, beam_y, beam_z, time_index,
                     work->weights, work->weights_scratch, status);
-            oskar_dftw(normalise, num_elements, wavenumber, work->weights,
+            oskar_dftw(norm_array, num_elements, wavenumber, work->weights,
                     oskar_station_element_true_enu_metres_const(s, i, 0),
                     oskar_station_element_true_enu_metres_const(s, i, 1),
                     oskar_station_element_true_enu_metres_const(s, i, 2),

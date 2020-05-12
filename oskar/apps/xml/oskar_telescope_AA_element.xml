@@ -13,6 +13,15 @@
             missing, the functional type will be used instead.
         </desc>
     </s>
+    <s k="normalise">
+        <label>Normalise element pattern</label>
+        <type name="bool" default="false" />
+        <desc>If true, the amplitude of each element beam will be normalised
+            to its value at the zeith; if false, then this
+            normalisation is not performed. Note, however, that global beam
+            normalisation is still possible by enabling the option labelled
+            <i>'Normalise beams at phase centre'.</i></desc>
+    </s>
 
     <s k="functional_type">
         <label>Functional pattern type</label>

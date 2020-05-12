@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, The University of Oxford
+ * Copyright (c) 2014-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,26 +56,27 @@ extern "C" {
  * Theta is the polar angle from the z-axis to the xy-plane, and phi is the
  * azimuthal angle from the x-axis to the y-axis.
  *
- * @param[in]  offset_in   Start offset into the input coordinate arrays.
- * @param[in]  num_points  The number of points.
- * @param[in]  x           The x-direction-cosines.
- * @param[in]  y           The y-direction-cosines.
- * @param[in]  z           The z-direction-cosines.
- * @param[in]  delta_phi1  Angle to add to computed values of \p phi1.
- * @param[in]  delta_phi2  Angle to add to computed values of \p phi2.
- * @param[out] theta       The theta angles, in radians.
- * @param[out] phi1        The phi angles, in radians.
- * @param[out] phi2        The phi angles, in radians.
- * @param[in,out] status   Status return code.
+ * @param[in]  offset_in           Start offset into input coordinate arrays.
+ * @param[in]  num_points          The number of points.
+ * @param[in]  x                   The x-direction-cosines.
+ * @param[in]  y                   The y-direction-cosines.
+ * @param[in]  z                   The z-direction-cosines.
+ * @param[in]  extra_point_at_pole If true, add an extra point at the pole.
+ * @param[in]  delta_phi1          Angle to add to computed values of \p phi1.
+ * @param[in]  delta_phi2          Angle to add to computed values of \p phi2.
+ * @param[out] theta               The theta angles, in radians.
+ * @param[out] phi1                The phi angles, in radians.
+ * @param[out] phi2                The phi angles, in radians.
+ * @param[in,out] status           Status return code.
  */
 OSKAR_EXPORT
 void oskar_convert_enu_directions_to_theta_phi(int offset_in, int num_points,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double delta_phi1, double delta_phi2, oskar_Mem* theta,
-        oskar_Mem* phi1, oskar_Mem* phi2, int* status);
+        int extra_point_at_pole, double delta_phi1, double delta_phi2,
+        oskar_Mem* theta, oskar_Mem* phi1, oskar_Mem* phi2, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CONVERT_ENU_DIRECTIONS_TO_THETA_PHI_H_ */
+#endif /* include guard */

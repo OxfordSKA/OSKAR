@@ -70,7 +70,8 @@ struct oskar_Station
     int identical_children;       /* True if all child stations are identical. */
     int num_elements;             /* Number of antenna elements in the station (auto determined). */
     int num_element_types;        /* Number of element types (this is the size of element_pattern array). */
-    int normalise_array_pattern;  /* True if the station beam should be normalised by the number of antennas. */
+    int normalise_array_pattern;  /* True if the array pattern should be normalised by the number of antennas. */
+    int normalise_element_pattern;/* True if the element patterns should be normalised. */
     int enable_array_pattern;     /* True if the array factor should be evaluated. */
     int common_element_orientation; /* True if elements share a common orientation (auto determined). */
     int common_pol_beams;         /* True if beams for both polarisations can be formed in the same way (auto determined). */

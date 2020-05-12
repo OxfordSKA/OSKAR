@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2019, The University of Oxford
+ * Copyright (c) 2014-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,8 @@ OSKAR_CONVERT_ENU_DIR_TO_THETA_PHI(convert_enu_directions_to_theta_phi_double, d
 
 void oskar_convert_enu_directions_to_theta_phi(int offset_in, int num_points,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double delta_phi1, double delta_phi2, oskar_Mem* theta,
-        oskar_Mem* phi1, oskar_Mem* phi2, int* status)
+        int extra_point_at_pole, double delta_phi1, double delta_phi2,
+        oskar_Mem* theta, oskar_Mem* phi1, oskar_Mem* phi2, int* status)
 {
     if (*status) return;
     const int type = oskar_mem_type(theta);
@@ -55,7 +55,7 @@ void oskar_convert_enu_directions_to_theta_phi(int offset_in, int num_points,
                     oskar_mem_float_const(x, status),
                     oskar_mem_float_const(y, status),
                     oskar_mem_float_const(z, status),
-                    delta_phi1_f, delta_phi2_f,
+                    extra_point_at_pole, delta_phi1_f, delta_phi2_f,
                     oskar_mem_float(theta, status),
                     oskar_mem_float(phi1, status),
                     oskar_mem_float(phi2, status));
@@ -64,7 +64,7 @@ void oskar_convert_enu_directions_to_theta_phi(int offset_in, int num_points,
                     oskar_mem_double_const(x, status),
                     oskar_mem_double_const(y, status),
                     oskar_mem_double_const(z, status),
-                    delta_phi1, delta_phi2,
+                    extra_point_at_pole, delta_phi1, delta_phi2,
                     oskar_mem_double(theta, status),
                     oskar_mem_double(phi1, status),
                     oskar_mem_double(phi2, status));
@@ -94,6 +94,7 @@ void oskar_convert_enu_directions_to_theta_phi(int offset_in, int num_points,
                 {PTR_SZ, oskar_mem_buffer_const(x)},
                 {PTR_SZ, oskar_mem_buffer_const(y)},
                 {PTR_SZ, oskar_mem_buffer_const(z)},
+                {INT_SZ, &extra_point_at_pole},
                 {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
                         (const void*)&delta_phi1 : (const void*)&delta_phi1_f},
                 {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?

@@ -170,6 +170,11 @@ int oskar_station_normalise_array_pattern(const oskar_Station* model)
     return model ? model->normalise_array_pattern : 0;
 }
 
+int oskar_station_normalise_element_pattern(const oskar_Station* model)
+{
+    return model ? model->normalise_element_pattern : 0;
+}
+
 int oskar_station_enable_array_pattern(const oskar_Station* model)
 {
     return model ? model->enable_array_pattern : 0;
@@ -526,6 +531,12 @@ void oskar_station_set_normalise_array_pattern(oskar_Station* model, int value)
 {
     if (!model) return;
     model->normalise_array_pattern = value;
+}
+
+void oskar_station_set_normalise_element_pattern(oskar_Station* model, int value)
+{
+    if (!model) return;
+    model->normalise_element_pattern = value;
 }
 
 void oskar_station_set_enable_array_pattern(oskar_Station* model, int value)

@@ -84,6 +84,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     dst->identical_children = src->identical_children;
     dst->num_elements = src->num_elements;
     dst->normalise_array_pattern = src->normalise_array_pattern;
+    dst->normalise_element_pattern = src->normalise_element_pattern;
     dst->enable_array_pattern = src->enable_array_pattern;
     dst->common_element_orientation = src->common_element_orientation;
     dst->common_pol_beams = src->common_pol_beams;

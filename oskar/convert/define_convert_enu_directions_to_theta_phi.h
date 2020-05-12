@@ -1,8 +1,9 @@
-/* Copyright (c) 2014-2019, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2014-2020, The University of Oxford. See LICENSE file. */
 
 #define OSKAR_CONVERT_ENU_DIR_TO_THETA_PHI(NAME, FP) KERNEL(NAME) (\
         const int off_in, const int num, GLOBAL_IN(FP, x), GLOBAL_IN(FP, y),\
-        GLOBAL_IN(FP, z), const FP delta_phi1, const FP delta_phi2,\
+        GLOBAL_IN(FP, z), const int extra_point_at_pole,\
+        const FP delta_phi1, const FP delta_phi2,\
         GLOBAL_OUT(FP, theta), GLOBAL_OUT(FP, phi1), GLOBAL_OUT(FP, phi2))\
 {\
     KERNEL_LOOP_X(int, i, 0, num)\
@@ -22,5 +23,10 @@
     phi1[i] = p1;\
     phi2[i] = p2;\
     KERNEL_LOOP_END\
+    if (extra_point_at_pole) {\
+        theta[num] = (FP)0;\
+        phi1[num] = delta_phi1;\
+        phi2[num] = delta_phi2;\
+    }\
 }\
 OSKAR_REGISTER_KERNEL(NAME)

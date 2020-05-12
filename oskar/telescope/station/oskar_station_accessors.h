@@ -159,6 +159,9 @@ OSKAR_EXPORT
 int oskar_station_normalise_array_pattern(const oskar_Station* model);
 
 OSKAR_EXPORT
+int oskar_station_normalise_element_pattern(const oskar_Station* model);
+
+OSKAR_EXPORT
 int oskar_station_enable_array_pattern(const oskar_Station* model);
 
 OSKAR_EXPORT
@@ -422,6 +425,22 @@ void oskar_station_set_gaussian_beam_values(oskar_Station* model,
  */
 OSKAR_EXPORT
 void oskar_station_set_normalise_array_pattern(oskar_Station* model, int value);
+
+/**
+ * @brief
+ * Sets the flag to specify whether each element beam should be normalised
+ * (default false).
+ *
+ * @details
+ * Sets the flag to specify whether each element beam should be normalised
+ * to its value at the zenith (default false).
+ *
+ * @param[in] model  Pointer to station model.
+ * @param[in] value  True or false.
+ */
+OSKAR_EXPORT
+void oskar_station_set_normalise_element_pattern(
+        oskar_Station* model, int value);
 
 /**
  * @brief

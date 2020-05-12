@@ -57,6 +57,7 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
             a->num_elements != b->num_elements ||
             a->num_element_types != b->num_element_types ||
             a->normalise_array_pattern != b->normalise_array_pattern ||
+            a->normalise_element_pattern != b->normalise_element_pattern ||
             a->enable_array_pattern != b->enable_array_pattern ||
             a->common_element_orientation != b->common_element_orientation ||
             a->common_pol_beams != b->common_pol_beams ||

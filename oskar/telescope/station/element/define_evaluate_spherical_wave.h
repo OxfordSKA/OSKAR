@@ -29,9 +29,13 @@ KERNEL(NAME) (\
 {\
     KERNEL_LOOP_PAR_X(int, i, 0, num_points)\
     FP2 Xp, Xt, Yp, Yt;\
+    FP theta_;\
     MAKE_ZERO2(FP, Xp); MAKE_ZERO2(FP, Xt);\
     MAKE_ZERO2(FP, Yp); MAKE_ZERO2(FP, Yt);\
-    const FP phi_x_ = phi_x[i], theta_ = theta[i];\
+    theta_ = theta[i];\
+    /* Hack to avoid divide-by-zero (also in Matlab code!). */\
+    if (theta_ < (FP)1e-5) theta_ = (FP)1e-5;\
+    const FP phi_x_ = phi_x[i];\
     const FP phi_y_ = phi_y[i];\
     /* Propagate NAN. */\
     if (phi_x_ != phi_x_) {\
