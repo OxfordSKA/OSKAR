@@ -358,7 +358,7 @@ void oskar_interferometer_finalise(oskar_Interferometer* h, int* status)
         size_t log_size = 0;
         char* log_data;
         if (h->num_sources_total < 32 && h->num_gpus > 0)
-            oskar_log_warning(h->log, "It may be faster to use CPU cores "
+            oskar_log_advice(h->log, "It may be faster to use CPU cores "
                     "only, as the sky model contains fewer than 32 sources.");
         oskar_log_set_value_width(h->log, 25);
         record_timing(h);
@@ -862,7 +862,7 @@ void oskar_interferometer_set_sky_model(oskar_Interferometer* h,
     oskar_log_value(h->log, 'M', 0, "Num. sources", "%d", h->num_sources_total);
     oskar_log_value(h->log, 'M', 0, "Num. chunks", "%d", h->num_sky_chunks);
     if (h->num_sources_total < 32 && h->num_gpus > 0)
-        oskar_log_warning(h->log, "It may be faster to use CPU cores "
+        oskar_log_advice(h->log, "It may be faster to use CPU cores "
                 "only, as the sky model contains fewer than 32 sources.");
 }
 

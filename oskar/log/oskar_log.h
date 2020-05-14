@@ -68,10 +68,23 @@ enum OSKAR_LOG_PRIORITY {
     OSKAR_LOG_NONE    = -1,
     OSKAR_LOG_ERROR   =  0,  /* == 'E' */
     OSKAR_LOG_WARNING =  1,  /* == 'W' */
-    OSKAR_LOG_MESSAGE =  2,  /* == 'M' */
-    OSKAR_LOG_STATUS  =  3,  /* == 'S' */
-    OSKAR_LOG_DEBUG   =  4   /* == 'D' */
+    OSKAR_LOG_ADVICE  =  2,  /* == 'W' */
+    OSKAR_LOG_MESSAGE =  3,  /* == 'M' */
+    OSKAR_LOG_STATUS  =  4,  /* == 'S' */
+    OSKAR_LOG_DEBUG   =  5   /* == 'D' */
 };
+
+/**
+ * @brief Writes an advisory message to the log.
+ *
+ * @details
+ * This function writes an advisory message to the log.
+ * This is for a lower-priority warning message.
+ *
+ * @param[in]     format Format string for printf().
+ */
+OSKAR_EXPORT
+void oskar_log_advice(oskar_Log* log, const char* format, ...);
 
 /**
  * @brief

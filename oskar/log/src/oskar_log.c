@@ -95,6 +95,22 @@ static oskar_Log log_ = {
 #endif
 
 
+void oskar_log_advice(oskar_Log* log, const char* format, ...)
+{
+    va_list args;
+    const char code = 'W', priority = 'A', *prefix = "== ADVICE";
+    const int depth = OSKAR_LOG_INFO_PREFIX;
+    oskar_log_line(log, priority, ' ');
+    va_start(args, format);
+    write_log(log, 0, priority, code, depth, prefix, format, args);
+    va_end(args);
+    va_start(args, format);
+    write_log(log, 1, priority, code, depth, prefix, format, args);
+    va_end(args);
+    oskar_log_line(log, priority, ' ');
+}
+
+
 void oskar_log_close(oskar_Log* log)
 {
     if (log->write_header && log->init)
@@ -569,6 +585,9 @@ static int log_priority_level(char code)
     case 'w':
     case 'W':
         return OSKAR_LOG_WARNING;
+    case 'a':
+    case 'A':
+        return OSKAR_LOG_ADVICE;
     case 'm':
     case 'M':
         return OSKAR_LOG_MESSAGE;
