@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The University of Oxford
+ * Copyright (c) 2011-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,69 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETER_H_
-#define OSKAR_INTERFEROMETER_H_
-
-/**
- * @file oskar_interferometer.h
- */
+#include "interferometer/private_interferometer.h"
+#include "interferometer/oskar_interferometer.h"
+#include "vis/oskar_vis_block_write_ms.h"
+#include "vis/oskar_vis_header_write_ms.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_Interferometer;
-#ifndef OSKAR_INTERFEROMETER_TYPEDEF_
-#define OSKAR_INTERFEROMETER_TYPEDEF_
-typedef struct oskar_Interferometer oskar_Interferometer;
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
-#include <oskar_global.h>
-#include <interferometer/oskar_interferometer_accessors.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-OSKAR_EXPORT
-void oskar_interferometer_check_init(oskar_Interferometer* h, int* status);
-
-OSKAR_EXPORT
-oskar_Interferometer* oskar_interferometer_create(int precision, int* status);
-
-OSKAR_EXPORT
-oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
-        int block_index, int* status);
-
-OSKAR_EXPORT
-void oskar_interferometer_finalise(oskar_Interferometer* h, int* status);
-
-OSKAR_EXPORT
-void oskar_interferometer_free(oskar_Interferometer* h, int* status);
-
-OSKAR_EXPORT
-void oskar_interferometer_free_device_data(oskar_Interferometer* h, int* status);
-
-OSKAR_EXPORT
-void oskar_interferometer_reset_cache(oskar_Interferometer* h, int* status);
-
-OSKAR_EXPORT
-void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
-        int gpu_id, int* status);
-
-OSKAR_EXPORT
-void oskar_interferometer_run(oskar_Interferometer* h, int* status);
-
-OSKAR_EXPORT
 void oskar_interferometer_write_block(oskar_Interferometer* h,
-        const oskar_VisBlock* block, int block_index, int* status);
+        const oskar_VisBlock* block, int block_index, int* status)
+{
+    if (*status) return;
+    oskar_timer_resume(h->tmr_write);
+#ifndef OSKAR_NO_MS
+    if (h->ms_name && !h->ms)
+        h->ms = oskar_vis_header_write_ms(h->header, h->ms_name, OSKAR_TRUE,
+                h->force_polarised_ms, status);
+    if (h->ms) oskar_vis_block_write_ms(block, h->header, h->ms, status);
+#endif
+    if (h->vis_name && !h->vis)
+        h->vis = oskar_vis_header_write(h->header, h->vis_name, status);
+    if (h->vis) oskar_vis_block_write(block, h->vis, block_index, status);
+    oskar_timer_pause(h->tmr_write);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* include guard */

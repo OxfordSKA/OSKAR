@@ -9,7 +9,15 @@ set(interferometer_SRC
     src/oskar_evaluate_jones_K.c
     src/oskar_evaluate_jones_R.c
     src/oskar_evaluate_jones_Z.c
-    src/oskar_interferometer.c
+    src/oskar_interferometer_accessors.c
+    src/oskar_interferometer_check_init.c
+    src/oskar_interferometer_create.c
+    src/oskar_interferometer_finalise_block.c
+    src/oskar_interferometer_finalise.c
+    src/oskar_interferometer_free.c
+    src/oskar_interferometer_run_block.c
+    src/oskar_interferometer_run.c
+    src/oskar_interferometer_write_block.c
     src/oskar_interferometer_cpu.cl
     src/oskar_interferometer_gpu.cl
     src/oskar_interferometer.cl
