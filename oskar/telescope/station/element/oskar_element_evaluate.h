@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,6 +50,7 @@ extern "C" {
  *
  * @param[in] model         Pointer to element model structure.
  * @param[in] normalise     If true, normalise pattern to value at zenith.
+ * @param[in] swap_xy       If true, swap X and Y responses in output.
  * @param[in] orientation_x Azimuth of X dipole in radians.
  * @param[in] orientation_y Azimuth of Y dipole in radians.
  * @param[in] offset_points Start offset into input coordinate arrays.
@@ -69,6 +70,7 @@ OSKAR_EXPORT
 void oskar_element_evaluate(
         const oskar_Element* model,
         int normalise,
+        int swap_xy,
         double orientation_x,
         double orientation_y,
         int offset_points,

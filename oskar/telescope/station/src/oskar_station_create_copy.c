@@ -92,6 +92,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     dst->apply_element_errors = src->apply_element_errors;
     dst->apply_element_weight = src->apply_element_weight;
     dst->seed_time_variable_errors = src->seed_time_variable_errors;
+    dst->swap_xy = src->swap_xy;
     dst->num_permitted_beams = src->num_permitted_beams;
 
     /* Copy Gaussian station beam data. */

@@ -183,6 +183,9 @@ OSKAR_EXPORT
 unsigned int oskar_station_seed_time_variable_errors(const oskar_Station* model);
 
 OSKAR_EXPORT
+int oskar_station_swap_xy(const oskar_Station* model);
+
+OSKAR_EXPORT
 double oskar_station_element_euler_index_rad(
         const oskar_Station* model, int feed, int dim, int index);
 
@@ -466,6 +469,16 @@ void oskar_station_set_enable_array_pattern(oskar_Station* model, int value);
 OSKAR_EXPORT
 void oskar_station_set_seed_time_variable_errors(oskar_Station* model,
         unsigned int value);
+
+/**
+ * @brief
+ * Sets the option to swap X and Y antenna responses in the output.
+ *
+ * @param[in] model  Pointer to station model.
+ * @param[in] value  True or false.
+ */
+OSKAR_EXPORT
+void oskar_station_set_swap_xy(oskar_Station* model, int value);
 
 #ifdef __cplusplus
 }

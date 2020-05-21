@@ -216,7 +216,7 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
         case Qt::SizeHintRole:
         {
             int width = QApplication::fontMetrics().width(
-                    QString(node->label())) + 20;
+                    (data(index, Qt::DisplayRole)).toString()) + 20;
             return QSize(width, 26);
         }
         case Qt::DisplayRole:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2015-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,36 @@ node* get_child_node(node* parent, const vector<string>& possible_names)
     {
         node* n = parent->first_node(possible_names[i].c_str());
         if (n) return n;
+    }
+    return 0;
+}
+
+node* get_node(const doc_t& doc, const string& search_key,
+        string parent_key, node* parent = 0)
+{
+    if (!parent) parent = doc.first_node("root");
+    for (node* s = parent->first_node(); s; s = s->next_sibling())
+    {
+        string key;
+        string name = s->name();
+        if (name != "s" && name != "setting" && name != "group") continue;
+
+        // Get node attributes (the key must be defined).
+        map<string, string> a = get_attributes(s);
+        if (key.empty()) key = a["key"];
+        if (key.empty()) key = a["k"];
+        if (key.empty()) continue;
+
+        // Check if keys match.
+        string current_key = parent_key + key;
+        if (search_key == current_key) return s;
+
+        // Otherwise keep searching.
+        if (s->first_node())
+        {
+            node* child = get_node(doc, search_key, current_key + '/', s);
+            if (child) return child;
+        }
     }
     return 0;
 }
@@ -203,49 +233,73 @@ bool declare_setting(node* s, const string& key_root,
     return true;
 }
 
-bool iterate_settings(node* n, const string key_root,
-        oskar::SettingsTree* settings)
+bool iterate_settings(oskar::SettingsTree* settings, const doc_t& doc,
+        node* n = 0, const string key_root = "")
 {
+    if (!n) n = doc.first_node("root");
     for (node* s = n->first_node(); s; s = s->next_sibling())
     {
-        string name, key, req, pri;
-        bool required = false, ok = false;
-        int priority = 0;
-
-        // Get the node name and check it's a settings node.
-        name = s->name();
-        if (name != "s" && name != "setting") continue;
-
-        // Get setting attributes (the key must be defined).
-        map<string, string> a = get_attributes(s);
-        if (key.empty()) key = a["key"];
-        if (key.empty()) key = a["k"];
-        if (key.empty()) continue;
-        if (req.empty()) req = a["required"];
-        if (req.empty()) req = a["req"];
-        if (req.empty()) req = a["r"];
-        if (pri.empty()) pri = a["priority"];
-        if (pri.empty()) pri = a["p"];
-        if (!req.empty())
+        // Get the node name and check its type.
+        string name = s->name();
+        if (name == "s" || name == "setting")
         {
-            //std::transform(req.begin(), req.end(), req.begin(), std::toupper);
-            for (size_t i = 0; i < req.length(); ++i) req[i] = toupper(req[i]);
-            required = (req == "TRUE" || req == "YES");
-        }
-        if (!pri.empty())
-            priority = oskar_settings_utility_string_to_int(pri, &ok);
+            string key, req, pri;
+            bool required = false, ok = false;
+            int priority = 0;
 
-        // Declare the setting.
-        if (!declare_setting(s, key_root, key, required, priority, settings))
-        {
-            cerr << "ERROR: Problem reading setting: " << key << endl;
-            return false;
-        }
+            // Get setting attributes (the key must be defined).
+            map<string, string> a = get_attributes(s);
+            if (key.empty()) key = a["key"];
+            if (key.empty()) key = a["k"];
+            if (key.empty()) continue;
+            if (req.empty()) req = a["required"];
+            if (req.empty()) req = a["req"];
+            if (req.empty()) req = a["r"];
+            if (pri.empty()) pri = a["priority"];
+            if (pri.empty()) pri = a["p"];
+            if (!req.empty())
+            {
+                for (size_t i = 0; i < req.length(); ++i)
+                    req[i] = toupper(req[i]);
+                required = (req == "TRUE" || req == "YES");
+            }
+            if (!pri.empty())
+                priority = oskar_settings_utility_string_to_int(pri, &ok);
 
-        // Read any child settings.
-        if (s->first_node())
-            if (!iterate_settings(s, key_root + key + "/", settings))
+            // Declare the setting.
+            if (!declare_setting(s, key_root, key,
+                    required, priority, settings))
+            {
+                cerr << "ERROR: Problem reading setting: " << key << endl;
                 return false;
+            }
+
+            // Read any child settings.
+            if (s->first_node())
+                if (!iterate_settings(settings, doc, s, key_root + key + "/"))
+                    return false;
+        }
+        else if (name == "import")
+        {
+            string group;
+
+            // Get setting attributes (the group must be defined).
+            map<string, string> a = get_attributes(s);
+            if (group.empty()) group = a["group"];
+            if (group.empty()) continue;
+
+            node* import_group = get_node(doc, group, "");
+            if (import_group)
+            {
+                if (!iterate_settings(settings, doc, import_group, key_root))
+                    return false;
+            }
+            else
+            {
+                cerr << "ERROR: Could not find group: " << group << endl;
+                return false;
+            }
+        }
     }
     return true;
 }
@@ -261,10 +315,8 @@ bool settings_declare_xml(SettingsTree* settings, const char* xml)
     string xml_copy(xml);
     doc.parse<0>(&xml_copy[0]);
 
-    node* root_node = doc.first_node("root");
-    string key_root = "";
     settings->clear();
-    return iterate_settings(root_node, key_root, settings);
+    return iterate_settings(settings, doc);
 }
 
 } // namespace oskar

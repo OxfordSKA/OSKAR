@@ -4,6 +4,7 @@
         const int num,\
         GLOBAL_IN(FP, phi_x),\
         GLOBAL_IN(FP, phi_y),\
+        const int swap_xy,\
         const int offset,\
         GLOBAL FP4c *jones)\
 {\
@@ -15,8 +16,13 @@
     SINCOS(p_x, sin_p_x, cos_p_x);\
     SINCOS(p_y, sin_p_y, cos_p_y);\
     const int j = i + offset;\
-    x_theta_ = jones[j].a, x_phi_ = jones[j].b;\
-    y_theta_ = jones[j].c, y_phi_ = jones[j].d;\
+    if (swap_xy) {\
+        x_theta_ = jones[j].c, x_phi_ = jones[j].d;\
+        y_theta_ = jones[j].a, y_phi_ = jones[j].b;\
+    } else {\
+        x_theta_ = jones[j].a, x_phi_ = jones[j].b;\
+        y_theta_ = jones[j].c, y_phi_ = jones[j].d;\
+    }\
     jones[j].a.x = x_theta_.x * cos_p_x - x_phi_.x * sin_p_x;\
     jones[j].a.y = x_theta_.y * cos_p_x - x_phi_.y * sin_p_x;\
     jones[j].b.x = x_theta_.x * sin_p_x + x_phi_.x * cos_p_x;\

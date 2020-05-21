@@ -49,6 +49,7 @@ extern "C" {
 void oskar_element_evaluate(
         const oskar_Element* model,
         int normalise,
+        int swap_xy,
         double orientation_x,
         double orientation_y,
         int offset_points,
@@ -149,7 +150,7 @@ void oskar_element_evaluate(
                         4, offset_out_cplx + 2, output, status);
         }
         oskar_convert_theta_phi_to_ludwig3_components(num_points_norm,
-                phi_x, phi_y, offset_out, output, status);
+                phi_x, phi_y, swap_xy, offset_out, output, status);
     }
     else /* Scalar response. */
     {

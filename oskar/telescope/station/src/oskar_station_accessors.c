@@ -210,6 +210,11 @@ unsigned int oskar_station_seed_time_variable_errors(const oskar_Station* model)
     return model ? model->seed_time_variable_errors : 0u;
 }
 
+int oskar_station_swap_xy(const oskar_Station* model)
+{
+    return model ? model->swap_xy : 0;
+}
+
 double oskar_station_element_euler_index_rad(
         const oskar_Station* model, int feed, int dim, int index)
 {
@@ -550,6 +555,12 @@ void oskar_station_set_seed_time_variable_errors(oskar_Station* model,
 {
     if (!model) return;
     model->seed_time_variable_errors = value;
+}
+
+void oskar_station_set_swap_xy(oskar_Station* model, int value)
+{
+    if (!model) return;
+    model->swap_xy = value;
 }
 
 #ifdef __cplusplus

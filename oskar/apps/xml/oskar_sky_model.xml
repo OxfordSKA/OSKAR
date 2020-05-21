@@ -1,216 +1,207 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <s k="sky"><label>Sky model settings</label>
-    <desc>These parameters are used to specify the content of the sky
-        model.</desc>
+<group k="filter">
+<s k="filter"><label>Filter settings</label>
+    <s k="flux_min"><label>Flux density min [Jy]</label>
+        <type name="DoubleRangeExt" default="min">-MAX,MAX,min,max</type>
+        <desc>Minimum flux density allowed by the filter, in Jy.
+            This is an exclusive interval bound;
+            i.e. min &amp;lt; flux &amp;le; max.</desc></s>
+    <s k="flux_max"><label>Flux density max [Jy]</label>
+        <type name="DoubleRangeExt" default="max">-MAX,MAX,min,max</type>
+        <desc>Maximum flux density allowed by the filter, in Jy.
+            This is an inclusive interval bound;
+            i.e. min &amp;lt; flux &amp;le; max.</desc></s>
+    <s k="radius_inner_deg"><label>Inner radius from phase centre [deg]</label>
+        <type name="DoubleRange" default="0.0">0,180</type>
+        <desc>Minimum angular distance from phase centre allowed by the
+            filter, in degrees. This is an inclusive interval bound;
+            i.e. inner &amp;le; r &amp;lt; outer.</desc></s>
+    <s k="radius_outer_deg"><label>Outer radius from phase centre [deg]</label>
+        <type name="DoubleRange" default="180.0">0,180</type>
+        <desc>Maximum angular distance from phase centre allowed by the
+            filter, in degrees. This is an exclusive interval bound;
+            i.e. inner &amp;le; r &amp;lt; outer.</desc></s>
+</s>
+</group>
+<group k="extended">
+<s k="extended_sources"><label>Extended source settings</label>
+    <s k="FWHM_major"><label>Major axis FWHM [arcsec]</label>
+        <type name="UnsignedDouble" default="0.0"/>
+        <desc>Major axis FWHM override of all sources in this group,
+            in arc seconds.</desc></s>
+    <s k="FWHM_minor"><label>Minor axis FWHM [arcsec]</label>
+        <type name="UnsignedDouble" default="0.0"/>
+        <desc>Minor axis FWHM override of all sources in this group,
+            in arc seconds.</desc></s>
+    <s k="position_angle"><label>Position angle [deg]</label>
+        <type name="double" default="0.0"/>
+        <desc>Position angle override of all extended sources in this
+            group (from North to East), in degrees.</desc></s>
+</s>
+</group>
+<group k="random_seed">
+    <s k="seed"><label>Random seed</label>
+        <type name="RandomSeed" default="1"/>
+        <desc>Random number generator seed used for random
+           distributions.</desc></s>
+</group>
+<group k="pol">
+<s k="pol"><label>Polarisation settings</label>
+    <s k="mean_pol_fraction"><label>Mean polarisation fraction</label>
+        <type name="DoubleRange" default="0.0">0,1</type>
+        <desc>The mean polarisation fraction of generated source fluxes
+            (range 0 to 1).</desc></s>
+    <s k="std_pol_fraction">
+        <label>Standard deviation polarisation fraction</label>
+        <type name="DoubleRange" default="0.0">0,1</type>
+        <desc>The standard deviation of polarisation fraction of
+            generated source fluxes (range 0 to 1).</desc></s>
+    <s k="mean_pol_angle_deg"><label>Mean polarisation angle [deg]</label>
+        <type name="double" default="0.0"/>
+        <desc>The mean polarisation angle of generated source fluxes, in
+            degrees.</desc></s>
+    <s k="std_pol_angle_deg">
+        <label>Standard deviation polarisation angle [deg]</label>
+        <type name="UnsignedDouble" default="0.0"/>
+        <desc>The standard deviation of polarisation angle of generated
+            source fluxes, in degrees.</desc></s>
+    <import group="sky/random_seed"/>
+</s>
+</group>
+<group k="random_generator_common">
+    <s k="num_sources"><label>Number of sources</label>
+        <type name="UInt" default="0"/>
+        <desc>Number of sources scattered approximately uniformly
+            over the sphere (before filtering). A value greater than
+            0 will activate the random generator.</desc></s>
+    <s k="flux_min"><label>Flux density min [Jy]</label>
+        <type name="UnsignedDouble" default="0.0"/>
+        <desc>Minimum flux density in the random distribution, in Jy
+            (before filtering).</desc></s>
+    <s k="flux_max"><label>Flux density max [Jy]</label>
+        <type name="UnsignedDouble" default="0.0"/>
+        <desc>Maximum flux density in the random distribution, in Jy
+            (before filtering).</desc></s>
+    <import group="sky/random_seed"/>
+</group>
+<group k="fits_file_common">
+    <s k="min_abs_val"><label>Minimum absolute value</label>
+        <type name="UnsignedDouble" default="0.0"/>
+        <desc>The minimum pixel value accepted, in units of the original
+            image.</desc></s>
+    <s k="override_map_units"><label>Override map units</label>
+        <type name="bool" default="false"/>
+        <desc>If true, override any units found in the file header
+            with the default.</desc></s>
+</group>
+    <!-- End groups -->
+    <desc>These parameters specify the contents of the sky model.</desc>
     <s k="oskar_sky_model"><label>OSKAR sky model file settings</label>
         <s k="file"><label>OSKAR sky model file(s)</label>
             <type name="InputFileList" default=""/>
             <desc>Paths to one or more OSKAR sky model text or binary files.
                 See the accompanying documentation for a description of an
-                OSKAR sky model file.</desc>
-        </s>
-        <import filename="oskar_sky_model_filter.xml"/>
-        <import filename="oskar_sky_model_extended_sources.xml"/>
+                OSKAR sky model file.</desc></s>
+        <import group="sky/filter"/>
+        <import group="sky/extended"/>
     </s>
-    <!--
-    <s k="gsm"><label>Global Sky Model (GSM) file settings</label>
-        <s k="file"><label>GSM file</label>
-            <type name="InputFile" default=""/>
-            <desc>Path to a Global Sky Model file, pixellated using the
-                HEALPix RING scheme. This option can be used to load
-                a GSM data file produced from software written
-                by Angelica de Oliveira-Costa, available at
-                http://space.mit.edu/angelica/gsm/</desc>
-        </s>
-        <s k="freq_hz"><label>Frequency [Hz]</label>
-            <type name="UnsignedDouble" default="408e6"/>
-            <desc>Frequency at which to apply the conversion from brightness
-                temperature to Jy/pixel.</desc>
-        </s>
-        <s k="spectral_index"><label>Spectral index</label>
-            <type name="double" default="-0.7"/>
-            <desc>The spectral index to give to each pixel.</desc>
-        </s>
-        Import filter and extended source settings here.
-    </s>
-    -->
     <s k="fits_image"><label>FITS image file settings</label>
         <s k="file"><label>Input FITS file(s)</label>
             <type name="InputFileList" default=""/>
-            <desc>FITS file(s) to use as a sky model.</desc>
-        </s>
-        <s k="min_peak_fraction"><label>Minimum fraction of peak</label>
-            <type name="double" default="0.02"/>
-            <desc>The minimum allowed pixel value, as a fraction of the
-                peak value in the image.</desc>
-        </s>
-        <s k="min_abs_val"><label>Minimum absolute value</label>
-            <type name="double" default="0.0"/>
-            <desc>The minimum pixel value accepted, in units of the original
-                image.</desc>
-        </s>
+            <desc>FITS file(s) to use as a sky model.</desc></s>
         <s k="default_map_units"><label>Default map units</label>
             <type name="OptionList" default="Jy/beam">Jy/beam,Jy/pixel,K,mK</type>
             <desc>The physical units of pixels in the input map, if not
-                specified in the file.</desc>
-        </s>
-        <s k="override_map_units"><label>Override map units</label>
-            <type name="bool" default="false"/>
-            <desc>If true, override any units found in the file header
-                with the default.</desc>
-        </s>
+                specified in the file.</desc></s>
         <s k="spectral_index"><label>Spectral index</label>
             <type name="double" default="0.0"/>
-            <desc>The spectral index of each pixel.</desc>
-        </s>
-        <import filename="oskar_sky_model_filter.xml"/>
+            <desc>The spectral index of each pixel.</desc></s>
+        <s k="min_peak_fraction"><label>Minimum fraction of peak</label>
+            <type name="double" default="0.02"/>
+            <desc>The minimum allowed pixel value, as a fraction of the
+                peak value in the image.</desc></s>
+        <import group="sky/fits_file_common"/>
+        <import group="sky/filter"/>
     </s>
     <s k="healpix_fits"><label>HEALPix FITS file settings</label>
         <s k="file"><label>Input HEALPix FITS file</label>
             <type name="InputFileList" default=""/>
             <desc>Paths to one or more HEALPix FITS files, ordered using the
-                HEALPix RING scheme (NEST schemes are not supported).</desc>
-        </s>
-        <s k="min_peak_fraction"><label>Minimum fraction of peak</label>
-            <type name="UnsignedDouble" default="0.0"/>
-            <desc>The minimum allowed pixel value, as a fraction of the
-                peak value in the image.</desc>
-        </s>
-        <s k="min_abs_val"><label>Minimum absolute value</label>
-            <type name="UnsignedDouble" default="0.0"/>
-            <desc>The minimum pixel value accepted, in units of the original
-                image.</desc>
-        </s>
-        <s k="coord_sys"><label>Coordinate system</label>
-            <type name="OptionList" default="G">Galactic,Equatorial</type>
-            <desc>The spherical coordinate system used for the HEALPix
-                representation.</desc>
-        </s>
+                HEALPix RING scheme (NEST schemes are not supported).</desc></s>
         <s k="default_map_units"><label>Default map units</label>
             <type name="OptionList" default="K">Jy/pixel,K,mK</type>
             <desc>The physical units of pixels in the input map, if not
-                specified in the file.</desc>
-        </s>
-        <s k="override_map_units"><label>Override map units</label>
-            <type name="bool" default="false"/>
-            <desc>If true, override any units found in the file header
-                with the default.</desc>
-        </s>
+                specified in the file.</desc></s>
+        <s k="spectral_index"><label>Spectral index</label>
+            <type name="double" default="-0.7"/>
+            <desc>The spectral index to give to each pixel.</desc></s>
+        <s k="coord_sys"><label>Coordinate system</label>
+            <type name="OptionList" default="G">Galactic,Equatorial</type>
+            <desc>The spherical coordinate system used for the HEALPix
+                representation.</desc></s>
+        <s k="min_peak_fraction"><label>Minimum fraction of peak</label>
+            <type name="UnsignedDouble" default="0.0"/>
+            <desc>The minimum allowed pixel value, as a fraction of the
+                peak value in the image.</desc></s>
+        <import group="sky/fits_file_common"/>
         <s k="freq_hz"><label>Frequency [Hz]</label>
             <type name="UnsignedDouble" default="408e6"/>
             <desc>Frequency at which to apply the conversion from brightness
-                temperature to Jy/pixel.</desc>
-        </s>
-        <s k="spectral_index"><label>Spectral index</label>
-            <type name="double" default="-0.7"/>
-            <desc>The spectral index to give to each pixel.</desc>
-        </s>
-        <import filename="oskar_sky_model_filter.xml"/>
-        <import filename="oskar_sky_model_extended_sources.xml"/>
+                temperature to Jy/pixel.</desc></s>
+        <import group="sky/filter"/>
+        <import group="sky/extended"/>
     </s>
     <s k="generator"><label>Generators</label>
         <s k="random_power_law"><label>Random, power-law in flux</label>
-            <s k="num_sources"><label>Number of sources</label>
-                <type name="UInt" default="0"/>
-                <desc>Number of sources scattered approximately uniformly
-                    over the sphere (before filtering). A value greater than
-                    0 will activate the random power-law generator.</desc>
-            </s>
-            <s k="flux_min"><label>Flux density min [Jy]</label>
-                <type name="UnsignedDouble" default="0.0"/>
-                <desc>Minimum flux density in the random distribution, in Jy
-                    (before filtering).</desc>
-            </s>
-            <s k="flux_max"><label>Flux density max [Jy]</label>
-                <type name="UnsignedDouble" default="0.0"/>
-                <desc>Maximum flux density in the random distribution, in Jy
-                    (before filtering).</desc>
-            </s>
+            <import group="sky/random_generator_common"/>
             <s k="power"><label>Power law index</label>
                 <type name="double" default="0.0"/>
                 <desc>Power law exponent describing number per unit flux
-                    density.</desc>
-            </s>
-            <s k="seed"><label>Random seed</label>
-                <type name="RandomSeed" default="1"/>
-                <desc>Random number generator seed used for random
-                    distributions.</desc>
-            </s>
-            <import filename="oskar_sky_model_filter.xml"/>
-            <import filename="oskar_sky_model_extended_sources.xml"/>
+                    density.</desc></s>
+            <import group="sky/filter"/>
+            <import group="sky/extended"/>
         </s>
         <s k="random_broken_power_law">
             <label>Random, broken power-law in flux</label>
-            <s k="num_sources"><label>Number of sources</label>
-                <type name="UInt" default="0"/>
-                <desc>Number of sources scattered approximately uniformly
-                    over the sphere (before filtering). A value greater than
-                    0 will activate the random broken-power-law
-                    generator.</desc>
-            </s>
-            <s k="flux_min"><label>Flux density min [Jy]</label>
-                <type name="UnsignedDouble" default="0.0"/>
-                <desc>Minimum flux density in the random distribution, in Jy
-                    (before filtering).</desc>
-            </s>
-            <s k="flux_max"><label>Flux density max [Jy]</label>
-                <type name="UnsignedDouble" default="0.0"/>
-                <desc>Maximum flux density in the random distribution, in Jy
-                    (before filtering).</desc>
-            </s>
+            <import group="sky/random_generator_common"/>
             <s k="power1"><label>Power law index 1</label>
                 <type name="double" default="0.0"/>
                 <desc>Power law exponent describing number per unit flux
-                    density in region 1.</desc>
-            </s>
+                    density in region 1.</desc></s>
             <s k="power2"><label>Power law index 2</label>
                 <type name="double" default="0.0"/>
                 <desc>Power law exponent describing number per unit flux
-                    density in region 2.</desc>
-            </s>
+                    density in region 2.</desc></s>
             <s k="threshold"><label>Threshold [Jy]</label>
                 <type name="double" default="0.0"/>
                 <desc>Threshold flux density for the intersection of region
                     1 and 2, in Jy. Region 1 is less than the threshold;
-                    Region 2 is greater than the threshold.</desc>
-            </s>
-            <s k="seed"><label>Random seed</label>
-                <type name="RandomSeed" default="1"/>
-                <desc>Random number generator seed used for random
-                    distributions.</desc>
-            </s>
-            <import filename="oskar_sky_model_filter.xml"/>
-            <import filename="oskar_sky_model_extended_sources.xml"/>
+                    Region 2 is greater than the threshold.</desc></s>
+            <import group="sky/filter"/>
+            <import group="sky/extended"/>
         </s>
         <s k="grid"><label>Grid at phase centre</label>
             <s k="side_length"><label>Side length of grid (no. sources)</label>
                 <type name="UInt" default="0"/>
                 <desc>Side length of the generated grid. A value greater
-                    than 0 will activate the grid generator.</desc>
-            </s>
+                    than 0 will activate the grid generator.</desc></s>
             <s k="fov_deg"><label>Field-of-view [deg]</label>
                 <type name="DoubleRange" default="0.0">0,180.0</type>
                 <desc>Field-of-view spanned by the grid centre, in
-                    degrees.</desc>
-            </s>
+                    degrees.</desc></s>
             <s k="mean_flux_jy"><label>Mean Stokes I flux [Jy]</label>
                 <type name="UnsignedDouble" default="0.0"/>
-                <desc>The mean of generated Stokes I fluxes, in Jy.</desc>
-            </s>
+                <desc>The mean of generated Stokes I fluxes, in Jy.</desc></s>
              <s k="std_flux_jy">
                 <label>Standard deviation of Stokes I flux [Jy]</label>
                 <type name="UnsignedDouble" default="0.0"/>
                 <desc>The standard deviation of generated Stokes I fluxes,
-                    in Jy.</desc>
-            </s>
-            <s k="seed"><label>Random seed</label>
-                <type name="RandomSeed" default="1"/>
-                <desc>Random number generator seed used for random
-                    distributions.</desc>
-            </s>
-            <import filename="oskar_sky_model_polarisation.xml"/>
-            <import filename="oskar_sky_model_extended_sources.xml"/>
+                    in Jy.</desc></s>
+            <import group="sky/random_seed"/>
+            <import group="sky/pol"/>
+            <import group="sky/extended"/>
         </s>
         <s k="healpix"><label>HEALPix (uniform, all sky) grid</label>
             <s k="nside"><label>Nside</label>
@@ -218,15 +209,12 @@
                 <desc>HEALPix Nside parameter. A value greater than 0 will
                     activate the HEALPix generator, which will produce
                     points evenly spaced over the whole sky. The total
-                    number of points is 12 * Nside * Nside.</desc>
-            </s>
+                    number of points is 12 * Nside * Nside.</desc></s>
             <s k="amplitude"><label>Amplitude</label>
                 <type name="double" default="1.0"/>
-                <desc>Amplitude assigned to generated HEALPix points,
-                    in Jy.</desc>
-            </s>
-            <import filename="oskar_sky_model_filter.xml"/>
-            <import filename="oskar_sky_model_extended_sources.xml"/>
+                <desc>Amplitude of generated HEALPix points, in Jy.</desc></s>
+            <import group="sky/filter"/>
+            <import group="sky/extended"/>
         </s>
     </s>
     <s k="spectral_index"><label>Spectral index override settings</label>
@@ -234,32 +222,27 @@
             <label>Override source spectral index values</label>
             <type name="bool" default="false"/>
             <desc>If <b>true</b>, override all source spectral index values
-                using the parameters below.</desc>
-        </s>
+                using the parameters below.</desc></s>
         <s k="ref_frequency_hz"><label>Reference frequency [Hz]</label>
             <type name="UnsignedDouble" default="0.0"/>
-            <desc>Reference frequency of all sources in the final
-                sky model.</desc>
             <depends key="sky/spectral_index/override" value="true"/>
-        </s>
+            <desc>Reference frequency of all sources in the final
+                sky model.</desc></s>
         <s k="mean"><label>Spectral index mean</label>
             <type name="double" default="0.0"/>
-            <desc>Mean spectral index of all sources in the final
-                sky model.</desc>
             <depends key="sky/spectral_index/override" value="true"/>
-        </s>
+            <desc>Mean spectral index of all sources in the final
+                sky model.</desc></s>
         <s k="std_dev"><label>Spectral index std. dev.</label>
             <type name="double" default="0.0"/>
-            <desc>Standard deviation of spectral index values for all sources
-                in the final sky model.</desc>
             <depends key="sky/spectral_index/override" value="true"/>
-        </s>
+            <desc>Standard deviation of spectral index values for all sources
+                in the final sky model.</desc></s>
         <s k="seed"><label>Random seed</label>
             <type name="RandomSeed" default="1"/>
-            <desc>Random number generator seed used for random
-                distributions.</desc>
             <depends key="sky/spectral_index/override" value="true"/>
-        </s>
+            <desc>Random number generator seed used for random
+                distributions.</desc></s>
     </s>
     <s k="common_flux_filter">
         <label>Common source flux filtering settings</label>
@@ -267,14 +250,12 @@
             <type name="DoubleRangeExt" default="min">-MAX,MAX,min,max</type>
             <desc>Minimum flux density allowed by the filter, in Jy. <b>Note
                 that this filter is applied on a per-channel basis after
-                scaling all source fluxes by the spectral index.</b></desc>
-        </s>
+                scaling all source fluxes by the spectral index.</b></desc></s>
         <s k="flux_max"><label>Flux density max [Jy]</label>
             <type name="DoubleRangeExt" default="max">-MAX,MAX,min,max</type>
             <desc>Maximum flux density allowed by the filter, in Jy. <b>Note
                 that this filter is applied on a per-channel basis after
-                scaling all source fluxes by the spectral index.</b></desc>
-        </s>
+                scaling all source fluxes by the spectral index.</b></desc></s>
     </s>
     <s key="advanced"><label>Advanced settings</label>
         <s k="zero_failed_gaussians">
@@ -284,8 +265,7 @@
                 Gaussian width parameter solutions have failed. This can
                 occur for sources very far from the phase centre. If
                 <b>false</b> (the default), sources with failed Gaussian
-                parameter solutions are modelled as point sources.</desc>
-        </s>
+                parameter solutions are modelled as point sources.</desc></s>
         <s k="apply_horizon_clip"><label>Apply horizon clip</label>
             <type name="bool" default="true"/>
             <desc>If <b>true</b>, clip sources below the horizon of every
@@ -294,17 +274,14 @@
                 horizon can save a significant amount of time. However, to
                 avoid a wasted check, set this to <b>false</b> if the sky
                 model covers a small area which is known to be always above
-                every station's horizon for the whole observation.</desc>
-        </s>
+                every station's horizon for the whole observation.</desc></s>
     </s>
     <s k="output_binary_file"><label>Output OSKAR sky model binary file</label>
         <type name="OutputFile" default=""/>
         <desc>Path used to save the final sky model structure as an
-            OSKAR binary file. Leave blank if not required.</desc>
-    </s>
+            OSKAR binary file. Leave blank if not required.</desc></s>
     <s k="output_text_file"><label>Output OSKAR sky model text file</label>
         <type name="OutputFile" default=""/>
         <desc>Path used to save the final sky model structure as a text
-            file (useful for debugging). Leave blank if not required.</desc>
-    </s>
+            file (useful for debugging). Leave blank if not required.</desc></s>
 </s>

@@ -49,8 +49,9 @@ extern "C" {
  * system to the Ludwig-3 system (H/V).
  *
  * @param[in] num_points   Number of coordinates.
- * @param[in] phi_x        The phi angles for the x antenna, in radians.
- * @param[in] phi_y        The phi angles for the y antenna, in radians.
+ * @param[in] phi_x        The phi angles for the X antenna, in radians.
+ * @param[in] phi_y        The phi angles for the Y antenna, in radians.
+ * @param[in] swap_xy      If true, swap X and Y responses in output.
  * @param[in] offset       Start offset into jones data array.
  * @param[in,out] jones    The spherical (input) and Ludwig-3 (output) components.
  * @param[in,out] status   Status return code.
@@ -58,7 +59,7 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_convert_theta_phi_to_ludwig3_components(
         int num_points, const oskar_Mem* phi_x, const oskar_Mem* phi_y,
-        int offset, oskar_Mem* jones, int* status);
+        int swap_xy, int offset, oskar_Mem* jones, int* status);
 
 #ifdef __cplusplus
 }

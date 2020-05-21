@@ -2,22 +2,19 @@
 
 <s k="telescope">
     <label>Telescope model settings</label>
-    <desc>These parameters are used to specify the contents of the
-        telescope model.</desc>
+    <desc>These parameters specify the contents of the telescope model.</desc>
     <s k="input_directory" required="true"><label>Input directory</label>
         <type name="InputDirectory"/>
         <desc>Path to a directory containing the telescope configuration
             data. See the accompanying documentation for a description
-            of an OSKAR telescope model directory.</desc>
-    </s>
+            of an OSKAR telescope model directory.</desc></s>
     <s k="normalise_beams_at_phase_centre" priority="1">
         <label>Normalise beams at phase centre</label>
         <type name="bool" default="true"/>
         <desc>If <b>true</b>, then scale the amplitude of every station beam
             at the interferometer phase centre to precisely 1.0 for each time
             snapshot. This effectively performs an amplitude calibration for
-            a source at the phase centre.</desc>
-    </s>
+            a source at the phase centre.</desc></s>
     <s k="allow_station_beam_duplication" priority="1">
         <label>Allow station beam duplication</label>
         <type name="bool" default="false" />
@@ -26,10 +23,8 @@
             simulation time, but <b>when using a telescope model with long
             baselines, source positions will not shift with respect to each
             station's horizon if this option is enabled.</b> This setting has
-            no effect if all stations are not identical.</desc>
-    </s>
-    <s k="pol_mode" priority="1">
-        <label>Polarisation mode</label>
+            no effect if all stations are not identical.</desc></s>
+    <s k="pol_mode" priority="1"><label>Polarisation mode</label>
         <type name="OptionList" default="Full">Full, Scalar</type>
         <desc>The polarisation mode of simulations which use the telescope
             model. If this is <b>Scalar</b>, then only Stokes I visibility
@@ -37,8 +32,7 @@
             when evaluating station beams. If this is <b>Full</b> (the default)
             then correlation products from both polarisations will be
             simulated. <b>Note that scalar mode can be significantly faster.</b>
-        </desc>
-    </s>
+        </desc></s>
     <s k="station_type" priority="1"><label>Station type</label>
         <type name="OptionList" default="A">
             Aperture array,Isotropic beam,Gaussian beam,VLA (PBCOR)
@@ -46,73 +40,55 @@
         <desc>The type of each station in the interferometer. A simple,
             time-invariant Gaussian station beam can be used instead of an
             aperture array beam if required for testing. All station beam
-            effects can be disabled by selecting 'Isotropic beam'.</desc>
-    </s>
-    <!-- Aperture array settings group -->
-    <s k="aperture_array">
-        <label>Aperture array settings</label>
+            effects can be disabled by selecting 'Isotropic beam'.</desc></s>
+    <s k="aperture_array"><label>Aperture array settings</label>
         <depends k="telescope/station_type" v="Aperture array" />
         <import filename="oskar_telescope_AA_array.xml" />
         <import filename="oskar_telescope_AA_element.xml" />
     </s>
-    <s k="gaussian_beam">
-        <label>Gaussian station beam settings</label>
+    <s k="gaussian_beam"><label>Gaussian station beam settings</label>
         <depends k="telescope/station_type" v="Gaussian beam" />
-        <!-- Required IF the station type is 'Gaussian beam' -->
-        <s k="fwhm_deg">
-            <label>Gaussian FWHM [deg]</label>
+        <s k="fwhm_deg"><label>Gaussian FWHM [deg]</label>
             <type name="double" default="0.0" />
             <desc>For stations using a simple Gaussian beam, this setting
                 gives the full-width half maximum value of the Gaussian
-                station beam at the reference frequency, in degrees.</desc>
-        </s>
-        <!-- Required IF the station type is 'Gaussian beam' -->
-        <s k="ref_freq_hz">
-            <label>Reference frequency [Hz]</label>
+                station beam at the reference frequency, in degrees.</desc></s>
+        <s k="ref_freq_hz"><label>Reference frequency [Hz]</label>
             <type name="double" default="0.0" />
-            <desc>The reference frequency of the specified FWHM, in Hz.</desc>
-        </s>
+            <desc>The reference frequency of the specified FWHM,
+                in Hz.</desc></s>
     </s>
-    <s k="ionosphere_screen_type">
-        <label>Ionosphere screen type</label>
+    <s k="ionosphere_screen_type"><label>Ionosphere screen type</label>
         <type name="OptionList" default="None">None,External</type>
-        <desc>Type of ionospheric phase screen to use.</desc>
-    </s>
-    <s k="external_tec_screen">
-        <label>External TEC screen</label>
+        <desc>Type of ionospheric phase screen to use.</desc></s>
+    <s k="external_tec_screen"><label>External TEC screen</label>
+        <depends k="telescope/ionosphere_screen_type" v="External"/>
         <desc>External ionospheric TEC screen parameters.</desc>
-        <depends k="telescope/ionosphere_screen_type" v="External" />
         <s k="input_fits_file"><label>Input FITS file</label>
             <type name="InputFile"/>
             <desc>Path to a FITS file written by ARatmospy to use
-               as a TEC screen.</desc>
-        </s>
+               as a TEC screen.</desc></s>
         <s k="screen_height_km">
             <label>Screen height [km]</label>
             <type name="UnsignedDouble" default="300" />
-            <desc>Height of ionospheric screen, in kilometres.</desc>
-        </s>
+            <desc>Height of ionospheric screen, in kilometres.</desc></s>
         <s k="screen_pixel_size_m">
             <label>Screen pixel size [m]</label>
             <type name="DoubleRangeExt" default="file">0,MAX,file,file</type>
-            <desc>Pixel size of ionospheric screen, in metres.</desc>
-        </s>
+            <desc>Pixel size of ionospheric screen, in metres.</desc></s>
         <!--
         <s k="screen_time_interval_sec">
             <label>Screen time interval [sec]</label>
             <type name="DoubleRangeExt" default="file">0,MAX,file,file</type>
             <desc>Time interval between ionospheric screens,
-                in seconds.</desc>
-        </s>
+                in seconds.</desc></s>
         -->
     </s>
-
     <!--
     <s k="output_directory"><label>Output directory</label>
         <type name="OutputFile" default=""/>
         <desc>Path used to save the final telescope model directory, excluding
             any element pattern data (useful for debugging). Leave blank if not
-            required.</desc>
-    </s>
+            required.</desc></s>
     -->
 </s>

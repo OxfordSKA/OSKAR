@@ -40,7 +40,7 @@ OSKAR_CONVERT_THETA_PHI_TO_LUDWIG3(convert_theta_phi_to_ludwig3_double, double, 
 
 void oskar_convert_theta_phi_to_ludwig3_components(
         int num_points, const oskar_Mem* phi_x, const oskar_Mem* phi_y,
-        int offset, oskar_Mem* jones, int* status)
+        int swap_xy, int offset, oskar_Mem* jones, int* status)
 {
     if (*status) return;
     const int type = oskar_mem_precision(jones);
@@ -55,12 +55,12 @@ void oskar_convert_theta_phi_to_ludwig3_components(
         if (type == OSKAR_SINGLE)
             convert_theta_phi_to_ludwig3_float(num_points,
                     oskar_mem_float_const(phi_x, status),
-                    oskar_mem_float_const(phi_y, status), offset,
+                    oskar_mem_float_const(phi_y, status), swap_xy, offset,
                     oskar_mem_float4c(jones, status));
         else if (type == OSKAR_DOUBLE)
             convert_theta_phi_to_ludwig3_double(num_points,
                     oskar_mem_double_const(phi_x, status),
-                    oskar_mem_double_const(phi_y, status), offset,
+                    oskar_mem_double_const(phi_y, status), swap_xy, offset,
                     oskar_mem_double4c(jones, status));
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -85,6 +85,7 @@ void oskar_convert_theta_phi_to_ludwig3_components(
                 {INT_SZ, &num_points},
                 {PTR_SZ, oskar_mem_buffer_const(phi_x)},
                 {PTR_SZ, oskar_mem_buffer_const(phi_y)},
+                {INT_SZ, &swap_xy},
                 {INT_SZ, &offset},
                 {PTR_SZ, oskar_mem_buffer(jones)}
         };

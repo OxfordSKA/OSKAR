@@ -326,6 +326,7 @@ void set_station_data(oskar_Station* station, SettingsTree* s, int* status)
     s->begin_group("telescope/aperture_array/element_pattern");
     oskar_station_set_normalise_element_pattern(station,
             s->to_int("normalise", status));
+    oskar_station_set_swap_xy(station, s->to_int("swap_xy", status));
     double dipole_length = s->to_double("dipole_length", status);
     char units = s->first_letter("dipole_length_units", status);
     char functional_type = s->first_letter("functional_type", status);

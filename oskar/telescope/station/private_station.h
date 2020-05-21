@@ -75,6 +75,7 @@ struct oskar_Station
     int enable_array_pattern;     /* True if the array factor should be evaluated. */
     int common_element_orientation; /* True if elements share a common orientation (auto determined). */
     int common_pol_beams;         /* True if beams for both polarisations can be formed in the same way (auto determined). */
+    int swap_xy;                  /* True if the X and Y antennas should be swapped in the output. */
     int array_is_3d;              /* True if array is 3-dimensional (auto determined; default false). */
     int apply_element_errors;     /* True if element gain and phase errors should be applied (auto determined; default false). */
     int apply_element_weight;     /* True if weights should be modified by user-supplied complex beamforming weights (auto determined; default false). */

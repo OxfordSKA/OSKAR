@@ -93,6 +93,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
     if (*status) return;
 
     const double wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
+    const int swap_xy       = oskar_station_swap_xy(s);
     const int is_3d         = oskar_station_array_is_3d(s);
     const int norm_array    = oskar_station_normalise_array_pattern(s);
     const int norm_element  = oskar_station_normalise_element_pattern(s);
@@ -121,7 +122,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
             for (i = 0; i < num_element_types; ++i)
                 oskar_element_evaluate(
                         oskar_station_element_const(s, i),
-                        norm_element,
+                        norm_element, swap_xy,
                         oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, 0),
                         offset_points, num_points, x, y, z, frequency_hz,
@@ -142,7 +143,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                 }
                 oskar_element_evaluate(
                         oskar_station_element_const(s, element_type[i]),
-                        norm_element,
+                        norm_element, swap_xy,
                         oskar_station_element_euler_index_rad(s, 0, 0, i) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, i),
                         offset_points, num_points, x, y, z, frequency_hz,
