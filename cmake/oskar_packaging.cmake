@@ -32,6 +32,7 @@ if (APPLE)
     set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/gui/icons/oskar.icns)
     set(CPACK_BUNDLE_STARTUP_COMMAND ${PROJECT_SOURCE_DIR}/cmake/OSKAR)
     set(CPACK_DMG_VOLUME_NAME "OSKAR-${OSKAR_VERSION}")
+    set(CPACK_COMMAND_HDIUTIL ${PROJECT_SOURCE_DIR}/cmake/oskar_hdiutil.sh)
     set(CPACK_PACKAGE_ICON ${PROJECT_SOURCE_DIR}/gui/icons/oskar.icns)
 elseif (WIN32)
     # Bundle MSVC runtime libraries.
