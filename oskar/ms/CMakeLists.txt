@@ -9,7 +9,7 @@ if (POLICY CMP0045)
     cmake_policy(SET CMP0045 NEW)
 endif()
 if (POLICY CMP0068)
-    cmake_policy(SET CMP0068 OLD)
+    cmake_policy(SET CMP0068 NEW)
 endif()
 
 # Declare the CMake project.
