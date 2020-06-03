@@ -115,26 +115,6 @@ CSV list of path names
 \\
 \hline
 
-fits\_image/min\_peak\_fraction
-&
-{The minimum allowed pixel value, as a fraction of the peak value in the image.}
-&
-Double
-&
-0.02
-\\
-\hline
-
-fits\_image/min\_abs\_val
-&
-{The minimum pixel value accepted, in units of the original image.}
-&
-Double
-&
-0.0
-\\
-\hline
-
 fits\_image/default\_map\_units
 &
 {The physical units of pixels in the input map, if not specified in the file.}
@@ -152,16 +132,6 @@ Jy/beam
 \\
 \hline
 
-fits\_image/override\_map\_units
-&
-{If true, override any units found in the file header with the default.}
-&
-Bool
-&
-false
-\\
-\hline
-
 fits\_image/spectral\_index
 &
 {The spectral index of each pixel.}
@@ -169,6 +139,36 @@ fits\_image/spectral\_index
 Double
 &
 0.0
+\\
+\hline
+
+fits\_image/min\_peak\_fraction
+&
+{The minimum allowed pixel value, as a fraction of the peak value in the image.}
+&
+Double
+&
+0.02
+\\
+\hline
+
+fits\_image/min\_abs\_val
+&
+{The minimum pixel value accepted, in units of the original image.}
+&
+Unsigned double
+&
+0.0
+\\
+\hline
+
+fits\_image/override\_map\_units
+&
+{If true, override any units found in the file header with the default.}
+&
+Bool
+&
+false
 \\
 \hline
 
@@ -222,6 +222,47 @@ CSV list of path names
 \\
 \hline
 
+healpix\_fits/default\_map\_units
+&
+{The physical units of pixels in the input map, if not specified in the file.}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Jy/pixel}
+\item {K}
+\item {mK}
+\end{itemize}
+}
+&
+K
+\\
+\hline
+
+healpix\_fits/spectral\_index
+&
+{The spectral index to give to each pixel.}
+&
+Double
+&
+-0.7
+\\
+\hline
+
+healpix\_fits/coord\_sys
+&
+{The spherical coordinate system used for the HEALPix representation.}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Galactic}
+\item {Equatorial}
+\end{itemize}
+}
+&
+Galactic
+\\
+\hline
+
 healpix\_fits/min\_peak\_fraction
 &
 {The minimum allowed pixel value, as a fraction of the peak value in the image.}
@@ -242,37 +283,6 @@ Unsigned double
 \\
 \hline
 
-healpix\_fits/coord\_sys
-&
-{The spherical coordinate system used for the HEALPix representation.}
-&
-{One of the following:}
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
-\vspace{4pt}\item {Galactic}
-\item {Equatorial}
-\end{itemize}
-}
-&
-Galactic
-\\
-\hline
-
-healpix\_fits/default\_map\_units
-&
-{The physical units of pixels in the input map, if not specified in the file.}
-&
-{One of the following:}
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
-\vspace{4pt}\item {Jy/pixel}
-\item {K}
-\item {mK}
-\end{itemize}
-}
-&
-K
-\\
-\hline
-
 healpix\_fits/override\_map\_units
 &
 {If true, override any units found in the file header with the default.}
@@ -290,16 +300,6 @@ healpix\_fits/freq\_hz
 Unsigned double
 &
 408e6
-\\
-\hline
-
-healpix\_fits/spectral\_index
-&
-{The spectral index to give to each pixel.}
-&
-Double
-&
--0.7
 \\
 \hline
 
@@ -375,7 +375,7 @@ Double
 
 generator/random\_power\_law/num\_sources
 &
-{Number of sources scattered approximately uniformly over the sphere (before filtering). A value greater than 0 will activate the random power-law generator.}
+{Number of sources scattered approximately uniformly over the sphere (before filtering). A value greater than 0 will activate the random generator.}
 &
 Unsigned integer
 &
@@ -403,16 +403,6 @@ Unsigned double
 \\
 \hline
 
-generator/random\_power\_law/power
-&
-{Power law exponent describing number per unit flux density.}
-&
-Double
-&
-0.0
-\\
-\hline
-
 generator/random\_power\_law/seed
 &
 {Random number generator seed used for random distributions.}
@@ -420,6 +410,16 @@ generator/random\_power\_law/seed
 Integer $\geq$ 1, or `time'
 &
 1
+\\
+\hline
+
+generator/random\_power\_law/power
+&
+{Power law exponent describing number per unit flux density.}
+&
+Double
+&
+0.0
 \\
 \hline
 
@@ -495,7 +495,7 @@ Double
 
 generator/random\_broken\_power\_law/num\_sources
 &
-{Number of sources scattered approximately uniformly over the sphere (before filtering). A value greater than 0 will activate the random broken-power-law generator.}
+{Number of sources scattered approximately uniformly over the sphere (before filtering). A value greater than 0 will activate the random generator.}
 &
 Unsigned integer
 &
@@ -520,6 +520,16 @@ generator/random\_broken\_power\_law/flux\_max
 Unsigned double
 &
 0.0
+\\
+\hline
+
+generator/random\_broken\_power\_law/seed
+&
+{Random number generator seed used for random distributions.}
+&
+Integer $\geq$ 1, or `time'
+&
+1
 \\
 \hline
 
@@ -550,16 +560,6 @@ generator/random\_broken\_power\_law/threshold
 Double
 &
 0.0
-\\
-\hline
-
-generator/random\_broken\_power\_law/seed
-&
-{Random number generator seed used for random distributions.}
-&
-Integer $\geq$ 1, or `time'
-&
-1
 \\
 \hline
 
@@ -775,7 +775,7 @@ Unsigned integer
 
 generator/healpix/amplitude
 &
-{Amplitude assigned to generated HEALPix points, in Jy.}
+{Amplitude of generated HEALPix points, in Jy.}
 &
 Double
 &

@@ -99,61 +99,11 @@ true
 
 aperture\_array/array\_pattern/normalise
 &
-{If true, the amplitude of each station beam will be divided by the number of antennas in the station; if false, then this normalisation is not performed. Note, however, that global beam normalisation is still possible by enabling the option labelled \textit{'Normalise beams at phase centre'.}}
+{If true, the amplitude of each station beam will be divided by the number of antennas in the station; if false, then this normalisation is not performed.}
 &
 Bool
 &
 false
-\\
-\hline
-
-aperture\_array/array\_pattern/element/gain
-&
-{Mean element amplitude gain factor. If set (and $>$ 0.0), this will override the contents of the station files.}
-&
-Double
-&
-0.0
-\\
-\hline
-
-aperture\_array/array\_pattern/element/gain\_error\_fixed
-&
-{Systematic element amplitude gain standard deviation. If set, this will override the contents of the station files.}
-&
-Double
-&
-0.0
-\\
-\hline
-
-aperture\_array/array\_pattern/element/gain\_error\_time
-&
-{Time-variable element amplitude gain standard deviation. If set, this will override the contents of the station files.}
-&
-Double
-&
-0.0
-\\
-\hline
-
-aperture\_array/array\_pattern/element/phase\_error\_fixed\_deg
-&
-{Systematic element phase standard deviation. If set, this will override the contents of the station files.}
-&
-Double
-&
-0.0
-\\
-\hline
-
-aperture\_array/array\_pattern/element/phase\_error\_time\_deg
-&
-{Time-variable element phase standard deviation. If set, this will override the contents of the station files.}
-&
-Double
-&
-0.0
 \\
 \hline
 
@@ -167,7 +117,117 @@ Double
 \\
 \hline
 
-aperture\_array/array\_pattern/element/cable\_length\_error\_m
+aperture\_array/array\_pattern/element/x\_gain
+&
+{Mean element amplitude gain factor. If set (and $>$ 0.0), this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
+aperture\_array/array\_pattern/element/y\_gain
+&
+{Mean element amplitude gain factor. If set (and $>$ 0.0), this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
+aperture\_array/array\_pattern/element/x\_gain\_error\_fixed
+&
+{Systematic element amplitude gain standard deviation. If set, this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
+aperture\_array/array\_pattern/element/y\_gain\_error\_fixed
+&
+{Systematic element amplitude gain standard deviation. If set, this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
+aperture\_array/array\_pattern/element/x\_gain\_error\_time
+&
+{Time-variable element amplitude gain standard deviation. If set, this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
+aperture\_array/array\_pattern/element/y\_gain\_error\_time
+&
+{Time-variable element amplitude gain standard deviation. If set, this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
+aperture\_array/array\_pattern/element/x\_phase\_error\_fixed\_deg
+&
+{Systematic element phase standard deviation. If set, this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
+aperture\_array/array\_pattern/element/y\_phase\_error\_fixed\_deg
+&
+{Systematic element phase standard deviation. If set, this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
+aperture\_array/array\_pattern/element/x\_phase\_error\_time\_deg
+&
+{Time-variable element phase standard deviation. If set, this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
+aperture\_array/array\_pattern/element/y\_phase\_error\_time\_deg
+&
+{Time-variable element phase standard deviation. If set, this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
+aperture\_array/array\_pattern/element/x\_cable\_length\_error\_m
+&
+{Element cable length error standard deviation, in metres. If set, this will override the contents of the station files.}
+&
+Double
+&
+0.0
+\\
+\hline
+
+aperture\_array/array\_pattern/element/y\_cable\_length\_error\_m
 &
 {Element cable length error standard deviation, in metres. If set, this will override the contents of the station files.}
 &
@@ -179,7 +239,7 @@ Double
 
 aperture\_array/array\_pattern/element/x\_orientation\_error\_deg
 &
-{The standard deviation of the antenna X-dipole orientation error. If set, this will override the contents of the station files.}
+{The standard deviation of the element orientation error. If set, this will override the contents of the station files.}
 &
 Double
 &
@@ -189,7 +249,7 @@ Double
 
 aperture\_array/array\_pattern/element/y\_orientation\_error\_deg
 &
-{The standard deviation of the antenna Y-dipole orientation error. If set, this will override the contents of the station files.}
+{The standard deviation of the element orientation error. If set, this will override the contents of the station files.}
 &
 Double
 &
@@ -197,19 +257,9 @@ Double
 \\
 \hline
 
-aperture\_array/array\_pattern/element/seed\_gain\_errors
+aperture\_array/array\_pattern/element/seed\_position\_xy\_errors
 &
-{Random number generator seed used for systematic gain error distribution.}
-&
-Integer $\geq$ 1, or `time'
-&
-1
-\\
-\hline
-
-aperture\_array/array\_pattern/element/seed\_phase\_errors
-&
-{Random number generator seed used for systematic phase error distribution.}
+{Random number generator seed used for antenna xy-position error distribution.}
 &
 Integer $\geq$ 1, or `time'
 &
@@ -227,9 +277,9 @@ Integer $\geq$ 1, or `time'
 \\
 \hline
 
-aperture\_array/array\_pattern/element/seed\_position\_xy\_errors
+aperture\_array/array\_pattern/element/seed\_x\_gain\_errors
 &
-{Random number generator seed used for antenna xy-position error distribution.}
+{Random number generator seed used for systematic gain error distribution.}
 &
 Integer $\geq$ 1, or `time'
 &
@@ -237,7 +287,47 @@ Integer $\geq$ 1, or `time'
 \\
 \hline
 
-aperture\_array/array\_pattern/element/seed\_cable\_length\_errors
+aperture\_array/array\_pattern/element/seed\_y\_gain\_errors
+&
+{Random number generator seed used for systematic gain error distribution.}
+&
+Integer $\geq$ 1, or `time'
+&
+1
+\\
+\hline
+
+aperture\_array/array\_pattern/element/seed\_x\_phase\_errors
+&
+{Random number generator seed used for systematic phase error distribution.}
+&
+Integer $\geq$ 1, or `time'
+&
+1
+\\
+\hline
+
+aperture\_array/array\_pattern/element/seed\_y\_phase\_errors
+&
+{Random number generator seed used for systematic phase error distribution.}
+&
+Integer $\geq$ 1, or `time'
+&
+1
+\\
+\hline
+
+aperture\_array/array\_pattern/element/seed\_x\_cable\_length\_errors
+&
+{Random number generator seed used for antenna cable length error distribution.}
+&
+Integer $\geq$ 1, or `time'
+&
+1
+\\
+\hline
+
+aperture\_array/array\_pattern/element/seed\_y\_cable\_length\_errors
 &
 {Random number generator seed used for antenna cable length error distribution.}
 &
@@ -249,7 +339,7 @@ Integer $\geq$ 1, or `time'
 
 aperture\_array/array\_pattern/element/seed\_x\_orientation\_error
 &
-{Random number generator seed used for antenna X dipole orientation error distribution.}
+{Random number generator seed used for antenna X orientation error distribution.}
 &
 Integer $\geq$ 1, or `time'
 &
@@ -259,7 +349,7 @@ Integer $\geq$ 1, or `time'
 
 aperture\_array/array\_pattern/element/seed\_y\_orientation\_error
 &
-{Random number generator seed used for antenna Y dipole orientation error distribution.}
+{Random number generator seed used for antenna Y orientation error distribution.}
 &
 Integer $\geq$ 1, or `time'
 &
@@ -274,6 +364,26 @@ aperture\_array/element\_pattern/enable\_numerical
 Bool
 &
 true
+\\
+\hline
+
+aperture\_array/element\_pattern/normalise
+&
+{If true, the amplitude of each element beam will be normalised to its value at the zeith; if false, then this normalisation is not performed.}
+&
+Bool
+&
+false
+\\
+\hline
+
+aperture\_array/element\_pattern/swap\_xy
+&
+{This setting should be considered a hack to swap the order of the X and Y responses in the output, if they come out the wrong way when using numerically-defined patterns.}
+&
+Bool
+&
+false
 \\
 \hline
 

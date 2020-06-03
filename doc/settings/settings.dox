@@ -3,7 +3,7 @@
 \page settings Settings
 
 \latexonly
-\def \docversion{12}
+\def \docversion{13}
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
 \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
 \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
@@ -73,7 +73,7 @@ All settings keys in this group are prefixed with <tt>simulator/</tt>.
 
 <!-- ************************************* -->
 \subsection settings_sky Sky model settings
-These parameters are used to specify the content of the sky model.
+These parameters specify the contents of the sky model.
 
 All settings keys in this group are prefixed with <tt>sky/</tt>.
 
@@ -91,7 +91,7 @@ All settings keys in this group are prefixed with <tt>observation/</tt>.
 
 <!-- ************************************* -->
 \subsection settings_telescope Telescope model settings
-These parameters are used to specify the contents of the telescope model.
+These parameters specify the contents of the telescope model.
 
 All settings keys in this group are prefixed with <tt>telescope/</tt>.
 
@@ -192,6 +192,12 @@ All settings keys in this group are prefixed with <tt>image/</tt>.
     (these are now specified in the telescope model folder).
     Updated beam pattern output settings.
     Reinstated GSM and HEALPix sky model settings.</td></tr>
+<tr><td>13</td><td>2020-01-07</td>
+    <td>Removed GSM sky model settings, as the GSM appears to be no longer
+    available. Removed unphysical geometric dipole type.
+    Added option to specify cable length errors.
+    Added option to ignore baseline w-components.
+    Added options to use externally-generated ionospheric screen.</td></tr>
 </table>
 
 */

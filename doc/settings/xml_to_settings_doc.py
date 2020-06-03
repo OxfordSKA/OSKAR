@@ -29,6 +29,30 @@ def get_first_child(node, possible_tags):
     return None
 
 
+def get_node(root, search_key, parent_key, parent=None):
+    if parent is None:
+        parent = root
+    for child in parent:
+        if child.tag not in ('s', 'setting', 'group'):
+            continue
+        key = child.attrib.get('key')
+        if not key:
+            key = child.attrib.get('k')
+        if not key:
+            continue
+
+        # Check if keys match.
+        current_key = parent_key + key
+        if search_key == current_key:
+            return child
+
+        # Otherwise keep searching.
+        next_child = get_node(root, search_key, current_key + '/', child)
+        if next_child is not None:
+            return next_child
+    return None
+
+
 def get_node_text(node):
     if node.text is None:
         return None
@@ -78,7 +102,7 @@ def set_default_value_latex(node, latex_file):
             raise RuntimeError('Invalid setting, missing default!')
 
         # Format double type default values.
-        if type_name_ == 'DOUBLE' or type_name_ == 'DOUBLERANGE':
+        if type_name_ in ('DOUBLE', 'DOUBLERANGE'):
             default_ = format_double_string(default_)
 
         elif type_name_ == 'DOUBLERANGEEXT':
@@ -119,8 +143,7 @@ def set_allowed_values_latex(node, latex_file):
 
     allowed_values_ = r'\textcolor{red}{\textbf{FIXME}}'
 
-    if type_name_ == 'DOUBLE' or type_name_ == 'INT' or \
-            type_name_ == 'BOOL' or type_name_ == 'STRING':
+    if type_name_ in ('DOUBLE', 'INT', 'BOOL', 'STRING'):
         allowed_values_ = type_name_[0].upper() + type_name_[1:].lower()
 
     elif type_name_ == 'UINT':
@@ -141,7 +164,6 @@ def set_allowed_values_latex(node, latex_file):
         a = params_[0]
         b = params_[1]
         if b == 'MAX':
-            # allowed_values_ = r'\textcolor{red}{Integer $\geq$ %s}' % (a)
             allowed_values_ = r'Integer $\geq$ %s' % (a)
         else:
             allowed_values_ = r'Integer in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
@@ -185,24 +207,16 @@ def set_allowed_values_latex(node, latex_file):
                     % (a, b, c, d)
 
     elif type_name_ == 'INPUTFILELIST':
-        # allowed_values_ = 'Comma separated list of path names'
         allowed_values_ = 'CSV list of path names'
 
-    elif type_name_ == 'INPUTFILE' or type_name_ == 'OUTPUTFILE' or \
-            type_name_ == 'INPUTDIRECTORY':
+    elif type_name_ in ('INPUTFILE', 'OUTPUTFILE', 'INPUTDIRECTORY'):
         allowed_values_ = 'Path name'
 
     elif type_name_ == 'INTLISTEXT':
         params_ = get_type_params(type_)
         if params_ is None:
-            # allowed_values_ = "Integer list (CSV)"
-            # allowed_values_ = 'Comma separated integer list'
-            # allowed_values_ = 'CSV integer list'
             raise ValueError('Invalid IntListExt specified')
         else:
-            # allowed_values_ = "Integer list (CSV) or '%s'" % params_[0]
-            # allowed_values_ = "Comma separated integer list, or the string `%s'" % params_[0]
-            # allowed_values_ = "Comma separated integer list, or `%s'" % params_[0]
             allowed_values_ = "CSV integer list or `%s'" % params_[0]
 
     elif type_name_ == 'INTLIST':
@@ -525,42 +539,53 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
         return full_key, latex_file
 
 
-def recurse_tree(node, key=None, depth=0, count=0, latex_file=None):
+def recurse_tree(root, node, key=None, depth=0, count=0, latex_file=None):
     depth += 1
 
     # Loop over child nodes of the current node.
     for child_ in node:
 
-        # Only handle settings nodes here.
-        if child_.tag != 's':
-            continue
+        # Check type of node.
+        if child_.tag in ('s', 'setting'):
+            # Settings node.
+            key_, latex_file = parse_setting_node(
+                child_, key, depth, count, latex_file)
 
-        # Settings node
-        key_, latex_file = parse_setting_node(
-            child_, key, depth, count, latex_file)
+            # Increment the setting count if a valid setting.
+            if key_ is not None:
+                type_ = child_.find('type')
+                if type_ is not None:
+                    count += 1
 
-        # Increment the setting count if a valid setting.
-        if key_ is not None:
-            type_ = child_.find('type')
-            if type_ is not None:
-                count += 1
+            # Descend the tree.
+            count = recurse_tree(root, child_, key_, depth+1, count, latex_file)
 
-        # Descend the tree.
-        new_depth = depth+1
-        count = recurse_tree(child_, key_, new_depth, count, latex_file)
+            # For the last settings table have to close it here.
+            # if depth == 1 and child_ == node[-1]:
+            if depth == 1 and latex_file:
+                print('Closing latex table')
+                # latex_file.write('\caption{Caption...}\n')
+                # latex_file.write(r'\footnotetext[1]{Required setting.}'+'\n')
+                latex_file.write(r'\end{longtable}'+'\n')
+                latex_file.write(r'\end{center}'+'\n')
+                latex_file.write(r'\normalsize'+'\n')
+                # latex_file.write(r'\renewcommand{\thefootnote}{\arabic{footnote}}'+'\n')
+                latex_file.write(r'\newpage'+'\n')
+                latex_file.close()
 
-        # For the last settings table have to close it here.
-        # if depth == 1 and child_ == node[-1]:
-        if depth == 1 and latex_file:
-            print('Closing latex table')
-            # latex_file.write('\caption{Caption...}\n')
-            # latex_file.write(r'\footnotetext[1]{Required setting.}'+'\n')
-            latex_file.write(r'\end{longtable}'+'\n')
-            latex_file.write(r'\end{center}'+'\n')
-            latex_file.write(r'\normalsize'+'\n')
-            # latex_file.write(r'\renewcommand{\thefootnote}{\arabic{footnote}}'+'\n')
-            latex_file.write(r'\newpage'+'\n')
-            latex_file.close()
+        elif child_.tag == 'import':
+            # Import group of tags.
+            # Look for the "group" attribute (key to import).
+            group = child_.attrib.get('group')
+            if group is None:
+                continue
+
+            import_group = get_node(root, group, "")
+            if import_group is not None:
+                count = recurse_tree(root, import_group, key, depth+1,
+                                     count, latex_file)
+            else:
+                raise RuntimeError("Could not find group '%s'" % group)
 
     return count
 
@@ -576,7 +601,7 @@ if __name__ == "__main__":
     xmlStr = fh_.read()
     fh_.close()
     xml = ET.fromstring(xmlStr)
-    recurse_tree(xml)
+    recurse_tree(xml, xml)
 
     # Create the settings.dox file.
     file_replace = '@PROJECT_SOURCE_DIR@/doc/settings/settings_tables.txt'

@@ -10,7 +10,7 @@ All settings keys in this group are prefixed with <tt>simulator/</tt>.
 
 <!-- ************************************* -->
 \subsection settings_sky Sky model settings
-These parameters are used to specify the content of the sky model.
+These parameters specify the contents of the sky model.
 
 All settings keys in this group are prefixed with <tt>sky/</tt>.
 
@@ -28,7 +28,7 @@ All settings keys in this group are prefixed with <tt>observation/</tt>.
 
 <!-- ************************************* -->
 \subsection settings_telescope Telescope model settings
-These parameters are used to specify the contents of the telescope model.
+These parameters specify the contents of the telescope model.
 
 All settings keys in this group are prefixed with <tt>telescope/</tt>.
 
