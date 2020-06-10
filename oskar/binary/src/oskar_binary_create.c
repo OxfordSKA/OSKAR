@@ -32,7 +32,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#ifndef _MSC_VER
 #include <sys/types.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
