@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
+ * Copyright (c) 2012-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -326,11 +326,14 @@ static fitsfile* create_fits_file(const char* filename, int precision,
     /* Write axis headers. */
     if (horizon_mode)
     {
+        fits_write_key_str(f, "WCSNAME", "AZELGEO", NULL, status);
+        fits_write_key_dbl(f, "LONPOLE", 0.0, 10, NULL, status);
+        fits_write_key_dbl(f, "LATPOLE", 90.0, 10, NULL, status);
         delta = oskar_convert_fov_to_cellsize(M_PI, width);
-        write_axis(f, 1, "-----SIN", "Azimuthal angle",
-                0.0, -delta * rad2deg, (width + 1) / 2.0, status);
+        write_axis(f, 1, "HOLN-SIN", "Azimuth",
+                0.0, delta * rad2deg, (width + 1) / 2.0, status);
         delta = oskar_convert_fov_to_cellsize(M_PI, height);
-        write_axis(f, 2, "-----SIN", "Elevation",
+        write_axis(f, 2, "HOLT-SIN", "Elevation",
                 90.0, delta * rad2deg, (height + 1) / 2.0, status);
     }
     else
