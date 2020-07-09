@@ -293,6 +293,8 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         }
         else
         {
+            oskar_log_error(log, "Unable to load ionospheric screen '%s'.",
+                    screen_path);
             *status = OSKAR_ERR_FILE_IO;
         }
     }

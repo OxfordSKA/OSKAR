@@ -213,7 +213,7 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
     for (s = 0; s < h->num_active_stations; ++s)
     {
         /* Text file. */
-        for (i = I; i <= V; ++i)
+        for (i = 0; i < 2; ++i)
             for (o = I; (o <= V) && h->stokes[i] && h->auto_power_txt; ++o)
                 new_text_file(h, AUTO_POWER_AMP, i, o, s, ta, ca, status);
 
@@ -221,7 +221,7 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
         if (h->coord_grid_type != 'B') continue;
 
         /* FITS file. */
-        for (i = I; i <= V; ++i)
+        for (i = 0; i < 2; ++i)
         {
             for (o = I; (o <= V) && h->stokes[i]; ++o)
             {
@@ -238,7 +238,7 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
     }
 
     /* Text file. */
-    for (i = I; i <= V; ++i)
+    for (i = 0; i < 2; ++i)
     {
         if (h->cross_power_raw_txt && h->stokes[i])
             new_text_file(h, CROSS_POWER_RAW_COMPLEX, i, -1, -1, ta, ca,
@@ -256,7 +256,7 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
     if (h->coord_grid_type != 'B') return;
 
     /* FITS file. */
-    for (i = I; i <= V; ++i)
+    for (i = 0; i < 2; ++i)
     {
         for (o = I; (o <= V) && h->stokes[i]; ++o)
         {
@@ -437,9 +437,10 @@ static char* construct_filename(oskar_BeamPattern* h, int data_product_type,
             channel_average ? "CHAN_AVG" : "CHAN_SEP");
     start += SNPRINTF(name + start, buflen - start, "_%s",
             data_type_to_string(data_product_type));
-    if (stokes_in >= 0)
-        start += SNPRINTF(name + start, buflen - start, "_%s",
-                stokes_type_to_string(stokes_in));
+    if (stokes_in == 0)
+        start += SNPRINTF(name + start, buflen - start, "_%s", "I");
+    if (stokes_in == 1)
+        start += SNPRINTF(name + start, buflen - start, "_%s", "CUSTOM");
     if (stokes_out >= 0)
         start += SNPRINTF(name + start, buflen - start, "_%s",
                 stokes_type_to_string(stokes_out));
@@ -496,7 +497,7 @@ static void new_text_file(oskar_BeamPattern* h, int data_product_type,
     if (*status) return;
 
     /* Check polarisation type is possible. */
-    if ((stokes_in > I || stokes_out > I) && h->pol_mode != OSKAR_POL_MODE_FULL)
+    if ((stokes_in > 0 || stokes_out > I) && h->pol_mode != OSKAR_POL_MODE_FULL)
         return;
 
     /* Construct the filename. */
@@ -604,7 +605,7 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
 
     for (i = 0; i < h->num_devices; ++i)
     {
-        int dev_loc, i_stokes;
+        int dev_loc, i_stokes_type;
         DeviceData* d = &h->d[i];
         if (*status) break;
 
@@ -650,35 +651,36 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
         }
 
         /* Auto-correlation beam output arrays. */
-        for (i_stokes = 0; i_stokes < 4; ++i_stokes)
+        for (i_stokes_type = 0; i_stokes_type < 2; ++i_stokes_type)
         {
-            if (!h->stokes[i_stokes]) continue;
+            if (!h->stokes[i_stokes_type]) continue;
 
-            if (!d->auto_power[i_stokes] && auto_power)
+            if (!d->auto_power[i_stokes_type] && auto_power)
             {
                 /* Device memory. */
-                d->auto_power[i_stokes] = oskar_mem_create(beam_type, dev_loc,
-                        max_size, status);
+                d->auto_power[i_stokes_type] = oskar_mem_create(
+                        beam_type, dev_loc, max_size, status);
+                oskar_mem_clear_contents(d->auto_power[i_stokes_type], status);
 
                 /* Host memory. */
-                d->auto_power_cpu[i_stokes][0] = oskar_mem_create(
+                d->auto_power_cpu[i_stokes_type][0] = oskar_mem_create(
                         beam_type, OSKAR_CPU, max_size, status);
-                d->auto_power_cpu[i_stokes][1] = oskar_mem_create(
+                d->auto_power_cpu[i_stokes_type][1] = oskar_mem_create(
                         beam_type, OSKAR_CPU, max_size, status);
                 if (h->average_single_axis == 'T')
-                    d->auto_power_time_avg[i_stokes] = oskar_mem_create(
+                    d->auto_power_time_avg[i_stokes_type] = oskar_mem_create(
                             beam_type, OSKAR_CPU, max_size, status);
                 if (h->average_single_axis == 'C')
-                    d->auto_power_channel_avg[i_stokes] = oskar_mem_create(
+                    d->auto_power_channel_avg[i_stokes_type] = oskar_mem_create(
                             beam_type, OSKAR_CPU, max_size, status);
                 if (h->average_time_and_channel)
-                    d->auto_power_channel_and_time_avg[i_stokes] =
+                    d->auto_power_channel_and_time_avg[i_stokes_type] =
                             oskar_mem_create(beam_type, OSKAR_CPU,
                                     max_size, status);
             }
 
             /* Cross-correlation beam output arrays. */
-            if (!d->cross_power[i_stokes] && cross_power)
+            if (!d->cross_power[i_stokes_type] && cross_power)
             {
                 if (h->num_active_stations < 2)
                 {
@@ -689,29 +691,26 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
                 }
 
                 /* Device memory. */
-                d->cross_power[i_stokes] = oskar_mem_create(
+                d->cross_power[i_stokes_type] = oskar_mem_create(
                         beam_type, dev_loc, max_src, status);
+                oskar_mem_clear_contents(d->cross_power[i_stokes_type], status);
 
                 /* Host memory. */
-                d->cross_power_cpu[i_stokes][0] = oskar_mem_create(
+                d->cross_power_cpu[i_stokes_type][0] = oskar_mem_create(
                         beam_type, OSKAR_CPU, max_src, status);
-                d->cross_power_cpu[i_stokes][1] = oskar_mem_create(
+                d->cross_power_cpu[i_stokes_type][1] = oskar_mem_create(
                         beam_type, OSKAR_CPU, max_src, status);
                 if (h->average_single_axis == 'T')
-                    d->cross_power_time_avg[i_stokes] = oskar_mem_create(
+                    d->cross_power_time_avg[i_stokes_type] = oskar_mem_create(
                             beam_type, OSKAR_CPU, max_src, status);
                 if (h->average_single_axis == 'C')
-                    d->cross_power_channel_avg[i_stokes] = oskar_mem_create(
+                    d->cross_power_channel_avg[i_stokes_type] = oskar_mem_create(
                             beam_type, OSKAR_CPU, max_src, status);
                 if (h->average_time_and_channel)
-                    d->cross_power_channel_and_time_avg[i_stokes] =
+                    d->cross_power_channel_and_time_avg[i_stokes_type] =
                             oskar_mem_create(beam_type, OSKAR_CPU,
                                     max_src, status);
             }
-            if (d->auto_power[i_stokes])
-                oskar_mem_clear_contents(d->auto_power[i_stokes], status);
-            if (d->cross_power[i_stokes])
-                oskar_mem_clear_contents(d->cross_power[i_stokes], status);
         }
 
         /* Timers. */

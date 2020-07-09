@@ -111,8 +111,8 @@ protected:
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         createTestData(prec1, loc1, matrix);
         oskar_timer_start(timer1);
-        oskar_evaluate_cross_power(num_sources, num_stations,
-                jones, 0, beam1, &status);
+        oskar_evaluate_cross_power(num_sources, num_stations, jones,
+                1.0, 0.0, 0.0, 0.0, 0, beam1, &status);
         time1 = oskar_timer_elapsed(timer1);
         destroyTestData();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -125,8 +125,8 @@ protected:
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         createTestData(prec2, loc2, matrix);
         oskar_timer_start(timer2);
-        oskar_evaluate_cross_power(num_sources, num_stations,
-                jones, 0, beam2, &status);
+        oskar_evaluate_cross_power(num_sources, num_stations, jones,
+                1.0, 0.0, 0.0, 0.0, 0, beam2, &status);
         time2 = oskar_timer_elapsed(timer2);
         destroyTestData();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);

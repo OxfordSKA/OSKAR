@@ -238,4 +238,49 @@
                     FITS image files.</desc></s>
         </s>
     </s>
+    <s k="test_source"><label>Test source configuration</label>
+        <logic group="AND">
+            <depends k="telescope/pol_mode" v="Full"/>
+            <logic group="OR">
+                <depends k="beam_pattern/station_outputs/text_file/auto_power" v="true"/>
+                <depends k="beam_pattern/station_outputs/fits_image/auto_power" v="true"/>
+                <depends k="beam_pattern/station_outputs/fits_image/auto_power_phase" v="true"/>
+                <depends k="beam_pattern/station_outputs/fits_image/auto_power_real" v="true"/>
+                <depends k="beam_pattern/station_outputs/fits_image/auto_power_imag" v="true"/>
+                <depends k="beam_pattern/telescope_outputs/text_file/cross_power_raw_complex" v="true"/>
+                <depends k="beam_pattern/telescope_outputs/text_file/cross_power_amp" v="true"/>
+                <depends k="beam_pattern/telescope_outputs/text_file/cross_power_phase" v="true"/>
+                <depends k="beam_pattern/telescope_outputs/fits_image/cross_power_amp" v="true"/>
+                <depends k="beam_pattern/telescope_outputs/fits_image/cross_power_phase" v="true"/>
+                <depends k="beam_pattern/telescope_outputs/fits_image/cross_power_real" v="true"/>
+                <depends k="beam_pattern/telescope_outputs/fits_image/cross_power_imag" v="true"/>
+            </logic>
+        </logic>
+        <s k="stokes_i" priority="1"><label>Use a Stokes I test source</label>
+            <type name="bool" default="true"/>
+            <desc>Use a Stokes I test source.</desc></s>
+        <s k="custom" priority="1"><label>Use a custom test source</label>
+            <type name="bool" default="false"/>
+            <desc>Use a custom test source.</desc></s>
+        <s k="custom_stokes_i"><label>Custom Stokes I value</label>
+            <depends k="beam_pattern/test_source/custom" v="true"/>
+            <type name="UnsignedDouble" default="1.0"/>
+            <desc>Stokes I value for the test source.</desc>
+        </s>
+        <s k="custom_stokes_q"><label>Custom Stokes Q value</label>
+            <depends k="beam_pattern/test_source/custom" v="true"/>
+            <type name="double" default="0.0"/>
+            <desc>Stokes Q value for the test source.</desc>
+        </s>
+        <s k="custom_stokes_u"><label>Custom Stokes U value</label>
+            <depends k="beam_pattern/test_source/custom" v="true"/>
+            <type name="double" default="0.0"/>
+            <desc>Stokes U value for the test source.</desc>
+        </s>
+        <s k="custom_stokes_v"><label>Custom Stokes V value</label>
+            <depends k="beam_pattern/test_source/custom" v="true"/>
+            <type name="double" default="0.0"/>
+            <desc>Stokes V value for the test source.</desc>
+        </s>
+    </s>
 </s>

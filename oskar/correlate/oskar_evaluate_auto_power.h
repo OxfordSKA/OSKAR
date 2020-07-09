@@ -50,6 +50,10 @@ extern "C" {
  * @param[in] num_sources    The number of sources to evaluate.
  * @param[in] offset_in      Start offset of input data.
  * @param[in] jones          Pointer to input Jones data array.
+ * @param[in] src_I          Test source Stokes I value.
+ * @param[in] src_Q          Test source Stokes Q value.
+ * @param[in] src_U          Test source Stokes U value.
+ * @param[in] src_V          Test source Stokes V value.
  * @param[in] offset_out     Start offset of output data.
  * @param[out] out           Pointer to output auto-power product.
  * @param[in,out] status     Status return code.
@@ -57,6 +61,7 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_evaluate_auto_power(int num_sources,
         int offset_in, const oskar_Mem* jones,
+        double src_I, double src_Q, double src_U, double src_V,
         int offset_out, oskar_Mem* out, int *status);
 
 #ifdef __cplusplus

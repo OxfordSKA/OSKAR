@@ -315,12 +315,29 @@ void oskar_beam_pattern_set_station_ids(oskar_BeamPattern* h,
 }
 
 
-void oskar_beam_pattern_set_stokes(oskar_BeamPattern* h, const char* stokes)
+void oskar_beam_pattern_set_test_source_stokes_i(oskar_BeamPattern* h,
+        int enabled)
 {
-    h->stokes[0] = (strchr(stokes, 'I') || strchr(stokes, 'i'));
-    h->stokes[1] = (strchr(stokes, 'Q') || strchr(stokes, 'q'));
-    h->stokes[2] = (strchr(stokes, 'U') || strchr(stokes, 'u'));
-    h->stokes[3] = (strchr(stokes, 'V') || strchr(stokes, 'v'));
+    h->stokes[0] = enabled;
+}
+
+
+void oskar_beam_pattern_set_test_source_stokes_custom(oskar_BeamPattern* h,
+        int enabled, double i, double q, double u, double v, int* status)
+{
+    if (*status) return;
+    if (i < 0.0 || ((q*q + u*u + v*v) > i*i))
+    {
+        oskar_log_error(h->log, "Invalid Stokes parameters for test source "
+                "(I, Q, U, V) = (%.2e, %.2e, %.2e, %.2e)", i, q, u, v);
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+    h->stokes[1] = enabled;
+    h->test_source_stokes[0] = i;
+    h->test_source_stokes[1] = q;
+    h->test_source_stokes[2] = u;
+    h->test_source_stokes[3] = v;
 }
 
 

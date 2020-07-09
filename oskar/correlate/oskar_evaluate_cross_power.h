@@ -55,6 +55,10 @@ extern "C" {
  * @param[in] num_stations   The number of stations in the input arrays.
  * @param[in] jones          Pointer to Jones matrix block
  *                           (length \p num_sources * \p num_stations).
+ * @param[in] src_I          Test source Stokes I value.
+ * @param[in] src_Q          Test source Stokes Q value.
+ * @param[in] src_U          Test source Stokes U value.
+ * @param[in] src_V          Test source Stokes V value.
  * @param[in] offset_out     Start offset into output array.
  * @param[out] out           Pointer to output average cross-power product
  *                           (length \p num_sources).
@@ -62,7 +66,9 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_evaluate_cross_power(int num_sources, int num_stations,
-        const oskar_Mem* jones, int offset_out, oskar_Mem* out, int *status);
+        const oskar_Mem* jones,
+        double src_I, double src_Q, double src_U, double src_V,
+        int offset_out, oskar_Mem* out, int *status);
 
 #ifdef __cplusplus
 }

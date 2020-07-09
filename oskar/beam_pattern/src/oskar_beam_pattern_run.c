@@ -71,14 +71,9 @@ static void complex_to_imag(const oskar_Mem* complex_in, const int offset,
         const int stride, const int num_points, oskar_Mem* output, int* status);
 static void jones_to_ixr(const oskar_Mem* complex_in, const int offset,
         const int num_points, oskar_Mem* output, int* status);
-static void power_to_stokes_I(const oskar_Mem* power_in, const int offset,
-        const int num_points, oskar_Mem* output, int* status);
-static void power_to_stokes_Q(const oskar_Mem* power_in, const int offset,
-        const int num_points, oskar_Mem* output, int* status);
-static void power_to_stokes_U(const oskar_Mem* power_in, const int offset,
-        const int num_points, oskar_Mem* output, int* status);
-static void power_to_stokes_V(const oskar_Mem* power_in, const int offset,
-        const int num_points, oskar_Mem* output, int* status);
+static void oskar_convert_linear_to_stokes(const int num_points,
+        const int offset_in, const oskar_Mem* linear, const int stokes_index,
+        oskar_Mem* output, int* status);
 static void record_timing(oskar_BeamPattern* h);
 static unsigned int disp_width(unsigned int value);
 
@@ -328,30 +323,37 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
                 oskar_telescope_phase_centre_dec_rad(d->tel),
                 station,
                 d->work, i_time, freq_hz, gast, offset, d->jones_data, status);
-        if (d->auto_power[I])
+        if (d->auto_power[0])
+            oskar_evaluate_auto_power(chunk_size,
+                    offset, d->jones_data, 1.0, 0.0, 0.0, 0.0,
+                    offset, d->auto_power[0], status);
+        if (d->auto_power[1])
             oskar_evaluate_auto_power(chunk_size,
                     offset, d->jones_data,
-                    offset, d->auto_power[I], status);
-#if 0
-        if (d->auto_power[Q])
-            oskar_evaluate_auto_power_stokes_q(chunk_size,
-                    offset, d->jones_data,
-                    offset, d->auto_power[Q], status);
-        if (d->auto_power[U])
-            oskar_evaluate_auto_power_stokes_u(chunk_size,
-                    offset, d->jones_data,
-                    offset, d->auto_power[U], status);
-#endif
+                    h->test_source_stokes[0],
+                    h->test_source_stokes[1],
+                    h->test_source_stokes[2],
+                    h->test_source_stokes[3],
+                    offset, d->auto_power[1], status);
     }
-    if (d->cross_power[I])
+    if (d->cross_power[0])
         oskar_evaluate_cross_power(chunk_size, h->num_active_stations,
-                d->jones_data, 0, d->cross_power[I], status);
+                d->jones_data, 1.0, 0.0, 0.0, 0.0,
+                0, d->cross_power[0], status);
+    if (d->cross_power[1])
+        oskar_evaluate_cross_power(chunk_size, h->num_active_stations,
+                d->jones_data,
+                h->test_source_stokes[0],
+                h->test_source_stokes[1],
+                h->test_source_stokes[2],
+                h->test_source_stokes[3],
+                0, d->cross_power[1], status);
 
     /* Copy the output data into host memory. */
     if (d->jones_data_cpu[i_active])
         oskar_mem_copy_contents(d->jones_data_cpu[i_active], d->jones_data,
                 0, 0, chunk_size * h->num_active_stations, status);
-    for (i = 0; i < 4; ++i)
+    for (i = 0; i < 2; ++i)
     {
         if (d->auto_power[i])
             oskar_mem_copy_contents(d->auto_power_cpu[i][i_active],
@@ -399,8 +401,8 @@ static void write_chunks(oskar_BeamPattern* h, int i_chunk_start,
         write_pixels(h, i_chunk, i_time, i_channel, chunk_sources, 0, 0,
                 d->jones_data_cpu[!i_active], JONES_DATA, -1, status);
 
-        /* Loop over Stokes parameters. */
-        for (stokes = 0; stokes < 4; ++stokes)
+        /* Loop over Stokes parameter types. */
+        for (stokes = 0; stokes < 2; ++stokes)
         {
             /* Write non-averaged data, if required. */
             write_pixels(h, i_chunk, i_time, i_channel, chunk_sources, 0, 0,
@@ -617,14 +619,9 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
                 continue;
             if (chunk_desc == AUTO_POWER_DATA && (dp & CROSS_POWER))
                 continue;
-            if (stokes_out == I)
-                power_to_stokes_I(in, off, num_pix, h->ctemp, status);
-            else if (stokes_out == Q)
-                power_to_stokes_Q(in, off, num_pix, h->ctemp, status);
-            else if (stokes_out == U)
-                power_to_stokes_U(in, off, num_pix, h->ctemp, status);
-            else if (stokes_out == V)
-                power_to_stokes_V(in, off, num_pix, h->ctemp, status);
+            if (stokes_out >= I && stokes_out <= V)
+                oskar_convert_linear_to_stokes(num_pix, off, in,
+                        stokes_out, h->ctemp, status);
             else continue;
             if (dp & AMP)
                 complex_to_amp(h->ctemp, 0, 1, num_pix, h->pix, status);
@@ -809,159 +806,72 @@ static void jones_to_ixr(const oskar_Mem* jones, const int offset,
 }
 
 
-static void power_to_stokes_I(const oskar_Mem* power_in, const int offset,
-        const int num_points, oskar_Mem* output, int* status)
+#define LINEAR_TO_STOKES(N, IN, OUT) {\
+    int i;\
+    switch (stokes_index) {\
+    case 0: /* I = 0.5 * (XX + YY) */\
+        for (i = 0; i < N; ++i) {\
+            OUT[i].x = 0.5 * (IN[i].a.x + IN[i].d.x);\
+            OUT[i].y = 0.5 * (IN[i].a.y + IN[i].d.y);\
+        }\
+        break;\
+    case 1: /* Q = 0.5 * (XX - YY) */\
+        for (i = 0; i < N; ++i) {\
+            OUT[i].x = 0.5 * (IN[i].a.x - IN[i].d.x);\
+            OUT[i].y = 0.5 * (IN[i].a.y - IN[i].d.y);\
+        }\
+        break;\
+    case 2: /* U = 0.5 * (XY + YX) */\
+        for (i = 0; i < N; ++i) {\
+            OUT[i].x = 0.5 * (IN[i].b.x + IN[i].c.x);\
+            OUT[i].y = 0.5 * (IN[i].b.y + IN[i].c.y);\
+        }\
+        break;\
+    case 3: /* V = -0.5i * (XY - YX) */\
+        for (i = 0; i < N; ++i) {\
+            OUT[i].x =  0.5 * (IN[i].b.y - IN[i].c.y);\
+            OUT[i].y = -0.5 * (IN[i].b.x - IN[i].c.x);\
+        }\
+        break;\
+    default:\
+        break;\
+    }\
+    }
+
+void oskar_convert_linear_to_stokes(const int num_points,
+        const int offset_in, const oskar_Mem* linear, const int stokes_index,
+        oskar_Mem* output, int* status)
 {
-    /* Both arrays must be complex: this allows cross-power Stokes I. */
-    if (!oskar_mem_is_complex(power_in) || !oskar_mem_is_complex(output))
-        return;
-
-    /* Generate 0.5 * (XX + YY) from input. */
-    if (!oskar_mem_is_matrix(power_in))
-        oskar_mem_copy_contents(output, power_in, 0, offset, num_points,
-                status);
-    else
+    if (*status) return;
+    if (!oskar_mem_is_complex(linear) || !oskar_mem_is_complex(output))
     {
-        int i;
-
-        if (oskar_mem_is_double(power_in))
-        {
-            double2* out;
-            const double4c* in;
-            out = oskar_mem_double2(output, status);
-            in = oskar_mem_double4c_const(power_in, status) + offset;
-            for (i = 0; i < num_points; ++i)
-            {
-                out[i].x = 0.5 * (in[i].a.x + in[i].d.x);
-                out[i].y = 0.5 * (in[i].a.y + in[i].d.y);
-            }
-        }
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
+    if (!oskar_mem_is_matrix(linear))
+    {
+        if (stokes_index == 0)
+            oskar_mem_copy_contents(output, linear, 0, offset_in, num_points,
+                    status);
         else
-        {
-            float2* out;
-            const float4c* in;
-            out = oskar_mem_float2(output, status);
-            in = oskar_mem_float4c_const(power_in, status) + offset;
-            for (i = 0; i < num_points; ++i)
-            {
-                out[i].x = 0.5 * (in[i].a.x + in[i].d.x);
-                out[i].y = 0.5 * (in[i].a.y + in[i].d.y);
-            }
-        }
-    }
-}
-
-
-static void power_to_stokes_Q(const oskar_Mem* power_in, const int offset,
-        const int num_points, oskar_Mem* output, int* status)
-{
-    int i;
-
-    /* Both arrays must be complex: this allows cross-power Stokes Q. */
-    if (!oskar_mem_is_complex(power_in) || !oskar_mem_is_matrix(power_in) ||
-            !oskar_mem_is_complex(output))
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
-
-    /* Generate 0.5 * (XX - YY) from input. */
-    if (oskar_mem_is_double(power_in))
+    }
+    if (oskar_mem_is_double(linear))
     {
         double2* out;
         const double4c* in;
         out = oskar_mem_double2(output, status);
-        in = oskar_mem_double4c_const(power_in, status) + offset;
-        for (i = 0; i < num_points; ++i)
-        {
-            out[i].x = 0.5 * (in[i].a.x - in[i].d.x);
-            out[i].y = 0.5 * (in[i].a.y - in[i].d.y);
-        }
+        in = oskar_mem_double4c_const(linear, status) + offset_in;
+        LINEAR_TO_STOKES(num_points, in, out)
     }
     else
     {
         float2* out;
         const float4c* in;
         out = oskar_mem_float2(output, status);
-        in = oskar_mem_float4c_const(power_in, status) + offset;
-        for (i = 0; i < num_points; ++i)
-        {
-            out[i].x = 0.5 * (in[i].a.x - in[i].d.x);
-            out[i].y = 0.5 * (in[i].a.y - in[i].d.y);
-        }
-    }
-}
-
-
-static void power_to_stokes_U(const oskar_Mem* power_in, const int offset,
-        const int num_points, oskar_Mem* output, int* status)
-{
-    int i;
-
-    /* Both arrays must be complex: this allows cross-power Stokes U. */
-    if (!oskar_mem_is_complex(power_in) || !oskar_mem_is_matrix(power_in) ||
-            !oskar_mem_is_complex(output))
-        return;
-
-    /* Generate 0.5 * (XY + YX) from input. */
-    if (oskar_mem_is_double(power_in))
-    {
-        double2* out;
-        const double4c* in;
-        out = oskar_mem_double2(output, status);
-        in = oskar_mem_double4c_const(power_in, status) + offset;
-        for (i = 0; i < num_points; ++i)
-        {
-            out[i].x = 0.5 * (in[i].b.x + in[i].c.x);
-            out[i].y = 0.5 * (in[i].b.y + in[i].c.y);
-        }
-    }
-    else
-    {
-        float2* out;
-        const float4c* in;
-        out = oskar_mem_float2(output, status);
-        in = oskar_mem_float4c_const(power_in, status) + offset;
-        for (i = 0; i < num_points; ++i)
-        {
-            out[i].x = 0.5 * (in[i].b.x + in[i].c.x);
-            out[i].y = 0.5 * (in[i].b.y + in[i].c.y);
-        }
-    }
-}
-
-
-static void power_to_stokes_V(const oskar_Mem* power_in, const int offset,
-        const int num_points, oskar_Mem* output, int* status)
-{
-    int i;
-
-    /* Both arrays must be complex: this allows cross-power Stokes V. */
-    if (!oskar_mem_is_complex(power_in) || !oskar_mem_is_matrix(power_in) ||
-            !oskar_mem_is_complex(output))
-        return;
-
-    /* Generate -0.5i * (XY - YX) from input. */
-    if (oskar_mem_is_double(power_in))
-    {
-        double2* out;
-        const double4c* in;
-        out = oskar_mem_double2(output, status);
-        in = oskar_mem_double4c_const(power_in, status) + offset;
-        for (i = 0; i < num_points; ++i)
-        {
-            out[i].x =  0.5 * (in[i].b.y - in[i].c.y);
-            out[i].y = -0.5 * (in[i].b.x - in[i].c.x);
-        }
-    }
-    else
-    {
-        float2* out;
-        const float4c* in;
-        out = oskar_mem_float2(output, status);
-        in = oskar_mem_float4c_const(power_in, status) + offset;
-        for (i = 0; i < num_points; ++i)
-        {
-            out[i].x =  0.5 * (in[i].b.y - in[i].c.y);
-            out[i].y = -0.5 * (in[i].b.x - in[i].c.x);
-        }
+        in = oskar_mem_float4c_const(linear, status) + offset_in;
+        LINEAR_TO_STOKES(num_points, in, out)
     }
 }
 

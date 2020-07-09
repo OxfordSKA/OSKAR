@@ -51,7 +51,7 @@ void oskar_beam_pattern_free_device_data(oskar_BeamPattern* h, int* status)
         oskar_mem_free(d->x, status);
         oskar_mem_free(d->y, status);
         oskar_mem_free(d->z, status);
-        for (j = 0; j < 4; ++j)
+        for (j = 0; j < 2; ++j)
         {
             oskar_mem_free(d->auto_power_cpu[j][0], status);
             oskar_mem_free(d->auto_power_cpu[j][1], status);

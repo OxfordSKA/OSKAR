@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, The University of Oxford
+ * Copyright (c) 2017-2020, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,7 +139,6 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
             s->to_int("average_time_and_channel", status));
     oskar_beam_pattern_set_separate_time_and_channel(h,
             s->to_int("separate_time_and_channel", status));
-    // oskar_beam_pattern_set_stokes(h, s->to_string("stokes", status).c_str());
     s->end_group();
 
     // Set output files.
@@ -180,6 +179,18 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
     oskar_beam_pattern_set_cross_power_raw_text(h,
             s->to_int("telescope_outputs/text_file/cross_power_raw_complex",
                     status));
+    s->end_group();
+
+    // Set test source configuration.
+    s->begin_group("beam_pattern/test_source");
+    oskar_beam_pattern_set_test_source_stokes_i(h,
+            s->to_int("stokes_i", status));
+    oskar_beam_pattern_set_test_source_stokes_custom(h,
+            s->to_int("custom", status),
+            s->to_double("custom_stokes_i", status),
+            s->to_double("custom_stokes_q", status),
+            s->to_double("custom_stokes_u", status),
+            s->to_double("custom_stokes_v", status), status);
     s->end_group();
 
     // Return handle to beam pattern simulator.

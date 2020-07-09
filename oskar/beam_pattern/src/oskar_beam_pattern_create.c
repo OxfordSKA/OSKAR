@@ -57,7 +57,9 @@ oskar_BeamPattern* oskar_beam_pattern_create(int precision, int* status)
     oskar_beam_pattern_set_num_devices(h, -1);
     oskar_beam_pattern_set_max_chunk_size(h, 16384);
     oskar_beam_pattern_set_station_ids(h, 1, &station_id);
-    oskar_beam_pattern_set_stokes(h, "I");
+    oskar_beam_pattern_set_test_source_stokes_i(h, 1);
+    oskar_beam_pattern_set_test_source_stokes_custom(h,
+            0, 1.0, 0.0, 0.0, 0.0, status);
     oskar_beam_pattern_set_coordinate_frame(h, 'E'); /* Equatorial. */
     oskar_beam_pattern_set_coordinate_type(h, 'B'); /* Beam image. */
     oskar_beam_pattern_set_image_fov(h, 2.0, 2.0);

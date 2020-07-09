@@ -153,7 +153,12 @@ void oskar_beam_pattern_set_station_ids(oskar_BeamPattern* h,
         int num_stations, const int* ids);
 
 OSKAR_EXPORT
-void oskar_beam_pattern_set_stokes(oskar_BeamPattern* h, const char* stokes);
+void oskar_beam_pattern_set_test_source_stokes_i(oskar_BeamPattern* h,
+        int enabled);
+
+OSKAR_EXPORT
+void oskar_beam_pattern_set_test_source_stokes_custom(oskar_BeamPattern* h,
+        int enabled, double i, double q, double u, double v, int* status);
 
 OSKAR_EXPORT
 void oskar_beam_pattern_set_telescope_model(oskar_BeamPattern* h,

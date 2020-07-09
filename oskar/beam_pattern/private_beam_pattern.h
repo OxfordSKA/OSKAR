@@ -49,22 +49,22 @@ struct DeviceData
     /* Cross power beams have dimension max_chunk_size. */
     oskar_Mem* jones_data_cpu[2]; /* On host, for copy back & write. */
 
-    /* Per Stokes parameter. */
-    oskar_Mem* auto_power_cpu[4][2]; /* On host, for copy back & write. */
-    oskar_Mem* auto_power_time_avg[4];
-    oskar_Mem* auto_power_channel_avg[4];
-    oskar_Mem* auto_power_channel_and_time_avg[4];
-    oskar_Mem* cross_power_cpu[4][2]; /* On host, for copy back & write. */
-    oskar_Mem* cross_power_time_avg[4];
-    oskar_Mem* cross_power_channel_avg[4];
-    oskar_Mem* cross_power_channel_and_time_avg[4];
+    /* Per test source Stokes type. */
+    oskar_Mem* auto_power_cpu[2][2]; /* On host, for copy back & write. */
+    oskar_Mem* auto_power_time_avg[2];
+    oskar_Mem* auto_power_channel_avg[2];
+    oskar_Mem* auto_power_channel_and_time_avg[2];
+    oskar_Mem* cross_power_cpu[2][2]; /* On host, for copy back & write. */
+    oskar_Mem* cross_power_time_avg[2];
+    oskar_Mem* cross_power_channel_avg[2];
+    oskar_Mem* cross_power_channel_and_time_avg[2];
 
     /* Device memory. */
     int previous_chunk_index;
     oskar_Telescope* tel;
     oskar_StationWork* work;
     oskar_Mem *x, *y, *z, *jones_data;
-    oskar_Mem *auto_power[4], *cross_power[4];
+    oskar_Mem *auto_power[2], *cross_power[2]; /* Per Stokes type. */
 
     /* Timers. */
     oskar_Timer* tmr_compute;   /* Total time spent calculating pixels. */
@@ -101,8 +101,10 @@ struct oskar_BeamPattern
     int cross_power_amp_fits, cross_power_phase_fits;
     int cross_power_real_fits, cross_power_imag_fits;
     int ixr_txt, ixr_fits;
-    int average_time_and_channel, separate_time_and_channel, stokes[4];
+    int average_time_and_channel, separate_time_and_channel;
     int set_cellsize;
+    int stokes[2]; /* Stokes I true/false, Stokes custom true/false. */
+    double test_source_stokes[4]; /* Custom Stokes parameters. */
     double cellsize_rad, lon0, lat0, phase_centre_deg[2], fov_deg[2];
     double time_start_mjd_utc, time_inc_sec, length_sec;
     double freq_start_hz, freq_inc_hz;
