@@ -3,7 +3,7 @@
 #
 FROM fdulwich/oskar-base AS build
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt update && apt install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     git \
     python3-dev \

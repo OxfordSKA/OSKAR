@@ -3,7 +3,7 @@
 #
 FROM fdulwich/oskar-base-dep AS build
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt update && apt install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
     cuda-cudart-dev-10-1 \
     cuda-cufft-dev-10-1 \

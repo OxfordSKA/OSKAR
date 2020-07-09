@@ -4,7 +4,9 @@
 #
 FROM nvidia/cuda:10.1-base-ubuntu18.04 AS build
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt update && apt install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     bison \
     build-essential \
     cmake \
@@ -25,7 +27,9 @@ RUN mkdir casacore-src && \
 # Also include other runtime library dependencies here (e.g. cuFFT),
 # to avoid having to keep reinstalling these later.
 FROM nvidia/cuda:10.1-base-ubuntu18.04
-RUN apt update && apt install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     cuda-cufft-10-1 \
     gosu \
     libblas3 \
