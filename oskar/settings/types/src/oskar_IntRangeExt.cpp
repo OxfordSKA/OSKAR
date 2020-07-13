@@ -138,10 +138,10 @@ bool IntRangeExt::is_default() const
 
 int IntRangeExt::value() const
 {
-    if (value_.which() == STRING && get<string>(value_) == ext_max_)
-        return max_;
     if (value_.which() == STRING && get<string>(value_) == ext_min_)
         return min_;
+    if (value_.which() == STRING && get<string>(value_) == ext_max_)
+        return max_;
     return get<int>(value_);
 }
 

@@ -25,11 +25,15 @@ set(OSKAR_VERSION_ID "0x020800")
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 8)
 set(OSKAR_VERSION_PATCH 0)
-set(OSKAR_VERSION_SUFFIX "dev3")
+set(OSKAR_VERSION_SUFFIX "dev4")
 
 # === Add local CMake module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake)
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake/modules)
+
+# === Get string length of current source directory for debug/log messages.
+string(LENGTH "${CMAKE_SOURCE_DIR}/" SOURCE_PATH_SIZE)
+add_definitions(-DSOURCE_PATH_SIZE=${SOURCE_PATH_SIZE})
 
 # === Set install directory paths
 if (NOT OSKAR_LIB_INSTALL_DIR)

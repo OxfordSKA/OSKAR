@@ -172,12 +172,14 @@ def set_allowed_values_latex(node, latex_file):
         params_ = get_type_params(type_)
         a = params_[0]
         b = params_[1]
-        c = params_[2]
         if b == 'MAX':
-            allowed_values_ = r"{Integer $\geq$ %s, or `%s'}" % (a, c)
+            allowed_values_ = r"Integer $\geq$ %s" % (a)
         else:
-            allowed_values_ = \
-                r"Integer in range %s $\leq$ $x$ $\leq$ %s, or `%s'" % (a, b, c)
+            allowed_values_ = r"Integer in range %s $\leq x \leq$ %s" % (a, b)
+        if len(params_) == 3:
+            allowed_values_ += r" , or `%s'" % (params_[2])
+        if len(params_) == 4:
+            allowed_values_ += r" , `%s' or `%s'" % (params_[2], params_[3])
 
     elif type_name_ == 'DOUBLERANGE':
         params_ = get_type_params(type_)
@@ -197,14 +199,14 @@ def set_allowed_values_latex(node, latex_file):
         params_ = get_type_params(type_)
         a = params_[0]
         b = params_[1]
-        c = params_[2]
-        d = params_[3]
         if b == 'MAX':
-            allowed_values_ = r"{Double $\geq$ %s, `%s' or `%s'}" % (a, c, d)
+            allowed_values_ = r"Double $\geq$ %s" % (a)
         else:
-            allowed_values_ = \
-                    r"Double in range %s $\leq$ $x$ $\leq$ %s, `%s' or `%s'" \
-                    % (a, b, c, d)
+            allowed_values_ = r"Double in range %s $\leq x \leq$ %s" % (a, b)
+        if len(params_) == 3:
+            allowed_values_ += r" , or `%s'" % (params_[2])
+        if len(params_) == 4:
+            allowed_values_ += r" , `%s' or `%s'" % (params_[2], params_[3])
 
     elif type_name_ == 'INPUTFILELIST':
         allowed_values_ = 'CSV list of path names'

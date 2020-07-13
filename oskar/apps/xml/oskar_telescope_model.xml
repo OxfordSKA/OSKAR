@@ -72,12 +72,12 @@
             <type name="UnsignedDouble" default="300" />
             <desc>Height of ionospheric screen, in kilometres.</desc></s>
         <s k="screen_pixel_size_m"><label>Screen pixel size [m]</label>
-            <type name="DoubleRangeExt" default="file">0,MAX,file,file</type>
+            <type name="DoubleRangeExt" default="file">0,MAX,file</type>
             <desc>Pixel size of ionospheric screen, in metres.</desc></s>
         <!--
         <s k="screen_time_interval_sec">
             <label>Screen time interval [sec]</label>
-            <type name="DoubleRangeExt" default="file">0,MAX,file,file</type>
+            <type name="DoubleRangeExt" default="file">0,MAX,file</type>
             <desc>Time interval between ionospheric screens,
                 in seconds.</desc></s>
         -->
