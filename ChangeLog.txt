@@ -9,6 +9,8 @@
     * Add capability to use custom Stokes parameters for beam pattern
       test source.
 
+    * Allow visibility blocks to be tiled in frequency as well as time.
+
 2020-01-20  OSKAR-2.7.6
 
     * Fix load of TEC screen settings.

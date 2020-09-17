@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2015-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2015-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "vis/private_vis_block.h"
@@ -288,7 +265,7 @@ void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
         const oskar_VisHeader* header, const oskar_Telescope* telescope,
         unsigned int block_index, oskar_Mem* station_work, int* status)
 {
-    int c, num_channels;
+    int c, num_channels, start_channel;
     unsigned int seed;
     double freq_start_hz, freq_inc_hz;
     double channel_bandwidth_hz, time_int_sec;
@@ -305,6 +282,7 @@ void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
     /* Get frequency start and increment. */
     seed                 = oskar_telescope_noise_seed(telescope);
     num_channels         = oskar_vis_block_num_channels(vis);
+    start_channel        = oskar_vis_block_start_channel_index(vis);
     channel_bandwidth_hz = oskar_vis_header_channel_bandwidth_hz(header);
     time_int_sec         = oskar_vis_header_time_average_sec(header);
     freq_start_hz        = oskar_vis_header_freq_start_hz(header);
@@ -313,7 +291,8 @@ void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
     /* Apply noise to each channel. */
     for (c = 0; c < num_channels; ++c)
     {
-        const double freq_hz = freq_start_hz + c * freq_inc_hz;
+        const int channel_index = c + start_channel;
+        const double freq_hz = freq_start_hz + channel_index * freq_inc_hz;
         oskar_get_station_std_dev_for_channel(station_work, freq_hz,
                 telescope, status);
         oskar_vis_block_apply_noise(vis, station_work, seed,

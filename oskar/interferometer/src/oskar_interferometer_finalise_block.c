@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <stdlib.h>
@@ -71,7 +48,7 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
         }
     }
 
-    /* Calculate baseline uvw coordinates for the block. */
+    /* Calculate (u,v,w) coordinates for the block. */
     if (oskar_vis_block_has_cross_correlations(b0))
     {
         const oskar_Mem *x, *y, *z;
@@ -86,10 +63,12 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
                 oskar_vis_header_time_start_mjd_utc(h->header),
                 oskar_vis_header_time_inc_sec(h->header) / 86400.0,
                 oskar_vis_block_start_time_index(b0), h->ignore_w_components,
-                h->t_u, h->t_v, h->t_w,
-                oskar_vis_block_baseline_uu_metres(b0),
-                oskar_vis_block_baseline_vv_metres(b0),
-                oskar_vis_block_baseline_ww_metres(b0), status);
+                oskar_vis_block_station_uvw_metres(b0, 0),
+                oskar_vis_block_station_uvw_metres(b0, 1),
+                oskar_vis_block_station_uvw_metres(b0, 2),
+                oskar_vis_block_baseline_uvw_metres(b0, 0),
+                oskar_vis_block_baseline_uvw_metres(b0, 1),
+                oskar_vis_block_baseline_uvw_metres(b0, 2), status);
     }
 
     /* Add uncorrelated system noise to the combined visibilities. */

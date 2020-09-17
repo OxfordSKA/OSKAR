@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "interferometer/private_interferometer.h"
@@ -45,13 +22,13 @@ extern "C" {
 
 static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
         oskar_Sky* sky, int channel_index_block, int time_index_block,
-        int time_index_simulation, int* status);
+        int channel_index_simulation, int time_index_simulation, int* status);
 static unsigned int disp_width(unsigned int v);
 
 void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
         int device_id, int* status)
 {
-    int time_index_start, time_index_end;
+    int chan_index_start, chan_index_end, time_index_start, time_index_end;
     DeviceData* d;
     if (*status) return;
 
@@ -70,26 +47,36 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
         oskar_device_set(h->dev_loc, h->gpu_ids[device_id], status);
 
     /* Clear the visibility block. */
-    const int i_active = block_index % 2; /* Index of the active buffer. */
     d = &(h->d[device_id]);
     oskar_timer_resume(d->tmr_compute);
     oskar_vis_block_clear(d->vis_block, status);
 
     /* Set the visibility block meta-data. */
     const int total_chunks = h->num_sky_chunks;
-    const int num_channels = h->num_channels;
+    const int total_chans = h->num_channels;
     const int total_times = h->num_time_steps;
+    const int num_blocks_chan = (total_chans + h->max_channels_per_block - 1) /
+            h->max_channels_per_block;
+    const int i_block_chan = block_index % num_blocks_chan;
+    const int i_block_time = block_index / num_blocks_chan;
     const double obs_start_mjd = h->time_start_mjd_utc;
     const double dt_dump_days = h->time_inc_sec / 86400.0;
-    time_index_start = block_index * h->max_times_per_block;
+    chan_index_start = i_block_chan * h->max_channels_per_block;
+    chan_index_end = chan_index_start + h->max_channels_per_block - 1;
+    time_index_start = i_block_time * h->max_times_per_block;
     time_index_end = time_index_start + h->max_times_per_block - 1;
     if (time_index_end >= total_times)
         time_index_end = total_times - 1;
+    if (chan_index_end >= total_chans)
+        chan_index_end = total_chans - 1;
     const int num_times_block = 1 + time_index_end - time_index_start;
+    const int num_chans_block = 1 + chan_index_end - chan_index_start;
 
-    /* Set the number of active times in the block. */
-    oskar_vis_block_set_num_times(d->vis_block, num_times_block, status);
+    /* Set the size of the block. */
+    oskar_vis_block_resize(d->vis_block, num_times_block, num_chans_block,
+            oskar_vis_block_num_stations(d->vis_block), status);
     oskar_vis_block_set_start_time_index(d->vis_block, time_index_start);
+    oskar_vis_block_set_start_channel_index(d->vis_block, chan_index_start);
 
     /* Go though all possible work units in the block. A work unit is defined
      * as the simulation for one time and one sky chunk. */
@@ -130,23 +117,26 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
         }
 
         /* Simulate all baselines for all channels for this time and chunk. */
-        for (i_channel = 0; i_channel < num_channels; ++i_channel)
+        for (i_channel = 0; i_channel < num_chans_block; ++i_channel)
         {
             if (*status) break;
+            const int sim_chan_idx = chan_index_start + i_channel;
             oskar_mutex_lock(h->mutex);
             oskar_log_message(h->log, 'S', 1, "Time %*i/%i, "
                     "Chunk %*i/%i, Channel %*i/%i [Device %i, %i sources]",
                     disp_width(total_times), sim_time_idx + 1, total_times,
                     disp_width(total_chunks), i_chunk + 1, total_chunks,
-                    disp_width(num_channels), i_channel + 1, num_channels,
+                    disp_width(total_chans), sim_chan_idx + 1, total_chans,
                     device_id, oskar_sky_num_sources(sky));
             oskar_mutex_unlock(h->mutex);
-            sim_baselines(h, d, sky, i_channel, i_time, sim_time_idx, status);
+            sim_baselines(h, d, sky, i_channel, i_time,
+                    sim_chan_idx, sim_time_idx, status);
         }
         d->previous_chunk_index = i_chunk;
     }
 
     /* Copy the visibility block to host memory. */
+    const int i_active = block_index % 2; /* Index of the active buffer. */
     oskar_timer_resume(d->tmr_copy);
     oskar_vis_block_copy(d->vis_block_cpu[i_active], d->vis_block, status);
     oskar_timer_pause(d->tmr_copy);
@@ -156,9 +146,9 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
 
 static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
         oskar_Sky* sky, int channel_index_block, int time_index_block,
-        int time_index_simulation, int* status)
+        int channel_index_simulation, int time_index_simulation, int* status)
 {
-    int num_baselines, num_stations, num_src, num_times_block, num_channels;
+    int num_baselines, num_stations, num_src, num_times_block, num_chans_block;
     double dt_dump_days, t_start, t_dump, gast, frequency, ra0, dec0;
     const oskar_Mem *x, *y, *z;
 
@@ -167,18 +157,21 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     num_stations    = oskar_telescope_num_stations(d->tel);
     num_src         = oskar_sky_num_sources(sky);
     num_times_block = oskar_vis_block_num_times(d->vis_block);
-    num_channels    = oskar_vis_block_num_channels(d->vis_block);
+    num_chans_block = oskar_vis_block_num_channels(d->vis_block);
 
     /* Return if there are no sources in the chunk,
-     * or if block time index requested is outside the valid range. */
-    if (num_src == 0 || time_index_block >= num_times_block) return;
+     * or if block indices requested are outside the block dimensions. */
+    if (num_src == 0 ||
+            time_index_block >= num_times_block ||
+            channel_index_block >= num_chans_block)
+        return;
 
     /* Get the time and frequency of the visibility slice being simulated. */
     dt_dump_days = h->time_inc_sec / 86400.0;
     t_start = h->time_start_mjd_utc;
     t_dump = t_start + dt_dump_days * (time_index_simulation + 0.5);
     gast = oskar_convert_mjd_to_gast_fast(t_dump);
-    frequency = h->freq_start_hz + channel_index_block * h->freq_inc_hz;
+    frequency = h->freq_start_hz + channel_index_simulation * h->freq_inc_hz;
 
     /* Scale source fluxes with spectral index and rotation measure. */
     oskar_sky_scale_flux_with_frequency(sky, frequency, status);
@@ -250,7 +243,7 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     oskar_timer_pause(d->tmr_join);
 
     /* Calculate output offset. */
-    const int offset = num_channels * time_index_block + channel_index_block;
+    const int offset = num_chans_block * time_index_block + channel_index_block;
     oskar_timer_resume(d->tmr_correlate);
 
     /* Auto-correlate for this time and channel. */

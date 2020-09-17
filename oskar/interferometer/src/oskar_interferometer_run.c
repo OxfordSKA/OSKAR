@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <stdlib.h>
@@ -50,13 +27,13 @@ typedef struct ThreadArgs ThreadArgs;
 static void* run_blocks(void* arg)
 {
     oskar_Interferometer* h;
-    int b, thread_id, device_id, num_blocks, num_threads, *status;
+    int b, *status;
 
     /* Get thread function arguments. */
     h = ((ThreadArgs*)arg)->h;
-    num_threads = ((ThreadArgs*)arg)->num_threads;
-    thread_id = ((ThreadArgs*)arg)->thread_id;
-    device_id = thread_id - 1;
+    const int num_threads = ((ThreadArgs*)arg)->num_threads;
+    const int thread_id = ((ThreadArgs*)arg)->thread_id;
+    const int device_id = thread_id - 1;
     status = ((ThreadArgs*)arg)->status;
 
 #ifdef _OPENMP
@@ -65,7 +42,7 @@ static void* run_blocks(void* arg)
     omp_set_num_threads(1);
 #endif
 
-    /* Loop over blocks of observation time, running simulation and file
+    /* Loop over visibility blocks, running simulation and file
      * writing one block at a time. Simulation and file output are overlapped
      * by using double buffering, and a dedicated thread is used for file
      * output.
@@ -78,7 +55,7 @@ static void* run_blocks(void* arg)
      * counter (which corresponds to the last block + 1) as this iteration
      * simply writes the last block.
      */
-    num_blocks = oskar_interferometer_num_vis_blocks(h);
+    const int num_blocks = oskar_interferometer_num_vis_blocks(h);
     for (b = 0; b < num_blocks + 1; ++b)
     {
         if ((thread_id > 0 || num_threads == 1) && b < num_blocks)

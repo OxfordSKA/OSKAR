@@ -12,6 +12,7 @@ set(vis_SRC
     src/oskar_vis_block_free.c
     src/oskar_vis_block_read.c
     src/oskar_vis_block_resize.c
+    src/oskar_vis_block_station_to_baseline_coords.c
     src/oskar_vis_block_write.c
     src/oskar_vis_header_accessors.c
     src/oskar_vis_header_create.c

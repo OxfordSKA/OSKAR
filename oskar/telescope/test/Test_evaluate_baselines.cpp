@@ -1,42 +1,21 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <gtest/gtest.h>
 
 #include "convert/oskar_convert_station_uvw_to_baseline_uvw.h"
 #include "mem/oskar_mem.h"
+#include "utility/oskar_timer.h"
 #include "utility/oskar_get_error_string.h"
 
 TEST(evaluate_baselines, cpu_gpu)
 {
     oskar_Mem *u, *v, *w, *uu, *vv, *ww;
     oskar_Mem *u_gpu, *v_gpu, *w_gpu, *uu_gpu, *vv_gpu, *ww_gpu;
-    int num_baselines, num_stations = 50, status = 0, type, location;
+    oskar_Timer *timer_cpu, *timer_gpu;
+    int num_baselines, num_stations = 512, status = 0, type, location;
     double *u_, *v_, *w_, *uu_, *vv_, *ww_;
 
     num_baselines = num_stations * (num_stations - 1) / 2;
@@ -68,8 +47,12 @@ TEST(evaluate_baselines, cpu_gpu)
     }
 
     // Evaluate baseline coordinates on CPU.
+    timer_cpu = oskar_timer_create(location);
+    oskar_timer_start(timer_cpu);
     oskar_convert_station_uvw_to_baseline_uvw(num_stations,
             0, u, v, w, 0, uu, vv, ww, &status);
+    printf("Station (u,v,w) to baseline (u,v,w) with %d stations (CPU): "
+            "%.4f sec\n", num_stations, oskar_timer_elapsed(timer_cpu));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check results are correct.
@@ -96,8 +79,12 @@ TEST(evaluate_baselines, cpu_gpu)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Evaluate baseline coordinates on device.
+    timer_gpu = oskar_timer_create(location);
+    oskar_timer_start(timer_gpu);
     oskar_convert_station_uvw_to_baseline_uvw(num_stations,
             0, u_gpu, v_gpu, w_gpu, 0, uu_gpu, vv_gpu, ww_gpu, &status);
+    printf("Station (u,v,w) to baseline (u,v,w) with %d stations (device): "
+            "%.4f sec\n", num_stations, oskar_timer_elapsed(timer_gpu));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check results are consistent.
@@ -125,6 +112,8 @@ TEST(evaluate_baselines, cpu_gpu)
     oskar_mem_free(uu_gpu, &status);
     oskar_mem_free(vv_gpu, &status);
     oskar_mem_free(ww_gpu, &status);
+    oskar_timer_free(timer_cpu);
+    oskar_timer_free(timer_gpu);
 
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }

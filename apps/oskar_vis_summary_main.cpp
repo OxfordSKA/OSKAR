@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "binary/oskar_binary.h"
@@ -88,26 +65,25 @@ int main(int argc, char **argv)
             return status;
         }
 
-        int max_times_per_block = oskar_vis_header_max_times_per_block(hdr);
-        int num_times = oskar_vis_header_num_times_total(hdr);
-        int num_stations = oskar_vis_header_num_stations(hdr);
-        int num_baselines = num_stations * (num_stations - 1) / 2;
-        int num_blocks = (num_times + max_times_per_block - 1) /
-                max_times_per_block;
-
+        int num_blocks = oskar_vis_header_num_blocks(hdr);
         if (display_header && !status)
         {
+            const int num_stations = oskar_vis_header_num_stations(hdr);
+            const int num_baselines = num_stations * (num_stations - 1) / 2;
             oskar_log_section(log, 'M', "Visibility Header");
             oskar_log_value(log, 'M', 0, "File", "[%i/%i] %s",
                     i+1, num_files, filename);
             oskar_log_value(log, 'M', 0, "Amplitude type", "%s",
                     oskar_mem_data_type_string(oskar_vis_header_amp_type(hdr)));
             oskar_log_value(log, 'M', 0, "Max. times per block", "%d",
-                    max_times_per_block);
-            oskar_log_value(log, 'M', 0, "No. times total", "%d", num_times);
-            oskar_log_value(log, 'M', 0, "No. blocks", "%d", num_blocks);
+                    oskar_vis_header_max_times_per_block(hdr));
+            oskar_log_value(log, 'M', 0, "Max. channels per block", "%d",
+                    oskar_vis_header_max_channels_per_block(hdr));
+            oskar_log_value(log, 'M', 0, "No. times total", "%d",
+                    oskar_vis_header_num_times_total(hdr));
             oskar_log_value(log, 'M', 0, "No. channels", "%d",
                     oskar_vis_header_num_channels_total(hdr));
+            oskar_log_value(log, 'M', 0, "No. blocks", "%d", num_blocks);
             oskar_log_value(log, 'M', 0, "No. stations", "%d", num_stations);
             oskar_log_value(log, 'M', 0, "No. baselines", "%d", num_baselines);
             oskar_log_value(log, 'M', 0, "Start frequency (MHz)", "%.6f",

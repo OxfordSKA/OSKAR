@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #ifndef OSKAR_PRIVATE_INTERFEROMETER_H_
@@ -74,7 +51,7 @@ struct oskar_Interferometer
     /* Settings. */
     int prec, num_devices, num_gpus_avail, dev_loc, num_gpus, *gpu_ids;
     int num_channels, num_time_steps;
-    int max_sources_per_chunk, max_times_per_block;
+    int max_sources_per_chunk, max_times_per_block, max_channels_per_block;
     int apply_horizon_clip, force_polarised_ms, zero_failed_gaussians;
     int coords_only, ignore_w_components;
     double freq_start_hz, freq_inc_hz, time_start_mjd_utc, time_inc_sec;
@@ -96,7 +73,7 @@ struct oskar_Interferometer
     oskar_VisHeader* header;
     oskar_MeasurementSet* ms;
     oskar_Binary* vis;
-    oskar_Mem *temp, *t_u, *t_v, *t_w;
+    oskar_Mem *temp;
     oskar_Timer* tmr_sim;   /* The total time for the simulation. */
     oskar_Timer* tmr_write; /* The time spent writing vis blocks. */
 

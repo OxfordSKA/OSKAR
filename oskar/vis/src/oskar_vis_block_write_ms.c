@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2015-2017, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2015-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "ms/oskar_measurement_set.h"
@@ -37,6 +14,62 @@ extern "C" {
 
 #define D2R (M_PI / 180.0)
 
+/* Local helper macros. */
+
+#define ASSEMBLE_ALL_FOR_TIME(FP, FP2, FP4c) {\
+    unsigned int a1, a2, b, c, j;\
+    if (start_chan_index == 0) {\
+        /* Assemble baseline coordinates. */\
+        for (a1 = 0, b = 0, j = 0; a1 < num_stations; ++a1) {\
+            if (have_auto) {\
+                ((FP*)uu_out)[j] = ((FP*)vv_out)[j] = ((FP*)ww_out)[j] = 0.0;\
+                ++j;\
+            }\
+            if (have_cross) {\
+                for (a2 = a1 + 1; a2 < num_stations; ++a2, ++b, ++j) {\
+                    const unsigned int i = num_baseln_in * t + b;\
+                    ((FP*)uu_out)[j] = ((const FP*)uu_in)[i];\
+                    ((FP*)vv_out)[j] = ((const FP*)vv_in)[i];\
+                    ((FP*)ww_out)[j] = ((const FP*)ww_in)[i];\
+                }\
+            }\
+        }\
+    }\
+    /* Assemble visibilities. */\
+    for (c = 0, j = 0; c < num_channels; ++c) {\
+        const unsigned int ia = num_stations * (t * num_channels + c);\
+        const unsigned int ix = num_baseln_in * (t * num_channels + c);\
+        if (num_pols_in == 4) ASSEMBLE_VIS(FP4c)\
+        else if (num_pols_out == 1) ASSEMBLE_VIS(FP2)\
+        else {\
+            FP2 zero; zero.x = zero.y = 0.0;\
+            for (a1 = 0, b = 0; a1 < num_stations; ++a1) {\
+                if (have_auto) COPY_SCALAR(FP2, acorr, ia + a1)\
+                if (have_cross)\
+                    for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)\
+                        COPY_SCALAR(FP2, xcorr, ix + b)\
+            }\
+        }\
+    }\
+}
+
+#define ASSEMBLE_VIS(T) {\
+            for (a1 = 0, b = 0; a1 < num_stations; ++a1) {\
+                if (have_auto) ((T*)out)[j++] = ((const T*)acorr)[ia + a1];\
+                if (have_cross)\
+                    for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)\
+                        ((T*)out)[j++] = ((const T*)xcorr)[ix + b];\
+            }\
+        }\
+
+#define COPY_SCALAR(FP2, DATA, IDX) {\
+                    const FP2 val = ((const FP2*)DATA)[IDX];\
+                    ((FP2*)out)[j + 0] = val;  ((FP2*)out)[j + 1] = zero;\
+                    ((FP2*)out)[j + 2] = zero; ((FP2*)out)[j + 3] = val;\
+                    j += 4;\
+                }\
+
+
 void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
         const oskar_VisHeader* header, oskar_MeasurementSet* ms, int* status)
 {
@@ -44,14 +77,12 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     oskar_Mem *temp_vis = 0, *temp_uu = 0, *temp_vv = 0, *temp_ww = 0;
     double exposure_sec, interval_sec, t_start_mjd, t_start_sec;
     double ra_rad, dec_rad, freq_start_hz;
-    unsigned int a1, a2, num_baseln_in, num_baseln_out, num_channels;
-    unsigned int num_pols_in, num_pols_out, num_stations, num_times, b, c, t;
-    unsigned int i, i_out, prec, start_time_index, start_chan_index;
-    unsigned int have_autocorr, have_crosscorr;
-    const void *xcorr, *acorr;
-    void* out;
-
-    /* Check if safe to proceed. */
+    unsigned int num_baseln_in, num_baseln_out, num_channels;
+    unsigned int num_pols_in, num_pols_out, num_stations, num_times, t;
+    unsigned int prec, start_time_index, start_chan_index;
+    unsigned int have_auto, have_cross;
+    const void *uu_in, *vv_in, *ww_in, *xcorr, *acorr;
+    void *uu_out, *vv_out, *ww_out, *out;
     if (*status) return;
 
     /* Pull data from visibility structures. */
@@ -66,8 +97,8 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     in_uu            = oskar_vis_block_baseline_uu_metres_const(blk);
     in_vv            = oskar_vis_block_baseline_vv_metres_const(blk);
     in_ww            = oskar_vis_block_baseline_ww_metres_const(blk);
-    have_autocorr    = oskar_vis_block_has_auto_correlations(blk);
-    have_crosscorr   = oskar_vis_block_has_cross_correlations(blk);
+    have_auto        = oskar_vis_block_has_auto_correlations(blk);
+    have_cross       = oskar_vis_block_has_cross_correlations(blk);
     start_time_index = oskar_vis_block_start_time_index(blk);
     start_chan_index = oskar_vis_block_start_channel_index(blk);
     ra_rad           = oskar_vis_header_phase_centre_ra_deg(header) * D2R;
@@ -80,11 +111,11 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     t_start_sec      = t_start_mjd * 86400.0;
 
     /* Check that there is something to write. */
-    if (!have_autocorr && !have_crosscorr) return;
+    if (!have_auto && !have_cross) return;
 
     /* Get number of output baselines. */
     num_baseln_out = num_baseln_in;
-    if (have_autocorr)
+    if (have_auto)
         num_baseln_out += num_stations;
 
     /* Check polarisation dimension consistency:
@@ -118,259 +149,59 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
         return;
     }
 
-    /* Add visibilities and u,v,w coordinates. */
+    /* Write visibilities and (u,v,w) coordinates. */
     temp_vis = oskar_mem_create(prec | OSKAR_COMPLEX, OSKAR_CPU,
             num_baseln_out * num_channels * num_pols_out, status);
     temp_uu = oskar_mem_create(prec, OSKAR_CPU, num_baseln_out, status);
     temp_vv = oskar_mem_create(prec, OSKAR_CPU, num_baseln_out, status);
     temp_ww = oskar_mem_create(prec, OSKAR_CPU, num_baseln_out, status);
+    out     = oskar_mem_void(temp_vis);
+    uu_out  = oskar_mem_void(temp_uu);
+    vv_out  = oskar_mem_void(temp_vv);
+    ww_out  = oskar_mem_void(temp_ww);
     xcorr   = oskar_mem_void_const(in_xcorr);
     acorr   = oskar_mem_void_const(in_acorr);
-    out     = oskar_mem_void(temp_vis);
+    uu_in   = oskar_mem_void_const(in_uu);
+    vv_in   = oskar_mem_void_const(in_vv);
+    ww_in   = oskar_mem_void_const(in_ww);
     if (prec == OSKAR_DOUBLE)
     {
-        const double *uu_in, *vv_in, *ww_in;
-        double *uu_out, *vv_out, *ww_out;
-        uu_in = oskar_mem_double_const(in_uu, status);
-        vv_in = oskar_mem_double_const(in_vv, status);
-        ww_in = oskar_mem_double_const(in_ww, status);
-        uu_out = oskar_mem_double(temp_uu, status);
-        vv_out = oskar_mem_double(temp_vv, status);
-        ww_out = oskar_mem_double(temp_ww, status);
         for (t = 0; t < num_times; ++t)
         {
-            /* Construct the baseline coordinates for the given time. */
-            unsigned int start_row = (start_time_index + t) * num_baseln_out;
-            for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
-            {
-                if (have_autocorr)
-                {
-                    uu_out[i_out] = 0.0;
-                    vv_out[i_out] = 0.0;
-                    ww_out[i_out] = 0.0;
-                    ++i_out;
-                }
-                if (have_crosscorr)
-                {
-                    for (a2 = a1 + 1; a2 < num_stations; ++a2, ++b, ++i_out)
-                    {
-                        i = num_baseln_in * t + b;
-                        uu_out[i_out] = uu_in[i];
-                        vv_out[i_out] = vv_in[i];
-                        ww_out[i_out] = ww_in[i];
-                    }
-                }
-            }
+            /* Assemble the baseline coordinates and all visibilities
+             * for the given time. */
+            ASSEMBLE_ALL_FOR_TIME(double, double2, double4c)
+            const unsigned int row0 = (start_time_index + t) * num_baseln_out;
+            oskar_ms_write_vis_d(ms, row0, start_chan_index,
+                    num_channels, num_baseln_out, (double*)out);
 
-            for (c = 0, i_out = 0; c < num_channels; ++c)
-            {
-                /* Construct amplitude data for the given time and channel. */
-                if (num_pols_in == 4)
-                {
-                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
-                    {
-                        if (have_autocorr)
-                        {
-                            i = num_stations * (t * num_channels + c) + a1;
-                            ((double4c*)out)[i_out++] =
-                                    ((const double4c*)acorr)[i];
-                        }
-                        if (have_crosscorr)
-                        {
-                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
-                            {
-                                i = num_baseln_in * (t * num_channels + c) + b;
-                                ((double4c*)out)[i_out++] =
-                                        ((const double4c*)xcorr)[i];
-                            }
-                        }
-                    }
-                }
-                else if (num_pols_in == 1 && num_pols_out == 1)
-                {
-                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
-                    {
-                        if (have_autocorr)
-                        {
-                            i = num_stations * (t * num_channels + c) + a1;
-                            ((double2*)out)[i_out++] =
-                                    ((const double2*)acorr)[i];
-                        }
-                        if (have_crosscorr)
-                        {
-                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
-                            {
-                                i = num_baseln_in * (t * num_channels + c) + b;
-                                ((double2*)out)[i_out++] =
-                                        ((const double2*)xcorr)[i];
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    double2 vis_amp, *out_;
-                    out_ = (double2*)out;
-                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
-                    {
-                        if (have_autocorr)
-                        {
-                            i = num_stations * (t * num_channels + c) + a1;
-                            vis_amp = ((const double2*)acorr)[i];
-                            out_[i_out + 0] = vis_amp;  /* XX */
-                            out_[i_out + 1].x = 0.0;    /* XY */
-                            out_[i_out + 1].y = 0.0;    /* XY */
-                            out_[i_out + 2].x = 0.0;    /* YX */
-                            out_[i_out + 2].y = 0.0;    /* YX */
-                            out_[i_out + 3] = vis_amp;  /* YY */
-                            i_out += 4;
-                        }
-                        if (have_crosscorr)
-                        {
-                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
-                            {
-                                i = num_baseln_in * (t * num_channels + c) + b;
-                                vis_amp = ((const double2*)xcorr)[i];
-                                out_[i_out + 0] = vis_amp;  /* XX */
-                                out_[i_out + 1].x = 0.0;    /* XY */
-                                out_[i_out + 1].y = 0.0;    /* XY */
-                                out_[i_out + 2].x = 0.0;    /* YX */
-                                out_[i_out + 2].y = 0.0;    /* YX */
-                                out_[i_out + 3] = vis_amp;  /* YY */
-                                i_out += 4;
-                            }
-                        }
-                    }
-                }
-            }
-            oskar_ms_write_coords_d(ms, start_row, num_baseln_out,
-                    uu_out, vv_out, ww_out, exposure_sec, interval_sec,
-                    (start_time_index + t + 0.5) * interval_sec + t_start_sec);
-            oskar_ms_write_vis_d(ms, start_row, start_chan_index,
-                    num_channels, num_baseln_out, (const double*)out);
+            /* Only write the coordinates for the first channel. */
+            if (start_chan_index == 0)
+                oskar_ms_write_coords_d(ms, row0, num_baseln_out,
+                        (double*)uu_out, (double*)vv_out, (double*)ww_out,
+                        exposure_sec, interval_sec,
+                        (start_time_index + t + 0.5) * interval_sec +
+                        t_start_sec);
         }
     }
     else if (prec == OSKAR_SINGLE)
     {
-        const float *uu_in, *vv_in, *ww_in;
-        float *uu_out, *vv_out, *ww_out;
-        uu_in = oskar_mem_float_const(in_uu, status);
-        vv_in = oskar_mem_float_const(in_vv, status);
-        ww_in = oskar_mem_float_const(in_ww, status);
-        uu_out = oskar_mem_float(temp_uu, status);
-        vv_out = oskar_mem_float(temp_vv, status);
-        ww_out = oskar_mem_float(temp_ww, status);
         for (t = 0; t < num_times; ++t)
         {
-            /* Construct the baseline coordinates for the given time. */
-            unsigned int start_row = (start_time_index + t) * num_baseln_out;
-            for (a1 = 0, b = 0, i_out = 0; a1 < num_stations; ++a1)
-            {
-                if (have_autocorr)
-                {
-                    uu_out[i_out] = 0.0;
-                    vv_out[i_out] = 0.0;
-                    ww_out[i_out] = 0.0;
-                    ++i_out;
-                }
-                if (have_crosscorr)
-                {
-                    for (a2 = a1 + 1; a2 < num_stations; ++a2, ++b, ++i_out)
-                    {
-                        i = num_baseln_in * t + b;
-                        uu_out[i_out] = uu_in[i];
-                        vv_out[i_out] = vv_in[i];
-                        ww_out[i_out] = ww_in[i];
-                    }
-                }
-            }
+            /* Assemble the baseline coordinates and all visibilities
+             * for the given time. */
+            ASSEMBLE_ALL_FOR_TIME(float, float2, float4c)
+            const unsigned int row0 = (start_time_index + t) * num_baseln_out;
+            oskar_ms_write_vis_f(ms, row0, start_chan_index,
+                    num_channels, num_baseln_out, (float*)out);
 
-            for (c = 0, i_out = 0; c < num_channels; ++c)
-            {
-                /* Construct amplitude data for the given time and channel. */
-                if (num_pols_in == 4)
-                {
-                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
-                    {
-                        if (have_autocorr)
-                        {
-                            i = num_stations * (t * num_channels + c) + a1;
-                            ((float4c*)out)[i_out++] =
-                                    ((const float4c*)acorr)[i];
-                        }
-                        if (have_crosscorr)
-                        {
-                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
-                            {
-                                i = num_baseln_in * (t * num_channels + c) + b;
-                                ((float4c*)out)[i_out++] =
-                                        ((const float4c*)xcorr)[i];
-                            }
-                        }
-                    }
-                }
-                else if (num_pols_in == 1 && num_pols_out == 1)
-                {
-                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
-                    {
-                        if (have_autocorr)
-                        {
-                            i = num_stations * (t * num_channels + c) + a1;
-                            ((float2*)out)[i_out++] =
-                                    ((const float2*)acorr)[i];
-                        }
-                        if (have_crosscorr)
-                        {
-                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
-                            {
-                                i = num_baseln_in * (t * num_channels + c) + b;
-                                ((float2*)out)[i_out++] =
-                                        ((const float2*)xcorr)[i];
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    float2 vis_amp, *out_;
-                    out_ = (float2*)out;
-                    for (a1 = 0, b = 0; a1 < num_stations; ++a1)
-                    {
-                        if (have_autocorr)
-                        {
-                            i = num_stations * (t * num_channels + c) + a1;
-                            vis_amp = ((const float2*)acorr)[i];
-                            out_[i_out + 0] = vis_amp;  /* XX */
-                            out_[i_out + 1].x = 0.0;    /* XY */
-                            out_[i_out + 1].y = 0.0;    /* XY */
-                            out_[i_out + 2].x = 0.0;    /* YX */
-                            out_[i_out + 2].y = 0.0;    /* YX */
-                            out_[i_out + 3] = vis_amp;  /* YY */
-                            i_out += 4;
-                        }
-                        if (have_crosscorr)
-                        {
-                            for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
-                            {
-                                i = num_baseln_in * (t * num_channels + c) + b;
-                                vis_amp = ((const float2*)xcorr)[i];
-                                out_[i_out + 0] = vis_amp;  /* XX */
-                                out_[i_out + 1].x = 0.0;    /* XY */
-                                out_[i_out + 1].y = 0.0;    /* XY */
-                                out_[i_out + 2].x = 0.0;    /* YX */
-                                out_[i_out + 2].y = 0.0;    /* YX */
-                                out_[i_out + 3] = vis_amp;  /* YY */
-                                i_out += 4;
-                            }
-                        }
-                    }
-                }
-            }
-            oskar_ms_write_coords_f(ms, start_row, num_baseln_out,
-                    uu_out, vv_out, ww_out, exposure_sec, interval_sec,
-                    (start_time_index + t + 0.5) * interval_sec + t_start_sec);
-            oskar_ms_write_vis_f(ms, start_row, start_chan_index,
-                    num_channels, num_baseln_out, (const float*)out);
+            /* Only write the coordinates for the first channel. */
+            if (start_chan_index == 0)
+                oskar_ms_write_coords_f(ms, row0, num_baseln_out,
+                        (float*)uu_out, (float*)vv_out, (float*)ww_out,
+                        exposure_sec, interval_sec,
+                        (start_time_index + t + 0.5) * interval_sec +
+                        t_start_sec);
         }
     }
     else

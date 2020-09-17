@@ -3,7 +3,7 @@
 \page binary_file Binary File Format
 
 \latexonly
-\def \docversion{8}
+\def \docversion{9}
 \endlatexonly
 
 \section binary_intro Introduction
@@ -428,6 +428,9 @@ Tags in this group have a group ID of 12.
 | 4      | Baseline UU-coordinates, in metres [array].
 | 5      | Baseline VV-coordinates, in metres [array].
 | 6      | Baseline WW-coordinates, in metres [array].
+| 7      | Station U-coordinates, in metres [array].
+| 8      | Station V-coordinates, in metres [array].
+| 9      | Station W-coordinates, in metres [array].
 
 \subsubsection vis_block_dims Dimension Order & Start Indices
 
@@ -470,26 +473,50 @@ Baselines are formed in order, by cross-correlating stations 0-1, 0-2, 0-3...
 1-2, 1-3... etc. For \f$n\f$ stations, there will be \f$n (n - 1) / 2\f$
 baselines.
 
-Note that Tag IDs 2 to 6 may not always be present, depending on the values of
+Note that Tag IDs 2 to 9 may not always be present, depending on the values of
 Tag ID 3 and 4 in the \ref binary_tag_vis_header "Visibility Header".
-Baseline coordinates will exist only if cross-correlation data are present.
+Baseline and/or station coordinates will exist only if cross-correlation data
+are present.
+
+Station \f$(u,v,w)\f$ coordinates take up a factor \f$n/2\f$ less storage
+space, and should be used in preference to baseline \f$(uu,vv,ww)\f$
+coordinates where possible. For this reason, baseline coordinates are no
+longer written to visibility data files, as they can be generated from the
+station coordinates on-the-fly if necessary.
 
 The dimension order of the cross-correlated baseline coordinates is also fixed.
-Each of the UU, VV and WW arrays is two dimensional, where the
+Each of the UU, VV and WW arrays is two-dimensional, where the
 dimension order is:
 
 - Time (slowest)
 - Baseline (fastest)
 
+Similarly, each of the U, V and W arrays is two-dimensional, where the
+dimension order is:
+
+- Time (slowest)
+- Station (fastest)
+
 \subsubsection vis_block_sequence Block Sequence
 
-Multiple blocks are used to store data from long observations.
+Multiple blocks are used to store data from long observations or when using
+lots of frequency channels.
 If there is more than one block in the file, zero-based tag index numbers will
 be used to uniquely identify visibility data blocks within the stream.
 
-The expected number of visibility blocks can be found by using Tag IDs 7 and 8
-in the \ref binary_tag_vis_header "Visibility Header", by rounding up the
-result of the division (Tag ID 8) / (Tag ID 7).
+The expected number of visibility blocks can be found by using
+Tag IDs 7, 8, 9 and 10 in the \ref binary_tag_vis_header "Visibility Header".
+
+The number of blocks needed in the time dimension is found by rounding up
+the result of the division (Tag ID 8) / (Tag ID 7), and in the frequency
+dimension by rounding up the result of the division (Tag ID 10) / (Tag ID 9).
+
+The total number of blocks is then given by the product of these numbers.
+Using integer arithmetic, this is:
+(((Tag ID 8) + (Tag ID 7) - 1) / (Tag ID 7)) * (((Tag ID 10) + (Tag ID 9) - 1) / (Tag ID 9))
+
+Blocks are written out in (time, channel) order, where the channel dimension
+varies faster.
 
 \htmlonly <hr /> \endhtmlonly
 
@@ -523,6 +550,9 @@ result of the division (Tag ID 8) / (Tag ID 7).
     The dimension order is now correct.</td></tr>
 <tr><td>8</td><td>2017-10-25</td>
     <td>Removed sections describing deprecated tags.</td></tr>
+<tr><td>9</td><td>2020-09-15</td>
+    <td>Added visibility block station coordinate tags and updated description
+    of visibility block sequence.</td></tr>
 </table>
 
 */

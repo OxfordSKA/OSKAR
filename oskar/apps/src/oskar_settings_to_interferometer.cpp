@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2017-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2017-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "apps/oskar_settings_log.h"
@@ -92,6 +69,25 @@ oskar_Interferometer* oskar_settings_to_interferometer(oskar::SettingsTree* s,
             s->to_double("common_flux_filter/flux_max", status));
     s->end_group();
 
+    // Set interferometer settings.
+    // Must be done BEFORE the observation settings!
+    s->begin_group("interferometer");
+    oskar_interferometer_set_correlation_type(h,
+            s->to_string("correlation_type", status), status);
+    oskar_interferometer_set_max_times_per_block(h,
+            s->to_int("max_time_samples_per_block", status));
+    oskar_interferometer_set_max_channels_per_block(h,
+            s->to_int("max_channels_per_block", status));
+    oskar_interferometer_set_output_vis_file(h,
+            s->to_string("oskar_vis_filename", status));
+    oskar_interferometer_set_output_measurement_set(h,
+            s->to_string("ms_filename", status));
+    oskar_interferometer_set_force_polarised_ms(h,
+            s->to_int("force_polarised_ms", status));
+    oskar_interferometer_set_ignore_w_components(h,
+            s->to_int("ignore_w_components", status));
+    s->end_group();
+
     // Set observation settings.
     s->begin_group("observation");
     int num_time_steps = s->to_int("num_time_steps", status);
@@ -102,22 +98,6 @@ oskar_Interferometer* oskar_settings_to_interferometer(oskar::SettingsTree* s,
             s->to_double("start_frequency_hz", status),
             s->to_double("frequency_inc_hz", status),
             s->to_int("num_channels", status));
-    s->end_group();
-
-    // Set interferometer settings.
-    s->begin_group("interferometer");
-    oskar_interferometer_set_correlation_type(h,
-            s->to_string("correlation_type", status), status);
-    oskar_interferometer_set_max_times_per_block(h,
-            s->to_int("max_time_samples_per_block", status));
-    oskar_interferometer_set_output_vis_file(h,
-            s->to_string("oskar_vis_filename", status));
-    oskar_interferometer_set_output_measurement_set(h,
-            s->to_string("ms_filename", status));
-    oskar_interferometer_set_force_polarised_ms(h,
-            s->to_int("force_polarised_ms", status));
-    oskar_interferometer_set_ignore_w_components(h,
-            s->to_int("ignore_w_components", status));
     s->end_group();
 
     // Return handle to interferometer simulator.

@@ -17,6 +17,11 @@
         <type name="uint" default="8"/>
         <desc>The maximum number of time samples held in memory before being
             written to disk.</desc></s>
+    <s k="max_channels_per_block" priority="1">
+        <label>Max. channels per block</label>
+        <type name="IntRangeExt" default="auto">0,MAX,auto</type>
+        <desc>The maximum number of channels held in memory before being
+            written to disk.</desc></s>
     <s k="correlation_type" priority="1"><label>Correlation type</label>
         <type name="OptionList" default="Cross-correlations">
             Cross-correlations,Auto-correlations,Both

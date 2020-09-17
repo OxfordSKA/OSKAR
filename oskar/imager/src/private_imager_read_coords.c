@@ -1,35 +1,13 @@
 /*
- * Copyright (c) 2017-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2017-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "imager/private_imager.h"
 #include "imager/private_imager_read_coords.h"
 #include "imager/oskar_imager.h"
 #include "binary/oskar_binary.h"
+#include "convert/oskar_convert_station_uvw_to_baseline_uvw.h"
 #include "math/oskar_cmath.h"
 #include "mem/oskar_binary_read_mem.h"
 #include "ms/oskar_measurement_set.h"
@@ -161,7 +139,7 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
 {
     oskar_Binary* vis_file;
     oskar_VisHeader* hdr;
-    oskar_Mem *uu, *vv, *ww, *weight, *time_centroid;
+    oskar_Mem *u, *v, *w, *uu, *vv, *ww, *weight, *time_centroid;
     int i_block;
     double time_start_mjd, time_inc_sec;
     if (*status) return;
@@ -198,6 +176,9 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
             oskar_vis_header_phase_centre_dec_deg(hdr));
 
     /* Create scratch arrays. Weights are all 1. */
+    u = oskar_mem_create(coord_prec, OSKAR_CPU, 0, status);
+    v = oskar_mem_create(coord_prec, OSKAR_CPU, 0, status);
+    w = oskar_mem_create(coord_prec, OSKAR_CPU, 0, status);
     uu = oskar_mem_create(coord_prec, OSKAR_CPU, 0, status);
     vv = oskar_mem_create(coord_prec, OSKAR_CPU, 0, status);
     ww = oskar_mem_create(coord_prec, OSKAR_CPU, 0, status);
@@ -209,7 +190,7 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
     /* Loop over visibility blocks. */
     for (i_block = 0; i_block < num_blocks; ++i_block)
     {
-        int c, t, dim_start_and_size[6];
+        int c, t, dim_start_and_size[6], tag_error = 0;
         if (*status) break;
 
         /* Read block metadata. */
@@ -232,13 +213,33 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
                     time_start_mjd + (start_time + t + 0.5) * time_inc_sec,
                     t * num_baselines, num_baselines, status);
 
-        /* Read the baseline coordinates. */
-        oskar_binary_read_mem(vis_file, uu, OSKAR_TAG_GROUP_VIS_BLOCK,
-                OSKAR_VIS_BLOCK_TAG_BASELINE_UU, i_block, status);
-        oskar_binary_read_mem(vis_file, vv, OSKAR_TAG_GROUP_VIS_BLOCK,
-                OSKAR_VIS_BLOCK_TAG_BASELINE_VV, i_block, status);
-        oskar_binary_read_mem(vis_file, ww, OSKAR_TAG_GROUP_VIS_BLOCK,
-                OSKAR_VIS_BLOCK_TAG_BASELINE_WW, i_block, status);
+        /* Try to read station coordinates in the block. */
+        oskar_binary_read_mem(vis_file, u, OSKAR_TAG_GROUP_VIS_BLOCK,
+                OSKAR_VIS_BLOCK_TAG_STATION_U, i_block, &tag_error);
+        if (!tag_error)
+        {
+            oskar_binary_read_mem(vis_file, v, OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_STATION_V, i_block, status);
+            oskar_binary_read_mem(vis_file, w, OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_STATION_W, i_block, status);
+
+            /* Convert from station to baseline coordinates. */
+            for (t = 0; t < num_times; ++t)
+                oskar_convert_station_uvw_to_baseline_uvw(num_stations,
+                        num_stations * t, u, v, w,
+                        num_baselines * t, uu, vv, ww, status);
+        }
+        else
+        {
+            /* Station coordinates not present,
+             * so read the baseline coordinates directly. */
+            oskar_binary_read_mem(vis_file, uu, OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_BASELINE_UU, i_block, status);
+            oskar_binary_read_mem(vis_file, vv, OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_BASELINE_VV, i_block, status);
+            oskar_binary_read_mem(vis_file, ww, OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_BASELINE_WW, i_block, status);
+        }
 
         /* Update the imager with the data. */
         oskar_timer_pause(h->tmr_read);
@@ -264,6 +265,9 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
             *percent_next = 10 + 10 * (*percent_done / 10);
         }
     }
+    oskar_mem_free(u, status);
+    oskar_mem_free(v, status);
+    oskar_mem_free(w, status);
     oskar_mem_free(uu, status);
     oskar_mem_free(vv, status);
     oskar_mem_free(ww, status);
