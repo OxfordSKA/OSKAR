@@ -17,6 +17,7 @@ set(utility_SRC
     src/oskar_get_memory_usage.c
     src/oskar_get_num_procs.c
     src/oskar_getline.c
+    src/oskar_hdf5.c
     src/oskar_lock_file.c
     src/oskar_thread.c
     src/oskar_string_to_array.c

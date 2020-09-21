@@ -64,6 +64,12 @@ else()
     add_definitions(-DOSKAR_NO_MS)
 endif()
 
+# Link with HDF5 if we have it.
+if (HDF5_FOUND)
+    target_link_libraries(${libname} ${HDF5_LIBRARIES})
+    add_definitions(-DOSKAR_HAVE_HDF5)
+endif()
+
 # Link with OpenCL if we have it.
 if (OpenCL_FOUND)
     target_link_libraries(${libname} ${OpenCL_LIBRARIES})
