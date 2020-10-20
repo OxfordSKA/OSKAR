@@ -2,14 +2,20 @@
 
 <s k="observation"><label>Observation settings</label>
     <desc>These parameters are used to specify the observation.</desc>
+    <s k="mode" priority="1"><label>Observation mode</label>
+    <type name="OptionList" default="Tracking">Tracking,Drift scan</type>
+    <desc>The observation mode. This is either <b>tracking</b> (the default)
+        or <b>drift scan.</b></desc></s>
     <s k="phase_centre_ra_deg" priority="1">
         <label>Phase centre RA [deg]</label>
         <type name="DoubleList" default="0"/>
+        <depends k="observation/mode" v="Tracking"/>
         <desc>Right Ascension of the observation pointing (phase centre),
             in degrees.</desc></s>
     <s k="phase_centre_dec_deg" priority="1">
         <label>Phase centre Dec [deg]</label>
         <type name="DoubleList" default="0"/>
+        <depends k="observation/mode" v="Tracking"/>
         <desc>Declination of the observation pointing (phase centre),
             in degrees.</desc></s>
     <s k="pointing_file"><label>Station pointing file</label>
@@ -25,7 +31,7 @@
         </desc></s>
     <s k="num_channels" priority="1"><label>Number of frequency channels</label>
         <type name="IntPositive" default="1"/>
-        <desc>Number of frequency channels / bands to use.</desc></s>
+        <desc>Number of frequency channels to use.</desc></s>
     <s k="frequency_inc_hz" priority="1"><label>Frequency increment [Hz]</label>
         <type name="UnsignedDouble" default="0"/>
         <desc>The frequency increment between successive channels, in Hz.

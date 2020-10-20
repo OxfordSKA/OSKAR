@@ -1,35 +1,11 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "settings/oskar_option_parser.h"
 #include "correlate/oskar_cross_correlate.h"
 #include "interferometer/oskar_jones.h"
-#include "sky/oskar_sky.h"
 #include "telescope/oskar_telescope.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_timer.h"
@@ -221,50 +197,38 @@ void benchmark(int num_stations, int num_sources, int type,
 {
     oskar_Timer* timer = oskar_timer_create(location);
 
-    // Create a sky model, telescope model and Jones matrices.
-    oskar_Telescope* tel = oskar_telescope_create(type, location,
-            num_stations, status);
-    oskar_Sky* sky = oskar_sky_create(type, location, num_sources, status);
-    oskar_Jones* J = oskar_jones_create(jones_type, location, num_stations,
-            num_sources, status);
-
-    // Allocate memory for visibility coordinates and output visibility slice.
-    oskar_Mem* vis = oskar_mem_create(jones_type, location,
-            oskar_telescope_num_baselines(tel), status);
-    oskar_Mem* u = oskar_mem_create(type, location, num_stations, status);
-    oskar_Mem* v = oskar_mem_create(type, location, num_stations, status);
-    oskar_Mem* w = oskar_mem_create(type, location, num_stations, status);
-
-    // Fill data structures with random data in sensible ranges.
+    // Create arrays and fill inputs with random data in sensible ranges.
     srand(2);
+    oskar_Mem *src_dir[3], *src_ext[3], *src_flux[4], *uvw[3];
+    oskar_Telescope* tel = oskar_telescope_create(
+            type, location, num_stations, status);
+    oskar_Jones* J = oskar_jones_create(
+            jones_type, location, num_stations, num_sources, status);
+    oskar_Mem* vis = oskar_mem_create(
+            jones_type, location, oskar_telescope_num_baselines(tel), status);
+    for (int i = 0; i < 4; ++i)
+        src_flux[i] = oskar_mem_create(type, location, num_sources, status);
+    for (int i = 0; i < 3; ++i)
+    {
+        src_dir[i] = oskar_mem_create(type, location, num_sources, status);
+        src_ext[i] = oskar_mem_create(type, location, num_sources, status);
+        uvw[i] = oskar_mem_create(type, location, num_stations, status);
+        oskar_mem_random_range(uvw[i], 1.0, 5.0, status);
+        oskar_mem_random_range(src_dir[i], 0.1, 0.9, status);
+        oskar_mem_random_range(src_ext[i], 0.1e-6, 0.2e-6, status);
+        oskar_mem_random_range(
+                oskar_telescope_station_true_offset_ecef_metres(tel, i),
+                0.1, 1000.0, status);
+    }
     oskar_mem_random_range(oskar_jones_mem(J), 1.0, 5.0, status);
-    oskar_mem_random_range(u, 1.0, 5.0, status);
-    oskar_mem_random_range(v, 1.0, 5.0, status);
-    oskar_mem_random_range(w, 1.0, 5.0, status);
-    oskar_mem_random_range(
-            oskar_telescope_station_true_offset_ecef_metres(tel, 0),
-            0.1, 1000.0, status);
-    oskar_mem_random_range(
-            oskar_telescope_station_true_offset_ecef_metres(tel, 1),
-            0.1, 1000.0, status);
-    oskar_mem_random_range(
-            oskar_telescope_station_true_offset_ecef_metres(tel, 2),
-            0.1, 1000.0, status);
-    oskar_mem_random_range(oskar_sky_I(sky), 1.0, 2.0, status);
-    oskar_mem_random_range(oskar_sky_Q(sky), 0.1, 1.0, status);
-    oskar_mem_random_range(oskar_sky_U(sky), 0.1, 0.5, status);
-    oskar_mem_random_range(oskar_sky_V(sky), 0.1, 0.2, status);
-    oskar_mem_random_range(oskar_sky_l(sky), 0.1, 0.9, status);
-    oskar_mem_random_range(oskar_sky_m(sky), 0.1, 0.9, status);
-    oskar_mem_random_range(oskar_sky_n(sky), 0.1, 0.9, status);
-    oskar_mem_random_range(oskar_sky_gaussian_a(sky), 0.1e-6, 0.2e-6, status);
-    oskar_mem_random_range(oskar_sky_gaussian_b(sky), 0.1e-6, 0.2e-6, status);
-    oskar_mem_random_range(oskar_sky_gaussian_c(sky), 0.1e-6, 0.2e-6, status);
+    oskar_mem_random_range(src_flux[0], 1.0, 2.0, status);
+    oskar_mem_random_range(src_flux[1], 0.1, 1.0, status);
+    oskar_mem_random_range(src_flux[2], 0.1, 0.5, status);
+    oskar_mem_random_range(src_flux[3], 0.1, 0.2, status);
 
     // Set options for bandwidth smearing, time smearing, extended sources.
     oskar_telescope_set_channel_bandwidth(tel, 10e6 * use_bandwidth_smearing);
     oskar_telescope_set_time_average(tel, 10 * use_time_smearing);
-    oskar_sky_set_use_extended(sky, use_extended);
 
     // Run benchmark.
     times.resize(niter);
@@ -275,8 +239,9 @@ void benchmark(int num_stations, int num_sources, int type,
     {
         oskar_mem_clear_contents(vis, status);
         oskar_timer_start(timer);
-        oskar_cross_correlate(oskar_sky_num_sources(sky), J, sky, tel,
-                u, v, w, 0.0, 100e6, 0, vis, status);
+        oskar_cross_correlate(use_extended, num_sources, J,
+                src_flux, src_dir, src_ext,
+                tel, uvw, 0.0, 100e6, 0, vis, status);
         times[i] = oskar_timer_elapsed(timer);
     }
 
@@ -293,12 +258,16 @@ void benchmark(int num_stations, int num_sources, int type,
     }
 
     // Free memory.
-    oskar_mem_free(u, status);
-    oskar_mem_free(v, status);
-    oskar_mem_free(w, status);
     oskar_mem_free(vis, status);
     oskar_jones_free(J, status);
     oskar_telescope_free(tel, status);
-    oskar_sky_free(sky, status);
+    for (int i = 0; i < 3; ++i)
+    {
+        oskar_mem_free(src_dir[i], status);
+        oskar_mem_free(src_ext[i], status);
+        oskar_mem_free(uvw[i], status);
+    }
+    for (int i = 0; i < 4; ++i)
+        oskar_mem_free(src_flux[i], status);
     oskar_timer_free(timer);
 }

@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "telescope/private_telescope.h"
@@ -63,8 +40,8 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     telescope->pm_x_rad = src->pm_x_rad;
     telescope->pm_y_rad = src->pm_y_rad;
     telescope->phase_centre_coord_type = src->phase_centre_coord_type;
-    telescope->phase_centre_ra_rad = src->phase_centre_ra_rad;
-    telescope->phase_centre_dec_rad = src->phase_centre_dec_rad;
+    telescope->phase_centre_rad[0] = src->phase_centre_rad[0];
+    telescope->phase_centre_rad[1] = src->phase_centre_rad[1];
     telescope->channel_bandwidth_hz = src->channel_bandwidth_hz;
     telescope->time_average_sec = src->time_average_sec;
     telescope->uv_filter_min = src->uv_filter_min;
@@ -91,6 +68,10 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     }
     oskar_mem_copy(telescope->tec_screen_path,
             src->tec_screen_path, status);
+
+    /* Copy the gain model. */
+    oskar_gains_free(telescope->gains, status);
+    telescope->gains = oskar_gains_create_copy(src->gains, status);
 
     /* Copy each station. */
     telescope->station = (oskar_Station**) calloc(

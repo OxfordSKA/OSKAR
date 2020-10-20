@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2018, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "ms/oskar_measurement_set.h"
@@ -156,14 +133,29 @@ unsigned int oskar_ms_num_stations(const oskar_MeasurementSet* p)
     return p->num_stations;
 }
 
+int oskar_ms_phase_centre_coord_type(const oskar_MeasurementSet* p)
+{
+    return p->phase_centre_type;
+}
+
+double oskar_ms_phase_centre_longitude_rad(const oskar_MeasurementSet* p)
+{
+    return p->phase_centre_rad[0];
+}
+
+double oskar_ms_phase_centre_latitude_rad(const oskar_MeasurementSet* p)
+{
+    return p->phase_centre_rad[1];
+}
+
 double oskar_ms_phase_centre_ra_rad(const oskar_MeasurementSet* p)
 {
-    return p->phase_centre_ra;
+    return p->phase_centre_rad[0];
 }
 
 double oskar_ms_phase_centre_dec_rad(const oskar_MeasurementSet* p)
 {
-    return p->phase_centre_dec;
+    return p->phase_centre_rad[1];
 }
 
 void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
@@ -172,11 +164,20 @@ void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
     if (!p->ms || !p->msc) return;
 
     // Set up the field info.
-    MVDirection radec(Quantity(longitude_rad, "rad"),
-            Quantity(latitude_rad, "rad"));
     Vector<MDirection> direction(1);
-    (void) coord_type;
-    direction(0) = MDirection(radec, MDirection::J2000);
+    if (coord_type == 0)
+    {
+        MVDirection radec(Quantity(longitude_rad, "rad"),
+                Quantity(latitude_rad, "rad"));
+        direction(0) = MDirection(radec, MDirection::J2000);
+    }
+    else if (coord_type == 1)
+    {
+        MVDirection azel(Quantity(longitude_rad, "rad"),
+                Quantity(latitude_rad, "rad"));
+        /* FIXME Using MDirection::AZEL causes this to throw! */
+        direction(0) = MDirection(azel, MDirection::J2000);
+    }
 
     // Write data to the last row of the FIELD table.
     int row = p->ms->field().nrow() - 1;
@@ -188,8 +189,9 @@ void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
     p->msc->field().delayDirMeasCol().put((unsigned int)row, direction);
     p->msc->field().phaseDirMeasCol().put((unsigned int)row, direction);
     p->msc->field().referenceDirMeasCol().put((unsigned int)row, direction);
-    p->phase_centre_ra = longitude_rad;
-    p->phase_centre_dec = latitude_rad;
+    p->phase_centre_type = coord_type;
+    p->phase_centre_rad[0] = longitude_rad;
+    p->phase_centre_rad[1] = latitude_rad;
 }
 
 template <typename T>

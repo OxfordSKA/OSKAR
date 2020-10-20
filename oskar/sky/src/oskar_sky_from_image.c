@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "convert/oskar_convert_relative_directions_to_lon_lat.h"
@@ -119,13 +96,15 @@ static void set_pixel(oskar_Sky* sky, int i, int x, int y, double val,
         const double crval[2], const double crpix[2], const double cdelt[2],
         double image_freq_hz, double spectral_index, int* status)
 {
-    double ra, dec, l, m;
+    double ra, dec;
 
     /* Convert pixel positions to RA and Dec values. */
-    l = cdelt[0] * (x + 1 - crpix[0]);
-    m = cdelt[1] * (y + 1 - crpix[1]);
+    const double l = cdelt[0] * (x + 1 - crpix[0]);
+    const double m = cdelt[1] * (y + 1 - crpix[1]);
+    const double cos_dec0 = cos(crval[1]);
+    const double sin_dec0 = sin(crval[1]);
     oskar_convert_relative_directions_to_lon_lat_2d_d(1,
-            &l, &m, crval[0], crval[1], &ra, &dec);
+            &l, &m, 0, crval[0], cos_dec0, sin_dec0, &ra, &dec);
 
     /* Store pixel data in sky model. */
     if (oskar_sky_num_sources(sky) <= i)

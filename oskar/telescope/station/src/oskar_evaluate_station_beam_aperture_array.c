@@ -1,34 +1,10 @@
 /*
- * Copyright (c) 2012-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "telescope/station/oskar_evaluate_station_beam_aperture_array.h"
 
-#include "telescope/station/oskar_evaluate_beam_horizon_direction.h"
 #include "telescope/station/oskar_station_evaluate_element_weights.h"
 #include "telescope/station/element/oskar_element_evaluate.h"
 #include "telescope/station/oskar_blank_below_horizon.h"
@@ -46,14 +22,22 @@ extern "C" {
 static void oskar_evaluate_station_beam_aperture_array_private(
         const oskar_Station* s, oskar_StationWork* work, int offset_points,
         int num_points, const oskar_Mem* x, const oskar_Mem* y,
-        const oskar_Mem* z, int time_index, double gast, double frequency_hz,
-        int depth, int offset_out, oskar_Mem* beam, int* status);
+        const oskar_Mem* z, int time_index, double gast_rad,
+        double frequency_hz, int depth, int offset_out, oskar_Mem* beam,
+        int* status);
 
 
-void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
-        const oskar_Station* station, int num_points, const oskar_Mem* x,
-        const oskar_Mem* y, const oskar_Mem* z, double gast,
-        double frequency_hz, oskar_StationWork* work, int time_index,
+void oskar_evaluate_station_beam_aperture_array(
+        const oskar_Station* station,
+        oskar_StationWork* work,
+        int num_points,
+        const oskar_Mem* x,
+        const oskar_Mem* y,
+        const oskar_Mem* z,
+        int time_index,
+        double gast_rad,
+        double frequency_hz,
+        oskar_Mem* beam,
         int* status)
 {
     if (*status) return;
@@ -62,7 +46,7 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     if (!oskar_station_has_child(station))
         oskar_evaluate_station_beam_aperture_array_private(station, work,
                 0, num_points, x, y, z, time_index,
-                gast, frequency_hz, 0, 0, beam, status);
+                gast_rad, frequency_hz, 0, 0, beam, status);
     else
     {
         /* Split up list of input points into manageable chunks. */
@@ -75,7 +59,7 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
             /* Start recursive call at depth 1 (depth 0 is element level). */
             oskar_evaluate_station_beam_aperture_array_private(station, work,
                     start, chunk_size, x, y, z, time_index,
-                    gast, frequency_hz, 1, start, beam, status);
+                    gast_rad, frequency_hz, 1, start, beam, status);
         }
     }
 }
@@ -83,8 +67,9 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
 static void oskar_evaluate_station_beam_aperture_array_private(
         const oskar_Station* s, oskar_StationWork* work, int offset_points,
         int num_points, const oskar_Mem* x, const oskar_Mem* y,
-        const oskar_Mem* z, int time_index, double gast, double frequency_hz,
-        int depth, int offset_out, oskar_Mem* beam, int* status)
+        const oskar_Mem* z, int time_index, double gast_rad,
+        double frequency_hz, int depth, int offset_out, oskar_Mem* beam,
+        int* status)
 {
     double beam_x, beam_y, beam_z;
     oskar_Mem *signal, *theta, *phi_x, *phi_y;
@@ -105,8 +90,8 @@ static void oskar_evaluate_station_beam_aperture_array_private(
     phi_y = work->phi_y;
 
     /* Compute direction cosines for the beam for this station. */
-    oskar_evaluate_beam_horizon_direction(&beam_x, &beam_y, &beam_z, s,
-            gast, status);
+    oskar_station_beam_horizon_direction(s, gast_rad,
+            &beam_x, &beam_y, &beam_z, status);
 
     /* Evaluate beam if there are no child stations. */
     if (!oskar_station_has_child(s))
@@ -196,7 +181,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
         {
             oskar_evaluate_station_beam_aperture_array_private(
                     oskar_station_child_const(s, 0), work, offset_points,
-                    num_points, x, y, z, time_index, gast, frequency_hz,
+                    num_points, x, y, z, time_index, gast_rad, frequency_hz,
                     depth + 1, 0, signal, status);
             for (i = 1; i < num_elements; ++i)
                 oskar_mem_copy_contents(signal, signal, i * num_points, 0,
@@ -207,7 +192,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
             for (i = 0; i < num_elements; ++i)
                 oskar_evaluate_station_beam_aperture_array_private(
                         oskar_station_child_const(s, i), work, offset_points,
-                        num_points, x, y, z, time_index, gast, frequency_hz,
+                        num_points, x, y, z, time_index, gast_rad, frequency_hz,
                         depth + 1, i * num_points, signal, status);
         }
         for (i = 0; i < num_feeds; ++i)

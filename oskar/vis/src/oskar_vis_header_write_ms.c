@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2015-2017, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2015-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "vis/oskar_vis_header.h"
@@ -40,25 +17,26 @@
 extern "C" {
 #endif
 
+#define D2R (M_PI / 180.0)
+
 oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         const char* ms_path, int overwrite, int force_polarised, int* status)
 {
     const oskar_Mem *x_metres, *y_metres, *z_metres;
-    double freq_start_hz, freq_inc_hz, ra_rad, dec_rad;
-    int amp_type, autocorr, crosscorr, dir_exists, len;
+    double freq_start_hz, freq_inc_hz, lon_rad, lat_rad;
+    int amp_type, autocorr, crosscorr, coord_type;
     unsigned int num_stations, num_pols, num_channels;
     char *output_path = 0;
     oskar_MeasurementSet* ms = 0;
-
-    /* Check if safe to proceed. */
     if (*status) return 0;
 
     /* Pull data from visibility structure. */
     amp_type      = oskar_vis_header_amp_type(hdr);
     num_stations  = oskar_vis_header_num_stations(hdr);
     num_channels  = oskar_vis_header_num_channels_total(hdr);
-    ra_rad        = oskar_vis_header_phase_centre_ra_deg(hdr) * M_PI / 180.0;
-    dec_rad       = oskar_vis_header_phase_centre_dec_deg(hdr) * M_PI / 180.0;
+    coord_type    = oskar_vis_header_phase_centre_coord_type(hdr);
+    lon_rad       = oskar_vis_header_phase_centre_longitude_deg(hdr) * D2R;
+    lat_rad       = oskar_vis_header_phase_centre_latitude_deg(hdr) * D2R;
     freq_start_hz = oskar_vis_header_freq_start_hz(hdr);
     freq_inc_hz   = oskar_vis_header_freq_inc_hz(hdr);
     x_metres      = oskar_vis_header_station_x_offset_ecef_metres_const(hdr);
@@ -77,7 +55,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         freq_inc_hz = 1.0;
 
     /* Check and add '.MS' file extension if necessary. */
-    len = (int) strlen(ms_path);
+    const size_t len = strlen(ms_path);
     output_path = (char*) calloc(6 + len, 1);
     if ((len >= 3) && (
             !strcmp(&(ms_path[len-3]), ".MS") ||
@@ -88,7 +66,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
 
     /* If directory doesn't exist, or if overwrite flag is set,
      * create a new one. */
-    dir_exists = oskar_dir_exists(output_path);
+    const int dir_exists = oskar_dir_exists(output_path);
     if (!dir_exists || overwrite)
     {
         /* Remove any existing directory. */
@@ -107,7 +85,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         }
 
         /* Set the phase centre. */
-        oskar_ms_set_phase_centre(ms, 0, ra_rad, dec_rad);
+        oskar_ms_set_phase_centre(ms, coord_type, lon_rad, lat_rad);
 
         /* Set the station positions. */
         if (oskar_mem_type(x_metres) == OSKAR_DOUBLE)
@@ -162,8 +140,9 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         }
 
         /* Check the phase centres are the same. */
-        if (fabs(oskar_ms_phase_centre_ra_rad(ms) - ra_rad) > 1e-10 ||
-                fabs(oskar_ms_phase_centre_dec_rad(ms) - dec_rad) > 1e-10)
+        if (oskar_ms_phase_centre_coord_type(ms) != coord_type ||
+                fabs(oskar_ms_phase_centre_longitude_rad(ms) - lon_rad) > 1e-10 ||
+                fabs(oskar_ms_phase_centre_latitude_rad(ms) - lat_rad) > 1e-10)
         {
             *status = OSKAR_ERR_VALUE_MISMATCH;
             oskar_ms_close(ms);

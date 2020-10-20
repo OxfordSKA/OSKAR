@@ -10,6 +10,7 @@
             channels do not cover a contiguous frequency range.)</desc></s>
     <s k="time_average_sec" priority="1"><label>Time average [sec]</label>
         <type name="UnsignedDouble" default="0"/>
+        <depends k="observation/mode" v="Tracking"/>
         <desc>The correlator time-average duration, in seconds, used to
             simulate time averaging smearing.</desc></s>
     <s k="max_time_samples_per_block" priority="1">

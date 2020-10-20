@@ -32,15 +32,26 @@ OSKAR_EXPORT
 oskar_HDF5* oskar_hdf5_open(const char* file_path, int* status);
 
 /**
- * @brief Closes the HDF5 file.
+ * @brief Decrements the reference count, freeing resources as needed.
  *
  * @details
- * Closes the HDF5 file.
+ * Decrements the reference count, freeing resources as needed.
  *
  * @param[in] h  Handle to HDF5 file.
  */
 OSKAR_EXPORT
 void oskar_hdf5_close(oskar_HDF5* h);
+
+/**
+ * @brief Increments the reference count.
+ *
+ * @details
+ * Increments the reference count.
+ *
+ * @param[in] h  Handle to HDF5 file.
+ */
+OSKAR_EXPORT
+void oskar_hdf5_inc_ref(oskar_HDF5* h);
 
 /**
  * @brief Returns the name (path) of a dataset in the file.
@@ -66,6 +77,24 @@ OSKAR_EXPORT
 int oskar_hdf5_num_datasets(const oskar_HDF5* h);
 
 /**
+ * @brief Reads attributes associated with an object in the HDF5 file.
+ *
+ * @details
+ * Reads attributes associated with an object in the HDF5 file.
+ *
+ * @param[in] h                  Handle to HDF5 file.
+ * @param[in] object_path        The name (path) of an object in the file.
+ * @param[in,out] num_attributes The size of the attribute arrays.
+ * @param[in,out] names          The name of each attribute.
+ * @param[in,out] values         The value of each attribute.
+ * @param[in,out] status         Status return code.
+ */
+OSKAR_EXPORT
+void oskar_hdf5_read_attributes(const oskar_HDF5* h, const char* object_path,
+        int* num_attributes, oskar_Mem*** names, oskar_Mem*** values,
+        int* status);
+
+/**
  * @brief Reads the dimensions of a dataset.
  *
  * @details
@@ -78,8 +107,8 @@ int oskar_hdf5_num_datasets(const oskar_HDF5* h);
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_hdf5_read_dataset_dims(oskar_HDF5* h, const char* dataset_path,
-        int* num_dims, size_t** dims, int* status);
+void oskar_hdf5_read_dataset_dims(const oskar_HDF5* h,
+        const char* dataset_path, int* num_dims, size_t** dims, int* status);
 
 /**
  * @brief Reads a whole dataset from the HDF5 file.
@@ -94,8 +123,8 @@ void oskar_hdf5_read_dataset_dims(oskar_HDF5* h, const char* dataset_path,
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-oskar_Mem* oskar_hdf5_read_dataset(oskar_HDF5* h, const char* dataset_path,
-        int* num_dims, size_t** dims, int* status);
+oskar_Mem* oskar_hdf5_read_dataset(const oskar_HDF5* h,
+        const char* dataset_path, int* num_dims, size_t** dims, int* status);
 
 /**
  * @brief Reads a part of a dataset from the HDF5 file.
@@ -111,8 +140,9 @@ oskar_Mem* oskar_hdf5_read_dataset(oskar_HDF5* h, const char* dataset_path,
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-oskar_Mem* oskar_hdf5_read_hyperslab(oskar_HDF5* h, const char* dataset_path,
-        int num_dims, const size_t* offset, const size_t* size, int* status);
+oskar_Mem* oskar_hdf5_read_hyperslab(const oskar_HDF5* h,
+        const char* dataset_path, int num_dims,
+        const size_t* offset, const size_t* size, int* status);
 
 #ifdef __cplusplus
 }

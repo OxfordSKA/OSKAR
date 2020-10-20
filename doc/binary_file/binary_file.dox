@@ -374,7 +374,7 @@ Tags in this group have a group ID of 11.
 | 11     | Number of stations [int].
 | 12     | Polarisation type [int]. (See \ref vis_pol_type "below")
 | 13-20  | <i>Reserved for future use.</i>
-| 21     | Phase centre coordinate type, currently always 0 [int].
+| 21     | Phase centre coordinate type [int]. (See \ref phase_centre_type "below")
 | 22     | Phase centre longitude / Right Ascension (deg) and latitude / Declination (deg) [double[2]].
 | 23     | Start frequency, in Hz [double].
 | 24     | Frequency increment, in Hz [double].
@@ -410,6 +410,14 @@ The polarisation type of the data is given by Tag ID 12, as follows:
 |   13 | Linear YX.
 |   14 | Linear YY.
 
+\anchor phase_centre_type
+The type of phase centre is given by Tag ID 21, as follows:
+
+| Code | Meaning
+| ---- | --------------------------------------------------------------------
+|    0 | Tracking (RA, Dec)
+|    1 | Drift scan (Azimuth, Elevation)
+
 \latexonly
 \clearpage
 \endlatexonly
@@ -439,11 +447,9 @@ containing data in the following order:
 
 - [0] Global start time index for the first time in the block, relative to
       observation start.
-- [1] Global start channel index for the first channel in the block
-      (usually 0; reserved for future use).
-- [2] Number of <i>usable</i> time samples in the block.
-- [3] Number of <i>usable</i> frequency channels in the block
-      (usually the total number; reserved for future use).
+- [1] Global start channel index for the first channel in the block.
+- [2] Number of time samples in the block.
+- [3] Number of frequency channels in the block.
 - [4] Number of cross-correlated baselines.
 - [5] Number of stations.
 
@@ -465,10 +471,6 @@ polarisation dimensions in the order \f$I, Q, U, V\f$ or (usually)
 \f$XX, XY, YX, YY\f$. The polarisation type is given by Tag ID 12 in the
 \ref binary_tag_vis_header "Visibility Header".
 
-The number of time samples containing usable data is given by the dimension
-size specified in Tag ID 1. This will only be different to the maximum number
-of time samples in the block for the very last block in the sequence.
-
 Baselines are formed in order, by cross-correlating stations 0-1, 0-2, 0-3...
 1-2, 1-3... etc. For \f$n\f$ stations, there will be \f$n (n - 1) / 2\f$
 baselines.
@@ -482,7 +484,7 @@ Station \f$(u,v,w)\f$ coordinates take up a factor \f$n/2\f$ less storage
 space, and should be used in preference to baseline \f$(uu,vv,ww)\f$
 coordinates where possible. For this reason, baseline coordinates are no
 longer written to visibility data files, as they can be generated from the
-station coordinates on-the-fly if necessary.
+station coordinates on-the-fly.
 
 The dimension order of the cross-correlated baseline coordinates is also fixed.
 Each of the UU, VV and WW arrays is two-dimensional, where the

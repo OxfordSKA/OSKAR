@@ -26,12 +26,14 @@ set(telescope_SRC
     src/oskar_telescope_set_station_coords_ecef.c
     src/oskar_telescope_set_station_coords_enu.c
     src/oskar_telescope_set_station_coords_wgs84.c
+    src/oskar_telescope_uvw.c
     src/oskar_TelescopeLoadAbstract.cpp
     src/private_TelescopeLoaderApodisation.cpp
     src/private_TelescopeLoaderCableLengthError.cpp
     src/private_TelescopeLoaderElementPattern.cpp
     src/private_TelescopeLoaderElementTypes.cpp
     src/private_TelescopeLoaderFeedAngle.cpp
+    src/private_TelescopeLoaderGainModel.cpp
     src/private_TelescopeLoaderGainPhase.cpp
     src/private_TelescopeLoaderLayout.cpp
     src/private_TelescopeLoaderMountTypes.cpp

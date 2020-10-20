@@ -99,8 +99,10 @@ TEST(coordinate_conversions, ra_dec_to_directions)
             fov_lat_deg * M_PI / 180.0, l_1, m_1);
 
     // Convert from l,m grid to spherical coordinates.
+    const double cos_dec0 = cos(dec0);
+    const double sin_dec0 = sin(dec0);
     oskar_convert_relative_directions_to_lon_lat_2d_d(num_points,
-            l_1, m_1, ra0, dec0, ra, dec);
+            l_1, m_1, 0, ra0, cos_dec0, sin_dec0, ra, dec);
 
     // Check reverse direction.
     oskar_convert_lon_lat_to_relative_directions_3d_d(num_points,

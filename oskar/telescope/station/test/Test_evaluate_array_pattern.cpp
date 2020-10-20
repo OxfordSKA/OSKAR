@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <gtest/gtest.h>
@@ -32,7 +9,6 @@
 #include "math/oskar_dftw.h"
 #include "convert/oskar_convert_lon_lat_to_relative_directions.h"
 #include "convert/oskar_convert_relative_directions_to_enu_directions.h"
-#include "telescope/station/oskar_evaluate_beam_horizon_direction.h"
 #include "telescope/station/oskar_station_evaluate_element_weights.h"
 #include "telescope/station/oskar_station.h"
 #include "math/oskar_evaluate_image_lon_lat_grid.h"
@@ -107,7 +83,7 @@ static oskar_Station* set_up_station1(int num_x, int num_y,
     /* Set meta-data. */
     oskar_station_set_position(station, 0.0, 70.0 * M_PI / 180.0, 0.0,
             0.0, 0.0, 0.0);
-    oskar_station_set_phase_centre(station, OSKAR_SPHERICAL_TYPE_EQUATORIAL,
+    oskar_station_set_phase_centre(station, OSKAR_COORDS_RADEC,
             beam_ra_deg * M_PI / 180.0, beam_dec_deg * M_PI / 180.0);
     return station;
 }
@@ -134,8 +110,8 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
     l = oskar_mem_create(type, location, num_points, status);
     m = oskar_mem_create(type, location, num_points, status);
     n = oskar_mem_create(type, location, num_points, status);
-    oskar_evaluate_beam_horizon_direction(&beam_x, &beam_y, &beam_z, station,
-            gast, status);
+    oskar_station_beam_horizon_direction(station,
+            gast, &beam_x, &beam_y, &beam_z, status);
     oskar_convert_lon_lat_to_relative_directions(num_points,
             lon, lat, 0.0, 0.0, l, m, n, status);
     oskar_convert_relative_directions_to_enu_directions(

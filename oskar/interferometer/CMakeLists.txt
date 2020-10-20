@@ -3,6 +3,7 @@
 #
 
 set(interferometer_SRC
+    define_jones_apply_station_gains.h
     define_evaluate_jones_K.h
     define_evaluate_jones_R.h
     src/oskar_evaluate_jones_E.c
@@ -22,6 +23,7 @@ set(interferometer_SRC
     src/oskar_interferometer_gpu.cl
     src/oskar_interferometer.cl
     src/oskar_jones_accessors.c
+    src/oskar_jones_apply_station_gains.c
     src/oskar_jones_create.c
     src/oskar_jones_create_copy.c
     src/oskar_jones_free.c

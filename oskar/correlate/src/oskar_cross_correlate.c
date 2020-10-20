@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "correlate/oskar_cross_correlate.h"
@@ -40,22 +17,29 @@
 extern "C" {
 #endif
 
-void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
-        const oskar_Sky* sky, const oskar_Telescope* tel,
-        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
-        double gast, double frequency_hz, int offset_out, oskar_Mem* vis,
+void oskar_cross_correlate(
+        int source_type,
+        int num_sources,
+        const oskar_Jones* jones,
+        const oskar_Mem* const src_flux[4],
+        const oskar_Mem* const src_dir[3],
+        const oskar_Mem* const src_ext[3],
+        const oskar_Telescope* tel,
+        const oskar_Mem* const station_uvw[3],
+        double gast,
+        double frequency_hz,
+        int offset_out,
+        oskar_Mem* vis,
         int* status)
 {
-    const oskar_Mem *J, *src_a, *src_b, *src_c, *src_l, *src_m, *src_n;
-    const oskar_Mem *src_I, *src_Q, *src_U, *src_V, *x, *y;
+    const oskar_Mem *J, *x, *y;
     double uv_filter_min, uv_filter_max;
-
-    /* Check if safe to proceed. */
+    double time_avg = 0.0, gha0 = 0.0, dec0 = 0.0;
     if (*status) return;
 
     /* Get the data dimensions. */
     const int num_stations = oskar_telescope_num_stations(tel);
-    const int use_extended = oskar_sky_use_extended(sky);
+    const int use_extended = (source_type == 1);
 
     /* Get bandwidth-smearing terms. */
     frequency_hz = fabs(frequency_hz);
@@ -63,10 +47,14 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
     const double channel_bandwidth = oskar_telescope_channel_bandwidth_hz(tel);
     const double frac_bandwidth = channel_bandwidth / frequency_hz;
 
-    /* Get time-average smearing term and Greenwich hour angle. */
-    const double time_avg = oskar_telescope_time_average_sec(tel);
-    const double gha0 = gast - oskar_telescope_phase_centre_ra_rad(tel);
-    const double dec0 = oskar_telescope_phase_centre_dec_rad(tel);
+    /* Get time-average smearing terms.
+     * Ignore if drift scanning - this will need to be done differently. */
+    if (oskar_telescope_phase_centre_coord_type(tel) != OSKAR_COORDS_AZEL)
+    {
+        time_avg = oskar_telescope_time_average_sec(tel);
+        gha0 = gast - oskar_telescope_phase_centre_longitude_rad(tel);
+        dec0 = oskar_telescope_phase_centre_latitude_rad(tel);
+    }
 
     /* Get UV filter parameters in wavelengths. */
     uv_filter_min = oskar_telescope_uv_filter_min(tel);
@@ -80,13 +68,12 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
         uv_filter_max = FLT_MAX;
 
     /* Check data locations. */
-    const int location = oskar_sky_mem_location(sky);
+    const int location = oskar_jones_mem_location(jones);
     if (oskar_telescope_mem_location(tel) != location ||
-            oskar_jones_mem_location(jones) != location ||
             oskar_mem_location(vis) != location ||
-            oskar_mem_location(u) != location ||
-            oskar_mem_location(v) != location ||
-            oskar_mem_location(w) != location)
+            oskar_mem_location(station_uvw[0]) != location ||
+            oskar_mem_location(station_uvw[1]) != location ||
+            oskar_mem_location(station_uvw[2]) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
@@ -94,11 +81,11 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
 
     /* Check for consistent data types. */
     const int jones_type = oskar_jones_type(jones);
-    const int base_type = oskar_sky_precision(sky);
+    const int base_type = oskar_type_precision(jones_type);
     if (oskar_mem_precision(vis) != base_type ||
-            oskar_type_precision(jones_type) != base_type ||
-            oskar_mem_type(u) != base_type || oskar_mem_type(v) != base_type ||
-            oskar_mem_type(w) != base_type)
+            oskar_mem_type(station_uvw[0]) != base_type ||
+            oskar_mem_type(station_uvw[1]) != base_type ||
+            oskar_mem_type(station_uvw[2]) != base_type)
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
@@ -111,9 +98,9 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
 
     /* Check the input dimensions. */
     if (oskar_jones_num_sources(jones) < num_sources ||
-            (int)oskar_mem_length(u) != num_stations ||
-            (int)oskar_mem_length(v) != num_stations ||
-            (int)oskar_mem_length(w) != num_stations)
+            (int)oskar_mem_length(station_uvw[0]) != num_stations ||
+            (int)oskar_mem_length(station_uvw[1]) != num_stations ||
+            (int)oskar_mem_length(station_uvw[2]) != num_stations)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
@@ -121,16 +108,6 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
 
     /* Get handles to arrays. */
     J = oskar_jones_mem_const(jones);
-    src_I = oskar_sky_I_const(sky);
-    src_Q = oskar_sky_Q_const(sky);
-    src_U = oskar_sky_U_const(sky);
-    src_V = oskar_sky_V_const(sky);
-    src_l = oskar_sky_l_const(sky);
-    src_m = oskar_sky_m_const(sky);
-    src_n = oskar_sky_n_const(sky);
-    src_a = oskar_sky_gaussian_a_const(sky);
-    src_b = oskar_sky_gaussian_b_const(sky);
-    src_c = oskar_sky_gaussian_c_const(sky);
     x = oskar_telescope_station_true_offset_ecef_metres_const(tel, 0);
     y = oskar_telescope_station_true_offset_ecef_metres_const(tel, 1);
 
@@ -145,19 +122,19 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_gaussian_omp_f(
                         num_sources, num_stations, offset_out,
                         oskar_mem_float4c_const(J, status),
-                        oskar_mem_float_const(src_I, status),
-                        oskar_mem_float_const(src_Q, status),
-                        oskar_mem_float_const(src_U, status),
-                        oskar_mem_float_const(src_V, status),
-                        oskar_mem_float_const(src_l, status),
-                        oskar_mem_float_const(src_m, status),
-                        oskar_mem_float_const(src_n, status),
-                        oskar_mem_float_const(src_a, status),
-                        oskar_mem_float_const(src_b, status),
-                        oskar_mem_float_const(src_c, status),
-                        oskar_mem_float_const(u, status),
-                        oskar_mem_float_const(v, status),
-                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(src_flux[0], status),
+                        oskar_mem_float_const(src_flux[1], status),
+                        oskar_mem_float_const(src_flux[2], status),
+                        oskar_mem_float_const(src_flux[3], status),
+                        oskar_mem_float_const(src_dir[0], status),
+                        oskar_mem_float_const(src_dir[1], status),
+                        oskar_mem_float_const(src_dir[2], status),
+                        oskar_mem_float_const(src_ext[0], status),
+                        oskar_mem_float_const(src_ext[1], status),
+                        oskar_mem_float_const(src_ext[2], status),
+                        oskar_mem_float_const(station_uvw[0], status),
+                        oskar_mem_float_const(station_uvw[1], status),
+                        oskar_mem_float_const(station_uvw[2], status),
                         oskar_mem_float_const(x, status),
                         oskar_mem_float_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -168,19 +145,19 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_gaussian_omp_d(
                         num_sources, num_stations, offset_out,
                         oskar_mem_double4c_const(J, status),
-                        oskar_mem_double_const(src_I, status),
-                        oskar_mem_double_const(src_Q, status),
-                        oskar_mem_double_const(src_U, status),
-                        oskar_mem_double_const(src_V, status),
-                        oskar_mem_double_const(src_l, status),
-                        oskar_mem_double_const(src_m, status),
-                        oskar_mem_double_const(src_n, status),
-                        oskar_mem_double_const(src_a, status),
-                        oskar_mem_double_const(src_b, status),
-                        oskar_mem_double_const(src_c, status),
-                        oskar_mem_double_const(u, status),
-                        oskar_mem_double_const(v, status),
-                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(src_flux[0], status),
+                        oskar_mem_double_const(src_flux[1], status),
+                        oskar_mem_double_const(src_flux[2], status),
+                        oskar_mem_double_const(src_flux[3], status),
+                        oskar_mem_double_const(src_dir[0], status),
+                        oskar_mem_double_const(src_dir[1], status),
+                        oskar_mem_double_const(src_dir[2], status),
+                        oskar_mem_double_const(src_ext[0], status),
+                        oskar_mem_double_const(src_ext[1], status),
+                        oskar_mem_double_const(src_ext[2], status),
+                        oskar_mem_double_const(station_uvw[0], status),
+                        oskar_mem_double_const(station_uvw[1], status),
+                        oskar_mem_double_const(station_uvw[2], status),
                         oskar_mem_double_const(x, status),
                         oskar_mem_double_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -191,16 +168,16 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_scalar_gaussian_omp_f(
                         num_sources, num_stations, offset_out,
                         oskar_mem_float2_const(J, status),
-                        oskar_mem_float_const(src_I, status),
-                        oskar_mem_float_const(src_l, status),
-                        oskar_mem_float_const(src_m, status),
-                        oskar_mem_float_const(src_n, status),
-                        oskar_mem_float_const(src_a, status),
-                        oskar_mem_float_const(src_b, status),
-                        oskar_mem_float_const(src_c, status),
-                        oskar_mem_float_const(u, status),
-                        oskar_mem_float_const(v, status),
-                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(src_flux[0], status),
+                        oskar_mem_float_const(src_dir[0], status),
+                        oskar_mem_float_const(src_dir[1], status),
+                        oskar_mem_float_const(src_dir[2], status),
+                        oskar_mem_float_const(src_ext[0], status),
+                        oskar_mem_float_const(src_ext[1], status),
+                        oskar_mem_float_const(src_ext[2], status),
+                        oskar_mem_float_const(station_uvw[0], status),
+                        oskar_mem_float_const(station_uvw[1], status),
+                        oskar_mem_float_const(station_uvw[2], status),
                         oskar_mem_float_const(x, status),
                         oskar_mem_float_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -211,16 +188,16 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_scalar_gaussian_omp_d(
                         num_sources, num_stations, offset_out,
                         oskar_mem_double2_const(J, status),
-                        oskar_mem_double_const(src_I, status),
-                        oskar_mem_double_const(src_l, status),
-                        oskar_mem_double_const(src_m, status),
-                        oskar_mem_double_const(src_n, status),
-                        oskar_mem_double_const(src_a, status),
-                        oskar_mem_double_const(src_b, status),
-                        oskar_mem_double_const(src_c, status),
-                        oskar_mem_double_const(u, status),
-                        oskar_mem_double_const(v, status),
-                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(src_flux[0], status),
+                        oskar_mem_double_const(src_dir[0], status),
+                        oskar_mem_double_const(src_dir[1], status),
+                        oskar_mem_double_const(src_dir[2], status),
+                        oskar_mem_double_const(src_ext[0], status),
+                        oskar_mem_double_const(src_ext[1], status),
+                        oskar_mem_double_const(src_ext[2], status),
+                        oskar_mem_double_const(station_uvw[0], status),
+                        oskar_mem_double_const(station_uvw[1], status),
+                        oskar_mem_double_const(station_uvw[2], status),
                         oskar_mem_double_const(x, status),
                         oskar_mem_double_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -240,16 +217,16 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_point_omp_f(
                         num_sources, num_stations, offset_out,
                         oskar_mem_float4c_const(J, status),
-                        oskar_mem_float_const(src_I, status),
-                        oskar_mem_float_const(src_Q, status),
-                        oskar_mem_float_const(src_U, status),
-                        oskar_mem_float_const(src_V, status),
-                        oskar_mem_float_const(src_l, status),
-                        oskar_mem_float_const(src_m, status),
-                        oskar_mem_float_const(src_n, status),
-                        oskar_mem_float_const(u, status),
-                        oskar_mem_float_const(v, status),
-                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(src_flux[0], status),
+                        oskar_mem_float_const(src_flux[1], status),
+                        oskar_mem_float_const(src_flux[2], status),
+                        oskar_mem_float_const(src_flux[3], status),
+                        oskar_mem_float_const(src_dir[0], status),
+                        oskar_mem_float_const(src_dir[1], status),
+                        oskar_mem_float_const(src_dir[2], status),
+                        oskar_mem_float_const(station_uvw[0], status),
+                        oskar_mem_float_const(station_uvw[1], status),
+                        oskar_mem_float_const(station_uvw[2], status),
                         oskar_mem_float_const(x, status),
                         oskar_mem_float_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -260,16 +237,16 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_point_omp_d(
                         num_sources, num_stations, offset_out,
                         oskar_mem_double4c_const(J, status),
-                        oskar_mem_double_const(src_I, status),
-                        oskar_mem_double_const(src_Q, status),
-                        oskar_mem_double_const(src_U, status),
-                        oskar_mem_double_const(src_V, status),
-                        oskar_mem_double_const(src_l, status),
-                        oskar_mem_double_const(src_m, status),
-                        oskar_mem_double_const(src_n, status),
-                        oskar_mem_double_const(u, status),
-                        oskar_mem_double_const(v, status),
-                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(src_flux[0], status),
+                        oskar_mem_double_const(src_flux[1], status),
+                        oskar_mem_double_const(src_flux[2], status),
+                        oskar_mem_double_const(src_flux[3], status),
+                        oskar_mem_double_const(src_dir[0], status),
+                        oskar_mem_double_const(src_dir[1], status),
+                        oskar_mem_double_const(src_dir[2], status),
+                        oskar_mem_double_const(station_uvw[0], status),
+                        oskar_mem_double_const(station_uvw[1], status),
+                        oskar_mem_double_const(station_uvw[2], status),
                         oskar_mem_double_const(x, status),
                         oskar_mem_double_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -280,13 +257,13 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_scalar_point_omp_f(
                         num_sources, num_stations, offset_out,
                         oskar_mem_float2_const(J, status),
-                        oskar_mem_float_const(src_I, status),
-                        oskar_mem_float_const(src_l, status),
-                        oskar_mem_float_const(src_m, status),
-                        oskar_mem_float_const(src_n, status),
-                        oskar_mem_float_const(u, status),
-                        oskar_mem_float_const(v, status),
-                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(src_flux[0], status),
+                        oskar_mem_float_const(src_dir[0], status),
+                        oskar_mem_float_const(src_dir[1], status),
+                        oskar_mem_float_const(src_dir[2], status),
+                        oskar_mem_float_const(station_uvw[0], status),
+                        oskar_mem_float_const(station_uvw[1], status),
+                        oskar_mem_float_const(station_uvw[2], status),
                         oskar_mem_float_const(x, status),
                         oskar_mem_float_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -297,13 +274,13 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_scalar_point_omp_d(
                         num_sources, num_stations, offset_out,
                         oskar_mem_double2_const(J, status),
-                        oskar_mem_double_const(src_I, status),
-                        oskar_mem_double_const(src_l, status),
-                        oskar_mem_double_const(src_m, status),
-                        oskar_mem_double_const(src_n, status),
-                        oskar_mem_double_const(u, status),
-                        oskar_mem_double_const(v, status),
-                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(src_flux[0], status),
+                        oskar_mem_double_const(src_dir[0], status),
+                        oskar_mem_double_const(src_dir[1], status),
+                        oskar_mem_double_const(src_dir[2], status),
+                        oskar_mem_double_const(station_uvw[0], status),
+                        oskar_mem_double_const(station_uvw[1], status),
+                        oskar_mem_double_const(station_uvw[2], status),
                         oskar_mem_double_const(x, status),
                         oskar_mem_double_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -327,19 +304,19 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_gaussian_cuda_f(
                         num_sources, num_stations, offset_out,
                         oskar_mem_float4c_const(J, status),
-                        oskar_mem_float_const(src_I, status),
-                        oskar_mem_float_const(src_Q, status),
-                        oskar_mem_float_const(src_U, status),
-                        oskar_mem_float_const(src_V, status),
-                        oskar_mem_float_const(src_l, status),
-                        oskar_mem_float_const(src_m, status),
-                        oskar_mem_float_const(src_n, status),
-                        oskar_mem_float_const(src_a, status),
-                        oskar_mem_float_const(src_b, status),
-                        oskar_mem_float_const(src_c, status),
-                        oskar_mem_float_const(u, status),
-                        oskar_mem_float_const(v, status),
-                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(src_flux[0], status),
+                        oskar_mem_float_const(src_flux[1], status),
+                        oskar_mem_float_const(src_flux[2], status),
+                        oskar_mem_float_const(src_flux[3], status),
+                        oskar_mem_float_const(src_dir[0], status),
+                        oskar_mem_float_const(src_dir[1], status),
+                        oskar_mem_float_const(src_dir[2], status),
+                        oskar_mem_float_const(src_ext[0], status),
+                        oskar_mem_float_const(src_ext[1], status),
+                        oskar_mem_float_const(src_ext[2], status),
+                        oskar_mem_float_const(station_uvw[0], status),
+                        oskar_mem_float_const(station_uvw[1], status),
+                        oskar_mem_float_const(station_uvw[2], status),
                         oskar_mem_float_const(x, status),
                         oskar_mem_float_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -350,19 +327,19 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_gaussian_cuda_d(
                         num_sources, num_stations, offset_out,
                         oskar_mem_double4c_const(J, status),
-                        oskar_mem_double_const(src_I, status),
-                        oskar_mem_double_const(src_Q, status),
-                        oskar_mem_double_const(src_U, status),
-                        oskar_mem_double_const(src_V, status),
-                        oskar_mem_double_const(src_l, status),
-                        oskar_mem_double_const(src_m, status),
-                        oskar_mem_double_const(src_n, status),
-                        oskar_mem_double_const(src_a, status),
-                        oskar_mem_double_const(src_b, status),
-                        oskar_mem_double_const(src_c, status),
-                        oskar_mem_double_const(u, status),
-                        oskar_mem_double_const(v, status),
-                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(src_flux[0], status),
+                        oskar_mem_double_const(src_flux[1], status),
+                        oskar_mem_double_const(src_flux[2], status),
+                        oskar_mem_double_const(src_flux[3], status),
+                        oskar_mem_double_const(src_dir[0], status),
+                        oskar_mem_double_const(src_dir[1], status),
+                        oskar_mem_double_const(src_dir[2], status),
+                        oskar_mem_double_const(src_ext[0], status),
+                        oskar_mem_double_const(src_ext[1], status),
+                        oskar_mem_double_const(src_ext[2], status),
+                        oskar_mem_double_const(station_uvw[0], status),
+                        oskar_mem_double_const(station_uvw[1], status),
+                        oskar_mem_double_const(station_uvw[2], status),
                         oskar_mem_double_const(x, status),
                         oskar_mem_double_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -373,16 +350,16 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_scalar_gaussian_cuda_f(
                         num_sources, num_stations, offset_out,
                         oskar_mem_float2_const(J, status),
-                        oskar_mem_float_const(src_I, status),
-                        oskar_mem_float_const(src_l, status),
-                        oskar_mem_float_const(src_m, status),
-                        oskar_mem_float_const(src_n, status),
-                        oskar_mem_float_const(src_a, status),
-                        oskar_mem_float_const(src_b, status),
-                        oskar_mem_float_const(src_c, status),
-                        oskar_mem_float_const(u, status),
-                        oskar_mem_float_const(v, status),
-                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(src_flux[0], status),
+                        oskar_mem_float_const(src_dir[0], status),
+                        oskar_mem_float_const(src_dir[1], status),
+                        oskar_mem_float_const(src_dir[2], status),
+                        oskar_mem_float_const(src_ext[0], status),
+                        oskar_mem_float_const(src_ext[1], status),
+                        oskar_mem_float_const(src_ext[2], status),
+                        oskar_mem_float_const(station_uvw[0], status),
+                        oskar_mem_float_const(station_uvw[1], status),
+                        oskar_mem_float_const(station_uvw[2], status),
                         oskar_mem_float_const(x, status),
                         oskar_mem_float_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -393,16 +370,16 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_scalar_gaussian_cuda_d(
                         num_sources, num_stations, offset_out,
                         oskar_mem_double2_const(J, status),
-                        oskar_mem_double_const(src_I, status),
-                        oskar_mem_double_const(src_l, status),
-                        oskar_mem_double_const(src_m, status),
-                        oskar_mem_double_const(src_n, status),
-                        oskar_mem_double_const(src_a, status),
-                        oskar_mem_double_const(src_b, status),
-                        oskar_mem_double_const(src_c, status),
-                        oskar_mem_double_const(u, status),
-                        oskar_mem_double_const(v, status),
-                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(src_flux[0], status),
+                        oskar_mem_double_const(src_dir[0], status),
+                        oskar_mem_double_const(src_dir[1], status),
+                        oskar_mem_double_const(src_dir[2], status),
+                        oskar_mem_double_const(src_ext[0], status),
+                        oskar_mem_double_const(src_ext[1], status),
+                        oskar_mem_double_const(src_ext[2], status),
+                        oskar_mem_double_const(station_uvw[0], status),
+                        oskar_mem_double_const(station_uvw[1], status),
+                        oskar_mem_double_const(station_uvw[2], status),
                         oskar_mem_double_const(x, status),
                         oskar_mem_double_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -422,16 +399,16 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_point_cuda_f(
                         num_sources, num_stations, offset_out,
                         oskar_mem_float4c_const(J, status),
-                        oskar_mem_float_const(src_I, status),
-                        oskar_mem_float_const(src_Q, status),
-                        oskar_mem_float_const(src_U, status),
-                        oskar_mem_float_const(src_V, status),
-                        oskar_mem_float_const(src_l, status),
-                        oskar_mem_float_const(src_m, status),
-                        oskar_mem_float_const(src_n, status),
-                        oskar_mem_float_const(u, status),
-                        oskar_mem_float_const(v, status),
-                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(src_flux[0], status),
+                        oskar_mem_float_const(src_flux[1], status),
+                        oskar_mem_float_const(src_flux[2], status),
+                        oskar_mem_float_const(src_flux[3], status),
+                        oskar_mem_float_const(src_dir[0], status),
+                        oskar_mem_float_const(src_dir[1], status),
+                        oskar_mem_float_const(src_dir[2], status),
+                        oskar_mem_float_const(station_uvw[0], status),
+                        oskar_mem_float_const(station_uvw[1], status),
+                        oskar_mem_float_const(station_uvw[2], status),
                         oskar_mem_float_const(x, status),
                         oskar_mem_float_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -442,16 +419,16 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_point_cuda_d(
                         num_sources, num_stations, offset_out,
                         oskar_mem_double4c_const(J, status),
-                        oskar_mem_double_const(src_I, status),
-                        oskar_mem_double_const(src_Q, status),
-                        oskar_mem_double_const(src_U, status),
-                        oskar_mem_double_const(src_V, status),
-                        oskar_mem_double_const(src_l, status),
-                        oskar_mem_double_const(src_m, status),
-                        oskar_mem_double_const(src_n, status),
-                        oskar_mem_double_const(u, status),
-                        oskar_mem_double_const(v, status),
-                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(src_flux[0], status),
+                        oskar_mem_double_const(src_flux[1], status),
+                        oskar_mem_double_const(src_flux[2], status),
+                        oskar_mem_double_const(src_flux[3], status),
+                        oskar_mem_double_const(src_dir[0], status),
+                        oskar_mem_double_const(src_dir[1], status),
+                        oskar_mem_double_const(src_dir[2], status),
+                        oskar_mem_double_const(station_uvw[0], status),
+                        oskar_mem_double_const(station_uvw[1], status),
+                        oskar_mem_double_const(station_uvw[2], status),
                         oskar_mem_double_const(x, status),
                         oskar_mem_double_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -462,13 +439,13 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_scalar_point_cuda_f(
                         num_sources, num_stations, offset_out,
                         oskar_mem_float2_const(J, status),
-                        oskar_mem_float_const(src_I, status),
-                        oskar_mem_float_const(src_l, status),
-                        oskar_mem_float_const(src_m, status),
-                        oskar_mem_float_const(src_n, status),
-                        oskar_mem_float_const(u, status),
-                        oskar_mem_float_const(v, status),
-                        oskar_mem_float_const(w, status),
+                        oskar_mem_float_const(src_flux[0], status),
+                        oskar_mem_float_const(src_dir[0], status),
+                        oskar_mem_float_const(src_dir[1], status),
+                        oskar_mem_float_const(src_dir[2], status),
+                        oskar_mem_float_const(station_uvw[0], status),
+                        oskar_mem_float_const(station_uvw[1], status),
+                        oskar_mem_float_const(station_uvw[2], status),
                         oskar_mem_float_const(x, status),
                         oskar_mem_float_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -479,13 +456,13 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 oskar_cross_correlate_scalar_point_cuda_d(
                         num_sources, num_stations, offset_out,
                         oskar_mem_double2_const(J, status),
-                        oskar_mem_double_const(src_I, status),
-                        oskar_mem_double_const(src_l, status),
-                        oskar_mem_double_const(src_m, status),
-                        oskar_mem_double_const(src_n, status),
-                        oskar_mem_double_const(u, status),
-                        oskar_mem_double_const(v, status),
-                        oskar_mem_double_const(w, status),
+                        oskar_mem_double_const(src_flux[0], status),
+                        oskar_mem_double_const(src_dir[0], status),
+                        oskar_mem_double_const(src_dir[1], status),
+                        oskar_mem_double_const(src_dir[2], status),
+                        oskar_mem_double_const(station_uvw[0], status),
+                        oskar_mem_double_const(station_uvw[1], status),
+                        oskar_mem_double_const(station_uvw[2], status),
                         oskar_mem_double_const(x, status),
                         oskar_mem_double_const(y, status),
                         uv_filter_min, uv_filter_max, inv_wavelength,
@@ -617,19 +594,19 @@ void oskar_cross_correlate(int num_sources,  const oskar_Jones* jones,
                 {INT_SZ, &num_sources},
                 {INT_SZ, &num_stations},
                 {INT_SZ, &offset_out},
-                {PTR_SZ, oskar_mem_buffer_const(src_I)},
-                {PTR_SZ, oskar_mem_buffer_const(src_Q)},
-                {PTR_SZ, oskar_mem_buffer_const(src_U)},
-                {PTR_SZ, oskar_mem_buffer_const(src_V)},
-                {PTR_SZ, oskar_mem_buffer_const(src_l)},
-                {PTR_SZ, oskar_mem_buffer_const(src_m)},
-                {PTR_SZ, oskar_mem_buffer_const(src_n)},
-                {PTR_SZ, oskar_mem_buffer_const(src_a)},
-                {PTR_SZ, oskar_mem_buffer_const(src_b)},
-                {PTR_SZ, oskar_mem_buffer_const(src_c)},
-                {PTR_SZ, oskar_mem_buffer_const(u)},
-                {PTR_SZ, oskar_mem_buffer_const(v)},
-                {PTR_SZ, oskar_mem_buffer_const(w)},
+                {PTR_SZ, oskar_mem_buffer_const(src_flux[0])},
+                {PTR_SZ, oskar_mem_buffer_const(src_flux[1])},
+                {PTR_SZ, oskar_mem_buffer_const(src_flux[2])},
+                {PTR_SZ, oskar_mem_buffer_const(src_flux[3])},
+                {PTR_SZ, oskar_mem_buffer_const(src_dir[0])},
+                {PTR_SZ, oskar_mem_buffer_const(src_dir[1])},
+                {PTR_SZ, oskar_mem_buffer_const(src_dir[2])},
+                {PTR_SZ, oskar_mem_buffer_const(src_ext[0])},
+                {PTR_SZ, oskar_mem_buffer_const(src_ext[1])},
+                {PTR_SZ, oskar_mem_buffer_const(src_ext[2])},
+                {PTR_SZ, oskar_mem_buffer_const(station_uvw[0])},
+                {PTR_SZ, oskar_mem_buffer_const(station_uvw[1])},
+                {PTR_SZ, oskar_mem_buffer_const(station_uvw[2])},
                 {PTR_SZ, oskar_mem_buffer_const(x)},
                 {PTR_SZ, oskar_mem_buffer_const(y)},
                 {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?

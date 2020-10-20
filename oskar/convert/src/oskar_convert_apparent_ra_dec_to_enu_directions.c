@@ -1,70 +1,89 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
+#include "convert/define_convert_apparent_ra_dec_to_enu_directions.h"
 #include "convert/oskar_convert_apparent_ra_dec_to_enu_directions.h"
-#include "convert/oskar_convert_apparent_ha_dec_to_enu_directions.h"
+#include "utility/oskar_device.h"
+#include "utility/oskar_kernel_macros.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_convert_apparent_ra_dec_to_enu_directions_f(int n,
-        const float* ra, const float* dec, float lst, float lat, float* x,
-        float* y, float* z)
+OSKAR_CONVERT_RA_DEC_TO_ENU_DIR(oskar_convert_apparent_ra_dec_to_enu_directions_float, float)
+OSKAR_CONVERT_RA_DEC_TO_ENU_DIR(oskar_convert_apparent_ra_dec_to_enu_directions_double, double)
+
+void oskar_convert_apparent_ra_dec_to_enu_directions(
+        int num_points, const oskar_Mem* ra_rad, const oskar_Mem* dec_rad,
+        double lst_rad, double latitude_rad, int offset_out,
+        oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int* status)
 {
-    /* Determine source Hour Angles (HA = LST - RA). */
-    float* ha = z; /* Temporary. */
-    int i;
-    for (i = 0; i < n; ++i)
+    if (*status) return;
+    const int type = oskar_mem_type(ra_rad);
+    const int location = oskar_mem_location(ra_rad);
+    const double sin_lat = sin(latitude_rad);
+    const double cos_lat = cos(latitude_rad);
+    const float sin_lat_f = (float)sin_lat;
+    const float cos_lat_f = (float)cos_lat;
+    const float lst_rad_f = (float)lst_rad;
+    if (location == OSKAR_CPU)
     {
-        ha[i] = lst - ra[i];
+        if (type == OSKAR_SINGLE)
+            oskar_convert_apparent_ra_dec_to_enu_directions_float(num_points,
+                    oskar_mem_float_const(ra_rad, status),
+                    oskar_mem_float_const(dec_rad, status),
+                    lst_rad_f, sin_lat_f, cos_lat_f, offset_out,
+                    oskar_mem_float(x, status),
+                    oskar_mem_float(y, status),
+                    oskar_mem_float(z, status));
+        else if (type == OSKAR_DOUBLE)
+            oskar_convert_apparent_ra_dec_to_enu_directions_double(num_points,
+                    oskar_mem_double_const(ra_rad, status),
+                    oskar_mem_double_const(dec_rad, status),
+                    lst_rad, sin_lat, cos_lat, offset_out,
+                    oskar_mem_double(x, status),
+                    oskar_mem_double(y, status),
+                    oskar_mem_double(z, status));
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-
-    /* Determine horizontal x,y,z directions (destroys contents of ha). */
-    oskar_convert_apparent_ha_dec_to_enu_directions_f(n, ha, dec, lat, x, y, z);
-}
-
-/* Double precision. */
-void oskar_convert_apparent_ra_dec_to_enu_directions_d(int n,
-        const double* ra, const double* dec, double lst, double lat,
-        double* x, double* y, double* z)
-{
-    /* Determine source Hour Angles (HA = LST - RA). */
-    double* ha = z; /* Temporary. */
-    int i;
-    for (i = 0; i < n; ++i)
+    else
     {
-        ha[i] = lst - ra[i];
+        size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
+        const char* k = 0;
+        const int is_dbl = (type == OSKAR_DOUBLE);
+        if (type == OSKAR_SINGLE)
+            k = "convert_apparent_ra_dec_to_enu_directions_float";
+        else if (type == OSKAR_DOUBLE)
+            k = "convert_apparent_ra_dec_to_enu_directions_double";
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+        oskar_device_check_local_size(location, 0, local_size);
+        global_size[0] = oskar_device_global_size(
+                (size_t) num_points, local_size[0]);
+        const oskar_Arg args[] = {
+                {INT_SZ, &num_points},
+                {PTR_SZ, oskar_mem_buffer_const(ra_rad)},
+                {PTR_SZ, oskar_mem_buffer_const(dec_rad)},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&lst_rad : (const void*)&lst_rad_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&sin_lat : (const void*)&sin_lat_f},
+                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                        (const void*)&cos_lat : (const void*)&cos_lat_f},
+                {INT_SZ, &offset_out},
+                {PTR_SZ, oskar_mem_buffer(x)},
+                {PTR_SZ, oskar_mem_buffer(y)},
+                {PTR_SZ, oskar_mem_buffer(z)}
+        };
+        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
     }
-
-    /* Determine horizontal x,y,z directions (destroys contents of ha). */
-    oskar_convert_apparent_ha_dec_to_enu_directions_d(n, ha, dec, lat, x, y, z);
 }
 
 #ifdef __cplusplus

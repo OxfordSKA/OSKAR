@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "beam_pattern/oskar_beam_pattern.h"
@@ -31,7 +8,6 @@
 #include "convert/oskar_convert_mjd_to_gast_fast.h"
 #include "correlate/oskar_evaluate_auto_power.h"
 #include "correlate/oskar_evaluate_cross_power.h"
-#include "telescope/station/oskar_evaluate_station_beam.h"
 #include "math/oskar_cmath.h"
 #include "math/private_cond2_2x2.h"
 #include "utility/oskar_device.h"
@@ -291,7 +267,7 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
     oskar_timer_resume(d->tmr_compute);
     const double dt_dump = h->time_inc_sec / 86400.0;
     const double mjd = h->time_start_mjd_utc + dt_dump * (i_time + 0.5);
-    const double gast = oskar_convert_mjd_to_gast_fast(mjd);
+    const double gast_rad = oskar_convert_mjd_to_gast_fast(mjd);
     const double freq_hz = h->freq_start_hz + i_channel * h->freq_inc_hz;
 
     /* Work out the size of the chunk. */
@@ -304,6 +280,10 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
     {
         const int offset = i_chunk * h->max_chunk_size;
         d->previous_chunk_index = i_chunk;
+        oskar_mem_copy_contents(d->lon_rad, h->lon_rad,
+                0, offset, chunk_size, status);
+        oskar_mem_copy_contents(d->lat_rad, h->lat_rad,
+                0, offset, chunk_size, status);
         oskar_mem_copy_contents(d->x, h->x, 0, offset, chunk_size, status);
         oskar_mem_copy_contents(d->y, h->y, 0, offset, chunk_size, status);
         oskar_mem_copy_contents(d->z, h->z, 0, offset, chunk_size, status);
@@ -317,12 +297,15 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
         if (!station)
             station = oskar_telescope_station_const(d->tel, 0);
         const int offset = i * chunk_size;
-        oskar_evaluate_station_beam(chunk_size,
-                h->coord_type, d->x, d->y, d->z,
-                oskar_telescope_phase_centre_ra_rad(d->tel),
-                oskar_telescope_phase_centre_dec_rad(d->tel),
-                station,
-                d->work, i_time, freq_hz, gast, offset, d->jones_data, status);
+        const oskar_Mem* const source_coords[] = {d->x, d->y, d->z};
+        oskar_station_beam(station, d->work,
+                h->source_coord_type, chunk_size, source_coords,
+                h->lon0, h->lat0,
+                oskar_telescope_phase_centre_coord_type(d->tel),
+                oskar_telescope_phase_centre_longitude_rad(d->tel),
+                oskar_telescope_phase_centre_latitude_rad(d->tel),
+                i_time, gast_rad, freq_hz,
+                offset, d->jones_data, status);
         if (d->auto_power[0])
             oskar_evaluate_auto_power(chunk_size,
                     offset, d->jones_data, 1.0, 0.0, 0.0, 0.0,

@@ -1,13 +1,18 @@
-/* Copyright (c) 2018-2020, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2018-2020, The OSKAR Developers. See LICENSE file. */
 
+#include "convert/define_convert_az_el_to_enu_directions.h"
+#include "convert/define_convert_apparent_ra_dec_to_enu_directions.h"
 #include "convert/define_convert_cirs_relative_directions_to_enu_directions.h"
 #include "convert/define_convert_ecef_to_station_uvw.h"
+#include "convert/define_convert_enu_directions_to_az_el.h"
 #include "convert/define_convert_enu_directions_to_cirs_relative_directions.h"
+#include "convert/define_convert_enu_directions_to_local_tangent_plane.h"
 #include "convert/define_convert_enu_directions_to_relative_directions.h"
 #include "convert/define_convert_enu_directions_to_theta_phi.h"
 #include "convert/define_convert_lon_lat_to_relative_directions.h"
 #include "convert/define_convert_ludwig3_to_theta_phi_components.h"
 #include "convert/define_convert_relative_directions_to_enu_directions.h"
+#include "convert/define_convert_relative_directions_to_lon_lat.h"
 #include "convert/define_convert_station_uvw_to_baseline_uvw.h"
 #include "convert/define_convert_theta_phi_to_ludwig3_components.h"
 #include "utility/oskar_cuda_registrar.h"

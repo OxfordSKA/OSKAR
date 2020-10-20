@@ -10,6 +10,8 @@
       test source.
 
     * Allow visibility blocks to be tiled in frequency as well as time.
+    
+    * Add limited drift-scan mode (point sources only; no time-smearing).
 
 2020-01-20  OSKAR-2.7.6
 

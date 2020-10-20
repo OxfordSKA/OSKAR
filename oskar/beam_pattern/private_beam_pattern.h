@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2016-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <log/oskar_log.h>
@@ -63,7 +40,7 @@ struct DeviceData
     int previous_chunk_index;
     oskar_Telescope* tel;
     oskar_StationWork* work;
-    oskar_Mem *x, *y, *z, *jones_data;
+    oskar_Mem *x, *y, *z, *lon_rad, *lat_rad, *jones_data;
     oskar_Mem *auto_power[2], *cross_power[2]; /* Per Stokes type. */
 
     /* Timers. */
@@ -88,9 +65,9 @@ struct oskar_BeamPattern
 {
     /* Settings. */
     int prec, num_devices, num_gpus_avail, dev_loc, num_gpus, *gpu_ids;
-    int coord_type, max_chunk_size;
+    int max_chunk_size;
     int num_time_steps, num_channels, num_chunks;
-    int pol_mode, width, height, num_pixels, nside;
+    int pol_mode, width, height, nside;
     int num_active_stations, *station_ids;
     int voltage_amp_txt, voltage_phase_txt, voltage_raw_txt;
     int voltage_amp_fits, voltage_phase_fits;
@@ -118,7 +95,8 @@ struct oskar_BeamPattern
     int i_global, status;
 
     /* Input data. */
-    oskar_Mem *x, *y, *z;
+    int source_coord_type, num_pixels;
+    oskar_Mem *lon_rad, *lat_rad, *x, *y, *z;
     oskar_Telescope* tel;
 
     /* Temporary arrays. */

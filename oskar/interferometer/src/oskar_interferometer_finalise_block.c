@@ -8,7 +8,6 @@
 #include "interferometer/private_interferometer.h"
 #include "interferometer/oskar_interferometer.h"
 
-#include "convert/oskar_convert_ecef_to_uvw.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_get_memory_usage.h"
 
@@ -50,26 +49,17 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
 
     /* Calculate (u,v,w) coordinates for the block. */
     if (oskar_vis_block_has_cross_correlations(b0))
-    {
-        const oskar_Mem *x, *y, *z;
-        x = oskar_telescope_station_measured_offset_ecef_metres_const(h->tel, 0);
-        y = oskar_telescope_station_measured_offset_ecef_metres_const(h->tel, 1);
-        z = oskar_telescope_station_measured_offset_ecef_metres_const(h->tel, 2);
-        oskar_convert_ecef_to_uvw(
-                oskar_telescope_num_stations(h->tel), x, y, z,
-                oskar_telescope_phase_centre_ra_rad(h->tel),
-                oskar_telescope_phase_centre_dec_rad(h->tel),
+        oskar_telescope_uvw(h->tel, 0, h->ignore_w_components,
                 oskar_vis_block_num_times(b0),
                 oskar_vis_header_time_start_mjd_utc(h->header),
                 oskar_vis_header_time_inc_sec(h->header) / 86400.0,
-                oskar_vis_block_start_time_index(b0), h->ignore_w_components,
+                oskar_vis_block_start_time_index(b0),
                 oskar_vis_block_station_uvw_metres(b0, 0),
                 oskar_vis_block_station_uvw_metres(b0, 1),
                 oskar_vis_block_station_uvw_metres(b0, 2),
                 oskar_vis_block_baseline_uvw_metres(b0, 0),
                 oskar_vis_block_baseline_uvw_metres(b0, 1),
                 oskar_vis_block_baseline_uvw_metres(b0, 2), status);
-    }
 
     /* Add uncorrelated system noise to the combined visibilities. */
     if (!h->coords_only && oskar_telescope_noise_enabled(h->tel))

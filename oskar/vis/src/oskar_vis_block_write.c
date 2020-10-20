@@ -40,15 +40,30 @@ void oskar_vis_block_write(const oskar_VisBlock* vis, oskar_Binary* h,
                 OSKAR_VIS_BLOCK_TAG_CROSS_CORRELATIONS, block_index, 0, status);
 
         /* Write the station coordinate data. */
-        oskar_binary_write_mem(h, vis->station_uvw_metres[0],
-                OSKAR_TAG_GROUP_VIS_BLOCK,
-                OSKAR_VIS_BLOCK_TAG_STATION_U, block_index, 0, status);
-        oskar_binary_write_mem(h, vis->station_uvw_metres[1],
-                OSKAR_TAG_GROUP_VIS_BLOCK,
-                OSKAR_VIS_BLOCK_TAG_STATION_V, block_index, 0, status);
-        oskar_binary_write_mem(h, vis->station_uvw_metres[2],
-                OSKAR_TAG_GROUP_VIS_BLOCK,
-                OSKAR_VIS_BLOCK_TAG_STATION_W, block_index, 0, status);
+        if (oskar_mem_length(vis->station_uvw_metres[0]) > 0)
+        {
+            oskar_binary_write_mem(h, vis->station_uvw_metres[0],
+                    OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_STATION_U, block_index, 0, status);
+            oskar_binary_write_mem(h, vis->station_uvw_metres[1],
+                    OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_STATION_V, block_index, 0, status);
+            oskar_binary_write_mem(h, vis->station_uvw_metres[2],
+                    OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_STATION_W, block_index, 0, status);
+        }
+        else if (oskar_mem_length(vis->baseline_uvw_metres[0]) > 0)
+        {
+            oskar_binary_write_mem(h, vis->baseline_uvw_metres[0],
+                    OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_BASELINE_UU, block_index, 0, status);
+            oskar_binary_write_mem(h, vis->baseline_uvw_metres[1],
+                    OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_BASELINE_VV, block_index, 0, status);
+            oskar_binary_write_mem(h, vis->baseline_uvw_metres[2],
+                    OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_BASELINE_WW, block_index, 0, status);
+        }
     }
 }
 

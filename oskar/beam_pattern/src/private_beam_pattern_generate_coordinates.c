@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "beam_pattern/private_beam_pattern.h"
@@ -48,11 +25,12 @@ static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
 void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         int beam_coord_type, int* status)
 {
+    oskar_Mem *x, *y, *z;
     size_t i = 0, num_pixels = 0;
     if (*status) return;
 
     /* If memory is already allocated, do nothing. */
-    if (h->x) return;
+    if (h->lon_rad) return;
 
     /* Calculate number of pixels if possible. */
     switch (h->coord_grid_type)
@@ -72,9 +50,14 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
     }
 
     /* Create output arrays. */
+    h->lon_rad = oskar_mem_create(h->prec, OSKAR_CPU, num_pixels, status);
+    h->lat_rad = oskar_mem_create(h->prec, OSKAR_CPU, num_pixels, status);
     h->x = oskar_mem_create(h->prec, OSKAR_CPU, num_pixels, status);
     h->y = oskar_mem_create(h->prec, OSKAR_CPU, num_pixels, status);
     h->z = oskar_mem_create(h->prec, OSKAR_CPU, num_pixels, status);
+    x = oskar_mem_create(h->prec, OSKAR_CPU, num_pixels, status);
+    y = oskar_mem_create(h->prec, OSKAR_CPU, num_pixels, status);
+    z = oskar_mem_create(h->prec, OSKAR_CPU, num_pixels, status);
 
     /* Get equatorial or horizon coordinates. */
     if (h->coord_frame_type == 'E')
@@ -123,12 +106,12 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
             }
 
             /* Evaluate beam phase centre coordinates in equatorial frame. */
-            if (beam_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
+            if (beam_coord_type == OSKAR_COORDS_RADEC)
             {
-                ra0 = oskar_telescope_phase_centre_ra_rad(h->tel);
-                dec0 = oskar_telescope_phase_centre_dec_rad(h->tel);
+                ra0 = oskar_telescope_phase_centre_longitude_rad(h->tel);
+                dec0 = oskar_telescope_phase_centre_latitude_rad(h->tel);
             }
-            else if (beam_coord_type == OSKAR_SPHERICAL_TYPE_AZEL)
+            else if (beam_coord_type == OSKAR_COORDS_AZEL)
             {
                 /* TODO convert from az0, el0 to ra0, dec0 */
                 *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
@@ -161,8 +144,8 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
             oskar_mem_realloc(h->z, num_pixels, status);
             oskar_convert_lon_lat_to_relative_directions(
                     (int) num_pixels, ra, dec,
-                    oskar_telescope_phase_centre_ra_rad(h->tel),
-                    oskar_telescope_phase_centre_dec_rad(h->tel),
+                    oskar_telescope_phase_centre_longitude_rad(h->tel),
+                    oskar_telescope_phase_centre_latitude_rad(h->tel),
                     h->x, h->y, h->z, status);
             oskar_mem_free(ra, status);
             oskar_mem_free(dec, status);
@@ -174,9 +157,9 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         };
 
         /* Set the return values. */
-        h->coord_type = OSKAR_RELATIVE_DIRECTIONS;
-        h->lon0 = oskar_telescope_phase_centre_ra_rad(h->tel);
-        h->lat0 = oskar_telescope_phase_centre_dec_rad(h->tel);
+        h->source_coord_type = OSKAR_COORDS_REL_DIR;
+        h->lon0 = oskar_telescope_phase_centre_longitude_rad(h->tel);
+        h->lat0 = oskar_telescope_phase_centre_latitude_rad(h->tel);
     }
     else if (h->coord_frame_type == 'H')
     {
@@ -209,7 +192,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         case 'S': /* Sky model, horizon coordinates. */
         {
             oskar_Mem *az, *el;
-            const int type = oskar_mem_type(h->x);
+            const int type = oskar_mem_type(h->lon_rad);
             az = oskar_mem_create(type, OSKAR_CPU, 0, status);
             el = oskar_mem_create(type, OSKAR_CPU, 0, status);
             load_coords(az, el, h->sky_model_file, status);
@@ -256,7 +239,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         };
 
         /* Set the return values. */
-        h->coord_type = OSKAR_ENU_DIRECTIONS;
+        h->source_coord_type = OSKAR_COORDS_ENU_DIR;
         h->lon0 = 0.0;
         h->lat0 = M_PI / 2.0;
     }
@@ -264,6 +247,11 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
     {
         *status = OSKAR_ERR_INVALID_ARGUMENT;
     }
+
+    /* Free scratch arrays. */
+    oskar_mem_free(x, status);
+    oskar_mem_free(y, status);
+    oskar_mem_free(z, status);
 
     /* Set the number of pixels. */
     h->num_pixels = (int) num_pixels;

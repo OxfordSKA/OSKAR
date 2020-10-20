@@ -57,9 +57,12 @@ void oskar_interferometer_free_device_data(oskar_Interferometer* h, int* status)
         oskar_vis_block_free(d->vis_block_cpu[0], status);
         oskar_vis_block_free(d->vis_block_cpu[1], status);
         oskar_vis_block_free(d->vis_block, status);
-        oskar_mem_free(d->u, status);
-        oskar_mem_free(d->v, status);
-        oskar_mem_free(d->w, status);
+        oskar_mem_free(d->lmn[0], status);
+        oskar_mem_free(d->lmn[1], status);
+        oskar_mem_free(d->lmn[2], status);
+        oskar_mem_free(d->uvw[0], status);
+        oskar_mem_free(d->uvw[1], status);
+        oskar_mem_free(d->uvw[2], status);
         oskar_sky_free(d->chunk, status);
         oskar_sky_free(d->chunk_clip, status);
         oskar_telescope_free(d->tel, status);
@@ -68,6 +71,7 @@ void oskar_interferometer_free_device_data(oskar_Interferometer* h, int* status)
         oskar_jones_free(d->E, status);
         oskar_jones_free(d->K, status);
         oskar_jones_free(d->R, status);
+        oskar_mem_free(d->gains, status);
         memset(d, 0, sizeof(DeviceData));
     }
 }

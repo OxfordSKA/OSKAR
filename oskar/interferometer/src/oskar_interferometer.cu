@@ -1,5 +1,7 @@
-/* Copyright (c) 2018-2019, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2018-2020, The OSKAR Developers. See LICENSE file. */
 
+#include "math/define_multiply.h"
+#include "interferometer/define_jones_apply_station_gains.h"
 #include "interferometer/define_evaluate_jones_K.h"
 #include "interferometer/define_evaluate_jones_R.h"
 #include "utility/oskar_cuda_registrar.h"

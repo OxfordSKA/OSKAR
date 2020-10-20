@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "telescope/private_telescope.h"
@@ -80,14 +57,14 @@ int oskar_telescope_phase_centre_coord_type(const oskar_Telescope* model)
     return model->phase_centre_coord_type;
 }
 
-double oskar_telescope_phase_centre_ra_rad(const oskar_Telescope* model)
+double oskar_telescope_phase_centre_longitude_rad(const oskar_Telescope* model)
 {
-    return model->phase_centre_ra_rad;
+    return model->phase_centre_rad[0];
 }
 
-double oskar_telescope_phase_centre_dec_rad(const oskar_Telescope* model)
+double oskar_telescope_phase_centre_latitude_rad(const oskar_Telescope* model)
 {
-    return model->phase_centre_dec_rad;
+    return model->phase_centre_rad[1];
 }
 
 double oskar_telescope_channel_bandwidth_hz(const oskar_Telescope* model)
@@ -255,6 +232,16 @@ unsigned int oskar_telescope_noise_seed(const oskar_Telescope* model)
 const char* oskar_telescope_tec_screen_path(const oskar_Telescope* model)
 {
     return oskar_mem_char_const(model->tec_screen_path);
+}
+
+oskar_Gains* oskar_telescope_gains(oskar_Telescope* model)
+{
+    return model->gains;
+}
+
+const oskar_Gains* oskar_telescope_gains_const(const oskar_Telescope* model)
+{
+    return model->gains;
 }
 
 
@@ -432,9 +419,10 @@ void oskar_telescope_set_polar_motion(oskar_Telescope* model,
 }
 
 static void oskar_telescope_set_station_phase_centre(oskar_Station* station,
-        int coord_type, double ra_rad, double dec_rad)
+        int coord_type, double longitude_rad, double latitude_rad)
 {
-    oskar_station_set_phase_centre(station, coord_type, ra_rad, dec_rad);
+    oskar_station_set_phase_centre(station, coord_type, longitude_rad,
+            latitude_rad);
     if (oskar_station_has_child(station))
     {
         int i, num_elements;
@@ -443,22 +431,22 @@ static void oskar_telescope_set_station_phase_centre(oskar_Station* station,
         {
             oskar_telescope_set_station_phase_centre(
                     oskar_station_child(station, i),
-                    coord_type, ra_rad, dec_rad);
+                    coord_type, longitude_rad, latitude_rad);
         }
     }
 }
 
 void oskar_telescope_set_phase_centre(oskar_Telescope* model,
-        int coord_type, double ra_rad, double dec_rad)
+        int coord_type, double longitude_rad, double latitude_rad)
 {
     int i;
     model->phase_centre_coord_type = coord_type;
-    model->phase_centre_ra_rad = ra_rad;
-    model->phase_centre_dec_rad = dec_rad;
+    model->phase_centre_rad[0] = longitude_rad;
+    model->phase_centre_rad[1] = latitude_rad;
     for (i = 0; i < model->num_stations; ++i)
     {
         oskar_telescope_set_station_phase_centre(model->station[i],
-                coord_type, ra_rad, dec_rad);
+                coord_type, longitude_rad, latitude_rad);
     }
 }
 

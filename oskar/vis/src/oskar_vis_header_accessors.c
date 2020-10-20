@@ -100,6 +100,16 @@ int oskar_vis_header_phase_centre_coord_type(const oskar_VisHeader* vis)
     return vis->phase_centre_type;
 }
 
+double oskar_vis_header_phase_centre_longitude_deg(const oskar_VisHeader* vis)
+{
+    return vis->phase_centre_deg[0];
+}
+
+double oskar_vis_header_phase_centre_latitude_deg(const oskar_VisHeader* vis)
+{
+    return vis->phase_centre_deg[1];
+}
+
 double oskar_vis_header_phase_centre_ra_deg(const oskar_VisHeader* vis)
 {
     return vis->phase_centre_deg[0];
@@ -223,18 +233,18 @@ void oskar_vis_header_set_time_average_sec(oskar_VisHeader* vis, double value)
 }
 
 void oskar_vis_header_set_phase_centre(oskar_VisHeader* vis,
-        int coord_type, double ra_deg, double dec_deg)
+        int coord_type, double longitude_deg, double latitude_deg)
 {
     vis->phase_centre_type = coord_type;
-    vis->phase_centre_deg[0] = ra_deg;
-    vis->phase_centre_deg[1] = dec_deg;
+    vis->phase_centre_deg[0] = longitude_deg;
+    vis->phase_centre_deg[1] = latitude_deg;
 }
 
 void oskar_vis_header_set_telescope_centre(oskar_VisHeader* vis,
-        double lon_deg, double lat_deg, double alt_metres)
+        double longitude_deg, double latitude_deg, double alt_metres)
 {
-    vis->telescope_centre_lon_deg = lon_deg;
-    vis->telescope_centre_lat_deg = lat_deg;
+    vis->telescope_centre_lon_deg = longitude_deg;
+    vis->telescope_centre_lat_deg = latitude_deg;
     vis->telescope_centre_alt_m = alt_metres;
 }
 

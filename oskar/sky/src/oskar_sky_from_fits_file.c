@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2016, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "convert/oskar_convert_brightness_to_jy.h"
@@ -65,7 +42,8 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
         /* Try to load HEALPix data. */
         data = oskar_mem_read_healpix_fits(filename, 0,
                 &nside, &ordering, &coordsys, &reported_map_units, status);
-        pixel_area_sr = (4.0 * M_PI) / oskar_mem_length(data);
+        if (data)
+            pixel_area_sr = (4.0 * M_PI) / oskar_mem_length(data);
 
         /* Check HEALPix ordering scheme. */
         if (!*status && ordering != 'R')
@@ -90,7 +68,6 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
     oskar_convert_brightness_to_jy(data, beam_area_pixels, pixel_area_sr,
             image_freq_hz, min_peak_fraction, min_abs_val, reported_map_units,
             default_map_units, override_units, status);
-    free(reported_map_units);
 
     /* Convert the image into a sky model. */
     if (naxis == 0)
@@ -102,6 +79,7 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
                 image_cellsize_deg, image_freq_hz, spectral_index, status);
 
     /* Free pixel data and return sky model. */
+    free(reported_map_units);
     oskar_mem_free(data, status);
     return t;
 }

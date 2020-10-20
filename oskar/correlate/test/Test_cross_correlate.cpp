@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <gtest/gtest.h>
@@ -65,13 +42,12 @@ protected:
     static const int num_sources = 277;
     static const int num_stations = 50;
     static const double bandwidth;
-    oskar_Mem *u_, *v_, *w_;
+    oskar_Mem *src_dir[3], *src_ext[3], *src_flux[4], *uvw[3];
     oskar_Telescope* tel;
-    oskar_Sky* sky;
     oskar_Jones* jones;
 
 protected:
-    void createTestData(int precision, int location, int matrix)
+    void create_test_data(int precision, int location, int matrix)
     {
         int status = 0, type;
 
@@ -80,10 +56,18 @@ protected:
         if (matrix) type |= OSKAR_MATRIX;
         jones = oskar_jones_create(type, location, num_stations, num_sources,
                 &status);
-        u_ = oskar_mem_create(precision, location, num_stations, &status);
-        v_ = oskar_mem_create(precision, location, num_stations, &status);
-        w_ = oskar_mem_create(precision, location, num_stations, &status);
-        sky = oskar_sky_create(precision, location, num_sources, &status);
+        for (int i = 0; i < 3; ++i)
+        {
+            src_dir[i] = oskar_mem_create(
+                    precision, location, num_sources, &status);
+            src_ext[i] = oskar_mem_create(
+                    precision, location, num_sources, &status);
+            uvw[i] = oskar_mem_create(
+                    precision, location, num_stations, &status);
+        }
+        for (int i = 0; i < 4; ++i)
+            src_flux[i] = oskar_mem_create(
+                    precision, location, num_sources, &status);
         tel = oskar_telescope_create(precision, location,
                 num_stations, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -95,9 +79,9 @@ protected:
         srand(2);
 #endif
         oskar_mem_random_range(oskar_jones_mem(jones), 1.0, 5.0, &status);
-        oskar_mem_random_range(u_, 1.0, 5.0, &status);
-        oskar_mem_random_range(v_, 1.0, 5.0, &status);
-        oskar_mem_random_range(w_, 1.0, 5.0, &status);
+        oskar_mem_random_range(uvw[0], 1.0, 5.0, &status);
+        oskar_mem_random_range(uvw[1], 1.0, 5.0, &status);
+        oskar_mem_random_range(uvw[2], 1.0, 5.0, &status);
         oskar_mem_random_range(
                 oskar_telescope_station_true_offset_ecef_metres(tel, 0),
                 0.1, 1000.0, &status);
@@ -107,35 +91,36 @@ protected:
         oskar_mem_random_range(
                 oskar_telescope_station_true_offset_ecef_metres(tel, 2),
                 0.1, 1000.0, &status);
-        oskar_mem_random_range(oskar_sky_I(sky), 1.0, 2.0, &status);
-        oskar_mem_random_range(oskar_sky_Q(sky), 0.1, 1.0, &status);
-        oskar_mem_random_range(oskar_sky_U(sky), 0.1, 0.5, &status);
-        oskar_mem_random_range(oskar_sky_V(sky), 0.1, 0.2, &status);
-        oskar_mem_random_range(oskar_sky_l(sky), 0.1, 0.9, &status);
-        oskar_mem_random_range(oskar_sky_m(sky), 0.1, 0.9, &status);
-        oskar_mem_random_range(oskar_sky_n(sky), 0.1, 0.9, &status);
-        oskar_mem_random_range(oskar_sky_gaussian_a(sky), 0.1e-6, 0.2e-6,
-                &status);
-        oskar_mem_random_range(oskar_sky_gaussian_b(sky), 0.1e-6, 0.2e-6,
-                &status);
-        oskar_mem_random_range(oskar_sky_gaussian_c(sky), 0.1e-6, 0.2e-6,
-                &status);
+        oskar_mem_random_range(src_flux[0], 1.0, 2.0, &status);
+        oskar_mem_random_range(src_flux[1], 0.1, 1.0, &status);
+        oskar_mem_random_range(src_flux[2], 0.1, 0.5, &status);
+        oskar_mem_random_range(src_flux[3], 0.1, 0.2, &status);
+        oskar_mem_random_range(src_dir[0], 0.1, 0.9, &status);
+        oskar_mem_random_range(src_dir[1], 0.1, 0.9, &status);
+        oskar_mem_random_range(src_dir[2], 0.1, 0.9, &status);
+        oskar_mem_random_range(src_ext[0], 0.1e-6, 0.2e-6, &status);
+        oskar_mem_random_range(src_ext[1], 0.1e-6, 0.2e-6, &status);
+        oskar_mem_random_range(src_ext[2], 0.1e-6, 0.2e-6, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
 
-    void destroyTestData()
+    void destroy_test_data()
     {
         int status = 0;
         oskar_jones_free(jones, &status);
-        oskar_mem_free(u_, &status);
-        oskar_mem_free(v_, &status);
-        oskar_mem_free(w_, &status);
-        oskar_sky_free(sky, &status);
+        for (int i = 0; i < 3; ++i)
+        {
+            oskar_mem_free(src_dir[i], &status);
+            oskar_mem_free(src_ext[i], &status);
+            oskar_mem_free(uvw[i], &status);
+        }
+        for (int i = 0; i < 4; ++i)
+            oskar_mem_free(src_flux[i], &status);
         oskar_telescope_free(tel, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
 
-    void runTest(int prec1, int prec2, int loc1, int loc2, int matrix,
+    void run_test(int prec1, int prec2, int loc1, int loc2, int matrix,
             int extended, double time_average)
     {
         int num_baselines, status = 0, type;
@@ -150,39 +135,39 @@ protected:
                 OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
 
         // Run first part.
-        createTestData(prec1, loc1, matrix);
+        create_test_data(prec1, loc1, matrix);
         num_baselines = oskar_telescope_num_baselines(tel);
         type = prec1 | OSKAR_COMPLEX;
         if (matrix) type |= OSKAR_MATRIX;
         vis1 = oskar_mem_create(type, loc1, num_baselines, &status);
         oskar_mem_clear_contents(vis1, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_sky_set_use_extended(sky, extended);
         oskar_telescope_set_channel_bandwidth(tel, bandwidth);
         oskar_telescope_set_time_average(tel, time_average);
         oskar_timer_start(timer1);
-        oskar_cross_correlate(oskar_sky_num_sources(sky), jones, sky,
-                tel, u_, v_, w_, 1.0, frequency, 0, vis1, &status);
+        oskar_cross_correlate(extended, num_sources, jones,
+                src_flux, src_dir, src_ext,
+                tel, uvw, 1.0, frequency, 0, vis1, &status);
         time1 = oskar_timer_elapsed(timer1);
-        destroyTestData();
+        destroy_test_data();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Run second part.
-        createTestData(prec2, loc2, matrix);
+        create_test_data(prec2, loc2, matrix);
         num_baselines = oskar_telescope_num_baselines(tel);
         type = prec2 | OSKAR_COMPLEX;
         if (matrix) type |= OSKAR_MATRIX;
         vis2 = oskar_mem_create(type, loc2, num_baselines, &status);
         oskar_mem_clear_contents(vis2, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_sky_set_use_extended(sky, extended);
         oskar_telescope_set_channel_bandwidth(tel, bandwidth);
         oskar_telescope_set_time_average(tel, time_average);
         oskar_timer_start(timer2);
-        oskar_cross_correlate(oskar_sky_num_sources(sky), jones, sky,
-                tel, u_, v_, w_, 1.0, frequency, 0, vis2, &status);
+        oskar_cross_correlate(extended, num_sources, jones,
+                src_flux, src_dir, src_ext,
+                tel, uvw, 1.0, frequency, 0, vis2, &status);
         time2 = oskar_timer_elapsed(timer2);
-        destroyTestData();
+        destroy_test_data();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Destroy the timers.
@@ -230,38 +215,38 @@ const double cross_correlate::bandwidth = 1e4;
 // CPU only.
 TEST_F(cross_correlate, matrix_point_singleCPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_CPU, 1, 0, 0.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(cross_correlate, matrix_point_singleGPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_GPU, 1, 0, 0.0);
 }
 
 TEST_F(cross_correlate, matrix_point_singleGPU_singleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_SINGLE,
+    run_test(OSKAR_SINGLE, OSKAR_SINGLE,
             OSKAR_GPU, OSKAR_CPU, 1, 0, 0.0);
 }
 
 TEST_F(cross_correlate, matrix_point_doubleGPU_doubleCPU)
 {
-    runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
+    run_test(OSKAR_DOUBLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 1, 0, 0.0);
 }
 
 TEST_F(cross_correlate, matrix_point_singleGPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 1, 0, 0.0);
 }
 
 TEST_F(cross_correlate, matrix_point_singleCPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_GPU, 1, 0, 0.0);
 }
 #endif
@@ -269,38 +254,38 @@ TEST_F(cross_correlate, matrix_point_singleCPU_doubleGPU)
 // CPU only.
 TEST_F(cross_correlate, matrix_point_timeSmearing_singleCPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_CPU, 1, 0, 10.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(cross_correlate, matrix_point_timeSmearing_singleGPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_GPU, 1, 0, 10.0);
 }
 
 TEST_F(cross_correlate, matrix_point_timeSmearing_singleGPU_singleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_SINGLE,
+    run_test(OSKAR_SINGLE, OSKAR_SINGLE,
             OSKAR_GPU, OSKAR_CPU, 1, 0, 10.0);
 }
 
 TEST_F(cross_correlate, matrix_point_timeSmearing_doubleGPU_doubleCPU)
 {
-    runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
+    run_test(OSKAR_DOUBLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 1, 0, 10.0);
 }
 
 TEST_F(cross_correlate, matrix_point_timeSmearing_singleGPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 1, 0, 10.0);
 }
 
 TEST_F(cross_correlate, matrix_point_timeSmearing_singleCPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_GPU, 1, 0, 10.0);
 }
 #endif
@@ -308,38 +293,38 @@ TEST_F(cross_correlate, matrix_point_timeSmearing_singleCPU_doubleGPU)
 // CPU only.
 TEST_F(cross_correlate, matrix_gaussian_singleCPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_CPU, 1, 1, 0.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(cross_correlate, matrix_gaussian_singleGPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_GPU, 1, 1, 0.0);
 }
 
 TEST_F(cross_correlate, matrix_gaussian_singleGPU_singleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_SINGLE,
+    run_test(OSKAR_SINGLE, OSKAR_SINGLE,
             OSKAR_GPU, OSKAR_CPU, 1, 1, 0.0);
 }
 
 TEST_F(cross_correlate, matrix_gaussian_doubleGPU_doubleCPU)
 {
-    runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
+    run_test(OSKAR_DOUBLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 1, 1, 0.0);
 }
 
 TEST_F(cross_correlate, matrix_gaussian_singleGPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 1, 1, 0.0);
 }
 
 TEST_F(cross_correlate, matrix_gaussian_singleCPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_GPU, 1, 1, 0.0);
 }
 #endif
@@ -347,38 +332,38 @@ TEST_F(cross_correlate, matrix_gaussian_singleCPU_doubleGPU)
 // CPU only.
 TEST_F(cross_correlate, matrix_gaussian_timeSmearing_singleCPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_CPU, 1, 1, 10.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(cross_correlate, matrix_gaussian_timeSmearing_singleGPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_GPU, 1, 1, 10.0);
 }
 
 TEST_F(cross_correlate, matrix_gaussian_timeSmearing_singleGPU_singleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_SINGLE,
+    run_test(OSKAR_SINGLE, OSKAR_SINGLE,
             OSKAR_GPU, OSKAR_CPU, 1, 1, 10.0);
 }
 
 TEST_F(cross_correlate, matrix_gaussian_timeSmearing_doubleGPU_doubleCPU)
 {
-    runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
+    run_test(OSKAR_DOUBLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 1, 1, 10.0);
 }
 
 TEST_F(cross_correlate, matrix_gaussian_timeSmearing_singleGPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 1, 1, 10.0);
 }
 
 TEST_F(cross_correlate, matrix_gaussian_timeSmearing_singleCPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_GPU, 1, 1, 10.0);
 }
 #endif
@@ -389,38 +374,38 @@ TEST_F(cross_correlate, matrix_gaussian_timeSmearing_singleCPU_doubleGPU)
 // CPU only.
 TEST_F(cross_correlate, scalar_point_singleCPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_CPU, 0, 0, 0.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(cross_correlate, scalar_point_singleGPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_GPU, 0, 0, 0.0);
 }
 
 TEST_F(cross_correlate, scalar_point_singleGPU_singleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_SINGLE,
+    run_test(OSKAR_SINGLE, OSKAR_SINGLE,
             OSKAR_GPU, OSKAR_CPU, 0, 0, 0.0);
 }
 
 TEST_F(cross_correlate, scalar_point_doubleGPU_doubleCPU)
 {
-    runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
+    run_test(OSKAR_DOUBLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 0, 0, 0.0);
 }
 
 TEST_F(cross_correlate, scalar_point_singleGPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 0, 0, 0.0);
 }
 
 TEST_F(cross_correlate, scalar_point_singleCPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_GPU, 0, 0, 0.0);
 }
 #endif
@@ -428,38 +413,38 @@ TEST_F(cross_correlate, scalar_point_singleCPU_doubleGPU)
 // CPU only.
 TEST_F(cross_correlate, scalar_point_timeSmearing_singleCPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_CPU, 0, 0, 10.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(cross_correlate, scalar_point_timeSmearing_singleGPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_GPU, 0, 0, 10.0);
 }
 
 TEST_F(cross_correlate, scalar_point_timeSmearing_singleGPU_singleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_SINGLE,
+    run_test(OSKAR_SINGLE, OSKAR_SINGLE,
             OSKAR_GPU, OSKAR_CPU, 0, 0, 10.0);
 }
 
 TEST_F(cross_correlate, scalar_point_timeSmearing_doubleGPU_doubleCPU)
 {
-    runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
+    run_test(OSKAR_DOUBLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 0, 0, 10.0);
 }
 
 TEST_F(cross_correlate, scalar_point_timeSmearing_singleGPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 0, 0, 10.0);
 }
 
 TEST_F(cross_correlate, scalar_point_timeSmearing_singleCPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_GPU, 0, 0, 10.0);
 }
 #endif
@@ -467,38 +452,38 @@ TEST_F(cross_correlate, scalar_point_timeSmearing_singleCPU_doubleGPU)
 // CPU only.
 TEST_F(cross_correlate, scalar_gaussian_singleCPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_CPU, 0, 1, 0.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(cross_correlate, scalar_gaussian_singleGPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_GPU, 0, 1, 0.0);
 }
 
 TEST_F(cross_correlate, scalar_gaussian_singleGPU_singleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_SINGLE,
+    run_test(OSKAR_SINGLE, OSKAR_SINGLE,
             OSKAR_GPU, OSKAR_CPU, 0, 1, 0.0);
 }
 
 TEST_F(cross_correlate, scalar_gaussian_doubleGPU_doubleCPU)
 {
-    runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
+    run_test(OSKAR_DOUBLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 0, 1, 0.0);
 }
 
 TEST_F(cross_correlate, scalar_gaussian_singleGPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 0, 1, 0.0);
 }
 
 TEST_F(cross_correlate, scalar_gaussian_singleCPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_GPU, 0, 1, 0.0);
 }
 #endif
@@ -506,38 +491,38 @@ TEST_F(cross_correlate, scalar_gaussian_singleCPU_doubleGPU)
 // CPU only.
 TEST_F(cross_correlate, scalar_gaussian_timeSmearing_singleCPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_CPU, 0, 1, 10.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(cross_correlate, scalar_gaussian_timeSmearing_singleGPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_GPU, 0, 1, 10.0);
 }
 
 TEST_F(cross_correlate, scalar_gaussian_timeSmearing_singleGPU_singleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_SINGLE,
+    run_test(OSKAR_SINGLE, OSKAR_SINGLE,
             OSKAR_GPU, OSKAR_CPU, 0, 1, 10.0);
 }
 
 TEST_F(cross_correlate, scalar_gaussian_timeSmearing_doubleGPU_doubleCPU)
 {
-    runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
+    run_test(OSKAR_DOUBLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 0, 1, 10.0);
 }
 
 TEST_F(cross_correlate, scalar_gaussian_timeSmearing_singleGPU_doubleCPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 0, 1, 10.0);
 }
 
 TEST_F(cross_correlate, scalar_gaussian_timeSmearing_singleCPU_doubleGPU)
 {
-    runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
+    run_test(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_GPU, 0, 1, 10.0);
 }
 #endif

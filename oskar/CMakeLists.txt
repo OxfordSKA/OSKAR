@@ -16,6 +16,7 @@ set(${libname}_folders
     beam_pattern
     convert
     correlate
+    gains
     imager
     interferometer
     log

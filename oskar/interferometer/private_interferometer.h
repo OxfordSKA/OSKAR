@@ -27,11 +27,12 @@ struct DeviceData
     /* Device memory. */
     int previous_chunk_index;
     oskar_VisBlock* vis_block;  /* Device memory block. */
-    oskar_Mem *u, *v, *w;
+    oskar_Mem *lmn[3], *uvw[3];
     oskar_Sky* chunk;           /* The unmodified sky chunk being processed. */
     oskar_Sky* chunk_clip;      /* Copy of the chunk after horizon clipping. */
     oskar_Telescope* tel;       /* Telescope model, created as a copy. */
-    oskar_Jones *J, *R, *E, *K, *Z;
+    oskar_Jones *J, *R, *E, *K;
+    oskar_Mem *gains;
     oskar_StationWork* station_work;
 
     /* Timers. */

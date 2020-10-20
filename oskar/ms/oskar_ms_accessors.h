@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #ifndef OSKAR_MS_ACCESSORS_H_
@@ -162,20 +139,52 @@ unsigned int oskar_ms_num_stations(const oskar_MeasurementSet* p);
 
 /**
  * @brief
- * Returns the phase centre RA in the Measurement Set.
+ * Returns the phase centre type in the Measurement Set.
  *
  * @details
- * Returns the phase centre RA in the Measurement Set.
+ * Returns the phase centre type in the Measurement Set.
+ * 0 = Tracking (RA, Dec);
+ * 1 = Drift scan (Azimuth, Elevation).
+ */
+OSKAR_MS_EXPORT
+int oskar_ms_phase_centre_coord_type(const oskar_MeasurementSet* p);
+
+/**
+ * @brief
+ * Returns the phase centre longitude in the Measurement Set.
+ *
+ * @details
+ * Returns the phase centre longitude in the Measurement Set.
+ */
+OSKAR_MS_EXPORT
+double oskar_ms_phase_centre_longitude_rad(const oskar_MeasurementSet* p);
+
+/**
+ * @brief
+ * Returns the phase centre latitude in the Measurement Set.
+ *
+ * @details
+ * Returns the phase centre latitude in the Measurement Set.
+ */
+OSKAR_MS_EXPORT
+double oskar_ms_phase_centre_latitude_rad(const oskar_MeasurementSet* p);
+
+/**
+ * @brief
+ * (DEPRECATED) Returns the phase centre RA in the Measurement Set.
+ *
+ * @details
+ * (DEPRECATED) Returns the phase centre RA in the Measurement Set.
  */
 OSKAR_MS_EXPORT
 double oskar_ms_phase_centre_ra_rad(const oskar_MeasurementSet* p);
 
 /**
  * @brief
- * Returns the phase centre Dec in the Measurement Set.
+ * (DEPRECATED) Returns the phase centre Dec in the Measurement Set.
  *
  * @details
- * Returns the phase centre Dec in the Measurement Set.
+ * (DEPRECATED) Returns the phase centre Dec in the Measurement Set.
  */
 OSKAR_MS_EXPORT
 double oskar_ms_phase_centre_dec_rad(const oskar_MeasurementSet* p);
@@ -187,9 +196,13 @@ double oskar_ms_phase_centre_dec_rad(const oskar_MeasurementSet* p);
  * @details
  * Sets the observation phase centre.
  *
- * @param[in] coord_type     Coordinate type (reserved; currently ignored).
- * @param[in] longitude_rad  The longitude (Right Ascension), in radians.
- * @param[in] latitude_rad   The latitude (Declination), in radians.
+ * The coordinate type can be either:
+ * 0 = Tracking (RA, Dec);
+ * 1 = Drift scan (Azimuth, Elevation).
+ *
+ * @param[in] coord_type     Coordinate type.
+ * @param[in] longitude_rad  The longitude, in radians.
+ * @param[in] latitude_rad   The latitude, in radians.
  */
 OSKAR_MS_EXPORT
 void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
@@ -254,4 +267,4 @@ double oskar_ms_time_start_mjd_utc(const oskar_MeasurementSet* p);
 }
 #endif
 
-#endif /* OSKAR_MS_ACCESSORS_H_ */
+#endif /* include guard */

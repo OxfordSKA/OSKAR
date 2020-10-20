@@ -38,11 +38,15 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
     if (!h->init_sky)
     {
         int i, num_failed = 0;
-        double ra0, dec0;
+        double ra0 = 0.0, dec0 = 0.0;
 
-        /* Compute source direction cosines relative to phase centre. */
-        ra0 = oskar_telescope_phase_centre_ra_rad(h->tel);
-        dec0 = oskar_telescope_phase_centre_dec_rad(h->tel);
+        /* Compute source direction cosines. */
+        if (oskar_telescope_phase_centre_coord_type(h->tel) !=
+                OSKAR_COORDS_AZEL)
+        {
+            ra0 = oskar_telescope_phase_centre_longitude_rad(h->tel);
+            dec0 = oskar_telescope_phase_centre_latitude_rad(h->tel);
+        }
         for (i = 0; i < h->num_sky_chunks; ++i)
         {
             oskar_sky_evaluate_relative_directions(h->sky_chunks[i],
@@ -79,7 +83,7 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
 
 static void set_up_vis_header(oskar_Interferometer* h, int* status)
 {
-    int num_stations, vis_type;
+    int vis_type;
     const double rad2deg = 180.0/M_PI;
     int write_autocorr = 0, write_crosscorr = 0;
     if (*status) return;
@@ -96,7 +100,7 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
     }
 
     /* Create visibility header. */
-    num_stations = oskar_telescope_num_stations(h->tel);
+    const int num_stations = oskar_telescope_num_stations(h->tel);
     vis_type = h->prec | OSKAR_COMPLEX;
     if (oskar_telescope_pol_mode(h->tel) == OSKAR_POL_MODE_FULL)
         vis_type |= OSKAR_MATRIX;
@@ -122,13 +126,16 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
     }
 
     /* Copy other metadata from telescope model. */
+    const int coord_type =
+            (oskar_telescope_phase_centre_coord_type(h->tel) ==
+                    OSKAR_COORDS_RADEC) ? 0 : 1;
     oskar_vis_header_set_time_average_sec(h->header,
             oskar_telescope_time_average_sec(h->tel));
     oskar_vis_header_set_channel_bandwidth_hz(h->header,
             oskar_telescope_channel_bandwidth_hz(h->tel));
-    oskar_vis_header_set_phase_centre(h->header, 0,
-            oskar_telescope_phase_centre_ra_rad(h->tel) * rad2deg,
-            oskar_telescope_phase_centre_dec_rad(h->tel) * rad2deg);
+    oskar_vis_header_set_phase_centre(h->header, coord_type,
+            oskar_telescope_phase_centre_longitude_rad(h->tel) * rad2deg,
+            oskar_telescope_phase_centre_latitude_rad(h->tel) * rad2deg);
     oskar_vis_header_set_telescope_centre(h->header,
             oskar_telescope_lon_rad(h->tel) * rad2deg,
             oskar_telescope_lat_rad(h->tel) * rad2deg,
@@ -210,9 +217,12 @@ static void* init_device(void* arg)
     /* Device scratch memory. */
     if (!d->tel)
     {
-        d->u = oskar_mem_create(h->prec, dev_loc, num_stations, status);
-        d->v = oskar_mem_create(h->prec, dev_loc, num_stations, status);
-        d->w = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+        d->uvw[0] = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+        d->uvw[1] = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+        d->uvw[2] = oskar_mem_create(h->prec, dev_loc, num_stations, status);
+        d->lmn[0] = oskar_mem_create(h->prec, dev_loc, 1 + num_src, status);
+        d->lmn[1] = oskar_mem_create(h->prec, dev_loc, 1 + num_src, status);
+        d->lmn[2] = oskar_mem_create(h->prec, dev_loc, 1 + num_src, status);
         d->chunk = oskar_sky_create(h->prec, dev_loc, num_src, status);
         d->chunk_clip = oskar_sky_create(h->prec, dev_loc, num_src, status);
         d->tel = oskar_telescope_create_copy(h->tel, dev_loc, status);
@@ -224,7 +234,7 @@ static void* init_device(void* arg)
                 status);
         d->K = oskar_jones_create(complx, dev_loc, num_stations, num_src,
                 status);
-        d->Z = 0;
+        d->gains = oskar_mem_create(vistype, dev_loc, num_stations, status);
         d->station_work = oskar_station_work_create(h->prec, dev_loc, status);
         oskar_station_work_set_tec_screen_common_params(d->station_work,
                 oskar_telescope_ionosphere_screen_type(d->tel),
@@ -276,7 +286,6 @@ static void set_up_device_data(oskar_Interferometer* h, int* status)
     /* Record memory usage. */
     if (!*status && init)
     {
-        int i;
         oskar_log_section(h->log, 'M', "Initial memory usage");
         for (i = 0; i < h->num_gpus; ++i)
             oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);

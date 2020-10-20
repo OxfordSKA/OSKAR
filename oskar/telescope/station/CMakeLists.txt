@@ -9,18 +9,18 @@ set(station_SRC
     define_evaluate_tec_screen.h
     define_evaluate_vla_beam_pbcor.h
     src/oskar_blank_below_horizon.c
-    src/oskar_evaluate_beam_horizon_direction.c
     src/oskar_evaluate_pierce_points.c
     src/oskar_evaluate_element_weights_dft.c
     src/oskar_evaluate_element_weights_errors.c
     src/oskar_evaluate_tec_screen.c
     src/oskar_evaluate_station_beam_aperture_array.c
     src/oskar_evaluate_station_beam_gaussian.c
-    src/oskar_evaluate_station_beam.c
     src/oskar_evaluate_station_from_telescope_dipole_azimuth.c
     src/oskar_evaluate_vla_beam_pbcor.c
     src/oskar_station_accessors.c
     src/oskar_station_analyse.c
+    src/oskar_station_beam.c
+    src/oskar_station_beam_horizon_direction.c
     src/oskar_station_create_child_stations.c
     src/oskar_station_create_copy.c
     src/oskar_station_create.c

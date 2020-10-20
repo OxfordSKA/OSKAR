@@ -10,6 +10,7 @@
 
 struct oskar_HDF5
 {
+    int refcount;
     int64_t file_id;
     int num_datasets;
     char** names;

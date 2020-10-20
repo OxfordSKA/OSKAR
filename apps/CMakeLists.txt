@@ -41,15 +41,6 @@ if (IONOSPHERE_TESTING)
     # BINARY: oskar_sim_tec_screen
     set(name oskar_sim_tec_screen)
     oskar_app(NAME ${name} SOURCES ${name}_main.cpp NO_INSTALL)
-
-    #if (PNG_FOUND)
-    #    include_directories(${PNG_INCLUDE_DIRS})
-    #    set(name oskar_ionosphere_to_kml)
-    #    oskar_app(NAME ${name} SOURCES ${name}_main.cpp
-    #        EXTRA_LIBS ${PNG_LIBRARY}
-    #        NO_INSTALL
-    #    )
-    #endif ()
 endif()
 
 # Install python scripts to the installation binary directory

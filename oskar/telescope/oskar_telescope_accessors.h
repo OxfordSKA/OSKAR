@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #ifndef OSKAR_TELESCOPE_ACCESSORS_H_
@@ -34,6 +11,7 @@
  */
 
 #include <oskar_global.h>
+#include <gains/oskar_gains.h>
 #include <mem/oskar_mem.h>
 #include <telescope/station/oskar_station.h>
 
@@ -158,31 +136,31 @@ int oskar_telescope_phase_centre_coord_type(const oskar_Telescope* model);
 
 /**
  * @brief
- * Returns the right ascension of the phase centre.
+ * Returns the longitude of the phase centre.
  *
  * @details
- * Returns the right ascension of the interferometer phase centre in radians.
+ * Returns the longitude of the interferometer phase centre in radians.
  *
  * @param[in] model   Pointer to telescope model.
  *
- * @return The right ascension in radians.
+ * @return The longitude in radians.
  */
 OSKAR_EXPORT
-double oskar_telescope_phase_centre_ra_rad(const oskar_Telescope* model);
+double oskar_telescope_phase_centre_longitude_rad(const oskar_Telescope* model);
 
 /**
  * @brief
- * Returns the declination of the phase centre.
+ * Returns the latitude of the phase centre.
  *
  * @details
- * Returns the declination of the interferometer phase centre in radians.
+ * Returns the latitude of the interferometer phase centre in radians.
  *
  * @param[in] model   Pointer to telescope model.
  *
- * @return The declination in radians.
+ * @return The latitude in radians.
  */
 OSKAR_EXPORT
-double oskar_telescope_phase_centre_dec_rad(const oskar_Telescope* model);
+double oskar_telescope_phase_centre_latitude_rad(const oskar_Telescope* model);
 
 /**
  * @brief
@@ -628,6 +606,35 @@ unsigned int oskar_telescope_noise_seed(const oskar_Telescope* model);
 OSKAR_EXPORT
 const char* oskar_telescope_tec_screen_path(const oskar_Telescope* model);
 
+/**
+ * @brief
+ * Returns the gain model.
+ *
+ * @details
+ * Returns the gain model.
+ *
+ * @param[in] model    Pointer to telescope model.
+ *
+ * @return The gain model.
+ */
+OSKAR_EXPORT
+oskar_Gains* oskar_telescope_gains(oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns the gain model.
+ *
+ * @details
+ * Returns the gain model.
+ *
+ * @param[in] model    Pointer to telescope model.
+ *
+ * @return The gain model.
+ */
+OSKAR_EXPORT
+const oskar_Gains* oskar_telescope_gains_const(const oskar_Telescope* model);
+
+
 /* Setters. */
 
 /**
@@ -788,16 +795,16 @@ void oskar_telescope_set_noise_rms(oskar_Telescope* model,
  * Sets the coordinates of the phase centre.
  *
  * @details
- * Sets the right ascension and declination of the interferometer phase centre.
+ * Sets the coordinates of the interferometer phase centre.
  *
- * @param[in] model       Pointer to telescope model.
- * @param[in] coord_type  Coordinate type (ICRS or CIRS).
- * @param[in] ra_rad      Right ascension in radians.
- * @param[in] dec_rad     Declination in radians.
+ * @param[in] model         Pointer to telescope model.
+ * @param[in] coord_type    Coordinate type (OSKAR_SPHERICAL_TYPE enumerator).
+ * @param[in] longitude_rad Longitude in radians.
+ * @param[in] latitude_rad  Latitude in radians.
  */
 OSKAR_EXPORT
 void oskar_telescope_set_phase_centre(oskar_Telescope* model,
-        int coord_type, double ra_rad, double dec_rad);
+        int coord_type, double longitude_rad, double latitude_rad);
 
 /**
  * @brief
@@ -971,4 +978,4 @@ void oskar_telescope_set_uv_filter(oskar_Telescope* model,
 }
 #endif
 
-#endif /* OSKAR_TELESCOPE_ACCESSORS_H_ */
+#endif /* include guard */
