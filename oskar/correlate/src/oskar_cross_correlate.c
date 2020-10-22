@@ -634,6 +634,7 @@ void oskar_cross_correlate(
             local_size[0] = 8;
         else if (is_matrix && is_dbl && time_avg != 0.0)
             local_size[0] = 64;
+        oskar_device_check_local_size(location, 0, local_size);
         const size_t arg_size_local[] = {
                 local_size[0] * oskar_mem_element_size(oskar_mem_type(vis))
         };
