@@ -35,6 +35,7 @@ RUN apt-get update && \
     libblas3 \
     libgfortran4 \
     libgomp1 \
+    libhdf5-100 \
     liblapack3 \
     libquadmath0 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*

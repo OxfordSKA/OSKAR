@@ -41,8 +41,12 @@ oskar_HDF5* oskar_hdf5_open(const char* file_path, int* status)
     }
 
     /* Iterate all datasets in the file using the callback function. */
-    H5Ovisit3(h->file_id, H5_INDEX_NAME, H5_ITER_NATIVE, iter_func, h,
-            H5O_INFO_BASIC);
+    #if H5_VERSION_GE(1, 12, 0)
+        H5Ovisit(h->file_id, H5_INDEX_NAME, H5_ITER_NATIVE, iter_func, h,
+                H5O_INFO_BASIC);
+    #else
+        H5Ovisit(h->file_id, H5_INDEX_NAME, H5_ITER_NATIVE, iter_func, h);
+    #endif
 #else
     (void)file_path;
     *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
