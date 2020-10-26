@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2020, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "imager/private_imager.h"
@@ -230,7 +207,7 @@ int oskar_imager_scale_norm_with_num_input_files(const oskar_Imager* h)
 void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
         int* status)
 {
-    if (*status) return;
+    if (*status || !type) return;
     h->image_padding = 1.0;
     if (!strncmp(type, "FFT", 3) || !strncmp(type, "fft", 3))
     {
@@ -403,6 +380,7 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
 void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
         int support, int oversample, int* status)
 {
+    if (*status || !type) return;
     h->support = support;
     h->oversample = oversample;
     if (!strncmp(type, "S", 1) || !strncmp(type, "s", 1))
@@ -561,6 +539,8 @@ void oskar_imager_set_size(oskar_Imager* h, int size, int* status)
 {
     if (size < 2 || size % 2 != 0)
     {
+        oskar_log_error(h->log, "Need an even number of pixels "
+                "for image side length.");
         *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
     }
@@ -712,6 +692,7 @@ void oskar_imager_set_num_w_planes(oskar_Imager* h, int value)
 
 void oskar_imager_set_weighting(oskar_Imager* h, const char* type, int* status)
 {
+    if (*status || !type) return;
     if (!strncmp(type, "N", 1) || !strncmp(type, "n", 1))
         h->weighting = OSKAR_WEIGHTING_NATURAL;
     else if (!strncmp(type, "R", 1) || !strncmp(type, "r", 1))
