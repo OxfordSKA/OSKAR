@@ -21,7 +21,6 @@ endmacro()
 declare_oskar_apps(
     oskar_convert_ecef_to_enu
     oskar_convert_geodetic_to_ecef
-    oskar_cuda_system_info
     oskar_binary_file_query
     oskar_filter_sky_model_clusters
     oskar_fit_element_data
@@ -32,16 +31,7 @@ declare_oskar_apps(
     oskar_system_info
     oskar_vis_add
     oskar_vis_add_noise
-    oskar_vis_summary
-    oskar_vis_upgrade_format
-    oskar_vis_to_ascii_table)
-
-set(IONOSPHERE_TESTING OFF)
-if (IONOSPHERE_TESTING)
-    # BINARY: oskar_sim_tec_screen
-    set(name oskar_sim_tec_screen)
-    oskar_app(NAME ${name} SOURCES ${name}_main.cpp NO_INSTALL)
-endif()
+    oskar_vis_summary)
 
 # Install python scripts to the installation binary directory
 file(GLOB app_scripts *.py)

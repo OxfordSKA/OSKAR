@@ -16,7 +16,6 @@ set(apps_SRC
     src/oskar_settings_to_interferometer.cpp
     src/oskar_settings_to_sky.cpp
     src/oskar_settings_to_telescope.cpp
-    # src/oskar_sim_tec_screen.cpp
     )
 add_library(oskar_apps ${apps_SRC})
 target_link_libraries(oskar_apps oskar oskar_settings)

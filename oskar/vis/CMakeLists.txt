@@ -20,13 +20,6 @@ set(vis_SRC
     src/oskar_vis_header_free.c
     src/oskar_vis_header_read.c
     src/oskar_vis_header_write.c
-
-    # Deprecated:
-    src/oskar_vis_accessors.c
-    src/oskar_vis_create.c
-    src/oskar_vis_free.c
-    src/oskar_vis_read.c
-    src/oskar_vis_write.c
 )
 
 if (CASACORE_FOUND)

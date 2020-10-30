@@ -19,12 +19,12 @@ with OSKAR are marked with *.
 
 -# \ref apps_oskar "oskar *"
 -# \ref apps_oskar_binary_file_query "oskar_binary_file_query"
--# \ref apps_oskar_cuda_system_info "oskar_cuda_system_info"
 -# \ref apps_oskar_fit_element_data "oskar_fit_element_data"
 -# \ref apps_oskar_fits_image_to_sky_model "oskar_fits_image_to_sky_model"
 -# \ref apps_oskar_imager "oskar_imager"
 -# \ref apps_oskar_sim_beam_pattern "oskar_sim_beam_pattern *"
 -# \ref apps_oskar_sim_interferometer "oskar_sim_interferometer *"
+-# \ref apps_oskar_system_info "oskar_system_info"
 -# \ref apps_oskar_vis_add "oskar_vis_add"
 -# \ref apps_oskar_vis_add_noise "oskar_vis_add_noise"
 -# \ref apps_oskar_vis_summary "oskar_vis_summary"
@@ -57,11 +57,6 @@ can be run using the syntax:
 \code
     $ oskar_binary_file_query <binary file path>
 \endcode
-
-\subsection apps_oskar_cuda_system_info oskar_cuda_system_info
-
-This utility displays a summary of the installed CUDA hardware.
-It takes no command line arguments.
 
 \subsection apps_oskar_fit_element_data oskar_fit_element_data
 
@@ -221,6 +216,11 @@ baseline (station pair), time and frequency, by collapsing the source dimension
 of the Jones matrices after combining with the source brightness matrix.
 - <b>Other</b> is the cost of all other computing components and overheads
 that have not been individually timed.
+
+\subsection apps_oskar_system_info oskar_system_info
+
+This utility displays a summary of the installed GPU hardware.
+It takes no command line arguments.
 
 \subsection apps_oskar_vis_add    oskar_vis_add
 
