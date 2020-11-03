@@ -7,9 +7,11 @@
 #define OSKAR_PRIVATE_HDF5_H_
 
 #include <stdint.h>
+#include "utility/oskar_thread.h"
 
 struct oskar_HDF5
 {
+    oskar_Mutex* mutex;
     int refcount;
     int64_t file_id;
     int num_datasets;

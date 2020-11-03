@@ -28,6 +28,7 @@ static int iter_func(hid_t loc_id, const char* name, const H5O_info_t* info,
 oskar_HDF5* oskar_hdf5_open(const char* file_path, int* status)
 {
     oskar_HDF5* h = (oskar_HDF5*) calloc(1, sizeof(oskar_HDF5));
+    h->mutex = oskar_mutex_create();
     h->refcount++;
 #ifdef OSKAR_HAVE_HDF5
     /* Open the HDF5 file for reading. */
@@ -94,6 +95,7 @@ void oskar_hdf5_close(oskar_HDF5* h)
     h->refcount--;
     if (h->refcount <= 0)
     {
+        oskar_mutex_free(h->mutex);
 #ifdef OSKAR_HAVE_HDF5
         (void) H5Fclose(h->file_id);
 #endif
@@ -534,9 +536,11 @@ oskar_Mem* oskar_hdf5_read_dataset(const oskar_HDF5* h,
     if (*status || !h) return 0;
 
     /* Open the dataset. */
+    oskar_mutex_lock(h->mutex);
     const hid_t dataset = H5Dopen2(h->file_id, dataset_path, H5P_DEFAULT);
     if (dataset < 0)
     {
+        oskar_mutex_unlock(h->mutex);
         *status = OSKAR_ERR_FILE_IO;
         oskar_log_error(0, "Error opening dataset '%s'", dataset_path);
         return 0;
@@ -550,6 +554,7 @@ oskar_Mem* oskar_hdf5_read_dataset(const oskar_HDF5* h,
 
     /* Close/release resources. */
     H5Dclose(dataset);
+    oskar_mutex_unlock(h->mutex);
 #else
     (void)h;
     (void)dataset_path;
@@ -573,9 +578,11 @@ oskar_Mem* oskar_hdf5_read_hyperslab(const oskar_HDF5* h,
     if (*status || !h) return 0;
 
     /* Open the dataset. */
+    oskar_mutex_lock(h->mutex);
     const hid_t dataset = H5Dopen2(h->file_id, dataset_path, H5P_DEFAULT);
     if (dataset < 0)
     {
+        oskar_mutex_unlock(h->mutex);
         *status = OSKAR_ERR_FILE_IO;
         oskar_log_error(0, "Error opening dataset '%s'", dataset_path);
         return 0;
@@ -586,6 +593,7 @@ oskar_Mem* oskar_hdf5_read_hyperslab(const oskar_HDF5* h,
 
     /* Close/release resources. */
     H5Dclose(dataset);
+    oskar_mutex_unlock(h->mutex);
 #else
     (void)h;
     (void)dataset_path;
