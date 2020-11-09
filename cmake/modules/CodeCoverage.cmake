@@ -248,6 +248,9 @@ function(setup_target_for_coverage_lcov)
         # filter collected data to final coverage report
         COMMAND ${LCOV_PATH} ${Coverage_LCOV_ARGS} --gcov-tool ${GCOV_PATH} --remove ${Coverage_NAME}.total ${LCOV_EXCLUDES} --output-file ${Coverage_NAME}.info
 
+        # Workaround: Ignore incorrectly mis-hit function declarations
+        COMMAND python3 ${PROJECT_SOURCE_DIR}/cmake/modules/fix_coverage.py ${Coverage_NAME}.info ${Coverage_NAME}.info
+
         # Generate HTML output
         COMMAND ${GENHTML_PATH} ${GENHTML_EXTRA_ARGS} ${Coverage_GENHTML_ARGS} -o ${Coverage_NAME} ${Coverage_NAME}.info
 
