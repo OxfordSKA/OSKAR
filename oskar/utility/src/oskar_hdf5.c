@@ -312,25 +312,24 @@ void oskar_hdf5_read_attributes(const oskar_HDF5* h, const char* object_path,
     if (*status || !h) return;
     herr_t hdf5_error = 0;
 
+    /* Check for valid inputs. */
+    if (!names || !values)
+        return;
+
     /* Open the object. */
+    oskar_mutex_lock(h->mutex);
     const hid_t obj = H5Oopen(h->file_id, object_path, H5P_DEFAULT);
     if (obj < 0)
     {
+        oskar_mutex_unlock(h->mutex);
         *status = OSKAR_ERR_FILE_IO;
-        oskar_log_error(0, "Error opening object '%s'", object_path);
+        oskar_log_error(0, "Error opening HDF5 object '%s'", object_path);
         return;
     }
 
     /* Get number of attributes. */
     const int old_num_attributes = *num_attributes;
     *num_attributes = H5Aget_num_attrs(obj);
-
-    /* Check for valid inputs. */
-    if (!names || !values)
-    {
-        H5Oclose(obj);
-        return;
-    }
 
     /* Get attributes. */
     const size_t sz = *num_attributes * sizeof(oskar_Mem*);
@@ -478,6 +477,7 @@ void oskar_hdf5_read_attributes(const oskar_HDF5* h, const char* object_path,
 
     /* Close/release resources. */
     H5Oclose(obj);
+    oskar_mutex_unlock(h->mutex);
 
     /* Check for errors. */
     if (!*status && hdf5_error < 0)
@@ -504,11 +504,13 @@ void oskar_hdf5_read_dataset_dims(const oskar_HDF5* h,
     if (*status || !h) return;
 
     /* Open the dataset. */
+    oskar_mutex_lock(h->mutex);
     const hid_t dataset = H5Dopen2(h->file_id, dataset_path, H5P_DEFAULT);
     if (dataset < 0)
     {
+        oskar_mutex_unlock(h->mutex);
         *status = OSKAR_ERR_FILE_IO;
-        oskar_log_error(0, "Error opening dataset '%s'", dataset_path);
+        oskar_log_error(0, "Error opening HDF5 dataset '%s'", dataset_path);
         return;
     }
 
@@ -517,6 +519,7 @@ void oskar_hdf5_read_dataset_dims(const oskar_HDF5* h,
 
     /* Close/release resources. */
     H5Dclose(dataset);
+    oskar_mutex_unlock(h->mutex);
 #else
     (void)h;
     (void)dataset_path;
@@ -542,7 +545,7 @@ oskar_Mem* oskar_hdf5_read_dataset(const oskar_HDF5* h,
     {
         oskar_mutex_unlock(h->mutex);
         *status = OSKAR_ERR_FILE_IO;
-        oskar_log_error(0, "Error opening dataset '%s'", dataset_path);
+        oskar_log_error(0, "Error opening HDF5 dataset '%s'", dataset_path);
         return 0;
     }
 
@@ -584,7 +587,7 @@ oskar_Mem* oskar_hdf5_read_hyperslab(const oskar_HDF5* h,
     {
         oskar_mutex_unlock(h->mutex);
         *status = OSKAR_ERR_FILE_IO;
-        oskar_log_error(0, "Error opening dataset '%s'", dataset_path);
+        oskar_log_error(0, "Error opening HDF5 dataset '%s'", dataset_path);
         return 0;
     }
 
