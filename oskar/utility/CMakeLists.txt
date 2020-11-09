@@ -28,4 +28,6 @@ set(utility_SRC
 set(utility_SRC "${utility_SRC}" PARENT_SCOPE)
 
 # === Recurse into test directory.
-add_subdirectory(test)
+if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
+    add_subdirectory(test)
+endif()

@@ -31,4 +31,6 @@ install(TARGETS oskar_settings
     RUNTIME DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime
 )
 
-add_subdirectory(test)
+if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
+    add_subdirectory(test)
+endif()

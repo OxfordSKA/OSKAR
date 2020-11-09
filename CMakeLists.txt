@@ -103,6 +103,7 @@ if (OpenCL_FOUND)
     endif()
 endif()
 if (HDF5_FOUND)
+    add_definitions(-DOSKAR_HAVE_HDF5)
     include_directories(${HDF5_INCLUDE_DIR})
 endif()
 
@@ -111,26 +112,32 @@ include(oskar_set_version)
 include(oskar_compiler_options)
 
 # === Set up testing and code coverage.
-enable_testing()
-if (CMAKE_BUILD_TYPE MATCHES Debug AND COVERAGE_REPORT)
-    message(STATUS "INFO: Adding code coverage build target")
-    include(CodeCoverage)
-    append_coverage_compiler_flags()
-    setup_target_for_coverage_lcov(
-        NAME coverage
-        EXECUTABLE ctest
-        EXCLUDE
-        "${PROJECT_BINARY_DIR}/*"
-        "${PROJECT_SOURCE_DIR}/apps/*"
-        "${PROJECT_SOURCE_DIR}/extern/*"
-        "${PROJECT_SOURCE_DIR}/gui/*"
-        "${PROJECT_SOURCE_DIR}/oskar/settings/extern/*"
-        "${PROJECT_SOURCE_DIR}/oskar/settings/old/*"
-        "${PROJECT_SOURCE_DIR}/oskar/splines/*"
-        "/usr/local/*"
-        "/Applications/*"
-        "/Users/*/Qt/*"
-        )
+if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
+    enable_testing()
+    if (CMAKE_BUILD_TYPE MATCHES Debug AND COVERAGE_REPORT)
+        message(STATUS "INFO: Adding code coverage build target")
+        include(CodeCoverage)
+        append_coverage_compiler_flags()
+        setup_target_for_coverage_lcov(
+            NAME coverage
+            EXECUTABLE ctest
+            EXCLUDE
+            "${PROJECT_BINARY_DIR}/*"
+            "${PROJECT_SOURCE_DIR}/apps/*"
+            "${PROJECT_SOURCE_DIR}/extern/*"
+            "${PROJECT_SOURCE_DIR}/gui/*"
+            "${PROJECT_SOURCE_DIR}/oskar/settings/extern/*"
+            "${PROJECT_SOURCE_DIR}/oskar/settings/old/*"
+            "${PROJECT_SOURCE_DIR}/oskar/splines/*"
+            "${PROJECT_SOURCE_DIR}/.*/test/.*"
+            "${PROJECT_SOURCE_DIR}/*/test/*"
+            ".*.h"
+            "*.h"
+            "/usr/*"
+            "/Applications/*"
+            "/Users/*/Qt/*"
+            )
+    endif()
 endif()
 
 # === Build external libraries, OSKAR library and OSKAR applications.

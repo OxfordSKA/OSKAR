@@ -13,7 +13,7 @@ Stage: one
     mkdir -p /home/build
     cd /home/build
     git clone https://github.com/OxfordSKA/OSKAR.git OSKAR.git
-    cmake OSKAR.git/
+    cmake OSKAR.git/ -DBUILD_TESTING=OFF
     make -j16 && make install
 
 Bootstrap: localimage

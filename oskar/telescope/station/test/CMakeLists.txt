@@ -2,8 +2,6 @@
 # oskar/telescope/station/test/CMakeLists.txt
 #
 
-project(station_test)
-
 set(name station_test)
 set(${name}_SRC
     main.cpp

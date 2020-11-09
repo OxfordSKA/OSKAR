@@ -55,5 +55,7 @@ endif()
 set(imager_SRC "${imager_SRC}" PARENT_SCOPE)
 
 # Build tests.
-add_subdirectory(test)
+if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
+    add_subdirectory(test)
+endif()
 

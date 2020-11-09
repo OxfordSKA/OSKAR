@@ -1,6 +1,7 @@
 #
 # oskar/utility/test/CMakeLists.txt
 #
+
 set(name utility_test)
 set(${name}_SRC
     main.cpp
@@ -11,12 +12,6 @@ set(${name}_SRC
     Test_Thread.cpp
     Test_Timer.cpp
 )
-
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)
-
 add_test(utility_test ${name})
-
-set(name memory_test)
-add_executable(${name} Test_get_memory_usage.cpp)
-target_link_libraries(${name} oskar gtest_main)

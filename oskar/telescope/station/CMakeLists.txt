@@ -77,4 +77,6 @@ endforeach()
 set(station_SRC "${station_SRC}" PARENT_SCOPE)
 
 # ==== Recurse into test subdirectory.
-add_subdirectory(test)
+if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
+    add_subdirectory(test)
+endif()

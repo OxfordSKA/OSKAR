@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     liblapack-dev
 WORKDIR /home/build
 RUN git clone https://github.com/OxfordSKA/OSKAR.git OSKAR.git && \
-    cmake OSKAR.git/ && \
+    cmake OSKAR.git/ -DBUILD_TESTING=OFF && \
     make -j4 && make install
 
 # Copy into a minimal image.

@@ -54,4 +54,6 @@ endif()
 
 set(math_SRC "${math_SRC}" PARENT_SCOPE)
 
-add_subdirectory(test)
+if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
+    add_subdirectory(test)
+endif()

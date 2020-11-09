@@ -129,8 +129,10 @@ if (CASACORE_FOUND)
     if (NOT STANDALONE_BUILD)
         # Add unit tests.
         # (Tricky if in standalone mode because of current GTest dependency.)
-        enable_testing()
-        add_subdirectory(test)
+        if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
+            enable_testing()
+            add_subdirectory(test)
+        endif()
     endif()
 
     # Verbose printing.

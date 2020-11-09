@@ -72,5 +72,7 @@ endif()
 set(mem_SRC "${mem_SRC}" PARENT_SCOPE)
 
 # === Recurse into test directory.
-add_subdirectory(test)
+if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
+    add_subdirectory(test)
+endif()
 

@@ -16,4 +16,6 @@ set(beam_pattern_SRC
 set(beam_pattern_SRC "${beam_pattern_SRC}" PARENT_SCOPE)
 
 # Tests
-add_subdirectory(test)
+if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
+    add_subdirectory(test)
+endif()
