@@ -224,6 +224,9 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
                     OSKAR_VIS_BLOCK_TAG_STATION_W, i_block, status);
 
             /* Convert from station to baseline coordinates. */
+            oskar_mem_ensure(uu, num_times * num_baselines, status);
+            oskar_mem_ensure(vv, num_times * num_baselines, status);
+            oskar_mem_ensure(ww, num_times * num_baselines, status);
             for (t = 0; t < num_times; ++t)
                 oskar_convert_station_uvw_to_baseline_uvw(num_stations,
                         num_stations * t, u, v, w,
