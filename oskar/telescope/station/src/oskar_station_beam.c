@@ -230,7 +230,7 @@ void oskar_station_beam(
             const double y_ = oskar_station_offset_ecef_y(station);
             const double z_ = oskar_station_offset_ecef_z(station);
             const double u = x_ * sin_ha0 + y_ * cos_ha0;
-            const double v = z_ * cos_dec0 - x_ * cos_ha0 - y_ * sin_ha0 * sin_dec0;
+            const double v = z_ * cos_dec0 - x_ * cos_ha0 * sin_dec0 + y_ * sin_ha0 * sin_dec0;
 
             /* Calculate directions relative to normalisation point. */
             oskar_convert_enu_directions_to_relative_directions(
@@ -255,7 +255,7 @@ void oskar_station_beam(
             const double y_ = oskar_station_offset_ecef_y(station);
             const double z_ = oskar_station_offset_ecef_z(station);
             const double u = x_ * sin_ha0 + y_ * cos_ha0;
-            const double v = z_ * cos_dec0 - x_ * cos_ha0 - y_ * sin_ha0 * sin_dec0;
+            const double v = z_ * cos_dec0 - x_ * cos_ha0 * sin_dec0 + y_ * sin_ha0 * sin_dec0;
 
             /* Evaluate the phase due to the TEC screen. */
             tec_phase = oskar_station_work_evaluate_tec_screen(work,
