@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2015-2017, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <gtest/gtest.h>
@@ -110,4 +87,49 @@ TEST(settings_types, DateTime)
         EXPECT_STREQ("45464844.546465", t1.get_value());
     }
 
+    // Failure modes.
+    // British style
+    {
+        EXPECT_FALSE(t.set_value("01-13-2015 10:05:23.2"));
+        EXPECT_FALSE(t.set_value("00-12-2015 10:05:23.2"));
+        EXPECT_FALSE(t.set_value("01-12-2015 25:05:23.2"));
+        EXPECT_FALSE(t.set_value("01-12-2015 22:60:23.2"));
+        EXPECT_FALSE(t.set_value("01-12-2015 22:59:61.2"));
+    }
+    // CASA style
+    {
+        EXPECT_FALSE(t.set_value("2015/13/1/03:04:05.6"));
+        EXPECT_FALSE(t.set_value("2015/12/0/03:04:05.6"));
+        EXPECT_FALSE(t.set_value("2015/12/1/25:04:05.6"));
+        EXPECT_FALSE(t.set_value("2015/12/1/22:60:05.6"));
+        EXPECT_FALSE(t.set_value("2015/12/1/22:59:61.6"));
+    }
+    // International style
+    {
+        EXPECT_FALSE(t.set_value("2015-13-1 04:05:06.7"));
+        EXPECT_FALSE(t.set_value("2015-12-33 04:05:06.7"));
+        EXPECT_FALSE(t.set_value("2015-12-0 04:05:06.7"));
+        EXPECT_FALSE(t.set_value("2015-12-1 25:05:06.7"));
+        EXPECT_FALSE(t.set_value("2015-12-1 22:60:06.7"));
+        EXPECT_FALSE(t.set_value("2015-12-1 22:59:61.7"));
+    }
+    // ISO style
+    {
+        EXPECT_FALSE(t.set_value("2015-13-4T05:06:07.8910111213"));
+        EXPECT_FALSE(t.set_value("2015-12-0T05:06:07.8910111213"));
+        EXPECT_FALSE(t.set_value("2015-12-1T25:06:07.8910111213"));
+        EXPECT_FALSE(t.set_value("2015-12-1T22:60:07.8910111213"));
+        EXPECT_FALSE(t.set_value("2015-12-1T22:59:67.8910111213"));
+    }
+
+    // Comparisons.
+    {
+        DateTime t1, t2;
+        EXPECT_TRUE(t1.set_value("1-2-2015 10:05:23.2"));
+        EXPECT_TRUE(t2.set_value("1-2-2015 10:05:23.2"));
+        EXPECT_TRUE(t1 == t2);
+        EXPECT_TRUE(t1.set_value("1-2-2015 10:05:23.2"));
+        EXPECT_TRUE(t2.set_value("1-2-2015 10:06:23.2"));
+        EXPECT_TRUE(t2 > t1);
+    }
 }

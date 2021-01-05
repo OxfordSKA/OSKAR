@@ -1,37 +1,78 @@
 /*
- * Copyright (c) 2011-2016, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <stdlib.h>
+#include <string.h>
 
 #include "sky/private_sky.h"
 #include "sky/oskar_sky.h"
+#include "utility/oskar_string_to_array.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+static const double deg2rad = 1.74532925199432957692369e-2;
+static const double arcsec2rad = 4.84813681109535993589914e-6;
+
+void oskar_sky_set_source_str(oskar_Sky* sky, int index,
+        const char* str, int* status)
+{
+    char* str_copy = 0;
+    /* RA, Dec, I, Q, U, V, freq0, spix, RM, FWHM maj, FWHM min, PA */
+    double par[] = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
+    const size_t num_param = sizeof(par) / sizeof(double), num_required = 3;
+    if (*status || !str) return;
+    if (index >= sky->num_sources)
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
+
+    /* Get source parameters (require at least RA, Dec, Stokes I). */
+    const size_t str_len = strlen(str);
+    str_copy = (char*) calloc(1 + str_len, 1);
+    memcpy(str_copy, str, str_len);
+    const size_t num_read = oskar_string_to_array_d(str_copy, num_param, par);
+    if (num_read < num_required)
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        free(str_copy);
+        return;
+    }
+    if (num_read <= 9)
+    {
+        /* RA, Dec, I, Q, U, V, freq0, spix, RM */
+        oskar_sky_set_source(sky, index, par[0] * deg2rad,
+                par[1] * deg2rad, par[2], par[3], par[4], par[5],
+                par[6], par[7], par[8], 0.0, 0.0, 0.0, status);
+    }
+    else if (num_read == 11)
+    {
+        /* Old format, with no rotation measure. */
+        /* RA, Dec, I, Q, U, V, freq0, spix, FWHM maj, FWHM min, PA */
+        oskar_sky_set_source(sky, index, par[0] * deg2rad,
+                par[1] * deg2rad, par[2], par[3], par[4], par[5],
+                par[6], par[7], 0.0, par[8] * arcsec2rad,
+                par[9] * arcsec2rad, par[10] * deg2rad, status);
+    }
+    else if (num_read == 12)
+    {
+        /* New format. */
+        /* RA, Dec, I, Q, U, V, freq0, spix, RM, FWHM maj, FWHM min, PA */
+        oskar_sky_set_source(sky, index, par[0] * deg2rad,
+                par[1] * deg2rad, par[2], par[3], par[4], par[5],
+                par[6], par[7], par[8], par[9] * arcsec2rad,
+                par[10] * arcsec2rad, par[11] * deg2rad, status);
+    }
+    else
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
+    free(str_copy);
+}
 
 void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
         double dec_rad, double I, double Q, double U, double V,

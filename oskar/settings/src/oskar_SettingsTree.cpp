@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2015-2017, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "settings/oskar_SettingsTree.h"
@@ -413,6 +390,26 @@ bool SettingsTree::set_value(const char* key, const char* value, bool write)
     }
     else
         return false;
+}
+
+bool SettingsTree::set_values(int num_strings, const char* const* list,
+        bool write)
+{
+    if (num_strings % 2 != 0)
+        return false;
+    const int num_items = num_strings / 2;
+    bool ok = true;
+    for (int i = 0; i < num_items || (num_items == 0); ++i)
+    {
+        const char* key = list[2 * i];
+        const char* value = list[2 * i + 1];
+        if (!key || strlen(key) == 0) break;
+        bool item_ok = set_value(key, value, write);
+        if (!item_ok)
+            add_failed(key, value);
+        ok &= item_ok;
+    }
+    return ok;
 }
 
 bool SettingsTree::starts_with(const char* key, const char* str,

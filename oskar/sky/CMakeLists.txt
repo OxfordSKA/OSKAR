@@ -6,7 +6,7 @@ set(sky_SRC
     define_sky_copy_source_data.h
     define_sky_scale_flux_with_frequency.h
     define_update_horizon_mask.h
-    src/oskar_evaluate_tec_tid.c
+    #src/oskar_evaluate_tec_tid.c
     src/oskar_generate_random_coordinate.c
     src/oskar_sky_accessors.c
     src/oskar_sky_append_to_set.c
@@ -31,7 +31,7 @@ set(sky_SRC
     src/oskar_sky_override_polarisation.c
     src/oskar_sky_read.c
     src/oskar_sky_resize.c
-    src/oskar_sky_rotate_to_position.c
+    #src/oskar_sky_rotate_to_position.c
     src/oskar_sky_save.c
     src/oskar_sky_scale_flux_with_frequency.c
     src/oskar_sky_set_gaussian_parameters.c

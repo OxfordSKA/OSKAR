@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, The OSKAR Developers.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -58,9 +58,11 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
 
     /* Set default polarisation type. */
     if (oskar_type_is_matrix(amp_type))
-        hdr->pol_type = OSKAR_VIS_POL_TYPE_LINEAR_XX_XY_YX_YY;
+        oskar_vis_header_set_pol_type(hdr,
+                OSKAR_VIS_POL_TYPE_LINEAR_XX_XY_YX_YY, status);
     else
-        hdr->pol_type = OSKAR_VIS_POL_TYPE_STOKES_I;
+        oskar_vis_header_set_pol_type(hdr,
+                OSKAR_VIS_POL_TYPE_STOKES_I, status);
 
     /* Initialise meta-data. */
     hdr->write_autocorr = write_autocorr;

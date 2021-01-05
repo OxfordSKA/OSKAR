@@ -50,6 +50,7 @@ void oskar_random_gaussian4(unsigned int seed, unsigned int counter0,
     oskar_box_muller_d(u.i[2], u.i[3], &rnd[2], &rnd[3]);
 }
 
+#if 0
 double oskar_random_gaussian(double* another)
 {
     double x, y, r2, fac;
@@ -71,6 +72,7 @@ double oskar_random_gaussian(double* another)
     /* Return the first random number. */
     return x;
 }
+#endif
 
 #ifdef __cplusplus
 }

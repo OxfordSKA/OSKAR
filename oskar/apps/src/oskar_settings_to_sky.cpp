@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -122,7 +122,7 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
     {
         oskar_log_message(log, 'M', 1,
                 "Writing sky model text file: %s", filename);
-        oskar_sky_save(filename, sky, status);
+        oskar_sky_save(sky, filename, status);
     }
 
     /* Write binary file. */
@@ -131,7 +131,7 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
     {
         oskar_log_message(log, 'M', 1,
                 "Writing sky model binary file: %s", filename);
-        oskar_sky_write(filename, sky, status);
+        oskar_sky_write(sky, filename, status);
     }
 
     s->clear_group();

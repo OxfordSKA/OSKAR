@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, The OSKAR Developers.
+ * Copyright (c) 2017-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -35,7 +35,7 @@ void oskar_imager_read_coords_ms(oskar_Imager* h, const char* filename,
 
     /* Read the header. */
     oskar_log_message(h->log, 'M', 0, "Opening Measurement Set '%s'", filename);
-    ms = oskar_ms_open(filename);
+    ms = oskar_ms_open_readonly(filename);
     if (!ms)
     {
         *status = OSKAR_ERR_FILE_IO;

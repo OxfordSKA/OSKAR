@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "sky/oskar_sky.h"
@@ -37,12 +14,10 @@
 extern "C" {
 #endif
 
-void oskar_sky_save(const char* filename, const oskar_Sky* sky, int* status)
+void oskar_sky_save(const oskar_Sky* sky, const char* filename, int* status)
 {
-    int s, type, num_sources;
+    int i;
     FILE* file;
-
-    /* Check if safe to proceed. */
     if (*status) return;
 
     /* Check sky model is in CPU memory. */
@@ -61,8 +36,8 @@ void oskar_sky_save(const char* filename, const oskar_Sky* sky, int* status)
     }
 
     /* Get the data type and number of sources. */
-    type = oskar_sky_precision(sky);
-    num_sources = oskar_sky_num_sources(sky);
+    const int type = oskar_sky_precision(sky);
+    const int num_sources = oskar_sky_num_sources(sky);
 
     /* Print a helpful header. */
     fprintf(file, "# Number of sources: %i\n", num_sources);
@@ -88,14 +63,14 @@ void oskar_sky_save(const char* filename, const oskar_Sky* sky, int* status)
         min_ = oskar_mem_double_const(oskar_sky_fwhm_minor_rad_const(sky), status);
         pa_  = oskar_mem_double_const(oskar_sky_position_angle_rad_const(sky), status);
 
-        for (s = 0; s < num_sources; ++s)
+        for (i = 0; i < num_sources; ++i)
         {
             fprintf(file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,% 12.6e,"
                     "% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 11.6f\n",
-                    ra_[s] * RAD2DEG, dec_[s] * RAD2DEG,
-                    I_[s], Q_[s], U_[s], V_[s], ref_[s], sp_[s], rm_[s],
-                    maj_[s] * RAD2ARCSEC, min_[s] * RAD2ARCSEC,
-                    pa_[s] * RAD2DEG);
+                    ra_[i] * RAD2DEG, dec_[i] * RAD2DEG,
+                    I_[i], Q_[i], U_[i], V_[i], ref_[i], sp_[i], rm_[i],
+                    maj_[i] * RAD2ARCSEC, min_[i] * RAD2ARCSEC,
+                    pa_[i] * RAD2DEG);
         }
     }
     else if (type == OSKAR_SINGLE)
@@ -115,14 +90,14 @@ void oskar_sky_save(const char* filename, const oskar_Sky* sky, int* status)
         min_ = oskar_mem_float_const(oskar_sky_fwhm_minor_rad_const(sky), status);
         pa_  = oskar_mem_float_const(oskar_sky_position_angle_rad_const(sky), status);
 
-        for (s = 0; s < num_sources; ++s)
+        for (i = 0; i < num_sources; ++i)
         {
             fprintf(file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,% 12.6e,"
                     "% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 11.6f\n",
-                    ra_[s] * RAD2DEG, dec_[s] * RAD2DEG,
-                    I_[s], Q_[s], U_[s], V_[s], ref_[s], sp_[s], rm_[s],
-                    maj_[s] * RAD2ARCSEC, min_[s] * RAD2ARCSEC,
-                    pa_[s] * RAD2DEG);
+                    ra_[i] * RAD2DEG, dec_[i] * RAD2DEG,
+                    I_[i], Q_[i], U_[i], V_[i], ref_[i], sp_[i], rm_[i],
+                    maj_[i] * RAD2ARCSEC, min_[i] * RAD2ARCSEC,
+                    pa_[i] * RAD2DEG);
         }
     }
     else

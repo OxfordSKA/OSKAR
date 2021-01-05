@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
         // Create the Measurement Set using the header from the first file.
         if (i == 0)
         {
-            ms = oskar_vis_header_write_ms(hdr, out_path.c_str(), 1,
+            ms = oskar_vis_header_write_ms(hdr, out_path.c_str(),
                     force_polarised, &error);
         }
 

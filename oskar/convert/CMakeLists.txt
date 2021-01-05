@@ -9,7 +9,7 @@ set(${name}_SRC
     define_convert_cirs_relative_directions_to_enu_directions.h
     define_convert_ecef_to_station_uvw.h
     define_convert_enu_directions_to_az_el.h
-    define_convert_enu_directions_to_cirs_relative_directions.h
+    #define_convert_enu_directions_to_cirs_relative_directions.h
     define_convert_enu_directions_to_local_tangent_plane.h
     define_convert_enu_directions_to_relative_directions.h
     define_convert_enu_directions_to_theta_phi.h
@@ -29,7 +29,7 @@ set(${name}_SRC
     src/oskar_convert_ecef_to_geodetic_spherical.c
     src/oskar_convert_ecef_to_station_uvw.c
     src/oskar_convert_enu_directions_to_az_el.c
-    src/oskar_convert_enu_directions_to_cirs_relative_directions.c
+    #src/oskar_convert_enu_directions_to_cirs_relative_directions.c
     src/oskar_convert_enu_directions_to_local_tangent_plane.c
     src/oskar_convert_enu_directions_to_relative_directions.c
     src/oskar_convert_enu_directions_to_theta_phi.c
@@ -44,8 +44,8 @@ set(${name}_SRC
     src/oskar_convert_ludwig3_to_theta_phi_components.c
     src/oskar_convert_mjd_to_gast_fast.c
     src/oskar_convert_mjd_to_gmst.c
-    src/oskar_convert_mjd_ut1_to_era.c
-    src/oskar_convert_mjd_utc_to_mjd_tt.c
+    #src/oskar_convert_mjd_ut1_to_era.c
+    #src/oskar_convert_mjd_utc_to_mjd_tt.c
     src/oskar_convert_offset_ecef_to_ecef.c
     src/oskar_convert_relative_directions_to_enu_directions.c
     src/oskar_convert_relative_directions_to_lon_lat.c
@@ -55,7 +55,7 @@ set(${name}_SRC
     src/oskar_convert_theta_phi_to_ludwig3_components.c
     src/oskar_convert_xyz_to_lon_lat.c
     src/oskar_convert.cl
-    src/oskar_evaluate_diurnal_aberration.c
+    #src/oskar_evaluate_diurnal_aberration.c
     src/oskar_equation_of_equinoxes_fast.c)
 
 if (CUDA_FOUND)

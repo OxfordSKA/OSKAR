@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 
     // Write new sky model out.
     output = oskar_sky_create_copy(output_gpu, OSKAR_CPU, &error);
-    oskar_sky_save(argv[2], output, &error);
+    oskar_sky_save(output, argv[2], &error);
 
     // Free sky models.
     oskar_sky_free(input_gpu, &error);

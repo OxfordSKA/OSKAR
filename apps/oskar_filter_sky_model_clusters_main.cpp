@@ -466,7 +466,7 @@ int main(int argc, char** argv)
     string outname(sky_file_to_filter);
     outname += "_filtered.osm";
     oskar_log_message(log, 'M', 0, "Saving to '%s'", outname.c_str());
-    oskar_sky_save(outname.c_str(), sky_out, &status);
+    oskar_sky_save(sky_out, outname.c_str(), &status);
     if (status)
     {
         oskar_log_error(log, "Error saving file: %s",

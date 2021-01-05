@@ -100,6 +100,7 @@ void oskar_random_gaussian4(unsigned int seed, unsigned int counter0,
         unsigned int counter1, unsigned int counter2, unsigned int counter3,
         double rnd[4]);
 
+#if 0
 /**
  * @brief
  * Generates a random number from a Gaussian distribution with zero mean
@@ -116,9 +117,10 @@ void oskar_random_gaussian4(unsigned int seed, unsigned int counter0,
  */
 OSKAR_EXPORT
 double oskar_random_gaussian(double* another);
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_RANDOM_GAUSSIAN_H_ */
+#endif /* include guard */

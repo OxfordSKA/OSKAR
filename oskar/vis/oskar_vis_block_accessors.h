@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, The OSKAR Developers.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -43,6 +43,9 @@ int oskar_vis_block_start_time_index(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 int oskar_vis_block_has_auto_correlations(const oskar_VisBlock* vis);
+
+OSKAR_EXPORT
+int oskar_vis_block_has_station_coords(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 int oskar_vis_block_has_cross_correlations(const oskar_VisBlock* vis);

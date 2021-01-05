@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The OSKAR Developers.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -537,6 +537,7 @@ void oskar_imager_set_scale_norm_with_num_input_files(oskar_Imager* h,
 
 void oskar_imager_set_size(oskar_Imager* h, int size, int* status)
 {
+    if (*status) return;
     if (size < 2 || size % 2 != 0)
     {
         oskar_log_error(h->log, "Need an even number of pixels "

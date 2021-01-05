@@ -1183,7 +1183,7 @@ TEST(SkyModel, read_write)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Write it to a file.
-    oskar_sky_write(filename, sky, &status);
+    oskar_sky_write(sky, filename, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Read the data file into a new sky model structure.

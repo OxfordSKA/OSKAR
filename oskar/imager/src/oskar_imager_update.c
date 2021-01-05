@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "imager/private_imager.h"
@@ -55,10 +32,10 @@ static void oskar_imager_allocate_planes(oskar_Imager* h, int *status);
 static void oskar_imager_update_weights_grid(oskar_Imager* h,
         size_t num_points, const oskar_Mem* uu, const oskar_Mem* vv,
         const oskar_Mem* ww, const oskar_Mem* weight, oskar_Mem* weights_grid,
-        int* status);
+        oskar_Mem* weights_guard, int* status);
 
 void oskar_imager_update_from_block(oskar_Imager* h,
-        const oskar_VisHeader* hdr, const oskar_VisBlock* block,
+        const oskar_VisHeader* hdr, oskar_VisBlock* block,
         int* status)
 {
     int c, t;
@@ -108,6 +85,10 @@ void oskar_imager_update_from_block(oskar_Imager* h,
         oskar_mem_set_value_real(time_centroid,
                 time_start_mjd + (start_time + t + 0.5) * time_inc_sec,
                 t * num_baselines, num_baselines, status);
+
+    /* Get baseline coordinates if required. */
+    if (oskar_vis_block_has_station_coords(block))
+        oskar_vis_block_station_to_baseline_coords(block, status);
 
     /* Update the imager with the data. */
     if (!h->coords_only)
@@ -499,7 +480,7 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
     if (h->coords_only)
     {
         oskar_imager_update_weights_grid(h, num_vis, pu, pv, pw, ph,
-                weights_grid, status);
+                weights_grid, h->weights_guard[i_plane], status);
     }
     else
     {
@@ -590,35 +571,44 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
 
 void oskar_imager_update_weights_grid(oskar_Imager* h, size_t num_points,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* weight, oskar_Mem* weights_grid, int* status)
+        const oskar_Mem* weight, oskar_Mem* weights_grid,
+        oskar_Mem* weights_guard, int* status)
 {
     if (*status) return;
 
     /* Update the weights grid. */
     if (h->weighting == OSKAR_WEIGHTING_UNIFORM)
     {
-        size_t num_skipped = 0;
+        size_t num_cells, num_skipped = 0;
 
         /* Resize the grid of weights if needed. */
         const int grid_size = oskar_imager_plane_size(h);
-        oskar_mem_ensure(weights_grid, (size_t) grid_size * grid_size, status);
+        num_cells = (size_t) grid_size * (size_t) grid_size;
+        oskar_mem_ensure(weights_grid, num_cells, status);
         if (*status) return;
 
         oskar_timer_resume(h->tmr_weights_grid);
         if (oskar_mem_precision(weights_grid) == OSKAR_DOUBLE)
+        {
             oskar_grid_weights_write_d(num_points,
                     oskar_mem_double_const(uu, status),
                     oskar_mem_double_const(vv, status),
                     oskar_mem_double_const(weight, status),
                     h->cellsize_rad, grid_size, &num_skipped,
                     oskar_mem_double(weights_grid, status));
+        }
         else
+        {
+            oskar_mem_ensure(weights_guard, num_cells, status);
+            if (*status) return;
             oskar_grid_weights_write_f(num_points,
                     oskar_mem_float_const(uu, status),
                     oskar_mem_float_const(vv, status),
                     oskar_mem_float_const(weight, status),
                     (float) (h->cellsize_rad), grid_size, &num_skipped,
-                    oskar_mem_float(weights_grid, status));
+                    oskar_mem_float(weights_grid, status),
+                    oskar_mem_float(weights_guard, status));
+        }
         if (num_skipped > 0)
             oskar_log_warning(h->log, "Skipped %lu visibility weights.",
                     (unsigned long) num_skipped);

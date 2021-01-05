@@ -12,7 +12,7 @@ set(imager_SRC
     src/oskar_grid_functions_pillbox.c
     src/oskar_grid_simple.c
     src/oskar_grid_weights.c
-    src/oskar_grid_wproj.c
+    #src/oskar_grid_wproj.c
     src/oskar_grid_wproj2.c
     src/oskar_imager_accessors.c
     src/oskar_imager_check_init.c

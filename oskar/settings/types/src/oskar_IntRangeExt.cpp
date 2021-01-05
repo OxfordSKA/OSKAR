@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, The OSKAR Developers.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -30,9 +30,11 @@ IntRangeExt::IntRangeExt()
     (void) init("");
 }
 
+// LCOV_EXCL_START
 IntRangeExt::~IntRangeExt()
 {
 }
+// LCOV_EXCL_STOP
 
 bool IntRangeExt::init(const char* s)
 {
@@ -89,14 +91,14 @@ bool IntRangeExt::set_default(const char* value)
     if (ok)
         set_value(value);
     return ok;
-}
+} // LCOV_EXCL_LINE
 
 bool IntRangeExt::set_value(const char* value)
 {
     bool ok = from_string(value_, value);
     str_value_ = to_string(value_);
     return ok;
-}
+} // LCOV_EXCL_LINE
 
 bool IntRangeExt::is_default() const
 {

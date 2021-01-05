@@ -14,7 +14,7 @@ set(${name}_SRC
     Test_cond2_2x2.cpp
     Test_fit_ellipse.cpp
     Test_prefix_sum.cpp
-    Test_spherical_harmonics.cpp
+    #Test_spherical_harmonics.cpp
 )
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)

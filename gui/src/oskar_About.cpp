@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "gui/oskar_About.h"
@@ -48,7 +25,6 @@ About::About(QString app_name, QString app_version, QWidget *parent)
     QVBoxLayout* vLayoutMain = new QVBoxLayout(this);
     QVBoxLayout* vLayout1 = new QVBoxLayout;
     QHBoxLayout* hLayout1 = new QHBoxLayout;
-    QHBoxLayout* hLayout2 = new QHBoxLayout;
 
     // Create icon.
     QLabel* icon = new QLabel(this);
@@ -90,23 +66,8 @@ About::About(QString app_name, QString app_version, QWidget *parent)
     // Add vertical spacer.
     vLayout1->addStretch();
 
-    // Create logos.
-    QLabel* oerc = new QLabel(this);
-    oerc->setSizePolicy(sizePolicy);
-    oerc->setPixmap(QPixmap(QString(":/icons/oerc-128x128.png")));
-    oerc->setAlignment(Qt::AlignCenter);
-    oerc->setMargin(4);
-    QLabel* oxford = new QLabel(this);
-    oxford->setSizePolicy(sizePolicy);
-    oxford->setPixmap(QPixmap(QString(":/icons/oxford-128x128.png")));
-    oxford->setAlignment(Qt::AlignCenter);
-    oxford->setMargin(4);
-    hLayout2->addLayout(vLayout1);
-    hLayout2->addWidget(oerc);
-    hLayout2->addWidget(oxford);
-
     // Add top banner to main vertical layout.
-    vLayoutMain->addLayout(hLayout2);
+    vLayoutMain->addLayout(vLayout1);
 
     // Create license group.
     QGroupBox* grpLic = new QGroupBox("License", this);
@@ -122,8 +83,9 @@ About::About(QString app_name, QString app_version, QWidget *parent)
         paragraph.setBottomMargin(10);
         QTextCursor cursor(licenseText);
         cursor.setBlockFormat(paragraph);
-        cursor.insertText("Copyright (c) 2011-2020, The University of Oxford. "
-                "\nAll rights reserved.");
+        cursor.insertText(
+                "Copyright (c) 2011-2021, The OSKAR Developers.\n"
+                "All rights reserved.");
         cursor.insertBlock();
         cursor.insertText("Redistribution and use in source and binary forms, "
                 "with or without modification, are permitted provided that "
@@ -138,7 +100,7 @@ About::About(QString app_name, QString app_version, QWidget *parent)
                 "following disclaimer in the documentation and/or other "
                 "materials provided with the distribution.");
         cursor.insertBlock();
-        cursor.insertText("Neither the name of the University of Oxford nor "
+        cursor.insertText("Neither the name of the copyright holder nor "
                 "the names of its contributors may be used to endorse or "
                 "promote products derived from this software without specific "
                 "prior written permission.");
@@ -164,6 +126,7 @@ About::About(QString app_name, QString app_version, QWidget *parent)
     QTextBrowser* license = new QTextBrowser(this);
     license->setDocument(licenseText);
     license->setReadOnly(true);
+    license->setMinimumWidth(500);
     vLayoutLic->addWidget(license);
 
     // Add license group.
@@ -238,16 +201,6 @@ About::About(QString app_name, QString app_version, QWidget *parent)
     libs->setHtml(html);
     libs->setReadOnly(true);
     vLayoutAtt->addWidget(libs);
-
-    // Create acknowledgement labels.
-    QLabel* ack1 = new QLabel("If OSKAR has been helpful in your research, "
-            "please give the following acknowledgement:", this);
-    vLayoutAtt->addWidget(ack1);
-    QLabel* ack2 = new QLabel("<blockquote>This research has made use "
-            "of OSKAR, developed at the University of Oxford."
-            "</blockquote>", this);
-    ack2->setTextFormat(Qt::RichText);
-    vLayoutAtt->addWidget(ack2);
 
     // Add attribution group.
     vLayoutMain->addWidget(grpAtt);

@@ -1,6 +1,5 @@
 <!DOCTYPE RCC><RCC version="1.0">
     <qresource prefix="/icons">
-        <file>oerc-128x128.png</file>
         <file>open.png</file>
         <file>oskar.ico</file>
         <file>oskar-16x16.png</file>
@@ -10,7 +9,6 @@
         <file>oskar-48x48.png</file>
         <file>oskar-64x64.png</file>
         <file>oskar-128x128.png</file>
-        <file>oxford-128x128.png</file>
         <file>save.png</file>
     </qresource>
 </RCC>

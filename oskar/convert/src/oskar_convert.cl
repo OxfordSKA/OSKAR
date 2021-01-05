@@ -1,10 +1,10 @@
-/* Copyright (c) 2018-2020, The OSKAR Developers. See LICENSE file. */
+/* Copyright (c) 2018-2021, The OSKAR Developers. See LICENSE file. */
 
 OSKAR_CONVERT_AZ_EL_TO_ENU_DIR( M_CAT(convert_az_el_to_enu_directions_, Real), Real)
 OSKAR_CONVERT_CIRS_REL_DIR_TO_ENU_DIR( M_CAT(convert_cirs_relative_directions_to_enu_directions_, Real), Real)
 OSKAR_CONVERT_ECEF_TO_STATION_UVW( M_CAT(convert_ecef_to_station_uvw_, Real), Real)
 OSKAR_CONVERT_ENU_DIR_TO_AZ_EL( M_CAT(convert_enu_directions_to_az_el_, Real), Real)
-OSKAR_CONVERT_ENU_DIR_TO_CIRS_REL_DIR( M_CAT(convert_enu_directions_to_cirs_relative_directions_, Real), Real)
+/*OSKAR_CONVERT_ENU_DIR_TO_CIRS_REL_DIR( M_CAT(convert_enu_directions_to_cirs_relative_directions_, Real), Real)*/
 OSKAR_CONVERT_ENU_DIR_TO_LOCAL( M_CAT(convert_enu_directions_to_local_, Real), Real)
 OSKAR_CONVERT_ENU_DIR_TO_REL_DIR( M_CAT(convert_enu_directions_to_relative_directions_, Real), Real)
 OSKAR_CONVERT_ENU_DIR_TO_THETA_PHI( M_CAT(convert_enu_directions_to_theta_phi_, Real), Real)
