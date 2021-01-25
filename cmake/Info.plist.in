@@ -33,7 +33,7 @@
     <key>CSResourcesFileMapped</key>
     <true/>
     <key>NSHumanReadableCopyright</key>
-    <string>(c) 2012-2017 The University of Oxford</string>
+    <string>(c) 2012-2021 The OSKAR Developers</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
     <key>NSHighResolutionCapable</key>
