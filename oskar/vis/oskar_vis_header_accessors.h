@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, The OSKAR Developers.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -31,6 +31,9 @@ OSKAR_EXPORT
 const oskar_Mem* oskar_vis_header_settings_const(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
+int oskar_vis_header_num_tags_header(const oskar_VisHeader* vis);
+
+OSKAR_EXPORT
 int oskar_vis_header_num_tags_per_block(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
@@ -56,6 +59,10 @@ int oskar_vis_header_num_blocks(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
 int oskar_vis_header_num_channels_total(const oskar_VisHeader* vis);
+
+OSKAR_EXPORT
+int oskar_vis_header_num_elements_in_station(
+        const oskar_VisHeader* vis, int station);
 
 OSKAR_EXPORT
 int oskar_vis_header_num_times_total(const oskar_VisHeader* vis);
@@ -111,25 +118,20 @@ OSKAR_EXPORT
 double oskar_vis_header_telescope_alt_metres(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_vis_header_station_x_offset_ecef_metres(oskar_VisHeader* vis);
+oskar_Mem* oskar_vis_header_station_offset_ecef_metres(
+        oskar_VisHeader* vis, int dim);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_header_station_x_offset_ecef_metres_const(
-        const oskar_VisHeader* vis);
+const oskar_Mem* oskar_vis_header_station_offset_ecef_metres_const(
+        const oskar_VisHeader* vis, int dim);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_vis_header_station_y_offset_ecef_metres(oskar_VisHeader* vis);
+oskar_Mem* oskar_vis_header_element_enu_metres(
+        oskar_VisHeader* vis, int dim, int station);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_header_station_y_offset_ecef_metres_const(
-        const oskar_VisHeader* vis);
-
-OSKAR_EXPORT
-oskar_Mem* oskar_vis_header_station_z_offset_ecef_metres(oskar_VisHeader* vis);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_vis_header_station_z_offset_ecef_metres_const(
-        const oskar_VisHeader* vis);
+const oskar_Mem* oskar_vis_header_element_enu_metres_const(
+        const oskar_VisHeader* vis, int dim, int station);
 
 
 /* Setters. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -158,11 +158,43 @@ double oskar_ms_phase_centre_dec_rad(const oskar_MeasurementSet* p)
     return p->phase_centre_rad[1];
 }
 
+void oskar_ms_set_array_centre(oskar_MeasurementSet* p,
+        double array_centre_itrf[3])
+{
+#ifdef OSKAR_MS_NEW
+    Table observation(p->ms->tableName() + "/OBSERVATION", Table::Update);
+    ArrayColumn<Double> arrayCentre(observation, "ARRAY_CENTER");
+    Vector<Double> centre(3);
+    centre[0] = array_centre_itrf[0];
+    centre[1] = array_centre_itrf[1];
+    centre[2] = array_centre_itrf[2];
+    arrayCentre.put(0, centre);
+#endif
+}
+
 void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
         double longitude_rad, double latitude_rad)
 {
-    if (!p->ms || !p->msc) return;
+    if (!p->ms) return;
 
+#ifdef OSKAR_MS_NEW
+    // Write data to the last row of the FIELD table.
+    Table field(p->ms->tableName() + "/FIELD", Table::Update);
+    int row = field.nrow() - 1;
+    if (row < 0)
+    {
+        field.addRow();
+        row = 0;
+    }
+    Matrix<Double> dir(2, 1);
+    dir(0, 0) = longitude_rad; dir(1, 0) = latitude_rad;
+    ArrayColumn<Double> delayDir(field, "DELAY_DIR");
+    ArrayColumn<Double> phaseDir(field, "PHASE_DIR");
+    ArrayColumn<Double> referenceDir(field, "REFERENCE_DIR");
+    delayDir.put((unsigned int)row, dir);
+    phaseDir.put((unsigned int)row, dir);
+    referenceDir.put((unsigned int)row, dir);
+#else
     // Set up the field info.
     Vector<MDirection> direction(1);
     if (coord_type == 0)
@@ -189,23 +221,79 @@ void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
     p->msc->field().delayDirMeasCol().put((unsigned int)row, direction);
     p->msc->field().phaseDirMeasCol().put((unsigned int)row, direction);
     p->msc->field().referenceDirMeasCol().put((unsigned int)row, direction);
+#endif
     p->phase_centre_type = coord_type;
     p->phase_centre_rad[0] = longitude_rad;
     p->phase_centre_rad[1] = latitude_rad;
+}
+
+void oskar_ms_set_element_coords(oskar_MeasurementSet* p, unsigned int station,
+        unsigned int num_elements, const double* x, const double* y,
+        const double* z, const double* matrix)
+{
+#ifdef OSKAR_MS_NEW
+    // Copy position from ANTENNA table.
+    Table antenna(p->ms->tableName() + "/ANTENNA", Table::Old);
+    ArrayColumn<Double> antennaPosition(antenna, "POSITION");
+    Vector<Double> pos(3);
+    antennaPosition.get(station, pos);
+
+    // Add row(s) to PHASED_ARRAY table if needed.
+    Table phasedArray(p->ms->tableName() + "/PHASED_ARRAY", Table::Update);
+    unsigned int num_rows = phasedArray.nrow();
+    if (station >= num_rows)
+        phasedArray.addRow(station - num_rows + 1);
+
+    // Get column references and write data to the appropriate row.
+    ScalarColumn<Int> antennaId(phasedArray, "ANTENNA_ID");
+    ArrayColumn<Double> position(phasedArray, "POSITION");
+    ArrayColumn<Double> coordinateAxes(phasedArray, "COORDINATE_AXES");
+    ArrayColumn<Double> coordinateSystem(phasedArray, "COORDINATE_SYSTEM");
+    ArrayColumn<Double> elementOffset(phasedArray, "ELEMENT_OFFSET");
+    ArrayColumn<Bool> elementFlag(phasedArray, "ELEMENT_FLAG");
+    // Should flags be per polarisation, as in the example script?
+    // https://git.astron.nl/RD/EveryBeam/-/blob/master/scripts/misc/add_beaminfo.py
+    // This is different from current MSv3 working draft at
+    // https://casacore.github.io/casacore-notes/264.pdf
+    Matrix<Bool> flags(
+            IPosition(2, num_elements, (p->num_pols == 4 ? 2 : 1)), false);
+    Matrix<Double> offset(IPosition(2, num_elements, 3));
+    for (unsigned int i = 0; i < num_elements; ++i)
+    {
+        offset(i, 0) = x[i];
+        offset(i, 1) = y[i];
+        offset(i, 2) = z[i];
+    }
+    antennaId.put(station, station);
+    position.put(station, pos);
+    Matrix<Double> m(IPosition(2, 3, 3), matrix);
+    coordinateAxes.put(station, m);
+    coordinateSystem.put(station, m);
+    elementOffset.put(station, offset);
+    elementFlag.put(station, flags);
+#endif
 }
 
 template <typename T>
 void oskar_ms_set_station_coords(oskar_MeasurementSet* p,
         unsigned int num_stations, const T* x, const T* y, const T* z)
 {
-    if (!p->ms || !p->msc) return;
+    if (!p->ms) return;
     if (num_stations != p->num_stations) return;
 
     Vector<Double> pos(3, 0.0);
+#ifdef OSKAR_MS_NEW
+    Table antenna(p->ms->tableName() + "/ANTENNA", Table::Update);
+    ArrayColumn<Double> position(antenna, "POSITION");
+#endif
     for (unsigned int a = 0; a < num_stations; ++a)
     {
         pos(0) = x[a]; pos(1) = y[a]; pos(2) = z[a];
+#ifdef OSKAR_MS_NEW
+        position.put(a, pos);
+#else
         p->msc->antenna().position().put(a, pos);
+#endif
     }
 }
 
@@ -216,20 +304,20 @@ void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p,
     oskar_ms_set_station_coords(p, num_stations, x, y, z);
 }
 
-void oskar_ms_set_station_coords_f(oskar_MeasurementSet* p,
-        unsigned int num_stations, const float* x, const float* y,
-        const float* z)
-{
-    oskar_ms_set_station_coords(p, num_stations, x, y, z);
-}
-
 void oskar_ms_set_time_range(oskar_MeasurementSet* p)
 {
-    if (!p->msc) return;
+    if (!p->ms) return;
 
     // Get the old time range.
     Vector<Double> old_range(2, 0.0);
+#ifdef OSKAR_MS_NEW
+    Table observation(p->ms->tableName() + "/OBSERVATION", Table::Update);
+    ArrayColumn<Double> timeRange(observation, "TIME_RANGE");
+    ScalarColumn<Double> releaseDate(observation, "RELEASE_DATE");
+    timeRange.get(0, old_range);
+#else
     p->msc->observation().timeRange().get(0, old_range);
+#endif
 
     // Compute the new time range.
     Vector<Double> range(2, 0.0);
@@ -239,8 +327,13 @@ void oskar_ms_set_time_range(oskar_MeasurementSet* p)
     double release_date = range[1] + 365.25 * 86400.0;
 
     // Fill observation columns.
+#ifdef OSKAR_MS_NEW
+    timeRange.put(0, range);
+    releaseDate.put(0, release_date);
+#else
     p->msc->observation().timeRange().put(0, range);
     p->msc->observation().releaseDate().put(0, release_date);
+#endif
 }
 
 double oskar_ms_time_inc_sec(const oskar_MeasurementSet* p)

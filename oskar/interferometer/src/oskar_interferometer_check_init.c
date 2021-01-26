@@ -83,7 +83,7 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
 
 static void set_up_vis_header(oskar_Interferometer* h, int* status)
 {
-    int vis_type;
+    int i, j, vis_type;
     const double rad2deg = 180.0/M_PI;
     int write_autocorr = 0, write_crosscorr = 0;
     if (*status) return;
@@ -140,15 +140,20 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
             oskar_telescope_lon_rad(h->tel) * rad2deg,
             oskar_telescope_lat_rad(h->tel) * rad2deg,
             oskar_telescope_alt_metres(h->tel));
-    oskar_mem_copy(oskar_vis_header_station_x_offset_ecef_metres(h->header),
-            oskar_telescope_station_true_offset_ecef_metres_const(h->tel, 0),
-            status);
-    oskar_mem_copy(oskar_vis_header_station_y_offset_ecef_metres(h->header),
-            oskar_telescope_station_true_offset_ecef_metres_const(h->tel, 1),
-            status);
-    oskar_mem_copy(oskar_vis_header_station_z_offset_ecef_metres(h->header),
-            oskar_telescope_station_true_offset_ecef_metres_const(h->tel, 2),
-            status);
+    for (i = 0; i < 3; ++i)
+    {
+        oskar_mem_copy(oskar_vis_header_station_offset_ecef_metres(h->header, i),
+                oskar_telescope_station_true_offset_ecef_metres_const(h->tel, i),
+                status);
+        for (j = 0; j < num_stations; ++j)
+        {
+            const int feed = 0; // Can only save feed 0 positions.
+            const oskar_Station* st = oskar_telescope_station_const(h->tel, j);
+            oskar_mem_copy(oskar_vis_header_element_enu_metres(h->header, i, j),
+                    oskar_station_element_true_enu_metres_const(st, feed, i),
+                    status);
+        }
+    }
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     if (verbose)
     {
         printf("Output visibility file: %s\n", out_path);
-        printf("Combining the %d input files:", num_in_files);
+        printf("Combining the %d input files:\n", num_in_files);
         for (int i = 0; i < num_in_files; ++i)
             printf("  [%02d] %s\n", i, in_files[i]);
     }

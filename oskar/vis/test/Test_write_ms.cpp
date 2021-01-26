@@ -36,11 +36,11 @@ TEST(write_ms, test_write)
     vv = oskar_mem_double(oskar_vis_block_baseline_vv_metres(blk), &status);
     ww = oskar_mem_double(oskar_vis_block_baseline_ww_metres(blk), &status);
     x = oskar_mem_double(
-            oskar_vis_header_station_x_offset_ecef_metres(hdr), &status);
+            oskar_vis_header_station_offset_ecef_metres(hdr, 0), &status);
     y = oskar_mem_double(
-            oskar_vis_header_station_y_offset_ecef_metres(hdr), &status);
+            oskar_vis_header_station_offset_ecef_metres(hdr, 1), &status);
     z = oskar_mem_double(
-            oskar_vis_header_station_z_offset_ecef_metres(hdr), &status);
+            oskar_vis_header_station_offset_ecef_metres(hdr, 2), &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     for (int i = 0, t = 0; t < num_times; ++t)
@@ -128,11 +128,11 @@ TEST(write_ms, test_write_partial)
     vv = oskar_mem_double(oskar_vis_block_baseline_vv_metres(blk), &status);
     ww = oskar_mem_double(oskar_vis_block_baseline_ww_metres(blk), &status);
     x = oskar_mem_double(
-            oskar_vis_header_station_x_offset_ecef_metres(hdr), &status);
+            oskar_vis_header_station_offset_ecef_metres(hdr, 0), &status);
     y = oskar_mem_double(
-            oskar_vis_header_station_y_offset_ecef_metres(hdr), &status);
+            oskar_vis_header_station_offset_ecef_metres(hdr, 1), &status);
     z = oskar_mem_double(
-            oskar_vis_header_station_z_offset_ecef_metres(hdr), &status);
+            oskar_vis_header_station_offset_ecef_metres(hdr, 2), &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     for (int i = 0, t = 0; t < max_times_per_block; ++t)

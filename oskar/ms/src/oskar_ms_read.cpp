@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2018, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "ms/oskar_measurement_set.h"
@@ -201,7 +178,7 @@ void oskar_ms_read_coords(oskar_MeasurementSet* p,
         unsigned int start_row, unsigned int num_baselines,
         T* uu, T* vv, T* ww, int* status)
 {
-    if (!p->ms || !p->msmc || num_baselines == 0) return;
+    if (!p->ms || num_baselines == 0) return;
 
     // Check that the row is within the table bounds.
     unsigned int total_rows = p->ms->nrow();
@@ -215,7 +192,11 @@ void oskar_ms_read_coords(oskar_MeasurementSet* p,
 
     // Read the coordinate data and copy it into the supplied arrays.
     Slice slice(start_row, num_baselines, 1);
+#ifdef OSKAR_MS_NEW
+    Array<Double> column_range = p->msmc.uvw.getColumnRange(slice);
+#else
     Array<Double> column_range = p->msmc->uvw().getColumnRange(slice);
+#endif
     Matrix<Double> matrix;
     matrix.reference(column_range);
     for (unsigned int i = 0; i < num_baselines; ++i)
@@ -246,7 +227,7 @@ void oskar_ms_read_vis(oskar_MeasurementSet* p,
         unsigned int num_channels, unsigned int num_baselines,
         const char* column, T* vis, int* status)
 {
-    if (!p->ms || !p->msmc || num_baselines == 0 || num_channels == 0) return;
+    if (!p->ms || num_baselines == 0 || num_channels == 0) return;
 
     // Check that the column exists.
     if (!p->ms->tableDesc().isColumn(column))

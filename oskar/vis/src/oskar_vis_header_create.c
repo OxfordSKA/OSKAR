@@ -16,9 +16,8 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
         int max_channels_per_block, int num_channels_total, int num_stations,
         int write_autocorr, int write_crosscor, int* status)
 {
+    int i, j;
     oskar_VisHeader* hdr = 0;
-
-    /* Check if safe to proceed. */
     if (*status) return 0;
 
     /* Check type. */
@@ -29,7 +28,7 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
     }
 
     /* Allocate the structure. */
-    hdr = (oskar_VisHeader*) malloc(sizeof(oskar_VisHeader));
+    hdr = (oskar_VisHeader*) calloc(1, sizeof(oskar_VisHeader));
     if (!hdr)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
@@ -55,6 +54,8 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
     hdr->max_channels_per_block = max_channels_per_block;
     hdr->num_channels_total     = num_channels_total;
     hdr->num_stations           = num_stations;
+    hdr->write_autocorr         = write_autocorr;
+    hdr->write_crosscorr        = write_crosscor;
 
     /* Set default polarisation type. */
     if (oskar_type_is_matrix(amp_type))
@@ -64,33 +65,22 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
         oskar_vis_header_set_pol_type(hdr,
                 OSKAR_VIS_POL_TYPE_STOKES_I, status);
 
-    /* Initialise meta-data. */
-    hdr->write_autocorr = write_autocorr;
-    hdr->write_crosscorr = write_crosscor;
-    hdr->freq_start_hz = 0.0;
-    hdr->freq_inc_hz = 0.0;
-    hdr->channel_bandwidth_hz = 0.0;
-    hdr->time_start_mjd_utc = 0.0;
-    hdr->time_inc_sec = 0.0;
-    hdr->time_average_sec = 0.0;
-    hdr->phase_centre_type = 0;
-    hdr->phase_centre_deg[0] = 0.0;
-    hdr->phase_centre_deg[1] = 0.0;
-    hdr->telescope_centre_lon_deg = 0.0;
-    hdr->telescope_centre_lat_deg = 0.0;
-    hdr->telescope_centre_alt_m = 0.0;
-
-    /* Initialise CPU memory. */
+    /* Initialise arrays. */
     hdr->telescope_path = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
     hdr->settings = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
-    hdr->station_x_offset_ecef_metres = oskar_mem_create(coord_precision,
-            OSKAR_CPU, num_stations, status);
-    hdr->station_y_offset_ecef_metres = oskar_mem_create(coord_precision,
-            OSKAR_CPU, num_stations, status);
-    hdr->station_z_offset_ecef_metres = oskar_mem_create(coord_precision,
-            OSKAR_CPU, num_stations, status);
+    for (i = 0; i < 3; ++i)
+    {
+        hdr->station_offset_ecef_metres[i] = oskar_mem_create(coord_precision,
+                OSKAR_CPU, num_stations, status);
+        hdr->element_enu_metres[i] = (oskar_Mem**) calloc(
+                num_stations, sizeof(oskar_Mem*));
+        for (j = 0; j < num_stations; ++j)
+        {
+            hdr->element_enu_metres[i][j] = oskar_mem_create(coord_precision,
+                    OSKAR_CPU, 0, status);
+        }
+    }
 
-    /* Return handle to structure. */
     return hdr;
 }
 

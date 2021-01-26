@@ -9,8 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cuda-cufft-dev-10-1 \
     cuda-nvcc-10-1 \
     git \
-    libhdf5-dev \
-    liblapack-dev
+    libhdf5-dev
 WORKDIR /home/build
 RUN git clone https://github.com/OxfordSKA/OSKAR.git OSKAR.git && \
     cmake OSKAR.git/ -DBUILD_TESTING=OFF && \

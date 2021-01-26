@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, The OSKAR Developers.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -20,8 +20,9 @@ void oskar_vis_block_read(oskar_VisBlock* vis, const oskar_VisHeader* hdr,
 
     /* Set query start index. */
     const int num_tags_per_block = oskar_vis_header_num_tags_per_block(hdr);
-    oskar_binary_set_query_search_start(h, block_index * num_tags_per_block,
-            status);
+    oskar_binary_set_query_search_start(h,
+            oskar_vis_header_num_tags_header(hdr) + (
+                    block_index * num_tags_per_block), status);
 
     /* Read visibility metadata. */
     oskar_binary_read(h, OSKAR_INT,

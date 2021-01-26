@@ -81,6 +81,8 @@ TEST(MeasurementSet, test_multi_channel)
             n_ant, n_chan, n_pol, freq, chan_width, 0, 1);
     ASSERT_TRUE(ms);
     oskar_ms_set_phase_centre(ms, 0, ra, dec);
+    double array_centre[3] = {11.1, 22.2, 33.3};
+    oskar_ms_set_array_centre(ms, array_centre);
 
     // Add some dummy antenna positions.
     std::vector<double> ax(n_ant), ay(n_ant), az(n_ant);

@@ -27,7 +27,7 @@ if (NOT OSKAR_VERSION_STR)
 endif()
 
 # Try to find dependencies.
-find_package(CasaCore)
+find_package(CASACORE)
 
 if (CASACORE_FOUND)
     # Set CMake cache variable so any parent CMakeLists file can use it.

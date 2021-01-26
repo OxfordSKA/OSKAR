@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #ifndef OSKAR_VIS_HEADER_H_
@@ -75,7 +52,10 @@ enum OSKAR_VIS_HEADER_TAGS
     OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_ALT_M      = 31,
     OSKAR_VIS_HEADER_TAG_STATION_X_OFFSET_ECEF    = 32,
     OSKAR_VIS_HEADER_TAG_STATION_Y_OFFSET_ECEF    = 33,
-    OSKAR_VIS_HEADER_TAG_STATION_Z_OFFSET_ECEF    = 34
+    OSKAR_VIS_HEADER_TAG_STATION_Z_OFFSET_ECEF    = 34,
+    OSKAR_VIS_HEADER_TAG_ELEMENT_X_ENU            = 35,
+    OSKAR_VIS_HEADER_TAG_ELEMENT_Y_ENU            = 36,
+    OSKAR_VIS_HEADER_TAG_ELEMENT_Z_ENU            = 37
 };
 
 enum OSKAR_VIS_HEADER_POL_TYPE
@@ -98,10 +78,9 @@ enum OSKAR_VIS_HEADER_POL_TYPE
 
 #include <vis/oskar_vis_header_accessors.h>
 #include <vis/oskar_vis_header_create.h>
-#include <vis/oskar_vis_header_create_copy.h>
 #include <vis/oskar_vis_header_free.h>
 #include <vis/oskar_vis_header_read.h>
 #include <vis/oskar_vis_header_write.h>
 #include <vis/oskar_vis_header_write_ms.h>
 
-#endif /* OSKAR_VIS_HEADER_H_ */
+#endif /* include guard */

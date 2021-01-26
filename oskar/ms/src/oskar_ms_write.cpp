@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2018, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "ms/oskar_measurement_set.h"
@@ -90,14 +67,24 @@ void oskar_ms_write_coords(oskar_MeasurementSet* p,
         const T* uu, const T* vv, const T* ww,
         double exposure_sec, double interval_sec, double time_stamp)
 {
-    MSMainColumns* msmc = p->msmc;
-    if (!msmc) return;
-
     // Allocate storage for a (u,v,w) coordinate and a visibility weight.
     Vector<Double> uvw(3);
     Vector<Float> weight(p->num_pols, 1.0), sigma(p->num_pols, 1.0);
 
     // Get references to columns.
+#ifdef OSKAR_MS_NEW
+    ArrayColumn<Double>& col_uvw = p->msmc.uvw;
+    ScalarColumn<Int>& col_antenna1 = p->msmc.antenna1;
+    ScalarColumn<Int>& col_antenna2 = p->msmc.antenna2;
+    ArrayColumn<Float>& col_weight = p->msmc.weight;
+    ArrayColumn<Float>& col_sigma = p->msmc.sigma;
+    ScalarColumn<Double>& col_exposure = p->msmc.exposure;
+    ScalarColumn<Double>& col_interval = p->msmc.interval;
+    ScalarColumn<Double>& col_time = p->msmc.time;
+    ScalarColumn<Double>& col_timeCentroid = p->msmc.timeCentroid;
+#else
+    MSMainColumns* msmc = p->msmc;
+    if (!msmc) return;
     ArrayColumn<Double>& col_uvw = msmc->uvw();
     ScalarColumn<Int>& col_antenna1 = msmc->antenna1();
     ScalarColumn<Int>& col_antenna2 = msmc->antenna2();
@@ -107,6 +94,7 @@ void oskar_ms_write_coords(oskar_MeasurementSet* p,
     ScalarColumn<Double>& col_interval = msmc->interval();
     ScalarColumn<Double>& col_time = msmc->time();
     ScalarColumn<Double>& col_timeCentroid = msmc->timeCentroid();
+#endif
 
     // Add new rows if required.
     oskar_ms_ensure_num_rows(p, start_row + num_baselines);
@@ -164,9 +152,6 @@ void oskar_ms_write_vis(oskar_MeasurementSet* p,
         unsigned int start_row, unsigned int start_channel,
         unsigned int num_channels, unsigned int num_baselines, const T* vis)
 {
-    MSMainColumns* msmc = p->msmc;
-    if (!msmc) return;
-
     // Allocate storage for the block of visibility data.
     unsigned int num_pols = p->num_pols;
     IPosition shape(3, num_pols, num_channels, num_baselines);
@@ -201,7 +186,11 @@ void oskar_ms_write_vis(oskar_MeasurementSet* p,
     Slicer array_section(start2, length2);
 
     // Write visibilities to DATA column.
-    ArrayColumn<Complex>& col_data = msmc->data();
+#ifdef OSKAR_MS_NEW
+    ArrayColumn<Complex>& col_data = p->msmc.data;
+#else
+    ArrayColumn<Complex>& col_data = p->msmc->data();
+#endif
     col_data.putColumnRange(row_range, array_section, vis_data);
     p->data_written = 1;
 }

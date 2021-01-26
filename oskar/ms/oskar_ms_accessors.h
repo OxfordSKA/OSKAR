@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -191,6 +191,19 @@ double oskar_ms_phase_centre_dec_rad(const oskar_MeasurementSet* p);
 
 /**
  * @brief
+ * Sets the array centre.
+ *
+ * @details
+ * Sets the ITRF coordinates of the array centre.
+ *
+ * @param[in] array_centre_itrf   The ITRF array centre coordinates, in metres.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_set_array_centre(oskar_MeasurementSet* p,
+        double array_centre_itrf[3]);
+
+/**
+ * @brief
  * Sets the observation phase centre.
  *
  * @details
@@ -209,6 +222,24 @@ void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
         double longitude_rad, double latitude_rad);
 
 /**
+ * @brief Writes element positions to the PHASED_ARRAY table.
+ *
+ * @details
+ * Adds the supplied list of element positions to the PHASED_ARRAY table.
+ *
+ * @param[in] station       The station index.
+ * @param[in] num_elements  The number of element coordinates.
+ * @param[in] x             The element x positions.
+ * @param[in] y             The element y positions.
+ * @param[in] z             The element z positions.
+ * @param[in] matrix[9]     Local to ITRF transformation matrix.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_set_element_coords(oskar_MeasurementSet* p, unsigned int station,
+        unsigned int num_elements, const double* x, const double* y,
+        const double* z, const double* matrix);
+
+/**
  * @brief Writes station positions to the ANTENNA table.
  *
  * @details
@@ -223,22 +254,6 @@ OSKAR_MS_EXPORT
 void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p,
         unsigned int num_stations, const double* x, const double* y,
         const double* z);
-
-/**
- * @brief Writes station positions to the ANTENNA table.
- *
- * @details
- * Adds the supplied list of station positions to the ANTENNA table.
- *
- * @param[in] num_stations  The number of stations to add.
- * @param[in] x             The station x positions.
- * @param[in] y             The station y positions.
- * @param[in] z             The station z positions.
- */
-OSKAR_MS_EXPORT
-void oskar_ms_set_station_coords_f(oskar_MeasurementSet* p,
-        unsigned int num_stations, const float* x, const float* y,
-        const float* z);
 
 OSKAR_MS_EXPORT
 void oskar_ms_set_time_range(oskar_MeasurementSet* p);

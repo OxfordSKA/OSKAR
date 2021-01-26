@@ -50,10 +50,8 @@ TEST(Visibilities, read_write)
         ASSERT_STREQ(name, oskar_mem_char_const(
                 oskar_vis_header_telescope_path_const(hdr)));
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_VisHeader* hdr_copy = oskar_vis_header_create_copy(hdr, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
         ASSERT_EQ(OSKAR_VIS_POL_TYPE_LINEAR_XX_XY_YX_YY,
-                oskar_vis_header_pol_type(hdr_copy));
+                oskar_vis_header_pol_type(hdr));
 
         // Write the header.
         oskar_Binary* h = oskar_vis_header_write(hdr, filename, &status);
@@ -114,7 +112,6 @@ TEST(Visibilities, read_write)
             ASSERT_EQ(0, status) << oskar_get_error_string(status);
         }
         oskar_vis_header_free(hdr, &status);
-        oskar_vis_header_free(hdr_copy, &status);
         oskar_vis_block_free(blk, &status);
         oskar_binary_free(h);
     }

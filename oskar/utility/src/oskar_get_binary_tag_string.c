@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, The OSKAR Developers.
+ * Copyright (c) 2019-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -175,6 +175,12 @@ const char* oskar_get_binary_tag_string(char group, char tag)
             return "Station Y coordinates (offset ECEF) [m]";
         case OSKAR_VIS_HEADER_TAG_STATION_Z_OFFSET_ECEF:
             return "Station Z coordinates (offset ECEF) [m]";
+        case OSKAR_VIS_HEADER_TAG_ELEMENT_X_ENU:
+            return "Element X coordinates (ENU) [m]";
+        case OSKAR_VIS_HEADER_TAG_ELEMENT_Y_ENU:
+            return "Element Y coordinates (ENU) [m]";
+        case OSKAR_VIS_HEADER_TAG_ELEMENT_Z_ENU:
+            return "Element Z coordinates (ENU) [m]";
         default:
             return "Unknown visibility header group tag";
         }

@@ -26,8 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "convert/oskar_convert_ecef_to_geodetic_spherical.h"
+#include "math/oskar_cmath.h"
 #include "telescope/station/oskar_evaluate_pierce_points.h"
-#include "convert/private_convert_ecef_to_geodetic_spherical_inline.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -163,9 +164,9 @@ void oskar_evaluate_pierce_points_d(int num_directions, const double* hor_x,
     double cos_l, sin_l, cos_b, sin_b, station_lon, station_lat, station_alt;
 
     /* Get the station longitude and latitude from ECEF coordinates. */
-    oskar_convert_ecef_to_geodetic_spherical_inline_d(station_ecef_x,
-            station_ecef_y, station_ecef_z, &station_lon, &station_lat,
-            &station_alt);
+    oskar_convert_ecef_to_geodetic_spherical(1,
+            &station_ecef_x, &station_ecef_y, &station_ecef_z,
+            &station_lon, &station_lat, &station_alt);
 
     /* Calculate sine and cosine of station longitude and latitude. */
     sin_l = sin(station_lon);

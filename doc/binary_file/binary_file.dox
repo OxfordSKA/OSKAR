@@ -327,10 +327,6 @@ Arrays will be present in both single and double precision.
 
 \htmlonly <hr /> \endhtmlonly
 
-\latexonly
-\clearpage
-\endlatexonly
-
 \subsection binary_tag_element Element Data Tags
 
 Tags in this group have a group ID of 10.
@@ -354,6 +350,10 @@ following index values:
 |    3 | V (imag).
 
 \htmlonly <hr /> \endhtmlonly
+
+\latexonly
+\clearpage
+\endlatexonly
 
 \subsection binary_tag_vis_header Visibility Header Data Tags
 
@@ -388,11 +388,18 @@ Tags in this group have a group ID of 11.
 | 32     | Station X-coordinates in offset ECEF frame, in metres [array].
 | 33     | Station Y-coordinates in offset ECEF frame, in metres [array].
 | 34     | Station Z-coordinates in offset ECEF frame, in metres [array].
+| 35     | Element X-coordinates in ENU frame, in metres [array].
+| 36     | Element Y-coordinates in ENU frame, in metres [array].
+| 37     | Element Z-coordinates in ENU frame, in metres [array].
 
 
 The Visibility Header contains static meta-data. It precedes a sequence of
 \ref binary_tag_vis_block "Visibility Blocks", which contain the actual
 cross-correlations and/or autocorrelations as a function of time and frequency.
+
+\latexonly
+\clearpage
+\endlatexonly
 
 \anchor vis_pol_type
 The polarisation type of the data is given by Tag ID 12, as follows:
@@ -552,9 +559,10 @@ varies faster.
     The dimension order is now correct.</td></tr>
 <tr><td>8</td><td>2017-10-25</td>
     <td>Removed sections describing deprecated tags.</td></tr>
-<tr><td>9</td><td>2020-09-15</td>
+<tr><td>9</td><td>2021-01-26</td>
     <td>Added visibility block station coordinate tags and updated description
-    of visibility block sequence.</td></tr>
+    of visibility block sequence.
+    Added visibility header element coordinate tags.</td></tr>
 </table>
 
 */

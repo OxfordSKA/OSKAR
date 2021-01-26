@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, The OSKAR Developers.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -29,6 +29,11 @@ oskar_Mem* oskar_vis_header_settings(oskar_VisHeader* vis)
 const oskar_Mem* oskar_vis_header_settings_const(const oskar_VisHeader* vis)
 {
     return vis->settings;
+}
+
+int oskar_vis_header_num_tags_header(const oskar_VisHeader* vis)
+{
+    return vis->num_tags_header;
 }
 
 int oskar_vis_header_num_tags_per_block(const oskar_VisHeader* vis)
@@ -78,6 +83,13 @@ int oskar_vis_header_num_blocks(const oskar_VisHeader* vis)
 int oskar_vis_header_num_channels_total(const oskar_VisHeader* vis)
 {
     return vis->num_channels_total;
+}
+
+int oskar_vis_header_num_elements_in_station(
+        const oskar_VisHeader* vis, int station)
+{
+    if (station >= vis->num_stations) return 0;
+    return (int) oskar_mem_length(vis->element_enu_metres[0][station]);
 }
 
 int oskar_vis_header_num_times_total(const oskar_VisHeader* vis)
@@ -165,40 +177,32 @@ double oskar_vis_header_telescope_alt_metres(const oskar_VisHeader* vis)
     return vis->telescope_centre_alt_m;
 }
 
-oskar_Mem* oskar_vis_header_station_x_offset_ecef_metres(oskar_VisHeader* vis)
+oskar_Mem* oskar_vis_header_station_offset_ecef_metres(oskar_VisHeader* vis, int dim)
 {
-    return vis->station_x_offset_ecef_metres;
+    if (dim >= 3) return 0;
+    return vis->station_offset_ecef_metres[dim];
 }
 
-const oskar_Mem* oskar_vis_header_station_x_offset_ecef_metres_const(
-        const oskar_VisHeader* vis)
+const oskar_Mem* oskar_vis_header_station_offset_ecef_metres_const(
+        const oskar_VisHeader* vis, int dim)
 {
-    return vis->station_x_offset_ecef_metres;
+    if (dim >= 3) return 0;
+    return vis->station_offset_ecef_metres[dim];
 }
 
-oskar_Mem* oskar_vis_header_station_y_offset_ecef_metres(oskar_VisHeader* vis)
+oskar_Mem* oskar_vis_header_element_enu_metres(
+        oskar_VisHeader* vis, int dim, int station)
 {
-    return vis->station_y_offset_ecef_metres;
+    if (dim >= 3 || station >= vis->num_stations) return 0;
+    return vis->element_enu_metres[dim][station];
 }
 
-const oskar_Mem* oskar_vis_header_station_y_offset_ecef_metres_const(
-        const oskar_VisHeader* vis)
+const oskar_Mem* oskar_vis_header_element_enu_metres_const(
+        const oskar_VisHeader* vis, int dim, int station)
 {
-    return vis->station_y_offset_ecef_metres;
+    if (dim >= 3 || station >= vis->num_stations) return 0;
+    return vis->element_enu_metres[dim][station];
 }
-
-oskar_Mem* oskar_vis_header_station_z_offset_ecef_metres(oskar_VisHeader* vis)
-{
-    return vis->station_z_offset_ecef_metres;
-}
-
-const oskar_Mem* oskar_vis_header_station_z_offset_ecef_metres_const(
-        const oskar_VisHeader* vis)
-{
-    return vis->station_z_offset_ecef_metres;
-}
-
-
 
 void oskar_vis_header_set_freq_start_hz(oskar_VisHeader* vis, double value)
 {
