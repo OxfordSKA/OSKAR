@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -14,6 +14,7 @@
 
 #include <string>
 #include <cstdio>
+#include <cstdlib>
 #include <cfloat>
 #include <cmath>
 
@@ -36,7 +37,7 @@ int main(int argc, char **argv)
     opt.add_flag("-s", "Display the simulation settings file.", false, "--opts");
     opt.add_flag("-t", "Display visibility statistics.", false, "--stats");
     opt.add_flag("-a", "Display header.", false, "--header");
-    if (!opt.check_options(argc, argv)) return OSKAR_ERR_INVALID_ARGUMENT;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     int num_files = 0;
     const char* const* vis_filename = opt.get_input_files(1, &num_files);
@@ -62,7 +63,7 @@ int main(int argc, char **argv)
         {
             oskar_log_error(log, "Error reading header from file '%s' (%s)\n",
                     filename, oskar_get_error_string(status));
-            return status;
+            return EXIT_FAILURE;
         }
 
         int num_blocks = oskar_vis_header_num_blocks(hdr);
@@ -137,7 +138,7 @@ int main(int argc, char **argv)
                 {
                     oskar_log_error(log, "Error reading block %d: %s",
                             b, oskar_get_error_string(status));
-                    return status;
+                    return EXIT_FAILURE;
                 }
 
                 if (oskar_vis_block_has_cross_correlations(blk))
@@ -230,7 +231,7 @@ int main(int argc, char **argv)
     } // End loop over visibility files.
 
     oskar_log_free(log);
-    return status;
+    return status ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
 

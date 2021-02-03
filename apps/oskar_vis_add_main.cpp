@@ -136,7 +136,7 @@ int main(int argc, char** argv)
     }
     oskar_binary_free(out_file);
 
-    return status;
+    return status ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
 static bool is_compatible(const oskar_VisHeader* v1, const oskar_VisHeader* v2)

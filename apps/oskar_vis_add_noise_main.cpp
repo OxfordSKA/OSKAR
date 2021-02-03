@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -16,6 +16,7 @@
 #include "vis/oskar_vis_block.h"
 #include "vis/oskar_vis_header.h"
 
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -161,5 +162,5 @@ int main(int argc, char** argv)
         oskar_log_error(log, "Error: %s", oskar_get_error_string(status));
     oskar_log_free(log);
     SettingsTree::free(s);
-    return status == 0 ? 0 : EXIT_FAILURE;
+    return status ? EXIT_FAILURE : EXIT_SUCCESS;
 }

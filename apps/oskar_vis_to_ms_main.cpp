@@ -111,7 +111,7 @@ int main(int argc, char** argv)
     oskar_ms_close(ms);
     if (error)
         oskar_log_error(0, oskar_get_error_string(error));
-    return error;
+    return error ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 #else
 // No Measurement Set support.
