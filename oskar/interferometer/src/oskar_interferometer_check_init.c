@@ -149,9 +149,11 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
         {
             const int feed = 0; // Can only save feed 0 positions.
             const oskar_Station* st = oskar_telescope_station_const(h->tel, j);
-            oskar_mem_copy(oskar_vis_header_element_enu_metres(h->header, i, j),
-                    oskar_station_element_true_enu_metres_const(st, feed, i),
-                    status);
+            if (oskar_station_type(st) == OSKAR_STATION_TYPE_AA)
+                oskar_mem_copy(
+                        oskar_vis_header_element_enu_metres(h->header, i, j),
+                        oskar_station_element_true_enu_metres_const(st, feed, i),
+                        status);
         }
     }
 }
