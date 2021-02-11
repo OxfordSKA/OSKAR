@@ -32,7 +32,7 @@ RUN apt-get update && \
     gosu \
     libgomp1 \
     libhdf5-100 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY --from=build /usr/local/lib /usr/local/lib/
 COPY --from=build /usr/local/include/casacore /usr/local/include/casacore/
 
