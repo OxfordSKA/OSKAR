@@ -41,7 +41,7 @@ static void add_column_metadata(TableDesc& desc, const String& column,
 
 static void add_column_frequency(TableDesc& desc, const String& column)
 {
-    Array<String> units(IPosition(1, 1), "Hz");
+    Array<String> units(IPosition(1, 1), String("Hz"));
     desc.rwColumnDesc(column).rwKeywordSet().define("QuantumUnits", units);
     RecordDesc rec_desc;
     rec_desc.addField("type", TpString);
