@@ -1,4 +1,4 @@
-image: fdulwich/oskar-ci:cuda-10-1
+image: fdulwich/oskar-ci:cuda-11-3
 
 stages:
   - test
