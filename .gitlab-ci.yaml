@@ -1,0 +1,15 @@
+image: fdulwich/oskar-ci:cuda-10-1
+
+stages:
+  - test
+
+unit-tests:
+  stage: test
+  tags: [k8srunner-gpu]
+  before_script:
+    - mkdir build && cd build
+    # todo: replace arch value with project variable
+    - cmake .. -DCUDA_ARCH=6.1
+    - make -j
+  script:
+    - ctest --output-on-failure
