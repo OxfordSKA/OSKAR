@@ -527,7 +527,7 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
     // Add column metadata.
     add_column_metadata(desc, "UVW", 3, "m", "uvw", "ITRF");
     desc.rwColumnDesc("FLAG_CATEGORY").rwKeywordSet().define(
-            "CATEGORY", Array<String>(IPosition(1, 0), ""));
+            "CATEGORY", Array<String>(IPosition(1, 0), String("")));
     add_column_metadata(desc, "EXPOSURE", 1, "s", "", "");
     add_column_metadata(desc, "INTERVAL", 1, "s", "", "");
     add_column_metadata(desc, "TIME", 1, "s", "epoch", "UTC");
