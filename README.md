@@ -42,11 +42,11 @@ As an example, to run the application `oskar_sim_interferometer`
 with a parameter file `settings.ini` and a container image file
 `OSKAR-Python3.sif` (both in the current directory) on a GPU use:
 
-    $ singularity exec --no-home --nv ./OSKAR-Python3.sif oskar_sim_interferometer settings.ini
+    $ singularity exec --nv ./OSKAR-Python3.sif oskar_sim_interferometer settings.ini
 
 Similarly, to run a Python script `sim_script.py` that uses OSKAR:
 
-    $ singularity exec --no-home --nv ./OSKAR-Python3.sif python3 sim_script.py
+    $ singularity exec --nv ./OSKAR-Python3.sif python3 sim_script.py
 
 ### Dependencies
 
@@ -101,7 +101,7 @@ When running the 'cmake' command a number of options can be specified:
 
     * -DCASACORE_LIB_DIR=<path> (default: searches the system library paths)
         Specifies a location to search for the casacore libraries
-        (libcasa_ms.so and others) if they are not in the system library path.
+        (libcasa_tables.so and others) if they are not in the system library path.
 
     * -DCASACORE_INC_DIR=<path> (default: searches the system include paths)
         Specifies a location to search for the casacore library headers if they
@@ -140,11 +140,15 @@ When running the 'cmake' command a number of options can be specified:
         If ON enables the display of diagnostic build information when
         running CMake.
 
-### Unit tests
+#### Unit tests
+
+After building from source, the unit tests should be run to make sure there
+are no problems with the build.
+(Note that pre-built packages do not include the unit tests.)
 
 From the build directory, the unit tests can be run by typing:
 
-    $ ctest [--verbose]
+    $ ctest
 
 ### Python interface
 
