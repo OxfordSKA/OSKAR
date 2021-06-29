@@ -5,6 +5,8 @@
     * Fix Measurement Set ANTENNA table to use absolute rather than relative
       coordinates.
 
+    * Fix to ensure noise random numbers are different per channel.
+
     * Add PHASED_ARRAY table to Measurement Sets.
 
     * Use Ludwig-3 (instead of theta/phi) system to evaluate antenna responses.

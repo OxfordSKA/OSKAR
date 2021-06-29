@@ -143,7 +143,7 @@ int main(int argc, char** argv)
         {
             if (status) break;
             oskar_vis_block_read(blk, hdr, h_in, b, &status);
-            oskar_vis_block_add_system_noise(blk, hdr, tel, b, station_work,
+            oskar_vis_block_add_system_noise(blk, hdr, tel, station_work,
                     &status);
             oskar_vis_block_write(blk, h_out, b, &status);
         }

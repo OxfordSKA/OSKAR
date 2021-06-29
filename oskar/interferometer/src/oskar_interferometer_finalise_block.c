@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -64,7 +64,7 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
     /* Add uncorrelated system noise to the combined visibilities. */
     if (!h->coords_only && oskar_telescope_noise_enabled(h->tel))
         oskar_vis_block_add_system_noise(b0, h->header, h->tel,
-                block_index, h->temp, status);
+                h->temp, status);
 
     /* Print status message. */
     if (!*status)
