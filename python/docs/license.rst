@@ -6,7 +6,7 @@ License
 OSKAR is made available under the 3-clause BSD License, as follows:
 
 | Copyright (c) 2011-2020, The University of Oxford
-| Copyright (c) 2020, Fred Dulwich
+| Copyright (c) 2020-2021, Fred Dulwich
 | All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

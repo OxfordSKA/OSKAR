@@ -21,7 +21,7 @@ matplotlib to render the output image as a PNG file.
 .. code-block:: python
 
     import matplotlib
-    matplotlib.use('Agg')
+    matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     import numpy
     import oskar
@@ -34,30 +34,30 @@ use GPUs here, hence ``simulator/use_gpus`` is set to ``false``.
 .. code-block:: python
 
     params = {
-        'simulator': {
-            'use_gpus': 'false'
+        "simulator": {
+            "use_gpus": False
         },
-        'observation' : {
-            'num_channels': '3',
-            'start_frequency_hz': '100e6',
-            'frequency_inc_hz': '20e6',
-            'phase_centre_ra_deg': '20',
-            'phase_centre_dec_deg': '-30',
-            'num_time_steps': '24',
-            'start_time_utc': '01-01-2000 12:00:00.000',
-            'length': '12:00:00.000'
+        "observation" : {
+            "num_channels": 3,
+            "start_frequency_hz": 100e6,
+            "frequency_inc_hz": 20e6,
+            "phase_centre_ra_deg": 20,
+            "phase_centre_dec_deg": -30,
+            "num_time_steps": 24,
+            "start_time_utc": "01-01-2000 12:00:00.000",
+            "length": "12:00:00.000"
         },
-        'telescope': {
-            'input_directory': 'telescope.tm'
+        "telescope": {
+            "input_directory": "telescope.tm"
         },
-        'interferometer': {
-            'oskar_vis_filename': 'example.vis',
-            'ms_filename': '',
-            'channel_bandwidth_hz': '1e6',
-            'time_average_sec': '10'
+        "interferometer": {
+            "oskar_vis_filename": "example.vis",
+            "ms_filename": "",
+            "channel_bandwidth_hz": 1e6,
+            "time_average_sec": 10
         }
     }
-    settings = oskar.SettingsTree('oskar_sim_interferometer')
+    settings = oskar.SettingsTree("oskar_sim_interferometer")
     settings.from_dict(params)
 
 We choose the numerical precision to use (``single`` or ``double``) when
@@ -65,9 +65,9 @@ running the simulation, and update one of the settings accordingly.
 
 .. code-block:: python
 
-    precision = 'single'
-    if precision == 'single':
-        settings['simulator/double_precision'] = 'false'
+    precision = "single"
+    if precision == "single":
+        settings["simulator/double_precision"] = False
 
 The sky model will contain only three sources, which are stored in a
 numpy array. The sky model is created with the appropriate precision
@@ -105,20 +105,20 @@ of arrays returned by :meth:`oskar.Imager.run`.
 
     imager = oskar.Imager(precision)
     imager.set(fov_deg=4, image_size=512)
-    imager.set(input_file='example.vis', output_root='example')
+    imager.set(input_file="example.vis", output_root="example")
     output = imager.run(return_images=1)
-    image = output['images'][0]
+    image = output["images"][0]
 
 Finally, the image is plotted using matplotlib and saved as a PNG file
 called ``example.png``, which is included below.
 
 .. code-block:: python
 
-    im = plt.imshow(image, cmap='jet')
+    im = plt.imshow(image, cmap="jet")
     plt.gca().invert_yaxis()
     plt.colorbar(im)
-    plt.savefig('%s.png' % imager.output_root)
-    plt.close('all')
+    plt.savefig("%s.png" % imager.output_root)
+    plt.close("all")
 
 
 .. figure:: example.png

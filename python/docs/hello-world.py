@@ -3,7 +3,7 @@
 """Script to run a simple test example of an OSKAR simulation."""
 
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use("Agg")
 # pylint: disable=wrong-import-position
 import matplotlib.pyplot as plt
 import numpy
@@ -11,36 +11,36 @@ import oskar
 
 # Basic settings. (Note that the sky model is set up later.)
 params = {
-    'simulator': {
-        'use_gpus': 'false'
+    "simulator": {
+        "use_gpus": False
     },
-    'observation' : {
-        'num_channels': '3',
-        'start_frequency_hz': '100e6',
-        'frequency_inc_hz': '20e6',
-        'phase_centre_ra_deg': '20',
-        'phase_centre_dec_deg': '-30',
-        'num_time_steps': '24',
-        'start_time_utc': '01-01-2000 12:00:00.000',
-        'length': '12:00:00.000'
+    "observation" : {
+        "num_channels": 3,
+        "start_frequency_hz": 100e6,
+        "frequency_inc_hz": 20e6,
+        "phase_centre_ra_deg": 20,
+        "phase_centre_dec_deg": -30,
+        "num_time_steps": 24,
+        "start_time_utc": "01-01-2000 12:00:00.000",
+        "length": "12:00:00.000"
     },
-    'telescope': {
-        'input_directory': 'telescope.tm'
+    "telescope": {
+        "input_directory": "telescope.tm"
     },
-    'interferometer': {
-        'oskar_vis_filename': 'example.vis',
-        'ms_filename': '',
-        'channel_bandwidth_hz': '1e6',
-        'time_average_sec': '10'
+    "interferometer": {
+        "oskar_vis_filename": "example.vis",
+        "ms_filename": "",
+        "channel_bandwidth_hz": 1e6,
+        "time_average_sec": 10
     }
 }
-settings = oskar.SettingsTree('oskar_sim_interferometer')
+settings = oskar.SettingsTree("oskar_sim_interferometer")
 settings.from_dict(params)
 
 # Set the numerical precision to use.
-precision = 'single'
-if precision == 'single':
-    settings['simulator/double_precision'] = 'false'
+precision = "single"
+if precision == "single":
+    settings["simulator/double_precision"] = False
 
 # Create a sky model containing three sources from a numpy array.
 sky_data = numpy.array([
@@ -55,16 +55,16 @@ sim.set_sky_model(sky)
 sim.run()
 
 # Make an image 4 degrees across and return it to Python.
-# (It will also be saved with the filename 'example_I.fits'.)
+# (It will also be saved with the filename "example_I.fits".)
 imager = oskar.Imager(precision)
 imager.set(fov_deg=4, image_size=512)
-imager.set(input_file='example.vis', output_root='example')
+imager.set(input_file="example.vis", output_root="example")
 output = imager.run(return_images=1)
-image = output['images'][0]
+image = output["images"][0]
 
 # Render the image using matplotlib and save it as a PNG file.
-im = plt.imshow(image, cmap='jet')
+im = plt.imshow(image, cmap="jet")
 plt.gca().invert_yaxis()
 plt.colorbar(im)
-plt.savefig('%s.png' % imager.output_root)
-plt.close('all')
+plt.savefig("%s.png" % imager.output_root)
+plt.close("all")

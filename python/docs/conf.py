@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'oskarpy'
-copyright = '2020, University of Oxford'
-author = 'University of Oxford'
+copyright = '2020-2021, The OSKAR Developers'
+author = 'The OSKAR Developers'
 
 
 # -- General configuration ---------------------------------------------------
@@ -58,3 +58,5 @@ pygments_style = 'sphinx'
 autodoc_member_order = 'bysource'
 html4_writer = True
 html_show_sourcelink = False
+master_doc = 'index'
+
