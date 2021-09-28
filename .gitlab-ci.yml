@@ -18,7 +18,7 @@ unit-tests:
 
 doc-pdf:
   stage: publish
-  image: ubuntu:20.04
+  image: ubuntu:18.04 # Use Doxygen version 1.8.13 for compatibility.
   before_script:
     - >
       apt-get update && DEBIAN_FRONTEND=noninteractive
