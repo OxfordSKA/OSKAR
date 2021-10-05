@@ -33,3 +33,24 @@ doc-pdf:
     expire_in: 1 week
 #  rules:
 #    - if: '$CI_COMMIT_TAG'
+
+docker_release:
+  stage: publish
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
+  variables:
+    GIT_VERSION: $CI_COMMIT_SHORT_SHA
+  before_script:
+    - apk add make git
+    - cp dist/*whl docker/rascil-base
+    - cd docker
+    - echo $CAR_OCI_REGISTRY_PASSWORD | docker login --username $CAR_OCI_REGISTRY_USERNAME --password-stdin $CAR_OCI_REGISTRY_HOST
+  script:
+    - docker build -t fdulwich/oskar-base-dep oskar-base-dep/    
+    - docker build -t fdulwich/oskar-base -t fdulwich/oskar-base:2.8.0-dev14 oskar-base/
+    - docker build -t fdulwich/oskar-python3 -t fdulwich/oskar-python3:2.8.0-dev14 oskar-python3/
+    - docker push fdulwich/oskar-python3:2.8.0-dev14
+#  rules:
+#    - if: '$CI_COMMIT_TAG'
+
