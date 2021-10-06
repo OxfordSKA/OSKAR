@@ -1,7 +1,7 @@
 #
 # Build OSKAR using the base image.
 #
-FROM fdulwich/oskar-base-dep AS build
+FROM artefact.skao.int/oskar-base-dep AS build
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
@@ -16,7 +16,7 @@ RUN git clone https://github.com/OxfordSKA/OSKAR.git OSKAR.git && \
     make -j4 && make install
 
 # Copy into a minimal image.
-FROM fdulwich/oskar-base-dep
+FROM artefact.skao.int/oskar-base-dep
 COPY --from=build /usr/local/bin/oskar* /usr/local/bin/
 COPY --from=build /usr/local/lib /usr/local/lib/
 COPY --from=build /usr/local/include/oskar /usr/local/include/oskar/
