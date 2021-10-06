@@ -43,7 +43,7 @@ docker_release:
     GIT_VERSION: $CI_COMMIT_SHORT_SHA
   before_script:
     - apk add make git
-    - cp dist/*whl docker/rascil-base
+#    - cp dist/*whl docker/rascil-base
     - cd docker
     - echo $CAR_OCI_REGISTRY_PASSWORD | docker login --username $CAR_OCI_REGISTRY_USERNAME --password-stdin $CAR_OCI_REGISTRY_HOST
   script:
