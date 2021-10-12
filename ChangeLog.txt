@@ -20,6 +20,9 @@
 
     * Add limited drift-scan mode (point sources only; no time-smearing).
 
+    * Add capability to specify station type mapping for beam duplication,
+      if using this mode.
+
 2020-01-20  OSKAR-2.7.6
 
     * Fix load of TEC screen settings.

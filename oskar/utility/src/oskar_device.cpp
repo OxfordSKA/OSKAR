@@ -269,6 +269,19 @@ void oskar_device_launch_kernel(const char* name, int location,
             oskar_log_error(0, "Kernel '%s' has not been registered.", name);
             *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
         }
+        if (*status != 0)
+        {
+            oskar_log_error(0, "Kernel '%s' launch failure (CUDA error %d).",
+                    name, *status);
+            if (*status == cudaErrorInvalidConfiguration)
+            {
+                oskar_log_error(0,
+                        "Number of threads/blocks: (%u, %u, %u)/(%u, %u, %u), "
+                        "shared memory: %zu",
+                        num_threads.x, num_threads.y, num_threads.z,
+                        num_blocks.x, num_blocks.y, num_blocks.z, shared_mem);
+            }
+        }
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

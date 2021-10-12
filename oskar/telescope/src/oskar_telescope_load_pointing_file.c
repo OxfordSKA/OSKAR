@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -111,13 +111,13 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
             if (id[0] < 0)
             {
                 /* Loop over stations. */
-                for (i = 0; i < (size_t)telescope->num_stations; ++i)
+                for (i = 0; i < (size_t)telescope->num_station_models; ++i)
                 {
                     set_coords(oskar_telescope_station(telescope, (int)i), 0, 0,
                             num_ids - 1, sub_id, coordsys, lon, lat, status);
                 }
             }
-            else if (id[0] < telescope->num_stations)
+            else if (id[0] < telescope->num_station_models)
             {
                 set_coords(oskar_telescope_station(telescope, id[0]), 0, 0,
                         num_ids - 1, sub_id, coordsys, lon, lat, status);

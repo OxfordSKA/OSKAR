@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -55,8 +55,8 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     if (*status) return t;
 
     /* Return if no stations were found. */
-    int num_stations = oskar_telescope_num_stations(t);
-    if (num_stations < 1)
+    int num_station_models = oskar_telescope_num_station_models(t);
+    if (num_station_models < 1)
     {
         *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
         oskar_log_error(log, "Telescope model is empty.");
@@ -134,7 +134,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
             break;
         }
     }
-    for (int i = 0; i < num_stations; ++i)
+    for (int i = 0; i < num_station_models; ++i)
         set_station_data(oskar_telescope_station(t, i), s, status);
 
     /* Apply element level overrides. */
@@ -146,7 +146,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     if (position_error_xy_m > 0.0)
     {
         int seed = s->to_int("seed_position_xy_errors", status);
-        for (int i = 0; i < num_stations; ++i)
+        for (int i = 0; i < num_station_models; ++i)
             oskar_station_override_element_xy_position_errors(
                     oskar_telescope_station(t, i),
                     0, (unsigned int) seed, position_error_xy_m, status);
@@ -191,7 +191,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         double gain_time = s->to_double(k_gain_time[feed], status);
         if (gain_time > 0.0)
         {
-            for (int i = 0; i < num_stations; ++i)
+            for (int i = 0; i < num_station_models; ++i)
                 oskar_station_override_element_time_variable_gains(
                         oskar_telescope_station(t, i),
                         feed, gain_time, status);
@@ -210,7 +210,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         double phase_time = s->to_double(k_phase_time[feed], status) * D2R;
         if (phase_time > 0.0)
         {
-            for (int i = 0; i < num_stations; ++i)
+            for (int i = 0; i < num_station_models; ++i)
                 oskar_station_override_element_time_variable_phases(
                         oskar_telescope_station(t, i),
                         feed, phase_time, status);
@@ -230,7 +230,7 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         if (rot_err > 0.0)
         {
             int seed = s->to_int(k_rot_seed[feed], status);
-            for (int i = 0; i < num_stations; ++i)
+            for (int i = 0; i < num_station_models; ++i)
                 oskar_station_override_element_feed_angle(
                         oskar_telescope_station(t, i),
                         feed, (unsigned int) seed, rot_err, 0.0, 0.0, status);

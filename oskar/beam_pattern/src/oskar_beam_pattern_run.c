@@ -251,15 +251,17 @@ static void* run_blocks(void* arg)
 static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
         int i_channel, int i_active, int device_id, int* status)
 {
-    int chunk_size, i;
     DeviceData* d;
-
-    /* Check if safe to proceed. */
+    int chunk_size, i;
+    int num_models_evaluated = 0;
+    int *models_evaluated = 0, *model_offsets = 0;
     if (*status) return;
 
     /* Get chunk index from GPU ID and chunk start,
      * and return immediately if it's out of range. */
     d = &h->d[device_id];
+    const int* type_map = oskar_mem_int_const(
+            oskar_telescope_station_type_map_const(d->tel), status);
     const int i_chunk = i_chunk_start + device_id;
     if (i_chunk >= h->num_chunks) return;
 
@@ -292,20 +294,63 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
     /* Generate beam for this pixel chunk, for all active stations. */
     for (i = 0; i < h->num_active_stations; ++i)
     {
-        const oskar_Station* station =
-                oskar_telescope_station_const(d->tel, h->station_ids[i]);
-        if (!station)
-            station = oskar_telescope_station_const(d->tel, 0);
         const int offset = i * chunk_size;
         const oskar_Mem* const source_coords[] = {d->x, d->y, d->z};
-        oskar_station_beam(station, d->work,
-                h->source_coord_type, chunk_size, source_coords,
-                h->lon0, h->lat0,
-                oskar_telescope_phase_centre_coord_type(d->tel),
-                oskar_telescope_phase_centre_longitude_rad(d->tel),
-                oskar_telescope_phase_centre_latitude_rad(d->tel),
-                i_time, gast_rad, freq_hz,
-                offset, d->jones_data, status);
+        if (!oskar_telescope_allow_station_beam_duplication(d->tel))
+        {
+            const oskar_Station* station =
+                    oskar_telescope_station_const(d->tel, h->station_ids[i]);
+            if (!station)
+                station = oskar_telescope_station_const(d->tel, 0);
+            oskar_station_beam(station,
+                    d->work, h->source_coord_type, chunk_size,
+                    source_coords, h->lon0, h->lat0,
+                    oskar_telescope_phase_centre_coord_type(d->tel),
+                    oskar_telescope_phase_centre_longitude_rad(d->tel),
+                    oskar_telescope_phase_centre_latitude_rad(d->tel),
+                    i_time, gast_rad, freq_hz,
+                    offset, d->jones_data, status);
+        }
+        else
+        {
+            int j = 0, station_to_copy = -1;
+            const int station_model_type = type_map[h->station_ids[i]];
+            for (j = 0; j < num_models_evaluated; ++j)
+            {
+                if (models_evaluated[j] == station_model_type)
+                {
+                    station_to_copy = model_offsets[j];
+                    break;
+                }
+            }
+            if (station_to_copy >= 0)
+            {
+                oskar_mem_copy_contents(
+                        d->jones_data, d->jones_data,
+                        (size_t)(i * chunk_size),               /* Dest. */
+                        (size_t)(station_to_copy * chunk_size), /* Source. */
+                        (size_t)chunk_size, status);
+            }
+            else
+            {
+                oskar_station_beam(
+                        oskar_telescope_station_const(d->tel, station_model_type),
+                        d->work, h->source_coord_type, chunk_size,
+                        source_coords, h->lon0, h->lat0,
+                        oskar_telescope_phase_centre_coord_type(d->tel),
+                        oskar_telescope_phase_centre_longitude_rad(d->tel),
+                        oskar_telescope_phase_centre_latitude_rad(d->tel),
+                        i_time, gast_rad, freq_hz,
+                        offset, d->jones_data, status);
+                num_models_evaluated++;
+                models_evaluated = (int*) realloc(models_evaluated,
+                        num_models_evaluated * sizeof(int));
+                model_offsets = (int*) realloc(model_offsets,
+                        num_models_evaluated * sizeof(int));
+                models_evaluated[num_models_evaluated - 1] = station_model_type;
+                model_offsets[num_models_evaluated - 1] = i;
+            }
+        }
         if (d->auto_power[0])
             oskar_evaluate_auto_power(chunk_size,
                     offset, d->jones_data, 1.0, 0.0, 0.0, 0.0,
@@ -319,6 +364,8 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
                     h->test_source_stokes[3],
                     offset, d->auto_power[1], status);
     }
+    free(models_evaluated);
+    free(model_offsets);
     if (d->cross_power[0])
         oskar_evaluate_cross_power(chunk_size, h->num_active_stations,
                 d->jones_data, 1.0, 0.0, 0.0, 0.0,

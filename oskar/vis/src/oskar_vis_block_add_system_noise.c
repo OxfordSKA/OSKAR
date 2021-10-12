@@ -24,9 +24,12 @@ static void oskar_get_station_std_dev_for_channel(oskar_Mem* station_std_dev,
     oskar_mem_ensure(station_std_dev, num_stations, status);
 
     /* Loop over stations and get noise value standard deviation for each. */
+    const int* type_map = oskar_mem_int_const(
+            oskar_telescope_station_type_map_const(tel), status);
     for (i = 0; i < num_stations; ++i)
     {
-        const oskar_Station* station = oskar_telescope_station_const(tel, i);
+        const oskar_Station* station =
+                oskar_telescope_station_const(tel, type_map[i]);
         if (!station) station = oskar_telescope_station_const(tel, 0);
         noise_freq = oskar_station_noise_freq_hz_const(station);
         noise_rms = oskar_station_noise_rms_jy_const(station);

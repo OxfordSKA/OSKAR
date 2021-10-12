@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -321,20 +321,19 @@ int oskar_telescope_num_stations(const oskar_Telescope* model);
 
 /**
  * @brief
- * Returns a flag to specify whether all stations are identical.
+ * Returns the number of station models in the telescope model.
  *
  * @details
- * Returns a flag to specify whether all stations are identical.
- *
- * Note that this flag is only valid after calling
- * oskar_telescope_analyse().
+ * Returns the number of station models in the telescope model.
+ * This is not necessarily the same as the number of stations,
+ * if beam duplication is allowed.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return True if all stations are identical; false if not.
+ * @return The number of stations.
  */
 OSKAR_EXPORT
-int oskar_telescope_identical_stations(const oskar_Telescope* model);
+int oskar_telescope_num_station_models(const oskar_Telescope* model);
 
 /**
  * @brief
@@ -442,7 +441,36 @@ const oskar_Station* oskar_telescope_station_const(
         const oskar_Telescope* model, int i);
 
 
-/* Coordinate arrays. */
+/* Arrays. */
+
+/**
+ * @brief
+ * Returns a handle to the station type mapping array.
+ *
+ * @details
+ * Returns a handle to the station type mapping array.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A handle to the station type mapping array.
+ */
+OSKAR_EXPORT
+oskar_Mem* oskar_telescope_station_type_map(oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a constant handle to the station type mapping array.
+ *
+ * @details
+ * Returns a constant handle to the station type mapping array.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A constant handle to the station type mapping array.
+ */
+OSKAR_EXPORT
+const oskar_Mem* oskar_telescope_station_type_map_const(
+        const oskar_Telescope* model);
 
 /**
  * @brief
@@ -912,19 +940,6 @@ void oskar_telescope_set_polar_motion(oskar_Telescope* model,
 
 /**
  * @brief
- * Sets unique station IDs in a telescope model.
- *
- * @details
- * This function sets unique station IDs in a telescope model,
- * recursively if necessary.
- *
- * @param[in] model            Pointer to telescope model.
- */
-OSKAR_EXPORT
-void oskar_telescope_set_station_ids(oskar_Telescope* model);
-
-/**
- * @brief
  * Sets the type of stations within the telescope model.
  *
  * @details
@@ -955,6 +970,23 @@ void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type,
 OSKAR_EXPORT
 void oskar_telescope_set_time_average(oskar_Telescope* model,
         double time_average_sec);
+
+/**
+ * @brief
+ * Sets or clears the station type mapping.
+ *
+ * @details
+ * Sets or clears the station type mapping.
+ *
+ * @param[in] model       Pointer to telescope model.
+ * @param[in] value       If true, set the type map to specify all stations
+ *                        are unique; otherwise, set all stations to be
+ *                        the same.
+ * @param[in,out] status  Status return code.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_unique_stations(oskar_Telescope* model,
+        int value, int* status);
 
 /**
  * @brief

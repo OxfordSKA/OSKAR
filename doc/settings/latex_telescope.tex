@@ -47,7 +47,7 @@ true
 
 allow\_station\_beam\_duplication
 &
-{If enabled, and if all stations are identical, all station beam responses will be copied from the first. This can reduce the simulation time, but \textbf{when using a telescope model with long baselines, source positions will not shift with respect to each station's horizon if this option is enabled.} This setting has no effect if all stations are not identical.}
+{If enabled, the station type map from the telescope model is used to duplicate beams from common station configurations. This can significantly reduce the simulation time if there are only a limited number of station types, but \textbf{when using a telescope model with long baselines, source positions will not shift with respect to each station's horizon if this option is enabled.}}
 &
 Bool
 &

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -145,10 +145,13 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
         oskar_mem_copy(oskar_vis_header_station_offset_ecef_metres(h->header, i),
                 oskar_telescope_station_true_offset_ecef_metres_const(h->tel, i),
                 status);
+        const int* type_map = oskar_mem_int_const(
+                oskar_telescope_station_type_map_const(h->tel), status);
         for (j = 0; j < num_stations; ++j)
         {
             const int feed = 0; // Can only save feed 0 positions.
-            const oskar_Station* st = oskar_telescope_station_const(h->tel, j);
+            const oskar_Station* st =
+                    oskar_telescope_station_const(h->tel, type_map[j]);
             if (oskar_station_type(st) == OSKAR_STATION_TYPE_AA)
                 oskar_mem_copy(
                         oskar_vis_header_element_enu_metres(h->header, i, j),

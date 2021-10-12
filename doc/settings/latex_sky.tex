@@ -144,7 +144,7 @@ Double
 
 fits\_image/min\_peak\_fraction
 &
-{The minimum allowed pixel value, as a fraction of the peak value in the image.}
+{The minimum allowed pixel value, as a fraction of the peak value in the image. A value of zero or less disables this filter.}
 &
 Double
 &
@@ -156,7 +156,7 @@ fits\_image/min\_abs\_val
 &
 {The minimum pixel value accepted, in units of the original image.}
 &
-Unsigned double
+Double
 &
 0.0
 \\
@@ -265,9 +265,9 @@ Galactic
 
 healpix\_fits/min\_peak\_fraction
 &
-{The minimum allowed pixel value, as a fraction of the peak value in the image.}
+{The minimum allowed pixel value, as a fraction of the peak value in the image. A value of zero or less disables this filter.}
 &
-Unsigned double
+Double
 &
 0.0
 \\
@@ -277,7 +277,7 @@ healpix\_fits/min\_abs\_val
 &
 {The minimum pixel value accepted, in units of the original image.}
 &
-Unsigned double
+Double
 &
 0.0
 \\

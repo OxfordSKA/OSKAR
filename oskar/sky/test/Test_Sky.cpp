@@ -541,8 +541,8 @@ TEST(SkyModel, horizon_clip)
     // Create a telescope model near the north pole.
     int n_stations = 512;
     oskar_Telescope* telescope = oskar_telescope_create(type,
-            OSKAR_CPU, 0, &status);
-    oskar_telescope_resize(telescope, n_stations, &status);
+            OSKAR_CPU, n_stations, &status);
+    oskar_telescope_resize_station_array(telescope, n_stations, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n_stations; ++i)
     {

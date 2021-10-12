@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "telescope/private_telescope.h"
@@ -39,50 +16,17 @@ extern "C" {
 
 void oskar_telescope_resize(oskar_Telescope* telescope, int size, int* status)
 {
-    int i, old_size = 0;
+    int i;
     if (*status) return;
 
-    /* Get the old size. */
-    old_size = telescope->num_stations;
+    /* Do not resize the station array here. */
+    oskar_mem_realloc(telescope->station_type_map, size, status);
 
-    /* Check if increasing or decreasing in size. */
-    if (size > old_size)
-    {
-        /* Enlarge the station array and create new stations. */
-        telescope->station = (oskar_Station**) realloc(telescope->station,
-                size * sizeof(oskar_Station*));
-        if (!telescope->station)
-        {
-            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-            return;
-        }
-        for (i = old_size; i < size; ++i)
-        {
-            telescope->station[i] = oskar_station_create(
-                    oskar_mem_type(telescope->station_true_offset_ecef_metres[0]),
-                    oskar_mem_location(telescope->station_true_offset_ecef_metres[0]),
-                    0, status);
-        }
-    }
-    else if (size < old_size)
-    {
-        /* Free old stations and shrink the station array. */
-        for (i = size; i < old_size; ++i)
-        {
-            oskar_station_free(oskar_telescope_station(telescope, i), status);
-        }
-        telescope->station = (oskar_Station**) realloc(telescope->station,
-                size * sizeof(oskar_Station*));
-    }
-    else
-    {
-        /* No resize necessary. */
-        return;
-    }
-
-    /* Resize the remaining arrays. */
+    /* Resize the coordinate arrays. */
     for (i = 0; i < 3; ++i)
     {
+        oskar_mem_realloc(telescope->station_true_geodetic_rad[i],
+                size, status);
         oskar_mem_realloc(telescope->station_true_offset_ecef_metres[i],
                 size, status);
         oskar_mem_realloc(telescope->station_true_enu_metres[i],

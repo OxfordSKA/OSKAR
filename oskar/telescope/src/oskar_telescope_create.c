@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -42,6 +42,8 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->noise_seed = 1;
     for (i = 0; i < 3; ++i)
     {
+        telescope->station_true_geodetic_rad[i] =
+                oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_stations, status);
         telescope->station_true_offset_ecef_metres[i] =
                 oskar_mem_create(type, location, num_stations, status);
         telescope->station_true_enu_metres[i] =
@@ -51,16 +53,12 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
         telescope->station_measured_enu_metres[i] =
                 oskar_mem_create(type, location, num_stations, status);
     }
+    telescope->station_type_map =
+            oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_stations, status);
+    oskar_mem_clear_contents(telescope->station_type_map, status);
     telescope->tec_screen_path =
             oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
     telescope->gains = oskar_gains_create(type);
-    if (num_stations > 0)
-        telescope->station = (oskar_Station**) calloc(
-                num_stations, sizeof(oskar_Station*));
-    for (i = 0; i < num_stations; ++i)
-    {
-        telescope->station[i] = oskar_station_create(type, location, 0, status);
-    }
     return telescope;
 }
 

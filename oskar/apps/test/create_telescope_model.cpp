@@ -61,9 +61,9 @@ void create_telescope_model(const char* filename, int* status)
     oskar_telescope_set_station_coords_enu(tel,
             longitude_rad, latitude_rad, 0.0,
             num_stations, x, y, z, error, error, error, status);
+    oskar_telescope_resize_station_array(tel, 1, status);
     oskar_Station* station = oskar_telescope_station(tel, 0);
     oskar_station_resize(station, 1, status);
-    oskar_telescope_duplicate_first_station(tel, status);
     oskar_telescope_save(tel, filename, status);
     oskar_telescope_free(tel, status);
     oskar_mem_free(x, status);

@@ -25,6 +25,21 @@
 \endfoot
  
 \endlastfoot
+mode
+&
+{The observation mode. This is either \textbf{tracking} (the default) or \textbf{drift scan.}}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Tracking}
+\item {Drift scan}
+\end{itemize}
+}
+&
+Tracking
+\\
+\hline
+
 phase\_centre\_ra\_deg
 &
 {Right Ascension of the observation pointing (phase centre), in degrees.}
@@ -67,7 +82,7 @@ Unsigned double
 
 num\_channels
 &
-{Number of frequency channels / bands to use.}
+{Number of frequency channels to use.}
 &
 Integer > 0
 &

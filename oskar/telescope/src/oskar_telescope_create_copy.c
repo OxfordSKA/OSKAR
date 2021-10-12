@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -29,9 +29,9 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     /* Copy the meta-data. */
     telescope->pol_mode = src->pol_mode;
     telescope->num_stations = src->num_stations;
+    telescope->num_station_models = src->num_station_models;
     telescope->max_station_size = src->max_station_size;
     telescope->max_station_depth = src->max_station_depth;
-    telescope->identical_stations = src->identical_stations;
     telescope->allow_station_beam_duplication = src->allow_station_beam_duplication;
     telescope->enable_numerical_patterns = src->enable_numerical_patterns;
     telescope->lon_rad = src->lon_rad;
@@ -57,6 +57,8 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     /* Copy the coordinates. */
     for (i = 0; i < 3; ++i)
     {
+        oskar_mem_copy(telescope->station_true_geodetic_rad[i],
+                src->station_true_geodetic_rad[i], status);
         oskar_mem_copy(telescope->station_true_offset_ecef_metres[i],
                 src->station_true_offset_ecef_metres[i], status);
         oskar_mem_copy(telescope->station_true_enu_metres[i],
@@ -66,8 +68,8 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
         oskar_mem_copy(telescope->station_measured_enu_metres[i],
                 src->station_measured_enu_metres[i], status);
     }
-    oskar_mem_copy(telescope->tec_screen_path,
-            src->tec_screen_path, status);
+    oskar_mem_copy(telescope->station_type_map, src->station_type_map, status);
+    oskar_mem_copy(telescope->tec_screen_path, src->tec_screen_path, status);
 
     /* Copy the gain model. */
     oskar_gains_free(telescope->gains, status);
@@ -75,8 +77,8 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
 
     /* Copy each station. */
     telescope->station = (oskar_Station**) calloc(
-            src->num_stations, sizeof(oskar_Station*));
-    for (i = 0; i < src->num_stations; ++i)
+            src->num_station_models, sizeof(oskar_Station*));
+    for (i = 0; i < src->num_station_models; ++i)
     {
         telescope->station[i] = oskar_station_create_copy(
                 oskar_telescope_station_const(src, i), location, status);

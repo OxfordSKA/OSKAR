@@ -67,6 +67,9 @@ TEST(evaluate_jones_E, evaluate_e)
     int num_stations = 6;
     oskar_Telescope* tel_cpu = oskar_telescope_create(prec,
             OSKAR_CPU, num_stations, &error);
+    oskar_telescope_set_allow_station_beam_duplication(tel_cpu, OSKAR_FALSE);
+    oskar_telescope_resize_station_array(tel_cpu, num_stations, &error);
+    oskar_telescope_set_unique_stations(tel_cpu, 1, &error);
     double frequency = 30e6;
     int station_dim = 20;
     double station_size_m = 180.0;
@@ -98,10 +101,9 @@ TEST(evaluate_jones_E, evaluate_e)
         oskar_mem_copy(oskar_station_element_true_enu_metres(s, 0, 1),
                 oskar_station_element_measured_enu_metres(s, 0, 1), &error);
     }
-    oskar_telescope_set_station_ids(tel_cpu);
+    oskar_telescope_set_station_ids_and_coords(tel_cpu, &error);
     oskar_telescope_set_phase_centre(tel_cpu,
             OSKAR_COORDS_RADEC, 0.0, M_PI/2.0);
-    oskar_telescope_set_allow_station_beam_duplication(tel_cpu, OSKAR_FALSE);
     oskar_telescope_analyse(tel_cpu, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 

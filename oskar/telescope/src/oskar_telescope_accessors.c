@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -123,9 +123,9 @@ int oskar_telescope_num_stations(const oskar_Telescope* model)
     return model->num_stations;
 }
 
-int oskar_telescope_identical_stations(const oskar_Telescope* model)
+int oskar_telescope_num_station_models(const oskar_Telescope* model)
 {
-    return model->identical_stations;
+    return model->num_station_models;
 }
 
 int oskar_telescope_allow_station_beam_duplication(
@@ -159,17 +159,30 @@ int oskar_telescope_max_station_depth(const oskar_Telescope* model)
 
 oskar_Station* oskar_telescope_station(oskar_Telescope* model, int i)
 {
+    if (i >= model->num_station_models) return 0;
     return model->station[i];
 }
 
 const oskar_Station* oskar_telescope_station_const(
         const oskar_Telescope* model, int i)
 {
+    if (i >= model->num_station_models) return 0;
     return model->station[i];
 }
 
 
-/* Coordinate arrays. */
+/* Arrays. */
+
+oskar_Mem* oskar_telescope_station_type_map(oskar_Telescope* model)
+{
+    return model->station_type_map;
+}
+
+const oskar_Mem* oskar_telescope_station_type_map_const(
+        const oskar_Telescope* model)
+{
+    return model->station_type_map;
+}
 
 oskar_Mem* oskar_telescope_station_measured_offset_ecef_metres(
         oskar_Telescope* model, int dim)
@@ -292,7 +305,7 @@ void oskar_telescope_set_gaussian_station_beam_width(oskar_Telescope* model,
         double fwhm_deg, double ref_freq_hz)
 {
     int i;
-    for (i = 0; i < model->num_stations; ++i)
+    for (i = 0; i < model->num_station_models; ++i)
     {
         oskar_telescope_set_gaussian_station_beam_p(model->station[i],
                 fwhm_deg * M_PI / 180.0, ref_freq_hz);
@@ -304,7 +317,7 @@ void oskar_telescope_set_noise_freq_file(oskar_Telescope* model,
 {
     int i;
     if (*status) return;
-    for (i = 0; i < model->num_stations; ++i)
+    for (i = 0; i < model->num_station_models; ++i)
     {
         if (!model->station[i]) continue;
         oskar_mem_load_ascii(filename, 1, status,
@@ -332,7 +345,7 @@ void oskar_telescope_set_noise_freq(oskar_Telescope* model,
     }
 
     /* Set noise frequency for all top-level stations. */
-    for (i = 0; i < model->num_stations; ++i)
+    for (i = 0; i < model->num_station_models; ++i)
     {
         oskar_Mem* t;
         if (!model->station[i]) continue;
@@ -348,7 +361,7 @@ void oskar_telescope_set_noise_rms_file(oskar_Telescope* model,
 {
     int i;
     if (*status) return;
-    for (i = 0; i < model->num_stations; ++i)
+    for (i = 0; i < model->num_station_models; ++i)
     {
         if (!model->station[i]) continue;
         oskar_mem_load_ascii(filename, 1, status,
@@ -366,7 +379,7 @@ void oskar_telescope_set_noise_rms(oskar_Telescope* model,
 
     /* Set noise RMS for all top-level stations. */
     if (*status) return;
-    for (i = 0; i < model->num_stations; ++i)
+    for (i = 0; i < model->num_station_models; ++i)
     {
         s = model->station[i];
         if (!s) continue;
@@ -412,7 +425,7 @@ void oskar_telescope_set_polar_motion(oskar_Telescope* model,
     model->pm_y_rad = pm_y_rad;
 
     /* Set for all stations, too. */
-    for (i = 0; i < model->num_stations; ++i)
+    for (i = 0; i < model->num_station_models; ++i)
     {
         oskar_station_set_polar_motion(model->station[i], pm_x_rad, pm_y_rad);
     }
@@ -443,7 +456,7 @@ void oskar_telescope_set_phase_centre(oskar_Telescope* model,
     model->phase_centre_coord_type = coord_type;
     model->phase_centre_rad[0] = longitude_rad;
     model->phase_centre_rad[1] = latitude_rad;
-    for (i = 0; i < model->num_stations; ++i)
+    for (i = 0; i < model->num_station_models; ++i)
     {
         oskar_telescope_set_station_phase_centre(model->station[i],
                 coord_type, longitude_rad, latitude_rad);
@@ -489,13 +502,6 @@ void oskar_telescope_set_time_average(oskar_Telescope* model,
     model->time_average_sec = time_average_sec;
 }
 
-void oskar_telescope_set_station_ids(oskar_Telescope* model)
-{
-    int i, counter = 0;
-    for (i = 0; i < model->num_stations; ++i)
-        oskar_station_set_unique_ids(model->station[i], &counter);
-}
-
 static void oskar_telescope_set_station_type_p(oskar_Station* station, int type)
 {
     oskar_station_set_station_type(station, type);
@@ -529,8 +535,21 @@ void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type,
         *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
     }
-    for (i = 0; i < model->num_stations; ++i)
+    for (i = 0; i < model->num_station_models; ++i)
         oskar_telescope_set_station_type_p(model->station[i], t);
+}
+
+void oskar_telescope_set_unique_stations(oskar_Telescope* model,
+        int value, int* status)
+{
+    if (value)
+    {
+        int i = 0;
+        int* type_map = oskar_mem_int(model->station_type_map, status);
+        for (i = 0; i < model->num_stations; ++i) type_map[i] = i;
+    }
+    else
+        oskar_mem_clear_contents(model->station_type_map, status);
 }
 
 void oskar_telescope_set_uv_filter(oskar_Telescope* model,

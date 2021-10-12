@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -20,18 +20,20 @@ void oskar_telescope_free(oskar_Telescope* telescope, int* status)
     /* Free the arrays. */
     for (i = 0; i < 3; ++i)
     {
+        oskar_mem_free(telescope->station_true_geodetic_rad[i], status);
         oskar_mem_free(telescope->station_true_offset_ecef_metres[i], status);
         oskar_mem_free(telescope->station_true_enu_metres[i], status);
         oskar_mem_free(telescope->station_measured_offset_ecef_metres[i], status);
         oskar_mem_free(telescope->station_measured_enu_metres[i], status);
     }
+    oskar_mem_free(telescope->station_type_map, status);
     oskar_mem_free(telescope->tec_screen_path, status);
 
     /* Free the gain model. */
     oskar_gains_free(telescope->gains, status);
 
     /* Free each station. */
-    for (i = 0; i < telescope->num_stations; ++i)
+    for (i = 0; i < telescope->num_station_models; ++i)
     {
         oskar_station_free(oskar_telescope_station(telescope, i), status);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The OSKAR Developers.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -93,12 +93,9 @@ static PyObject* load(PyObject* self, PyObject* args)
 
 static PyObject* identical_stations(PyObject* self, PyObject* args)
 {
-    oskar_Telescope* h = 0;
-    PyObject* capsule = 0;
-    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = (oskar_Telescope*) get_handle(capsule, name))) return 0;
-    return Py_BuildValue("O", oskar_telescope_identical_stations(h) ?
-            Py_True : Py_False);
+    PyErr_Format(PyExc_RuntimeError,
+            "This method is no longer available.");
+    return 0;
 }
 
 
@@ -506,6 +503,18 @@ static PyObject* set_station_coords_ecef(PyObject* self, PyObject* args)
             OSKAR_DOUBLE, OSKAR_CPU, num_stations, &status);
 
     /* Set data. */
+#if OSKAR_VERSION >= 0x020800
+    oskar_telescope_set_station_coords_ecef(h, longitude, latitude, altitude,
+            num_stations, x_c, y_c, z_c, x_err_c, y_err_c, z_err_c, &status);
+    oskar_telescope_resize_station_array(h, 1, &status);
+    for (i = 0; i < 1; ++i)
+    {
+        oskar_Station* station = oskar_telescope_station(h, i);
+        oskar_station_resize(station, 1, &status);
+        oskar_station_resize_element_types(station, 1, &status);
+    }
+    oskar_telescope_set_station_ids_and_coords(h, &status);
+#else
     oskar_telescope_set_station_coords_ecef(h, longitude, latitude, altitude,
             num_stations, x_c, y_c, z_c, x_err_c, y_err_c, z_err_c, &status);
     for (i = 0; i < num_stations; ++i)
@@ -514,6 +523,7 @@ static PyObject* set_station_coords_ecef(PyObject* self, PyObject* args)
         oskar_station_resize(station, 1, &status);
         oskar_station_resize_element_types(station, 1, &status);
     }
+#endif
 
     /* Free memory. */
     oskar_mem_free(x_c, &status);
@@ -595,6 +605,18 @@ static PyObject* set_station_coords_enu(PyObject* self, PyObject* args)
             OSKAR_DOUBLE, OSKAR_CPU, num_stations, &status);
 
     /* Set data. */
+#if OSKAR_VERSION >= 0x020800
+    oskar_telescope_set_station_coords_enu(h, longitude, latitude, altitude,
+            num_stations, x_c, y_c, z_c, x_err_c, y_err_c, z_err_c, &status);
+    oskar_telescope_resize_station_array(h, 1, &status);
+    for (i = 0; i < 1; ++i)
+    {
+        oskar_Station* station = oskar_telescope_station(h, i);
+        oskar_station_resize(station, 1, &status);
+        oskar_station_resize_element_types(station, 1, &status);
+    }
+    oskar_telescope_set_station_ids_and_coords(h, &status);
+#else
     oskar_telescope_set_station_coords_enu(h, longitude, latitude, altitude,
             num_stations, x_c, y_c, z_c, x_err_c, y_err_c, z_err_c, &status);
     for (i = 0; i < num_stations; ++i)
@@ -603,6 +625,7 @@ static PyObject* set_station_coords_enu(PyObject* self, PyObject* args)
         oskar_station_resize(station, 1, &status);
         oskar_station_resize_element_types(station, 1, &status);
     }
+#endif
 
     /* Free memory. */
     oskar_mem_free(x_c, &status);
@@ -672,6 +695,18 @@ static PyObject* set_station_coords_wgs84(PyObject* self, PyObject* args)
             OSKAR_DOUBLE, OSKAR_CPU, num_stations, &status);
 
     /* Set data. */
+#if OSKAR_VERSION >= 0x020800
+    oskar_telescope_set_station_coords_wgs84(h, longitude, latitude, altitude,
+            num_stations, lon_deg_c, lat_deg_c, alt_m_c, &status);
+    oskar_telescope_resize_station_array(h, 1, &status);
+    for (i = 0; i < 1; ++i)
+    {
+        oskar_Station* station = oskar_telescope_station(h, i);
+        oskar_station_resize(station, 1, &status);
+        oskar_station_resize_element_types(station, 1, &status);
+    }
+    oskar_telescope_set_station_ids_and_coords(h, &status);
+#else
     oskar_telescope_set_station_coords_wgs84(h, longitude, latitude, altitude,
             num_stations, lon_deg_c, lat_deg_c, alt_m_c, &status);
     for (i = 0; i < num_stations; ++i)
@@ -680,6 +715,7 @@ static PyObject* set_station_coords_wgs84(PyObject* self, PyObject* args)
         oskar_station_resize(station, 1, &status);
         oskar_station_resize_element_types(station, 1, &status);
     }
+#endif
 
     /* Free memory. */
     oskar_mem_free(lon_deg_c, &status);

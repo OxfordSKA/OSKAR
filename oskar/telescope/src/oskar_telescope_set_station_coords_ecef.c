@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "convert/oskar_convert_ecef_to_enu.h"
@@ -56,6 +33,7 @@ void oskar_telescope_set_station_coords_ecef(oskar_Telescope* telescope,
     }
 
     /* Resize the telescope model to hold the station data. */
+    /* Do not resize the station array here. */
     oskar_telescope_resize(telescope, num_stations, status);
     if (*status) return;
 
@@ -66,11 +44,12 @@ void oskar_telescope_set_station_coords_ecef(oskar_Telescope* telescope,
     /* Loop over station coordinates. */
     for (i = 0; i < num_stations; ++i)
     {
-        double lon = 0.0, lat = 0.0, alt = 0.0;
+        double true_geodetic[3]; /* Longitude, latitude, altitude. */
 
         /* x, y, z, delta x, delta y, delta z */
         double ecef[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         double hor[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        if (*status) break;
 
         /* Get coordinates from input arrays. */
         ecef[0] = oskar_mem_get_element(x, i, status);
@@ -87,7 +66,8 @@ void oskar_telescope_set_station_coords_ecef(oskar_Telescope* telescope,
 
         /* Convert station ECEF to station longitude, latitude, altitude. */
         oskar_convert_ecef_to_geodetic_spherical(1,
-                &ecef[3], &ecef[4], &ecef[5], &lon, &lat, &alt);
+                &ecef[3], &ecef[4], &ecef[5],
+                &true_geodetic[0], &true_geodetic[1], &true_geodetic[2]);
 
         /* Convert station ECEF to horizon plane coordinates. */
         oskar_convert_ecef_to_enu(1, &ecef[0], &ecef[1], &ecef[2],
@@ -103,16 +83,10 @@ void oskar_telescope_set_station_coords_ecef(oskar_Telescope* telescope,
         oskar_convert_enu_to_offset_ecef_d(1, &hor[3], &hor[4], &hor[5],
                 longitude_rad, latitude_rad, &ecef[3], &ecef[4], &ecef[5]);
 
-        /* Store the offset geocentric and horizon plane coordinates. */
-        oskar_station_set_position(oskar_telescope_station(telescope, i),
-                lon, lat, alt, ecef[3], ecef[4], ecef[5]);
-        oskar_telescope_set_station_coords(telescope, i, &ecef[0], &ecef[3],
-                &hor[0], &hor[3], status);
-        if (*status) break;
+        /* Store the coordinates. */
+        oskar_telescope_set_station_coords(telescope, i, true_geodetic,
+                &ecef[0], &ecef[3], &hor[0], &hor[3], status);
     }
-
-    /* (Re-)Set unique station IDs. */
-    oskar_telescope_set_station_ids(telescope);
 }
 
 #ifdef __cplusplus
