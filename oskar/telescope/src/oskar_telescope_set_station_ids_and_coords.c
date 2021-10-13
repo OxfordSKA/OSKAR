@@ -68,6 +68,9 @@ void oskar_telescope_set_station_ids_and_coords(
             oskar_station_free(stations[i], status);
         free(stations);
 
+        /* Reset the type map so we use a unique model per station. */
+        oskar_telescope_set_unique_stations(model, 1, status);
+
         /* Set coordinates of each station. */
         double true_geodetic[3], true_offset_ecef[3];
         for (i = 0; i < model->num_stations; ++i)
