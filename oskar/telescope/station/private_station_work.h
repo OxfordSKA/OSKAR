@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -25,6 +25,7 @@ struct oskar_StationWork
 
     /* TEC screen. */
     char screen_type;
+    int isoplanatic_screen;
     int previous_time_index;
     int screen_num_pixels_x, screen_num_pixels_y, screen_num_pixels_t;
     double screen_height_km;

@@ -1,7 +1,8 @@
-/* Copyright (c) 2019, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2019-2021, The OSKAR Developers. See LICENSE file. */
 
 #define OSKAR_EVALUATE_TEC_SCREEN(NAME, FP, FP2)\
-KERNEL(NAME) (const int num_points, GLOBAL_IN(FP, l), GLOBAL_IN(FP, m),\
+KERNEL(NAME) (const int isoplanatic,\
+        const int num_points, GLOBAL_IN(FP, l), GLOBAL_IN(FP, m),\
         const FP station_u, const FP station_v, const FP inv_frequency_hz,\
         const FP screen_height_m, const FP inv_pixel_size_m,\
         const int screen_num_pixels_x, const int screen_num_pixels_y,\
@@ -11,8 +12,9 @@ KERNEL(NAME) (const int num_points, GLOBAL_IN(FP, l), GLOBAL_IN(FP, m),\
     const int screen_half_y = screen_num_pixels_y / 2;\
     KERNEL_LOOP_X(int, i, 0, num_points)\
     FP2 comp;\
-    const FP world_x = (station_u + l[i] * screen_height_m) * inv_pixel_size_m;\
-    const FP world_y = (station_v + m[i] * screen_height_m) * inv_pixel_size_m;\
+    const int s = isoplanatic ? 0 : i;\
+    const FP world_x = (station_u + l[s] * screen_height_m) * inv_pixel_size_m;\
+    const FP world_y = (station_v + m[s] * screen_height_m) * inv_pixel_size_m;\
     const int pix_x = screen_half_x + ROUND(FP, world_x);\
     const int pix_y = screen_half_y + ROUND(FP, world_y);\
     if (pix_x >= 0 && pix_y >= 0 &&\

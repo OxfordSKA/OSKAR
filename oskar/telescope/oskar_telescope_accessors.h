@@ -221,6 +221,20 @@ double oskar_telescope_tec_screen_time_interval_sec(
 
 /**
  * @brief
+ * Returns the flag to specify whether isoplanatic screens should be used.
+ *
+ * @details
+ * Returns the flag to specify whether isoplanatic screens should be used.
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return If true, screens should be treated as isoplanatic.
+ */
+OSKAR_EXPORT
+int oskar_telescope_isoplanatic_screen(const oskar_Telescope* model);
+
+/**
+ * @brief
  * Returns the time averaging interval in seconds.
  *
  * @details
@@ -706,6 +720,19 @@ void oskar_telescope_set_channel_bandwidth(oskar_Telescope* model,
 OSKAR_EXPORT
 void oskar_telescope_set_ionosphere_screen_type(oskar_Telescope* model,
         const char* type);
+
+/**
+ * @brief
+ * Sets the option to treat phase screens as isoplanatic.
+ *
+ * @details
+ * Sets the option to treat phase screens as isoplanatic.
+ *
+ * @param[in] model    Pointer to telescope model.
+ * @param[in] flag     If true, treat phase screens as isoplanatic.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_isoplanatic_screen(oskar_Telescope* model, int flag);
 
 /**
  * @brief

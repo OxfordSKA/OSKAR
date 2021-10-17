@@ -23,6 +23,8 @@
     * Add capability to specify station type mapping for beam duplication,
       if using this mode.
 
+    * Add option to treat phase screens as isoplanatic.
+
 2020-01-20  OSKAR-2.7.6
 
     * Fix load of TEC screen settings.

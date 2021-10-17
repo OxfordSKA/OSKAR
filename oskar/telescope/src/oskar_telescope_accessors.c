@@ -88,6 +88,11 @@ double oskar_telescope_tec_screen_time_interval_sec(
     return model->tec_screen_time_interval_sec;
 }
 
+int oskar_telescope_isoplanatic_screen(const oskar_Telescope* model)
+{
+    return model->isoplanatic_screen;
+}
+
 double oskar_telescope_time_average_sec(const oskar_Telescope* model)
 {
     return model->time_average_sec;
@@ -270,6 +275,11 @@ void oskar_telescope_set_ionosphere_screen_type(oskar_Telescope* model,
         const char* type)
 {
     model->ionosphere_screen_type = toupper(type[0]);
+}
+
+void oskar_telescope_set_isoplanatic_screen(oskar_Telescope* model, int flag)
+{
+    model->isoplanatic_screen = flag;
 }
 
 void oskar_telescope_set_enable_noise(oskar_Telescope* model,

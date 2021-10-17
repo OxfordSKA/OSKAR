@@ -53,6 +53,7 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     telescope->tec_screen_height_km = src->tec_screen_height_km;
     telescope->tec_screen_pixel_size_m = src->tec_screen_pixel_size_m;
     telescope->tec_screen_time_interval_sec = src->tec_screen_time_interval_sec;
+    telescope->isoplanatic_screen = src->isoplanatic_screen;
 
     /* Copy the coordinates. */
     for (i = 0; i < 3; ++i)

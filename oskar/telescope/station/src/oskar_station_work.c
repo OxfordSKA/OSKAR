@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -100,6 +100,12 @@ oskar_Mem* oskar_station_work_lmn_direction(oskar_StationWork* work, int dim,
     return work->lmn[dim];
 }
 
+void oskar_station_work_set_isoplanatic_screen(oskar_StationWork* work,
+        int flag)
+{
+    work->isoplanatic_screen = flag;
+}
+
 void oskar_station_work_set_tec_screen_common_params(oskar_StationWork* work,
         char screen_type, double screen_height_km, double screen_pixel_size_m,
         double screen_time_interval_sec)
@@ -159,7 +165,8 @@ const oskar_Mem* oskar_station_work_evaluate_tec_screen(oskar_StationWork* work,
         }
     }
     oskar_mem_ensure(work->screen_output, (size_t) num_points, status);
-    oskar_evaluate_tec_screen(num_points, l, m, station_u_m, station_v_m,
+    oskar_evaluate_tec_screen(work->isoplanatic_screen,
+            num_points, l, m, station_u_m, station_v_m,
             frequency_hz, work->screen_height_km * 1000.0,
             work->screen_pixel_size_m,
             work->screen_num_pixels_x, work->screen_num_pixels_y,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -67,6 +67,10 @@ oskar_Mem* oskar_station_work_enu_direction(oskar_StationWork* work, int dim,
 OSKAR_EXPORT
 oskar_Mem* oskar_station_work_lmn_direction(oskar_StationWork* work, int dim,
         int num_points, int* status);
+
+OSKAR_EXPORT
+void oskar_station_work_set_isoplanatic_screen(oskar_StationWork* work,
+        int flag);
 
 OSKAR_EXPORT
 void oskar_station_work_set_tec_screen_common_params(oskar_StationWork* work,

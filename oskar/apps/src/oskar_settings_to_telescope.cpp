@@ -243,6 +243,8 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     const char* ionosphere_screen_type =
             s->to_string("ionosphere_screen_type", status);
     oskar_telescope_set_ionosphere_screen_type(t, ionosphere_screen_type);
+    oskar_telescope_set_isoplanatic_screen(t,
+            s->to_int("isoplanatic_screen", status));
     if (std::toupper(ionosphere_screen_type[0]) == 'E')
     {
         s->begin_group("external_tec_screen");

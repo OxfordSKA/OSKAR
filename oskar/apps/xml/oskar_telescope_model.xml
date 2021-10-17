@@ -83,6 +83,12 @@
                 in seconds.</desc></s>
         -->
     </s>
+    <s k="isoplanatic_screen"><label>Assume isoplanatic screen</label>
+        <depends k="telescope/ionosphere_screen_type" v="External"/>
+        <type name="bool" default="false"/>
+        <desc>If true, phase screens will be treated as isoplanatic,
+            i.e. the same value will be used for all sources in the field.</desc>
+    </s>
     <!--
     <s k="output_directory"><label>Output directory</label>
         <type name="OutputFile" default=""/>

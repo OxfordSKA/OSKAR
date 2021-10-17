@@ -246,6 +246,8 @@ static void* init_device(void* arg)
                 status);
         d->gains = oskar_mem_create(vistype, dev_loc, num_stations, status);
         d->station_work = oskar_station_work_create(h->prec, dev_loc, status);
+        oskar_station_work_set_isoplanatic_screen(d->station_work,
+                oskar_telescope_isoplanatic_screen(d->tel));
         oskar_station_work_set_tec_screen_common_params(d->station_work,
                 oskar_telescope_ionosphere_screen_type(d->tel),
                 oskar_telescope_tec_screen_height_km(d->tel),

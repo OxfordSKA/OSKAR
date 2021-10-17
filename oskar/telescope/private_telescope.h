@@ -41,6 +41,7 @@ struct oskar_Telescope
     double tec_screen_height_km;
     double tec_screen_pixel_size_m;
     double tec_screen_time_interval_sec;
+    int isoplanatic_screen;
 
     /* Station data. */
     int supplied_coord_type;                           /* Type of coordinates specified in telescope model. */
