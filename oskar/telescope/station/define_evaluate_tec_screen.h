@@ -12,9 +12,17 @@ KERNEL(NAME) (const int isoplanatic,\
     const int screen_half_y = screen_num_pixels_y / 2;\
     KERNEL_LOOP_X(int, i, 0, num_points)\
     FP2 comp;\
-    const int s = isoplanatic ? 0 : i;\
-    const FP world_x = (station_u + l[s] * screen_height_m) * inv_pixel_size_m;\
-    const FP world_y = (station_v + m[s] * screen_height_m) * inv_pixel_size_m;\
+    FP s_l, s_m;\
+    if (isoplanatic) {\
+        s_l = (FP)0;\
+        s_m = (FP)0;\
+    }\
+    else {\
+        s_l = l[i];\
+        s_m = m[i];\
+    }\
+    const FP world_x = (station_u + s_l * screen_height_m) * inv_pixel_size_m;\
+    const FP world_y = (station_v + s_m * screen_height_m) * inv_pixel_size_m;\
     const int pix_x = screen_half_x + ROUND(FP, world_x);\
     const int pix_y = screen_half_y + ROUND(FP, world_y);\
     if (pix_x >= 0 && pix_y >= 0 &&\
