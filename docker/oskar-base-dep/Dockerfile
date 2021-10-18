@@ -2,7 +2,7 @@
 # Build a base image for OSKAR.
 # Install the casacore Tables library and its dependencies.
 #
-FROM nvidia/cuda:10.1-base-ubuntu18.04 AS build
+FROM nvidia/cuda:11.4.2-base-ubuntu20.04 AS build
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get upgrade -y && \
@@ -24,20 +24,13 @@ RUN mkdir casacore-src && \
 # Copy into a minimal image.
 # Also include other runtime library dependencies here (e.g. cuFFT),
 # to avoid having to keep reinstalling these later.
-FROM nvidia/cuda:10.1-base-ubuntu18.04
+FROM nvidia/cuda:11.4.2-base-ubuntu20.04
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
-    cuda-cufft-10-1 \
-    gosu \
+    libcufft-11-4 \
     libgomp1 \
-    libhdf5-100 \
+    libhdf5-103 \
     && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY --from=build /usr/local/lib /usr/local/lib/
 COPY --from=build /usr/local/include/casacore /usr/local/include/casacore/
-
-# Use entrypoint script to create a user on the fly and avoid running as root.
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["/bin/bash"]

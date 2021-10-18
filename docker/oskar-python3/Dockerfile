@@ -15,4 +15,4 @@ RUN pip3 install -U astropy numpy matplotlib setuptools && \
 FROM artefact.skao.int/oskar-base
 RUN apt-get update && apt-get install -y --no-install-recommends python3 \
     && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
-COPY --from=build /usr/local/lib/python3.6 /usr/local/lib/python3.6/
+COPY --from=build /usr/local/lib/python3.8 /usr/local/lib/python3.8/
