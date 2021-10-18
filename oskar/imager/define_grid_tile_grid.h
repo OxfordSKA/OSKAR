@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2019, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2018-2021, The OSKAR Developers. See LICENSE file. */
 
 #define SHMSZ 8
 #define REGSZ 8
@@ -71,12 +71,12 @@
     LOCAL int s_tile_coords[NUM_VIS_LOCAL];\
     LOCAL FP2 s_vis[NUM_VIS_LOCAL];\
     LOCAL FP  s_weight[NUM_VIS_LOCAL];\
+    WARP_DECL(int i_vis);\
     FP2 my_grid[REGSZ + 1];\
     LOCAL_CUDA_BASE(FP2, smem)\
     int tile_u = -1, tile_v = -1, my_grid_u = 0, my_grid_v_start = 0;\
     PREFER_DOUBLE norm_local = (PREFER_DOUBLE)0;\
     while (true) {\
-        WARP_DECL(int i_vis);\
         if (tid_x == 0)\
             ATOMIC_ADD_CAPTURE_int(vis_counter, 0, NUM_VIS_LOCAL, i_vis)\
         WARP_BROADCAST(i_vis, 0);\
@@ -188,12 +188,12 @@ OSKAR_REGISTER_KERNEL(NAME)
     LOCAL int s_wsupport[NUM_VIS_LOCAL], s_wkernel_idx[NUM_VIS_LOCAL];\
     LOCAL FP2 s_vis[NUM_VIS_LOCAL];\
     LOCAL FP  s_weight[NUM_VIS_LOCAL];\
+    WARP_DECL(int i_vis);\
     FP2 my_grid[REGSZ + 1];\
     LOCAL_CUDA_BASE(FP2, smem)\
     int tile_u = -1, tile_v = -1, my_grid_u = 0, my_grid_v_start = 0;\
     PREFER_DOUBLE norm_local = (PREFER_DOUBLE)0;\
     while (true) {\
-        WARP_DECL(int i_vis);\
         if (tid_x == 0)\
             ATOMIC_ADD_CAPTURE_int(vis_counter, 0, NUM_VIS_LOCAL, i_vis)\
         WARP_BROADCAST(i_vis, 0);\
