@@ -3,7 +3,7 @@
 \page telescope_model Telescope Model
 
 \latexonly
-\def \docversion{9}
+\def \docversion{10}
 \endlatexonly
 
 \section telescope_intro Introduction
@@ -36,12 +36,15 @@ to its own centre.
 
 The **alphabetical** order of the station directories corresponds to the order
 in which the station coordinates and element data appear in the layout and
-configuration files. (**Note that leading zeros must be used in directory
-names when necessary.**) With one exception, there must be the same number of
-directories as the number of rows in all configuration file(s) at that level.
-The exception is the case where all stations (or sub-stations) are identical,
-where it is sufficient to specify only one station directory: in this case,
-the configuration will be copied for all stations defined in the parent layout.
+configuration files, if all (sub-)stations are different.
+(**Note that leading zeros must be used in directory names when necessary.**)
+If instead all stations are the same, then only a single (sub-)station directory
+should be present.
+
+Since OSKAR 2.8, it is possible to specify the type of each top-level station
+using a file to map station type index to station index, which is useful if
+there are fewer station types than there are stations in the telescope.
+An example of how this could look is shown at the end of this section.
 
 \subsubsection tel_example_single_general  Example Telescope Model (single level beamforming; general case)
 
@@ -110,6 +113,24 @@ it is sufficient to specify only one station directory at each level:
   - [file describing the layout of stations in the interferometer]
   - [file describing the centre position of the interferometer]
 
+\subsubsection tel_example_single_type_map  Example Telescope Model (single level beamforming; use of station type map)
+
+If there are only a small number of station types in the telescope model, then
+use the station directories to specify the station types, and add another file
+in the root of the telescope model to specify the type of each station:
+
+- my_telescope_model/
+  - station-type000/
+    - [files describing the configuration of station type 0]
+  - station-type001/
+    - [files describing the configuration of station type 1]
+  - [file describing the layout of stations in the interferometer]
+  - [file describing the centre position of the interferometer]
+  - [file describing the mapping between station type and station index]
+
+Note that station type indices are zero-based, and must appear as such in the
+mapping file (see \ref telescope_station_type_mapping).
+
 \latexonly
 \newpage
 \endlatexonly
@@ -119,13 +140,16 @@ it is sufficient to specify only one station directory at each level:
 This section shows the names of files that may be present in the various
 directories of the telescope model.
 
+Fields in text files can be space-separated and/or comma-separated.
+Characters appearing after a hash ('#') symbol are treated as comments,
+and any further characters on that line are ignored.
+Empty lines are also ignored.
+
 \par position.txt
 Centre reference position of telescope array.<br>
 <b>See</b> \ref telescope_position <br>
 <b>Required:</b> Yes.<br>
 <b>Allowed locations:</b> Telescope model root directory.
-
-\subsubsection telescope_element_data Element Data
 
 \par layout.txt
 The layout (in horizontal East-North-Up coordinates) of stations or elements
@@ -150,6 +174,17 @@ if required.<br>
 <b>Required:</b> No, unless layout.txt and layout_ecef.txt are omitted.<br>
 <b>Allowed locations:</b> Telescope model root directory.
 
+\par station_type_map.txt
+If using station directories to specify only a limited number of
+station types, this file contains the mapping between the station ID and
+station type.<br>
+<b>See</b> \ref telescope_station_type_mapping <br>
+<b>Required:</b> No, unless the number of station folders is greater than 1
+and less than the number of stations.<br>
+<b>Allowed locations:</b> Telescope model root directory.
+
+\subsubsection telescope_element_data Element Data
+
 \par element_types.txt
 Type index of each element in the station.<br>
 <b>See</b> \ref telescope_element_types <br>
@@ -167,10 +202,6 @@ Per-element cable length errors.<br>
 <b>See</b> \ref telescope_element_cable_length_errors <br>
 <b>Required:</b> No.<br>
 <b>Allowed locations:</b> Station directory.
-
-\latexonly
-\newpage
-\endlatexonly
 
 \par apodisation.txt | apodization.txt
 Per-element complex apodisation weight.<br>
@@ -236,11 +267,6 @@ Flux density RMS noise values, in Jy, as a function of frequency.<br>
 <b>Required:</b> No.<br>
 <b>Allowed locations:</b> Telescope model root directory, or top-level
 station directory. (Inherited.)
-
-Fields in text files can be space-separated and/or comma-separated.
-Characters appearing after a hash ('#') symbol are treated as comments,
-and any further characters on that line are ignored.
-Empty lines are also ignored.
 
 \latexonly
 \newpage
@@ -336,6 +362,43 @@ platform is not 'Fixed', as these coordinates will then not correspond
 to geographic directions.
 -->
 
+\section telescope_station_type_mapping Station Type Mapping
+
+For some telescope models, it may be convenient to only store station data
+for a limited number of station types. In this case, the station directories
+can be used to specify data for each type of station, and a further file
+named "station_type_map.txt" at the top level of the telescope model is used
+to assign each station to a station type.
+
+If present, this file must contain a single column of integers, one row per
+station, where the value of the integer corresponds to the
+alphabetically-sorted index of each station directory in the telescope
+model.
+
+The order of the station indices in the station type map matches the
+order of stations specified in the top-level station layout file.
+
+If the station type map is missing, the station type map is set implicitly,
+depending on the number of station directories in the telescope model:
+
+- If there is only one station directory, all stations are assumed to be
+  identical, and will be assigned a type of 0.
+  (This is the same as in previous versions of OSKAR.)
+- If the number of station directories matches the number of stations defined
+  in the layout file, all stations are assumed to be different, and will be
+  assigned a type of 0 to (num_stations - 1).
+- Otherwise, an error will be reported if the number of station directories
+  is different to the number of stations in the layout file <b>and</b> the
+  station type map file is missing.
+
+| Column | Description
+| ------ | --------------------------------------------------------------------
+| 1      | Integer index of station folder to use (per station; zero-based).
+
+\latexonly
+\newpage
+\endlatexonly
+
 \section telescope_element_types  Element Types
 
 In each station directory, there may be optionally an "element_types.txt"
@@ -349,11 +412,7 @@ In order, the parameter columns are:
 
 | Column | Description
 | ------ | --------------------------------------------------------------
-| 1      | Element type index (must be an integer).
-
-\latexonly
-\newpage
-\endlatexonly
+| 1      | Integer element type index (per element; zero-based).
 
 \section telescope_element_gain_phase_errors Element Gain & Phase Error Files
 
@@ -736,11 +795,9 @@ character are treated as comments, and empty lines are ignored.
 \vskip 1cm
 \endlatexonly
 
-<!--
 \latexonly
 \newpage
 \endlatexonly
--->
 
 
 <b>Revision History</b>
@@ -783,6 +840,9 @@ character are treated as comments, and empty lines are ignored.
 <tr><td>9</td><td>2020-01-06</td>
     <td>[2.7.5] Added description of optional cable length errors and
     spherical wave element pattern files.
+    </td></tr>
+<tr><td>10</td><td>2021-10-18</td>
+    <td>[2.8.0] Added description of file used to specify station type mapping.
     </td></tr>
 <!-- Not yet implemented
     Updated description of feed angle specification to include
