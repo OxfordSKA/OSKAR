@@ -90,9 +90,10 @@ When running the 'cmake' command a number of options can be specified:
         Sets the target architecture for the compilation of CUDA device code.
         <arch> must be one of either: 2.0, 2.1, 3.0, 3.2, 3.5, 3.7,
                                       5.0, 5.2, 6.0, 6.1, 6.2, 7.0, 7.5,
-                                      8.0, 8.6 or ALL.
-        ALL is for all currently supported architectures.
-        Separate multiple architectures using semi-colons, if required.
+                                      8.0, 8.6, 8.7 or ALL.
+        Note that ALL is currently most from 3.5 to 7.5.
+        Separate multiple architectures using semi-colons, if required
+        (e.g. -DCUDA_ARCH="ALL;8.0").
 
     * -DCMAKE_INSTALL_PREFIX=<path> (default: /usr/local/)
         Path prefix used to install OSKAR (with make install).
