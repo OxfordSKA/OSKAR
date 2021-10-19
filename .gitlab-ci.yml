@@ -8,6 +8,7 @@ stages:
 
 build-debug:
   stage: build
+  tags: [k8srunner-gpu]
   before_script:
     - mkdir debug
     - cd debug
@@ -17,6 +18,7 @@ build-debug:
 
 build-release:
   stage: build
+  tags: [k8srunner-gpu]
   before_script:
     - mkdir release
     - cd release
