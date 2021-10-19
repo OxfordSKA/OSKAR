@@ -3,6 +3,7 @@ image: fdulwich/oskar-ci:cuda-11.3-1
 stages:
   - build
   - test
+  - doc
   - publish
   - prepost
 
@@ -18,6 +19,8 @@ build-debug:
   artifacts:
     paths:
       - debug
+    exclude:
+      - debug/*.o
     expire_in: 3600 seconds
 
 build-release:
@@ -32,6 +35,8 @@ build-release:
   artifacts:
     paths:
       - release
+    exclude:
+      - release/*.o
     expire_in: 3600 seconds
 
 test-coverage:
@@ -63,7 +68,7 @@ test-release:
     - ctest --output-on-failure
 
 build-doxygen:
-  stage: build
+  stage: doc
   image: ubuntu:18.04 # Use Doxygen version 1.8.13 for compatibility.
   before_script:
     - >
@@ -119,9 +124,17 @@ pages:
 
 prepare-metrics:
   stage: prepost
+  dependencies:
+    - test-coverage
   script:
     - mkdir -p build/reports
-    - cp ./debug/coverage_xml.xml ./build/reports/code-coverage.xml
+    - cp debug/coverage_xml.xml build/reports/code-coverage.xml
+  artifacts:
+    paths:
+      - build
+    reports:
+      cobertura: build/reports/code-coverage.xml
+    expire_in: never
 
 # Create Gitlab CI badges from CI metrics
 # https://developer.skao.int/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
