@@ -15,6 +15,10 @@ build-debug:
     - cmake ../ -DCOVERAGE_REPORT=ON -DCUDA_ARCH=6.1
   script:
     - make -j
+  artifacts:
+    paths:
+      - debug
+    expire_in: 3600 seconds
 
 build-release:
   stage: build
@@ -25,6 +29,10 @@ build-release:
     - cmake ../ -DCUDA_ARCH=6.1
   script:
     - make -j
+  artifacts:
+    paths:
+      - release
+    expire_in: 3600 seconds
 
 test-coverage:
   stage: test
@@ -37,6 +45,11 @@ test-coverage:
   script:
     - make coverage
     - make coverage_xml
+  artifacts:
+    paths:
+      - debug/coverage
+      - debug/coverage_xml.xml
+    expire_in: 3600 seconds
 
 test-release:
   stage: test
@@ -63,7 +76,7 @@ build-doc-pdf:
   artifacts:
     paths:
       - doc-pdf/doc/*.pdf
-    expire_in: 1 week
+    expire_in: 3600 seconds
 #  rules:
 #    - if: '$CI_COMMIT_TAG'
 
