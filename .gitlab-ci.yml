@@ -50,8 +50,8 @@ test-coverage:
     - make coverage
     - make coverage_xml
   after_script:
-    - mv coverage_xml.xml ../build/reports/code-coverage.xml
-    - mv coverage/ ../
+    - mv debug/coverage_xml.xml build/reports/code-coverage.xml
+    - mv debug/coverage/ ./
   artifacts:
     paths:
       - build/
@@ -71,7 +71,7 @@ test-release:
   script:
     - ctest --output-on-failure --output-junit=unit-tests.xml
   after_script:
-    - mv unit-tests.xml ../build/reports/
+    - mv release/unit-tests.xml build/reports/
   artifacts:
     paths:
       - build/
