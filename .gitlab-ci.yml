@@ -62,20 +62,20 @@ test-release:
   script:
     - ctest --output-on-failure
 
-build-doc-pdf:
-  stage: publish
+build-doxygen:
+  stage: build
   image: ubuntu:18.04 # Use Doxygen version 1.8.13 for compatibility.
   before_script:
     - >
       apt-get update && DEBIAN_FRONTEND=noninteractive
       apt-get -qq install build-essential cmake doxygen doxygen-latex texlive
-    - mkdir doc-pdf && cd doc-pdf
+    - mkdir build-doxygen && cd build-doxygen
     - cmake ..
   script:
     - make doc_single
   artifacts:
     paths:
-      - doc-pdf/doc/*.pdf
+      - build-doxygen
     expire_in: 3600 seconds
 #  rules:
 #    - if: '$CI_COMMIT_TAG'
@@ -104,14 +104,14 @@ docker-release:
 pages:
   stage: publish
   dependencies:
-    - build-doc-pdf
+    - build-doxygen
     - test-coverage
   script:
     - rm -rf public
     - mkdir -p public
     - mkdir -p public/pdf
     - mv debug/coverage public/
-    - cp doc-pdf/doc/*.pdf public/pdf/
+    - cp build-doxygen/doc/*.pdf public/pdf/
   artifacts:
     paths:
       - public
