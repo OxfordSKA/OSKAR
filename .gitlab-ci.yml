@@ -5,22 +5,22 @@ stages:
   - test
   - doc
   - publish
-  - prepost
+
+.reports: &ready_reports
+  - mkdir -p build/reports/
 
 build-debug:
   stage: build
   tags: [k8srunner-gpu]
   before_script:
     - mkdir debug
-    - cd debug
+    - cd debug/
     - cmake ../ -DCOVERAGE_REPORT=ON -DCUDA_ARCH=6.1
   script:
     - make -j
   artifacts:
     paths:
-      - debug
-    exclude:
-      - debug/*.o
+      - debug/
     expire_in: 3600 seconds
 
 build-release:
@@ -28,15 +28,13 @@ build-release:
   tags: [k8srunner-gpu]
   before_script:
     - mkdir release
-    - cd release
+    - cd release/
     - cmake ../ -DCUDA_ARCH=6.1
   script:
     - make -j
   artifacts:
     paths:
-      - release
-    exclude:
-      - release/*.o
+      - release/
     expire_in: 3600 seconds
 
 test-coverage:
@@ -45,16 +43,21 @@ test-coverage:
     - build-debug
   tags: [k8srunner-gpu]
   before_script:
+    - *ready_reports
     - nvidia-smi
-    - cd debug
+    - cd debug/
   script:
     - make coverage
     - make coverage_xml
+  after_script:
+    - mv coverage_xml.xml ../build/reports/code-coverage.xml
+    - mv coverage/ ../
   artifacts:
     paths:
-      - debug/coverage
-      - debug/coverage_xml.xml
-    expire_in: 3600 seconds
+      - build/
+      - coverage/
+    reports:
+      cobertura: build/reports/code-coverage.xml
 
 test-release:
   stage: test
@@ -62,10 +65,18 @@ test-release:
     - build-release
   tags: [k8srunner-gpu]
   before_script:
+    - *ready_reports
     - nvidia-smi
-    - cd release
+    - cd release/
   script:
-    - ctest --output-on-failure
+    - ctest --output-on-failure --output-junit=unit-tests.xml
+  after_script:
+    - mv unit-tests.xml ../build/reports/
+  artifacts:
+    paths:
+      - build/
+    reports:
+      junit: build/reports/unit-tests.xml
 
 build-doxygen:
   stage: doc
@@ -74,13 +85,13 @@ build-doxygen:
     - >
       apt-get update && DEBIAN_FRONTEND=noninteractive
       apt-get -qq install build-essential cmake doxygen doxygen-latex texlive
-    - mkdir build-doxygen && cd build-doxygen
+    - mkdir build-doxygen && cd build-doxygen/
     - cmake ..
   script:
     - make doc_single
   artifacts:
     paths:
-      - build-doxygen
+      - build-doxygen/
     expire_in: 3600 seconds
 #  rules:
 #    - if: '$CI_COMMIT_TAG'
@@ -108,6 +119,7 @@ docker-release:
 
 pages:
   stage: publish
+  image: alpine
   dependencies:
     - build-doxygen
     - test-coverage
@@ -115,25 +127,11 @@ pages:
     - rm -rf public
     - mkdir -p public
     - mkdir -p public/pdf
-    - mv debug/coverage public/
+    - mv coverage/ public/
     - cp build-doxygen/doc/*.pdf public/pdf/
   artifacts:
     paths:
       - public
-    expire_in: never
-
-prepare-metrics:
-  stage: prepost
-  dependencies:
-    - test-coverage
-  script:
-    - mkdir -p build/reports
-    - cp debug/coverage_xml.xml build/reports/code-coverage.xml
-  artifacts:
-    paths:
-      - build
-    reports:
-      cobertura: build/reports/code-coverage.xml
     expire_in: never
 
 # Create Gitlab CI badges from CI metrics
