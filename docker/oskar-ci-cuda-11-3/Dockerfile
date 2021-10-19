@@ -31,7 +31,9 @@ RUN apt-get update && \
     cmake \
     cuda-cudart-dev-11-3 \
     cuda-nvcc-11-3 \
+    gcovr \
     git \
+    lcov \
     libcufft-dev-11-3 \
     libhdf5-dev \
     && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*

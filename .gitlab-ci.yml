@@ -1,40 +1,71 @@
-image: fdulwich/oskar-ci:cuda-11-3
+image: fdulwich/oskar-ci:cuda-11.3-1
 
 stages:
+  - build
   - test
   - publish
+  - prepost
 
-unit-tests:
+build-debug:
+  stage: build
+  before_script:
+    - mkdir debug
+    - cd debug
+    - cmake ../ -DCOVERAGE_REPORT=ON -DCUDA_ARCH=6.1
+  script:
+    - make -j
+
+build-release:
+  stage: build
+  before_script:
+    - mkdir release
+    - cd release
+    - cmake ../ -DCUDA_ARCH=6.1
+  script:
+    - make -j
+
+test-coverage:
   stage: test
+  dependencies:
+    - build-debug
   tags: [k8srunner-gpu]
   before_script:
     - nvidia-smi
-    - mkdir build && cd build
-    # todo: replace arch value with project variable
-    - cmake .. -DCUDA_ARCH=6.1
-    - make -j
+    - cd debug
+  script:
+    - make coverage
+    - make coverage_xml
+
+test-release:
+  stage: test
+  dependencies:
+    - build-release
+  tags: [k8srunner-gpu]
+  before_script:
+    - nvidia-smi
+    - cd release
   script:
     - ctest --output-on-failure
 
-doc-pdf:
+build-doc-pdf:
   stage: publish
   image: ubuntu:18.04 # Use Doxygen version 1.8.13 for compatibility.
   before_script:
     - >
       apt-get update && DEBIAN_FRONTEND=noninteractive
       apt-get -qq install build-essential cmake doxygen doxygen-latex texlive
-    - mkdir build && cd build
+    - mkdir doc-pdf && cd doc-pdf
     - cmake ..
   script:
     - make doc_single
   artifacts:
     paths:
-      - build/doc/*.pdf
+      - doc-pdf/doc/*.pdf
     expire_in: 1 week
 #  rules:
 #    - if: '$CI_COMMIT_TAG'
 
-docker_release:
+docker-release:
   stage: publish
   image: docker:20.10.7
   services:
@@ -48,10 +79,37 @@ docker_release:
     - echo $CI_COMMIT_TAG
     - echo $CAR_OCI_REGISTRY_PASSWORD | docker login --username $CAR_OCI_REGISTRY_USERNAME --password-stdin $CAR_OCI_REGISTRY_HOST
   script:
-    - docker build -t artefact.skao.int/oskar-base-dep oskar-base-dep/    
+    - docker build -t artefact.skao.int/oskar-base-dep oskar-base-dep/
     - docker build -t artefact.skao.int/oskar-base -t artefact.skao.int/oskar-base:$CI_COMMIT_TAG oskar-base/
     - docker build -t artefact.skao.int/oskar-python3 -t artefact.skao.int/oskar-python3:$CI_COMMIT_TAG oskar-python3/
     - docker push artefact.skao.int/oskar-python3:$CI_COMMIT_TAG
   rules:
     - if: '$CI_COMMIT_TAG'
 
+pages:
+  stage: publish
+  dependencies:
+    - build-doc-pdf
+    - test-coverage
+  script:
+    - rm -rf public
+    - mkdir -p public
+    - mkdir -p public/pdf
+    - mv debug/coverage public/
+    - cp doc-pdf/doc/*.pdf public/pdf/
+  artifacts:
+    paths:
+      - public
+    expire_in: never
+
+prepare-metrics:
+  stage: prepost
+  script:
+    - mkdir -p build/reports
+    - cp ./debug/coverage_xml.xml ./build/reports/code-coverage.xml
+
+# Create Gitlab CI badges from CI metrics
+# https://developer.skao.int/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
+include:
+  - project: 'ska-telescope/templates-repository'
+    file: 'gitlab-ci/includes/post_step.yml'
