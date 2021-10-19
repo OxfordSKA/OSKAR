@@ -117,11 +117,7 @@ if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
     if (CMAKE_BUILD_TYPE MATCHES Debug AND COVERAGE_REPORT)
         message(STATUS "INFO: Adding code coverage build target")
         include(CodeCoverage)
-        append_coverage_compiler_flags()
-        setup_target_for_coverage_lcov(
-            NAME coverage
-            EXECUTABLE ctest
-            EXCLUDE
+        set(COVERAGE_EXCLUDES
             "${PROJECT_BINARY_DIR}/*"
             "${PROJECT_SOURCE_DIR}/apps/*"
             "${PROJECT_SOURCE_DIR}/extern/*"
@@ -136,7 +132,10 @@ if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
             "/usr/*"
             "/Applications/*"
             "/Users/*/Qt/*"
-            )
+        )
+        append_coverage_compiler_flags()
+        setup_target_for_coverage_lcov(NAME coverage EXECUTABLE ctest)
+        setup_target_for_coverage_gcovr_xml(NAME coverage_xml EXECUTABLE ctest)
     endif()
 endif()
 
