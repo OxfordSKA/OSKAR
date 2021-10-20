@@ -1,4 +1,4 @@
-image: fdulwich/oskar-ci:cuda-11.3-1
+image: fdulwich/oskar-ci:cuda-11.3-2
 
 stages:
   - build
@@ -66,10 +66,12 @@ test-release:
   tags: [k8srunner-gpu]
   before_script:
     - *ready_reports
+    # We need CMake >= 3.21.0 for the --output-junit option on CTest.
+    - cmake --version
     - nvidia-smi
     - cd release/
   script:
-    - ctest --output-on-failure --output-junit=unit-tests.xml
+    - ctest --output-junit unit-tests.xml
   after_script:
     - mv release/unit-tests.xml build/reports/
   artifacts:

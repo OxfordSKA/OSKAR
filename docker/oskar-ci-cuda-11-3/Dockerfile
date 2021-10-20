@@ -28,14 +28,24 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
     build-essential \
-    cmake \
     cuda-cudart-dev-11-3 \
     cuda-nvcc-11-3 \
     gcovr \
     git \
     lcov \
     libcufft-dev-11-3 \
-    libhdf5-dev \
-    && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+    libhdf5-dev
+
+# Need to install CMake >= 3.21.0 for JUnit test output.
+# Following instructions at https://apt.kitware.com/
+RUN apt-get -qq install gpg wget && \
+    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null && \
+    echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null && \
+    apt-get update && \
+    rm /usr/share/keyrings/kitware-archive-keyring.gpg && \
+    apt-get -qq install kitware-archive-keyring cmake && \
+    apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copy casacore from build stage.
 COPY --from=build /usr/local/lib /usr/local/lib/
 COPY --from=build /usr/local/include/casacore /usr/local/include/casacore/
