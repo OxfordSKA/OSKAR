@@ -27,6 +27,8 @@
 
 import argparse
 import subprocess
+import shutil
+import sys
 
 def demangle(symbol):
     p = subprocess.Popen(['c++filt','-n'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
@@ -60,11 +62,16 @@ def main():
     p.add_argument('output', type=str)
     p.add_argument('--verbose', '-v', action='store_true')
     args = p.parse_args()
-    with open(args.input, 'r') as fin:
-        lines = list(fin)
-    with open(args.output, 'w') as fout:
-        for line in filter_lcov(lines, verbose=args.verbose):
-            fout.write(line)
+    if sys.platform == "darwin":
+        # Filter only on macOS, as we use GCC on Linux.
+        with open(args.input, 'r') as fin:
+            lines = list(fin)
+        with open(args.output, 'w') as fout:
+            for line in filter_lcov(lines, verbose=args.verbose):
+                fout.write(line)
+    else:
+        if args.input != args.output:
+            shutil.copy(args.input, args.output)
 
 if __name__ == '__main__':
     main()
