@@ -48,9 +48,8 @@ test-coverage:
     - cd debug/
   script:
     - make coverage
-    - make coverage_xml
   after_script:
-    - mv debug/coverage_xml.xml build/reports/code-coverage.xml
+    - mv debug/coverage.xml build/reports/code-coverage.xml
     - mv debug/coverage/ ./
   artifacts:
     paths:
