@@ -14,15 +14,14 @@ import sys
 import os
 import time
 import subprocess
+import shutil
 from xml.dom import minidom
 from optparse import OptionParser
-
-from distutils.spawn import find_executable
 
 CPPFILT = "c++filt"
 HAVE_CPPFILT = False
 
-if find_executable(CPPFILT) is not None:
+if shutil.which(CPPFILT) is not None:
     HAVE_CPPFILT = True
 
 VERSION = '1.6'
