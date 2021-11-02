@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import xml.etree.ElementTree as ET
 import re
@@ -264,7 +264,7 @@ def get_allowed(node):
     return allowed
 
 
-def recurse_tree(root, node, lists, parent_key="", depth=0, file=None):
+def process_xml(root, node, lists, parent_key="", depth=0, count=0, file=None):
     # Loop over child nodes of the current node.
     for child in node:
         # Check type of node.
@@ -300,7 +300,8 @@ def recurse_tree(root, node, lists, parent_key="", depth=0, file=None):
 
             # Settings node.
             elif type_node is not None:
-                print("%s%s" % ("  "*depth, key))
+                count += 1
+                print("[%03d]%s%s" % (count, " "*depth, key))
                 description = get_description(child, "  ")
                 default_value = get_default(child)
                 file.write("* ``" + key + "``")
@@ -313,7 +314,8 @@ def recurse_tree(root, node, lists, parent_key="", depth=0, file=None):
                 file.write(" |vspace| |br|\n\n")
 
             # Descend the tree.
-            recurse_tree(root, child, lists, key, depth + 1, file)
+            count = process_xml(
+                root, child, lists, key, depth + 1, count, file)
 
             # Close the file on the last top-level setting.
             if depth == 0 and file:
@@ -329,10 +331,11 @@ def recurse_tree(root, node, lists, parent_key="", depth=0, file=None):
 
             import_group = get_node(root, group, "")
             if import_group is not None:
-                recurse_tree(root, import_group, lists, parent_key,
-                             depth, file)
+                count = process_xml(
+                    root, import_group, lists, parent_key, depth, count, file)
             else:
                 raise RuntimeError("Could not find group '%s'" % group)
+    return count
 
 
 def main():
@@ -340,7 +343,8 @@ def main():
         xml_str = f.read()
     xml = ET.fromstring(xml_str)
     lists = []
-    recurse_tree(xml, xml, lists)
+    count = process_xml(xml, xml, lists)
+    print("Processed %d settings" % count)
 
     # Create the parent settings file with the toctree filled in.
     with open("@PROJECT_SOURCE_DIR@/doc/settings/settings.rst.in", "r") as f:

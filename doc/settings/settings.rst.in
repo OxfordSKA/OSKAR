@@ -1,0 +1,48 @@
+
+.. _settings:
+
+********
+Settings
+********
+
+This document describes the settings files used by OSKAR applications, which
+use the INI plain-text file format.
+
+.. note::
+
+   If you are using the OSKAR GUI, the settings descriptions are
+   available as tool-tips, and you should not need to refer to this document.
+
+Settings are defined simply using key-value pairs, for example:
+
+.. code-block:: text
+
+   simulator/double_precision=true
+   observation/start_time_utc=01-01-2000 12:01:02.000
+   observation/length=06:00:00.000
+
+Settings can also be grouped into sections. For example, the above can also be
+written as:
+
+.. code-block:: text
+
+   [simulator]
+   double_precision=true
+
+   [observation]
+   start_time_utc=01-01-2000 12:01:02.000
+   length=06:00:00.000
+
+Settings files can be written or modified using any text editor, by using the
+``--set`` command line flag when running the application,
+via the OSKAR Python interface, or by using the OSKAR GUI.
+
+The following sections describe the currently available settings.
+
+.. raw:: latex
+
+    \clearpage
+
+.. toctree::
+
+SETTINGS_LISTS
