@@ -1,52 +1,25 @@
-image: fdulwich/oskar-ci:cuda-11.3-2
+image: fdulwich/oskar-ci:cuda-11.3-3
 
 stages:
-  - build
-  - test
+  - build and test
   - doc
   - publish
 
 .reports: &ready_reports
   - mkdir -p build/reports/
 
-build-debug:
-  stage: build
-  tags: [k8srunner-gpu]
-  before_script:
-    - mkdir debug
-    - cd debug/
-    - cmake ../ -DCOVERAGE_REPORT=ON -DCUDA_ARCH=6.1
-  script:
-    - make -j
-  artifacts:
-    paths:
-      - debug/
-    expire_in: 3600 seconds
-
-build-release:
-  stage: build
-  tags: [k8srunner-gpu]
-  before_script:
-    - mkdir release
-    - cd release/
-    - cmake ../ -DCUDA_ARCH=6.1
-  script:
-    - make -j
-  artifacts:
-    paths:
-      - release/
-    expire_in: 3600 seconds
-
-test-coverage:
-  stage: test
-  dependencies:
-    - build-debug
+build-test-debug:
+  stage: build and test
   tags: [k8srunner-gpu]
   before_script:
     - *ready_reports
     - nvidia-smi
+    - mkdir debug
     - cd debug/
+    - cmake ../ -DCOVERAGE_REPORT=ON -DCUDA_ARCH=6.1 -DFIND_OPENCL=ON
   script:
+    - make -j
+    - ./apps/oskar_system_info
     - make coverage
   after_script:
     - mv debug/coverage.xml build/reports/code-coverage.xml
@@ -58,18 +31,19 @@ test-coverage:
     reports:
       cobertura: build/reports/code-coverage.xml
 
-test-release:
-  stage: test
-  dependencies:
-    - build-release
+build-test-release:
+  stage: build and test
   tags: [k8srunner-gpu]
   before_script:
     - *ready_reports
     # We need CMake >= 3.21.0 for the --output-junit option on CTest.
     - cmake --version
     - nvidia-smi
+    - mkdir release
     - cd release/
+    - cmake ../ -DCUDA_ARCH=6.1
   script:
+    - make -j
     - ctest --output-junit unit-tests.xml
   after_script:
     - mv release/unit-tests.xml build/reports/
@@ -79,23 +53,17 @@ test-release:
     reports:
       junit: build/reports/unit-tests.xml
 
-build-doxygen:
+build-docs:
   stage: doc
-  image: ubuntu:18.04 # Use Doxygen version 1.8.13 for compatibility.
   before_script:
-    - >
-      apt-get update && DEBIAN_FRONTEND=noninteractive
-      apt-get -qq install build-essential cmake doxygen doxygen-latex texlive
-    - mkdir build-doxygen && cd build-doxygen/
+    - mkdir build-docs && cd build-docs/
     - cmake ..
   script:
-    - make doc_single
+    - make doc_html
   artifacts:
     paths:
-      - build-doxygen/
+      - build-docs/doc/_build/html/
     expire_in: 3600 seconds
-#  rules:
-#    - if: '$CI_COMMIT_TAG'
 
 docker-release:
   stage: publish
@@ -122,18 +90,17 @@ pages:
   stage: publish
   image: alpine
   dependencies:
-    - build-doxygen
-    - test-coverage
+    - build-docs
+    - build-test-debug
   script:
     - rm -rf public
     - mkdir -p public
-    - mkdir -p public/pdf
     - mv coverage/ public/
-    - cp build-doxygen/doc/*.pdf public/pdf/
+    - mv build-docs/doc/_build/html/* public/
   artifacts:
     paths:
       - public
-    expire_in: never
+#    expire_in: never
 
 # Create Gitlab CI badges from CI metrics
 # https://developer.skao.int/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
