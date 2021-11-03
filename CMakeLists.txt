@@ -135,7 +135,6 @@ if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
         )
         append_coverage_compiler_flags()
         setup_target_for_coverage_lcov(NAME coverage EXECUTABLE ctest)
-        setup_target_for_coverage_gcovr_xml(NAME coverage_xml EXECUTABLE ctest)
     endif()
 endif()
 
