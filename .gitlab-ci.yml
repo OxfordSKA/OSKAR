@@ -16,7 +16,7 @@ build-test-debug:
     - nvidia-smi
     - mkdir debug
     - cd debug/
-    - cmake ../ -DCOVERAGE_REPORT=ON -DCUDA_ARCH=6.1 -DFIND_OPENCL=ON
+    - cmake ../ -DCOVERAGE_REPORT=ON -DCUDA_ARCH=6.1
   script:
     - make -j
     - ./apps/oskar_system_info
