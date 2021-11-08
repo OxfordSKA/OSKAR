@@ -89,7 +89,7 @@ docker-release:
 singularity-release:
   stage: publish
   before_script:
-    - mkdir build && cd build/
+    - mkdir build-image && cd build-image/
     - cmake ..
     - export MY_VER=`cmake -LA -N . | grep OSKAR_VERSION_LONG | awk '{split($0,a,"="); print a[2]}'`
     - cd ../singularity/
