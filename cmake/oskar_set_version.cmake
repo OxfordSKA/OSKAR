@@ -24,6 +24,24 @@ if (OSKAR_VERSION_SUFFIX AND NOT OSKAR_VERSION_SUFFIX STREQUAL "")
     if (CMAKE_BUILD_TYPE MATCHES [dD]ebug)
         set(OSKAR_VERSION_STR "${OSKAR_VERSION_STR} -debug-")
     endif()
+    set(OSKAR_VERSION_SHORT "${OSKAR_VERSION}-${OSKAR_VERSION_SUFFIX}"
+        CACHE STRING "Short OSKAR version"
+    )
+else()
+    set(OSKAR_VERSION_SHORT "${OSKAR_VERSION}"
+        CACHE STRING "Short OSKAR version"
+    )
+endif()
+
+# Add the short Git hash for the long version string.
+if (GIT_COMMIT_HASH)
+    set(OSKAR_VERSION_LONG "${OSKAR_VERSION_SHORT}-${GIT_COMMIT_HASH}"
+        CACHE STRING "Long OSKAR version"
+    )
+else()
+    set(OSKAR_VERSION_LONG "${OSKAR_VERSION_SHORT}"
+        CACHE STRING "Long OSKAR version"
+    )
 endif()
 
 configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_version.h.in

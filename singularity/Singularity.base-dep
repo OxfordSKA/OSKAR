@@ -1,17 +1,17 @@
 Bootstrap: docker
-From: nvidia/cuda:10.1-base-ubuntu18.04
+From: nvidia/cuda:11.4.2-base-ubuntu20.04
 Stage: one
 
 %post
-    apt update && apt install -y --no-install-recommends \
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update && apt-get upgrade && \
+    apt-get install -y --no-install-recommends \
         bison \
         build-essential \
         cmake \
         flex \
         gfortran \
-        libcfitsio-dev \
         liblapack-dev \
-        wcslib-dev \
         wget
     mkdir -p /home/build
     cd /home/build
@@ -19,22 +19,20 @@ Stage: one
         https://github.com/casacore/casacore/archive/v3.2.0.tar.gz
     mkdir casacore-src && \
         tar zxf casacore.tar.gz -C casacore-src --strip-components 1 && \
-        cmake casacore-src/ -DMODULE=ms -DBUILD_TESTING=OFF -DBUILD_PYTHON=OFF \
+        cmake casacore-src/ -DMODULE=tables -DBUILD_TESTING=OFF -DBUILD_PYTHON=OFF \
             -DUSE_FFTW3=OFF -DUSE_OPENMP=ON -DUSE_HDF5=OFF -DUSE_THREADS=ON && \
         make -j16 && make install
 
 Bootstrap: docker
-From: nvidia/cuda:10.1-base-ubuntu18.04
+From: nvidia/cuda:11.4.2-base-ubuntu20.04
 Stage: two
 
 %post
-    apt update && apt install -y --no-install-recommends \
-        cuda-cufft-10-1 \
-        libblas3 \
-        libgfortran4 \
+    apt-get update && apt-get upgrade && \
+    apt-get install -y --no-install-recommends \
+        libcufft-11-4 \
         libgomp1 \
-        liblapack3 \
-        libquadmath0 \
+        libhdf5-103 \
         && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 %files from one

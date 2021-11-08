@@ -1,9 +1,9 @@
 Bootstrap: localimage
-From: OSKAR-2.7.6-base.sif
+From: OSKAR-base.sif
 Stage: one
 
 %post
-    apt update && apt install -y --no-install-recommends \
+    apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         git \
         python3-dev \
@@ -12,12 +12,12 @@ Stage: one
     pip3 install 'git+https://github.com/OxfordSKA/OSKAR.git@master#egg=oskarpy&subdirectory=python'
 
 Bootstrap: localimage
-From: OSKAR-2.7.6-base.sif
+From: OSKAR-base.sif
 Stage: two
 
 %post
-    apt update && apt install -y --no-install-recommends python3 \
+    apt-get update && apt-get install -y --no-install-recommends python3 \
         && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 %files from one
-    /usr/local/lib/python3.6 /usr/local/lib/python3.6
+    /usr/local/lib/python3.8 /usr/local/lib/python3.8
