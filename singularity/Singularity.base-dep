@@ -4,7 +4,7 @@ Stage: one
 
 %post
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update && apt-get upgrade \
+    apt-get update && apt-get upgrade -y \
         && apt-get install -y --no-install-recommends \
         bison \
         build-essential \
@@ -29,7 +29,7 @@ Stage: two
 
 %post
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update && apt-get upgrade \
+    apt-get update && apt-get upgrade -y \
         && apt-get install -y --no-install-recommends \
         libcufft-11-4 \
         libgomp1 \
