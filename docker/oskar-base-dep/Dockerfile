@@ -2,6 +2,11 @@
 # Build a base image for OSKAR.
 # Install the casacore Tables library and its dependencies.
 #
+##############################################################################
+# This image is no longer required, as we can just use the Ubuntu package
+# libcasa-tables4 instead (which pulls in only libcasa-casa4).
+##############################################################################
+#
 FROM nvidia/cuda:11.4.2-base-ubuntu20.04 AS build
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
@@ -25,6 +30,7 @@ RUN mkdir casacore-src && \
 # Also include other runtime library dependencies here (e.g. cuFFT),
 # to avoid having to keep reinstalling these later.
 FROM nvidia/cuda:11.4.2-base-ubuntu20.04
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \

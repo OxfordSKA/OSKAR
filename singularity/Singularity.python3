@@ -1,25 +1,43 @@
-Bootstrap: localimage
-From: OSKAR-base.sif
+Bootstrap: docker
+From: nvidia/cuda:11.4.2-base-ubuntu20.04
 Stage: one
 
 %post
     export DEBIAN_FRONTEND=noninteractive
     apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
+        casacore-dev \
+        cmake \
+        cuda-cudart-dev-11-4 \
+        libcufft-dev-11-4 \
+        cuda-nvcc-11-4 \
         git \
+        libhdf5-dev \
         python3-dev \
         python3-pip
+    mkdir -p /home/build
+    cd /home/build
+    git clone https://github.com/OxfordSKA/OSKAR.git OSKAR.git
+    cmake OSKAR.git/ -DCUDA_ARCH="ALL;8.0;8.6" -DBUILD_TESTING=OFF
+    make -j16 && make install
     pip3 install -U astropy numpy matplotlib setuptools && \
     pip3 install 'git+https://github.com/OxfordSKA/OSKAR.git@master#egg=oskarpy&subdirectory=python'
 
-Bootstrap: localimage
-From: OSKAR-base.sif
+Bootstrap: docker
+From: nvidia/cuda:11.4.2-base-ubuntu20.04
 Stage: two
 
 %post
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update && apt-get install -y --no-install-recommends python3 \
+    apt-get update && apt-get install -y --no-install-recommends \
+        libcasa-tables4 \
+        libcufft-11-4 \
+        libgomp1 \
+        libhdf5-103 \
+        python3 \
         && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 %files from one
+    /usr/local/bin/oskar* /usr/local/bin/
+    /usr/local/lib/* /usr/local/lib/
     /usr/local/lib/python3.8 /usr/local/lib/python3.8
