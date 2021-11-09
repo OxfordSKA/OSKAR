@@ -4,8 +4,8 @@ Stage: one
 
 %post
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update && apt-get upgrade && \
-    apt-get install -y --no-install-recommends \
+    apt-get update && apt-get upgrade \
+        && apt-get install -y --no-install-recommends \
         bison \
         build-essential \
         cmake \
@@ -28,8 +28,9 @@ From: nvidia/cuda:11.4.2-base-ubuntu20.04
 Stage: two
 
 %post
-    apt-get update && apt-get upgrade && \
-    apt-get install -y --no-install-recommends \
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update && apt-get upgrade \
+        && apt-get install -y --no-install-recommends \
         libcufft-11-4 \
         libgomp1 \
         libhdf5-103 \
