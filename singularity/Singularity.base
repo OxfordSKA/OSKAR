@@ -3,6 +3,7 @@ From: OSKAR-base-dep.sif
 Stage: one
 
 %post
+    export DEBIAN_FRONTEND=noninteractive
     apt-get update && apt-get install -y --no-install-recommends \
         cmake \
         cuda-cudart-dev-11-4 \
