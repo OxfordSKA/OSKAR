@@ -106,14 +106,14 @@ mac-release:
   tags: [shared-macos-amd64]
   image: macos-10.15-xcode-11
   before_script:
-    brew tap ska-sa/tap
-    brew update
-    brew install casacore cmake hdf5 qt
-    mkdir build-mac && cd build-mac/
-    cmake ../ -DFIND_OPENCL=ON
-    make -j4
+    - brew tap ska-sa/tap
+    - brew update
+    - brew install casacore cmake hdf5 qt
+    - mkdir build-mac && cd build-mac/
+    - cmake ../ -DFIND_OPENCL=ON
+    - make -j4
   script:
-    make package
+    - make package
   artifacts:
     paths:
       - build-mac/*.dmg
