@@ -104,7 +104,7 @@ singularity-release:
 mac-release:
   stage: publish
   tags: [shared-macos-amd64]
-  image: macos-10.15-xcode-11
+  image: macos-11-xcode-12
   before_script:
     - brew tap ska-sa/tap
     - brew update
@@ -114,6 +114,7 @@ mac-release:
     - make -j4
   script:
     - make package
+  allow_failure: true  # Allow failure, as macOS runners are in beta.
   artifacts:
     paths:
       - build-mac/*.dmg
