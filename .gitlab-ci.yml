@@ -106,11 +106,16 @@ mac-release:
   tags: [shared-macos-amd64]
   image: macos-11-xcode-12
   before_script:
-    - brew tap ska-sa/tap
-    - brew update
-    - brew install casacore cmake hdf5 qt
+    - brew install bison cmake flex gcc hdf5 lapack qt wget
+    - mkdir build-casacore && cd build-casacore/
+    - wget -O casacore.tar.gz https://github.com/casacore/casacore/archive/v3.2.1.tar.gz
+    - mkdir casacore-src
+    - tar zxf casacore.tar.gz -C casacore-src --strip-components 1
+    - cmake casacore-src/ -DMODULE=tables -DBUILD_TESTING=OFF -DBUILD_PYTHON=OFF -DBUILD_PYTHON3=OFF -DUSE_FFTW3=OFF -DUSE_OPENMP=OFF -DUSE_HDF5=OFF -DUSE_THREADS=ON
+    - make -j4 && make install
+    - cd ../
     - mkdir build-mac && cd build-mac/
-    - cmake ../ -DFIND_OPENCL=ON
+    - cmake ../ -DFIND_OPENCL=ON -DCMAKE_PREFIX_PATH=/usr/local/opt/qt/
     - make -j4
   script:
     - make package
@@ -118,6 +123,7 @@ mac-release:
   artifacts:
     paths:
       - build-mac/*.dmg
+    expire_in: 3600 seconds
 # rules:
 #   - if: '$CI_COMMIT_TAG'
 
