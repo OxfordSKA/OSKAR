@@ -106,6 +106,7 @@ mac-release:
   tags: [shared-macos-amd64]
   image: macos-11-xcode-12
   before_script:
+    - export MACOSX_DEPLOYMENT_TARGET="10.9"
     - brew update
     - brew install cmake hdf5 qt@5
     - mkdir build-casacore && cd build-casacore/
