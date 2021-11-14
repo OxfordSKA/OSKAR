@@ -15,6 +15,13 @@ Singularity), macOS and Windows platforms are available to download from
 OSKAR is licensed under the terms of the 3-clause BSD License.
 Please see the [LICENSE](LICENSE) file for details.
 
+## Documentation
+
+Package documentation is built automatically as part of the
+GitLab CI/CD pipeline, and can be viewed at
+
+- [https://ska-telescope.gitlab.io/sim/OSKAR/](https://ska-telescope.gitlab.io/sim/OSKAR/)
+
 ### Singularity image
 
 A pre-built [Singularity](https://sylabs.io/singularity/) SIF container image
