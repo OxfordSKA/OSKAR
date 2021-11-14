@@ -262,17 +262,16 @@ void oskar_device_launch_kernel(const char* name, int location,
                 cuda_kernels_.find(std::string(name));
         mutex_.unlock();
         if (iter != cuda_kernels_.end())
+        {
             *status = (int) cudaLaunchKernel(iter->second,
                     num_blocks, num_threads, arg_, shared_mem, 0);
-        else
-        {
-            oskar_log_error(0, "Kernel '%s' has not been registered.", name);
-            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-        }
-        if (*status != 0)
-        {
-            oskar_log_error(0, "Kernel '%s' launch failure (CUDA error %d).",
-                    name, *status);
+            if (*status != 0)
+            {
+                oskar_log_error(0,
+                        "Kernel '%s' launch failure (CUDA error %d: %s).",
+                        name, *status,
+                        cudaGetErrorString((cudaError_t)(*status)));
+            }
             if (*status == cudaErrorInvalidConfiguration)
             {
                 oskar_log_error(0,
@@ -281,6 +280,11 @@ void oskar_device_launch_kernel(const char* name, int location,
                         num_threads.x, num_threads.y, num_threads.z,
                         num_blocks.x, num_blocks.y, num_blocks.z, shared_mem);
             }
+        }
+        else
+        {
+            oskar_log_error(0, "Kernel '%s' has not been registered.", name);
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
         }
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;

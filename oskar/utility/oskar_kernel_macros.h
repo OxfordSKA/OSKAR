@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2019, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2018-2021, The OSKAR Developers. See LICENSE file. */
 
 #ifndef M_CAT
 #define M_CAT(A, B) M_CAT_(A, B)
@@ -37,6 +37,7 @@
 #define BARRIER __syncthreads()
 #define BARRIER_GLOBAL __syncthreads()
 #define DEVICE_FUNC __device__
+#define FMA(X, Y, Z) fma(X, Y, Z)
 #define GLOBAL
 #define GLOBAL_IN( TYPE, NAME) const TYPE *const __restrict__ NAME
 #define GLOBAL_OUT(TYPE, NAME) TYPE *__restrict__ NAME
@@ -155,6 +156,7 @@
 #define BARRIER barrier(CLK_LOCAL_MEM_FENCE)
 #define BARRIER_GLOBAL barrier(CLK_GLOBAL_MEM_FENCE | CLK_LOCAL_MEM_FENCE)
 #define DEVICE_FUNC
+#define FMA(X, Y, Z) fma(X, Y, Z)
 #define GLOBAL global
 #define GLOBAL_IN( TYPE, NAME) global const TYPE *const restrict NAME
 #define GLOBAL_OUT(TYPE, NAME) global TYPE *restrict NAME
@@ -220,6 +222,7 @@
     DO_PRAGMA(omp atomic update) ARRAY[IDX] += VAL;
 
 #define DEVICE_FUNC
+#define FMA(X, Y, Z) (X * Y + Z)
 #define GLOBAL
 #define GLOBAL_IN( TYPE, NAME) const TYPE *const RESTRICT NAME
 #define GLOBAL_OUT(TYPE, NAME) TYPE *RESTRICT NAME

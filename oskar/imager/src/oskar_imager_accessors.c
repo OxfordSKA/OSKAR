@@ -586,6 +586,14 @@ void oskar_imager_set_uv_filter_min(oskar_Imager* h, double min_wavelength)
 }
 
 
+void oskar_imager_set_uv_taper(oskar_Imager* h,
+        double taper_u_wavelength, double taper_v_wavelength)
+{
+    h->uv_taper[0] = taper_u_wavelength;
+    h->uv_taper[1] = taper_v_wavelength;
+}
+
+
 static int qsort_compare_doubles(const void* a, const void* b)
 {
     double aa, bb;

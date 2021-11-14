@@ -12,6 +12,7 @@
 #include "imager/private_imager_filter_uv.h"
 #include "imager/private_imager_set_num_planes.h"
 #include "imager/private_imager_select_data.h"
+#include "imager/private_imager_taper_weights.h"
 #include "imager/private_imager_update_plane_dft.h"
 #include "imager/private_imager_update_plane_fft.h"
 #include "imager/private_imager_update_plane_wproj.h"
@@ -528,6 +529,14 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         if (num_skipped > 0)
             oskar_log_warning(h->log, "Skipped %lu visibility weights.",
                     (unsigned long) num_skipped);
+
+        /* Apply (u,v) tapering to weights if required. */
+        if (h->uv_taper[0] > 0.0 || h->uv_taper[1] > 0.0)
+        {
+            oskar_imager_taper_weights(num_vis, pu, pv, ph, h->weight_tmp,
+                    h->uv_taper, status);
+            ph = h->weight_tmp;
+        }
 
         /* Update the supplied plane with the supplied visibilities. */
         num_skipped = 0;

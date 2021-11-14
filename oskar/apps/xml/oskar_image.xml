@@ -119,6 +119,20 @@
     <s k="weighting" priority="1"><label>Weighting</label>
         <type name="OptionList" default="Natural">Natural,Radial,Uniform</type>
         <desc>The type of visibility weighting scheme to use.</desc></s>
+    <s k="weight_taper"><label>Weight tapering options</label>
+        <s k="u_wavelengths"><label>Weight taper scale in U [wavelengths]</label>
+            <type name="UnsignedDouble" default="0.0"/>
+            <desc>The scale of tapering in U to apply to the weights, in
+                wavelengths. If nonzero, weights will be multiplied by a factor
+                exp(log(0.3) * [(u / scale_u)^2 + (v / scale_v)^2]).
+            </desc></s>
+        <s k="v_wavelengths"><label>Weight taper scale in V [wavelengths]</label>
+            <type name="UnsignedDouble" default="0.0"/>
+            <desc>The scale of tapering in V to apply to the weights, in
+                wavelengths. If nonzero, weights will be multiplied by a factor
+                exp(log(0.3) * [(u / scale_u)^2 + (v / scale_v)^2]).
+            </desc></s>
+    </s>
     <s k="fft"><label>FFT options</label>
         <logic group="OR">
             <depends k="image/algorithm" v="FFT"/>

@@ -52,7 +52,7 @@ struct oskar_Imager
     char direction_type, kernel_type;
     char **input_files, *input_root, *output_root, *ms_column;
     double cellsize_rad, fov_deg, image_padding, im_centre_deg[2];
-    double uv_filter_min, uv_filter_max;
+    double uv_filter_min, uv_filter_max, uv_taper[2];
     double time_min_utc, time_max_utc, freq_min_hz, freq_max_hz;
 
     /* Visibility meta-data. */

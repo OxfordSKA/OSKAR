@@ -114,6 +114,8 @@ TEST(apps, test_imager_modes)
             },
             {
                     "image/weighting", "Uniform",
+                    "image/weight_taper/u_wavelengths", "1000",
+                    "image/weight_taper/v_wavelengths", "1000",
                     NULL, NULL
             },
             {
@@ -292,9 +294,9 @@ TEST(apps, test_imager_sizes)
     // Test a variety of image sizes.
     const int sizes[] = {
             2 * 2 * 2 * 2 * 2 * 2,
-            2 * 2 * 2 * 2 * 2 * 3,
-            2 * 2 * 2 * 2 * 2 * 5,
-            2 * 2 * 2 * 2 * 2 * 7
+            3 * 3 * 3 * 3 * 2,
+            5 * 5 * 5 * 2,
+            7 * 7 * 7 * 2
     };
     const int num_sizes = sizeof(sizes) / sizeof(int);
 

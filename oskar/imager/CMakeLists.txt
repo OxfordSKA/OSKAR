@@ -41,6 +41,7 @@ set(imager_SRC
     src/private_imager_read_dims.c
     src/private_imager_select_data.c
     src/private_imager_set_num_planes.c
+    src/private_imager_taper_weights.c
     src/private_imager_update_plane_dft.c
     src/private_imager_update_plane_fft.c
     src/private_imager_update_plane_wproj.c

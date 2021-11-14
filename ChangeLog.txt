@@ -25,6 +25,8 @@
 
     * Add option to treat phase screens as isoplanatic.
 
+    * Add options to taper weights used by the imager.
+
 2020-01-20  OSKAR-2.7.6
 
     * Fix load of TEC screen settings.
