@@ -145,7 +145,7 @@ add_subdirectory(apps)
 add_subdirectory(gui)
 
 # === Build documentation.
-add_subdirectory(doc)
+add_subdirectory(docs)
 
 # === Copy cleanup script into the build directory.
 configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_cleanup.sh

@@ -1,4 +1,4 @@
-.. _quickstart:
+.. _python_quickstart:
 
 Quick Start
 ===========

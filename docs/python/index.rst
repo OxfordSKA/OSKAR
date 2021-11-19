@@ -1,6 +1,7 @@
+.. _python_interface:
 
-oskarpy documentation
-=====================
+Python Interface
+================
 
 This is the documentation for the Python bindings to OSKAR.
 The main motivations for providing Python bindings are:
@@ -11,28 +12,17 @@ The main motivations for providing Python bindings are:
    resort to writing parameter files, or saving and loading data to and from
    disk where this is unnecessary.
 
-See the :ref:`quickstart` guide for installation instructions.
+See the :ref:`python_quickstart` guide for installation instructions.
 
 .. toctree::
-   :maxdepth: 3
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: Contents
 
    quickstart
    containers
    examples
-   class_ref
-
-OSKAR is made available under the 3-clause BSD License.
-Please see the :ref:`license` page for details of third-party software
-used by OSKAR.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   license
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
+   class_ref

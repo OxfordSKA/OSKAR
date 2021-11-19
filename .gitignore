@@ -16,5 +16,5 @@
 /build/
 
 # Auto-generated settings documentation
-/doc/settings/settings.rst
-/doc/settings/settings-*.rst
+/docs/settings/settings.rst
+/docs/settings/settings-*.rst

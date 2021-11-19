@@ -129,6 +129,9 @@ called ``example.png``, which is included below.
 
    An example image generated using OSKAR and plotted using matplotlib
 
+.. raw:: latex
+
+    \clearpage
 
 For completeness, the whole script is available here
 (:download:`hello-world.py`):

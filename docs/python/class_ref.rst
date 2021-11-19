@@ -1,3 +1,6 @@
+.. raw:: latex
+
+    \clearpage
 
 Class Reference
 ===============

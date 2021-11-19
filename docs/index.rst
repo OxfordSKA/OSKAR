@@ -7,7 +7,7 @@ simulation of astronomical radio interferometers.
 OSKAR has been designed primarily to produce simulated data from
 telescopes that use aperture arrays, as envisaged for the SKA.
 
-See the :ref:`install_guide` guide for installation instructions.
+See :ref:`install_guide` for installation instructions.
 
 OSKAR is made available under the 3-clause BSD License.
 Please see the :ref:`license` page for details of third-party software
@@ -38,9 +38,17 @@ used by OSKAR.
 
 .. toctree::
    :maxdepth: 1
+   :caption: Usage from Python
+
+   python/index
+
+.. toctree::
+   :maxdepth: 1
    :caption: Reference
 
    apps/apps
    theory/theory
    binary_file/binary_file
    license
+
+* :ref:`genindex`

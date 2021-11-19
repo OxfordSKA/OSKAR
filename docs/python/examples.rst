@@ -1,3 +1,7 @@
+.. raw:: latex
+
+    \clearpage
+
 .. _example_scripts:
 
 Example Scripts

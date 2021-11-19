@@ -41,14 +41,14 @@ directory) on a GPU use:
 
 .. code-block:: bash
 
-   singularity exec --no-home --nv ./OSKAR-Python3.sif python3 hello-world.py
+   singularity exec --nv ./OSKAR-Python3.sif python3 hello-world.py
 
 Similarly, to run the application ``oskar_sim_interferometer``
 with a parameter file ``settings.ini`` in the current directory, use:
 
 .. code-block:: bash
 
-   singularity exec --no-home --nv ./OSKAR-Python3.sif oskar_sim_interferometer settings.ini
+   singularity exec --nv ./OSKAR-Python3.sif oskar_sim_interferometer settings.ini
 
 Running a Singularity container is conceptually similar to running a process,
 so this command can be included in a SLURM script and run on a GPU node using

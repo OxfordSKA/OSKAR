@@ -152,15 +152,24 @@ not if using a pre-built package.
 The dependencies are:
 
 * CMake >= 3.1 (`<https://cmake.org>`_)
-* [Optional] CUDA >= 7.0 (`<https://developer.nvidia.com/cuda-downloads>`_) or OpenCL
-* [Optional] Qt 5 (`<https://qt.io>`_)
-* [Optional] casacore >= 2.0 (`<https://github.com/casacore/casacore>`_)
+
+* [Optional] CUDA >= 7.0 (`<https://developer.nvidia.com/cuda-downloads>`_)
+  or OpenCL, required for GPU acceleration on supported hardware.
+
+* [Optional] Qt 5 (`<https://qt.io>`_),
+  required to build the graphical user interface.
+
+* [Optional] casacore >= 2.0 (`<https://github.com/casacore/casacore>`_),
+  required to use CASA Measurement Sets.
+
+Packages for these dependencies are available in the package repositories
+of many recent Linux distributions, including Debian and Ubuntu.
 
 Build Commands
 --------------
 
-To build OSKAR, ensure the required dependencies are installed,
-open a terminal and give the following commands:
+To build from source, either clone the repository (for the current master
+branch) or download and unpack the source archive, then:
 
   .. code-block:: bash
 
@@ -168,21 +177,12 @@ open a terminal and give the following commands:
      cd build
      cmake [OPTIONS] ../top/level/source/folder
      make -j8
-
-OSKAR can then be installed with:
-
-  .. code-block:: bash
-
      make install
-
-You may need to run this command as root, unless you change the default
-install location as described in the next section.
 
 Build Options
 ^^^^^^^^^^^^^
 
 When running the 'cmake' command a number of build options can be specified.
-These are as listed below.
 
 - ``-DCUDA_ARCH="<arch>"`` (default: all)
 
@@ -202,23 +202,19 @@ Advanced Build Options
 
 - ``-DCASACORE_LIB_DIR=<path>`` (default: searches the system library paths)
 
-  - Specifies a custom path in which to look for the casacore libraries (libcasa_ms.so and others).
-  - Note: This should only be used if the casacore library in the system library path can't be used to build OSKAR.
+  - Specifies a custom path in which to look for the casacore libraries
+    (libcasa_tables.so and others) if they are not in the system library path.
 
 - ``-DCASACORE_INC_DIR=<path>`` (default: searches the system include paths)
 
-  - Specifies a custom path in which to look for the casacore library headers. This is the path to the top level casacore include folder.
-  - Note: This should only be used if the casacore headers in the system include path can't be used to build OSKAR.
+  - Specifies a location to search for the casacore library headers if they
+    are not in the system include path.
+    This is the path to the top level casacore include folder.
 
 - ``-DCMAKE_PREFIX_PATH=<path>`` (default: None)
 
   - Specifies a location in which to search for Qt 5. For example, if
     using Homebrew on macOS, this may need to be set to /usr/local/opt/qt5/
-
-- ``-DCMAKE_BUILD_TYPE=<release, debug, or RelWithDebInfo>``  (default: release)
-
-  - Build OSKAR with release flags, debug flags, or release flags with
-    debugging symbols.
 
 - ``-DFIND_CUDA=ON|OFF`` (default: ON)
 
@@ -238,38 +234,41 @@ Advanced Build Options
 - ``-DFORCE_LIBSTDC++=ON|OFF`` (default: OFF)
 
   - If ON forces the use of libstdc++ with the Clang compiler.
-  - Note: Used for controlling linking behaviour when using clang or clang-omp compilers with dependencies which may have been compiled against libstdc++
+  - Used for controlling linking behaviour when using clang or clang-omp compilers with dependencies which may have been compiled against libstdc++
+
+- ``-DCMAKE_BUILD_TYPE=<release, debug>``  (default: release)
+
+  - Build in release or debug mode.
 
 - ``-DBUILD_INFO=ON|OFF`` (default: OFF)
 
   - If ON enables the display of diagnostic build information when running CMake.
 
 
-Python Interface
-================
-
-After installing OSKAR, the Python interface to it can be installed to
-make it easier to use from Python scripts.
-Straightforward instructions for installation with ``pip`` can be found in the
-``python`` subdirectory of the source distribution.
-
-
-Testing the Installation
-========================
-
 Unit Tests
 ----------
+After building from source, the unit tests should be run to make sure there
+are no problems with the build.
+(Note that pre-built packages do not include the unit tests.)
 
-The unit test binaries can be run by typing the following command from the
-build directory:
+From the build directory, the unit tests can be run by typing:
 
   .. code-block:: bash
 
      ctest
 
-Running the Example Simulation
-------------------------------
+Example Simulation
+------------------
+The :ref:`example simulation <example>` can be run to check that a
+simple simulation behaves as expected.
 
-The example simulation described in the documentation can be
-run to check that a simple simulation behaves as expected.
+
+Python Interface
+================
+
+After installing OSKAR, the :ref:`Python interface <python_interface>` to it
+can be installed to make it easier to use from Python scripts.
+Straightforward instructions for installation with ``pip`` can be found in the
+``python`` subdirectory of the source distribution,
+or on the :ref:`Python interface quick-start <python_quickstart>` page.
 

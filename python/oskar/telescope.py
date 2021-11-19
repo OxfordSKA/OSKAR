@@ -52,9 +52,11 @@ class Telescope(object):
     limited extent, override parts of it once it has been loaded: however,
     most users will probably wish to simply load a new telescope model.
 
-    Note that the :class:`oskar.Telescope` class **does not need to be used**
-    if it is sufficient to use only the :class:`oskar.SettingsTree` to
-    set up the simulations. (If so, this page can be safely ignored!)
+    .. tip::
+
+       Note that the :class:`oskar.Telescope` class **does not need to be used**
+       if it is sufficient to use only the :class:`oskar.SettingsTree` to
+       set up the simulations. (If so, this page can be safely ignored!)
 
     If required, element-level data can be overridden (in memory only) once
     the telescope model has been loaded using the methods:
@@ -193,7 +195,14 @@ class Telescope(object):
                                                math.radians(std_deg))
 
     def get_identical_stations(self):
-        """Returns true if all stations are identical, false if not."""
+        """
+        .. deprecated:: 2.8
+
+        Returns true if all stations are identical, false if not.
+
+        This should not be used in OSKAR versions >= 2.8,
+        as it is no longer checked for.
+        """
         self.capsule_ensure()
         return _telescope_lib.identical_stations(self._capsule)
 

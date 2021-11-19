@@ -62,7 +62,7 @@ build-docs:
     - make doc_html
   artifacts:
     paths:
-      - build-docs/doc/_build/html/
+      - build-docs/docs/_build/html/
     expire_in: 3600 seconds
 
 docker-release:
@@ -139,7 +139,7 @@ pages:
     - rm -rf public
     - mkdir -p public
     - mv coverage/ public/
-    - mv build-docs/doc/_build/html/* public/
+    - mv build-docs/docs/_build/html/* public/
   artifacts:
     paths:
       - public

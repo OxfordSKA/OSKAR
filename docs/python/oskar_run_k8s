@@ -1,0 +1,150 @@
+#!/bin/bash
+
+#####
+# Runs an OSKAR application or Python script in a container using the AlaSKA
+# Kubernetes cluster.
+#
+# This script is designed to be executed on the AlaSKA Slurm login node. There
+# is no SSH access to AlaSKA Kubernetes nodes - instead, kubectl is installed
+# on the Slurm login node and configured to access the AlaSKA Kubernetes cluster.
+#
+# Files can be shared with jobs in Kubernetes using the scratch storage, which
+# is mounted at /scratch on all Slurm hosts. This storage is also made available
+# in Kubernetes using a storage class.
+#
+# To execute a job using this script, first create a directory on /scratch and
+# populate it with the inputs for your job. Then execute this script, specifying
+# the job directory on /scratch:
+#
+#     oskar_run_k8s [-d|--jobdir <dir>] -- <application> <args> ...
+#
+# Everything following "--" is the command to execute in the container.
+#
+# If not given, jobdir defaults to the current working directory, which must be
+# on /scratch.
+#
+# This will create a Kubernetes job and corresponding persistent volume claim
+# to make the job directory on /scratch available to the job.
+#
+# Examples:
+#
+#     To run the 'oskar_sim_interferometer' application with a parameter
+#     file 'sim.ini' and data files in the current directory (which must be
+#     on /scratch), use:
+#
+#         oskar_run_k8s -- oskar_sim_interferometer sim.ini
+#
+#     To run an OSKAR Python script called 'hello-world.py' in the specified
+#     job directory, use:
+#
+#         oskar_run_k8s -d /scratch/<user>/<job> -- python3 hello-world.py
+#
+# For convenience the container includes the astropy, matplotlib, numpy and
+# oskar Python modules. To use other ones, you can build a new container based
+# on this one.
+#####
+
+set -e
+
+# If a scratch directory is specified it must be the first argument
+JOBDIR=
+while [ $# -gt 0 ]; do
+    case $1 in
+        -d|--jobdir)
+            JOBDIR="$2"
+            shift
+            ;;
+        --jobdir=?*)
+            JOBDIR="${1#--jobdir=}"
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "[WARNING] Ignoring unknown argument - $1"
+    esac
+    shift
+done
+
+if [ $# -gt 0 ]; then
+    echo "[INFO] Executing Oskar command - $@"
+else
+    echo "[ERROR] No Oskar command given" 1>&2
+    exit 1
+fi
+
+if [ -n "$JOBDIR" ]; then
+    echo "[INFO] Using job directory - $JOBDIR"
+else
+    echo "[INFO] No job directory specified, using current directory"
+    JOBDIR="$PWD"
+fi
+
+# The job directory must be in /scratch
+if [[ ! "$JOBDIR" == /scratch/* ]]; then
+    echo "[ERROR] Job directory must be on /scratch" 1>&2
+    exit 1
+fi
+
+# The job storage path is the directory under scratch
+JOBPATH="${JOBDIR#/scratch/}"
+
+# Generate a random suffix for the job resources
+# We do this instead of using generateName as we need to match up the PVC
+JOBNAME="oskar-$(cat /dev/urandom | tr -dc 'a-z0-9' | head -c 5)"
+echo "[INFO] Using job name - $JOBNAME"
+
+echo "[INFO] Creating Kubernetes resources for job"
+cat <<END | kubectl create -f -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: $JOBNAME
+  annotations:
+    alaska/storage-path: "$JOBPATH"
+spec:
+  storageClassName: alaska-scratch
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Mi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: $JOBNAME
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      securityContext:
+        runAsUser: $(id -u)
+        runAsGroup: $(id -g)
+        fsGroup: $(id -g)
+      containers:
+        - name: oskar
+          image: artefact.skao.int/oskar-python3:latest
+          imagePullPolicy: IfNotPresent
+          workingDir: /data
+          volumeMounts:
+            - mountPath: /data
+              name: job-storage
+          command:
+`for var in "$@"; do echo "            - \"$var\""; done`
+          resources:
+            limits:
+              nvidia.com/gpu: 4 # requesting 4 GPUs
+      restartPolicy: Never
+      volumes:
+        - name: job-storage
+          persistentVolumeClaim:
+            claimName: $JOBNAME
+END
+
+echo "[INFO] Job resources accepted by Kubernetes"
+echo "[INFO] To check the status of the job use \"kubectl get job/$JOBNAME\""
+echo "[INFO] To check if job storage was allocated use \"kubectl get pvc/$JOBNAME\""
+echo "[INFO] To check if job pod(s) are scheduled use \"kubectl get pod -l job-name=$JOBNAME\""
+echo "[INFO] To view job logs use \"kubectl logs job/$JOBNAME\""

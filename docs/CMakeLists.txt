@@ -44,7 +44,7 @@ function(add_sphinx_doc)
         # message("-- Using Python: ${PYTHON_EXECUTABLE}")
         add_custom_target(${SPHINX_TARGET_ROOT}_html
             COMMAND "${PYTHON_EXECUTABLE}"
-                "${PROJECT_BINARY_DIR}/doc/settings/xml_to_rst.py"
+                "${PROJECT_BINARY_DIR}/docs/settings/xml_to_rst.py"
             COMMAND "${SPHINX_EXECUTABLE}"
                 -M html
                 "${SPHINX_DOC_SOURCE_DIR}"
@@ -55,7 +55,7 @@ function(add_sphinx_doc)
         )
         add_custom_target(${SPHINX_TARGET_ROOT}_pdf
             COMMAND "${PYTHON_EXECUTABLE}"
-                "${PROJECT_BINARY_DIR}/doc/settings/xml_to_rst.py"
+                "${PROJECT_BINARY_DIR}/docs/settings/xml_to_rst.py"
             COMMAND "${SPHINX_EXECUTABLE}"
                 -M latexpdf
                 "${SPHINX_DOC_SOURCE_DIR}"

@@ -8,7 +8,7 @@ Settings
 This document describes the settings files used by OSKAR applications, which
 use the INI plain-text file format.
 
-.. note::
+.. tip::
 
    If you are using the OSKAR GUI, the settings descriptions are
    available as tool-tips, and you should not need to refer to this document.

@@ -13,13 +13,16 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath(os.path.join("@PROJECT_SOURCE_DIR@", "python")))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'oskarpy'
-copyright = '2020-2021, The OSKAR Developers'
+project = 'OSKAR'
+copyright = '2012-2021, The OSKAR Developers'
 author = 'The OSKAR Developers'
+version = '@OSKAR_VERSION_MAJOR@.@OSKAR_VERSION_MINOR@.@OSKAR_VERSION_PATCH@'
+release = '@OSKAR_VERSION_STR@'
 
 
 # -- General configuration ---------------------------------------------------
@@ -29,7 +32,8 @@ author = 'The OSKAR Developers'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinx.ext.mathjax',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -49,10 +53,19 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 html_theme = 'sphinx_rtd_theme'
 
 
+# -- Options for LaTeX output -------------------------------------------------
+
+latex_elements = {
+    "papersize": "a4paper",
+    "preamble": r"""
+""",
+    "fncychap": "\\usepackage[Bjornstrup]{fncychap}",
+}
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 pygments_style = 'sphinx'
 autodoc_member_order = 'bysource'

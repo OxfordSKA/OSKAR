@@ -30,7 +30,7 @@ rm -rf _CPack_Packages
 # Remove OSKAR source module folders
 rm -rf apps
 rm -rf cmake
-rm -rf doc
+rm -rf docs
 rm -rf extern
 rm -rf gui
 rm -rf oskar
