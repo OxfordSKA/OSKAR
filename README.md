@@ -20,10 +20,10 @@ Please see the [LICENSE](LICENSE) file for details.
 Package documentation is built automatically as part of the
 GitLab CI/CD pipeline, and can be viewed at
 
-- [https://ska-telescope.gitlab.io/sim/OSKAR/](https://ska-telescope.gitlab.io/sim/OSKAR/)
+- [https://ska-telescope.gitlab.io/sim/oskar/](https://ska-telescope.gitlab.io/sim/oskar/)
 
 ## Installation Guide
 
 If compiling from source, see the
-[Installation Guide](https://ska-telescope.gitlab.io/sim/OSKAR/install/install.html)
+[Installation Guide](https://ska-telescope.gitlab.io/sim/oskar/install/install.html)
 in the documentation.

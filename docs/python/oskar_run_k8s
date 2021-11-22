@@ -125,7 +125,7 @@ spec:
         fsGroup: $(id -g)
       containers:
         - name: oskar
-          image: artefact.skao.int/oskar-python3:latest
+          image: artefact.skao.int/oskar-python3:<version>
           imagePullPolicy: IfNotPresent
           workingDir: /data
           volumeMounts:
