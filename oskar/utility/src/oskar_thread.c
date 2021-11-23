@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2017, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2017-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "utility/oskar_thread.h"
@@ -75,7 +52,7 @@ static void oskar_mutex_uninit(oskar_Mutex* mutex)
 
 oskar_Mutex* oskar_mutex_create(void)
 {
-    oskar_Mutex* mutex;
+    oskar_Mutex* mutex = 0;
     mutex = (oskar_Mutex*) calloc(1, sizeof(oskar_Mutex));
     oskar_mutex_init(mutex);
     return mutex;
@@ -203,7 +180,7 @@ oskar_Thread* oskar_thread_create(void *(*start_routine)(void*), void* arg,
 #ifndef OSKAR_OS_WIN
     pthread_attr_t attr;
 #endif
-    oskar_Thread* thread;
+    oskar_Thread* thread = 0;
     thread = (oskar_Thread*) calloc(1, sizeof(oskar_Thread));
     thread->start_routine = start_routine;
     thread->arg = arg;
@@ -256,7 +233,7 @@ struct oskar_Barrier
 
 oskar_Barrier* oskar_barrier_create(int num_threads)
 {
-    oskar_Barrier* barrier;
+    oskar_Barrier* barrier = 0;
     barrier = (oskar_Barrier*) calloc(1, sizeof(oskar_Barrier));
     oskar_condition_init(&barrier->var);
     barrier->num_threads = num_threads;

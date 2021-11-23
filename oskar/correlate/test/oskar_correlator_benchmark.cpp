@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -7,9 +7,9 @@
 #include "correlate/oskar_cross_correlate.h"
 #include "interferometer/oskar_jones.h"
 #include "telescope/oskar_telescope.h"
+#include "utility/oskar_device.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_timer.h"
-#include "utility/oskar_device.h"
 #include "oskar_version.h"
 
 #include <cmath>
@@ -44,7 +44,9 @@ int main(int argc, char** argv)
     opt.add_flag("-n", "Number of iterations", 1, "1", false);
     opt.add_flag("-v", "Display verbose output.", false);
     if (!opt.check_options(argc, argv))
+    {
         return EXIT_FAILURE;
+    }
 
     int location = -1, status = 0;
     double max_std_dev = 0.0;
@@ -53,24 +55,38 @@ int main(int argc, char** argv)
     int type = opt.is_set("-sp") ? OSKAR_SINGLE : OSKAR_DOUBLE;
     int jones_type = type | OSKAR_COMPLEX;
     if (!opt.is_set("-s"))
+    {
         jones_type |= OSKAR_MATRIX;
+    }
     int niter = opt.get_int("-n");
     int use_extended = opt.is_set("-e") ? OSKAR_TRUE : OSKAR_FALSE;
     int use_bandwidth_smearing = opt.is_set("-b") ? OSKAR_TRUE : OSKAR_FALSE;
     int use_time_smearing = opt.is_set("-t") ? OSKAR_TRUE : OSKAR_FALSE;
     std::string raw_file, ascii_file;
     if (opt.is_set("-r"))
+    {
         raw_file = opt.get_string("-r");
+    }
     if (opt.is_set("-a"))
+    {
         ascii_file = opt.get_string("-a");
+    }
     if (opt.is_set("-std"))
+    {
         max_std_dev = opt.get_double("-std");
+    }
     if (opt.is_set("-g"))
+    {
         location = OSKAR_GPU;
+    }
     if (opt.is_set("-c"))
+    {
         location = OSKAR_CPU;
+    }
     if (opt.is_set("-cl"))
+    {
         location = OSKAR_CL;
+    }
     if (location < 0)
     {
         opt.error("Please select one of -g, -c or -cl");
@@ -91,9 +107,13 @@ int main(int argc, char** argv)
                 "true" : "false");
         printf("- Number of iterations: %i\n", niter);
         if (max_std_dev > 0.0)
+        {
             printf("- Max standard deviations: %f\n", max_std_dev);
+        }
         if (!raw_file.empty())
+        {
             printf("- Writing iteration data to: %s\n", raw_file.c_str());
+        }
         printf("\n");
     }
 
@@ -137,7 +157,7 @@ int main(int argc, char** argv)
     // Compute average.
     if (max_std_dev > 0.0)
     {
-        double std_dev_sec = 0.0, old_time_average_sec;
+        double std_dev_sec = 0.0, old_time_average_sec = 0.0;
 
         // Compute standard deviation.
         old_time_average_sec = time_taken_sec / niter;
@@ -161,7 +181,9 @@ int main(int argc, char** argv)
             }
         }
         if (counter)
+        {
             average_time_sec /= counter;
+        }
     }
     else
     {
@@ -207,7 +229,9 @@ void benchmark(int num_stations, int num_sources, int type,
     oskar_Mem* vis = oskar_mem_create(
             jones_type, location, oskar_telescope_num_baselines(tel), status);
     for (int i = 0; i < 4; ++i)
+    {
         src_flux[i] = oskar_mem_create(type, location, num_sources, status);
+    }
     for (int i = 0; i < 3; ++i)
     {
         src_dir[i] = oskar_mem_create(type, location, num_sources, status);
@@ -268,6 +292,8 @@ void benchmark(int num_stations, int num_sources, int type,
         oskar_mem_free(uvw[i], status);
     }
     for (int i = 0; i < 4; ++i)
+    {
         oskar_mem_free(src_flux[i], status);
+    }
     oskar_timer_free(timer);
 }

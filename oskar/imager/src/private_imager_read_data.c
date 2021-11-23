@@ -10,9 +10,9 @@
 #include "math/oskar_cmath.h"
 #include "mem/oskar_binary_read_mem.h"
 #include "ms/oskar_measurement_set.h"
+#include "utility/oskar_timer.h"
 #include "vis/oskar_vis_block.h"
 #include "vis/oskar_vis_header.h"
-#include "utility/oskar_timer.h"
 
 #include <float.h>
 #include <math.h>
@@ -28,11 +28,12 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
         int* status)
 {
 #ifndef OSKAR_NO_MS
-    oskar_MeasurementSet* ms;
-    oskar_Mem *uvw, *u, *v, *w, *data, *weight, *time_centroid;
-    int type;
-    size_t start_row;
-    double *uvw_, *u_, *v_, *w_;
+    oskar_MeasurementSet* ms = 0;
+    oskar_Mem *uvw = 0, *u = 0, *v = 0, *w = 0, *data = 0;
+    oskar_Mem *weight = 0, *time_centroid = 0;
+    int type = 0;
+    size_t start_row = 0;
+    double *uvw_ = 0, *u_ = 0, *v_ = 0, *w_ = 0;
     if (*status) return;
 
     /* Read the header. */
@@ -78,7 +79,7 @@ void oskar_imager_read_data_ms(oskar_Imager* h, const char* filename,
     /* Loop over visibility blocks. */
     for (start_row = 0; start_row < num_rows; start_row += num_baselines)
     {
-        size_t allocated, required, block_size, i;
+        size_t allocated = 0, required = 0, block_size = 0, i = 0;
         if (*status) break;
 
         /* Read rows from Measurement Set. */
@@ -149,12 +150,12 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
         int i_file, int num_files, int* percent_done, int* percent_next,
         int* status)
 {
-    oskar_Binary* vis_file;
-    oskar_VisBlock* block;
-    oskar_VisHeader* hdr;
-    oskar_Mem *weight, *time_centroid, *scratch;
-    int i_block;
-    double time_start_mjd, time_inc_sec;
+    oskar_Binary* vis_file = 0;
+    oskar_VisBlock* block = 0;
+    oskar_VisHeader* hdr = 0;
+    oskar_Mem *weight = 0, *time_centroid = 0, *scratch = 0;
+    int i_block = 0;
+    double time_start_mjd = 0.0, time_inc_sec = 0.0;
     if (*status) return;
 
     /* Read the header. */
@@ -199,7 +200,7 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
     block = oskar_vis_block_create_from_header(OSKAR_CPU, hdr, status);
     for (i_block = 0; i_block < num_blocks; ++i_block)
     {
-        int c, t;
+        int c = 0, t = 0;
         if (*status) break;
 
         /* Read the visibility data. */
@@ -215,9 +216,11 @@ void oskar_imager_read_data_vis(oskar_Imager* h, const char* filename,
 
         /* Fill in the time centroid values. */
         for (t = 0; t < num_times; ++t)
+        {
             oskar_mem_set_value_real(time_centroid,
                     time_start_mjd + (start_time + t + 0.5) * time_inc_sec,
                     t * num_baselines, num_baselines, status);
+        }
         oskar_timer_pause(h->tmr_read);
 
         /* Update the imager with the data. */

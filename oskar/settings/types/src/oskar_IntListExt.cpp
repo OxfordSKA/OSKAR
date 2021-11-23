@@ -19,7 +19,9 @@ bool compare(const IntListExt::Value& a, const IntListExt::Value& b)
     if (a.is_singular() || b.is_singular()) return false;
     if (a.which() != b.which()) return false;
     if (a.which() != 0)
+    {
         return get<string>(a) == get<string>(b);
+    }
     else
     {
         const vector<int>& v = get<vector<int> >(a);
@@ -53,8 +55,7 @@ bool IntListExt::set_default(const char* value)
 {
     bool ok = from_string_(value, default_);
     str_default_ = to_string_(default_);
-    if (ok)
-        set_value(value);
+    if (ok) set_value(value);
     return ok;
 } // LCOV_EXCL_LINE
 
@@ -89,7 +90,9 @@ int IntListExt::size() const
 const int* IntListExt::values() const
 {
     if (!value_.is_singular() && value_.which() == 0)
+    {
         return (size() > 0) ? &get<vector<int> >(value_)[0] : 0;
+    }
     return 0;
 }
 

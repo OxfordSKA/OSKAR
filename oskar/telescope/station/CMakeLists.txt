@@ -9,7 +9,7 @@ set(station_SRC
     define_evaluate_tec_screen.h
     define_evaluate_vla_beam_pbcor.h
     src/oskar_blank_below_horizon.c
-    src/oskar_evaluate_pierce_points.c
+    #src/oskar_evaluate_pierce_points.c
     src/oskar_evaluate_element_weights_dft.c
     src/oskar_evaluate_element_weights_errors.c
     src/oskar_evaluate_tec_screen.c

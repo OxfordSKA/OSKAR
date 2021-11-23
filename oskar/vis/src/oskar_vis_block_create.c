@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, The OSKAR Developers.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -16,13 +16,17 @@ oskar_VisBlock* oskar_vis_block_create(int location, int amp_type,
         int create_crosscorr, int create_autocorr, int* status)
 {
     oskar_VisBlock* vis = 0;
-    int i, type;
+    int i = 0, type = 0;
 
     /* Check type. */
     if (oskar_type_is_double(amp_type))
+    {
         type = OSKAR_DOUBLE;
+    }
     else if (oskar_type_is_single(amp_type))
+    {
         type = OSKAR_SINGLE;
+    }
     else
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;

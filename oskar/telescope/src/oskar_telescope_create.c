@@ -19,7 +19,7 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
         int num_stations, int* status)
 {
     int i = 0;
-    oskar_Telescope* telescope;
+    oskar_Telescope* telescope = 0;
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;

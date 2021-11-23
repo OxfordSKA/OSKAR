@@ -16,7 +16,7 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
         int location, int* status)
 {
     int i = 0;
-    oskar_Telescope* telescope;
+    oskar_Telescope* telescope = 0;
 
     /* Create a new, empty model. */
     telescope = oskar_telescope_create(oskar_telescope_precision(src),

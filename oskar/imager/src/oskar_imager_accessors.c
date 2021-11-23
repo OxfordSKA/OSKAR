@@ -223,10 +223,17 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
         h->image_padding = 1.2;
     }
     else if (!strncmp(type, "DFT 2", 5) || !strncmp(type, "dft 2", 5))
+    {
         h->algorithm = OSKAR_ALGORITHM_DFT_2D;
+    }
     else if (!strncmp(type, "DFT 3", 5) || !strncmp(type, "dft 3", 5))
+    {
         h->algorithm = OSKAR_ALGORITHM_DFT_3D;
-    else *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
+    else
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
 
     /* Recalculate grid plane size. */
     h->grid_size = 0;
@@ -268,16 +275,20 @@ void oskar_imager_set_coords_only(oskar_Imager* h, int flag)
     {
         /* Finishing. */
         if (h->ww_points > 0)
+        {
             h->ww_rms = sqrt(h->ww_rms / h->ww_points);
+        }
 
         /* Calculate required number of w-planes if not set. */
         if ((h->ww_max > 0.0) && (h->num_w_planes < 1))
         {
-            double max_uvw, ww_mid;
+            double max_uvw = 0.0, ww_mid = 0.0;
             max_uvw = 1.05 * h->ww_max;
             ww_mid = 0.5 * (h->ww_min + h->ww_max);
             if (h->ww_rms > ww_mid)
+            {
                 max_uvw *= h->ww_rms / ww_mid;
+            }
             h->num_w_planes = (int)(max_uvw *
                     fabs(sin(h->cellsize_rad * h->image_size / 2.0)));
         }
@@ -318,7 +329,9 @@ void oskar_imager_set_fft_on_gpu(oskar_Imager* h, int value)
 void oskar_imager_set_freq_max_hz(oskar_Imager* h, double max_freq_hz)
 {
     if (max_freq_hz != 0.0 && max_freq_hz != DBL_MAX)
+    {
         max_freq_hz += 0.01;
+    }
     h->freq_max_hz = max_freq_hz;
 }
 
@@ -326,7 +339,9 @@ void oskar_imager_set_freq_max_hz(oskar_Imager* h, double max_freq_hz)
 void oskar_imager_set_freq_min_hz(oskar_Imager* h, double min_freq_hz)
 {
     if (min_freq_hz != 0.0)
+    {
         min_freq_hz -= 0.01;
+    }
     h->freq_min_hz = min_freq_hz;
 }
 
@@ -340,7 +355,7 @@ void oskar_imager_set_generate_w_kernels_on_gpu(oskar_Imager* h, int value)
 void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
         int* status)
 {
-    int i;
+    int i = 0;
     if (*status) return;
     oskar_imager_free_device_data(h, status);
     if (*status) return;
@@ -349,7 +364,9 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
         h->num_gpus = h->num_gpus_avail;
         h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
+        {
             h->gpu_ids[i] = i;
+        }
     }
     else if (num > 0)
     {
@@ -361,7 +378,9 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
         h->num_gpus = num;
         h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
+        {
             h->gpu_ids[i] = ids[i];
+        }
     }
     else /* num == 0 */
     {
@@ -384,12 +403,21 @@ void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
     h->support = support;
     h->oversample = oversample;
     if (!strncmp(type, "S", 1) || !strncmp(type, "s", 1))
+    {
         h->kernel_type = 'S';
+    }
     else if (!strncmp(type, "G", 1) || !strncmp(type, "g", 1))
+    {
         h->kernel_type = 'G';
+    }
     else if (!strncmp(type, "P", 1) || !strncmp(type, "p", 1))
+    {
         h->kernel_type = 'P';
-    else *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
+    else
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
 }
 
 
@@ -410,28 +438,53 @@ void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
 {
     if (*status) return;
     if (!strncmp(type, "S", 1) || !strncmp(type, "s", 1))
+    {
         h->im_type = OSKAR_IMAGE_TYPE_STOKES;
+    }
     else if (!strncmp(type, "I",  1) || !strncmp(type, "i",  1))
+    {
         h->im_type = OSKAR_IMAGE_TYPE_I;
+    }
     else if (!strncmp(type, "Q",  1) || !strncmp(type, "q",  1))
+    {
         h->im_type = OSKAR_IMAGE_TYPE_Q;
+    }
     else if (!strncmp(type, "U",  1) || !strncmp(type, "u",  1))
+    {
         h->im_type = OSKAR_IMAGE_TYPE_U;
+    }
     else if (!strncmp(type, "V",  1) || !strncmp(type, "v",  1))
+    {
         h->im_type = OSKAR_IMAGE_TYPE_V;
+    }
     else if (!strncmp(type, "P",  1) || !strncmp(type, "p",  1))
+    {
         h->im_type = OSKAR_IMAGE_TYPE_PSF;
+    }
     else if (!strncmp(type, "L",  1) || !strncmp(type, "l",  1))
+    {
         h->im_type = OSKAR_IMAGE_TYPE_LINEAR;
+    }
     else if (!strncmp(type, "XX", 2) || !strncmp(type, "xx", 2))
+    {
         h->im_type = OSKAR_IMAGE_TYPE_XX;
+    }
     else if (!strncmp(type, "XY", 2) || !strncmp(type, "xy", 2))
+    {
         h->im_type = OSKAR_IMAGE_TYPE_XY;
+    }
     else if (!strncmp(type, "YX", 2) || !strncmp(type, "yx", 2))
+    {
         h->im_type = OSKAR_IMAGE_TYPE_YX;
+    }
     else if (!strncmp(type, "YY", 2) || !strncmp(type, "yy", 2))
+    {
         h->im_type = OSKAR_IMAGE_TYPE_YY;
-    else *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
+    else
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
     h->use_stokes = (h->im_type == OSKAR_IMAGE_TYPE_STOKES ||
             h->im_type == OSKAR_IMAGE_TYPE_I ||
             h->im_type == OSKAR_IMAGE_TYPE_Q ||
@@ -440,24 +493,34 @@ void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
     h->num_im_pols = (h->im_type == OSKAR_IMAGE_TYPE_STOKES ||
             h->im_type == OSKAR_IMAGE_TYPE_LINEAR) ? 4 : 1;
     if (h->im_type == OSKAR_IMAGE_TYPE_I || h->im_type == OSKAR_IMAGE_TYPE_XX)
+    {
         h->pol_offset = 0;
+    }
     if (h->im_type == OSKAR_IMAGE_TYPE_Q || h->im_type == OSKAR_IMAGE_TYPE_XY)
+    {
         h->pol_offset = 1;
+    }
     if (h->im_type == OSKAR_IMAGE_TYPE_U || h->im_type == OSKAR_IMAGE_TYPE_YX)
+    {
         h->pol_offset = 2;
+    }
     if (h->im_type == OSKAR_IMAGE_TYPE_V || h->im_type == OSKAR_IMAGE_TYPE_YY)
+    {
         h->pol_offset = 3;
+    }
 }
 
 
 void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
         const char* const* filenames, int* status)
 {
-    int i;
-    char* ptr;
+    int i = 0;
+    char* ptr = 0;
     if (*status) return;
     for (i = 0; i < h->num_files; ++i)
+    {
         free(h->input_files[i]);
+    }
     free(h->input_files);
     free(h->input_root);
     h->input_files = 0;
@@ -500,7 +563,9 @@ void oskar_imager_set_num_devices(oskar_Imager* h, int value)
     int status = 0;
     oskar_imager_free_device_data(h, &status);
     if (value < 1)
+    {
         value = (h->num_gpus == 0) ? oskar_get_num_procs() : h->num_gpus;
+    }
     if (value < 1) value = 1;
     h->num_devices = value;
     h->d = (DeviceData*) realloc(h->d, h->num_devices * sizeof(DeviceData));
@@ -550,18 +615,24 @@ void oskar_imager_set_size(oskar_Imager* h, int size, int* status)
     oskar_imager_reset_cache(h, status);
     (void) oskar_imager_plane_size(h);
     if (h->set_fov)
+    {
         h->cellsize_rad = oskar_convert_fov_to_cellsize(
                 h->fov_deg * (M_PI / 180.0), h->image_size);
+    }
     else if (h->set_cellsize)
+    {
         h->fov_deg = oskar_convert_cellsize_to_fov(
                 h->cellsize_rad, h->image_size) * (180.0 / M_PI);
+    }
 }
 
 
 void oskar_imager_set_time_max_utc(oskar_Imager* h, double time_max_mjd_utc)
 {
     if (time_max_mjd_utc != 0.0 && time_max_mjd_utc != DBL_MAX)
+    {
         time_max_mjd_utc += 0.01 / 86400.0;
+    }
     h->time_max_utc = time_max_mjd_utc * 86400.0;
 }
 
@@ -569,7 +640,9 @@ void oskar_imager_set_time_max_utc(oskar_Imager* h, double time_max_mjd_utc)
 void oskar_imager_set_time_min_utc(oskar_Imager* h, double time_min_mjd_utc)
 {
     if (time_min_mjd_utc != 0.0)
+    {
         time_min_mjd_utc -= 0.01 / 86400.0;
+    }
     h->time_min_utc = time_min_mjd_utc * 86400.0;
 }
 
@@ -596,7 +669,7 @@ void oskar_imager_set_uv_taper(oskar_Imager* h,
 
 static int qsort_compare_doubles(const void* a, const void* b)
 {
-    double aa, bb;
+    double aa = 0.0, bb = 0.0;
     aa = *(const double*)a;
     bb = *(const double*)b;
     if (aa < bb) return -1;
@@ -609,12 +682,14 @@ static void update_set(double ref, double inc, int num_to_check,
         int* num_recorded, double** values, double tol,
         double min_val, double max_val)
 {
-    int i, j;
+    int i = 0, j = 0;
     for (i = 0; i < num_to_check; ++i)
     {
         double value = ref + i * inc;
         for (j = 0; j < *num_recorded; ++j)
+        {
             if (fabs(value - (*values)[j]) < tol) break;
+        }
         if (j == *num_recorded &&
                 value >= min_val && (value <= max_val || max_val <= 0.0))
         {
@@ -634,9 +709,11 @@ void oskar_imager_set_vis_frequency(oskar_Imager* h,
     h->vis_freq_start_hz = ref_hz;
     h->freq_inc_hz = inc_hz;
     if (!h->planes)
+    {
         update_set(ref_hz, inc_hz, num,
                 &(h->num_sel_freqs), &(h->sel_freqs), 0.01,
                 h->freq_min_hz, h->freq_max_hz);
+    }
 }
 
 
@@ -648,9 +725,10 @@ void oskar_imager_set_vis_phase_centre(oskar_Imager* h,
      * rotated baseline coordinates. */
     if (h->direction_type == 'R')
     {
-        double l1, m1, n1, d_a, d_d, dec_rad, dec0_rad, *M;
-        double sin_d_a, cos_d_a, sin_d_d, cos_d_d;
-        double sin_dec, cos_dec, sin_dec0, cos_dec0;
+        double l1 = 0.0, m1 = 0.0, n1 = 0.0, d_a = 0.0, d_d = 0.0;
+        double dec_rad = 0.0, dec0_rad = 0.0, *M = 0;
+        double sin_d_a = 0.0, cos_d_a = 0.0, sin_d_d = 0.0, cos_d_d = 0.0;
+        double sin_dec = 0.0, cos_dec = 0.0, sin_dec0 = 0.0, cos_dec0 = 0.0;
 
         /* Rotate by -delta_ra around v, then delta_dec around u. */
         dec_rad = h->im_centre_deg[1] * DEG2RAD;
@@ -703,12 +781,21 @@ void oskar_imager_set_weighting(oskar_Imager* h, const char* type, int* status)
 {
     if (*status || !type) return;
     if (!strncmp(type, "N", 1) || !strncmp(type, "n", 1))
+    {
         h->weighting = OSKAR_WEIGHTING_NATURAL;
+    }
     else if (!strncmp(type, "R", 1) || !strncmp(type, "r", 1))
+    {
         h->weighting = OSKAR_WEIGHTING_RADIAL;
+    }
     else if (!strncmp(type, "U", 1) || !strncmp(type, "u", 1))
+    {
         h->weighting = OSKAR_WEIGHTING_UNIFORM;
-    else *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
+    else
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
 }
 
 

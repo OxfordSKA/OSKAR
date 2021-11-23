@@ -10,7 +10,7 @@ void oskar_dierckx_bispev_f(const float *tx, int nx, const float *ty, int ny,
     int my, float *z, float *wrk, int lwrk, int *iwrk, int kwrk, int *ier)
 {
     /* Local variables */
-    int i, iw, lwest;
+    int i = 0, iw = 0, lwest = 0;
 
     /* before starting computations a data check is made. if the input data
      * are invalid control is immediately repassed to the calling program. */
@@ -39,7 +39,7 @@ void oskar_dierckx_bispev_d(const double *tx, int nx, const double *ty, int ny,
     int my, double *z, double *wrk, int lwrk, int *iwrk, int kwrk, int *ier)
 {
     /* Local variables */
-    int i, iw, lwest;
+    int i = 0, iw = 0, lwest = 0;
 
     /* before starting computations a data check is made. if the input data
      * are invalid control is immediately repassed to the calling program. */

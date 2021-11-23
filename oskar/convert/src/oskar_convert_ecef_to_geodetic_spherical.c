@@ -14,7 +14,7 @@ void oskar_convert_ecef_to_geodetic_spherical(int num_points,
         const double* x, const double* y, const double* z,
         double* lon_rad, double* lat_rad, double* alt_m)
 {
-    int i;
+    int i = 0;
     const double a = 6378137.000; /* Equatorial radius (semi-major axis). */
     const double b = 6356752.314; /* Polar radius (semi-minor axis). */
     const double ba = b / a;
@@ -22,7 +22,9 @@ void oskar_convert_ecef_to_geodetic_spherical(int num_points,
     const double e4 = e2 * e2;
     for (i = 0; i < num_points; ++i)
     {
-        double p, q, r, s, t, u, v, w, k, D, L2, L, M;
+        double p = 0.0, q = 0.0, r = 0.0, s = 0.0, t = 0.0;
+        double u = 0.0, v = 0.0, w = 0.0, k = 0.0;
+        double D = 0.0, L2 = 0.0, L = 0.0, M = 0.0;
         L2 = x[i]*x[i] + y[i]*y[i];
         L = sqrt(L2);
         p = x[i] / a;

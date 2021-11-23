@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, The OSKAR Developers.
+ * Copyright (c) 2020-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -14,7 +14,7 @@ extern "C" {
 void oskar_vis_block_station_to_baseline_coords(oskar_VisBlock* vis,
         int* status)
 {
-    int i;
+    int i = 0;
     if (*status) return;
 
     /* Convert station (u,v,w) to baseline (u,v,w). */

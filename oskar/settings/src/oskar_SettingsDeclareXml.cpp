@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2015-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "settings/oskar_SettingsDeclareXml.h"
@@ -53,7 +30,9 @@ map<string, string> get_attributes(node* n)
 {
     map<string, string> attrib;
     for (attr* a = n->first_attribute(); a; a = a->next_attribute())
+    {
         attrib[string(a->name())] = string(a->value());
+    }
     return attrib;
 }
 
@@ -178,8 +157,12 @@ bool add_setting_deps(node* s, oskar::SettingsTree* settings)
 
         // Dependency node (has key, condition, value defined).
         if (dependency_node)
+        {
             if (!settings->add_dependency(k.c_str(), v.c_str(), c.c_str()))
+            {
                 return false;
+            }
+        }
 
         // Logic node (will only have group defined, if that).
         if (logic_node)
@@ -216,8 +199,9 @@ bool declare_setting(node* s, const string& key_root,
 
         // Get any type parameters.
         options = type_node->value();
-        if (!options.empty())
+        if (!options.empty()) {
             options = oskar_settings_utility_string_trim(options);
+        }
     }
 
     // Add the setting.
@@ -225,7 +209,9 @@ bool declare_setting(node* s, const string& key_root,
     if (!settings->add_setting(key.c_str(), get_label(s).c_str(),
             get_description(s).c_str(), type_name.c_str(),
             default_value.c_str(), options.c_str(), required, priority))
+    {
         return false;
+    }
 
     // Add any dependencies.
     if (!add_setting_deps(s, settings)) return false;
@@ -260,11 +246,15 @@ bool iterate_settings(oskar::SettingsTree* settings, const doc_t& doc,
             if (!req.empty())
             {
                 for (size_t i = 0; i < req.length(); ++i)
+                {
                     req[i] = toupper(req[i]);
+                }
                 required = (req == "TRUE" || req == "YES");
             }
             if (!pri.empty())
+            {
                 priority = oskar_settings_utility_string_to_int(pri, &ok);
+            }
 
             // Declare the setting.
             if (!declare_setting(s, key_root, key,
@@ -276,8 +266,12 @@ bool iterate_settings(oskar::SettingsTree* settings, const doc_t& doc,
 
             // Read any child settings.
             if (s->first_node())
+            {
                 if (!iterate_settings(settings, doc, s, key_root + key + "/"))
+                {
                     return false;
+                }
+            }
         }
         else if (name == "import")
         {
@@ -292,7 +286,9 @@ bool iterate_settings(oskar::SettingsTree* settings, const doc_t& doc,
             if (import_group)
             {
                 if (!iterate_settings(settings, doc, import_group, key_root))
+                {
                     return false;
+                }
             }
             else
             {

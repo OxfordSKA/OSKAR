@@ -16,10 +16,10 @@ extern "C" {
 oskar_Sky* oskar_sky_load(const char* filename, int type, int* status)
 {
     int n = 0;
-    FILE* file;
+    FILE* file = 0;
     char* line = 0;
     size_t bufsize = 0;
-    oskar_Sky* sky;
+    oskar_Sky* sky = 0;
     if (*status) return 0;
 
     /* Get the data type. */
@@ -50,8 +50,7 @@ oskar_Sky* oskar_sky_load(const char* filename, int type, int* status)
         {
             const int new_size = ((2 * n) < 100) ? 100 : (2 * n);
             oskar_sky_resize(sky, new_size, status);
-            if (*status)
-                break;
+            if (*status) break;
         }
 
         /* Try to set source data from the string. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, The OSKAR Developers.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -12,7 +12,7 @@ extern "C" {
 
 void oskar_vis_block_free(oskar_VisBlock* vis, int* status)
 {
-    int i;
+    int i = 0;
     if (!vis) return;
     for (i = 0; i < 3; ++i)
     {

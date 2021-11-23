@@ -53,6 +53,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
     if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE_COMPLEX)
+        {
             evaluate_jones_K_float(
                     num_sources,
                     oskar_mem_float_const(l, status),
@@ -66,7 +67,9 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
                     source_filter_min_f, source_filter_max_f,
                     ignore_w_components,
                     oskar_mem_float2(oskar_jones_mem(K), status));
+        }
         else if (type == OSKAR_DOUBLE_COMPLEX)
+        {
             evaluate_jones_K_double(
                     num_sources,
                     oskar_mem_double_const(l, status),
@@ -80,6 +83,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
                     source_filter_min, source_filter_max,
                     ignore_w_components,
                     oskar_mem_double2(oskar_jones_mem(K), status));
+        }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -93,16 +97,22 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
         const int is_dbl = (type == OSKAR_DOUBLE_COMPLEX);
         const char* k = 0;
         if (type == OSKAR_SINGLE_COMPLEX)
+        {
             k = "evaluate_jones_K_float";
+        }
         else if (type == OSKAR_DOUBLE_COMPLEX)
+        {
             k = "evaluate_jones_K_double";
+        }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             return;
         }
         if (oskar_device_is_cpu(location))
+        {
             local_size[1] = 1;
+        }
         oskar_device_check_local_size(location, 0, local_size);
         oskar_device_check_local_size(location, 1, local_size);
         global_size[0] = oskar_device_global_size(

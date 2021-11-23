@@ -10,9 +10,10 @@ void oskar_dierckx_fpbisp_f(const float *tx, int nx, const float *ty, int ny,
     int my, float *z, float *wx, float *wy, int *lx, int *ly)
 {
     /* Local variables */
-    int i, j, l, m, i1, j1, l1, l2, kx1, ky1, nkx1, nky1;
+    int i = 0, j = 0, l = 0, m = 0, i1 = 0, j1 = 0, l1 = 0, l2 = 0;
+    int kx1 = 0, ky1 = 0, nkx1 = 0, nky1 = 0;
     float h[6];
-    float tb, te, sp, arg;
+    float tb = 0.0f, te = 0.0f, sp = 0.0f, arg = 0.0f;
 
     /* Parameter adjustments */
     --tx;
@@ -96,9 +97,10 @@ void oskar_dierckx_fpbisp_d(const double *tx, int nx, const double *ty, int ny,
     int my, double *z, double *wx, double *wy, int *lx, int *ly)
 {
     /* Local variables */
-    int i, j, l, m, i1, j1, l1, l2, kx1, ky1, nkx1, nky1;
+    int i = 0, j = 0, l = 0, m = 0, i1 = 0, j1 = 0, l1 = 0, l2 = 0;
+    int kx1 = 0, ky1 = 0, nkx1 = 0, nky1 = 0;
     double h[6];
-    double tb, te, sp, arg;
+    double tb = 0.0, te = 0.0, sp = 0.0, arg = 0.0;
 
     /* Parameter adjustments */
     --tx;

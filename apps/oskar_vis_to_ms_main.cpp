@@ -110,7 +110,9 @@ int main(int argc, char** argv)
     // Close the Measurement Set.
     oskar_ms_close(ms);
     if (error)
+    {
         oskar_log_error(0, oskar_get_error_string(error));
+    }
     return error ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 #else
@@ -121,5 +123,3 @@ int main(void)
     return EXIT_FAILURE;
 }
 #endif
-
-

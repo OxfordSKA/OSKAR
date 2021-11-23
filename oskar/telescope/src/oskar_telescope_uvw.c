@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -28,7 +28,7 @@ void oskar_telescope_uvw(
         oskar_Mem* ww,
         int* status)
 {
-    int i;
+    int i = 0;
     const oskar_Mem *xyz[3];
     if (*status) return;
     const int num_stations = oskar_telescope_num_stations(tel);
@@ -41,13 +41,17 @@ void oskar_telescope_uvw(
     for (i = 0; i < 3; ++i)
     {
         if (coord_type == OSKAR_COORDS_AZEL)
+        {
             xyz[i] = use_true_coords ?
                     oskar_telescope_station_true_enu_metres_const(tel, i) :
                     oskar_telescope_station_measured_enu_metres_const(tel, i);
+        }
         else
+        {
             xyz[i] = use_true_coords ?
                     oskar_telescope_station_true_offset_ecef_metres_const(tel, i) :
                     oskar_telescope_station_measured_offset_ecef_metres_const(tel, i);
+        }
     }
     oskar_mem_ensure(u, total_stations, status);
     oskar_mem_ensure(v, total_stations, status);
@@ -65,10 +69,14 @@ void oskar_telescope_uvw(
             oskar_mem_copy_contents(v, xyz[1],
                     i * num_stations, 0, num_stations, status);
             if (ignore_w_components)
+            {
                 oskar_mem_clear_contents(w, status);
+            }
             else
+            {
                 oskar_mem_copy_contents(w, xyz[2],
                         i * num_stations, 0, num_stations, status);
+            }
         }
         else
         {
@@ -81,9 +89,11 @@ void oskar_telescope_uvw(
                     i * num_stations, u, v, w, status);
         }
         if (uu && vv && ww)
+        {
             oskar_convert_station_uvw_to_baseline_uvw(num_stations,
                     i * num_stations, u, v, w,
                     i * num_baselines, uu, vv, ww, status);
+        }
     }
 }
 

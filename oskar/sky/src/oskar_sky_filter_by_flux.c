@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2017, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "sky/oskar_sky.h"
@@ -38,14 +15,11 @@ extern "C" {
 void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
         int* status)
 {
-    int location, type, num_sources, in = 0, out = 0;
-
-    /* Check if safe to proceed. */
+    int in = 0, out = 0;
     if (*status) return;
 
     /* Return immediately if no filtering should be done. */
-    if (min_I <= -DBL_MAX && max_I >= DBL_MAX)
-        return;
+    if (min_I <= -DBL_MAX && max_I >= DBL_MAX) return;
 
     if (max_I < min_I)
     {
@@ -54,9 +28,9 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
     }
 
     /* Get the meta-data. */
-    location = oskar_sky_mem_location(sky);
-    type = oskar_sky_precision(sky);
-    num_sources = oskar_sky_num_sources(sky);
+    const int location = oskar_sky_mem_location(sky);
+    const int type = oskar_sky_precision(sky);
+    const int num_sources = oskar_sky_num_sources(sky);
 
     /* Filtering is only supported for data in host memory. */
     if (location != OSKAR_CPU)
@@ -67,8 +41,10 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
 
     if (type == OSKAR_SINGLE)
     {
-        float *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *spix_, *rm_;
-        float *l_, *m_, *n_, *maj_, *min_, *pa_, *a_, *b_, *c_;
+        float *ra_ = 0, *dec_ = 0, *I_ = 0, *Q_ = 0, *U_ = 0, *V_ = 0;
+        float *ref_ = 0, *spix_ = 0, *rm_ = 0;
+        float *l_ = 0, *m_ = 0, *n_ = 0, *maj_ = 0, *min_ = 0, *pa_ = 0;
+        float *a_ = 0, *b_ = 0, *c_ = 0;
         ra_   = oskar_mem_float(oskar_sky_ra_rad(sky), status);
         dec_  = oskar_mem_float(oskar_sky_dec_rad(sky), status);
         I_    = oskar_mem_float(oskar_sky_I(sky), status);
@@ -90,8 +66,7 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
 
         for (in = 0; in < num_sources; ++in)
         {
-            if (!(I_[in] > (float)min_I && I_[in] <= (float)max_I))
-                continue;
+            if (!(I_[in] > (float)min_I && I_[in] <= (float)max_I)) continue;
 
             ra_[out]   = ra_[in];
             dec_[out]  = dec_[in];
@@ -116,8 +91,10 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
     }
     else if (type == OSKAR_DOUBLE)
     {
-        double *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *spix_, *rm_;
-        double *l_, *m_, *n_, *maj_, *min_, *pa_, *a_, *b_, *c_;
+        double *ra_ = 0, *dec_ = 0, *I_ = 0, *Q_ = 0, *U_ = 0, *V_ = 0;
+        double *ref_ = 0, *spix_ = 0, *rm_ = 0;
+        double *l_ = 0, *m_ = 0, *n_ = 0, *maj_ = 0, *min_ = 0, *pa_ = 0;
+        double *a_ = 0, *b_ = 0, *c_ = 0;
         ra_   = oskar_mem_double(oskar_sky_ra_rad(sky), status);
         dec_  = oskar_mem_double(oskar_sky_dec_rad(sky), status);
         I_    = oskar_mem_double(oskar_sky_I(sky), status);
@@ -139,8 +116,7 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
 
         for (in = 0; in < num_sources; ++in)
         {
-            if (!(I_[in] > min_I && I_[in] <= max_I))
-                continue;
+            if (!(I_[in] > min_I && I_[in] <= max_I)) continue;
 
             ra_[out]   = ra_[in];
             dec_[out]  = dec_[in];

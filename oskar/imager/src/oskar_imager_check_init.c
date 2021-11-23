@@ -24,7 +24,7 @@ void oskar_imager_check_init(oskar_Imager* h, int* status)
     /* Allocate empty weights grids if required. */
     if (!h->weights_grids && h->num_planes > 0)
     {
-        int i;
+        int i = 0;
         h->weights_grids = (oskar_Mem**)
                 calloc(h->num_planes, sizeof(oskar_Mem*));
         h->weights_guard = (oskar_Mem**)

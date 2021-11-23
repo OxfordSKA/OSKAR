@@ -229,7 +229,7 @@ TEST(SkyModel, copy_contents)
 {
     int src_size = 20, dst_size = 60, status = 0;
 
-    oskar_Sky *dst, *src;
+    oskar_Sky *dst = 0, *src = 0;
     dst = oskar_sky_create(OSKAR_DOUBLE, OSKAR_CPU, dst_size, &status);
     src = oskar_sky_create(OSKAR_DOUBLE, OSKAR_CPU, src_size, &status);
     for (int i = 0; i < src_size; ++i)
@@ -378,7 +378,7 @@ TEST(SkyModel, filter_by_radius)
 
 TEST(SkyModel, filter_by_flux)
 {
-    int i, type, num_sources = 223, status = 0;
+    int i = 0, type = 0, num_sources = 223, status = 0;
     double flux_min = 5.0;
     double flux_max = 10.0;
 
@@ -616,7 +616,7 @@ TEST(SkyModel, resize)
 TEST(SkyModel, scale_by_spectral_index)
 {
     int num_sources = 10000, status = 0;
-    oskar_Timer* timer;
+    oskar_Timer* timer = 0;
 //    double sec = 0.0;
     double stokes_I = 10.0, stokes_Q = 1.0, stokes_U = 0.5, stokes_V = 0.1;
     double spix = -0.7, freq_ref = 10.0e6, freq_new = 50.0e6;
@@ -698,11 +698,11 @@ TEST(SkyModel, scale_by_spectral_index)
 TEST(SkyModel, rotation_measure)
 {
     int num_sources = 10000, status = 0;
-    oskar_Timer* timer;
+    oskar_Timer* timer = 0;
 //    double sec = 0.0;
     double stokes_I = 10.0, stokes_Q = 1.0, stokes_U = 0.0, stokes_V = 0.1;
     double spix = 0.0, freq_ref = 100.0e6, freq_new = 99e6, rm = 0.5;
-    double max_err, avg_err;
+    double max_err = 0.0, avg_err = 0.0;
 
     // Create and fill a sky model.
     oskar_Sky* sky_ref = oskar_sky_create(OSKAR_SINGLE, OSKAR_CPU,
@@ -1154,7 +1154,7 @@ TEST(SkyModel, load_ascii)
 
 TEST(SkyModel, read_write)
 {
-    oskar_Sky *sky, *sky2;
+    oskar_Sky *sky = 0, *sky2 = 0;
     int type = OSKAR_DOUBLE;
     int location = OSKAR_CPU;
     int status = 0;
@@ -1193,7 +1193,7 @@ TEST(SkyModel, read_write)
     // Check the contents of the sky model.
     ASSERT_EQ(oskar_sky_num_sources(sky),
             oskar_sky_num_sources(sky2));
-    double max_, avg_, tol = 1e-15;
+    double max_ = 0.0, avg_ = 0.0, tol = 1e-15;
     oskar_mem_evaluate_relative_error(oskar_sky_ra_rad_const(sky),
             oskar_sky_ra_rad_const(sky2), 0, &max_, &avg_, 0, &status);
     EXPECT_LT(max_, tol);
@@ -1251,4 +1251,3 @@ TEST(SkyModel, read_write)
     // Remove the data file.
     remove(filename);
 }
-

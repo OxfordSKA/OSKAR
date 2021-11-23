@@ -38,7 +38,9 @@ int oskar_ms_column_element_type(const oskar_MeasurementSet* p,
         const char* column)
 {
     if (!p->ms || !p->ms->tableDesc().isColumn(column))
+    {
         return OSKAR_MS_UNKNOWN_TYPE;
+    }
 
     switch (p->ms->tableDesc().columnDesc(column).dataType())
     {
@@ -99,7 +101,9 @@ void oskar_ms_ensure_num_rows(oskar_MeasurementSet* p, unsigned int num)
     if (!p->ms) return;
     int rows_to_add = (int)num - (int)(p->ms->nrow());
     if (rows_to_add > 0)
+    {
         p->ms->addRow((unsigned int)rows_to_add);
+    }
 }
 
 double oskar_ms_freq_inc_hz(const oskar_MeasurementSet* p)
@@ -242,7 +246,9 @@ void oskar_ms_set_element_coords(oskar_MeasurementSet* p, unsigned int station,
     Table phasedArray(p->ms->tableName() + "/PHASED_ARRAY", Table::Update);
     unsigned int num_rows = phasedArray.nrow();
     if (station >= num_rows)
+    {
         phasedArray.addRow(station - num_rows + 1);
+    }
 
     // Get column references and write data to the appropriate row.
     ScalarColumn<Int> antennaId(phasedArray, "ANTENNA_ID");
@@ -345,4 +351,3 @@ double oskar_ms_time_start_mjd_utc(const oskar_MeasurementSet* p)
 {
     return p->start_time / 86400.0;
 }
-

@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "mem/oskar_mem.h"
@@ -98,7 +75,7 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     /* Loop over lines in the file. */
     while (oskar_getline(&line, &buffer_size, file) >= 0)
     {
-        size_t num_cols_read, col_index = 0;
+        size_t num_cols_read = 0, col_index = 0;
 
         /* Break if error. */
         if (*status) break;
@@ -106,8 +83,7 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
         /* Get the row's data from the file, skipping the row if there aren't
          * enough columns to read. */
         num_cols_read = oskar_string_to_array_d(line, num_cols_max, row_data);
-        if (num_cols_read < num_cols_min)
-            continue;
+        if (num_cols_read < num_cols_min) continue;
 
         /* Copy defaults to fill out any missing row data as needed. */
         for (i = num_cols_read; i < num_cols_max; ++i)
@@ -176,7 +152,7 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
         double** row_defaults, size_t* num_cols_min, size_t* num_cols_max,
         va_list args, int* status)
 {
-    size_t i, buffer_size = 0, col_start = 0;
+    size_t i = 0, buffer_size = 0, col_start = 0;
     char* line = 0;
 
     /* Loop over arrays passed to this function to set up handles and
@@ -219,7 +195,7 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
 
         /* Make a copy of the default string from the argument list. */
         {
-            size_t def_len;
+            size_t def_len = 0;
             const char* def = va_arg(args, const char*);
             def_len = 1 + strlen(def);
             if (buffer_size < def_len)
@@ -238,7 +214,7 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
         /* Get default value(s) for the array, and store them at the
          * current column start. */
         {
-            size_t num_defaults;
+            size_t num_defaults = 0;
             num_defaults = oskar_string_to_array_d(line, num_cols_needed,
                     *row_defaults + col_start);
 

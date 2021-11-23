@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -49,9 +49,9 @@ void oskar_station_beam_horizon_direction(const oskar_Station* station,
      * allowed (az,el) directions. */
     if (oskar_station_num_permitted_beams(station) > 0)
     {
-        int i, n, min_index = 0;
-        double az, el, cos_el, min_dist = DBL_MAX;
-        const double *p_az, *p_el;
+        int i = 0, n = 0, min_index = 0;
+        double az = 0.0, el = 0.0, cos_el = 0.0, min_dist = DBL_MAX;
+        const double *p_az = 0, *p_el = 0;
 
         /* Convert current direction cosines to azimuth, elevation. */
         az = atan2(*x, *y);

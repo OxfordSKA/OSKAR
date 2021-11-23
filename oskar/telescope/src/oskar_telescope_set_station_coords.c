@@ -15,7 +15,7 @@ void oskar_telescope_set_station_coords(oskar_Telescope* dst, int index,
         const double measured_offset_ecef[3], const double true_offset_ecef[3],
         const double measured_enu[3], const double true_enu[3], int* status)
 {
-    int i;
+    int i = 0;
     for (i = 0; i < 3; ++i)
     {
         oskar_mem_set_element_real(dst->station_true_geodetic_rad[i],

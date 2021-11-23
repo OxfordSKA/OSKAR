@@ -1,42 +1,19 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "imager/private_imager.h"
 #include "imager/oskar_imager.h"
 
+#include "imager/oskar_grid_functions_spheroidal.h"
 #include "imager/private_imager_composite_nearest_even.h"
 #include "imager/private_imager_generate_w_phase_screen.h"
 #include "imager/private_imager_init_wproj.h"
-#include "imager/oskar_grid_functions_spheroidal.h"
 #include "math/oskar_cmath.h"
 #include "math/oskar_fft.h"
-#include "utility/oskar_get_memory_usage.h"
 #include "utility/oskar_device.h"
+#include "utility/oskar_get_memory_usage.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -103,7 +80,7 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 #if 0
     /* Print kernel support sizes. */
     {
-        int i;
+        int i = 0;
         for (i = 0; i < h->num_w_planes; ++i)
         {
             const int* supp = oskar_mem_int_const(h->w_support, status);
@@ -116,8 +93,10 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     oskar_imager_normalise_kernel_cube(h->w_support, h->oversample,
             conv_size_half, kernel_cube, status);
     if (save_kernels)
+    {
         oskar_imager_trim_and_save_kernel_cube(h, h->num_w_planes,
                 h->w_support, &conv_size_half, kernel_cube, status);
+    }
 
     /* Rearrange and compact the kernels. */
     oskar_mem_free(h->w_kernels_compact, status);
@@ -150,9 +129,11 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     /* Copy to device memory if required. */
     if (h->grid_on_gpu && h->num_gpus > 0)
     {
-        int i;
+        int i = 0;
         if (h->num_devices < h->num_gpus)
+        {
             oskar_imager_set_num_devices(h, h->num_gpus);
+        }
         for (i = 0; i < h->num_gpus; ++i)
         {
             DeviceData* d = &h->d[i];
@@ -185,15 +166,19 @@ static void oskar_imager_evaluate_w_kernel_params(const oskar_Imager* h,
         const double ww_mid = 0.5 * (h->ww_min + h->ww_max);
         max_uvw = 1.05 * h->ww_max;
         if (h->ww_rms > ww_mid)
+        {
             max_uvw *= h->ww_rms / ww_mid;
+        }
     }
     else
     {
         max_uvw = 0.25 / fabs(h->cellsize_rad);
     }
     if (*num_w_planes < 1)
+    {
         *num_w_planes = (int)(max_uvw *
                 fabs(sin(h->cellsize_rad * h->image_size / 2.0)));
+    }
     if (*num_w_planes < 16) *num_w_planes = 16;
     *w_scale = pow(*num_w_planes - 1, 2.0) / max_uvw;
 }
@@ -203,14 +188,14 @@ static oskar_Mem* oskar_imager_evaluate_w_kernel_cube(oskar_Imager* h,
         int num_w_planes, double w_scale,
         size_t* conv_size_half, double* norm_factor, int* status)
 {
-    size_t max_mem_bytes;
+    size_t max_mem_bytes = 0;
     oskar_FFT* fft = 0;
     oskar_Mem *screen = 0, *screen_gpu = 0, *screen_ptr = 0;
     oskar_Mem *taper = 0, *taper_gpu = 0, *taper_ptr = 0;
     oskar_Mem *kernel_cube = 0;
-    char *ptr_out, *ptr_in;
-    double *maxes, max_val = -INT_MAX, sampling;
-    int i;
+    char *ptr_out = 0, *ptr_in = 0;
+    double *maxes = 0, max_val = -INT_MAX, sampling = 0.0;
+    int i = 0;
     if (*status) return 0;
 
     /* Calculate convolution kernel size. */
@@ -283,7 +268,7 @@ static oskar_Mem* oskar_imager_evaluate_w_kernel_cube(oskar_Imager* h,
     maxes = (double*) calloc(num_w_planes, sizeof(double));
     for (i = 0; i < num_w_planes; ++i)
     {
-        size_t iy, in = 0, out = 0, offset;
+        size_t iy = 0, in = 0, out = 0, offset = 0;
 
         /* Generate the tapered phase screen. */
         oskar_imager_generate_w_phase_screen(i, conv_size, inner,
@@ -292,7 +277,9 @@ static oskar_Mem* oskar_imager_evaluate_w_kernel_cube(oskar_Imager* h,
         /* Perform the FFT to get the kernel. No shifts are required. */
         oskar_fft_exec(fft, screen_ptr, status);
         if (screen_ptr != screen)
+        {
             oskar_mem_copy(screen, screen_ptr, status);
+        }
         if (*status) break;
 
         /* Get the maximum (from the first element). */
@@ -335,7 +322,7 @@ static oskar_Mem* oskar_imager_evaluate_w_kernel_support_sizes(
         int num_w_planes, int oversample, size_t conv_size_half,
         const oskar_Mem* kernel_cube, double norm_factor, int* status)
 {
-    int *supp, i;
+    int *supp = 0, i = 0;
     oskar_Mem* w_support = 0;
     if (*status || !kernel_cube) return 0;
     w_support = oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_w_planes, status);
@@ -386,7 +373,9 @@ static oskar_Mem* oskar_imager_evaluate_w_kernel_support_sizes(
         {
             supp[i] = 1 + (int)(0.5 + (double)j / (double)oversample);
             if (supp[i] * oversample * 2 >= conv_size)
+            {
                 supp[i] = conv_size / 2 / oversample - 1;
+            }
         }
     }
     return w_support;
@@ -398,15 +387,15 @@ static void oskar_imager_trim_and_save_kernel_cube(oskar_Imager* h,
         oskar_Mem* kernel_cube, int* status)
 {
     char* fname = 0;
-    int i, max_val = -INT_MAX;
-    const int* supp;
+    int i = 0, max_val = -INT_MAX;
+    const int* supp = 0;
     fitsfile* f = 0;
     char *ttype[] = {"SUPPORT"};
     char *tform[] = {"1J"}; /* 32-bit integer. */
     char *tunit[] = {"\0"};
     char extname[] = "W_KERNELS";
-    double cellsize_rad, fov_rad, w_scale;
-    int grid_size, image_size, oversample;
+    double cellsize_rad = 0.0, fov_rad = 0.0, w_scale = 0.0;
+    int grid_size = 0, image_size = 0, oversample = 0;
     if (*status || !kernel_cube) return;
     supp = oskar_mem_int_const(support, status);
     for (i = 0; i < num_w_planes; ++i) max_val = MAX(max_val, supp[i]);
@@ -414,7 +403,7 @@ static void oskar_imager_trim_and_save_kernel_cube(oskar_Imager* h,
     const size_t new_conv_size_half = (size_t) new_conv_size / 2 - 2;
     if (new_conv_size_half < *conv_size_half)
     {
-        size_t iy, in = 0, out = 0;
+        size_t iy = 0, in = 0, out = 0;
         char *ptr = oskar_mem_char(kernel_cube);
         const int prec = oskar_mem_precision(kernel_cube);
         const size_t element_size = 2 * oskar_mem_element_size(prec);
@@ -480,7 +469,7 @@ static void oskar_imager_normalise_kernel_cube(const oskar_Mem* support,
         int* status)
 {
     double sum = 0.0;
-    int ix, iy;
+    int ix = 0, iy = 0;
     if (*status) return;
     const int* supp = oskar_mem_int_const(support, status);
 
@@ -490,17 +479,25 @@ static void oskar_imager_normalise_kernel_cube(const oskar_Mem* support,
     {
         const double *RESTRICT p = oskar_mem_double_const(kernel_cube, status);
         for (iy = -supp[0]; iy <= supp[0]; ++iy)
+        {
             for (ix = -supp[0]; ix <= supp[0]; ++ix)
+            {
                 sum += p[2 * (abs(ix) * oversample +
                         conv_size_half * (abs(iy) * oversample))];
+            }
+        }
     }
     else
     {
         const float *RESTRICT p = oskar_mem_float_const(kernel_cube, status);
         for (iy = -supp[0]; iy <= supp[0]; ++iy)
+        {
             for (ix = -supp[0]; ix <= supp[0]; ++ix)
+            {
                 sum += p[2 * (abs(ix) * oversample +
                         conv_size_half * (abs(iy) * oversample))];
+            }
+        }
     }
     oskar_mem_scale_real(kernel_cube, 1.0 / sum,
             0, oskar_mem_length(kernel_cube), status);
@@ -512,10 +509,10 @@ static void oskar_imager_rearrange_kernels(int num_w_planes,
         const oskar_Mem* kernels_in, oskar_Mem* kernels_out,
         int* rearranged_kernel_start, int* status)
 {
-    int w, j, k, off_u, off_v;
+    int w = 0, j = 0, k = 0, off_u = 0, off_v = 0;
     size_t rearranged_size = 0;
-    float2*  out_f;
-    double2* out_d;
+    float2*  out_f = 0;
+    double2* out_d = 0;
     if (*status) return;
     const float2*  in_f = (const float2*)  oskar_mem_void_const(kernels_in);
     const double2* in_d = (const double2*) oskar_mem_void_const(kernels_in);
@@ -572,9 +569,13 @@ static void oskar_imager_rearrange_kernels(int num_w_planes,
                         const size_t a = c_in + idx_v * conv_size_half + idx_u;
                         const size_t b = p + stride * k;
                         if (prec == OSKAR_SINGLE)
+                        {
                             out_f[b] = in_f[a];
+                        }
                         else
+                        {
                             out_d[b] = in_d[a];
+                        }
                     }
                 }
             }

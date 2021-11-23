@@ -5,10 +5,10 @@
 
 #include <gtest/gtest.h>
 
-#include "utility/oskar_dir.h"
-#include "utility/oskar_get_error_string.h"
 #include "mem/oskar_mem.h"
 #include "telescope/oskar_telescope.h"
+#include "utility/oskar_dir.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -28,9 +28,9 @@ TEST(telescope_model_load_save, test_0_level)
     double altitude_m = 1.0;
 
     {
-        FILE* f;
+        FILE* f = 0;
         int num_stations = 10;
-        char* path;
+        char* path = 0;
 
         // Create a telescope model directory.
         oskar_dir_mkpath(tm);
@@ -46,7 +46,9 @@ TEST(telescope_model_load_save, test_0_level)
         path = oskar_dir_get_path(tm, "layout.txt");
         f = fopen(path, "w");
         for (int i = 0; i < num_stations; ++i)
+        {
             fprintf(f, "%.1f, %.1f, %.1f\n", i * 10.0, i * 20.0, i * 30.0);
+        }
         fclose(f);
         free(path);
     }
@@ -133,7 +135,7 @@ TEST(telescope_model_load_save, test_1_level)
     EXPECT_NEAR(oskar_telescope_alt_metres(telescope),
             oskar_telescope_alt_metres(telescope2), 1e-10);
 
-    double max_, avg_;
+    double max_ = 0.0, avg_ = 0.0;
     for (int dim = 0; dim < 3; dim++)
     {
         oskar_mem_evaluate_relative_error(
@@ -250,7 +252,7 @@ TEST(telescope_model_load_save, test_2_level)
     EXPECT_NEAR(oskar_telescope_alt_metres(telescope),
             oskar_telescope_alt_metres(telescope2), 1e-10);
 
-    double max_, avg_ = 0.0;
+    double max_ = 0.0, avg_ = 0.0;
     for (int dim = 0; dim < 3; dim++)
     {
         oskar_mem_evaluate_relative_error(
@@ -397,7 +399,7 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
     for (int i = 0; i < oskar_telescope_num_station_models(telescope); ++i)
     {
         oskar_Station* s = oskar_telescope_station(telescope, i);
-        oskar_Mem *freq, *rms;
+        oskar_Mem *freq = 0, *rms = 0;
         freq = oskar_station_noise_freq_hz(s);
         rms = oskar_station_noise_rms_jy(s);
         ASSERT_EQ(num_values, (int)oskar_mem_length(rms));
@@ -432,8 +434,8 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
 static void generate_noisy_telescope(const char* dir, int num_stations,
         const vector<double>& freqs, const vector<double>& noise)
 {
-    FILE* f;
-    char* path;
+    FILE* f = 0;
+    char* path = 0;
 
     // Create a telescope model directory.
     if (oskar_dir_exists(dir)) oskar_dir_remove(dir);
@@ -459,7 +461,9 @@ static void generate_noisy_telescope(const char* dir, int num_stations,
         path = oskar_dir_get_path(dir, "noise_frequencies.txt");
         f = fopen(path, "w");
         for (size_t i = 0; i < freqs.size(); ++i)
+        {
             fprintf(f, "%.10f\n", freqs[i]);
+        }
         fclose(f);
         free(path);
     }
@@ -470,9 +474,10 @@ static void generate_noisy_telescope(const char* dir, int num_stations,
         path = oskar_dir_get_path(dir, "rms.txt");
         f = fopen(path, "w");
         for (size_t i = 0; i < noise.size(); ++i)
+        {
             fprintf(f, "%.10f\n", noise[i]);
+        }
         fclose(f);
         free(path);
     }
 }
-

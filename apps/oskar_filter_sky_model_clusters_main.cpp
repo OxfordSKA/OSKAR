@@ -132,7 +132,9 @@ int main(int argc, char** argv)
     opt.add_flag("-i", "Use integrated flux", 0, "", false,
             "--use-integrated-flux");
     if (!opt.check_options(argc, argv))
+    {
         return EXIT_FAILURE;
+    }
 
     double sigma = opt.get_double("-s");
     double threshold = opt.get_double("-t");
@@ -305,7 +307,9 @@ int main(int argc, char** argv)
     {
         int counter = 0;
         for (int i = 0; i < num_output; ++i)
+        {
             counter += (int)output_source_components[i].size();
+        }
         if (num_input != counter)
         {
             oskar_log_error(log, "Inconsistent component counts: %d input, "
@@ -354,7 +358,9 @@ int main(int argc, char** argv)
             {
                 int c = output_source_components[i][j];
                 if (filter_I[c] > output_source_I[i])
+                {
                     output_source_I[i] = filter_I[c];
+                }
             }
         }
     }
@@ -446,8 +452,10 @@ int main(int argc, char** argv)
     oskar_log_message(log, 'M', 0, "Saving to '%s'", outname.c_str());
     oskar_sky_save(sky_out, outname.c_str(), &status);
     if (status)
+    {
         oskar_log_error(log, "Error saving file: %s",
                 oskar_get_error_string(status));
+    }
 
     // Free memory.
     oskar_log_free(log);

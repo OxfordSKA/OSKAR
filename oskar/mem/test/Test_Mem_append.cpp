@@ -55,9 +55,13 @@ TEST(Mem, append_cpu)
     for (int i = 0; i < (int)oskar_mem_length(mem); ++i)
     {
         if (i < num_values1)
+        {
             EXPECT_DOUBLE_EQ(value1, data[i]);
+        }
         else
+        {
             EXPECT_DOUBLE_EQ(value2, data[i]);
+        }
     }
 
     // Free memory.

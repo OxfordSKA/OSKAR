@@ -51,7 +51,6 @@ set(${name}_SRC
     src/oskar_convert_relative_directions_to_lon_lat.c
     src/oskar_convert_station_uvw_to_baseline_uvw.c
     src/oskar_convert_theta_phi_to_enu_directions.c
-    src/oskar_convert_theta_phi_to_healpix_ring.c
     src/oskar_convert_theta_phi_to_ludwig3_components.c
     src/oskar_convert_xyz_to_lon_lat.c
     src/oskar_convert.cl

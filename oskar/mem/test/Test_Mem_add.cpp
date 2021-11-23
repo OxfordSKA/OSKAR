@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2017, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <gtest/gtest.h>
@@ -36,7 +13,7 @@ TEST(Mem, add_matrix_cpu)
 {
     // Use case: Two CPU oskar_Mem matrix types are added together.
     int num_elements = 10, status = 0;
-    oskar_Mem *in1, *in2, *out;
+    oskar_Mem *in1 = 0, *in2 = 0, *out = 0;
     in1 = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements, &status);
     in2 = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
@@ -91,7 +68,7 @@ TEST(Mem, add_in_place)
 {
     // Use case: In place add.
     int num_elements = 10, status = 0;
-    oskar_Mem *in, *in_out;
+    oskar_Mem *in = 0, *in_out = 0;
     in = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements, &status);
     in_out = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
@@ -142,7 +119,7 @@ TEST(Mem, add_in_place)
 TEST(Mem, add_gpu_single)
 {
     int num_elements = 445, prec = OSKAR_SINGLE, status = 0;
-    oskar_Mem *in1, *in2, *in1_cl, *in2_cl, *out, *out_cl;
+    oskar_Mem *in1 = 0, *in2 = 0, *in1_cl = 0, *in2_cl = 0, *out = 0, *out_cl = 0;
     in1 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
     in2 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
     float* A = oskar_mem_float(in1, &status);
@@ -178,7 +155,7 @@ TEST(Mem, add_gpu_single)
 TEST(Mem, add_cl_single)
 {
     int num_elements = 445, prec = OSKAR_SINGLE, status = 0;
-    oskar_Mem *in1, *in2, *in1_cl, *in2_cl, *out, *out_cl;
+    oskar_Mem *in1 = 0, *in2 = 0, *in1_cl = 0, *in2_cl = 0, *out = 0, *out_cl = 0;
     in1 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
     in2 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
     float* A = oskar_mem_float(in1, &status);
@@ -212,7 +189,7 @@ TEST(Mem, add_cl_single)
 TEST(Mem, add_cl_double)
 {
     int num_elements = 445, prec = OSKAR_DOUBLE, status = 0;
-    oskar_Mem *in1, *in2, *in1_cl, *in2_cl, *out, *out_cl;
+    oskar_Mem *in1 = 0, *in2 = 0, *in1_cl = 0, *in2_cl = 0, *out = 0, *out_cl = 0;
     in1 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
     in2 = oskar_mem_create(prec, OSKAR_CPU, num_elements, &status);
     double* A = oskar_mem_double(in1, &status);

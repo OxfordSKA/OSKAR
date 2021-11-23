@@ -6,7 +6,7 @@ extern "C" {
 
 void oskar_dierckx_fprota(double cos_, double sin_, double *a, double *b)
 {
-    double stor1, stor2;
+    double stor1 = 0.0, stor2 = 0.0;
 
     stor1 = *a;
     stor2 = *b;

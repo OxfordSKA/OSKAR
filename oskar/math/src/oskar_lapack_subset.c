@@ -127,8 +127,8 @@ static void oskar_strsm(const char *side, const char *uplo, const char *transa,
 void oskar_dgetrf(const int m, const int n, double *A, const int lda,
         int *ipiv, int *info)
 {
-    int a_offset, i1, i2, i3;
-    int i, j, jb, nb, iinfo, mindim;
+    int a_offset = 0, i1 = 0, i2 = 0, i3 = 0;
+    int i = 0, j = 0, jb = 0, nb = 0, iinfo = 0, mindim = 0;
 
     if (m == 0 || n == 0) return;
 
@@ -202,8 +202,8 @@ void oskar_dgetrf(const int m, const int n, double *A, const int lda,
 void oskar_sgetrf(const int m, const int n, float *A, const int lda,
         int *ipiv, int *info)
 {
-    int a_offset, i1, i2, i3;
-    int i, j, jb, nb, iinfo, mindim;
+    int a_offset = 0, i1 = 0, i2 = 0, i3 = 0;
+    int i = 0, j = 0, jb = 0, nb = 0, iinfo = 0, mindim = 0;
 
     if (m == 0 || n == 0) return;
 
@@ -277,8 +277,8 @@ void oskar_sgetrf(const int m, const int n, float *A, const int lda,
 void oskar_dgetrf2(const int m, const int n, double *A,
         const int lda, int *ipiv, int *info)
 {
-    int a_offset, i, n1, n2, iinfo = 0, mindim;
-    double temp;
+    int a_offset = 0, i = 0, n1 = 0, n2 = 0, iinfo = 0, mindim = 0;
+    double temp = 0.0;
 
     /* Parameter adjustments */
     a_offset = 1 + lda;
@@ -317,7 +317,9 @@ void oskar_dgetrf2(const int m, const int n, double *A,
             else
             {
                 for (i = 1; i <= m - 1; ++i)
+                {
                     A[i + 1 + lda] /= A[a_offset];
+                }
             }
         }
         else
@@ -369,8 +371,8 @@ void oskar_dgetrf2(const int m, const int n, double *A,
 void oskar_sgetrf2(const int m, const int n, float *A,
         const int lda, int *ipiv, int *info)
 {
-    int a_offset, i, n1, n2, iinfo = 0, mindim;
-    float temp;
+    int a_offset = 0, i = 0, n1 = 0, n2 = 0, iinfo = 0, mindim = 0;
+    float temp = 0.0;
 
     /* Parameter adjustments */
     a_offset = 1 + lda;
@@ -409,7 +411,9 @@ void oskar_sgetrf2(const int m, const int n, float *A,
             else
             {
                 for (i = 1; i <= m - 1; ++i)
+                {
                     A[i + 1 + lda] /= A[a_offset];
+                }
             }
         }
         else
@@ -462,7 +466,7 @@ void oskar_sgetrf2(const int m, const int n, float *A,
 void oskar_dgetrs(const char *trans, const int n, const int nrhs,
         double *A, const int lda, int *ipiv, double *B, const int ldb)
 {
-    int notran;
+    int notran = 0;
     if (n == 0 || nrhs == 0) return;
 
     notran = !strncmp(trans, "N", 1) || !strncmp(trans, "n", 1);
@@ -500,7 +504,7 @@ void oskar_dgetrs(const char *trans, const int n, const int nrhs,
 void oskar_sgetrs(const char *trans, const int n, const int nrhs,
         float *A, const int lda, int *ipiv, float *B, const int ldb)
 {
-    int notran;
+    int notran = 0;
     if (n == 0 || nrhs == 0) return;
 
     notran = !strncmp(trans, "N", 1) || !strncmp(trans, "n", 1);
@@ -536,7 +540,8 @@ void oskar_sgetrs(const char *trans, const int n, const int nrhs,
 
 
 #define LASWP_MACRO \
-        int i, j, k, i1, i2, n32, ip, ix, ix0, inc;                           \
+        int i = 0, j = 0, k = 0, i1 = 0, i2 = 0, n32 = 0;                     \
+        int ip = 0, ix = 0, ix0 = 0, inc = 0;                                 \
         A -= (1 + lda);                                                       \
         --ipiv;                                                               \
         if (incx > 0)                                                         \
@@ -603,7 +608,7 @@ void oskar_sgetrs(const char *trans, const int n, const int nrhs,
 void oskar_dlaswp(const int n, double *A, const int lda,
         const int k1, const int k2, int *ipiv, const int incx)
 {
-    double temp;
+    double temp = 0.0;
     LASWP_MACRO
 }
 
@@ -611,14 +616,16 @@ void oskar_dlaswp(const int n, double *A, const int lda,
 void oskar_slaswp(const int n, float *A, const int lda,
         const int k1, const int k2, int *ipiv, const int incx)
 {
-    float temp;
+    float temp = 0.0f;
     LASWP_MACRO
 }
 
 
 int oskar_ieeeck(const int ispec, const float zero, const float one)
 {
-    float nan1, nan2, nan3, nan4, nan5, nan6, neginf, posinf, negzro, newzro;
+    float nan1 = 0.0f, nan2 = 0.0f, nan3 = 0.0f;
+    float nan4 = 0.0f, nan5 = 0.0f, nan6 = 0.0f;
+    float neginf = 0.0f, posinf = 0.0f, negzro = 0.0f, newzro = 0.0f;
 
     posinf = one / zero;
     if (posinf <= one) return 0;
@@ -668,20 +675,24 @@ int oskar_ilaenv(const int ispec, const char *name,
         const int n1, const int n2, const int n3, const int n4)
 {
     char c2[2], c3[3], c4[2], subnam[6];
-    int i, nb, nx, nbmin, cname, sname;
+    int i = 0, nb = 0, nx = 0, nbmin = 0, cname = 0, sname = 0;
 
     /* Convert NAME to upper case if the first character is lower case. */
     strncpy(subnam, name, sizeof(subnam));
     if (subnam[0] == tolower(subnam[0]))
     {
         for (i = 0; i < 6 && subnam[i] != 0; ++i)
+        {
             subnam[i] = toupper(subnam[i]);
+        }
     }
 
     sname = subnam[0] == 'S' || subnam[0] == 'D';
     cname = subnam[0] == 'C' || subnam[0] == 'Z';
     if (! (cname || sname))
+    {
         return 1;
+    }
     strncpy(c2, subnam + 1, sizeof(c2));
     strncpy(c3, subnam + 3, sizeof(c3));
     strncpy(c4, c3 + 1, sizeof(c4));
@@ -698,41 +709,65 @@ int oskar_ilaenv(const int ispec, const char *name,
         if (!strncmp(c2, "GE", 2))
         {
             if (!strncmp(c3, "TRF", 3))
+            {
                 nb = 64;
+            }
             else if (!strncmp(c3, "QRF", 3) ||
                     !strncmp(c3, "RQF", 3) ||
                     !strncmp(c3, "LQF",  3) ||
                     !strncmp(c3, "QLF", 3))
+            {
                 nb = 32;
+            }
             else if (!strncmp(c3, "HRD", 3))
+            {
                 nb = 32;
+            }
             else if (!strncmp(c3, "BRD", 3))
+            {
                 nb = 32;
+            }
             else if (!strncmp(c3, "TRI", 3))
+            {
                 nb = 64;
+            }
         }
         else if (!strncmp(c2, "PO", 2))
         {
             if (!strncmp(c3, "TRF", 3))
+            {
                 nb = 64;
+            }
         }
         else if (!strncmp(c2, "SY", 2))
         {
             if (!strncmp(c3, "TRF", 3))
+            {
                 nb = 64;
+            }
             else if (sname && !strncmp(c3, "TRD", 3))
+            {
                 nb = 32;
+            }
             else if (sname && !strncmp(c3, "GST", 3))
+            {
                 nb = 64;
+            }
         }
         else if (cname && !strncmp(c2, "HE", 2))
         {
             if (!strncmp(c3, "TRF", 3))
+            {
                 nb = 64;
+            }
             else if (!strncmp(c3, "TRD", 3))
+            {
                 nb = 32;
+            }
             else if (!strncmp(c3, "GST", 3))
+            {
                 nb = 64;
+            }
         }
         else if (sname && !strncmp(c2, "OR", 2))
         {
@@ -745,7 +780,9 @@ int oskar_ilaenv(const int ispec, const char *name,
                         !strncmp(c4, "HR", 2) ||
                         !strncmp(c4, "TR", 2) ||
                         !strncmp(c4, "BR", 2))
+                {
                     nb = 32;
+                }
             }
             else if (c3[0] == 'M')
             {
@@ -756,7 +793,9 @@ int oskar_ilaenv(const int ispec, const char *name,
                         !strncmp(c4, "HR", 2) ||
                         !strncmp(c4, "TR", 2) ||
                         !strncmp(c4, "BR", 2))
+                {
                     nb = 32;
+                }
             }
         }
         else if (cname && !strncmp(c2, "UN", 2))
@@ -770,7 +809,9 @@ int oskar_ilaenv(const int ispec, const char *name,
                         !strncmp(c4, "HR", 2) ||
                         !strncmp(c4, "TR", 2) ||
                         !strncmp(c4, "BR", 2))
+                {
                     nb = 32;
+                }
             }
             else if (c3[0] == 'M')
             {
@@ -781,7 +822,9 @@ int oskar_ilaenv(const int ispec, const char *name,
                         !strncmp(c4, "HR", 2) ||
                         !strncmp(c4, "TR", 2) ||
                         !strncmp(c4, "BR", 2))
+                {
                     nb = 32;
+                }
             }
         }
         else if (!strncmp(c2, "GB", 2))
@@ -789,9 +832,13 @@ int oskar_ilaenv(const int ispec, const char *name,
             if (!strncmp(c3, "TRF", 3))
             {
                 if (n4 <= 64)
+                {
                     nb = 1;
+                }
                 else
+                {
                     nb = 32;
+                }
             }
         }
         else if (!strncmp(c2, "PB", 2))
@@ -799,33 +846,47 @@ int oskar_ilaenv(const int ispec, const char *name,
             if (!strncmp(c3, "TRF", 3))
             {
                 if (n2 <= 64)
+                {
                     nb = 1;
+                }
                 else
+                {
                     nb = 32;
+                }
             }
         }
         else if (!strncmp(c2, "TR", 2))
         {
             if (!strncmp(c3, "TRI", 3))
+            {
                 nb = 64;
+            }
             else if (!strncmp(c3, "EVC", 3))
+            {
                 nb = 64;
+            }
         }
         else if (!strncmp(c2, "LA", 2))
         {
             if (!strncmp(c3, "UUM", 3))
+            {
                 nb = 64;
+            }
         }
         else if (sname && !strncmp(c2, "ST", 2))
         {
             if (!strncmp(c3, "EBZ", 3))
+            {
                 nb = 1;
+            }
         }
         else if (!strncmp(c2, "GG", 2))
         {
             nb = 32;
             if (!strncmp(c3, "HD3", 3))
+            {
                 nb = 32;
+            }
         }
         return nb;
     case 2:
@@ -834,7 +895,9 @@ int oskar_ilaenv(const int ispec, const char *name,
         if (!strncmp(c2, "SY", 2))
         {
             if (!strncmp(c3, "TRF", 3))
+            {
                 nbmin = 8;
+            }
         }
         return nbmin;
     case 3:
@@ -846,21 +909,31 @@ int oskar_ilaenv(const int ispec, const char *name,
                     !strncmp(c3, "RQF", 3) ||
                     !strncmp(c3, "LQF", 3) ||
                     !strncmp(c3, "QLF", 3))
+            {
                 nx = 128;
+            }
             else if (!strncmp(c3, "HRD", 3))
+            {
                 nx = 128;
+            }
             else if (!strncmp(c3, "BRD", 3))
+            {
                 nx = 128;
+            }
         }
         else if (!strncmp(c2, "SY", 2))
         {
             if (sname && !strncmp(c3, "TRD", 3))
+            {
                 nx = 32;
+            }
         }
         else if (cname && !strncmp(c2, "HE", 2))
         {
             if (!strncmp(c3, "TRD", 3))
+            {
                 nx = 32;
+            }
         }
         else if (sname && !strncmp(c2, "OR", 2))
         {
@@ -873,7 +946,9 @@ int oskar_ilaenv(const int ispec, const char *name,
                         !strncmp(c4, "HR", 2) ||
                         !strncmp(c4, "TR", 2) ||
                         !strncmp(c4, "BR", 2))
+                {
                     nx = 128;
+                }
             }
         }
         else if (cname && !strncmp(c2, "UN", 2))
@@ -887,7 +962,9 @@ int oskar_ilaenv(const int ispec, const char *name,
                         !strncmp(c4, "HR", 2) ||
                         !strncmp(c4, "TR", 2) ||
                         !strncmp(c4, "BR", 2))
+                {
                     nx = 128;
+                }
             }
         }
         else if (!strncmp(c2, "GG", 2))
@@ -938,7 +1015,7 @@ int oskar_ilaenv(const int ispec, const char *name,
 int oskar_iparmq(const int ispec, const char *name,
         const int ilo, const int ihi)
 {
-    int ret_val = 0, t, i, nh, ns;
+    int ret_val = 0, t = 0, i = 0, nh = 0, ns = 0;
     char subnam[6];
 
     if (ispec == 15 || ispec == 13 || ispec == 16)
@@ -947,9 +1024,13 @@ int oskar_iparmq(const int ispec, const char *name,
         nh = ihi - ilo + 1;
         ns = 2;
         if (nh >= 30)
+        {
             ns = 4;
+        }
         if (nh >= 60)
+        {
             ns = 10;
+        }
         if (nh >= 150)
         {
             /* Computing MAX */
@@ -957,11 +1038,17 @@ int oskar_iparmq(const int ispec, const char *name,
             ns = max(10, t);
         }
         if (nh >= 590)
+        {
             ns = 64;
+        }
         if (nh >= 3000)
+        {
             ns = 128;
+        }
         if (nh >= 6000)
+        {
             ns = 256;
+        }
         /* Computing MAX */
         t = ns - ns % 2;
         ns = max(2, t);
@@ -998,7 +1085,9 @@ int oskar_iparmq(const int ispec, const char *name,
         if (subnam[0] == tolower(subnam[0]))
         {
             for (i = 0; i < 6 && subnam[i] != 0; ++i)
+            {
                 subnam[i] = toupper(subnam[i]);
+            }
         }
 
         if (!strncmp(subnam + 1, "GGHRD", 5) ||
@@ -1006,18 +1095,24 @@ int oskar_iparmq(const int ispec, const char *name,
         {
             ret_val = 1;
             if (nh >= 14)
+            {
                 ret_val = 2;
+            }
         }
         else if (!strncmp(subnam + 3, "EXC", 3))
         {
             if (nh >= 14)
+            {
                 ret_val = 2;
+            }
         }
         else if (!strncmp(subnam + 1, "HSEQR", 5) ||
                 !strncmp(subnam + 1, "LAQR", 4))
         {
             if (ns >= 14)
+            {
                 ret_val = 2;
+            }
         }
         return ret_val;
     default:
@@ -1030,7 +1125,7 @@ int oskar_iparmq(const int ispec, const char *name,
 /* BLAS functions. */
 
 #define IMAX_MACRO \
-        int i, ix, ret_val = 1;                                              \
+        int i = 0, ix = 0, ret_val = 1;                                      \
         --dx;                                                                \
         if (n < 1 || incx <= 0) return 0;                                    \
         if (n == 1) return 1;                                                \
@@ -1066,20 +1161,20 @@ int oskar_iparmq(const int ispec, const char *name,
 
 int oskar_idamax(const int n, double *dx, const int incx)
 {
-    double mx;
+    double mx = 0.0;
     IMAX_MACRO
 }
 
 
 int oskar_isamax(const int n, float *dx, const int incx)
 {
-    float mx;
+    float mx = 0.0f;
     IMAX_MACRO
 }
 
 
 #define GEMM_MACRO \
-        int i, j, l, nota, notb;                                             \
+        int i = 0, j = 0, l = 0, nota = 0, notb = 0;                         \
         if (m == 0 || n == 0 || ((alpha == zero || k == 0) && beta == one))  \
             return;                                                          \
         nota = !strncmp(transa, "N", 1) || !strncmp(transa, "n", 1);         \
@@ -1203,7 +1298,7 @@ void oskar_dgemm(const char *transa, const char *transb,
         double *A, const int lda, double *B, const int ldb,
         const double beta, double *C, const int ldc)
 {
-    double x;
+    double x = 0.0;
     const double one = 1., zero = 0.;
     GEMM_MACRO
 }
@@ -1214,14 +1309,14 @@ void oskar_sgemm(const char *transa, const char *transb,
         float *A, const int lda, float *B, const int ldb,
         const float beta, float *C, const int ldc)
 {
-    float x;
+    float x = 0.0;
     const float one = 1.f, zero = 0.f;
     GEMM_MACRO
 }
 
 
 #define TRSM_MACRO \
-        int i, j, k, lside, upper, nota, nounit;                              \
+        int i = 0, j = 0, k = 0, lside = 0, upper = 0, nota = 0, nounit = 0;  \
         A -= (1 + lda);                                                       \
         B -= (1 + ldb);                                                       \
         lside = !strncmp(side, "L", 1) || !strncmp(side, "l", 1);             \
@@ -1443,7 +1538,7 @@ void oskar_dtrsm(const char *side, const char *uplo, const char *transa,
         const char *diag, const int m, const int n, const double alpha,
         const double *A, const int lda, double *B, const int ldb)
 {
-    double x;
+    double x = 0.0;
     const double one = 1., zero = 0.;
     TRSM_MACRO
 }
@@ -1453,14 +1548,14 @@ void oskar_strsm(const char *side, const char *uplo, const char *transa,
         const char *diag, const int m, const int n, const float alpha,
         const float *A, const int lda, float *B, const int ldb)
 {
-    float x;
+    float x = 0.0f;
     const float one = 1.f, zero = 0.f;
     TRSM_MACRO
 }
 
 
 #define SCAL_MACRO \
-        int i, m, mp1, nincx;                                                \
+        int i = 0, m = 0, mp1 = 0, nincx = 0;                                \
         --dx;                                                                \
         if (n <= 0 || incx <= 0) return;                                     \
         if (incx == 1)                                                       \
@@ -1501,4 +1596,3 @@ void oskar_sscal(const int n, const float da, float *dx, const int incx)
 {
     SCAL_MACRO
 }
-

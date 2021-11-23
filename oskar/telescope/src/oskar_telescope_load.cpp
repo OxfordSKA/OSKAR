@@ -153,9 +153,13 @@ static void load_directories(oskar_Telescope* telescope,
         // Set the number of station models to be the number of directories.
         // Do this first!
         if (num_dirs == 0)
+        {
             oskar_telescope_resize_station_array(telescope, 1, status);
+        }
         else
+        {
             oskar_telescope_resize_station_array(telescope, num_dirs, status);
+        }
 
         // Load everything at this level.
         for (size_t i = 0; i < loaders.size(); ++i)

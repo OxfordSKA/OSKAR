@@ -16,7 +16,7 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
         int max_channels_per_block, int num_channels_total, int num_stations,
         int write_autocorr, int write_crosscor, int* status)
 {
-    int i, j;
+    int i = 0, j = 0;
     oskar_VisHeader* hdr = 0;
     if (*status) return 0;
 
@@ -46,9 +46,13 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
 
     /* Set dimensions. */
     if (max_channels_per_block <= 0)
+    {
         max_channels_per_block = num_channels_total;
+    }
     if (max_times_per_block <= 0)
+    {
         max_times_per_block = num_times_total;
+    }
     hdr->max_times_per_block    = max_times_per_block;
     hdr->num_times_total        = num_times_total;
     hdr->max_channels_per_block = max_channels_per_block;
@@ -59,11 +63,15 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
 
     /* Set default polarisation type. */
     if (oskar_type_is_matrix(amp_type))
+    {
         oskar_vis_header_set_pol_type(hdr,
                 OSKAR_VIS_POL_TYPE_LINEAR_XX_XY_YX_YY, status);
+    }
     else
+    {
         oskar_vis_header_set_pol_type(hdr,
                 OSKAR_VIS_POL_TYPE_STOKES_I, status);
+    }
 
     /* Initialise arrays. */
     hdr->telescope_path = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);

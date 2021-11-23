@@ -45,7 +45,9 @@ int main(int argc, char** argv)
     // Write out the sky model.
     oskar_sky_save(sky, opt.get_arg(1), &error);
     if (error)
+    {
         oskar_log_error(0, oskar_get_error_string(error));
+    }
 
     oskar_sky_free(sky, &error);
     return error ? EXIT_FAILURE : EXIT_SUCCESS;

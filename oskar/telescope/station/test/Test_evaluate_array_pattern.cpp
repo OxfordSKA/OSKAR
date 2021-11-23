@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <gtest/gtest.h>
 
-#include "math/oskar_cmath.h"
-#include "math/oskar_dftw.h"
 #include "convert/oskar_convert_lon_lat_to_relative_directions.h"
 #include "convert/oskar_convert_relative_directions_to_enu_directions.h"
-#include "telescope/station/oskar_station_evaluate_element_weights.h"
-#include "telescope/station/oskar_station.h"
+#include "math/oskar_cmath.h"
+#include "math/oskar_dftw.h"
 #include "math/oskar_evaluate_image_lon_lat_grid.h"
+#include "telescope/station/oskar_station.h"
+#include "telescope/station/oskar_station_evaluate_element_weights.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_timer.h"
 
@@ -44,7 +44,7 @@ static void check_images(const oskar_Mem* image1, const oskar_Mem* image2)
 static oskar_Mem* set_up_beam_pattern(int type, bool polarised,
         int image_size, int* status)
 {
-    oskar_Mem* bp;
+    oskar_Mem* bp = 0;
     int num_pols = polarised ? 4 : 1;
     bp = oskar_mem_create(type | OSKAR_COMPLEX, OSKAR_CPU,
             image_size * image_size * num_pols, status);
@@ -54,11 +54,11 @@ static oskar_Mem* set_up_beam_pattern(int type, bool polarised,
 static oskar_Station* set_up_station1(int num_x, int num_y,
         int type, double beam_ra_deg, double beam_dec_deg, int* status)
 {
-    oskar_Station* station;
+    oskar_Station* station = 0;
 
     /* Generator parameters. */
     double sep_m = 1.0;
-    int dummy = 0, ix, iy, i;
+    int dummy = 0, ix = 0, iy = 0, i = 0;
 
     /* Initialise the station model. */
     station = oskar_station_create(type, OSKAR_CPU,
@@ -92,8 +92,8 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
         oskar_Mem** z, const oskar_Station* station, const oskar_Mem* lon,
         const oskar_Mem* lat, double gast, double freq_hz, int* status)
 {
-    double beam_x, beam_y, beam_z;
-    oskar_Mem *l, *m, *n;
+    double beam_x = 0.0, beam_y = 0.0, beam_z = 0.0;
+    oskar_Mem *l = 0, *m = 0, *n = 0;
 
     const int type = oskar_station_precision(station);
     const int location = oskar_station_mem_location(station);
@@ -129,8 +129,8 @@ static void run_array_pattern_hierarchical(oskar_Mem* bp,
         const oskar_Mem* lat, double gast, double freq_hz,
         const char* message, int* status)
 {
-    oskar_Mem *w, *x, *y, *z, *ones, *pattern;
-    oskar_Timer* timer;
+    oskar_Mem *w = 0, *x = 0, *y = 0, *z = 0, *ones = 0, *pattern = 0;
+    oskar_Timer* timer = 0;
 
     /* Get the meta-data. */
     const int num_elements = oskar_station_num_elements(station);
@@ -221,21 +221,21 @@ TEST(evaluate_array_pattern, test)
     double freq_hz = 100e6;
     double gast = 0.0;
 
-    bool polarised;
+    bool polarised = 0;
     int status = 0, type = 0;
-    oskar_Station *station_cpu_f, *station_cpu_d;
-    oskar_Station *station_gpu_f, *station_gpu_d;
-    oskar_Mem *lon_cpu_f, *lat_cpu_f, *lon_cpu_d, *lat_cpu_d;
-    oskar_Mem *lon_gpu_f, *lat_gpu_f, *lon_gpu_d, *lat_gpu_d;
+    oskar_Station *station_cpu_f = 0, *station_cpu_d = 0;
+    oskar_Station *station_gpu_f = 0, *station_gpu_d = 0;
+    oskar_Mem *lon_cpu_f = 0, *lat_cpu_f = 0, *lon_cpu_d = 0, *lat_cpu_d = 0;
+    oskar_Mem *lon_gpu_f = 0, *lat_gpu_f = 0, *lon_gpu_d = 0, *lat_gpu_d = 0;
 
-    oskar_Mem *bp_c2c_2d_cpu_f, *bp_c2c_2d_cpu_d;
-    oskar_Mem *bp_c2c_2d_gpu_f, *bp_c2c_2d_gpu_d;
-    oskar_Mem *bp_c2c_3d_cpu_f, *bp_c2c_3d_cpu_d;
-    oskar_Mem *bp_c2c_3d_gpu_f, *bp_c2c_3d_gpu_d;
-    oskar_Mem *bp_m2m_2d_cpu_f, *bp_m2m_2d_cpu_d;
-    oskar_Mem *bp_m2m_2d_gpu_f, *bp_m2m_2d_gpu_d;
-    oskar_Mem *bp_m2m_3d_cpu_f, *bp_m2m_3d_cpu_d;
-    oskar_Mem *bp_m2m_3d_gpu_f, *bp_m2m_3d_gpu_d;
+    oskar_Mem *bp_c2c_2d_cpu_f = 0, *bp_c2c_2d_cpu_d = 0;
+    oskar_Mem *bp_c2c_2d_gpu_f = 0, *bp_c2c_2d_gpu_d = 0;
+    oskar_Mem *bp_c2c_3d_cpu_f = 0, *bp_c2c_3d_cpu_d = 0;
+    oskar_Mem *bp_c2c_3d_gpu_f = 0, *bp_c2c_3d_gpu_d = 0;
+    oskar_Mem *bp_m2m_2d_cpu_f = 0, *bp_m2m_2d_cpu_d = 0;
+    oskar_Mem *bp_m2m_2d_gpu_f = 0, *bp_m2m_2d_gpu_d = 0;
+    oskar_Mem *bp_m2m_3d_cpu_f = 0, *bp_m2m_3d_cpu_d = 0;
+    oskar_Mem *bp_m2m_3d_gpu_f = 0, *bp_m2m_3d_gpu_d = 0;
 
     /* Convert inputs. */
     double ra_rad  = ra_deg  * M_PI / 180.0;

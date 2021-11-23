@@ -20,11 +20,11 @@ extern "C" {
 oskar_Binary* oskar_vis_header_write(const oskar_VisHeader* hdr,
         const char* filename, int* status)
 {
-    int i;
+    int i = 0;
     unsigned char grp = OSKAR_TAG_GROUP_VIS_HEADER;
     oskar_Binary* h = 0;
-    char *str, time_str[80];
-    struct tm* timeinfo;
+    char *str = 0, time_str[80];
+    struct tm* timeinfo = 0;
     if (*status) return 0;
 
     /* Create the file handle. */
@@ -51,25 +51,30 @@ oskar_Binary* oskar_vis_header_write(const oskar_VisHeader* hdr,
     /* Write the current working directory. */
     str = oskar_dir_cwd();
     if (str)
+    {
         oskar_binary_write(h, OSKAR_CHAR,
                 OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_CWD,
                 0, 1 + strlen(str), str, status);
+    }
     free(str);
 
     /* Write the username. */
     str = getenv("USERNAME");
-    if (!str)
-        str = getenv("USER");
+    if (!str) str = getenv("USER");
     if (str && strlen(str) > 0)
+    {
         oskar_binary_write(h, OSKAR_CHAR,
                 OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_USERNAME,
                 0, 1 + strlen(str), str, status);
+    }
 
     /* If settings exist, write out the data. */
     str = oskar_mem_char(hdr->settings);
     if (str && strlen(str) > 0)
+    {
         oskar_binary_write_mem(h, hdr->settings,
                 OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0, status);
+    }
 
     /* Write the telescope model path. */
     oskar_binary_write_mem(h, hdr->telescope_path, grp,

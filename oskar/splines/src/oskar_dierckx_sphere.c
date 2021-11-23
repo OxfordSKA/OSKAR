@@ -13,10 +13,13 @@ void oskar_dierckx_sphere(int iopt, int m, const double* theta,
         double* wrk2, int lwrk2, int* iwrk, int kwrk, int* ier)
 {
     /* Local variables */
-    int i, j, la, lf, ki, lh, kn, lq, ib1, ib3;
-    int np4, nt4, lcc, ncc, lff, lco, lbp, lbt, lcs, lfp, lro, npp;
-    int lsp, lst, ntt, ncof, nreg, ncest, maxit, nrint, kwest, lwest;
-    double tol, pi, pi2;
+    int i = 0, j = 0, la = 0, lf = 0, ki = 0, lh = 0, kn = 0;
+    int lq = 0, ib1 = 0, ib3 = 0;
+    int np4 = 0, nt4 = 0, lcc = 0, ncc = 0, lff = 0, lco = 0;
+    int lbp = 0, lbt = 0, lcs = 0, lfp = 0, lro = 0, npp = 0;
+    int lsp = 0, lst = 0, ntt = 0, ncof = 0, nreg = 0, ncest = 0;
+    int maxit = 0, nrint = 0, kwest = 0, lwest = 0;
+    double tol = 0.0, pi = 0.0, pi2 = 0.0;
 
     /* Parameter adjustments */
     --tt;
@@ -116,4 +119,3 @@ void oskar_dierckx_sphere(int iopt, int m, const double* theta,
 #ifdef __cplusplus
 }
 #endif
-

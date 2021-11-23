@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, The OSKAR Developers.
+ * Copyright (c) 2020-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -31,6 +31,7 @@ void oskar_convert_apparent_ra_dec_to_enu_directions(
     if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
+        {
             oskar_convert_apparent_ra_dec_to_enu_directions_float(num_points,
                     oskar_mem_float_const(ra_rad, status),
                     oskar_mem_float_const(dec_rad, status),
@@ -38,7 +39,9 @@ void oskar_convert_apparent_ra_dec_to_enu_directions(
                     oskar_mem_float(x, status),
                     oskar_mem_float(y, status),
                     oskar_mem_float(z, status));
+        }
         else if (type == OSKAR_DOUBLE)
+        {
             oskar_convert_apparent_ra_dec_to_enu_directions_double(num_points,
                     oskar_mem_double_const(ra_rad, status),
                     oskar_mem_double_const(dec_rad, status),
@@ -46,8 +49,11 @@ void oskar_convert_apparent_ra_dec_to_enu_directions(
                     oskar_mem_double(x, status),
                     oskar_mem_double(y, status),
                     oskar_mem_double(z, status));
+        }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
     else
     {
@@ -55,9 +61,13 @@ void oskar_convert_apparent_ra_dec_to_enu_directions(
         const char* k = 0;
         const int is_dbl = (type == OSKAR_DOUBLE);
         if (type == OSKAR_SINGLE)
+        {
             k = "convert_apparent_ra_dec_to_enu_directions_float";
+        }
         else if (type == OSKAR_DOUBLE)
+        {
             k = "convert_apparent_ra_dec_to_enu_directions_double";
+        }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;

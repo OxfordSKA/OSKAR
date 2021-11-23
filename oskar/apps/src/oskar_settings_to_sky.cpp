@@ -8,8 +8,8 @@
 #include "convert/oskar_convert_brightness_to_jy.h"
 #include "convert/oskar_convert_healpix_ring_to_theta_phi.h"
 #include "math/oskar_healpix_npix_to_nside.h"
-#include "math/oskar_random_gaussian.h"
 #include "math/oskar_random_broken_power_law.h"
+#include "math/oskar_random_gaussian.h"
 #include "sky/oskar_generate_random_coordinate.h"
 #include "sky/oskar_sky.h"
 #include "utility/oskar_get_error_string.h"
@@ -50,7 +50,7 @@ static void set_up_pol(oskar_Sky* sky, SettingsTree* s, int* status);
 
 oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
 {
-    const char* filename;
+    const char* filename = 0;
     if (*status || !s) return 0;
     s->clear_group();
 
@@ -65,7 +65,9 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
 
     /* Disable filters and grid generator in drift scan mode. */
     if (s->starts_with("mode", "Drift", status))
+    {
         dec0 = -100.0;
+    }
 
     s->end_group();
     s->begin_group("sky");
@@ -160,8 +162,10 @@ static void load_osm(oskar_Sky* sky, SettingsTree* s,
         oskar_Sky* t = oskar_sky_read(files[i],
                 OSKAR_CPU, &binary_file_error);
         if (binary_file_error)
+        {
             t = oskar_sky_load(files[i],
                     oskar_sky_precision(sky), status);
+        }
 
         /* Apply filters and extended source over-ride. */
         set_up_filter(t, s, ra0, dec0, log, status);
@@ -250,8 +254,10 @@ static void load_fits_image(oskar_Sky* sky, SettingsTree* s,
                 default_map_units, override_map_units,
                 0.0, spectral_index, status);
         if (*status == OSKAR_ERR_BAD_UNITS)
+        {
             oskar_log_error(log, "Units error: Need K, mK, Jy/pixel or "
                     "Jy/beam and beam size.");
+        }
 
         /* Apply filters. */
         set_up_filter(t, s, ra0, dec0, log, status);
@@ -295,8 +301,10 @@ static void load_healpix_fits(oskar_Sky* sky, SettingsTree* s,
                 default_map_units, override_map_units,
                 freq_hz, spectral_index, status);
         if (*status == OSKAR_ERR_BAD_UNITS)
+        {
             oskar_log_error(log, "Units error: Need K, mK, Jy/pixel or "
                     "Jy/beam and beam size.");
+        }
 
         /* Apply filters and extended source over-ride. */
         set_up_filter(t, s, ra0, dec0, log, status);
@@ -320,7 +328,9 @@ static void gen_grid(oskar_Sky* sky, SettingsTree* s,
     /* Check if generator is enabled. */
     int side_length = s->to_int("generator/grid/side_length", status);
     if (*status || side_length <= 0)
+    {
         return;
+    }
     if (dec0 < -99.0)
     {
         oskar_log_warning(log,
@@ -359,7 +369,9 @@ static void gen_healpix(oskar_Sky* sky, SettingsTree* s,
     /* Check if generator is enabled. */
     int nside = s->to_int("generator/healpix/nside", status);
     if (*status || nside <= 0)
+    {
         return;
+    }
 
     /* Generate the new positions into a temporary sky model. */
     oskar_log_message(log, 'M', 0, "Generating HEALPix source positions...");
@@ -370,7 +382,7 @@ static void gen_healpix(oskar_Sky* sky, SettingsTree* s,
     double amplitude = s->to_double("amplitude", status);
     for (int i = 0; i < npix; ++i)
     {
-        double ra, dec;
+        double ra = 0.0, dec = 0.0;
         oskar_convert_healpix_ring_to_theta_phi_d(nside, i, &dec, &ra);
         dec = M_PI / 2.0 - dec;
         oskar_sky_set_source(t, i, ra, dec, amplitude,
@@ -399,7 +411,9 @@ static void gen_rpl(oskar_Sky* sky, SettingsTree* s,
     int num_sources = s->to_int(
             "generator/random_power_law/num_sources", status);
     if (*status || num_sources <= 0)
+    {
         return;
+    }
 
     /* Generate the sources into a temporary sky model. */
     oskar_log_message(log, 'M', 0,
@@ -434,7 +448,9 @@ static void gen_rbpl(oskar_Sky* sky, SettingsTree* s,
     int num_sources = s->to_int(
             "generator/random_broken_power_law/num_sources", status);
     if (*status || num_sources <= 0)
+    {
         return;
+    }
 
     /* Generate the sources into a temporary sky model. */
     oskar_log_message(log, 'M', 0,
@@ -453,7 +469,7 @@ static void gen_rbpl(oskar_Sky* sky, SettingsTree* s,
     srand(seed);
     for (int i = 0; i < num_sources; ++i)
     {
-        double ra, dec, b;
+        double ra = 0.0, dec = 0.0, b = 0.0;
         oskar_generate_random_coordinate(&ra, &dec);
         b = oskar_random_broken_power_law(flux_min, flux_max,
                 threshold, power1, power2);
@@ -488,12 +504,16 @@ static void set_up_filter(oskar_Sky* sky, SettingsTree* s,
     if (radius_inner_deg != 0.0 || radius_outer_deg < 180.0)
     {
         if (dec0_rad < -99.0)
+        {
             oskar_log_warning(log, "Cannot filter sky model by radius "
                     "from phase centre in drift-scan mode.");
+        }
         else
+        {
             oskar_sky_filter_by_radius(sky,
                     radius_inner_deg * D2R, radius_outer_deg * D2R,
                     ra0_rad, dec0_rad, status);
+        }
     }
     s->end_group();
 }
@@ -506,7 +526,9 @@ static void set_up_extended(oskar_Sky* sky, SettingsTree* s, int* status)
     double minor = s->to_double("FWHM_minor", status) * ARCSEC2RAD;
     double pa = s->to_double("position_angle", status) * D2R;
     if (major > 0.0 || minor > 0.0)
+    {
         oskar_sky_set_gaussian_parameters(sky, major, minor, pa, status);
+    }
     s->end_group();
 }
 

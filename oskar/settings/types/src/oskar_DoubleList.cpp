@@ -63,8 +63,7 @@ bool DoubleList::set_default(const char* s)
 {
     bool ok = from_string(default_, s, delimiter_);
     str_default_ = to_string(default_, delimiter_);
-    if (ok)
-        set_value(s);
+    if (ok) set_value(s);
     return ok;
 } // LCOV_EXCL_LINE
 

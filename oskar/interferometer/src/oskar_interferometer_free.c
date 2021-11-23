@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -16,11 +16,13 @@ extern "C" {
 
 void oskar_interferometer_free(oskar_Interferometer* h, int* status)
 {
-    int i;
+    int i = 0;
     if (!h) return;
     oskar_interferometer_reset_cache(h, status);
     for (i = 0; i < h->num_sky_chunks; ++i)
+    {
         oskar_sky_free(h->sky_chunks[i], status);
+    }
     oskar_telescope_free(h->tel, status);
     oskar_mem_free(h->temp, status);
     oskar_timer_free(h->tmr_sim);
@@ -39,14 +41,16 @@ void oskar_interferometer_free(oskar_Interferometer* h, int* status)
 
 void oskar_interferometer_free_device_data(oskar_Interferometer* h, int* status)
 {
-    int i;
+    int i = 0;
     if (!h->d) return;
     for (i = 0; i < h->num_devices; ++i)
     {
         DeviceData* d = &(h->d[i]);
         if (!d) continue;
         if (i < h->num_gpus)
+        {
             oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
+        }
         oskar_timer_free(d->tmr_compute);
         oskar_timer_free(d->tmr_copy);
         oskar_timer_free(d->tmr_clip);

@@ -32,12 +32,14 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
 
     /* Create the visibility header if required. */
     if (!h->header)
+    {
         set_up_vis_header(h, status);
+    }
 
     /* Calculate source parameters if required. */
     if (!h->init_sky)
     {
-        int i, num_failed = 0;
+        int i = 0, num_failed = 0;
         double ra0 = 0.0, dec0 = 0.0;
 
         /* Compute source direction cosines. */
@@ -59,13 +61,17 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
         if (num_failed > 0)
         {
             if (h->zero_failed_gaussians)
+            {
                 oskar_log_warning(h->log, "Gaussian ellipse solution failed "
                         "for %i sources. These will have their fluxes "
                         "set to zero.", num_failed);
+            }
             else
+            {
                 oskar_log_warning(h->log, "Gaussian ellipse solution failed "
                         "for %i sources. These will be simulated "
                         "as point sources.", num_failed);
+            }
         }
         h->init_sky = 1;
     }
@@ -73,7 +79,9 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
     /* Check that each compute device has been set up. */
     set_up_device_data(h, status);
     if (!*status && !h->coords_only)
+    {
         oskar_log_section(h->log, 'M', "Starting simulation...");
+    }
 
     /* Start simulation timer. */
     oskar_timer_start(h->tmr_sim);
@@ -83,16 +91,20 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
 
 static void set_up_vis_header(oskar_Interferometer* h, int* status)
 {
-    int i, j, vis_type;
+    int i = 0, j = 0, vis_type = 0;
     const double rad2deg = 180.0/M_PI;
     int write_autocorr = 0, write_crosscorr = 0;
     if (*status) return;
 
     /* Check type of correlations to produce. */
     if (h->correlation_type == 'C')
+    {
         write_crosscorr = 1;
+    }
     else if (h->correlation_type == 'A')
+    {
         write_autocorr = 1;
+    }
     else if (h->correlation_type == 'B')
     {
         write_autocorr = 1;
@@ -103,7 +115,9 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
     const int num_stations = oskar_telescope_num_stations(h->tel);
     vis_type = h->prec | OSKAR_COMPLEX;
     if (oskar_telescope_pol_mode(h->tel) == OSKAR_POL_MODE_FULL)
+    {
         vis_type |= OSKAR_MATRIX;
+    }
     h->header = oskar_vis_header_create(vis_type, h->prec,
             h->max_times_per_block, h->num_time_steps,
             h->max_channels_per_block, h->num_channels,
@@ -118,7 +132,7 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
     /* Add settings file contents if defined. */
     if (h->settings_path)
     {
-        oskar_Mem* temp;
+        oskar_Mem* temp = 0;
         temp = oskar_mem_read_binary_raw(h->settings_path,
                 OSKAR_CHAR, OSKAR_CPU, status);
         oskar_mem_copy(oskar_vis_header_settings(h->header), temp, status);
@@ -153,10 +167,12 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
             const oskar_Station* st =
                     oskar_telescope_station_const(h->tel, type_map[j]);
             if (oskar_station_type(st) == OSKAR_STATION_TYPE_AA)
+            {
                 oskar_mem_copy(
                         oskar_vis_header_element_enu_metres(h->header, i, j),
                         oskar_station_element_true_enu_metres_const(st, feed, i),
                         status);
+            }
         }
     }
 }
@@ -172,7 +188,7 @@ typedef struct ThreadArgs ThreadArgs;
 
 static void* init_device(void* arg)
 {
-    int dev_loc, vistype, *status;
+    int dev_loc = 0, vistype = 0, *status = 0;
     ThreadArgs* a = (ThreadArgs*)arg;
     oskar_Interferometer* h = a->h;
     DeviceData* d = a->d;
@@ -183,7 +199,9 @@ static void* init_device(void* arg)
     const int complx = (h->prec) | OSKAR_COMPLEX;
     vistype = complx;
     if (oskar_telescope_pol_mode(h->tel) == OSKAR_POL_MODE_FULL)
+    {
         vistype |= OSKAR_MATRIX;
+    }
 
     d->previous_chunk_index = -1;
 
@@ -254,8 +272,10 @@ static void* init_device(void* arg)
                 oskar_telescope_tec_screen_pixel_size_m(d->tel),
                 oskar_telescope_tec_screen_time_interval_sec(d->tel));
         if (oskar_telescope_ionosphere_screen_type(d->tel) == 'E')
+        {
             oskar_station_work_set_tec_screen_path(d->station_work,
                     oskar_telescope_tec_screen_path(d->tel));
+        }
     }
     return 0;
 }
@@ -263,7 +283,7 @@ static void* init_device(void* arg)
 
 static void set_up_device_data(oskar_Interferometer* h, int* status)
 {
-    int i, init = 1;
+    int i = 0, init = 1;
     oskar_Thread** threads = 0;
     ThreadArgs* args = 0;
     if (*status) return;
@@ -271,7 +291,9 @@ static void set_up_device_data(oskar_Interferometer* h, int* status)
     /* Expand the number of devices to the number of selected GPUs,
      * if required. */
     if (h->num_devices < h->num_gpus)
+    {
         oskar_interferometer_set_num_devices(h, h->num_gpus);
+    }
 
     /* Set up devices in parallel. */
     const int num_devices = h->num_devices;
@@ -300,7 +322,9 @@ static void set_up_device_data(oskar_Interferometer* h, int* status)
     {
         oskar_log_section(h->log, 'M', "Initial memory usage");
         for (i = 0; i < h->num_gpus; ++i)
+        {
             oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);
+        }
         oskar_log_mem(h->log);
     }
 }

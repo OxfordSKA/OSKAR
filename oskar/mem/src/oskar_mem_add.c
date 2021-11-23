@@ -22,7 +22,7 @@ void oskar_mem_add(
         int* status)
 {
     oskar_Mem *a_temp = 0, *b_temp = 0;
-    const oskar_Mem *a_, *b_; /* Pointers. */
+    const oskar_Mem *a_ = 0, *b_ = 0; /* Pointers. */
     if (num_elements == 0) return;
     const int type = oskar_mem_type(out);
     const int precision = oskar_mem_precision(out);
@@ -53,14 +53,16 @@ void oskar_mem_add(
     if (oskar_mem_is_complex(in2))   offset_in2 *= 2;
     if (location == OSKAR_CPU)
     {
-        size_t i;
+        size_t i = 0;
         if (precision == OSKAR_DOUBLE)
         {
             double *c = oskar_mem_double(out, status);
             const double *a = oskar_mem_double_const(a_, status);
             const double *b = oskar_mem_double_const(b_, status);
             for (i = 0; i < num_elements; ++i)
+            {
                 c[i + offset_out] = a[i + offset_in1] + b[i + offset_in2];
+            }
         }
         else if (precision == OSKAR_SINGLE)
         {
@@ -68,10 +70,14 @@ void oskar_mem_add(
             const float *a = oskar_mem_float_const(a_, status);
             const float *b = oskar_mem_float_const(b_, status);
             for (i = 0; i < num_elements; ++i)
+            {
                 c[i + offset_out] = a[i + offset_in1] + b[i + offset_in2];
+            }
         }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
     else
     {
@@ -81,10 +87,18 @@ void oskar_mem_add(
         const unsigned int off_c = (unsigned int) offset_out;
         const unsigned int n = (unsigned int) num_elements;
         const char* k = 0;
-        if (precision == OSKAR_DOUBLE)      k = "mem_add_double";
-        else if (precision == OSKAR_SINGLE) k = "mem_add_float";
+        if (precision == OSKAR_DOUBLE)
+        {
+            k = "mem_add_double";
+        }
+        else if (precision == OSKAR_SINGLE)
+        {
+            k = "mem_add_float";
+        }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
         oskar_device_check_local_size(location, 0, local_size);
         global_size[0] = oskar_device_global_size(num_elements, local_size[0]);
         const oskar_Arg args[] = {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, The OSKAR Developers.
+ * Copyright (c) 2017-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -30,28 +30,38 @@ oskar_Interferometer* oskar_settings_to_interferometer(oskar::SettingsTree* s,
             s->to_int("max_sources_per_chunk", status));
     oskar_interferometer_set_settings_path(h, s->file_name());
     if (!s->to_int("use_gpus", status))
+    {
         oskar_interferometer_set_gpus(h, 0, 0, status);
+    }
     else
     {
         if (s->starts_with("cuda_device_ids", "all", status))
         {
             oskar_interferometer_set_gpus(h, -1, 0, status);
             if (oskar_interferometer_num_gpus(h) == 0)
+            {
                 oskar_log_warning(log_, "No GPU capability available.");
+            }
         }
         else
         {
             int size = 0;
             const int* ids = s->to_int_list("cuda_device_ids", &size, status);
             if (size > 0)
+            {
                 oskar_interferometer_set_gpus(h, size, ids, status);
+            }
         }
     }
     if (s->starts_with("num_devices", "auto", status))
+    {
         oskar_interferometer_set_num_devices(h, -1);
+    }
     else
+    {
         oskar_interferometer_set_num_devices(h,
                 s->to_int("num_devices", status));
+    }
     oskar_log_set_keep_file(log_, s->to_int("keep_log_file", status));
     oskar_log_set_file_priority(log_,
             s->to_int("write_status_to_log_file", status) ?

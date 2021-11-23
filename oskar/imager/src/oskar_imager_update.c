@@ -10,8 +10,8 @@
 #include "imager/private_imager_create_fits_files.h"
 #include "imager/private_imager_filter_time.h"
 #include "imager/private_imager_filter_uv.h"
-#include "imager/private_imager_set_num_planes.h"
 #include "imager/private_imager_select_data.h"
+#include "imager/private_imager_set_num_planes.h"
 #include "imager/private_imager_taper_weights.h"
 #include "imager/private_imager_update_plane_dft.h"
 #include "imager/private_imager_update_plane_fft.h"
@@ -39,14 +39,16 @@ void oskar_imager_update_from_block(oskar_Imager* h,
         const oskar_VisHeader* hdr, oskar_VisBlock* block,
         int* status)
 {
-    int c, t;
-    double time_start_mjd, time_inc_sec;
-    oskar_Mem *weight = 0, *weight_ptr = 0, *time_centroid;
+    int c = 0, t = 0;
+    double time_start_mjd = 0.0, time_inc_sec = 0.0;
+    oskar_Mem *weight = 0, *weight_ptr = 0, *time_centroid = 0;
     if (*status) return;
 
     /* Check that cross-correlations exist. */
     if (!oskar_vis_block_has_cross_correlations(block))
+    {
         return;
+    }
 
     /* Get dimensions from the block. */
     const int start_time    = oskar_vis_block_start_time_index(block);
@@ -83,13 +85,17 @@ void oskar_imager_update_from_block(oskar_Imager* h,
     time_centroid = oskar_mem_create(OSKAR_DOUBLE,
             OSKAR_CPU, num_rows, status);
     for (t = 0; t < num_times; ++t)
+    {
         oskar_mem_set_value_real(time_centroid,
                 time_start_mjd + (start_time + t + 0.5) * time_inc_sec,
                 t * num_baselines, num_baselines, status);
+    }
 
     /* Get baseline coordinates if required. */
     if (oskar_vis_block_has_station_coords(block))
+    {
         oskar_vis_block_station_to_baseline_coords(block, status);
+    }
 
     /* Update the imager with the data. */
     if (!h->coords_only)
@@ -177,7 +183,7 @@ static void oskar_imager_sort_by_abs_w(size_t num_vis,
      * https://stackoverflow.com/questions/32948281/c-sort-two-arrays-the-same-way */
     if (oskar_mem_precision(weight) == OSKAR_SINGLE)
     {
-        size_t i;
+        size_t i = 0;
         float** ptr_w = (float**) calloc(num_vis, sizeof(float*));
         float* uu_ = oskar_mem_float(uu, status);
         float* vv_ = oskar_mem_float(vv, status);
@@ -219,7 +225,7 @@ static void oskar_imager_sort_by_abs_w(size_t num_vis,
     }
     else
     {
-        size_t i;
+        size_t i = 0;
         double** ptr_w = (double**) calloc(num_vis, sizeof(double*));
         double* uu_ = oskar_mem_double(uu, status);
         double* vv_ = oskar_mem_double(vv, status);
@@ -267,15 +273,17 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
         const oskar_Mem* ww, const oskar_Mem* amps, const oskar_Mem* weight,
         const oskar_Mem* time_centroid, int* status)
 {
-    int c, p, i_plane;
-    size_t max_num_vis;
+    int c = 0, p = 0, i_plane = 0;
+    size_t max_num_vis = 0;
     oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
-    const oskar_Mem *u_in, *v_in, *w_in, *amp_in = 0, *weight_in;
+    const oskar_Mem *u_in = 0, *v_in = 0, *w_in = 0, *amp_in = 0, *weight_in = 0;
     if (*status) return;
 
     /* Set dimensions. */
     if (num_rows == 0)
+    {
         num_rows = oskar_mem_length(uu);
+    }
 
     /* Check polarisation type. */
     if (num_pols == 1 && h->im_type != OSKAR_IMAGE_TYPE_I &&
@@ -354,7 +362,9 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
     oskar_mem_ensure(h->vv_im, max_num_vis, status);
     oskar_mem_ensure(h->ww_im, max_num_vis, status);
     if (!h->coords_only)
+    {
         oskar_mem_ensure(h->vis_im, max_num_vis, status);
+    }
     oskar_mem_ensure(h->weight_im, max_num_vis, status);
     if (h->direction_type == 'R')
     {
@@ -368,7 +378,7 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
     {
         for (p = 0; p < h->num_im_pols; ++p)
         {
-            oskar_Mem *pu, *pv, *pw, *pt;
+            oskar_Mem *pu = 0, *pv = 0, *pw = 0, *pt = 0;
             size_t num_vis = 0;
             if (*status) break;
 
@@ -392,19 +402,25 @@ void oskar_imager_update(oskar_Imager* h, size_t num_rows, int start_chan,
 
             /* Rotate baseline coordinates if required. */
             if (h->direction_type == 'R')
+            {
                 oskar_imager_rotate_coords(h, num_vis,
                         h->uu_tmp, h->vv_tmp, h->ww_tmp,
                         h->uu_im, h->vv_im, h->ww_im);
+            }
 
             /* Overwrite visibilities if making PSF, or phase rotate. */
             if (!h->coords_only)
             {
                 if (h->im_type == OSKAR_IMAGE_TYPE_PSF)
+                {
                     oskar_mem_set_value_real(h->vis_im, 1.0,
                             0, oskar_mem_length(h->vis_im), status);
+                }
                 else if (h->direction_type == 'R')
+                {
                     oskar_imager_rotate_vis(h, num_vis,
                             h->uu_tmp, h->vv_tmp, h->ww_tmp, h->vis_im);
+                }
             }
 
             /* Apply time and baseline length filters if required. */
@@ -443,7 +459,7 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         int* status)
 {
     oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
-    const oskar_Mem *pu, *pv, *pw, *pa, *ph;
+    const oskar_Mem *pu = 0, *pv = 0, *pw = 0, *pa = 0, *ph = 0;
     if (*status || num_vis == 0) return;
 
     /* Convert precision of input data if required. */
@@ -527,8 +543,10 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
             break;
         }
         if (num_skipped > 0)
+        {
             oskar_log_warning(h->log, "Skipped %lu visibility weights.",
                     (unsigned long) num_skipped);
+        }
 
         /* Apply (u,v) tapering to weights if required. */
         if (h->uv_taper[0] > 0.0 || h->uv_taper[1] > 0.0)
@@ -541,7 +559,9 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         /* Update the supplied plane with the supplied visibilities. */
         num_skipped = 0;
         if (!plane_norm_ptr && h->plane_norm)
+        {
             plane_norm_ptr = &(h->plane_norm[i_plane]);
+        }
         oskar_timer_resume(h->tmr_grid_update);
         switch (h->algorithm)
         {
@@ -565,8 +585,10 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         oskar_timer_pause(h->tmr_grid_update);
         h->num_vis_processed += (num_vis - num_skipped);
         if (num_skipped > 0)
+        {
             oskar_log_warning(h->log, "Skipped %lu visibility points.",
                     (unsigned long) num_skipped);
+        }
     }
 
     /* Clean up. */
@@ -588,7 +610,7 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, size_t num_points,
     /* Update the weights grid. */
     if (h->weighting == OSKAR_WEIGHTING_UNIFORM)
     {
-        size_t num_cells, num_skipped = 0;
+        size_t num_cells = 0, num_skipped = 0;
 
         /* Resize the grid of weights if needed. */
         const int grid_size = oskar_imager_plane_size(h);
@@ -619,15 +641,17 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, size_t num_points,
                     oskar_mem_float(weights_guard, status));
         }
         if (num_skipped > 0)
+        {
             oskar_log_warning(h->log, "Skipped %lu visibility weights.",
                     (unsigned long) num_skipped);
+        }
         oskar_timer_pause(h->tmr_weights_grid);
     }
 
     /* Update baseline W minimum, maximum and RMS. */
     if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
     {
-        size_t j;
+        size_t j = 0;
         oskar_timer_resume(h->tmr_coord_scan);
         if (oskar_mem_precision(ww) == OSKAR_DOUBLE)
         {
@@ -658,7 +682,7 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, size_t num_points,
 
 void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
 {
-    int i;
+    int i = 0;
     if (*status) return;
 
     /* Don't continue if we're in "coords only" mode or if planes are
@@ -681,15 +705,17 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
     h->planes = (oskar_Mem**) calloc(num_planes, sizeof(oskar_Mem*));
     h->plane_norm = (double*) calloc(num_planes, sizeof(double));
     for (i = 0; i < num_planes; ++i)
+    {
         h->planes[i] = oskar_mem_create(plane_type, OSKAR_CPU,
                 num_cells, status);
+    }
 
     /* Allocate visibility planes on the devices if required. */
     if (h->grid_on_gpu && !(
             h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
             h->algorithm == OSKAR_ALGORITHM_DFT_3D))
     {
-        int j, norm_type;
+        int j = 0, norm_type = 0;
         const int loc = h->dev_loc;
         for (j = 0; j < h->num_gpus; ++j)
         {
@@ -711,9 +737,13 @@ void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
             /* Get the normalisation type. */
             if (oskar_device_supports_double(loc) &&
                     oskar_device_supports_atomic64(loc))
+            {
                 norm_type = OSKAR_DOUBLE;
+            }
             else
+            {
                 norm_type = OSKAR_SINGLE;
+            }
 
             /* Define (empty) device arrays for scratch data. */
             d->uu = oskar_mem_create(h->imager_prec, loc, 0, status);

@@ -22,7 +22,7 @@ static void max_station_size_and_depth(const oskar_Station* s,
     *max_depth = depth > *max_depth ? depth : *max_depth;
     if (oskar_station_has_child(s))
     {
-        int i;
+        int i = 0;
         for (i = 0; i < num_elements; ++i)
         {
             max_station_size_and_depth(oskar_station_child_const(s, i),
@@ -50,17 +50,19 @@ static void set_child_station_locations(oskar_Station* s,
     /* Recursively set data for child stations. */
     if (oskar_station_has_child(s))
     {
-        int i, num_elements;
+        int i = 0, num_elements = 0;
         num_elements = oskar_station_num_elements(s);
         for (i = 0; i < num_elements; ++i)
+        {
             set_child_station_locations(oskar_station_child(s, i), s);
+        }
     }
 }
 
 
 void oskar_telescope_analyse(oskar_Telescope* model, int* status)
 {
-    int i = 0, finished_identical_station_check = 0, num_station_models;
+    int i = 0, finished_identical_station_check = 0, num_station_models = 0;
     if (*status) return;
 
     /* Recursively find the maximum number of elements in any station. */

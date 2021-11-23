@@ -558,11 +558,17 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         unsigned int num_baselines = 0;
 
         if (write_autocorr && write_crosscorr)
+        {
             num_baselines = num_stations * (num_stations + 1) / 2;
+        }
         else if (!write_autocorr && write_crosscorr)
+        {
             num_baselines = num_stations * (num_stations - 1) / 2;
+        }
         else if (write_autocorr && !write_crosscorr)
+        {
             num_baselines = num_stations;
+        }
         else
         {
             oskar_ms_close(p);
@@ -625,7 +631,9 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
     // Add a row to the OBSERVATION subtable.
     const char* username = getenv("USERNAME");
     if (!username)
+    {
         username = getenv("USER");
+    }
     p->start_time = DBL_MAX;
     p->end_time = -DBL_MAX;
     Vector<String> corrSchedule(1);
@@ -661,7 +669,7 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
 
     // Get a string containing the current system time.
     char time_str[80];
-    time_t unix_time;
+    time_t unix_time = 0;
     unix_time = std::time(NULL);
     std::strftime(time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)",
             std::localtime(&unix_time));

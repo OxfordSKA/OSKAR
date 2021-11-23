@@ -259,9 +259,13 @@ void oskar_vis_header_set_pol_type(oskar_VisHeader* vis, int value,
     {
         if (value == OSKAR_VIS_POL_TYPE_STOKES_I_Q_U_V ||
                 value == OSKAR_VIS_POL_TYPE_LINEAR_XX_XY_YX_YY)
+        {
             vis->pol_type = value;
+        }
         else
+        {
             *status = OSKAR_ERR_TYPE_MISMATCH;
+        }
     }
     else
     {
@@ -273,9 +277,13 @@ void oskar_vis_header_set_pol_type(oskar_VisHeader* vis, int value,
                 value == OSKAR_VIS_POL_TYPE_LINEAR_XY ||
                 value == OSKAR_VIS_POL_TYPE_LINEAR_YX ||
                 value == OSKAR_VIS_POL_TYPE_LINEAR_YY)
+        {
             vis->pol_type = value;
+        }
         else
+        {
             *status = OSKAR_ERR_TYPE_MISMATCH;
+        }
     }
 }
 

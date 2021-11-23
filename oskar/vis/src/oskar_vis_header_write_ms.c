@@ -50,7 +50,7 @@ static void norm(double v[3])
 
 static void transpose(double m[9])
 {
-    double t;
+    double t = 0.0;
     t = m[1]; m[1] = m[3]; m[3] = t;
     t = m[2]; m[2] = m[6]; m[6] = t;
     t = m[5]; m[5] = m[7]; m[7] = t;
@@ -81,10 +81,10 @@ static void projection_matrix(
 oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         const char* ms_path, int force_polarised, int* status)
 {
-    double freq_start_hz, freq_inc_hz, lon_rad, lat_rad;
+    double freq_start_hz = 0.0, freq_inc_hz = 0.0, lon_rad = 0.0, lat_rad = 0.0;
     double ref_ecef[3], ref_wgs84[3], *station_ecef[3];
-    int amp_type, autocorr, crosscorr, coord_type, dim;
-    unsigned int i, num_stations, num_pols, num_channels;
+    int amp_type = 0, autocorr = 0, crosscorr = 0, coord_type = 0, dim = 0;
+    unsigned int i = 0, num_stations = 0, num_pols = 0, num_channels = 0;
     char *output_path = 0;
     oskar_MeasurementSet* ms = 0;
     if (*status) return 0;
@@ -110,8 +110,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
 
     /* Set channel width to be greater than 0, if it isn't already.
      * This is required for the Measurement Set to be valid. */
-    if (! (freq_inc_hz > 0.0))
-        freq_inc_hz = 1.0;
+    if (! (freq_inc_hz > 0.0)) freq_inc_hz = 1.0;
 
     /* Check and add '.MS' file extension if necessary. */
     const size_t len = strlen(ms_path);
@@ -119,13 +118,16 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     if ((len >= 3) && (
             !strcmp(&(ms_path[len-3]), ".MS") ||
             !strcmp(&(ms_path[len-3]), ".ms") ))
+    {
         strcpy(output_path, ms_path);
+    }
     else
+    {
         sprintf(output_path, "%s.MS", ms_path);
+    }
 
     /* Remove any existing directory. */
-    if (oskar_dir_exists(output_path))
-        oskar_dir_remove(output_path);
+    if (oskar_dir_exists(output_path)) oskar_dir_remove(output_path);
 
     /* Create the Measurement Set. */
     ms = oskar_ms_create(output_path, "OSKAR " OSKAR_VERSION_STR,
@@ -159,13 +161,17 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         {
             const double *t = oskar_mem_double_const(offset_ecef, status);
             for (i = 0; i < num_stations; ++i)
+            {
                 station_ecef[dim][i] = t[i] + ref_ecef[dim];
+            }
         }
         else
         {
             const float *t = oskar_mem_float_const(offset_ecef, status);
             for (i = 0; i < num_stations; ++i)
+            {
                 station_ecef[dim][i] = t[i] + ref_ecef[dim];
+            }
         }
     }
 
@@ -176,7 +182,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     /* Write PHASED_ARRAY table, one row per station. */
     for (i = 0; i < num_stations; ++i)
     {
-        unsigned int j, dim;
+        unsigned int j = 0, dim = 0;
         double *element_ecef[3], station_wgs84[3];
         double local_to_itrf_projection_matrix[9], norm_vec_ellipsoid[3];
 
@@ -218,9 +224,13 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
                 const oskar_Mem* t =
                         oskar_vis_header_element_enu_metres_const(hdr, dim, i);
                 if (oskar_mem_precision(t) == OSKAR_DOUBLE)
+                {
                     hor_xyz[dim] = oskar_mem_double_const(t, status)[j];
+                }
                 else
+                {
                     hor_xyz[dim] = oskar_mem_float_const(t, status)[j];
+                }
             }
 
             /* Apply projection matrix. */

@@ -14,11 +14,13 @@ void oskar_dierckx_surfit(int iopt, int m, double *x, double *y,
         int *iwrk, int kwrk, int *ier)
 {
     /* Local variables */
-    int i, la, lf, ki, lh, kn, lq, ib1, jb1, ib3, km1, km2, kx1, ky1,
-    lff, lco, nek, lfp, lbx, lby;
-    double tol;
-    int nxk, nyk, nmx, nmy, lsx, lsy, nreg, kmax, nest, ncest, maxit,
-    nminx, nminy, nrint, kwest, lwest;
+    int i = 0, la = 0, lf = 0, ki = 0, lh = 0, kn = 0, lq = 0;
+    int ib1 = 0, jb1 = 0, ib3 = 0, km1 = 0, km2 = 0, kx1 = 0, ky1 = 0,
+    lff = 0, lco = 0, nek = 0, lfp = 0, lbx = 0, lby = 0;
+    double tol = 0.0;
+    int nxk = 0, nyk = 0, nmx = 0, nmy = 0, lsx = 0, lsy = 0, nreg = 0;
+    int kmax = 0, nest = 0, ncest = 0, maxit = 0,
+    nminx = 0, nminy = 0, nrint = 0, kwest = 0, lwest = 0;
 
     /* Parameter adjustments */
     --w;

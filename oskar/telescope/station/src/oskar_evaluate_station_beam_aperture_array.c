@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -44,13 +44,15 @@ void oskar_evaluate_station_beam_aperture_array(
 
     /* Evaluate beam directly if there are no child stations. */
     if (!oskar_station_has_child(station))
+    {
         oskar_evaluate_station_beam_aperture_array_private(station, work,
                 0, num_points, x, y, z, time_index,
                 gast_rad, frequency_hz, 0, 0, beam, status);
+    }
     else
     {
         /* Split up list of input points into manageable chunks. */
-        int start;
+        int start = 0;
         for (start = 0; start < num_points; start += MAX_CHUNK_SIZE)
         {
             int chunk_size = num_points - start;
@@ -71,10 +73,10 @@ static void oskar_evaluate_station_beam_aperture_array_private(
         double frequency_hz, int depth, int offset_out, oskar_Mem* beam,
         int* status)
 {
-    double beam_x, beam_y, beam_z;
-    oskar_Mem *signal, *theta, *phi_x, *phi_y;
+    double beam_x = 0.0, beam_y = 0.0, beam_z = 0.0;
+    oskar_Mem *signal = 0, *theta = 0, *phi_x = 0, *phi_y = 0;
     const oskar_Mem* element_types_ptr = 0;
-    int i;
+    int i = 0;
     if (*status) return;
 
     const double wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
@@ -105,6 +107,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
             signal = oskar_station_work_beam(work, beam,
                     num_element_types * (num_points + 1), 0, status);
             for (i = 0; i < num_element_types; ++i)
+            {
                 oskar_element_evaluate(
                         oskar_station_element_const(s, i),
                         norm_element, swap_xy,
@@ -112,6 +115,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                         oskar_station_element_euler_index_rad(s, 1, 0, 0),
                         offset_points, num_points, x, y, z, frequency_hz,
                         theta, phi_x, phi_y, i * num_points, signal, status);
+            }
         }
         else
         {
@@ -156,8 +160,10 @@ static void oskar_evaluate_station_beam_aperture_array_private(
         else
         {
             if (oskar_station_num_element_types(s) == 1)
+            {
                 oskar_mem_copy_contents(beam, signal,
                         offset_out, 0, num_points, status);
+            }
             else
             {
                 /* Can't separate array and element pattern evaluation. */
@@ -184,16 +190,20 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                     num_points, x, y, z, time_index, gast_rad, frequency_hz,
                     depth + 1, 0, signal, status);
             for (i = 1; i < num_elements; ++i)
+            {
                 oskar_mem_copy_contents(signal, signal, i * num_points, 0,
                         num_points, status);
+            }
         }
         else
         {
             for (i = 0; i < num_elements; ++i)
+            {
                 oskar_evaluate_station_beam_aperture_array_private(
                         oskar_station_child_const(s, i), work, offset_points,
                         num_points, x, y, z, time_index, gast_rad, frequency_hz,
                         depth + 1, i * num_points, signal, status);
+            }
         }
         for (i = 0; i < num_feeds; ++i)
         {

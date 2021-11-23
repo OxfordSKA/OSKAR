@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <gtest/gtest.h>
@@ -84,7 +61,7 @@ TEST(Mem, load_ascii_real_cpu)
     fclose(file);
 
     // Load columns back into CPU memory.
-    oskar_Mem *a, *b, *c, *d;
+    oskar_Mem *a = 0, *b = 0, *c = 0, *d = 0;
     a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
@@ -136,7 +113,7 @@ TEST(Mem, load_ascii_real_gpu)
     fclose(file);
 
     // Load columns back into GPU memory.
-    oskar_Mem *a, *b, *c, *d;
+    oskar_Mem *a = 0, *b = 0, *c = 0, *d = 0;
     a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, 0, &status);
     b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, 0, &status);
     c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, 0, &status);
@@ -149,7 +126,7 @@ TEST(Mem, load_ascii_real_gpu)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy to CPU memory to check contents.
-    oskar_Mem *aa, *bb, *cc, *dd;
+    oskar_Mem *aa = 0, *bb = 0, *cc = 0, *dd = 0;
     aa = oskar_mem_create_copy(a, OSKAR_CPU, &status);
     bb = oskar_mem_create_copy(b, OSKAR_CPU, &status);
     cc = oskar_mem_create_copy(c, OSKAR_CPU, &status);
@@ -196,7 +173,7 @@ TEST(Mem, load_ascii_complex_real_cpu)
     fclose(file);
 
     // Load columns back into CPU memory.
-    oskar_Mem *a, *b;
+    oskar_Mem *a = 0, *b = 0;
     a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, 0, &status);
     b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -244,7 +221,7 @@ TEST(Mem, load_ascii_complex_real_gpu_cpu)
     fclose(file);
 
     // Load columns back into CPU memory.
-    oskar_Mem *a, *b;
+    oskar_Mem *a = 0, *b = 0;
     a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_GPU, 0, &status);
     b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -294,7 +271,7 @@ TEST(Mem, load_ascii_complex_real_default_cpu)
     fclose(file);
 
     // Load columns back into CPU memory.
-    oskar_Mem *a, *b, *c;
+    oskar_Mem *a = 0, *b = 0, *c = 0;
     a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, 0, &status);
     b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
@@ -350,7 +327,7 @@ TEST(Mem, load_ascii_lots_of_columns)
     fclose(file);
 
     // Load some columns back into CPU memory.
-    oskar_Mem *a, *b, *c;
+    oskar_Mem *a = 0, *b = 0, *c = 0;
     a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, 0, &status);
     b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
@@ -403,7 +380,7 @@ TEST(Mem, load_ascii_required_data)
     fclose(file);
 
     // Load some columns back into CPU memory.
-    oskar_Mem *a, *b, *c;
+    oskar_Mem *a = 0, *b = 0, *c = 0;
     a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
@@ -454,7 +431,7 @@ TEST(Mem, load_ascii_required_data)
 TEST(Mem, save_ascii)
 {
     int status = 0, location = OSKAR_CPU;
-    oskar_Mem *mem1, *mem2, *mem3, *mem4, *mem5, *mem6, *mem7, *mem8;
+    oskar_Mem *mem1 = 0, *mem2 = 0, *mem3 = 0, *mem4 = 0, *mem5 = 0, *mem6 = 0, *mem7 = 0, *mem8 = 0;
     size_t length = 100;
 #ifdef OSKAR_HAVE_CUDA
     location = OSKAR_GPU;
@@ -497,4 +474,3 @@ TEST(Mem, save_ascii)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     remove(fname);
 }
-

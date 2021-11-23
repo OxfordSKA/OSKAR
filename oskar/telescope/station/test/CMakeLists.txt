@@ -8,7 +8,6 @@ set(${name}_SRC
     Test_element_weights_errors.cpp
     Test_evaluate_array_pattern.cpp
     Test_evaluate_jones_E.cpp
-    Test_evaluate_pierce_points.cpp
     Test_evaluate_station_beam.cpp
 )
 add_executable(${name} ${${name}_SRC})

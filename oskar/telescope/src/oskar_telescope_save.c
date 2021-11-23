@@ -25,7 +25,7 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
         const char* dir_path, const oskar_Station* station, int depth,
         int* status)
 {
-    char* path;
+    char* path = 0;
     int i = 0, num_stations = 0;
 
     if (depth == 0)
@@ -43,12 +43,14 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
 
     /* Create the directory if it doesn't exist. */
     if (!oskar_dir_exists(dir_path))
+    {
         oskar_dir_mkpath(dir_path);
+    }
 
     if (depth == 0)
     {
         /* Write the reference position. */
-        FILE* file;
+        FILE* file = 0;
         path = oskar_dir_get_path(dir_path, "position.txt");
         file = fopen(path, "w");
         free(path);
@@ -155,15 +157,17 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
 
         /* Get the number of stations. */
         if (oskar_station_has_child(station))
+        {
             num_stations = oskar_station_num_elements(station);
+        }
     }
 
     /* Recursive call to write stations. */
     for (i = 0; i < num_stations; ++i)
     {
         /* Get station name, and a pointer to the station to save. */
-        const oskar_Station* s;
-        char station_name[128], *path;
+        const oskar_Station* s = 0;
+        char station_name[128], *path = 0;
         sprintf(station_name, "level%1d_%03d", depth, i);
         s = (depth == 0) ? oskar_telescope_station_const(telescope, i) :
                 oskar_station_child_const(station, i);

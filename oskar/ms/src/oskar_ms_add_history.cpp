@@ -31,10 +31,10 @@ static std::vector<std::string> split_string(const std::string& s, char delim)
 
 static double current_utc_to_mjd()
 {
-    int a, y, m, jdn;
-    double day_fraction;
-    time_t unix_time;
-    struct tm* time_s;
+    int a = 0, y = 0, m = 0, jdn = 0;
+    double day_fraction = 0.0;
+    time_t unix_time = 0;
+    struct tm* time_s = 0;
 
     // Get system UTC.
     unix_time = std::time(NULL);

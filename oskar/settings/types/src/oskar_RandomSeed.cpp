@@ -24,8 +24,7 @@ static bool from_string(const char* s, int& value)
 
 static std::string to_string(int value)
 {
-    if (value < 1) return "time";
-    else return oskar_settings_utility_int_to_string(value);
+    return (value < 1) ? "time" : oskar_settings_utility_int_to_string(value);
 }
 
 RandomSeed::RandomSeed()
@@ -52,10 +51,7 @@ bool RandomSeed::set_default(const char* s)
 {
     bool ok = from_string(s, default_);
     str_default_ = to_string(default_);
-    if (ok)
-        set_value(s);
-    else
-        init(0);
+    if (ok) set_value(s); else init(0);
     return ok;
 } // LCOV_EXCL_LINE
 

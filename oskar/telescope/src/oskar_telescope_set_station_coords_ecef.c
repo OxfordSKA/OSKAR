@@ -18,7 +18,7 @@ void oskar_telescope_set_station_coords_ecef(oskar_Telescope* telescope,
         const oskar_Mem* z, const oskar_Mem* x_err, const oskar_Mem* y_err,
         const oskar_Mem* z_err, int* status)
 {
-    int i;
+    int i = 0;
 
     /* Check lengths. */
     if ((int)oskar_mem_length(x) < num_stations ||

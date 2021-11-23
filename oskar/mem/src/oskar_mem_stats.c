@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "mem/oskar_mem.h"
@@ -40,9 +17,13 @@ extern "C" {
  * vol 2, 3rd edition, page 232 */
 #define RUNNING_STATS_KNUTH \
     if (max && val > *max) \
+    { \
         *max = val; \
+    } \
     if (min && val < *min) \
+    { \
         *min = val; \
+    } \
     if (i == 0) \
     { \
         old_m = new_m = val; \
@@ -59,8 +40,8 @@ extern "C" {
 void oskar_mem_stats(const oskar_Mem* mem, size_t n, double* min, double* max,
         double* mean, double* std_dev, int* status)
 {
-    int type;
-    size_t i;
+    int type = 0;
+    size_t i = 0;
     double old_m = 0.0, new_m = 0.0, old_s = 0.0, new_s = 0.0;
 
     /* Check if safe to proceed. */
@@ -90,8 +71,8 @@ void oskar_mem_stats(const oskar_Mem* mem, size_t n, double* min, double* max,
     /* Gather statistics. */
     if (type == OSKAR_SINGLE)
     {
-        double val;
-        const float *data;
+        double val = 0.0;
+        const float *data = 0;
         data = oskar_mem_float_const(mem, status);
         for (i = 0; i < n; ++i)
         {
@@ -101,8 +82,8 @@ void oskar_mem_stats(const oskar_Mem* mem, size_t n, double* min, double* max,
     }
     else if (type == OSKAR_DOUBLE)
     {
-        double val;
-        const double *data;
+        double val = 0.0;
+        const double *data = 0;
         data = oskar_mem_double_const(mem, status);
         for (i = 0; i < n; ++i)
         {

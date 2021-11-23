@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The OSKAR Developers.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -18,7 +18,7 @@ extern "C" {
 
 void oskar_beam_pattern_reset_cache(oskar_BeamPattern* h, int* status)
 {
-    int i;
+    int i = 0;
     oskar_beam_pattern_free_device_data(h, status);
     oskar_mem_free(h->lon_rad, status);
     oskar_mem_free(h->lat_rad, status);
@@ -33,9 +33,13 @@ void oskar_beam_pattern_reset_cache(oskar_BeamPattern* h, int* status)
     for (i = 0; i < h->num_data_products; ++i)
     {
         if (h->data_products[i].text_file)
+        {
             fclose(h->data_products[i].text_file);
+        }
         if (h->data_products[i].fits_file)
+        {
             ffclos(h->data_products[i].fits_file, status);
+        }
     }
     free(h->data_products);
     h->data_products = NULL;

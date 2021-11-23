@@ -7,8 +7,8 @@ extern "C" {
 void oskar_dierckx_fpbspl_f(const float *t, int k, float x, int l, float *h)
 {
     /* Local variables */
-    float f, hh[5];
-    int i, j, li, lj;
+    float f = 0.0f, hh[5];
+    int i = 0, j = 0, li = 0, lj = 0;
 
     /* Parameter adjustments */
     --t;
@@ -37,8 +37,8 @@ void oskar_dierckx_fpbspl_f(const float *t, int k, float x, int l, float *h)
 void oskar_dierckx_fpbspl_d(const double *t, int k, double x, int l, double *h)
 {
     /* Local variables */
-    double f, hh[5];
-    int i, j, li, lj;
+    double f = 0.0, hh[5];
+    int i = 0, j = 0, li = 0, lj = 0;
 
     /* Parameter adjustments */
     --t;

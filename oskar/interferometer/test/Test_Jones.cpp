@@ -5,8 +5,8 @@
 
 #include <gtest/gtest.h>
 
-#include "mem/oskar_mem.h"
 #include "interferometer/oskar_jones.h"
+#include "mem/oskar_mem.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_timer.h"
 #include "utility/oskar_vector_types.h"
@@ -26,7 +26,8 @@
 static void check_values(const oskar_Mem* approx, const oskar_Mem* accurate)
 {
     int status = 0;
-    double min_rel_error, max_rel_error, avg_rel_error, std_rel_error, tol;
+    double min_rel_error = 0.0, max_rel_error = 0.0;
+    double avg_rel_error = 0.0, std_rel_error = 0.0, tol = 0.0;
     oskar_mem_evaluate_relative_error(approx, accurate, &min_rel_error,
             &max_rel_error, &avg_rel_error, &std_rel_error, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -54,9 +55,9 @@ static void t_join(int out_typeA, int in_type1A, int in_type2A,
         int expectedA, int expectedB)
 {
     int status = 0;
-    oskar_Timer *timerA, *timerB;
+    oskar_Timer *timerA = 0, *timerB = 0;
 //    double timeA, timeB;
-    oskar_Jones *in1, *in2, *outA, *outB;
+    oskar_Jones *in1 = 0, *in2 = 0, *outA = 0, *outB = 0;
 
     // Create the timers.
     timerA = oskar_timer_create(out_locA == OSKAR_GPU ?
@@ -119,9 +120,9 @@ void t_join_in_place(int in_type1A, int in_type2A, int in_loc1A, int in_loc2A,
         int expectedA, int expectedB)
 {
     int status = 0;
-    oskar_Timer *timerA, *timerB;
+    oskar_Timer *timerA = 0, *timerB = 0;
 //    double timeA, timeB;
-    oskar_Jones *in1A, *in2A, *in1B, *in2B;
+    oskar_Jones *in1A = 0, *in2A = 0, *in1B = 0, *in2B = 0;
 
     // Create the timers.
     timerA = oskar_timer_create(in_loc1A == OSKAR_GPU ?
@@ -174,8 +175,8 @@ void t_join_in_place(int in_type1A, int in_type2A, int in_loc1A, int in_loc2A,
 
 static void test_ones(int precision, int location)
 {
-    oskar_Jones *jones, *temp = 0, *j_ptr;
-    int status = 0, num_stations, num_sources;
+    oskar_Jones *jones = 0, *temp = 0, *j_ptr = 0;
+    int status = 0, num_stations = 0, num_sources = 0;
 
     // Test scalar complex type.
     jones = oskar_jones_create(precision | OSKAR_COMPLEX, location,
@@ -224,7 +225,9 @@ static void test_ones(int precision, int location)
 
     // Free memory.
     if (location != OSKAR_CPU)
+    {
         oskar_jones_free(temp, &status);
+    }
     oskar_jones_free(jones, &status);
     ASSERT_EQ(0, status);
 
@@ -287,7 +290,9 @@ static void test_ones(int precision, int location)
 
     // Free memory.
     if (location != OSKAR_CPU)
+    {
         oskar_jones_free(temp, &status);
+    }
     oskar_jones_free(jones, &status);
     ASSERT_EQ(0, status);
 }
@@ -890,4 +895,3 @@ TEST(Jones, set_ones_doubleCPU)
 {
     test_ones(OSKAR_DOUBLE, OSKAR_CPU);
 }
-

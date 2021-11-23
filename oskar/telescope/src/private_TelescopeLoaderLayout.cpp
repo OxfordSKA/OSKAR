@@ -64,7 +64,9 @@ void TelescopeLoaderLayout::load(oskar_Telescope* telescope,
     {
         // If telescope hasn't already been sized, return an error.
         if (oskar_telescope_num_stations(telescope) == 0)
+        {
             *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
+        }
         return;
     }
 
@@ -121,7 +123,9 @@ void TelescopeLoaderLayout::load(oskar_Station* station,
 
     // If station hasn't already been sized, return an error.
     if (oskar_station_num_elements(station) == 0)
+    {
         *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
+    }
 
     // Check if this is the last level.
     if (num_subdirs > 0)

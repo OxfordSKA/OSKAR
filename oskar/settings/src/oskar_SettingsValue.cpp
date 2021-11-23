@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2015-2017, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "settings/oskar_SettingsValue.h"
@@ -102,31 +79,31 @@ SettingsValue::TypeId SettingsValue::type_id(const char* type_name)
 {
     string t = type_name ?
             oskar_settings_utility_string_to_upper(type_name) : string();
-    if (t == "BOOL") return BOOL;
-    else if (t == "DATETIME") return DATE_TIME;
-    else if (t == "DOUBLE") return DOUBLE;
-    else if (t == "DOUBLELIST") return DOUBLE_LIST;
-    else if (t == "DOUBLERANGE") return DOUBLE_RANGE;
-    else if (t == "DOUBLERANGEEXT") return DOUBLE_RANGE_EXT;
-    else if (t == "INPUTDIRECTORY") return INPUT_DIRECTORY;
-    else if (t == "INPUTFILE") return INPUT_FILE;
-    else if (t == "INPUTFILELIST") return INPUT_FILE_LIST;
-    else if (t == "INPUTDIRECTORY") return INPUT_DIRECTORY;
-    else if (t == "INT") return INT;
-    else if (t == "INTLIST") return INT_LIST;
-    else if (t == "INTLISTEXT") return INT_LIST_EXT;
-    else if (t == "INTPOSITIVE") return INT_POSITIVE;
-    else if (t == "INTRANGE") return INT_RANGE;
-    else if (t == "INTRANGEEXT") return INT_RANGE_EXT;
-    else if (t == "OPTIONLIST") return OPTION_LIST;
-    else if (t == "OUTPUTFILE") return OUTPUT_FILE;
-    else if (t == "RANDOMSEED") return RANDOM_SEED;
-    else if (t == "STRING") return STRING;
-    else if (t == "STRINGLIST") return STRING_LIST;
-    else if (t == "TIME") return TIME;
-    else if (t == "UNSIGNEDDOUBLE") return UNSIGNED_DOUBLE;
-    else if (t == "UNSIGNEDINT" || t == "UINT") return UNSIGNED_INT;
-    else return UNDEF;
+    if (t == "BOOL") { return BOOL; }
+    else if (t == "DATETIME") { return DATE_TIME; }
+    else if (t == "DOUBLE") { return DOUBLE; }
+    else if (t == "DOUBLELIST") { return DOUBLE_LIST; }
+    else if (t == "DOUBLERANGE") { return DOUBLE_RANGE; }
+    else if (t == "DOUBLERANGEEXT") { return DOUBLE_RANGE_EXT; }
+    else if (t == "INPUTDIRECTORY") { return INPUT_DIRECTORY; }
+    else if (t == "INPUTFILE") { return INPUT_FILE; }
+    else if (t == "INPUTFILELIST") { return INPUT_FILE_LIST; }
+    else if (t == "INPUTDIRECTORY") { return INPUT_DIRECTORY; }
+    else if (t == "INT") { return INT; }
+    else if (t == "INTLIST") { return INT_LIST; }
+    else if (t == "INTLISTEXT") { return INT_LIST_EXT; }
+    else if (t == "INTPOSITIVE") { return INT_POSITIVE; }
+    else if (t == "INTRANGE") { return INT_RANGE; }
+    else if (t == "INTRANGEEXT") { return INT_RANGE_EXT; }
+    else if (t == "OPTIONLIST") { return OPTION_LIST; }
+    else if (t == "OUTPUTFILE") { return OUTPUT_FILE; }
+    else if (t == "RANDOMSEED") { return RANDOM_SEED; }
+    else if (t == "STRING") { return STRING; }
+    else if (t == "STRINGLIST") { return STRING_LIST; }
+    else if (t == "TIME") { return TIME; }
+    else if (t == "UNSIGNEDDOUBLE") { return UNSIGNED_DOUBLE; }
+    else if (t == "UNSIGNEDINT" || t == "UINT") { return UNSIGNED_INT; }
+    return UNDEF;
 }
 
 bool SettingsValue::init(const char* type, const char* param)
@@ -295,14 +272,12 @@ const char* const* SettingsValue::to_string_list(int* size, bool& ok) const
         case STRING_LIST:
             ok = true;
             *size = ttl::var::get<StringList>(value_).size();
-            if (*size > 0)
-                return ttl::var::get<StringList>(value_).values();
+            if (*size > 0) return ttl::var::get<StringList>(value_).values();
             break;
         case INPUT_FILE_LIST:
             ok = true;
             *size = ttl::var::get<InputFileList>(value_).size();
-            if (*size > 0)
-                return ttl::var::get<InputFileList>(value_).values();
+            if (*size > 0) return ttl::var::get<InputFileList>(value_).values();
             break;
         default:
             break;
@@ -319,14 +294,12 @@ const int* SettingsValue::to_int_list(int* size, bool& ok) const
         case INT_LIST:
             ok = true;
             *size = ttl::var::get<IntList>(value_).size();
-            if (*size > 0)
-                return ttl::var::get<IntList>(value_).values();
+            if (*size > 0) return ttl::var::get<IntList>(value_).values();
             break;
         case INT_LIST_EXT:
             ok = true;
             *size = ttl::var::get<IntListExt>(value_).size();
-            if (*size > 0)
-                return ttl::var::get<IntListExt>(value_).values();
+            if (*size > 0) return ttl::var::get<IntListExt>(value_).values();
             break;
         default:
             break;
@@ -343,8 +316,7 @@ const double* SettingsValue::to_double_list(int* size, bool& ok) const
         case DOUBLE_LIST:
             ok = true;
             *size = ttl::var::get<DoubleList>(value_).size();
-            if (*size > 0)
-                return ttl::var::get<DoubleList>(value_).values();
+            if (*size > 0) return ttl::var::get<DoubleList>(value_).values();
             break;
         default:
             break;

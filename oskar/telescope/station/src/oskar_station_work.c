@@ -19,11 +19,13 @@ static void get_mem_from_template(oskar_Mem** b, const oskar_Mem* a,
 oskar_StationWork* oskar_station_work_create(int type,
         int location, int* status)
 {
-    int i;
-    oskar_StationWork* work;
+    int i = 0;
+    oskar_StationWork* work = 0;
     work = (oskar_StationWork*) calloc(1, sizeof(oskar_StationWork));
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+    }
 
     /* Initialise members. */
     const int complex_type = type | OSKAR_COMPLEX;
@@ -51,7 +53,7 @@ oskar_StationWork* oskar_station_work_create(int type,
 
 void oskar_station_work_free(oskar_StationWork* work, int* status)
 {
-    int i;
+    int i = 0;
     if (!work) return;
     oskar_mem_free(work->weights, status);
     oskar_mem_free(work->weights_scratch, status);
@@ -72,7 +74,9 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
         oskar_mem_free(work->temp_dir_out[i], status);
     }
     for (i = 0; i < work->num_depths; ++i)
+    {
         oskar_mem_free(work->beam[i], status);
+    }
     free(work);
 }
 
@@ -133,7 +137,9 @@ const oskar_Mem* oskar_station_work_evaluate_tec_screen(oskar_StationWork* work,
 {
     /* Check if we have a phase screen. */
     if (work->screen_type == 'N')
+    {
         return 0;
+    }
     else if (work->screen_type == 'E')
     {
         /* External phase screen. */
@@ -158,7 +164,9 @@ const oskar_Mem* oskar_station_work_evaluate_tec_screen(oskar_StationWork* work,
              * Also consider loading a few at once? */
             int start_index[3] = {0, 0, time_index};
             if (time_index >= work->screen_num_pixels_t)
+            {
                 start_index[2] = work->screen_num_pixels_t - 1;
+            }
             oskar_mem_read_fits(work->tec_screen, 0, num_pixels,
                     oskar_mem_char_const(work->tec_screen_path),
                     3, start_index, 0, 0, 0, status);
@@ -187,7 +195,7 @@ oskar_Mem* oskar_station_work_beam(oskar_StationWork* work,
 {
     if (depth > work->num_depths - 1)
     {
-        int i, old_num_depths;
+        int i = 0, old_num_depths = 0;
         old_num_depths = work->num_depths;
         work->num_depths = depth + 1;
         work->beam = (oskar_Mem**) realloc(work->beam,
@@ -217,9 +225,13 @@ static void get_mem_from_template(oskar_Mem** b, const oskar_Mem* a,
 
     /* Create or resize the array. */
     if (!*b)
+    {
         *b = oskar_mem_create(type, loc, length, status);
+    }
     else
+    {
         oskar_mem_ensure(*b, length, status);
+    }
 }
 
 #ifdef __cplusplus

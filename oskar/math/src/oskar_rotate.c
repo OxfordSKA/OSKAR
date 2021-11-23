@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "math/oskar_rotate.h"
@@ -33,43 +10,41 @@
 extern "C" {
 #endif
 
-void oskar_rotate_sph_f(int num_points, float* x, float* y, float*z,
+void oskar_rotate_sph_f(int num_points, float* x, float* y, float* z,
         float lon, float lat)
 {
-    int i;
-    float cosLon, sinLon, cosLat, sinLat, x_, y_, z_;
-    cosLon = cosf(lon);
-    sinLon = sinf(lon);
-    cosLat = cosf(lat);
-    sinLat = sinf(lat);
+    int i = 0;
+    const float cos_lon = cosf(lon);
+    const float sin_lon = sinf(lon);
+    const float cos_lat = cosf(lat);
+    const float sin_lat = sinf(lat);
     for (i = 0; i < num_points; ++i)
     {
-        x_ = x[i];
-        y_ = y[i];
-        z_ = z[i];
-        x[i] = x_ * cosLon * cosLat - y_ * sinLon - z_ * cosLon*sinLat;
-        y[i] = x_ * cosLat * sinLon + y_ * cosLon - z_ * sinLon*sinLat;
-        z[i] = x_ * sinLat + z_ * cosLat;
+        const float x_ = x[i];
+        const float y_ = y[i];
+        const float z_ = z[i];
+        x[i] = x_ * cos_lon * cos_lat - y_ * sin_lon - z_ * cos_lon * sin_lat;
+        y[i] = x_ * cos_lat * sin_lon + y_ * cos_lon - z_ * sin_lon * sin_lat;
+        z[i] = x_ * sin_lat + z_ * cos_lat;
     }
 }
 
-void oskar_rotate_sph_d(int num_points, double* x, double* y, double*z,
+void oskar_rotate_sph_d(int num_points, double* x, double* y, double* z,
         double lon, double lat)
 {
-    int i;
-    double cosLon, sinLon, cosLat, sinLat, x_, y_, z_;
-    cosLon = cos(lon);
-    sinLon = sin(lon);
-    cosLat = cos(lat);
-    sinLat = sin(lat);
+    int i = 0;
+    const double cos_lon = cos(lon);
+    const double sin_lon = sin(lon);
+    const double cos_lat = cos(lat);
+    const double sin_lat = sin(lat);
     for (i = 0; i < num_points; ++i)
     {
-        x_ = x[i];
-        y_ = y[i];
-        z_ = z[i];
-        x[i] = x_ * cosLon * cosLat - y_ * sinLon - z_ * cosLon*sinLat;
-        y[i] = x_ * cosLat * sinLon + y_ * cosLon - z_ * sinLon*sinLat;
-        z[i] = x_ * sinLat + z_ * cosLat;
+        const double x_ = x[i];
+        const double y_ = y[i];
+        const double z_ = z[i];
+        x[i] = x_ * cos_lon * cos_lat - y_ * sin_lon - z_ * cos_lon * sin_lat;
+        y[i] = x_ * cos_lat * sin_lon + y_ * cos_lon - z_ * sin_lon * sin_lat;
+        z[i] = x_ * sin_lat + z_ * cos_lat;
     }
 }
 

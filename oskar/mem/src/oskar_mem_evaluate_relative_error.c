@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "mem/oskar_mem.h"
@@ -44,7 +21,9 @@ extern "C" {
         *max_rel_error = rel_error; \
     } \
     if (min_rel_error && rel_error < *min_rel_error) \
+    { \
         *min_rel_error = rel_error; \
+    } \
     if (i == 0) \
     { \
         old_m = new_m = rel_error; \
@@ -62,10 +41,10 @@ extern "C" {
 #define CHECK_ELEMENTS(TOL) \
     for (i = 0; i < n; ++i) \
     { \
-        double rel_error, abs_a, abs_b, diff; \
-        abs_a = fabs(approx[i]); \
-        abs_b = fabs(accurate[i]); \
-        diff = fabs(abs_a - abs_b); \
+        double rel_error = 0.0; \
+        const double abs_a = fabs(approx[i]); \
+        const double abs_b = fabs(accurate[i]); \
+        const double diff = fabs(abs_a - abs_b); \
         if (approx[i] == accurate[i] || \
                 (abs_a < FLT_EPSILON && abs_b < FLT_EPSILON)) \
         { \
@@ -87,13 +66,11 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
         double* max_rel_error, double* avg_rel_error, double* std_rel_error,
         int* status)
 {
-    int prec_approx, prec_accurate;
-    size_t i, n;
-    const oskar_Mem *app_ptr, *acc_ptr;
+    int prec_approx = 0, prec_accurate = 0;
+    size_t i = 0, n = 0;
+    const oskar_Mem *app_ptr = 0, *acc_ptr = 0;
     oskar_Mem *approx_temp = 0, *accurate_temp = 0;
     double old_m = 0.0, new_m = 0.0, old_s = 0.0, new_s = 0.0;
-
-    /* Check if safe to proceed. */
     if (*status) return;
 
     /* Initialise outputs. */
@@ -162,30 +139,30 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     /* Check numbers are the same, to appropriate precision. */
     if (prec_approx == OSKAR_SINGLE && prec_accurate == OSKAR_SINGLE)
     {
-        const float *approx, *accurate;
+        const float *approx = 0, *accurate = 0;
         approx = oskar_mem_float_const(app_ptr, status);
         accurate = oskar_mem_float_const(acc_ptr, status);
         CHECK_ELEMENTS(1e-5)
     }
     else if (prec_approx == OSKAR_DOUBLE && prec_accurate == OSKAR_SINGLE)
     {
-        const double *approx;
-        const float *accurate;
+        const double *approx = 0;
+        const float *accurate = 0;
         approx = oskar_mem_double_const(app_ptr, status);
         accurate = oskar_mem_float_const(acc_ptr, status);
         CHECK_ELEMENTS(1e-5);
     }
     else if (prec_approx == OSKAR_SINGLE && prec_accurate == OSKAR_DOUBLE)
     {
-        const float *approx;
-        const double *accurate;
+        const float *approx = 0;
+        const double *accurate = 0;
         approx = oskar_mem_float_const(app_ptr, status);
         accurate = oskar_mem_double_const(acc_ptr, status);
         CHECK_ELEMENTS(1e-5);
     }
     else if (prec_approx == OSKAR_DOUBLE && prec_accurate == OSKAR_DOUBLE)
     {
-        const double *approx, *accurate;
+        const double *approx = 0, *accurate = 0;
         approx = oskar_mem_double_const(app_ptr, status);
         accurate = oskar_mem_double_const(acc_ptr, status);
         CHECK_ELEMENTS(1e-15);

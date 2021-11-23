@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -25,7 +25,7 @@ static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
 void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         int beam_coord_type, int* status)
 {
-    oskar_Mem *x, *y, *z;
+    oskar_Mem *x = 0, *y = 0, *z = 0;
     size_t i = 0, num_pixels = 0;
     if (*status) return;
 
@@ -78,7 +78,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         case 'H': /* Healpix */
         {
             double ra0 = 0.0, dec0 = 0.0;
-            oskar_Mem *theta, *phi;
+            oskar_Mem *theta = 0, *phi = 0;
 
             /* Generate theta and phi. */
             const int type = oskar_mem_type(h->x);
@@ -92,13 +92,17 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
             {
                 double* theta_ = oskar_mem_double(theta, status);
                 for (i = 0; i < num_pixels; ++i)
+                {
                     theta_[i] = (M_PI / 2.0) - theta_[i];
+                }
             }
             else if (type == OSKAR_SINGLE)
             {
                 float* theta_ = oskar_mem_float(theta, status);
                 for (i = 0; i < num_pixels; ++i)
+                {
                     theta_[i] = (float)(M_PI / 2.0) - theta_[i];
+                }
             }
             else
             {
@@ -133,7 +137,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         }
         case 'S': /* Sky model */
         {
-            oskar_Mem *ra, *dec;
+            oskar_Mem *ra = 0, *dec = 0;
             const int type = oskar_mem_type(h->x);
             ra = oskar_mem_create(type, OSKAR_CPU, 0, status);
             dec = oskar_mem_create(type, OSKAR_CPU, 0, status);
@@ -177,7 +181,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         }
         case 'H': /* Healpix */
         {
-            oskar_Mem *theta, *phi;
+            oskar_Mem *theta = 0, *phi = 0;
             const int type = oskar_mem_type(h->x);
             theta = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
             phi = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
@@ -191,7 +195,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
         }
         case 'S': /* Sky model, horizon coordinates. */
         {
-            oskar_Mem *az, *el;
+            oskar_Mem *az = 0, *el = 0;
             const int type = oskar_mem_type(h->lon_rad);
             az = oskar_mem_create(type, OSKAR_CPU, 0, status);
             el = oskar_mem_create(type, OSKAR_CPU, 0, status);
@@ -260,7 +264,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
 static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
         const char* filename, int* status)
 {
-    FILE* file;
+    FILE* file = 0;
     char* line = 0;
     size_t n = 0, bufsize = 0;
     if (*status) return;

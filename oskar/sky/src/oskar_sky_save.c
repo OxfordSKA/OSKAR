@@ -16,8 +16,8 @@ extern "C" {
 
 void oskar_sky_save(const oskar_Sky* sky, const char* filename, int* status)
 {
-    int i;
-    FILE* file;
+    int i = 0;
+    FILE* file = 0;
     if (*status) return;
 
     /* Check sky model is in CPU memory. */
@@ -48,8 +48,9 @@ void oskar_sky_save(const oskar_Sky* sky, const char* filename, int* status)
     /* Print out sky model in ASCII format. */
     if (type == OSKAR_DOUBLE)
     {
-        const double *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *sp_, *rm_;
-        const double *maj_, *min_, *pa_;
+        const double *ra_ = 0, *dec_ = 0, *I_ = 0, *Q_ = 0, *U_ = 0, *V_ = 0;
+        const double *ref_ = 0, *sp_ = 0, *rm_ = 0;
+        const double *maj_ = 0, *min_ = 0, *pa_ = 0;
         ra_  = oskar_mem_double_const(oskar_sky_ra_rad_const(sky), status);
         dec_ = oskar_mem_double_const(oskar_sky_dec_rad_const(sky), status);
         I_   = oskar_mem_double_const(oskar_sky_I_const(sky), status);
@@ -75,8 +76,9 @@ void oskar_sky_save(const oskar_Sky* sky, const char* filename, int* status)
     }
     else if (type == OSKAR_SINGLE)
     {
-        const float *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *sp_, *rm_;
-        const float *maj_, *min_, *pa_;
+        const float *ra_ = 0, *dec_ = 0, *I_ = 0, *Q_ = 0, *U_ = 0, *V_ = 0;
+        const float *ref_ = 0, *sp_ = 0, *rm_ = 0;
+        const float *maj_ = 0, *min_ = 0, *pa_ = 0;
         ra_  = oskar_mem_float_const(oskar_sky_ra_rad_const(sky), status);
         dec_ = oskar_mem_float_const(oskar_sky_dec_rad_const(sky), status);
         I_   = oskar_mem_float_const(oskar_sky_I_const(sky), status);

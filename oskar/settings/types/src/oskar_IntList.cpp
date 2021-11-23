@@ -61,8 +61,7 @@ bool IntList::set_default(const char* value)
 {
     bool ok = from_string(value, default_, delimiter_);
     str_default_ = to_string(default_, delimiter_);
-    if (ok)
-        set_value(value);
+    if (ok) set_value(value);
     return ok;
 } // LCOV_EXCL_LINE
 

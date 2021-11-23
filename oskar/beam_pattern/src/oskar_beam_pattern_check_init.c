@@ -76,8 +76,8 @@ void oskar_beam_pattern_check_init(oskar_BeamPattern* h, int* status)
 
 static void set_up_host_data(oskar_BeamPattern* h, int *status)
 {
-    int i, k;
-    size_t j;
+    int i = 0, k = 0;
+    size_t j = 0;
     if (*status) return;
 
     /* Set up pixel positions. */
@@ -120,23 +120,41 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
         {
             /* Text file. */
             if (h->voltage_raw_txt)
+            {
                 new_text_file(h, RAW_COMPLEX, -1, -1, i, 0, 0, status);
+            }
             if (h->voltage_amp_txt)
             {
                 if (h->pol_mode == OSKAR_POL_MODE_SCALAR)
+                {
                     new_text_file(h, AMP, -1, -1, i, 0, 0, status);
-                else for (k = XX; k <= YY; ++k)
-                    new_text_file(h, AMP, -1, k, i, 0, 0, status);
+                }
+                else
+                {
+                    for (k = XX; k <= YY; ++k)
+                    {
+                        new_text_file(h, AMP, -1, k, i, 0, 0, status);
+                    }
+                }
             }
             if (h->voltage_phase_txt)
             {
                 if (h->pol_mode == OSKAR_POL_MODE_SCALAR)
+                {
                     new_text_file(h, PHASE, -1, -1, i, 0, 0, status);
-                else for (k = XX; k <= YY; ++k)
-                    new_text_file(h, PHASE, -1, k, i, 0, 0, status);
+                }
+                else
+                {
+                    for (k = XX; k <= YY; ++k)
+                    {
+                        new_text_file(h, PHASE, -1, k, i, 0, 0, status);
+                    }
+                }
             }
             if (h->ixr_txt && h->pol_mode == OSKAR_POL_MODE_FULL)
+            {
                 new_text_file(h, IXR, -1, -1, i, 0, 0, status);
+            }
 
             /* Can only create images if coordinates are on a grid. */
             if (h->coord_grid_type != 'B') continue;
@@ -145,31 +163,55 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
             if (h->voltage_amp_fits)
             {
                 if (h->pol_mode == OSKAR_POL_MODE_SCALAR)
+                {
                     new_fits_file(h, AMP, -1, -1, i, 0, 0, status);
-                else for (k = XX; k <= YY; ++k)
-                    new_fits_file(h, AMP, -1, k, i, 0, 0, status);
+                }
+                else
+                {
+                    for (k = XX; k <= YY; ++k)
+                    {
+                        new_fits_file(h, AMP, -1, k, i, 0, 0, status);
+                    }
+                }
             }
             if (h->voltage_phase_fits)
             {
                 if (h->pol_mode == OSKAR_POL_MODE_SCALAR)
+                {
                     new_fits_file(h, PHASE, -1, -1, i, 0, 0, status);
-                else for (k = XX; k <= YY; ++k)
-                    new_fits_file(h, PHASE, -1, k, i, 0, 0, status);
+                }
+                else
+                {
+                    for (k = XX; k <= YY; ++k)
+                    {
+                        new_fits_file(h, PHASE, -1, k, i, 0, 0, status);
+                    }
+                }
             }
             if (h->ixr_fits && h->pol_mode == OSKAR_POL_MODE_FULL)
+            {
                 new_fits_file(h, IXR, -1, -1, i, 0, 0, status);
+            }
         }
     }
 
     /* Create data products that can be averaged. */
     if (h->separate_time_and_channel)
+    {
         create_averaged_products(h, 0, 0, status);
+    }
     if (h->average_time_and_channel)
+    {
         create_averaged_products(h, 1, 1, status);
+    }
     if (h->average_single_axis == 'C')
+    {
         create_averaged_products(h, 0, 1, status);
+    }
     else if (h->average_single_axis == 'T')
+    {
         create_averaged_products(h, 1, 0, status);
+    }
 
     /* Check that at least one output file will be generated. */
     if (h->num_data_products == 0 && !*status)
@@ -183,7 +225,7 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
 static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
         int* status)
 {
-    int s, i, o;
+    int s = 0, i = 0, o = 0;
     if (*status) return;
 
     /* Create station-level data products that can be averaged. */
@@ -191,8 +233,12 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
     {
         /* Text file. */
         for (i = 0; i < 2; ++i)
+        {
             for (o = I; (o <= V) && h->stokes[i] && h->auto_power_txt; ++o)
+            {
                 new_text_file(h, AUTO_POWER_AMP, i, o, s, ta, ca, status);
+            }
+        }
 
         /* Can only create images if coordinates are on a grid. */
         if (h->coord_grid_type != 'B') continue;
@@ -203,13 +249,21 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
             for (o = I; (o <= V) && h->stokes[i]; ++o)
             {
                 if (h->auto_power_fits)
+                {
                     new_fits_file(h, AUTO_POWER_AMP, i, o, s, ta, ca, status);
+                }
                 if (h->auto_power_phase_fits)
+                {
                     new_fits_file(h, AUTO_POWER_PHASE, i, o, s, ta, ca, status);
+                }
                 if (h->auto_power_real_fits)
+                {
                     new_fits_file(h, AUTO_POWER_REAL, i, o, s, ta, ca, status);
+                }
                 if (h->auto_power_imag_fits)
+                {
                     new_fits_file(h, AUTO_POWER_IMAG, i, o, s, ta, ca, status);
+                }
             }
         }
     }
@@ -218,14 +272,20 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
     for (i = 0; i < 2; ++i)
     {
         if (h->cross_power_raw_txt && h->stokes[i])
+        {
             new_text_file(h, CROSS_POWER_RAW_COMPLEX, i, -1, -1, ta, ca,
                     status);
+        }
         for (o = I; (o <= V) && h->stokes[i]; ++o)
         {
             if (h->cross_power_amp_txt)
+            {
                 new_text_file(h, CROSS_POWER_AMP, i, o, -1, ta, ca, status);
+            }
             if (h->cross_power_phase_txt)
+            {
                 new_text_file(h, CROSS_POWER_PHASE, i, o, -1, ta, ca, status);
+            }
         }
     }
 
@@ -238,13 +298,21 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
         for (o = I; (o <= V) && h->stokes[i]; ++o)
         {
             if (h->cross_power_amp_fits)
+            {
                 new_fits_file(h, CROSS_POWER_AMP, i, o, -1, ta, ca, status);
+            }
             if (h->cross_power_phase_fits)
+            {
                 new_fits_file(h, CROSS_POWER_PHASE, i, o, -1, ta, ca, status);
+            }
             if (h->cross_power_real_fits)
+            {
                 new_fits_file(h, CROSS_POWER_REAL, i, o, -1, ta, ca, status);
+            }
             if (h->cross_power_imag_fits)
+            {
                 new_fits_file(h, CROSS_POWER_IMAG, i, o, -1, ta, ca, status);
+            }
         }
     }
 }
@@ -278,14 +346,14 @@ static fitsfile* create_fits_file(const char* filename, int precision,
         int horizon_mode, const char* settings_log, size_t settings_log_length,
         int* status)
 {
-    int imagetype;
+    int imagetype = 0;
     long naxes[4], naxes_dummy[4] = {1l, 1l, 1l, 1l};
-    double delta;
+    double delta = 0.0;
     const double deg2rad = M_PI / 180.0;
     const double rad2deg = 180.0 / M_PI;
     fitsfile* f = 0;
-    const char* line;
-    size_t length;
+    const char* line = 0;
+    size_t length = 0;
     if (*status) return 0;
 
     /* Create a new FITS file and write the image headers. */
@@ -342,7 +410,7 @@ static fitsfile* create_fits_file(const char* filename, int precision,
     length = settings_log_length;
     for (; settings_log_length > 0;)
     {
-        const char* eol;
+        const char* eol = 0;
         fits_write_history(f, line, status);
         eol = (const char*) memchr(line, '\0', length);
         if (!eol) break;
@@ -369,14 +437,17 @@ static int data_product_index(oskar_BeamPattern* h, int data_product_type,
         int stokes_in, int stokes_out, int i_station, int time_average,
         int channel_average)
 {
-    int i;
+    int i = 0;
     for (i = 0; i < h->num_data_products; ++i)
+    {
         if (h->data_products[i].type == data_product_type &&
                 h->data_products[i].stokes_in == stokes_in &&
                 h->data_products[i].stokes_out == stokes_out &&
                 h->data_products[i].i_station == i_station &&
                 h->data_products[i].time_average == time_average &&
-                h->data_products[i].channel_average == channel_average) break;
+                h->data_products[i].channel_average == channel_average)
+            break;
+    }
     if (i == h->num_data_products)
     {
         i = h->num_data_products++;
@@ -398,7 +469,7 @@ static char* construct_filename(oskar_BeamPattern* h, int data_product_type,
         int stokes_in, int stokes_out, int i_station, int time_average,
         int channel_average, const char* ext)
 {
-    int buflen, start = 0;
+    int buflen = 0, start = 0;
     char* name = 0;
 
     /* Construct the filename. */
@@ -430,14 +501,16 @@ static void new_fits_file(oskar_BeamPattern* h, int data_product_type,
         int stokes_in, int stokes_out, int i_station, int time_average,
         int channel_average, int* status)
 {
-    int i, horizon_mode;
-    char* name;
-    fitsfile* f;
+    int i = 0, horizon_mode = 0;
+    char* name = 0;
+    fitsfile* f = 0;
     if (*status) return;
 
     /* Check polarisation type is possible. */
     if ((stokes_in > I || stokes_out > I) && h->pol_mode != OSKAR_POL_MODE_FULL)
+    {
         return;
+    }
 
     /* Construct the filename. */
     name = construct_filename(h, data_product_type, stokes_in, stokes_out,
@@ -468,14 +541,16 @@ static void new_text_file(oskar_BeamPattern* h, int data_product_type,
         int stokes_in, int stokes_out, int i_station, int time_average,
         int channel_average, int* status)
 {
-    int i;
-    char* name;
-    FILE* f;
+    int i = 0;
+    char* name = 0;
+    FILE* f = 0;
     if (*status) return;
 
     /* Check polarisation type is possible. */
     if ((stokes_in > 0 || stokes_out > I) && h->pol_mode != OSKAR_POL_MODE_FULL)
+    {
         return;
+    }
 
     /* Construct the filename. */
     name = construct_filename(h, data_product_type, stokes_in, stokes_out,
@@ -490,16 +565,24 @@ static void new_text_file(oskar_BeamPattern* h, int data_product_type,
         return;
     }
     if (i_station >= 0)
+    {
         fprintf(f, "# Beam pixel list for station %d\n",
                 h->station_ids[i_station]);
+    }
     else
+    {
         fprintf(f, "# Beam pixel list for telescope (interferometer)\n");
+    }
     fprintf(f, "# Filename is '%s'\n", name);
     fprintf(f, "# Dimension order (slowest to fastest) is:\n");
     if (h->average_single_axis != 'T')
+    {
         fprintf(f, "#     [pixel chunk], [time], [channel], [pixel index]\n");
+    }
     else
+    {
         fprintf(f, "#     [pixel chunk], [channel], [time], [pixel index]\n");
+    }
     fprintf(f, "# Number of pixel chunks: %d\n", h->num_chunks);
     fprintf(f, "# Number of times (output): %d\n",
             time_average ? 1 : h->num_time_steps);
@@ -555,7 +638,8 @@ static const char* stokes_type_to_string(int type)
 
 static void set_up_device_data(oskar_BeamPattern* h, int* status)
 {
-    int i, beam_type, max_src, max_size, auto_power, cross_power, raw_data;
+    int i = 0, beam_type = 0, max_src = 0, max_size = 0;
+    int auto_power = 0, cross_power = 0, raw_data = 0;
     if (*status) return;
 
     /* Get local variables. */
@@ -563,7 +647,9 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
     max_size = h->num_active_stations * max_src;
     beam_type = h->prec | OSKAR_COMPLEX;
     if (h->pol_mode == OSKAR_POL_MODE_FULL)
+    {
         beam_type |= OSKAR_MATRIX;
+    }
     raw_data = h->ixr_txt || h->ixr_fits ||
             h->voltage_raw_txt || h->voltage_amp_txt || h->voltage_phase_txt ||
             h->voltage_amp_fits || h->voltage_phase_fits;
@@ -578,11 +664,13 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
     /* Expand the number of devices to the number of selected GPUs,
      * if required. */
     if (h->num_devices < h->num_gpus)
+    {
         oskar_beam_pattern_set_num_devices(h, h->num_gpus);
+    }
 
     for (i = 0; i < h->num_devices; ++i)
     {
-        int dev_loc, i_stokes_type;
+        int dev_loc = 0, i_stokes_type = 0;
         DeviceData* d = &h->d[i];
         if (*status) break;
 
@@ -618,8 +706,10 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
                     oskar_telescope_tec_screen_pixel_size_m(d->tel),
                     oskar_telescope_tec_screen_time_interval_sec(d->tel));
             if (oskar_telescope_ionosphere_screen_type(d->tel) == 'E')
+            {
                 oskar_station_work_set_tec_screen_path(d->work,
                         oskar_telescope_tec_screen_path(d->tel));
+            }
         }
 
         /* Host memory. */
@@ -649,15 +739,21 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
                 d->auto_power_cpu[i_stokes_type][1] = oskar_mem_create(
                         beam_type, OSKAR_CPU, max_size, status);
                 if (h->average_single_axis == 'T')
+                {
                     d->auto_power_time_avg[i_stokes_type] = oskar_mem_create(
                             beam_type, OSKAR_CPU, max_size, status);
+                }
                 if (h->average_single_axis == 'C')
+                {
                     d->auto_power_channel_avg[i_stokes_type] = oskar_mem_create(
                             beam_type, OSKAR_CPU, max_size, status);
+                }
                 if (h->average_time_and_channel)
+                {
                     d->auto_power_channel_and_time_avg[i_stokes_type] =
                             oskar_mem_create(beam_type, OSKAR_CPU,
                                     max_size, status);
+                }
             }
 
             /* Cross-correlation beam output arrays. */
@@ -682,21 +778,29 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
                 d->cross_power_cpu[i_stokes_type][1] = oskar_mem_create(
                         beam_type, OSKAR_CPU, max_src, status);
                 if (h->average_single_axis == 'T')
+                {
                     d->cross_power_time_avg[i_stokes_type] = oskar_mem_create(
                             beam_type, OSKAR_CPU, max_src, status);
+                }
                 if (h->average_single_axis == 'C')
+                {
                     d->cross_power_channel_avg[i_stokes_type] = oskar_mem_create(
                             beam_type, OSKAR_CPU, max_src, status);
+                }
                 if (h->average_time_and_channel)
+                {
                     d->cross_power_channel_and_time_avg[i_stokes_type] =
                             oskar_mem_create(beam_type, OSKAR_CPU,
                                     max_src, status);
+                }
             }
         }
 
         /* Timers. */
         if (!d->tmr_compute)
+        {
             d->tmr_compute = oskar_timer_create(OSKAR_TIMER_NATIVE);
+        }
     }
 }
 

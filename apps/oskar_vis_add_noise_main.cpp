@@ -104,7 +104,9 @@ int main(int argc, char** argv)
         oskar_log_line(log, 'D', '-');
         oskar_log_value(log, 'D', -1, "Number of input files", "%i", num_files);
         for (int i = 0; i < num_files; ++i)
+        {
             oskar_log_message(log, 'D', 1, "%s", vis_filename_in[i]);
+        }
         oskar_log_value(log, 'D', -1, "Settings file", "%s", settings.c_str());
         oskar_log_value(log, 'D', -1,
                 "Verbose", "%s", verbose ? "true" : "false");
@@ -159,7 +161,9 @@ int main(int argc, char** argv)
     // Free telescope model.
     oskar_telescope_free(tel, &status);
     if (status)
+    {
         oskar_log_error(log, "Error: %s", oskar_get_error_string(status));
+    }
     oskar_log_free(log);
     SettingsTree::free(s);
     return status ? EXIT_FAILURE : EXIT_SUCCESS;

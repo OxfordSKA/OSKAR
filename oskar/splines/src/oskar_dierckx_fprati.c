@@ -8,7 +8,7 @@ double oskar_dierckx_fprati(double *p1, double *f1, double p2, double f2,
         double *p3, double *f3)
 {
     /* Local variables */
-    double p, h1, h2, h3;
+    double p = 0.0, h1 = 0.0, h2 = 0.0, h3 = 0.0;
 
     if (*p3 > 0.0)
     {

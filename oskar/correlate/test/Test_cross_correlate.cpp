@@ -18,7 +18,8 @@
 static void check_values(const oskar_Mem* approx, const oskar_Mem* accurate)
 {
     int status = 0;
-    double min_rel_error, max_rel_error, avg_rel_error, std_rel_error, tol;
+    double min_rel_error = 0.0, max_rel_error = 0.0;
+    double avg_rel_error = 0.0, std_rel_error = 0.0, tol = 0.0;
     oskar_mem_evaluate_relative_error(approx, accurate, &min_rel_error,
             &max_rel_error, &avg_rel_error, &std_rel_error, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -58,7 +59,7 @@ protected:
 protected:
     void create_test_data(int precision, int location, int matrix)
     {
-        int status = 0, type;
+        int status = 0, type = 0;
 
         // Allocate memory for data structures.
         type = precision | OSKAR_COMPLEX;
@@ -75,8 +76,10 @@ protected:
                     precision, location, num_stations, &status);
         }
         for (int i = 0; i < 4; ++i)
+        {
             src_flux[i] = oskar_mem_create(
                     precision, location, num_sources, &status);
+        }
         tel = oskar_telescope_create(precision, location,
                 num_stations, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -124,7 +127,9 @@ protected:
             oskar_mem_free(uvw[i], &status);
         }
         for (int i = 0; i < 4; ++i)
+        {
             oskar_mem_free(src_flux[i], &status);
+        }
         oskar_telescope_free(tel, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
@@ -132,10 +137,10 @@ protected:
     void run_test(int prec1, int prec2, int loc1, int loc2, int matrix,
             int extended, double time_average, double freq_average)
     {
-        int num_baselines, status = 0, type;
-        oskar_Mem *vis1, *vis2;
-        oskar_Timer *timer1, *timer2;
-        double time1, time2, frequency = 100e6;
+        int num_baselines = 0, status = 0, type = 0;
+        oskar_Mem *vis1 = 0, *vis2 = 0;
+        oskar_Timer *timer1 = 0, *timer2 = 0;
+        double time1 = 0.0, time2 = 0.0, frequency = 100e6;
 
         // Create the timers.
         timer1 = oskar_timer_create(loc1);

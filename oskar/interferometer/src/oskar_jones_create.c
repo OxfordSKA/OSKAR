@@ -16,7 +16,7 @@ extern "C" {
 oskar_Jones* oskar_jones_create(int type, int location, int num_stations,
         int num_sources, int* status)
 {
-    oskar_Jones* jones;
+    oskar_Jones* jones = 0;
     const int base_type = oskar_type_precision(type);
     if (!oskar_type_is_complex(type) ||
             (base_type != OSKAR_SINGLE && base_type != OSKAR_DOUBLE))

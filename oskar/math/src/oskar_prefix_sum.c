@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, The OSKAR Developers.
+ * Copyright (c) 2017-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -8,16 +8,16 @@
 
 static size_t get_block_size(size_t num_elements)
 {
-    if (num_elements == 0) return 0;
-    else if (num_elements <= 1) return 1;
-    else if (num_elements <= 2) return 2;
-    else if (num_elements <= 4) return 4;
-    else if (num_elements <= 8) return 8;
-    else if (num_elements <= 16) return 16;
-    else if (num_elements <= 32) return 32;
-    else if (num_elements <= 64) return 64;
-    else if (num_elements <= 128) return 128;
-    else if (num_elements <= 256) return 256;
+    if (num_elements == 0) { return 0; }
+    else if (num_elements <= 1) { return 1; }
+    else if (num_elements <= 2) { return 2; }
+    else if (num_elements <= 4) { return 4; }
+    else if (num_elements <= 8) { return 8; }
+    else if (num_elements <= 16) { return 16; }
+    else if (num_elements <= 32) { return 32; }
+    else if (num_elements <= 64) { return 64; }
+    else if (num_elements <= 128) { return 128; }
+    else if (num_elements <= 256) { return 256; }
     return 512;
 }
 
@@ -51,8 +51,8 @@ void oskar_prefix_sum(size_t num_elements, const oskar_Mem* in,
     }
     if (location == OSKAR_CPU)
     {
-        size_t i;
-        int sum = 0, *out_;
+        size_t i = 0;
+        int sum = 0, *out_ = 0;
         const int* in_ = oskar_mem_int_const(in, status);
         out_ = oskar_mem_int(out, status);
         for (i = 0; i < num_elements; ++i)

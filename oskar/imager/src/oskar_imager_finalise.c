@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2016-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "imager/private_imager.h"
@@ -58,9 +35,9 @@ void oskar_imager_finalise(oskar_Imager* h,
         int num_output_images, oskar_Mem** output_images,
         int num_output_grids, oskar_Mem** output_grids, int* status)
 {
-    int c, p, i;
-    size_t j, log_size = 0, length = 0;
-    char* log_data;
+    int c = 0, p = 0, i = 0;
+    size_t j = 0, log_size = 0, length = 0;
+    char* log_data = 0;
 
     /* Report any error. */
     if (*status)
@@ -80,7 +57,9 @@ void oskar_imager_finalise(oskar_Imager* h,
     if (h->scale_norm_with_num_input_files)
     {
         for (i = 0; i < h->num_planes; ++i)
+        {
             h->plane_norm[i] /= h->num_files;
+        }
     }
 
     /* Clear convolution kernels and scratch arrays.
@@ -102,12 +81,14 @@ void oskar_imager_finalise(oskar_Imager* h,
         oskar_timer_resume(h->tmr_grid_finalise);
         for (i = 0; i < h->num_planes; ++i)
         {
-            int d;
+            int d = 0;
             for (d = 0; d < h->num_gpus; ++d)
             {
                 oskar_device_set(h->dev_loc, h->gpu_ids[d], status);
                 if (d == 0)
+                {
                     oskar_mem_copy(h->planes[i], h->d[d].planes[i], status);
+                }
                 else
                 {
                     oskar_mem_copy(temp, h->d[d].planes[i], status);
@@ -129,10 +110,14 @@ void oskar_imager_finalise(oskar_Imager* h,
         if (h->grid_on_gpu && h->num_gpus == 1 && !(
                 h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
                 h->algorithm == OSKAR_ALGORITHM_DFT_3D))
+        {
             plane = h->d[0].planes[i];
+        }
         if (!(output_grids[i]))
+        {
             output_grids[i] = oskar_mem_create(oskar_mem_type(plane),
                     OSKAR_CPU, 0, status);
+        }
         oskar_mem_copy(output_grids[i], plane, status);
         oskar_mem_scale_real(output_grids[i], 1.0 / h->plane_norm[i],
                 0, oskar_mem_length(output_grids[i]), status);
@@ -149,10 +134,14 @@ void oskar_imager_finalise(oskar_Imager* h,
             if (h->grid_on_gpu && h->num_gpus > 0 && !(
                     h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
                     h->algorithm == OSKAR_ALGORITHM_DFT_3D))
+            {
                 plane = h->d[0].planes[i];
+            }
             oskar_imager_finalise_plane(h, plane, h->plane_norm[i], status);
             if (plane != h->planes[i])
+            {
                 oskar_mem_copy(h->planes[i], plane, status);
+            }
             oskar_imager_trim_image(h, h->planes[i],
                     oskar_imager_plane_size(h), h->image_size, status);
         }
@@ -161,8 +150,10 @@ void oskar_imager_finalise(oskar_Imager* h,
         for (i = 0; (i < h->num_planes) && (i < num_output_images); ++i)
         {
             if (!(output_images[i]))
+            {
                 output_images[i] = oskar_mem_create(h->imager_prec,
                         OSKAR_CPU, num_pix, status);
+            }
             oskar_mem_ensure(output_images[i], num_pix, status);
             memcpy(oskar_mem_void(output_images[i]),
                     oskar_mem_void_const(h->planes[i]),
@@ -172,15 +163,21 @@ void oskar_imager_finalise(oskar_Imager* h,
         /* Write to files if required. */
         oskar_timer_resume(h->tmr_write);
         for (c = 0, i = 0; c < h->num_im_channels; ++c)
+        {
             for (p = 0; p < h->num_im_pols; ++p, ++i)
+            {
                 write_plane(h, h->planes[i], c, p, status);
+            }
+        }
         oskar_timer_pause(h->tmr_write);
     }
 
     /* Record memory usage. */
     oskar_log_section(h->log, 'M', "Memory usage");
     for (i = 0; i < h->num_gpus; ++i)
+    {
         oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);
+    }
     oskar_log_mem(h->log);
 
     /* Record time taken. */
@@ -198,76 +195,128 @@ void oskar_imager_finalise(oskar_Imager* h,
     const double t_grid_finalise = oskar_timer_elapsed(h->tmr_grid_finalise);
     const double t_read = oskar_timer_elapsed(h->tmr_read);
     const double t_write = oskar_timer_elapsed(h->tmr_write);
-    if (t_scan > 0.0) oskar_log_value(h->log, 'M', 0,
+    if (t_scan > 0.0)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Coordinate scan", "%.3f s", t_scan);
-    if (t_init > 0.0) oskar_log_value(h->log, 'M', 0,
+    }
+    if (t_init > 0.0)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Initialise", "%.3f s", t_init);
-    if (t_copy_convert > 0.0) oskar_log_value(h->log, 'M', 0,
+    }
+    if (t_copy_convert > 0.0)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Copy/convert data", "%.3f s", t_copy_convert);
-    if (t_select_scale > 0.0) oskar_log_value(h->log, 'M', 0,
+    }
+    if (t_select_scale > 0.0)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Select/scale data", "%.3f s", t_select_scale);
-    if (t_rotate > 0.0) oskar_log_value(h->log, 'M', 0,
+    }
+    if (t_rotate > 0.0)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Rotate visibility data", "%.3f s", t_rotate);
-    if (t_filter > 1e-3) oskar_log_value(h->log, 'M', 0,
+    }
+    if (t_filter > 1e-3)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Filter visibility data", "%.3f s", t_filter);
-    if (t_grid_update > 0.0) oskar_log_value(h->log, 'M', 0,
+    }
+    if (t_grid_update > 0.0)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Grid update", "%.3f s", t_grid_update);
-    if (t_wt_grid > 0.0) oskar_log_value(h->log, 'M', 0,
+    }
+    if (t_wt_grid > 0.0)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Weights grid", "%.3f s", t_wt_grid);
-    if (t_wt_lookup > 0.0) oskar_log_value(h->log, 'M', 0,
+    }
+    if (t_wt_lookup > 0.0)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Weights lookup", "%.3f s", t_wt_lookup);
-    if (t_grid_finalise > 0.0) oskar_log_value(h->log, 'M', 0,
+    }
+    if (t_grid_finalise > 0.0)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Grid finalise", "%.3f s", t_grid_finalise);
-    if (t_read > 0.0) oskar_log_value(h->log, 'M', 0,
+    }
+    if (t_read > 0.0)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Read visibility data", "%.3f s", t_read);
-    if (t_write > 0.0) oskar_log_value(h->log, 'M', 0,
+    }
+    if (t_write > 0.0)
+    {
+        oskar_log_value(h->log, 'M', 0,
             "Write image data", "%.3f s", t_write);
+    }
 
     /* Record summary. */
     oskar_log_section(h->log, 'M', "Imaging complete");
     if (!*status)
     {
         if (h->num_vis_processed > 1e6)
+        {
             oskar_log_value(h->log, 'M', 0,
                     "Visibilities processed", "%.3f million",
                     h->num_vis_processed * 1e-6);
+        }
         else
+        {
             oskar_log_value(h->log, 'M', 0,
                     "Visibilities processed", "%lu",
                     (unsigned long) (h->num_vis_processed));
+        }
         if (h->num_w_planes > 0)
+        {
             oskar_log_value(h->log, 'M', 0,
                     "W-projection planes", "%d", h->num_w_planes);
+        }
         if (h->fov_deg > 0.1)
+        {
             oskar_log_value(h->log, 'M', 0,
                     "Field of view [deg]", "%.1f", h->fov_deg);
+        }
         else
+        {
             oskar_log_value(h->log, 'M', 0,
                     "Field of view [arcmin]", "%.1f", h->fov_deg * 60.0);
+        }
         oskar_log_value(h->log, 'M', 0,
                 "Image dimension [pixels]", "%d", h->image_size);
         if (h->num_files > 0)
         {
             oskar_log_message(h->log, 'M', 0, "Input(s):");
             for (i = 0; i < h->num_files; ++i)
+            {
                 oskar_log_value(h->log, 'M', 1, "Visibility data", "%s",
                         h->input_files[i]);
+            }
         }
         if (h->output_root)
         {
             oskar_log_message(h->log, 'M', 0, "Output(s):");
             for (i = 0; i < h->num_im_pols; ++i)
+            {
                 oskar_log_value(h->log, 'M', 1, "FITS file", "%s (%.1f MB)",
                         h->output_name[i],
                         num_pix * h->num_im_channels *
                         oskar_mem_element_size(h->imager_prec) / 1e6);
+            }
         }
         oskar_log_message(h->log, 'M', 0, "Run completed in %.3f sec.",
                 oskar_timer_elapsed(h->tmr_overall));
     }
     else
+    {
         oskar_log_error(h->log, "Run failed with code %i: %s.", *status,
                 oskar_get_error_string(*status));
+    }
 
     /* Write log to the output FITS files as HISTORY entries.
      * Replace newlines with zeros. */
@@ -284,7 +333,7 @@ void oskar_imager_finalise(oskar_Imager* h,
         length = log_size;
         for (; log_size > 0;)
         {
-            const char* eol;
+            const char* eol = 0;
             fits_write_history(h->fits_file[i], line, status);
             eol = (const char*) memchr(line, '\0', length);
             if (!eol) break;
@@ -320,7 +369,9 @@ void oskar_imager_finalise_plane(oskar_Imager* h,
     /* If algorithm if DFT, we've finished here. */
     if (h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
             h->algorithm == OSKAR_ALGORITHM_DFT_3D)
+    {
         return;
+    }
 
     /* Check plane is complex type, as plane must be gridded visibilities. */
     if (!oskar_mem_is_complex(plane))
@@ -342,12 +393,16 @@ void oskar_imager_finalise_plane(oskar_Imager* h,
     const int fft_loc = (h->fft_on_gpu && h->num_gpus > 0) ?
             h->dev_loc : OSKAR_CPU;
     if (fft_loc != OSKAR_CPU)
+    {
         oskar_device_set(h->dev_loc, h->gpu_ids[0], status);
+    }
     oskar_fftphase(size, size, plane, status);
 
     /* Call FFT. */
     if (!h->fft)
+    {
         h->fft = oskar_fft_create(h->imager_prec, fft_loc, 2, size, 0, status);
+    }
     oskar_fft_exec(h->fft, plane, status);
 
     /* Generate grid correction function if required. */
@@ -356,16 +411,22 @@ void oskar_imager_finalise_plane(oskar_Imager* h,
         oskar_Mem* corr_func = 0;
         corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, size, status);
         if (h->algorithm != OSKAR_ALGORITHM_FFT)
+        {
             oskar_grid_correction_function_spheroidal(size, h->oversample,
                     oskar_mem_double(corr_func, status));
+        }
         else
         {
             if (h->kernel_type == 'S')
+            {
                 oskar_grid_correction_function_spheroidal(size, 0,
                         oskar_mem_double(corr_func, status));
+            }
             else if (h->kernel_type == 'P')
+            {
                 oskar_grid_correction_function_pillbox(size,
                         oskar_mem_double(corr_func, status));
+            }
         }
         h->corr_func = oskar_mem_convert_precision(corr_func,
                 h->imager_prec, status);
@@ -387,7 +448,7 @@ void oskar_imager_trim_image(oskar_Imager* h, oskar_Mem* plane,
     oskar_timer_resume(h->tmr_grid_finalise);
     if (oskar_mem_is_complex(plane))
     {
-        size_t i;
+        size_t i = 0;
         const size_t num_cells = (size_t)plane_size * (size_t)plane_size;
         if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
         {
@@ -405,9 +466,9 @@ void oskar_imager_trim_image(oskar_Imager* h, oskar_Mem* plane,
     const int size_diff = plane_size - image_size;
     if (size_diff > 0)
     {
-        char *ptr;
+        char *ptr = 0;
         size_t in = 0, out = 0, element_size = 0;
-        int i;
+        int i = 0;
         ptr = oskar_mem_char(plane);
         element_size = oskar_mem_element_size(oskar_mem_precision(plane));
         in = element_size * (size_diff / 2) * (plane_size + 1);

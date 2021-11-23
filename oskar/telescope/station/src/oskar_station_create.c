@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -15,8 +15,8 @@ extern "C" {
 oskar_Station* oskar_station_create(int type, int location, int num_elements,
         int* status)
 {
-    int feed, dim;
-    oskar_Station* model;
+    int feed = 0, dim = 0;
+    oskar_Station* model = 0;
 
     /* Check the type and location. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)

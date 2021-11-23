@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2014-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "log/oskar_log.h"
@@ -54,16 +31,14 @@ void oskar_element_load_scalar(oskar_Element* data,
         double closeness, double closeness_inc, int ignore_at_poles,
         int ignore_below_horizon, oskar_Log* log, int* status)
 {
-    int i, n = 0, type = OSKAR_DOUBLE;
+    int i = 0, n = 0, type = OSKAR_DOUBLE;
     oskar_Splines *scalar_re = 0, *scalar_im = 0;
     oskar_Mem *theta = 0, *phi = 0, *re = 0, *im = 0, *weight = 0;
 
     /* Declare the line buffer. */
-    char *line = NULL;
+    char *line = 0;
     size_t bufsize = 0;
-    FILE* file;
-
-    /* Check if safe to proceed. */
+    FILE* file = 0;
     if (*status) return;
 
     /* Check the data type. */
@@ -85,7 +60,9 @@ void oskar_element_load_scalar(oskar_Element* data,
     for (i = 0; i < n; ++i)
     {
         if (fabs(data->freqs_hz[i] - freq_hz) <= freq_hz * DBL_EPSILON)
+        {
             break;
+        }
     }
 
     /* Expand arrays to hold data for a new frequency, if needed. */
@@ -120,20 +97,21 @@ void oskar_element_load_scalar(oskar_Element* data,
     n = 0;
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        double re_, im_;
+        double re_ = 0.0, im_ = 0.0;
         double par[] = {0., 0., 0., 0.}; /* theta, phi, amp, phase (optional) */
         void *p_theta = 0, *p_phi = 0, *p_re = 0, *p_im = 0, *p_weight = 0;
 
         /* Parse the line, and skip if data were not read correctly. */
-        if (oskar_string_to_array_d(line, 4, par) < 3)
-            continue;
+        if (oskar_string_to_array_d(line, 4, par) < 3) continue;
 
         /* Ignore data below horizon if requested. */
         if (ignore_below_horizon && par[0] > 90.0) continue;
 
         /* Ignore data at poles if requested. */
         if (ignore_at_poles)
+        {
             if (par[0] < 1e-6 || par[0] > (180.0 - 1e-6)) continue;
+        }
 
         /* Convert angular measures to radians. */
         par[0] *= DEG2RAD; /* theta */
@@ -200,7 +178,7 @@ static void fit_splines(oskar_Splines* splines, int n,
         double closeness, double closeness_inc, const char* name,
         oskar_Log* log, int* status)
 {
-    double avg_frac_error;
+    double avg_frac_error = 0.0;
     if (*status) return;
     avg_frac_error = closeness; /* Copy the fitting parameter. */
     oskar_log_message(log, 'M', 0, "");

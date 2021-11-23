@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The OSKAR Developers.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -22,11 +22,9 @@ oskar_Sky* oskar_sky_from_image(int precision, const oskar_Mem* image,
         const double image_crpix[2], double image_cellsize_deg,
         double image_freq_hz, double spectral_index, int* status)
 {
-    int i, type, x, y;
-    double crval[2], cdelt[2], val;
+    int i = 0, type = 0, x = 0, y = 0;
+    double crval[2], cdelt[2], val = 0.0;
     oskar_Sky* sky = 0;
-
-    /* Check if safe to proceed. */
     if (*status) return 0;
 
     /* Check pixel size has been defined. */
@@ -60,8 +58,7 @@ oskar_Sky* oskar_sky_from_image(int precision, const oskar_Mem* image,
             {
                 /* Check pixel value. */
                 val = (double) (img[image_size[0] * y + x]);
-                if (val == 0.0)
-                    continue;
+                if (val == 0.0) continue;
 
                 set_pixel(sky, i++, x, y, val, crval, image_crpix, cdelt,
                         image_freq_hz, spectral_index, status);
@@ -77,8 +74,7 @@ oskar_Sky* oskar_sky_from_image(int precision, const oskar_Mem* image,
             {
                 /* Check pixel value. */
                 val = img[image_size[0] * y + x];
-                if (val == 0.0)
-                    continue;
+                if (val == 0.0) continue;
 
                 set_pixel(sky, i++, x, y, val, crval, image_crpix, cdelt,
                         image_freq_hz, spectral_index, status);
@@ -96,7 +92,7 @@ static void set_pixel(oskar_Sky* sky, int i, int x, int y, double val,
         const double crval[2], const double crpix[2], const double cdelt[2],
         double image_freq_hz, double spectral_index, int* status)
 {
-    double ra, dec;
+    double ra = 0.0, dec = 0.0;
 
     /* Convert pixel positions to RA and Dec values. */
     const double l = cdelt[0] * (x + 1 - crpix[0]);
@@ -108,7 +104,9 @@ static void set_pixel(oskar_Sky* sky, int i, int x, int y, double val,
 
     /* Store pixel data in sky model. */
     if (oskar_sky_num_sources(sky) <= i)
+    {
         oskar_sky_resize(sky, i + 1000, status);
+    }
     oskar_sky_set_source(sky, i, ra, dec, val, 0.0, 0.0, 0.0,
             image_freq_hz, spectral_index, 0.0, 0.0, 0.0, 0.0, status);
 }

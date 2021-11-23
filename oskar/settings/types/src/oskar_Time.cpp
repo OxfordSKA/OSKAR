@@ -66,8 +66,7 @@ static string to_string(const Time::Value& val)
         char sep = ':';
         ss << setfill('0') << setw(2) << val.hours << sep;
         ss << setfill('0') << setw(2) << val.minutes << sep;
-        if (val.seconds < 10.)
-            ss << 0;
+        if (val.seconds < 10.) ss << 0;
         ss << oskar_settings_utility_double_to_string_2(val.seconds, 'f', 12);
     }
     else if (val.format == Time::SECONDS)
@@ -102,10 +101,7 @@ bool Time::set_default(const char* val)
 {
     bool ok = from_string(val, default_);
     str_default_ = to_string(default_);
-    if (ok)
-        set_value(val);
-    else
-        init(0);
+    if (ok) set_value(val); else init(0);
     return ok;
 } // LCOV_EXCL_LINE
 

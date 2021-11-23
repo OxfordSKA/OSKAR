@@ -44,8 +44,7 @@ bool IntPositive::set_default(const char* value)
 {
     bool ok = from_string(value, default_);
     str_default_ = oskar_settings_utility_int_to_string(default_);
-    if (ok)
-        set_value(value);
+    if (ok) set_value(value);
     return ok;
 } // LCOV_EXCL_LINE
 

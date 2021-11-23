@@ -39,8 +39,10 @@ int main(int argc, char** argv)
     oskar_device_check_error_cuda(&error);
     oskar_log_section(log, 'M', "CUDA devices (%d)", num_devices);
     if (error)
+    {
         oskar_log_error(log, "Could not determine CUDA device information (%s)",
                 oskar_get_error_string(error));
+    }
     for (int i = 0; i < num_devices; ++i)
     {
         oskar_device_log_details(devices[i], log);

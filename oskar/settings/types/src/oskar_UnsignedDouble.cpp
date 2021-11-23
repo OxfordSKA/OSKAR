@@ -31,10 +31,7 @@ bool UnsignedDouble::set_default(const char* value)
     default_ = v;
     str_default_ = oskar_settings_utility_double_to_string_2(default_,
             (format_ == AUTO ? 'g' : 'e'));
-    if (ok)
-        set_value(value);
-    else
-        (void) init(0);
+    if (ok) set_value(value); else (void) init(0);
     return ok;
 }
 

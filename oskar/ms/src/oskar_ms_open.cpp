@@ -88,7 +88,9 @@ static oskar_MeasurementSet* _oskar_ms_open(const char* filename, bool readonly)
     Table pol(p->ms->tableName() + "/POLARIZATION", Table::Old);
     ScalarColumn<Int> numCorr(pol, "NUM_CORR");
     if (pol.nrow() > 0)
+    {
         p->num_pols = numCorr.get(0);
+    }
     if (num_spectral_windows > 0)
     {
         ScalarColumn<Int> numChan(spw, "NUM_CHAN");
@@ -101,7 +103,9 @@ static oskar_MeasurementSet* _oskar_ms_open(const char* filename, bool readonly)
     Table antenna(p->ms->tableName() + "/ANTENNA", Table::Old);
     p->num_stations = antenna.nrow();
     if (p->ms->nrow() > 0)
+    {
         p->time_inc_sec = p->msmc.interval.get(0);
+    }
 
     // Get the phase centre.
     if (num_fields > 0)
@@ -120,7 +124,9 @@ static oskar_MeasurementSet* _oskar_ms_open(const char* filename, bool readonly)
     Table observation(p->ms->tableName() + "/OBSERVATION", Table::Old);
     ArrayColumn<Double> timeRange(observation, "TIME_RANGE");
     if (observation.nrow() > 0)
+    {
         timeRange.get(0, range);
+    }
 #else
     // Get the data dimensions.
     if (p->ms->polarization().nrow() > 0)

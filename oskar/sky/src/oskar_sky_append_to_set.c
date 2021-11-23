@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "sky/private_sky.h"
@@ -43,17 +20,16 @@ extern "C" {
 void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
         int max_sources_per_model, const oskar_Sky* model, int* status)
 {
-    int free_space, space_required, num_extra_models, number_to_copy;
-    int i, j, type, location, from_offset;
-    oskar_Sky **set;
-    size_t new_size;
-
-    /* Check if safe to proceed. */
+    int free_space = 0, space_required = 0;
+    int num_extra_models = 0, number_to_copy = 0;
+    int i = 0, j = 0, from_offset = 0;
+    oskar_Sky **set = 0;
+    size_t new_size = 0;
     if (*status) return;
 
     /* Get type and location. */
-    type     = oskar_sky_precision(model);
-    location = oskar_sky_mem_location(model);
+    const int type     = oskar_sky_precision(model);
+    const int location = oskar_sky_mem_location(model);
     if (location != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
@@ -97,7 +73,7 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
     for (i = (*set_size-1 > 0) ? *set_size-1 : 0;
             i < *set_size + num_extra_models; ++i)
     {
-        int n_copy, offset_dst;
+        int n_copy = 0, offset_dst = 0;
         offset_dst = oskar_sky_num_sources(set[i]);
         free_space = max_sources_per_model - offset_dst;
         n_copy = MIN(free_space, number_to_copy);
@@ -116,14 +92,14 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
             j < *set_size + num_extra_models; ++j)
     {
         oskar_Sky* sky = set[j];
-        const oskar_Mem *major, *minor;
+        const oskar_Mem *major = 0, *minor = 0;
 
         /* If any source in the model is extended, set the flag. */
         major = oskar_sky_fwhm_major_rad_const(sky);
         minor = oskar_sky_fwhm_minor_rad_const(sky);
         if (type == OSKAR_DOUBLE)
         {
-            const double *maj_, *min_;
+            const double *maj_ = 0, *min_ = 0;
             maj_ = oskar_mem_double_const(major, status);
             min_ = oskar_mem_double_const(minor, status);
             for (i = 0; i < sky->num_sources; ++i)
@@ -137,7 +113,7 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
         }
         else
         {
-            const float *maj_, *min_;
+            const float *maj_ = 0, *min_ = 0;
             maj_ = oskar_mem_float_const(major, status);
             min_ = oskar_mem_float_const(minor, status);
             for (i = 0; i < sky->num_sources; ++i)

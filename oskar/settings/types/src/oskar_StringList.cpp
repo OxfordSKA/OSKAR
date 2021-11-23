@@ -56,7 +56,9 @@ bool StringList::set_value(const char* s)
     str_value_ = to_string(value_, delimiter_);
     pointers_.clear();
     for (size_t i = 0; i < value_.size(); ++i)
+    {
         pointers_.push_back(value_[i].c_str());
+    }
     return true;
 } // LCOV_EXCL_LINE
 

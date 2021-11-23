@@ -46,7 +46,9 @@ int main(int argc, char **argv)
     bool display_stats = opt.is_set("-t") ? true : false;
     bool display_header = opt.is_set("-a") ? true : false;
     if (!display_log && !display_settings && !display_stats && !display_header)
+    {
         display_header = true;
+    }
 
     oskar_Log* log = 0;
     oskar_log_set_file_priority(log, OSKAR_LOG_NONE);
@@ -208,7 +210,9 @@ int main(int argc, char **argv)
             oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
             oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0;
             if (!status)
+            {
                 printf("%s", oskar_mem_char(temp));
+            }
             status = 0;
             oskar_mem_free(temp, &status);
         }
@@ -221,7 +225,9 @@ int main(int argc, char **argv)
             oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
             oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0;
             if (!status)
+            {
                 printf("%s", oskar_mem_char(temp));
+            }
             status = 0;
             oskar_mem_free(temp, &status);
         }
@@ -328,4 +334,3 @@ void update_stats(const oskar_Mem* vis, int num_vis, size_t* counter,
     }
     }
 }
-

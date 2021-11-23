@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The OSKAR Developers.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -139,7 +139,7 @@ void oskar_beam_pattern_set_cross_power_raw_text(oskar_BeamPattern* h,
 void oskar_beam_pattern_set_gpus(oskar_BeamPattern* h, int num,
         const int* ids, int* status)
 {
-    int i;
+    int i = 0;
     if (*status) return;
     oskar_beam_pattern_free_device_data(h, status);
     if (*status) return;
@@ -148,7 +148,9 @@ void oskar_beam_pattern_set_gpus(oskar_BeamPattern* h, int num,
         h->num_gpus = h->num_gpus_avail;
         h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
+        {
             h->gpu_ids[i] = i;
+        }
     }
     else if (num > 0)
     {
@@ -161,7 +163,9 @@ void oskar_beam_pattern_set_gpus(oskar_BeamPattern* h, int num,
         h->num_gpus = num;
         h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
+        {
             h->gpu_ids[i] = ids[i];
+        }
     }
     else /* num == 0 */
     {
@@ -231,7 +235,9 @@ void oskar_beam_pattern_set_num_devices(oskar_BeamPattern* h, int value)
     int status = 0;
     oskar_beam_pattern_free_device_data(h, &status);
     if (value < 1)
+    {
         value = (h->num_gpus == 0) ? (oskar_get_num_procs() - 1) : h->num_gpus;
+    }
     if (value < 1) value = 1;
     h->num_devices = value;
     h->d = (DeviceData*) realloc(h->d, h->num_devices * sizeof(DeviceData));
@@ -284,7 +290,7 @@ void oskar_beam_pattern_set_sky_model_file(oskar_BeamPattern* h,
 void oskar_beam_pattern_set_station_ids(oskar_BeamPattern* h,
         int num_stations, const int* ids)
 {
-    int i;
+    int i = 0;
     h->num_active_stations = num_stations;
     if (num_stations < 0) return;
     h->station_ids = (int*) realloc(h->station_ids, num_stations * sizeof(int));
@@ -321,7 +327,7 @@ void oskar_beam_pattern_set_test_source_stokes_custom(oskar_BeamPattern* h,
 void oskar_beam_pattern_set_telescope_model(oskar_BeamPattern* h,
         const oskar_Telescope* model, int* status)
 {
-    int num_stations;
+    int num_stations = 0;
     if (*status || !h || !model) return;
 
     /* Check the model is not empty. */
@@ -334,7 +340,7 @@ void oskar_beam_pattern_set_telescope_model(oskar_BeamPattern* h,
     }
     if (h->num_active_stations < 0)
     {
-        int i;
+        int i = 0;
         h->num_active_stations = num_stations;
         h->station_ids = (int*)
                 realloc(h->station_ids, num_stations * sizeof(int));

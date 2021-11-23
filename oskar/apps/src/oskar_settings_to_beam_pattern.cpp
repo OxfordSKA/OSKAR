@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2017-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2017-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "apps/oskar_settings_log.h"
@@ -53,26 +30,36 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
     oskar_beam_pattern_set_max_chunk_size(h,
             s->to_int("max_sources_per_chunk", status));
     if (!s->to_int("use_gpus", status))
+    {
         oskar_beam_pattern_set_gpus(h, 0, 0, status);
+    }
     else
     {
         if (s->starts_with("cuda_device_ids", "all", status))
         {
             oskar_beam_pattern_set_gpus(h, -1, 0, status);
             if (oskar_beam_pattern_num_gpus(h) == 0)
+            {
                 oskar_log_warning(log_, "No GPU capability available.");
+            }
         }
         else
         {
             const int* ids = s->to_int_list("cuda_device_ids", &size, status);
             if (size > 0)
+            {
                 oskar_beam_pattern_set_gpus(h, size, ids, status);
+            }
         }
     }
     if (s->starts_with("num_devices", "auto", status))
+    {
         oskar_beam_pattern_set_num_devices(h, -1);
+    }
     else
+    {
         oskar_beam_pattern_set_num_devices(h, s->to_int("num_devices", status));
+    }
     oskar_log_set_keep_file(log_, s->to_int("keep_log_file", status));
     oskar_log_set_file_priority(log_,
             s->to_int("write_status_to_log_file", status) ?
@@ -94,7 +81,9 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
     // Set beam pattern options.
     s->begin_group("beam_pattern");
     if (s->to_int("all_stations", status))
+    {
         oskar_beam_pattern_set_station_ids(h, -1, 0);
+    }
     else
     {
         const int* station_ids = s->to_int_list("station_ids", &size, status);
@@ -106,9 +95,13 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
             s->first_letter("coordinate_type", status));
     const int* image_size = s->to_int_list("beam_image/size", &size, status);
     if (size == 1)
+    {
         oskar_beam_pattern_set_image_size(h, image_size[0], image_size[0]);
+    }
     else if (size > 1)
+    {
         oskar_beam_pattern_set_image_size(h, image_size[0], image_size[1]);
+    }
     const int specify_cellsize =
             s->to_int("beam_image/specify_cellsize", status);
     if (specify_cellsize)
@@ -121,9 +114,13 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
         const double* image_fov =
                 s->to_double_list("beam_image/fov_deg", &size, status);
         if (size == 1)
+        {
             oskar_beam_pattern_set_image_fov(h, image_fov[0], image_fov[0]);
+        }
         else if (size > 1)
+        {
             oskar_beam_pattern_set_image_fov(h, image_fov[0], image_fov[1]);
+        }
     }
     oskar_beam_pattern_set_root_path(h,
             s->to_string("root_path", status));

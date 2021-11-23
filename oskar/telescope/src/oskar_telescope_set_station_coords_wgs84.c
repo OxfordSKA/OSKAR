@@ -18,7 +18,7 @@ void oskar_telescope_set_station_coords_wgs84(oskar_Telescope* telescope,
         int num_stations, const oskar_Mem* lon_deg, const oskar_Mem* lat_deg,
         const oskar_Mem* alt_m, int* status)
 {
-    int i;
+    int i = 0;
 
     /* Check lengths. */
     if ((int)oskar_mem_length(lon_deg) < num_stations ||

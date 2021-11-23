@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The OSKAR Developers.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -15,13 +15,15 @@ extern "C" {
 
 void oskar_beam_pattern_free_device_data(oskar_BeamPattern* h, int* status)
 {
-    int i, j;
+    int i = 0, j = 0;
     for (i = 0; i < h->num_devices; ++i)
     {
         DeviceData* d = &h->d[i];
         if (!d) continue;
         if (i < h->num_gpus)
+        {
             oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
+        }
         oskar_mem_free(d->jones_data_cpu[0], status);
         oskar_mem_free(d->jones_data_cpu[1], status);
         oskar_mem_free(d->jones_data, status);

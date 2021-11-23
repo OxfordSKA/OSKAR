@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <stdlib.h>
@@ -60,8 +37,8 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* amps, const oskar_Mem* weight, int i_plane,
         oskar_Mem* plane, double* plane_norm, int* status)
 {
-    size_t i, num_pixels;
-    oskar_Mem* plane_ptr;
+    size_t i = 0, num_pixels = 0;
+    oskar_Mem* plane_ptr = 0;
     oskar_Thread** threads = 0;
     ThreadArgs* args = 0;
     if (*status) return;
@@ -71,7 +48,9 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
     if (!plane_ptr)
     {
         if (h->planes)
+        {
             plane_ptr = h->planes[i_plane];
+        }
         else
         {
             *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
@@ -81,9 +60,13 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
     num_pixels = (size_t) h->image_size;
     num_pixels *= num_pixels;
     if (oskar_mem_precision(plane_ptr) != h->imager_prec)
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
+    }
     if (oskar_mem_is_complex(plane_ptr) || oskar_mem_is_matrix(plane_ptr))
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+    }
     oskar_mem_ensure(plane_ptr, num_pixels, status);
     if (*status) return;
 
@@ -110,7 +93,9 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
     /* Start the worker threads. */
     h->i_block = 0;
     for (i = 0; i < num_threads; ++i)
+    {
         threads[i] = oskar_thread_create(run_blocks, (void*)&args[i], 0);
+    }
 
     /* Wait for worker threads to finish. */
     for (i = 0; i < num_threads; ++i)
@@ -139,11 +124,12 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
 
 static void* run_blocks(void* arg)
 {
-    oskar_Imager* h;
-    oskar_Mem *plane, *uu, *vv, *ww = 0, *amp, *weight, *block, *l, *m, *n;
-    size_t max_size;
+    oskar_Imager* h = 0;
+    oskar_Mem *plane = 0, *uu = 0, *vv = 0, *ww = 0, *amp = 0, *weight = 0;
+    oskar_Mem *block = 0, *l = 0, *m = 0, *n = 0;
+    size_t max_size = 0;
     const size_t smallest = 1024, largest = 65536;
-    int dev_loc = OSKAR_CPU, *status;
+    int dev_loc = OSKAR_CPU, *status = 0;
 
     /* Get thread function arguments. */
     h = ((ThreadArgs*)arg)->h;
@@ -165,7 +151,9 @@ static void* run_blocks(void* arg)
     amp = oskar_mem_create_copy(((ThreadArgs*)arg)->amp, dev_loc, status);
     weight = oskar_mem_create_copy(((ThreadArgs*)arg)->weight, dev_loc, status);
     if (h->algorithm == OSKAR_ALGORITHM_DFT_3D)
+    {
         ww = oskar_mem_create_copy(((ThreadArgs*)arg)->ww, dev_loc, status);
+    }
 
 #ifdef _OPENMP
     /* Disable nested parallelism. */
@@ -190,7 +178,7 @@ static void* run_blocks(void* arg)
     /* Loop until all blocks are done. */
     for (;;)
     {
-        size_t block_size;
+        size_t block_size = 0;
 
         /* Get a unique block index. */
         oskar_mutex_lock(h->mutex);
@@ -207,8 +195,10 @@ static void* run_blocks(void* arg)
         oskar_mem_copy_contents(l, h->l, 0, block_start, block_size, status);
         oskar_mem_copy_contents(m, h->m, 0, block_start, block_size, status);
         if (h->algorithm == OSKAR_ALGORITHM_DFT_3D)
+        {
             oskar_mem_copy_contents(n, h->n, 0, block_start,
                     block_size, status);
+        }
 
         /* Run DFT for the block. */
         oskar_dft_c2r(num_vis, 2.0 * M_PI, uu, vv, ww, amp, weight,

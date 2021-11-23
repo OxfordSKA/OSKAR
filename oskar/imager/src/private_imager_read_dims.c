@@ -18,7 +18,7 @@ void oskar_imager_read_dims_ms(oskar_Imager* h, const char* filename,
         int* status)
 {
 #ifndef OSKAR_NO_MS
-    oskar_MeasurementSet* ms;
+    oskar_MeasurementSet* ms = 0;
     if (*status) return;
 
     /* Read the header. */
@@ -48,8 +48,8 @@ void oskar_imager_read_dims_ms(oskar_Imager* h, const char* filename,
 void oskar_imager_read_dims_vis(oskar_Imager* h, const char* filename,
         int* status)
 {
-    oskar_Binary* vis_file;
-    oskar_VisHeader* header;
+    oskar_Binary* vis_file = 0;
+    oskar_VisHeader* header = 0;
     if (*status) return;
 
     /* Read the header. */

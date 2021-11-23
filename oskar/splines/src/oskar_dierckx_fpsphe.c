@@ -24,18 +24,26 @@ void oskar_dierckx_fpsphe(int iopt, int m, const double* theta,
         int* index, int* nummer, double* wrk, int lwrk, int* ier)
 {
     /* System generated locals */
-    int a_dim1, a_offset, q_dim1, q_offset, bt_dim1, bt_offset, bp_dim1,
-    bp_offset;
-    double r1;
+    int a_dim1 = 0, a_offset = 0, q_dim1 = 0, q_offset = 0;
+    int bt_dim1 = 0, bt_offset = 0, bp_dim1 = 0, bp_offset = 0;
+    double r1 = 0.0;
 
     /* Local variables */
-    int i, j, l, i1, i2, i3, j1, j2, l1, l2, l3, l4, la, ii, ij, il, in;
-    int lf, lh, ll, lp, lt, np4 = 0, nt4 = 0, nt6, jlt, npp = 0, num, nrr;
-    int ntt = 0, ich1, ich3, num1, ncof = 0, nreg = 0, rank, iter, irot, jrot;
-    int iband = 0, ncoff = 0, nrint, iband1 = 0, lwest, iband3, iband4;
-    double p, c1, d1, d2, f1, f2, f3, p1, p2, p3, aa, cn, co, fn, ri, si;
-    double wi, rn, sq, acc, arg, hti, htj, eps, piv, fac1, fac2;
-    double facc, facs, dmax, fpms = 0.0, pinv, sigma, fpmax, store, pi, pi2;
+    int i = 0, j = 0, l = 0, i1 = 0, i2 = 0, i3 = 0, j1 = 0, j2 = 0;
+    int l1 = 0, l2 = 0, l3 = 0, l4 = 0, la = 0, ii = 0, ij = 0, il = 0, in = 0;
+    int lf = 0, lh = 0, ll = 0, lp = 0, lt = 0, np4 = 0, nt4 = 0, nt6 = 0;
+    int jlt = 0, npp = 0, num = 0, nrr = 0;
+    int ntt = 0, ich1 = 0, ich3 = 0, num1 = 0, ncof = 0, nreg = 0, rank = 0;
+    int iter = 0, irot = 0, jrot = 0;
+    int iband = 0, ncoff = 0, nrint = 0;
+    int iband1 = 0, lwest = 0, iband3 = 0, iband4 = 0;
+    double p = 0.0, c1 = 0.0, d1 = 0.0, d2 = 0.0, f1 = 0.0, f2 = 0.0, f3 = 0.0;
+    double p1 = 0.0, p2 = 0.0, p3 = 0.0, aa = 0.0, cn = 0.0, co = 0.0;
+    double fn = 0.0, ri = 0.0, si = 0.0;
+    double wi = 0.0, rn = 0.0, sq = 0.0, acc = 0.0, arg = 0.0;
+    double hti = 0.0, htj = 0.0, eps = 0.0, piv = 0.0, fac1 = 0.0, fac2 = 0.0;
+    double facc = 0.0, facs = 0.0, dmax = 0.0, fpms = 0.0, pinv = 0.0;
+    double sigma = 0.0, fpmax = 0.0, store = 0.0, pi = 0.0, pi2 = 0.0;
     double ht[4], hp[4];
 
     /* Parameter adjustments */
@@ -276,8 +284,14 @@ L70:
         ncof = npp * (ntt - 1) + 6;
         /*  find the bandwidth of the observation matrix a. */
         iband = npp << 2;
-        if (ntt == 4) iband = (npp + 1) * 3;
-        else if (ntt < 4) iband = ncof;
+        if (ntt == 4)
+        {
+            iband = (npp + 1) * 3;
+        }
+        else if (ntt < 4)
+        {
+            iband = ncof;
+        }
         iband1 = iband - 1;
         /*  initialize the observation matrix a. */
         for (i = 1; i <= ncof; ++i)
@@ -998,4 +1012,3 @@ L980:
 #ifdef __cplusplus
 }
 #endif
-

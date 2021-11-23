@@ -26,10 +26,10 @@ void oskar_device_get_info_cl(oskar_Device* device)
 #define GDI clGetDeviceInfo
     char vd[2];
     char* t = 0;
-    size_t i, len = 0, st = 0;
+    size_t i = 0, len = 0, st = 0;
     cl_uint ui = 0;
     cl_ulong ul = 0;
-    cl_device_type d_type;
+    cl_device_type d_type = 0;
     cl_device_id id = device->device_id_cl;
     device->platform_type = 'O';
     GDI(id, CL_DEVICE_VENDOR, 0, 0, &len);
@@ -69,16 +69,24 @@ void oskar_device_get_info_cl(oskar_Device* device)
     device->max_work_group_size = st;
     GDI(id, CL_DEVICE_TYPE, sizeof(cl_device_type), &d_type, 0);
     if ((d_type & CL_DEVICE_TYPE_GPU) == CL_DEVICE_TYPE_GPU)
+    {
         device->device_type = 'G';
+    }
     if ((d_type & CL_DEVICE_TYPE_CPU) == CL_DEVICE_TYPE_CPU)
+    {
         device->device_type = 'C';
+    }
     if ((d_type & CL_DEVICE_TYPE_ACCELERATOR) == CL_DEVICE_TYPE_ACCELERATOR)
+    {
         device->device_type = 'A';
+    }
     GDI(id, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, sizeof(cl_uint), &ui, 0);
     size_t* max_dims = (size_t*) calloc(ui, sizeof(size_t));
     GDI(id, CL_DEVICE_MAX_WORK_ITEM_SIZES, ui * sizeof(size_t), max_dims, 0);
     for (i = 0; (i < ui) && (i < 3); ++i)
+    {
         device->max_local_size[i] = max_dims[i];
+    }
     free(max_dims);
     free(t);
 #undef GDI
@@ -103,8 +111,7 @@ void oskar_device_get_info_cuda(oskar_Device* device)
     device->compute_capability[0] = prop.major;
     device->compute_capability[1] = prop.minor;
     device->supports_double = 0;
-    if (prop.major >= 2 || prop.minor >= 3)
-        device->supports_double = 1;
+    if (prop.major >= 2 || prop.minor >= 3) device->supports_double = 1;
     device->supports_atomic32 = 1;
     device->supports_atomic64 = 1;
     device->global_mem_cache_size = (size_t) prop.l2CacheSize;

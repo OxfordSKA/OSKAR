@@ -18,8 +18,8 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
         const oskar_Telescope* telescope, double gast,
         oskar_StationWork* work, int* status)
 {
-    int i;
-    oskar_Mem *horizon_mask, *source_indices;
+    int i = 0;
+    oskar_Mem *horizon_mask = 0, *source_indices = 0;
     if (*status) return;
 
     /* Get pointers to work arrays. */
@@ -50,7 +50,9 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
 
     /* Resize the output sky model if necessary. */
     if (oskar_sky_capacity(out) < num_in)
+    {
         oskar_sky_resize(out, num_in, status);
+    }
 
     /* Resize the work buffers if necessary. */
     oskar_mem_ensure(horizon_mask, num_in, status);
@@ -71,7 +73,9 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
     /* Apply exclusive prefix sum to mask to get source output indices.
      * Last element of index array is total number to copy. */
     if (location != OSKAR_CPU)
+    {
         oskar_prefix_sum(num_in, horizon_mask, source_indices, status);
+    }
 
     /* Copy sources above horizon. */
     oskar_sky_copy_source_data(in, horizon_mask, source_indices, out, status);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, The OSKAR Developers.
+ * Copyright (c) 2020-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -23,7 +23,7 @@ OSKAR_JONES_APPLY_STATION_GAINS_M(jones_apply_station_gains_matrix_double, doubl
 void oskar_jones_apply_station_gains(oskar_Jones* jones,
         oskar_Mem* gains, int* status)
 {
-    oskar_Mem* mem;
+    oskar_Mem* mem = 0;
     if (*status) return;
     const int type = oskar_mem_type(gains);
     const int location = oskar_mem_location(gains);

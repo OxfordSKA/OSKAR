@@ -12,7 +12,9 @@ void oskar_ms_close(oskar_MeasurementSet* p)
 {
     if (!p) return;
     if (p->data_written)
+    {
         oskar_ms_set_time_range(p);
+    }
 #ifndef OSKAR_MS_NEW
     if (p->msmc)
         delete p->msmc;
@@ -20,7 +22,9 @@ void oskar_ms_close(oskar_MeasurementSet* p)
         delete p->msc;
 #endif
     if (p->ms)
+    {
         delete p->ms;
+    }
     free(p->a1);
     free(p->a2);
     free(p->app_name);

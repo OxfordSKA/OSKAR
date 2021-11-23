@@ -15,7 +15,7 @@ extern "C" {
 
 oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status)
 {
-    int i;
+    int i = 0;
     int num_channels_total = 0, num_times_total = 0, num_stations = 0;
     int max_channels_per_block = 0, max_times_per_block = 0, tag_error = 0;
     int amp_type = 0, coord_precision = 0;

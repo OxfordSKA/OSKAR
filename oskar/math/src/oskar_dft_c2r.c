@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2017-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2017-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "math/define_dft_c2r.h"
@@ -112,6 +89,7 @@ void oskar_dft_c2r(
         if (is_3d)
         {
             if (is_dbl)
+            {
                 dft_c2r_3d_double(num_in, wavenumber,
                         oskar_mem_double_const(x_in, status),
                         oskar_mem_double_const(y_in, status),
@@ -122,7 +100,9 @@ void oskar_dft_c2r(
                         oskar_mem_double_const(y_out, status),
                         oskar_mem_double_const(z_out, status), 0,
                         oskar_mem_double(output, status), 0);
+            }
             else
+            {
                 dft_c2r_3d_float(num_in, (float)wavenumber,
                         oskar_mem_float_const(x_in, status),
                         oskar_mem_float_const(y_in, status),
@@ -133,10 +113,12 @@ void oskar_dft_c2r(
                         oskar_mem_float_const(y_out, status),
                         oskar_mem_float_const(z_out, status), 0,
                         oskar_mem_float(output, status), 0);
+            }
         }
         else
         {
             if (is_dbl)
+            {
                 dft_c2r_2d_double(num_in, wavenumber,
                         oskar_mem_double_const(x_in, status),
                         oskar_mem_double_const(y_in, status), 0,
@@ -145,7 +127,9 @@ void oskar_dft_c2r(
                         oskar_mem_double_const(x_out, status),
                         oskar_mem_double_const(y_out, status), 0, 0,
                         oskar_mem_double(output, status), 0);
+            }
             else
+            {
                 dft_c2r_2d_float(num_in, (float)wavenumber,
                         oskar_mem_float_const(x_in, status),
                         oskar_mem_float_const(y_in, status), 0,
@@ -154,6 +138,7 @@ void oskar_dft_c2r(
                         oskar_mem_float_const(x_out, status),
                         oskar_mem_float_const(y_out, status), 0, 0,
                         oskar_mem_float(output, status), 0);
+            }
         }
     }
     else
@@ -162,15 +147,19 @@ void oskar_dft_c2r(
         float wavenumber_f = (float) wavenumber;
         const void* np = 0;
         const char* k = 0;
-        int out_size, max_out_size, start;
+        int out_size = 0, max_out_size = 0, start = 0;
         local_size[0] = oskar_device_is_nv(location) ? 384 : 256;
         oskar_device_check_local_size(location, 0, local_size);
 
         /* Select the kernel. */
         if (is_3d)
+        {
             k = is_dbl ? "dft_c2r_3d_double" : "dft_c2r_3d_float";
+        }
         else
+        {
             k = is_dbl ? "dft_c2r_2d_double" : "dft_c2r_2d_float";
+        }
 
         /* Compute the maximum manageable output chunk size. */
         /* Product of max output and input sizes. */

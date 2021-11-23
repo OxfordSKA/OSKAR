@@ -42,9 +42,13 @@ void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
         {
             val = img[i];
             if (val < min_abs_val)
+            {
                 img[i] = 0.0;
+            }
             if (min_peak_fraction > 0.0 && val < peak_min)
+            {
                 img[i] = 0.0;
+            }
         }
     }
     else
@@ -63,9 +67,13 @@ void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
         {
             val = img[i];
             if (val < min_abs_val)
+            {
                 img[i] = 0.0;
+            }
             if (min_peak_fraction > 0.0 && val < peak_min)
+            {
                 img[i] = 0.0;
+            }
         }
     }
 
@@ -74,16 +82,26 @@ void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
             default_map_units : reported_map_units;
     if (!strncmp(unit_str, "JY/BEAM", 7) ||
             !strncmp(unit_str, "Jy/beam", 7))
+    {
         units = JY_BEAM;
+    }
     else if (!strncmp(unit_str, "JY/PIXEL", 8) ||
             !strncmp(unit_str, "Jy/pixel", 8))
+    {
         units = JY_PIXEL;
+    }
     else if (!strncmp(unit_str, "mK", 2))
+    {
         units = MK;
+    }
     else if (!strncmp(unit_str, "K", 1))
+    {
         units = K;
+    }
     else
+    {
         *status = OSKAR_ERR_BAD_UNITS;
+    }
 
     /* Check if we need to convert the pixel values. */
     if (units == JY_BEAM)
@@ -94,12 +112,16 @@ void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
             *status = OSKAR_ERR_BAD_UNITS;
         }
         else
+        {
             scaling = 1.0 / beam_area_pixels;
+        }
     }
     else if (units == K || units == MK)
     {
         if (units == MK)
+        {
             scaling = 1e-3; /* Convert milli-Kelvin to Kelvin. */
+        }
 
         /* Convert temperature to Jansky per pixel. */
         /* Brightness temperature to flux density conversion:
@@ -111,7 +133,9 @@ void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
 
     /* Scale pixels into Jy. */
     if (scaling != 1.0)
+    {
         oskar_mem_scale_real(data, scaling, 0, oskar_mem_length(data), status);
+    }
 }
 
 #ifdef __cplusplus

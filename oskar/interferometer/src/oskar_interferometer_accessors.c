@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -39,7 +39,9 @@ int oskar_interferometer_num_gpus(const oskar_Interferometer* h)
 int oskar_interferometer_num_vis_blocks(const oskar_Interferometer* h)
 {
     if (h->num_time_steps == 0 || h->num_channels == 0)
+    {
         return 0;
+    }
     const int t = (h->num_time_steps + h->max_times_per_block - 1) /
             h->max_times_per_block;
     const int c = (h->num_channels + h->max_channels_per_block - 1) /
@@ -64,12 +66,21 @@ void oskar_interferometer_set_correlation_type(oskar_Interferometer* h,
 {
     if (*status) return;
     if (!strncmp(type, "A", 1) || !strncmp(type, "a", 1))
+    {
         h->correlation_type = 'A';
+    }
     else if (!strncmp(type, "B",  1) || !strncmp(type, "b",  1))
+    {
         h->correlation_type = 'B';
+    }
     else if (!strncmp(type, "C",  1) || !strncmp(type, "c",  1))
+    {
         h->correlation_type = 'C';
-    else *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
+    else
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
 }
 
 void oskar_interferometer_set_force_polarised_ms(oskar_Interferometer* h,
@@ -81,7 +92,7 @@ void oskar_interferometer_set_force_polarised_ms(oskar_Interferometer* h,
 void oskar_interferometer_set_gpus(oskar_Interferometer* h, int num,
         const int* ids, int* status)
 {
-    int i;
+    int i = 0;
     if (*status || !h) return;
     oskar_interferometer_free_device_data(h, status);
     if (*status) return;
@@ -90,7 +101,9 @@ void oskar_interferometer_set_gpus(oskar_Interferometer* h, int num,
         h->num_gpus = h->num_gpus_avail;
         h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
+        {
             h->gpu_ids[i] = i;
+        }
     }
     else if (num > 0)
     {
@@ -103,7 +116,9 @@ void oskar_interferometer_set_gpus(oskar_Interferometer* h, int num,
         h->num_gpus = num;
         h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
         for (i = 0; i < h->num_gpus; ++i)
+        {
             h->gpu_ids[i] = ids[i];
+        }
     }
     else /* num == 0 */
     {
@@ -152,7 +167,9 @@ void oskar_interferometer_set_num_devices(oskar_Interferometer* h, int value)
     int status = 0;
     oskar_interferometer_free_device_data(h, &status);
     if (value < 1)
+    {
         value = (h->num_gpus == 0) ? oskar_get_num_procs() : h->num_gpus;
+    }
     if (value < 1) value = 1;
     h->num_devices = value;
     h->d = (DeviceData*) realloc(h->d, h->num_devices * sizeof(DeviceData));
@@ -166,7 +183,9 @@ void oskar_interferometer_set_observation_frequency(oskar_Interferometer* h,
     h->freq_inc_hz = inc_hz;
     h->num_channels = num_channels;
     if (h->max_channels_per_block <= 0)
+    {
         h->max_channels_per_block = (num_channels < 8) ? num_channels : 8;
+    }
 }
 
 void oskar_interferometer_set_observation_time(oskar_Interferometer* h,
@@ -176,7 +195,9 @@ void oskar_interferometer_set_observation_time(oskar_Interferometer* h,
     h->time_inc_sec = inc_sec;
     h->num_time_steps = num_time_steps;
     if (h->max_times_per_block <= 0)
+    {
         h->max_times_per_block = (num_time_steps < 8) ? num_time_steps : 8;
+    }
 }
 
 void oskar_interferometer_set_settings_path(oskar_Interferometer* h,
@@ -193,12 +214,14 @@ void oskar_interferometer_set_settings_path(oskar_Interferometer* h,
 void oskar_interferometer_set_sky_model(oskar_Interferometer* h,
         const oskar_Sky* sky, int* status)
 {
-    int i;
+    int i = 0;
     if (*status || !h || !sky) return;
 
     /* Clear the old chunk set. */
     for (i = 0; i < h->num_sky_chunks; ++i)
+    {
         oskar_sky_free(h->sky_chunks[i], status);
+    }
     free(h->sky_chunks);
     h->sky_chunks = 0;
     h->num_sky_chunks = 0;
@@ -206,8 +229,10 @@ void oskar_interferometer_set_sky_model(oskar_Interferometer* h,
     /* Split up the sky model into chunks and store them. */
     h->num_sources_total = oskar_sky_num_sources(sky);
     if (h->num_sources_total > 0)
+    {
         oskar_sky_append_to_set(&h->num_sky_chunks, &h->sky_chunks,
                 h->max_sources_per_chunk, sky, status);
+    }
     h->init_sky = 0;
 
     /* Print summary data. */
@@ -217,8 +242,10 @@ void oskar_interferometer_set_sky_model(oskar_Interferometer* h,
     oskar_log_value(h->log, 'M', 0,
             "Number of chunks", "%d", h->num_sky_chunks);
     if (h->num_sources_total < 32 && h->num_gpus > 0)
+    {
         oskar_log_advice(h->log, "It may be faster to use CPU cores "
                 "only, as the sky model contains fewer than 32 sources.");
+    }
 }
 
 void oskar_interferometer_set_telescope_model(oskar_Interferometer* h,
@@ -267,9 +294,13 @@ void oskar_interferometer_set_output_measurement_set(oskar_Interferometer* h,
     if ((len >= 3) && (
             !strcmp(&(filename[len-3]), ".MS") ||
             !strcmp(&(filename[len-3]), ".ms") ))
+    {
         strcpy(h->ms_name, filename);
+    }
     else
+    {
         sprintf(h->ms_name, "%s.MS", filename);
+    }
 }
 
 void oskar_interferometer_set_source_flux_range(oskar_Interferometer* h,

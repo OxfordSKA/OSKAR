@@ -47,24 +47,42 @@ bool DoubleRange::init(const char* s)
     // these will resolve as -DBL_MAX and DBL_MAX respectively.
     bool ok = true;
     vector<string> p = oskar_settings_utility_string_get_type_params(s);
-    if (p.size() == 0u) {
+    if (p.size() == 0u)
+    {
         return false;
     }
-    else if (p.size() == 1u) {
-        if (p[0] == "MIN") min_ = -DBL_MAX;
-        else min_ = oskar_settings_utility_string_to_double(p[0], &ok);
-    }
-    else if (p.size() == 2u) {
+    else if (p.size() == 1u)
+    {
         if (p[0] == "MIN")
+        {
             min_ = -DBL_MAX;
+        }
         else
+        {
             min_ = oskar_settings_utility_string_to_double(p[0], &ok);
-        if (p[1] == "MAX")
-            max_ = DBL_MAX;
-        else
-            max_ = oskar_settings_utility_string_to_double(p[1], &ok);
+        }
     }
-    else {
+    else if (p.size() == 2u)
+    {
+        if (p[0] == "MIN")
+        {
+            min_ = -DBL_MAX;
+        }
+        else
+        {
+            min_ = oskar_settings_utility_string_to_double(p[0], &ok);
+        }
+        if (p[1] == "MAX")
+        {
+            max_ = DBL_MAX;
+        }
+        else
+        {
+            max_ = oskar_settings_utility_string_to_double(p[1], &ok);
+        }
+    }
+    else
+    {
         return false;
     }
     return ok;
@@ -77,8 +95,7 @@ bool DoubleRange::set_default(const char* s)
     bool ok = from_string_(default_, v);
     str_default_ = oskar_settings_utility_double_to_string_2(default_,
             (format_ == AUTO ? 'g' : 'e'));
-    if (ok)
-        set_value(s);
+    if (ok) set_value(s);
     return ok;
 }
 
@@ -94,8 +111,7 @@ bool DoubleRange::set_value(const char* s)
 
 bool DoubleRange::is_default() const
 {
-    if (fabs(default_ - value_) < DBL_EPSILON) return true;
-    else return false;
+    return (fabs(default_ - value_) < DBL_EPSILON);
 }
 
 double DoubleRange::min() const

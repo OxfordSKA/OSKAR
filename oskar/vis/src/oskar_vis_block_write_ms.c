@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2015-2020, The OSKAR Developers.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
+#include "math/oskar_cmath.h"
 #include "ms/oskar_measurement_set.h"
 #include "vis/oskar_vis_block.h"
 #include "vis/oskar_vis_header.h"
-#include "math/oskar_cmath.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,7 +17,7 @@ extern "C" {
 #define D2R (M_PI / 180.0)
 
 #define ASSEMBLE_ALL_FOR_TIME(FP, FP2, FP4c) {\
-    unsigned int a1, a2, b, c, j;\
+    unsigned int a1 = 0, a2 = 0, b = 0, c = 0, j = 0;\
     if (start_chan_index == 0) {\
         /* Assemble baseline coordinates. */\
         for (a1 = 0, b = 0, j = 0; a1 < num_stations; ++a1) {\
@@ -73,17 +73,20 @@ extern "C" {
 void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
         const oskar_VisHeader* hdr, oskar_MeasurementSet* ms, int* status)
 {
-    const oskar_Mem *in_acorr, *in_xcorr, *in_uu, *in_vv, *in_ww;
+    const oskar_Mem *in_acorr = 0, *in_xcorr = 0;
+    const oskar_Mem *in_uu = 0, *in_vv = 0, *in_ww = 0;
     oskar_Mem *temp_vis = 0, *temp_uu = 0, *temp_vv = 0, *temp_ww = 0;
-    double exposure_sec, interval_sec, t_start_mjd, t_start_sec;
-    double lon_rad, lat_rad, freq_start_hz;
-    int coord_type;
-    unsigned int num_baseln_in, num_baseln_out, num_channels;
-    unsigned int num_pols_in, num_pols_out, num_stations, num_times, t;
-    unsigned int prec, start_time_index, start_chan_index;
-    unsigned int have_auto, have_cross;
-    const void *uu_in, *vv_in, *ww_in, *xcorr, *acorr;
-    void *uu_out, *vv_out, *ww_out, *out;
+    double exposure_sec = 0.0, interval_sec = 0.0;
+    double t_start_mjd = 0.0, t_start_sec = 0.0;
+    double lon_rad = 0.0, lat_rad = 0.0, freq_start_hz = 0.0;
+    int coord_type = 0;
+    unsigned int num_baseln_in = 0, num_baseln_out = 0, num_channels = 0;
+    unsigned int num_pols_in = 0, num_pols_out = 0;
+    unsigned int num_stations = 0, num_times = 0, t = 0;
+    unsigned int prec = 0, start_time_index = 0, start_chan_index = 0;
+    unsigned int have_auto = 0, have_cross = 0;
+    const void *uu_in = 0, *vv_in = 0, *ww_in = 0, *xcorr = 0, *acorr = 0;
+    void *uu_out = 0, *vv_out = 0, *ww_out = 0, *out = 0;
     if (*status) return;
 
     /* Pull data from visibility structures. */
@@ -118,7 +121,9 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     /* Get number of output baselines. */
     num_baseln_out = num_baseln_in;
     if (have_auto)
+    {
         num_baseln_out += num_stations;
+    }
 
     /* Check polarisation dimension consistency:
      * num_pols_in can be less than num_pols_out, but not vice-versa. */
@@ -180,11 +185,13 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
 
             /* Only write the coordinates for the first channel. */
             if (start_chan_index == 0)
+            {
                 oskar_ms_write_coords_d(ms, row0, num_baseln_out,
                         (double*)uu_out, (double*)vv_out, (double*)ww_out,
                         exposure_sec, interval_sec,
                         (start_time_index + t + 0.5) * interval_sec +
                         t_start_sec);
+            }
         }
     }
     else if (prec == OSKAR_SINGLE)
@@ -200,11 +207,13 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
 
             /* Only write the coordinates for the first channel. */
             if (start_chan_index == 0)
+            {
                 oskar_ms_write_coords_f(ms, row0, num_baseln_out,
                         (float*)uu_out, (float*)vv_out, (float*)ww_out,
                         exposure_sec, interval_sec,
                         (start_time_index + t + 0.5) * interval_sec +
                         t_start_sec);
+            }
         }
     }
     else

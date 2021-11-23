@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "convert/oskar_convert_fov_to_cellsize.h"
@@ -42,13 +19,11 @@ void oskar_evaluate_image_lmn_grid(int num_l, int num_m, double fov_lon,
         double fov_lat, int centred, oskar_Mem* grid_l, oskar_Mem* grid_m,
         oskar_Mem* grid_n, int* status)
 {
-    int type, loc;
-
     if (*status) return;
 
     /* Check data type and location consistency. */
-    type = oskar_mem_type(grid_l);
-    loc = oskar_mem_location(grid_l);
+    const int type = oskar_mem_type(grid_l);
+    const int loc = oskar_mem_location(grid_l);
     if (oskar_mem_type(grid_m) != type || oskar_mem_type(grid_n) != type)
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
@@ -68,17 +43,23 @@ void oskar_evaluate_image_lmn_grid(int num_l, int num_m, double fov_lon,
     }
 
     if (type == OSKAR_DOUBLE)
+    {
         oskar_evaluate_image_lmn_grid_d(num_l, num_m, fov_lon,
                 fov_lat, centred, oskar_mem_double(grid_l, status),
                 oskar_mem_double(grid_m, status),
                 oskar_mem_double(grid_n, status));
+    }
     else if (type == OSKAR_SINGLE)
+    {
         oskar_evaluate_image_lmn_grid_f(num_l, num_m, (float)fov_lon,
                 (float)fov_lat, centred, oskar_mem_float(grid_l, status),
                 oskar_mem_float(grid_m, status),
                 oskar_mem_float(grid_n, status));
+    }
     else
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+    }
 }
 
 
@@ -87,11 +68,11 @@ void oskar_evaluate_image_lmn_grid_f(int num_l, int num_m, float fov_lon,
         float fov_lat, int centred, float* grid_l, float* grid_m,
         float* grid_n)
 {
-    int i, j, p;
+    int i = 0, j = 0, p = 0;
 
     if (centred)
     {
-        double l_max, m_max, *l, *m, r;
+        double l_max = 0.0, m_max = 0.0, *l = 0, *m = 0, r = 0.0;
 
         /* Allocate temporary memory for vectors. */
         l = (double*) malloc(num_l * sizeof(double));
@@ -133,7 +114,7 @@ void oskar_evaluate_image_lmn_grid_f(int num_l, int num_m, float fov_lon,
     }
     else
     {
-        double l, m, delta_l, delta_m, r;
+        double l = 0.0, m = 0.0, delta_l = 0.0, delta_m = 0.0, r = 0.0;
 
         delta_l = sin(oskar_convert_fov_to_cellsize(fov_lon, num_l));
         delta_m = sin(oskar_convert_fov_to_cellsize(fov_lat, num_m));
@@ -169,11 +150,11 @@ void oskar_evaluate_image_lmn_grid_d(int num_l, int num_m, double fov_lon,
         double fov_lat, int centred, double* grid_l, double* grid_m,
         double* grid_n)
 {
-    int i, j, p;
+    int i = 0, j = 0, p = 0;
 
     if (centred)
     {
-        double l_max, m_max, *l, *m, r;
+        double l_max = 0.0, m_max = 0.0, *l = 0, *m = 0, r = 0.0;
 
         /* Allocate temporary memory for vectors. */
         l = (double*) malloc(num_l * sizeof(double));
@@ -215,7 +196,7 @@ void oskar_evaluate_image_lmn_grid_d(int num_l, int num_m, double fov_lon,
     }
     else
     {
-        double l, m, delta_l, delta_m, r;
+        double l = 0.0, m = 0.0, delta_l = 0.0, delta_m = 0.0, r = 0.0;
 
         delta_l = sin(oskar_convert_fov_to_cellsize(fov_lon, num_l));
         delta_m = sin(oskar_convert_fov_to_cellsize(fov_lat, num_m));

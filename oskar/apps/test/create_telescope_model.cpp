@@ -46,7 +46,7 @@ void create_telescope_model(const char* filename, int* status)
     const int num_stations = sizeof(coords_enu) / sizeof(double[3]);
     oskar_Telescope* tel = oskar_telescope_create(
             precision, OSKAR_CPU, num_stations, status);
-    oskar_Mem *x, *y, *z, *error;
+    oskar_Mem *x = 0, *y = 0, *z = 0, *error = 0;
     x = oskar_mem_create(precision, OSKAR_CPU, num_stations, status);
     y = oskar_mem_create(precision, OSKAR_CPU, num_stations, status);
     z = oskar_mem_create(precision, OSKAR_CPU, num_stations, status);

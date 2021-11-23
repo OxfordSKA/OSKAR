@@ -7,7 +7,7 @@ extern "C" {
 
 void oskar_dierckx_fpgivs(double piv, double *ww, double *cos_, double *sin_)
 {
-    double dd, store, t;
+    double dd = 0.0, store = 0.0, t = 0.0;
     store = fabs(piv);
     if (store < *ww)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, The OSKAR Developers.
+ * Copyright (c) 2020-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -99,8 +99,7 @@ void oskar_hdf5_close(oskar_HDF5* h)
 #ifdef OSKAR_HAVE_HDF5
         (void) H5Fclose(h->file_id);
 #endif
-        for (int i = 0; i < h->num_datasets; ++i)
-            free(h->names[i]);
+        for (int i = 0; i < h->num_datasets; ++i) free(h->names[i]);
         free(h->names);
         free(h);
     }
@@ -154,17 +153,23 @@ static oskar_Mem* read_hyperslab(const oskar_HDF5* h, const hid_t dataset,
             count_in[i] = (size[i] > 0) ? size[i] : 1;
         }
         if (hdf5_error >= 0)
+        {
             hdf5_error = (int) H5Sselect_hyperslab(filespace,
                     H5S_SELECT_SET, offset_in, NULL, count_in, NULL);
+        }
 
         /* Define a 1D memory dataspace big enough to hold everything. */
         const hsize_t offset_out = 0;
         for (int i = 0; i < num_dims; ++i)
+        {
             count_out *= ((size[i] > 0) ? size[i] : 1);
+        }
         memspace = H5Screate_simple(1, &count_out, NULL);
         if (hdf5_error >= 0)
+        {
             hdf5_error = (int) H5Sselect_hyperslab(memspace,
                     H5S_SELECT_SET, &offset_out, NULL, &count_out, NULL);
+        }
         free(count_in);
         free(offset_in);
 
@@ -186,8 +191,10 @@ static oskar_Mem* read_hyperslab(const oskar_HDF5* h, const hid_t dataset,
         {
             data = oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_elements, status);
             if (!*status)
+            {
                 hdf5_error = H5Dread(dataset, H5T_NATIVE_INT, memspace,
                         filespace, H5P_DEFAULT, oskar_mem_void(data));
+            }
             break;
         }
         case H5T_FLOAT:
@@ -198,16 +205,20 @@ static oskar_Mem* read_hyperslab(const oskar_HDF5* h, const hid_t dataset,
                 data = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU,
                         num_elements, status);
                 if (!*status)
+                {
                     hdf5_error = H5Dread(dataset, H5T_NATIVE_FLOAT, memspace,
                             filespace, H5P_DEFAULT, oskar_mem_void(data));
+                }
             }
             else if (size0 >= sizeof(double))
             {
                 data = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
                         num_elements, status);
                 if (!*status)
+                {
                     hdf5_error = H5Dread(dataset, H5T_NATIVE_DOUBLE, memspace,
                             filespace, H5P_DEFAULT, oskar_mem_void(data));
+                }
             }
             break;
         }
@@ -228,18 +239,22 @@ static oskar_Mem* read_hyperslab(const oskar_HDF5* h, const hid_t dataset,
                         data = oskar_mem_create(OSKAR_SINGLE_COMPLEX,
                                 OSKAR_CPU, num_elements, status);
                         if (!*status)
+                        {
                             hdf5_error = H5Dread(dataset, datatype, memspace,
                                     filespace, H5P_DEFAULT,
                                     oskar_mem_void(data));
+                        }
                     }
                     else if (size0 == sizeof(double))
                     {
                         data = oskar_mem_create(OSKAR_DOUBLE_COMPLEX,
                                 OSKAR_CPU, num_elements, status);
                         if (!*status)
+                        {
                             hdf5_error = H5Dread(dataset, datatype, memspace,
                                     filespace, H5P_DEFAULT,
                                     oskar_mem_void(data));
+                        }
                     }
                     else
                     {
@@ -295,7 +310,9 @@ static void read_dims(const oskar_HDF5* h, const hid_t dataset,
         H5Sget_simple_extent_dims(dataspace, dims_l, NULL);
         *dims = (size_t*) realloc(*dims, num_dims_l * sizeof(size_t));
         for (int i = 0; i < num_dims_l; ++i)
+        {
             (*dims)[i] = (size_t) (dims_l[i]);
+        }
         free(dims_l);
     }
     if (num_dims) *num_dims = num_dims_l;
@@ -313,8 +330,7 @@ void oskar_hdf5_read_attributes(const oskar_HDF5* h, const char* object_path,
     herr_t hdf5_error = 0;
 
     /* Check for valid inputs. */
-    if (!names || !values)
-        return;
+    if (!names || !values) return;
 
     /* Open the object. */
     oskar_mutex_lock(h->mutex);
@@ -375,8 +391,10 @@ void oskar_hdf5_read_attributes(const oskar_HDF5* h, const char* object_path,
             (*values)[i] = oskar_mem_create(OSKAR_INT,
                     OSKAR_CPU, num_elements, status);
             if (!*status)
+            {
                 hdf5_error = H5Aread(attribute, H5T_NATIVE_INT,
                         oskar_mem_void((*values)[i]));
+            }
             break;
         }
         case H5T_FLOAT:
@@ -384,8 +402,10 @@ void oskar_hdf5_read_attributes(const oskar_HDF5* h, const char* object_path,
             (*values)[i] = oskar_mem_create(OSKAR_DOUBLE,
                     OSKAR_CPU, num_elements, status);
             if (!*status)
+            {
                 hdf5_error = H5Aread(attribute, H5T_NATIVE_DOUBLE,
                         oskar_mem_void((*values)[i]));
+            }
             break;
         }
         case H5T_STRING:
@@ -411,8 +431,10 @@ void oskar_hdf5_read_attributes(const oskar_HDF5* h, const char* object_path,
                 (*values)[i] = oskar_mem_create(OSKAR_CHAR,
                         OSKAR_CPU, 1 + num_elements * type_size, status);
                 if (!*status)
+                {
                     hdf5_error = H5Aread(attribute, datatype,
                             oskar_mem_void((*values)[i]));
+                }
             }
             break;
         }
@@ -433,16 +455,20 @@ void oskar_hdf5_read_attributes(const oskar_HDF5* h, const char* object_path,
                         (*values)[i] = oskar_mem_create(OSKAR_SINGLE_COMPLEX,
                                 OSKAR_CPU, num_elements, status);
                         if (!*status)
+                        {
                             hdf5_error = H5Aread(attribute, datatype,
                                     oskar_mem_void((*values)[i]));
+                        }
                     }
                     else if (size0 == sizeof(double))
                     {
                         (*values)[i] = oskar_mem_create(OSKAR_DOUBLE_COMPLEX,
                                 OSKAR_CPU, num_elements, status);
                         if (!*status)
+                        {
                             hdf5_error = H5Aread(attribute, datatype,
                                     oskar_mem_void((*values)[i]));
+                        }
                     }
                     else
                     {

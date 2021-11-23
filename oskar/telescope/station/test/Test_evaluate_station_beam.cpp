@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -73,7 +73,7 @@ TEST(evaluate_station_beam, test_array_pattern)
     int num_pixels = image_size * image_size;
 
     // Generate horizontal lm coordinates for the beam pattern.
-    oskar_Mem *beam_pattern, *h_l, *h_m, *h_n, *d_l, *d_m, *d_n;
+    oskar_Mem *beam_pattern = 0, *h_l = 0, *h_m = 0, *h_n = 0, *d_l = 0, *d_m = 0, *d_n = 0;
     h_l = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pixels, &error);
     h_m = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pixels, &error);
     h_n = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pixels, &error);
@@ -149,7 +149,7 @@ TEST(evaluate_station_beam, gaussian)
         int location = OSKAR_CPU;
         double* x = (double*)malloc(size * sizeof(double));
         oskar_linspace_d(x, -lm_minmax, lm_minmax, size);
-        oskar_Mem *l, *m, *beam, *horizon_mask;
+        oskar_Mem *l = 0, *m = 0, *beam = 0, *horizon_mask = 0;
         l = oskar_mem_create(type, location, num_points, &error);
         m = oskar_mem_create(type, location, num_points, &error);
         horizon_mask = oskar_mem_create(type, location, num_points, &error);
@@ -184,7 +184,7 @@ TEST(evaluate_station_beam, gaussian)
         int location = OSKAR_CPU;
         float* x = (float*)malloc(size * sizeof(float));
         oskar_linspace_f(x, -lm_minmax, lm_minmax, size);
-        oskar_Mem *l, *m, *beam, *horizon_mask;
+        oskar_Mem *l = 0, *m = 0, *beam = 0, *horizon_mask = 0;
         l = oskar_mem_create(type, location, num_points, &error);
         m = oskar_mem_create(type, location, num_points, &error);
         horizon_mask = oskar_mem_create(type, location, num_points, &error);
@@ -219,7 +219,7 @@ TEST(evaluate_station_beam, gaussian)
         int location = device_loc;
         double* x = (double*)malloc(size * sizeof(double));
         oskar_linspace_d(x, -lm_minmax, lm_minmax, size);
-        oskar_Mem *h_l, *h_m, *l, *m, *beam, *horizon_mask;
+        oskar_Mem *h_l = 0, *h_m = 0, *l = 0, *m = 0, *beam = 0, *horizon_mask = 0;
         h_l = oskar_mem_create(type, OSKAR_CPU, num_points, &error);
         h_m = oskar_mem_create(type, OSKAR_CPU, num_points, &error);
         horizon_mask = oskar_mem_create(type, location, num_points, &error);
@@ -258,7 +258,7 @@ TEST(evaluate_station_beam, gaussian)
         int location = device_loc;
         float* x = (float*)malloc(size * sizeof(float));
         oskar_linspace_f(x, -lm_minmax, lm_minmax, size);
-        oskar_Mem *h_l, *h_m, *l, *m, *beam, *horizon_mask;
+        oskar_Mem *h_l = 0, *h_m = 0, *l = 0, *m = 0, *beam = 0, *horizon_mask = 0;
         h_l = oskar_mem_create(type, OSKAR_CPU, num_points, &error);
         h_m = oskar_mem_create(type, OSKAR_CPU, num_points, &error);
         horizon_mask = oskar_mem_create(type, location, num_points, &error);

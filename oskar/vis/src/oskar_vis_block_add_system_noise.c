@@ -3,10 +3,10 @@
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
-#include "vis/private_vis_block.h"
-#include "vis/oskar_vis_block.h"
-#include "math/oskar_random_gaussian.h"
 #include "math/oskar_find_closest_match.h"
+#include "math/oskar_random_gaussian.h"
+#include "vis/oskar_vis_block.h"
+#include "vis/private_vis_block.h"
 #include <math.h>
 
 #ifdef __cplusplus
@@ -16,8 +16,8 @@ extern "C" {
 static void oskar_get_station_std_dev_for_channel(oskar_Mem* station_std_dev,
         double frequency_hz, const oskar_Telescope* tel, int* status)
 {
-    int i, j;
-    const oskar_Mem *noise_freq, *noise_rms;
+    int i = 0, j = 0;
+    const oskar_Mem *noise_freq = 0, *noise_rms = 0;
 
     /* Ensure output array is big enough. */
     const int num_stations = oskar_telescope_num_stations(tel);
@@ -44,8 +44,8 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
         int global_slice_idx, int local_slice_idx,
         double channel_bandwidth_hz, double time_int_sec, int* status)
 {
-    int a1, a2, b, c = 0;
-    void *acorr_ptr, *xcorr_ptr;
+    int a1 = 0, a2 = 0, b = 0, c = 0;
+    void *acorr_ptr = 0, *xcorr_ptr = 0;
     double rnd[8];
     const double inv_sqrt2 = 1.0 / sqrt(2.0);
 
@@ -234,11 +234,12 @@ void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
         const oskar_VisHeader* header, const oskar_Telescope* telescope,
         oskar_Mem* station_work, int* status)
 {
-    int t, c, num_times_block, num_channels_block, num_channels_total;
-    int start_time, start_channel;
-    unsigned int seed;
-    double freq_start_hz, freq_inc_hz;
-    double channel_bandwidth_hz, time_int_sec;
+    int t = 0, c = 0;
+    int num_times_block = 0, num_channels_block = 0, num_channels_total = 0;
+    int start_time = 0, start_channel = 0;
+    unsigned int seed = 0;
+    double freq_start_hz = 0.0, freq_inc_hz = 0.0;
+    double channel_bandwidth_hz = 0.0, time_int_sec = 0.0;
     if (*status) return;
 
     /* Check baseline dimensions match. */

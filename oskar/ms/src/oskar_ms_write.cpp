@@ -101,7 +101,9 @@ void oskar_ms_write_coords(oskar_MeasurementSet* p,
 
     // Create baseline antenna indices if required.
     if (!p->a1 || !p->a2)
+    {
         oskar_ms_create_baseline_indices(p, num_baselines);
+    }
 
     // Loop over rows to add.
     for (unsigned int r = 0; r < num_baselines; ++r)
@@ -122,9 +124,13 @@ void oskar_ms_write_coords(oskar_MeasurementSet* p,
 
     // Update time range if required.
     if (time_stamp < p->start_time)
+    {
         p->start_time = time_stamp - interval_sec/2.0;
+    }
     if (time_stamp > p->end_time)
+    {
         p->end_time = time_stamp + interval_sec/2.0;
+    }
     p->time_inc_sec = interval_sec;
     p->data_written = 1;
 }

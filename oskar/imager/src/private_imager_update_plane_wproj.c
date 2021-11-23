@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "imager/private_imager.h"
@@ -68,7 +45,9 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
         if (!plane_ptr)
         {
             if (h->planes)
+            {
                 plane_ptr = h->planes[i_plane];
+            }
             else
             {
                 *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
@@ -90,6 +69,7 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
         oskar_mem_ensure(plane_ptr, num_cells, status);
         if (*status) return;
         if (h->imager_prec == OSKAR_DOUBLE)
+        {
             oskar_grid_wproj2_d(h->num_w_planes,
                     oskar_mem_int_const(h->w_support, status),
                     h->oversample,
@@ -103,7 +83,9 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
                     h->cellsize_rad, h->w_scale,
                     grid_size, num_skipped, plane_norm,
                     oskar_mem_double(plane_ptr, status));
+        }
         else
+        {
             oskar_grid_wproj2_f(h->num_w_planes,
                     oskar_mem_int_const(h->w_support, status),
                     h->oversample,
@@ -117,10 +99,11 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
                     h->cellsize_rad, h->w_scale,
                     grid_size, num_skipped, plane_norm,
                     oskar_mem_float(plane_ptr, status));
+        }
     }
     else
     {
-        int i;
+        int i = 0;
         oskar_Thread** threads = 0;
         ThreadArgs* args = 0;
 
@@ -147,7 +130,9 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
 
         /* Start the worker threads. */
         for (i = 0; i < num_threads; ++i)
+        {
             threads[i] = oskar_thread_create(run_subset, (void*)&args[i], 0);
+        }
 
         /* Wait for worker threads to finish. */
         for (i = 0; i < num_threads; ++i)
@@ -168,13 +153,13 @@ void oskar_imager_update_plane_wproj(oskar_Imager* h, size_t num_vis,
 
 static void* run_subset(void* arg)
 {
-    oskar_Imager* h;
-    oskar_Mem *plane;
-    const oskar_Mem *uu, *vv, *ww, *amps, *weight;
-    int count_skipped = 0, num_total = 0, *status;
+    oskar_Imager* h = 0;
+    oskar_Mem *plane = 0;
+    const oskar_Mem *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0;
+    int count_skipped = 0, num_total = 0, *status = 0;
     int start = 0, num_points = 0;
     size_t local_size[] = {1, 1, 1}, global_size[] = {1, 1, 1};
-    DeviceData* d;
+    DeviceData* d = 0;
 
     /* Get thread function arguments. */
     ThreadArgs* a = (ThreadArgs*) arg;
@@ -195,7 +180,9 @@ static void* run_subset(void* arg)
     if (!plane)
     {
         if (d->planes)
+        {
             plane = d->planes[i_plane];
+        }
         else
         {
             *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
@@ -275,11 +262,17 @@ static void* run_subset(void* arg)
     {
         const char* k = 0;
         if (oskar_type_is_single(vis_type))
+        {
             k = "grid_tile_count_wproj_float";
+        }
         else if (oskar_type_is_double(vis_type))
+        {
             k = "grid_tile_count_wproj_double";
+        }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
         local_size[0] = 512;
         oskar_device_check_local_size(location, 0, local_size);
         global_size[0] = oskar_device_global_size(num_points, local_size[0]);
@@ -331,11 +324,17 @@ static void* run_subset(void* arg)
     {
         const char* k = 0;
         if (oskar_type_is_single(vis_type))
+        {
             k = "grid_tile_bucket_sort_wproj_float";
+        }
         else if (oskar_type_is_double(vis_type))
+        {
             k = "grid_tile_bucket_sort_wproj_double";
+        }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
         local_size[0] = 128;
         oskar_device_check_local_size(location, 0, local_size);
         global_size[0] = oskar_device_global_size(num_points, local_size[0]);
@@ -377,11 +376,17 @@ static void* run_subset(void* arg)
     {
         const char* k = 0;
         if (oskar_type_is_single(vis_type))
+        {
             k = "grid_tile_grid_wproj_float";
+        }
         else if (oskar_type_is_double(vis_type))
+        {
             k = "grid_tile_grid_wproj_double";
+        }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
         local_size[0] = tile_size_u;
         size_t num_blocks = (num_points + local_size[0] - 1) / local_size[0];
         if (num_blocks > 10000) num_blocks = 10000;
@@ -421,13 +426,13 @@ static void* run_subset(void* arg)
     /* Update the normalisation value. */
     if (oskar_mem_type(d->norm) == OSKAR_SINGLE)
     {
-        float temp_norm;
+        float temp_norm = 0.0f;
         oskar_mem_read_element(d->norm, 0, &temp_norm, status);
         a->plane_norm = temp_norm;
     }
     else
     {
-        double temp_norm;
+        double temp_norm = 0.0;
         oskar_mem_read_element(d->norm, 0, &temp_norm, status);
         a->plane_norm = temp_norm;
     }

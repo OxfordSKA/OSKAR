@@ -8,8 +8,8 @@ void oskar_dierckx_fprpsp(int nt, int np, const double *co, const double *si,
         double *c, double *f, int ncoff)
 {
     /* Local variables */
-    int i, j, k, l, ii, np4, nt4, npp, ncof;
-    double c1, c2, c3, cn;
+    int i = 0, j = 0, k = 0, l = 0, ii = 0, np4 = 0, nt4 = 0, npp = 0, ncof = 0;
+    double c1 = 0.0, c2 = 0.0, c3 = 0.0, cn = 0.0;
 
     /* Parameter adjustments */
     --si;
@@ -73,4 +73,3 @@ void oskar_dierckx_fprpsp(int nt, int np, const double *co, const double *si,
 #ifdef __cplusplus
 }
 #endif
-

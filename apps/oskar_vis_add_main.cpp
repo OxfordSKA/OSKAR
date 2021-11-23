@@ -52,7 +52,9 @@ int main(int argc, char** argv)
         printf("Output visibility file: %s\n", out_path);
         printf("Combining the %d input files:\n", num_in_files);
         for (int i = 0; i < num_in_files; ++i)
+        {
             printf("  [%02d] %s\n", i, in_files[i]);
+        }
     }
 
     // Read all the visibility headers and check consistency.
@@ -94,9 +96,11 @@ int main(int argc, char** argv)
                 headers[0]), &status);
         out_file = oskar_vis_header_write(headers[0], out_path, &status);
         if (status)
+        {
             oskar_log_error(0,
                     "Failed to write output visibility data file '%s'",
                     out_path);
+        }
     }
 
     // Loop over each block in each file.
@@ -135,6 +139,8 @@ int main(int argc, char** argv)
         oskar_binary_free(files[i]);
     }
     oskar_binary_free(out_file);
+    free(files);
+    free(headers);
 
     return status ? EXIT_FAILURE : EXIT_SUCCESS;
 }
@@ -143,31 +149,47 @@ static bool is_compatible(const oskar_VisHeader* v1, const oskar_VisHeader* v2)
 {
     if (oskar_vis_header_num_channels_total(v1) !=
             oskar_vis_header_num_channels_total(v2))
+    {
         return false;
+    }
     if (oskar_vis_header_max_channels_per_block(v1) !=
             oskar_vis_header_max_channels_per_block(v2))
+    {
         return false;
+    }
     if (oskar_vis_header_num_times_total(v1) !=
             oskar_vis_header_num_times_total(v2))
+    {
         return false;
+    }
     if (oskar_vis_header_max_times_per_block(v1) !=
             oskar_vis_header_max_times_per_block(v2))
+    {
         return false;
+    }
     if (oskar_vis_header_num_stations(v1) !=
             oskar_vis_header_num_stations(v2))
+    {
         return false;
+    }
     if (fabs(oskar_vis_header_freq_start_hz(v1) -
             oskar_vis_header_freq_start_hz(v2)) > DBL_EPSILON)
+    {
         return false;
+    }
     if (fabs(oskar_vis_header_freq_inc_hz(v1) -
             oskar_vis_header_freq_inc_hz(v2)) > DBL_EPSILON)
+    {
         return false;
-    if (oskar_vis_header_amp_type(v1) !=
-            oskar_vis_header_amp_type(v2))
+    }
+    if (oskar_vis_header_amp_type(v1) != oskar_vis_header_amp_type(v2))
+    {
         return false;
-    if (oskar_vis_header_pol_type(v1) !=
-            oskar_vis_header_pol_type(v2))
+    }
+    if (oskar_vis_header_pol_type(v1) != oskar_vis_header_pol_type(v2))
+    {
         return false;
+    }
 
     return true;
 }

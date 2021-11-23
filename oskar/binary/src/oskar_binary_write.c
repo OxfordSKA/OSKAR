@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "binary/oskar_binary.h"
@@ -41,7 +18,7 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
         size_t data_size, const void* data, int* status)
 {
     oskar_BinaryTag tag;
-    size_t block_size;
+    size_t block_size = 0;
     unsigned long crc = 0;
 
     /* Check if safe to proceed. */
@@ -64,22 +41,34 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
 
     /* Set the size of the payload element. */
     if (data_type & OSKAR_CHAR)
+    {
         tag.magic[3] = sizeof(char);
+    }
     else if (data_type & OSKAR_INT)
+    {
         tag.magic[3] = sizeof(int);
+    }
     else if (data_type & OSKAR_SINGLE)
+    {
         tag.magic[3] = sizeof(float);
+    }
     else if (data_type & OSKAR_DOUBLE)
+    {
         tag.magic[3] = sizeof(double);
+    }
     else
     {
         *status = OSKAR_ERR_BINARY_TYPE_UNKNOWN;
         return;
     }
     if (data_type & OSKAR_COMPLEX)
+    {
         tag.magic[3] *= 2;
+    }
     if (data_type & OSKAR_MATRIX)
+    {
         tag.magic[3] *= 4;
+    }
 
     /* Set up the tag identifiers */
     tag.flags = 0;
@@ -110,7 +99,9 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
     crc = oskar_crc_compute(handle->crc_data, &tag, sizeof(oskar_BinaryTag));
     crc = oskar_crc_update(handle->crc_data, crc, data, data_size);
     if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+    {
         oskar_endian_swap(&crc, sizeof(unsigned long));
+    }
 
     /* Write the tag to the file. */
     if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, handle->stream) != 1)
@@ -132,7 +123,9 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
 
     /* Write the 4-byte CRC-32C code. */
     if (fwrite(&crc, 4, 1, handle->stream) != 1)
+    {
         *status = OSKAR_ERR_BINARY_WRITE_FAIL;
+    }
 }
 
 void oskar_binary_write_double(oskar_Binary* handle, unsigned char id_group,
@@ -154,7 +147,7 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
         size_t data_size, const void* data, int* status)
 {
     oskar_BinaryTag tag;
-    size_t block_size, lgroup, ltag;
+    size_t block_size = 0, lgroup = 0, ltag = 0;
     unsigned long crc = 0;
 
     /* Check if safe to proceed. */
@@ -177,22 +170,34 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
 
     /* Set the size of the payload element. */
     if (data_type & OSKAR_CHAR)
+    {
         tag.magic[3] = sizeof(char);
+    }
     else if (data_type & OSKAR_INT)
+    {
         tag.magic[3] = sizeof(int);
+    }
     else if (data_type & OSKAR_SINGLE)
+    {
         tag.magic[3] = sizeof(float);
+    }
     else if (data_type & OSKAR_DOUBLE)
+    {
         tag.magic[3] = sizeof(double);
+    }
     else
     {
         *status = OSKAR_ERR_BINARY_TYPE_UNKNOWN;
         return;
     }
     if (data_type & OSKAR_COMPLEX)
+    {
         tag.magic[3] *= 2;
+    }
     if (data_type & OSKAR_MATRIX)
+    {
         tag.magic[3] *= 4;
+    }
 
     /* Check that string lengths are within range. */
     lgroup = strlen(name_group);
@@ -235,7 +240,9 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
     crc = oskar_crc_update(handle->crc_data, crc, name_tag, tag.tag.bytes);
     crc = oskar_crc_update(handle->crc_data, crc, data, data_size);
     if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+    {
         oskar_endian_swap(&crc, sizeof(unsigned long));
+    }
 
     /* Write the tag to the file. */
     if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, handle->stream) != 1)
@@ -269,7 +276,9 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
 
     /* Write the 4-byte CRC-32C code. */
     if (fwrite(&crc, 4, 1, handle->stream) != 1)
+    {
         *status = OSKAR_ERR_BINARY_WRITE_FAIL;
+    }
 }
 
 void oskar_binary_write_ext_double(oskar_Binary* handle, const char* name_group,

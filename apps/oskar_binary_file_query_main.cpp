@@ -32,9 +32,13 @@ static void print_log(const char* filename, oskar_Log* log, int* status)
     oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, status);
     oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0; /* Null-terminate. */
     if (tag_not_present)
+    {
         oskar_log_error(log, "Run log not found");
+    }
     else
+    {
         printf("%s\n", oskar_mem_char(temp));
+    }
     oskar_mem_free(temp, status);
     oskar_binary_free(h);
 }
@@ -54,18 +58,22 @@ static void print_settings(const char* filename, oskar_Log* log, int* status)
     oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, status);
     oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0; /* Null-terminate. */
     if (tag_not_present)
+    {
         oskar_log_error(log, "Settings data not found");
+    }
     else
+    {
         printf("%s\n", oskar_mem_char(temp));
+    }
     oskar_mem_free(temp, status);
     oskar_binary_free(h);
 }
 
 static void scan_file(const char* filename, oskar_Log* log, int* status)
 {
-    int extended_tags = 0, depth = -4, i;
+    int extended_tags = 0, depth = -4, i = 0;
     const char p = 'M';
-    oskar_Mem* temp;
+    oskar_Mem* temp = 0;
     oskar_Binary* h = oskar_binary_create(filename, 'r', status);
     if (*status)
     {
@@ -107,7 +115,9 @@ static void scan_file(const char* filename, oskar_Log* log, int* status)
         const char* label = oskar_get_binary_tag_string(group, tag);
         temp = oskar_mem_create(type, OSKAR_CPU, 0, status);
         if (bytes <= 512 || type == OSKAR_CHAR)
+        {
             oskar_binary_read_mem(h, temp, group, tag, idx, status);
+        }
         const int precision = oskar_type_precision((int)type);
         num_items = oskar_mem_length(temp);
         if (oskar_type_is_complex(type)) num_items *= 2;
@@ -121,7 +131,9 @@ static void scan_file(const char* filename, oskar_Log* log, int* status)
             const int max_string_length = 40;
             const char* fmt = "%s: %.*s";
             for (c = 0; c < bytes && c < oskar_mem_length(temp); ++c)
+            {
                 if (data[c] < 32 && data[c] != 0) data[c] = ' ';
+            }
             if (bytes > max_string_length) fmt = "%s: %.*s ...";
             oskar_log_message(log, p, depth, fmt, label,
                     max_string_length, oskar_mem_char(temp));
@@ -175,11 +187,15 @@ static void scan_file(const char* filename, oskar_Log* log, int* status)
             case 1:
                 if ((fabs(data[0]) < 1e3 && fabs(data[0]) > 1e-3) ||
                         data[0] == 0.0)
+                {
                     oskar_log_message(log, p, depth, "%s: %.3f",
                             label, data[0]);
+                }
                 else
+                {
                     oskar_log_message(log, p, depth, "%s: %.3e",
                             label, data[0]);
+                }
                 break;
             case 2:
                 oskar_log_message(log, p, depth, "%s: [%.3e, %.3e]",
@@ -187,10 +203,14 @@ static void scan_file(const char* filename, oskar_Log* log, int* status)
                 break;
             default:
                 if (num_items > 2)
+                {
                     oskar_log_message(log, p, depth,
                             "%s: [%.3e, %.3e ...]", label, data[0], data[1]);
+                }
                 else
+                {
                     oskar_log_message(log, p, depth, "%s", label);
+                }
             }
             break;
         }
@@ -202,11 +222,15 @@ static void scan_file(const char* filename, oskar_Log* log, int* status)
             case 1:
                 if ((fabs(data[0]) < 1e3 && fabs(data[0]) > 1e-3) ||
                         data[0] == 0.0)
+                {
                     oskar_log_message(log, p, depth, "%s: %.3f",
                             label, data[0]);
+                }
                 else
+                {
                     oskar_log_message(log, p, depth, "%s: %.3e",
                             label, data[0]);
+                }
                 break;
             case 2:
                 oskar_log_message(log, p, depth, "%s: [%.3e, %.3e]",
@@ -214,10 +238,14 @@ static void scan_file(const char* filename, oskar_Log* log, int* status)
                 break;
             default:
                 if (num_items > 2)
+                {
                     oskar_log_message(log, p, depth,
                             "%s: [%.3e, %.3e ...]", label, data[0], data[1]);
+                }
                 else
+                {
                     oskar_log_message(log, p, depth, "%s", label);
+                }
             }
             break;
         }
@@ -273,14 +301,22 @@ int main(int argc, char** argv)
     oskar_log_set_term_priority(log, OSKAR_LOG_STATUS);
 
     if (display_log)
+    {
         print_log(filename, log, &error);
+    }
     else if (display_settings)
+    {
         print_settings(filename, log, &error);
+    }
     else
+    {
         scan_file(filename, log, &error);
+    }
 
     if (error)
+    {
         oskar_log_error(log, oskar_get_error_string(error));
+    }
 
     return error ? EXIT_FAILURE : EXIT_SUCCESS;
 }

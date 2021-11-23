@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "log/oskar_log.h"
@@ -236,7 +213,9 @@ char* oskar_log_file_data(oskar_Log* log, size_t* size)
 void oskar_log_free(oskar_Log* log)
 {
     if (!log)
+    {
         oskar_log_close(&log_);
+    }
     else
     {
         oskar_log_close(log);
@@ -369,7 +348,7 @@ void oskar_log_set_value_width(oskar_Log* log, int value)
 
 void init_log(oskar_Log* log)
 {
-    struct tm* timeinfo;
+    struct tm* timeinfo = 0;
     size_t buf_len = 0;
     char *current_dir = 0, fname1[120], time_str[120];
     int i = 0, n = 0;
@@ -386,7 +365,9 @@ void init_log(oskar_Log* log)
             timeinfo->tm_year, timeinfo->tm_mon, timeinfo->tm_mday,
             timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
     if (n < 0 || n >= (int)sizeof(fname1))
+    {
         return;
+    }
 
     /* Construct a unique log file name. */
     do
@@ -401,7 +382,9 @@ void init_log(oskar_Log* log)
             n = SNPRINTF(log->name, sizeof(log->name), "%s_%d.log", fname1, i);
         }
         if (n < 0 || n >= (int)sizeof(log->name))
+        {
             return;
+        }
         if (i > 1000)
         {
             log->name[0] = 0;
@@ -452,9 +435,13 @@ void init_log(oskar_Log* log)
     }
     free(current_dir);
     if (log->file)
+    {
         oskar_log_message(log, 'M', 0, "Logging to file %s", log->name);
+    }
     else if (log->file_priority > OSKAR_LOG_NONE)
+    {
         oskar_log_warning(log, "Log file could not be created.");
+    }
 }
 
 
@@ -507,7 +494,7 @@ static char get_entry_code(char priority)
 static void print_entry(oskar_Log* log, FILE* stream, char priority, char code,
         int depth, const char* prefix, const char* format, va_list args)
 {
-    int i;
+    int i = 0;
     if (!stream) return;
     const int width = log->value_width;
 

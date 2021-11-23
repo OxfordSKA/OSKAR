@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -30,10 +30,12 @@ static int device_loc = OSKAR_CPU;
 static void jones_to_power(const oskar_Mem* jones, oskar_Mem* power,
         int* status)
 {
-    const oskar_Mem *input;
+    const oskar_Mem *input = 0;
     oskar_Mem *jones_ = 0;
     if (oskar_mem_location(jones) == OSKAR_CPU)
+    {
         input = jones;
+    }
     else
     {
         jones_ = oskar_mem_create_copy(jones, OSKAR_CPU, status);
@@ -46,14 +48,18 @@ static void jones_to_power(const oskar_Mem* jones, oskar_Mem* power,
         const float2* in = oskar_mem_float2_const(input, status);
         float* out = oskar_mem_float(power, status);
         for (size_t i = 0; i < num_elements; ++i)
+        {
             out[i] = in[i].x * in[i].x + in[i].y * in[i].y;
+        }
     }
     else if (oskar_mem_precision(input) == OSKAR_DOUBLE)
     {
         const double2* in = oskar_mem_double2_const(input, status);
         double* out = oskar_mem_double(power, status);
         for (size_t i = 0; i < num_elements; ++i)
+        {
             out[i] = in[i].x * in[i].x + in[i].y * in[i].y;
+        }
     }
     oskar_mem_free(jones_, status);
 }
@@ -162,4 +168,3 @@ TEST(evaluate_jones_E, evaluate_e)
     oskar_station_work_free(work, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 }
-

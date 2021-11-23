@@ -22,9 +22,13 @@ bool compare(const DoubleRangeExt::Value& a, const DoubleRangeExt::Value& b)
     if (a.is_singular() || b.is_singular()) return false;
     if (a.which() != b.which()) return false;
     if (a.which() == DOUBLE)
+    {
         return (fabs(get<double>(a) - get<double>(b)) < DBL_MIN);
+    }
     if (a.which() == STRING)
+    {
         return get<string>(a) == get<string>(b);
+    }
     return false;
 }
 
@@ -61,19 +65,31 @@ bool DoubleRangeExt::init(const char* s)
     vector<string> p = oskar_settings_utility_string_get_type_params(s);
     if (p.size() < 3u || p.size() > 4u) return false;
     if (p[0] == "-DBL_MAX" || p[0] == "-MAX")
+    {
         min_ = -DBL_MAX;
+    }
     else if (p[0] == "DBL_MIN" || p[0] == "-DBL_MIN"
                     || p[0] == "MIN" || p[0] == "-MIN")
+    {
         min_ = -DBL_MIN;
+    }
     else
+    {
         min_ = oskar_settings_utility_string_to_double(p[0], &ok);
+    }
     if (!ok) return false;
+
     if (p[1] == "DBL_MAX" || p[1] == "MAX")
+    {
         max_ =  DBL_MAX;
+    }
     else
+    {
         max_ = oskar_settings_utility_string_to_double(p[1], &ok);
+    }
     ext_min_ = p[2];
-    if (p.size() == 4u) {
+    if (p.size() == 4u)
+    {
         ext_max_ = p[3];
     }
     return ok;
@@ -84,10 +100,11 @@ bool DoubleRangeExt::set_default(const char* value)
     string v(value);
     bool ok = from_string_(default_, v);
     if (default_.which() == DOUBLE)
+    {
         format_ = (v.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+    }
     str_default_ = to_string_(default_);
-    if (ok)
-        set_value(value);
+    if (ok) set_value(value);
     return ok;
 }
 
@@ -96,7 +113,9 @@ bool DoubleRangeExt::set_value(const char* value)
     string v(value);
     bool ok = from_string_(value_, v);
     if (value_.which() == DOUBLE)
+    {
         format_ = (v.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
+    }
     str_value_ = to_string_(value_);
     return ok;
 }
@@ -109,9 +128,13 @@ bool DoubleRangeExt::is_default() const
 double DoubleRangeExt::value() const
 {
     if (value_.which() == STRING && get<string>(value_) == ext_min_)
+    {
         return min_;
+    }
     if (value_.which() == STRING && get<string>(value_) == ext_max_)
+    {
         return max_;
+    }
     return get<double>(value_);
 }
 
@@ -145,7 +168,9 @@ bool DoubleRangeExt::operator>(const DoubleRangeExt& other) const
     if (value_.is_singular() || other.value_.is_singular()) return false;
     if (value_.which() != other.value_.which()) return false;
     if (value_.which() == DOUBLE)
+    {
         return get<double>(value_) > get<double>(other.value_);
+    }
     return false;
 }
 
@@ -154,21 +179,40 @@ bool DoubleRangeExt::from_string_(Value& value, const string& s) const
     if (s.empty()) return false;
 
     if (s == ext_min_)
+    {
         value = ext_min_;
+    }
     else if (s == ext_max_)
+    {
         value = ext_max_;
-    else {
+    }
+    else
+    {
         bool ok = true;
         double v = oskar_settings_utility_string_to_double(s, &ok);
         if (!ok) return false;
         if (v < min_ && !ext_min_.empty())
+        {
             value = ext_min_;
+        }
         else if (v > max_ && !ext_max_.empty())
+        {
             value = ext_max_;
-        else {
-            if (v >= max_) value = max_;
-            else if (v <= min_) value = min_;
-            else value = v;
+        }
+        else
+        {
+            if (v >= max_)
+            {
+                value = max_;
+            }
+            else if (v <= min_)
+            {
+                value = min_;
+            }
+            else
+            {
+                value = v;
+            }
         }
     }
     return true;
@@ -177,17 +221,20 @@ bool DoubleRangeExt::from_string_(Value& value, const string& s) const
 string DoubleRangeExt::to_string_(const Value& value) const
 {
     if (value.is_singular()) return string();
-    if (value.which() == DOUBLE) {
+    if (value.which() == DOUBLE)
+    {
         double v = get<double>(value);
         int n = 16;
-        if (v != 0.0 && v > 1.0) {
+        if (v != 0.0 && v > 1.0)
+        {
             n -= (floor(log10(v)) + 1);
         }
         string s = oskar_settings_utility_double_to_string_2(v,
                 format_ == AUTO ? 'g' : 'e');
         return s;
     }
-    else if (value.which() == STRING) {
+    else if (value.which() == STRING)
+    {
         return get<string>(value);
     }
     return string();

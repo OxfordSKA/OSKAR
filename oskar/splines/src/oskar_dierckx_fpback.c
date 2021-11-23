@@ -8,8 +8,8 @@ void oskar_dierckx_fpback(const double *a, const double *z, int n, int k,
         double *c, int nest)
 {
     /* Local variables */
-    int i, j, l, m, i1, k1;
-    double store;
+    int i = 0, j = 0, l = 0, m = 0, i1 = 0, k1 = 0;
+    double store = 0.0;
 
     /* Parameter adjustments */
     --c;

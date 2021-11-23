@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "binary/oskar_binary.h"
@@ -58,10 +35,10 @@ int main(void)
     int a = 0, b = 0, c = 0, i = 0;
     int num_elements_double = 22;
     int num_elements_int = 17;
-    size_t size_double, size_int;
+    size_t size_double = 0, size_int = 0;
     oskar_Binary* h = 0;
-    double* data_double;
-    int* data_int;
+    double* data_double = 0;
+    int* data_int = 0;
     size_double = num_elements_double * sizeof(double);
     size_int = num_elements_int * sizeof(int);
 
@@ -79,14 +56,18 @@ int main(void)
         ASSERT_INT_EQ(0, status);
         {
             for (i = 0; i < num_elements_double; ++i)
+            {
                 data_double[i] = i + 1000.0;
+            }
             oskar_binary_write(h, OSKAR_DOUBLE,
                     1, 10, 987654321, size_double, &data_double[0], &status);
             ASSERT_INT_EQ(0, status);
         }
         {
             for (i = 0; i < num_elements_int; ++i)
+            {
                 data_int[i] = i * 10;
+            }
             oskar_binary_write(h, OSKAR_INT,
                     2, 20, 1, size_int, &data_int[0], &status);
             ASSERT_INT_EQ(0, status);
@@ -95,7 +76,9 @@ int main(void)
         ASSERT_INT_EQ(0, status);
         {
             for (i = 0; i < num_elements_int; ++i)
+            {
                 data_int[i] = i * 75;
+            }
             oskar_binary_write(h, OSKAR_INT,
                     14, 5, 6, size_int, &data_int[0], &status);
             ASSERT_INT_EQ(0, status);
@@ -104,7 +87,9 @@ int main(void)
         ASSERT_INT_EQ(0, status);
         {
             for (i = 0; i < num_elements_double; ++i)
+            {
                 data_double[i] = i * 1234.0;
+            }
             oskar_binary_write(h, OSKAR_DOUBLE,
                     4, 0, 3, size_double, &data_double[0], &status);
             ASSERT_INT_EQ(0, status);
@@ -141,9 +126,13 @@ int main(void)
                 4, 0, 3, size_double, &data_double[0], &status);
         ASSERT_INT_EQ(0, status);
         for (i = 0; i < num_elements_double; ++i)
+        {
             ASSERT_DOUBLE_EQ(i * 1234.0, data_double[i]);
+        }
         for (i = 0; i < num_elements_int; ++i)
+        {
             ASSERT_INT_EQ(i * 10, data_int[i]);
+        }
         free(data_double);
         free(data_int);
     }
@@ -157,16 +146,20 @@ int main(void)
                 1, 10, 987654321, size_double, &data_double[0], &status);
         ASSERT_INT_EQ(0, status);
         for (i = 0; i < num_elements_double; ++i)
+        {
             ASSERT_DOUBLE_EQ(i + 1000.0, data_double[i]);
+        }
         for (i = 0; i < num_elements_int; ++i)
+        {
             ASSERT_INT_EQ(i * 75, data_int[i]);
+        }
         free(data_double);
         free(data_int);
     }
 
     /* Look for a tag that isn't there. */
     {
-        double t;
+        double t = 0.0;
         oskar_binary_read_double(h, 255, 0, 0, &t, &status);
         ASSERT_INT_EQ((int) OSKAR_ERR_BINARY_TAG_NOT_FOUND, status);
         status = 0;

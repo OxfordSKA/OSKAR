@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "binary/oskar_binary.h"
@@ -43,7 +20,7 @@ void oskar_binary_read_block(oskar_Binary* handle,
         int chunk_index, size_t data_size, void* data, int* status)
 {
     size_t bytes = 0, chunk_size = 1 << 29;
-    char* p;
+    char* p = 0;
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -103,12 +80,14 @@ void oskar_binary_read_block(oskar_Binary* handle,
     /* Check CRC-32 code, if present. */
     if (handle->crc[chunk_index])
     {
-        unsigned long crc;
+        unsigned long crc = 0;
         crc = handle->crc_header[chunk_index];
         crc = oskar_crc_update(handle->crc_data, crc, data,
                 handle->payload_size_bytes[chunk_index]);
         if (crc != handle->crc[chunk_index])
+        {
             *status = OSKAR_ERR_BINARY_CRC_FAIL;
+        }
     }
 }
 
@@ -116,7 +95,7 @@ void oskar_binary_read(oskar_Binary* handle,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
         int user_index, size_t data_size, void* data, int* status)
 {
-    int chunk_index;
+    int chunk_index = 0;
     if (*status) return;
 
     /* Check file was opened for reading. */
@@ -150,7 +129,7 @@ void oskar_binary_read_ext(oskar_Binary* handle,
         unsigned char data_type, const char* name_group, const char* name_tag,
         int user_index, size_t data_size, void* data, int* status)
 {
-    int chunk_index;
+    int chunk_index = 0;
     if (*status) return;
 
     /* Check file was opened for reading. */

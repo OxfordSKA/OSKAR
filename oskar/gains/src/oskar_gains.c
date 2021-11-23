@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, The OSKAR Developers.
+ * Copyright (c) 2020-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -23,7 +23,9 @@ oskar_Gains* oskar_gains_create_copy(const oskar_Gains* other, int* status)
     h->precision = other->precision;
     h->num_dims = other->num_dims;
     if (other->freqs)
+    {
         h->freqs = oskar_mem_create_copy(other->freqs, OSKAR_CPU, status);
+    }
     if (other->hdf5_file)
     {
         h->hdf5_file = other->hdf5_file;
@@ -31,10 +33,12 @@ oskar_Gains* oskar_gains_create_copy(const oskar_Gains* other, int* status)
     }
     if (other->dims)
     {
-        int i;
+        int i = 0;
         h->dims = (size_t*) calloc(h->num_dims, sizeof(size_t));
         for (i = 0; i < h->num_dims; ++i)
+        {
             h->dims[i] = other->dims[i];
+        }
     }
     return h;
 }
@@ -50,8 +54,8 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
     oskar_Mem *temp_gains = 0, *temp_x = 0, *temp_y = 0;
     oskar_Mem *ptr_gains = 0, *ptr_x = 0, *ptr_y = 0;
     oskar_Mem *x = 0, *y = 0;
-    int channel_index;
-    size_t i;
+    int channel_index = 0;
+    size_t i = 0;
     if (*status) return;
 
     /* Check data have been loaded. */
@@ -92,7 +96,9 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
     ptr_x = x = oskar_hdf5_read_hyperslab(h->hdf5_file, "gain_xpol",
             3, offsets, sizes, status);
     if (oskar_mem_precision(x) != out_prec)
+    {
         ptr_x = temp_x = oskar_mem_convert_precision(x, out_prec, status);
+    }
 
     /* Check for the other polarisation. */
     if (oskar_mem_is_matrix(gains))
@@ -100,18 +106,22 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
         ptr_y = y = oskar_hdf5_read_hyperslab(h->hdf5_file, "gain_ypol",
                 3, offsets, sizes, status);
         if (oskar_mem_precision(y) != out_prec)
+        {
             ptr_y = temp_y = oskar_mem_convert_precision(y, out_prec, status);
+        }
 
         /* Check output is writable by the CPU. */
         ptr_gains = gains;
         if (oskar_mem_location(gains) != OSKAR_CPU)
+        {
             ptr_gains = temp_gains = oskar_mem_create(
                     oskar_mem_type(gains), OSKAR_CPU, num_antennas, status);
+        }
 
         /* Write gains into diagonal matrices. */
         if (out_prec == OSKAR_DOUBLE)
         {
-            double4c* out;
+            double4c* out = 0;
             double2 zero = {0.0, 0.0};
             const double2* in_x = oskar_mem_double2_const(ptr_x, status);
             const double2* in_y = oskar_mem_double2_const(ptr_y, status);
@@ -126,7 +136,7 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
         }
         else
         {
-            float4c* out;
+            float4c* out = 0;
             float2 zero = {0.0f, 0.0f};
             const float2* in_x = oskar_mem_float2_const(ptr_x, status);
             const float2* in_y = oskar_mem_float2_const(ptr_y, status);
@@ -142,7 +152,9 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
 
         /* Copy into output if necessary. */
         if (ptr_gains != gains)
+        {
             oskar_mem_copy(gains, ptr_gains, status);
+        }
     }
     else
     {

@@ -37,9 +37,11 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     /************************************************************************/
     /* Options that affect the load. */
     if (s->contains("interferometer"))
+    {
         oskar_telescope_set_enable_noise(t,
                 s->to_int("interferometer/noise/enable", status),
                 s->to_int("interferometer/noise/seed", status));
+    }
     oskar_telescope_set_pol_mode(t,
             s->to_string("telescope/pol_mode", status), status);
     oskar_telescope_set_allow_station_beam_duplication(t,
@@ -73,13 +75,17 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     if (s->contains("observation"))
     {
         if (s->starts_with("observation/mode", "Drift", status))
+        {
             oskar_telescope_set_phase_centre(t,
                     OSKAR_COORDS_AZEL, 0.0, (M_PI / 2.0));
+        }
         else
+        {
             oskar_telescope_set_phase_centre(t,
                     OSKAR_COORDS_RADEC,
                     s->to_double("observation/phase_centre_ra_deg", status) * D2R,
                     s->to_double("observation/phase_centre_dec_deg", status) * D2R);
+        }
     }
     if (s->contains("interferometer"))
     {
@@ -88,7 +94,9 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         if (s->contains("observation"))
         {
             if (s->starts_with("observation/mode", "Drift", status))
+            {
                 drift_scan = 1;
+            }
             num_channels = s->to_int("observation/num_channels", status);
             freq_st_hz = s->to_double("observation/start_frequency_hz", status);
             freq_inc_hz = s->to_double("observation/frequency_inc_hz", status);
@@ -97,8 +105,10 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         oskar_telescope_set_channel_bandwidth(t,
                 s->to_double("channel_bandwidth_hz", status));
         if (!drift_scan)
+        {
             oskar_telescope_set_time_average(t,
                     s->to_double("time_average_sec", status));
+        }
         oskar_telescope_set_uv_filter(t,
                 s->to_double("uv_filter_min", status),
                 s->to_double("uv_filter_max", status),
@@ -135,7 +145,9 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         }
     }
     for (int i = 0; i < num_station_models; ++i)
+    {
         set_station_data(oskar_telescope_station(t, i), s, status);
+    }
 
     /* Apply element level overrides. */
     s->clear_group();
@@ -147,9 +159,11 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     {
         int seed = s->to_int("seed_position_xy_errors", status);
         for (int i = 0; i < num_station_models; ++i)
+        {
             oskar_station_override_element_xy_position_errors(
                     oskar_telescope_station(t, i),
                     0, (unsigned int) seed, position_error_xy_m, status);
+        }
     }
 
     const char* k_gain[] = {
@@ -192,9 +206,11 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         if (gain_time > 0.0)
         {
             for (int i = 0; i < num_station_models; ++i)
+            {
                 oskar_station_override_element_time_variable_gains(
                         oskar_telescope_station(t, i),
                         feed, gain_time, status);
+            }
         }
 
         /* Override station element systematic/fixed phase errors if required. */
@@ -211,9 +227,11 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         if (phase_time > 0.0)
         {
             for (int i = 0; i < num_station_models; ++i)
+            {
                 oskar_station_override_element_time_variable_phases(
                         oskar_telescope_station(t, i),
                         feed, phase_time, status);
+            }
         }
 
         /* Override station element cable length errors if required. */
@@ -231,9 +249,11 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
         {
             int seed = s->to_int(k_rot_seed[feed], status);
             for (int i = 0; i < num_station_models; ++i)
+            {
                 oskar_station_override_element_feed_angle(
                         oskar_telescope_station(t, i),
                         feed, (unsigned int) seed, rot_err, 0.0, 0.0, status);
+            }
         }
     }
 
@@ -266,15 +286,25 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
                 /*const double time_interval =
                         s->to_double("screen_time_interval_sec", status);*/
                 if (pixel_size > 0.0)
+                {
                     oskar_telescope_set_tec_screen_pixel_size(t, pixel_size);
+                }
                 else
+                {
                     oskar_telescope_set_tec_screen_pixel_size(t, axis_inc[0]);
-                /*if (time_interval > 0.0)
+                }
+#if 0
+                if (time_interval > 0.0)
+                {
                     oskar_telescope_set_tec_screen_time_interval(t,
                             time_interval);
-                else*/
+                }
+                else
+#endif
+                {
                     oskar_telescope_set_tec_screen_time_interval(t,
                             axis_inc[2]);
+                }
             }
             free(axis_size);
             free(axis_inc);
@@ -338,6 +368,8 @@ void set_station_data(oskar_Station* station, SettingsTree* s, int* status)
     {
         int num_elements = oskar_station_num_elements(station);
         for (int i = 0; i < num_elements; ++i)
+        {
             set_station_data(oskar_station_child(station, i), s, status);
+        }
     }
 }

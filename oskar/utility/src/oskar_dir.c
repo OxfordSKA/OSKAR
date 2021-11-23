@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2016-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "utility/oskar_dir.h"
@@ -104,11 +81,10 @@ int oskar_dir_file_exists(const char* dir_path, const char* file_name)
 
 char* oskar_dir_get_home_path(const char* item_name, int* exists)
 {
-    char *path, *home_dir;
+    char *path = 0, *home_dir = 0;
     home_dir = oskar_dir_home();
     path = oskar_dir_get_path(home_dir, item_name);
-    if (exists)
-        *exists = oskar_dir_file_exists(home_dir, item_name);
+    if (exists) *exists = oskar_dir_file_exists(home_dir, item_name);
     free(home_dir);
     return path;
 }
@@ -117,15 +93,19 @@ char* oskar_dir_get_home_path(const char* item_name, int* exists)
 char* oskar_dir_get_path(const char* dir_path, const char* item_name)
 {
     char* buffer = 0;
-    int buf_len = 0, dir_path_len;
+    int buf_len = 0, dir_path_len = 0;
     dir_path_len = (int) strlen(dir_path);
     buf_len = 2 + dir_path_len + (int) strlen(item_name);
     buffer = (char*) calloc(buf_len, sizeof(char));
     if (!buffer) return 0;
     if (dir_path[dir_path_len - 1] == oskar_dir_separator())
+    {
         sprintf(buffer, "%s%s", dir_path, item_name);
+    }
     else
+    {
         sprintf(buffer, "%s%c%s", dir_path, oskar_dir_separator(), item_name);
+    }
     return buffer;
 }
 
@@ -144,8 +124,7 @@ char* oskar_dir_home(void)
         buffer = (char*) malloc((size_t) buf_len);
         if (!buffer) return 0;
         getpwuid_r(geteuid(), &pwd, buffer, (size_t) buf_len, &result);
-        if (result != NULL)
-            tmp = pwd.pw_dir;
+        if (result != NULL) tmp = pwd.pw_dir;
     }
     if (tmp)
     {
@@ -192,11 +171,10 @@ static void item(const char* dir_path, const char* name, const char* wildcard,
     if (match_files ^ match_dirs)
     {
         int rejected = 0;
-        char* item_path;
+        char* item_path = 0;
         item_path = oskar_dir_get_path(dir_path, name);
         const int is_dir = oskar_dir_exists(item_path);
-        if ((is_dir && !match_dirs) || (!is_dir && match_dirs))
-            rejected = 1;
+        if ((is_dir && !match_dirs) || (!is_dir && match_dirs)) rejected = 1;
         free(item_path);
         if (rejected) return;
     }
@@ -214,12 +192,14 @@ static int get_items(const char* dir_path, const char* wildcard,
 {
     int i = 0;
 #ifndef OSKAR_OS_WIN
-    DIR *d;
-    struct dirent *t;
+    DIR *d = 0;
+    struct dirent *t = 0;
     if (!(d = opendir(dir_path))) return 0;
     while ((t = readdir(d)) != 0)
+    {
         item(dir_path, t->d_name, wildcard, match_files, match_dirs,
                 &i, num_items, items);
+    }
     (void) closedir(d);
 #else
     WIN32_FIND_DATA f;
@@ -234,8 +214,10 @@ static int get_items(const char* dir_path, const char* wildcard,
         return 0;
     }
     do
+    {
         item(dir_path, f.cFileName, wildcard, match_files, match_dirs,
                 &i, num_items, items);
+    }
     while (FindNextFile(h, &f));
     FindClose(h);
     free(buffer);
@@ -280,11 +262,12 @@ int oskar_dir_mkdir(const char* dir_path)
     if (stat(dir_path, &s) != 0)
     {
         /* Item does not exist. Try to create the directory. */
-        if (mkdir(dir_path, 0755) != 0 && errno != EEXIST)
-            return 0;
+        if (mkdir(dir_path, 0755) != 0 && errno != EEXIST) return 0;
     }
     else if (!S_ISDIR(s.st_mode))
+    {
         return 0;
+    }
 #else
     int attrib;
     if ((attrib = GetFileAttributes(dir_path)) == INVALID_FILE_ATTRIBUTES)
@@ -292,10 +275,14 @@ int oskar_dir_mkdir(const char* dir_path)
         /* Item does not exist. Try to create the directory. */
         if (!CreateDirectory(dir_path, 0) &&
                 GetLastError() != ERROR_ALREADY_EXISTS)
+        {
             return 0;
+        }
     }
     else if (!(attrib & FILE_ATTRIBUTE_DIRECTORY))
+    {
         return 0;
+    }
 #endif
     return 1;
 }
@@ -303,7 +290,7 @@ int oskar_dir_mkdir(const char* dir_path)
 
 int oskar_dir_mkpath(const char* dir_path)
 {
-    char *start, *sep, *dir_path_p;
+    char *start = 0, *sep = 0, *dir_path_p = 0;
     int error = 0;
 
     /* Copy the input path string so it can be modified. */
@@ -331,13 +318,15 @@ int oskar_dir_mkpath(const char* dir_path)
 
 int oskar_dir_remove(const char* dir_path)
 {
-    int error = 0, i, num_items = 0;
+    int error = 0, i = 0, num_items = 0;
     char **items = 0, *path = 0;
     if (!oskar_dir_exists(dir_path) ||
             !strcmp(dir_path, ".") ||
             !strcmp(dir_path, "./") ||
             !strcmp(dir_path, ".\\"))
+    {
         return 0;
+    }
 
     /* Get names of all items in the directory. */
     oskar_dir_items(dir_path, NULL, 1, 1, &num_items, &items);
@@ -348,9 +337,13 @@ int oskar_dir_remove(const char* dir_path)
 
         /* Remove files and directories recursively. */
         if (!oskar_dir_exists(path))
+        {
             error = remove(path);
+        }
         else
+        {
             error = !oskar_dir_remove(path);
+        }
         free(path);
         if (error) break;
     }

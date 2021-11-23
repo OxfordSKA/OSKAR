@@ -5,12 +5,12 @@
 
 #include "settings/types/oskar_DateTime.h"
 #include "settings/oskar_settings_utility_string.h"
-#include <sstream>
-#include <iostream>
-#include <iomanip>
 #include <cfloat>
 #include <cmath>
 #include <cstdio>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -26,15 +26,19 @@ namespace oskar {
  */
 static void value_from_mjd(double mjd, DateTime::Value& val)
 {
-    double iMJD;
+    double iMJD = 0.0;
     double F = modf(mjd, &iMJD);
     int I = static_cast<int>(iMJD) + 2400001;
     int A = static_cast<int>(trunc((I - 1867216.25) / 36524.25));
-    int B;
+    int B = 0;
     if (I > 2299160)
+    {
         B = I + 1 + A - static_cast<int>(trunc(A / 4.));
+    }
     else
+    {
         B = I;
+    }
 
     int C = B + 1524;
     int D = static_cast<int>(trunc((C - 122.1) / 365.25));
@@ -42,18 +46,11 @@ static void value_from_mjd(double mjd, DateTime::Value& val)
     int G = static_cast<int>(trunc((C - E) / 30.6001));
     double day = C - E + F - static_cast<int>(trunc(30.6001 * G));
 
-    int month, year;
-    if (G < 13.5)
-        month = G - 1;
-    else
-        month = G - 13;
+    int month = 0, year = 0;
+    if (G < 13.5) month = G - 1; else month = G - 13;
+    if (month > 2.5) year = D - 4716; else year = D - 4715;
 
-    if (month > 2.5)
-        year = D - 4716;
-    else
-        year = D - 4715;
-
-    double iday, fday;
+    double iday = 0.0, fday = 0.0;
     fday = modf(day, &iday);
     double hours = trunc(fday * 24.);
     double minutes = trunc(((fday * 24.) - hours) * 60.);
@@ -336,10 +333,7 @@ bool DateTime::set_default(const char* s)
     bool ok = true;
     default_ = from_string(s, ok);
     str_default_ = to_string(default_);
-    if (ok)
-        set_value(s);
-    else
-        (void) init(0);
+    if (ok) set_value(s); else (void) init(0);
     return ok;
 } // LCOV_EXCL_LINE
 
@@ -393,29 +387,36 @@ double DateTime::to_mjd_2() const
     int minutes = value_.minutes;
     double seconds = value_.seconds;
 
-    int yearp;
-    int monthp;
-    if (month == 1 || month == 2) {
+    int yearp = 0;
+    int monthp = 0;
+    if (month == 1 || month == 2)
+    {
        yearp = year - 1;
        monthp = year + 12;
     }
-    else {
+    else
+    {
         yearp = year;
         monthp = month;
     }
-    int B;
+    int B = 0;
     if ((year < 1582) || (year == 1582 && month < 10) ||
-                    (year == 1582 && month == 10 && day < 15)) {
+                    (year == 1582 && month == 10 && day < 15))
+    {
         B = 0;
     }
-    else {
+    else
+    {
         int A = static_cast<int>(trunc(yearp / 100.));
         B = 2 - A + static_cast<int>(trunc(A / 4.));
     }
-    int C;
-    if (yearp < 0) {
+    int C = 0;
+    if (yearp < 0)
+    {
         C = static_cast<int>(trunc((365.25 * yearp) - 0.75));
-    } else {
+    }
+    else
+    {
         C = static_cast<int>(trunc(365.25 * yearp));
     }
     int D = static_cast<int>(trunc(30.6001 * (monthp + 1)));

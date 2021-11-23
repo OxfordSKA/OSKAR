@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "binary/oskar_binary.h"
@@ -56,10 +33,16 @@ static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,
 
 oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
 {
-    oskar_Binary* handle;
+    oskar_Binary* handle = 0;
     oskar_BinaryHeader header;
-    FILE* stream;
-    int i;
+    FILE* stream = 0;
+    int i = 0;
+
+    /* Initialise the header. This doesn't actually need to happen here,
+     * since it will be done when the header is read or written,
+     * but the linter should be happier with it. */
+    memset(&header, 0, sizeof(oskar_BinaryHeader));
+    header.bin_version = OSKAR_BINARY_FORMAT_VERSION;
 
     /* Open the file and check or write the header, depending on the mode. */
     if (mode == 'r')
@@ -99,7 +82,9 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         /* Write header only if the file is empty. */
         fseek(stream, 0, SEEK_END);
         if (FTELL(stream) == 0)
+        {
             oskar_binary_write_header(stream, &header, status);
+        }
     }
     else
     {
@@ -120,19 +105,23 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
 
     /* Finish if writing. */
     if (mode == 'w')
+    {
         return handle;
+    }
 
     /* Read all tags in the stream. */
     for (i = 0;; ++i)
     {
         oskar_BinaryTag tag;
-        unsigned long crc;
-        int format_version, element_size;
+        unsigned long crc = 0;
+        int format_version = 0, element_size = 0;
         size_t block_size = 0, memcpy_size = 0;
 
         /* Try to read a tag, and end the loop if unsuccessful. */
         if (fread(&tag, sizeof(oskar_BinaryTag), 1, stream) != 1)
+        {
             break;
+        }
 
         /* If the bytes read are not a tag, or the reserved flag bits
          * are not zero, then return an error. */
@@ -164,36 +153,52 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
             /* Check data size is compatible. */
             element_size = tag.magic[3];
             if (tag.data_type & OSKAR_MATRIX)
+            {
                 element_size /= 4;
+            }
             if (tag.data_type & OSKAR_COMPLEX)
+            {
                 element_size /= 2;
+            }
             if (tag.data_type & OSKAR_CHAR)
             {
                 if (element_size != sizeof(char))
+                {
                     *status = OSKAR_ERR_BINARY_FORMAT_BAD;
+                }
             }
             else if (tag.data_type & OSKAR_INT)
             {
                 if (element_size != sizeof(int))
+                {
                     *status = OSKAR_ERR_BINARY_INT_UNKNOWN;
+                }
             }
             else if (tag.data_type & OSKAR_SINGLE)
             {
                 if (element_size != sizeof(float))
+                {
                     *status = OSKAR_ERR_BINARY_FLOAT_UNKNOWN;
+                }
             }
             else if (tag.data_type & OSKAR_DOUBLE)
             {
                 if (element_size != sizeof(double))
+                {
                     *status = OSKAR_ERR_BINARY_DOUBLE_UNKNOWN;
+                }
             }
             else
+            {
                 *status = OSKAR_ERR_BINARY_TYPE_UNKNOWN;
+            }
         }
 
         /* Check if we need to allocate more storage for the tag data. */
         if (i % 10 == 0)
+        {
             oskar_binary_resize(handle, i + 10);
+        }
 
         /* Initialise the tag index data. */
         handle->extended[i] = 0;
@@ -221,13 +226,17 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         memcpy_size = MIN(sizeof(int), sizeof(tag.user_index));
         memcpy(&handle->user_index[i], tag.user_index, memcpy_size);
         if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+        {
             oskar_endian_swap(&handle->user_index[i], sizeof(int));
+        }
 
         /* Store the number of bytes in the block in native byte order. */
         memcpy_size = MIN(sizeof(size_t), sizeof(tag.size_bytes));
         memcpy(&block_size, tag.size_bytes, memcpy_size);
         if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+        {
             oskar_endian_swap(&block_size, sizeof(size_t));
+        }
 
         /* Set payload size to block size, minus 4 bytes if CRC-32 present. */
         handle->payload_size_bytes[i] = block_size;
@@ -248,9 +257,13 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
 
             /* Store the tag names. */
             if (fread(handle->name_group[i], tag.group.bytes, 1, stream) != 1)
+            {
                 *status = OSKAR_ERR_BINARY_FILE_INVALID;
+            }
             if (fread(handle->name_tag[i], tag.tag.bytes, 1, stream) != 1)
+            {
                 *status = OSKAR_ERR_BINARY_FILE_INVALID;
+            }
             if (*status) break;
 
             /* Update the CRC code. */
@@ -291,7 +304,9 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
             }
 
             if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+            {
                 oskar_endian_swap(&handle->crc[i], sizeof(unsigned long));
+            }
         }
 
         /* Save the number of tags read from the stream. */
@@ -334,7 +349,9 @@ static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,
     /* Write header to stream. */
     rewind(stream);
     if (fwrite(header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
+    {
         *status = OSKAR_ERR_BINARY_WRITE_FAIL;
+    }
 }
 
 
@@ -374,11 +391,17 @@ static void oskar_binary_read_header(FILE* stream, oskar_BinaryHeader* header,
 
         /* Check size of data types. */
         if (sizeof(int) != (size_t)(header->size_int))
+        {
             *status = OSKAR_ERR_BINARY_INT_UNKNOWN;
+        }
         if (sizeof(float) != (size_t)(header->size_float))
+        {
             *status = OSKAR_ERR_BINARY_FLOAT_UNKNOWN;
+        }
         if (sizeof(double) != (size_t)(header->size_double))
+        {
             *status = OSKAR_ERR_BINARY_DOUBLE_UNKNOWN;
+        }
     }
 }
 

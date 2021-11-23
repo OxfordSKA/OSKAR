@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, The OSKAR Developers.
+ * Copyright (c) 2020-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -38,6 +38,7 @@ void oskar_convert_enu_directions_to_local_tangent_plane(int num_points,
     if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
+        {
             convert_enu_directions_to_local_float(num_points,
                     oskar_mem_float_const(x, status),
                     oskar_mem_float_const(y, status),
@@ -45,7 +46,9 @@ void oskar_convert_enu_directions_to_local_tangent_plane(int num_points,
                     cos_phi_f, sin_phi_f, cos_theta_f, sin_theta_f,
                     oskar_mem_float(l, status),
                     oskar_mem_float(m, status));
+        }
         else if (type == OSKAR_DOUBLE)
+        {
             convert_enu_directions_to_local_double(num_points,
                     oskar_mem_double_const(x, status),
                     oskar_mem_double_const(y, status),
@@ -53,8 +56,11 @@ void oskar_convert_enu_directions_to_local_tangent_plane(int num_points,
                     cos_phi, sin_phi, cos_theta, sin_theta,
                     oskar_mem_double(l, status),
                     oskar_mem_double(m, status));
+        }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
     else
     {
@@ -62,9 +68,13 @@ void oskar_convert_enu_directions_to_local_tangent_plane(int num_points,
         const int is_dbl = (type == OSKAR_DOUBLE);
         const char* k = 0;
         if (type == OSKAR_SINGLE)
+        {
             k = "convert_enu_directions_to_local_float";
+        }
         else if (type == OSKAR_DOUBLE)
+        {
             k = "convert_enu_directions_to_local_double";
+        }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;

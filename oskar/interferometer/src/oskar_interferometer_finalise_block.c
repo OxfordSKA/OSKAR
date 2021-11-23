@@ -20,7 +20,7 @@ static unsigned int disp_width(unsigned int v);
 oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
         int block_index, int* status)
 {
-    int i, i_active;
+    int i = 0, i_active = 0;
     oskar_VisBlock *b0 = 0, *b = 0;
     if (*status) return 0;
 
@@ -39,16 +39,21 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
         {
             b = h->d[i].vis_block_cpu[!i_active];
             if (oskar_vis_block_has_cross_correlations(b))
+            {
                 oskar_mem_add(xc0, xc0, oskar_vis_block_cross_correlations(b),
                         0, 0, 0, oskar_mem_length(xc0), status);
+            }
             if (oskar_vis_block_has_auto_correlations(b))
+            {
                 oskar_mem_add(ac0, ac0, oskar_vis_block_auto_correlations(b),
                         0, 0, 0, oskar_mem_length(ac0), status);
+            }
         }
     }
 
     /* Calculate (u,v,w) coordinates for the block. */
     if (oskar_vis_block_has_cross_correlations(b0))
+    {
         oskar_telescope_uvw(h->tel, 0, h->ignore_w_components,
                 oskar_vis_block_num_times(b0),
                 oskar_vis_header_time_start_mjd_utc(h->header),
@@ -60,11 +65,14 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
                 oskar_vis_block_baseline_uvw_metres(b0, 0),
                 oskar_vis_block_baseline_uvw_metres(b0, 1),
                 oskar_vis_block_baseline_uvw_metres(b0, 2), status);
+    }
 
     /* Add uncorrelated system noise to the combined visibilities. */
     if (!h->coords_only && oskar_telescope_noise_enabled(h->tel))
+    {
         oskar_vis_block_add_system_noise(b0, h->header, h->tel,
                 h->temp, status);
+    }
 
     /* Print status message. */
     if (!*status)

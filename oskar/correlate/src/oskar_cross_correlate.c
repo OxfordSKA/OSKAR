@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -32,8 +32,8 @@ void oskar_cross_correlate(
         oskar_Mem* vis,
         int* status)
 {
-    const oskar_Mem *J, *x, *y;
-    double uv_filter_min, uv_filter_max;
+    const oskar_Mem *J = 0, *x = 0, *y = 0;
+    double uv_filter_min = 0.0, uv_filter_max = 0.0;
     double time_avg = 0.0, gha0 = 0.0, dec0 = 0.0;
     if (*status) return;
 
@@ -65,7 +65,9 @@ void oskar_cross_correlate(
         uv_filter_max *= inv_wavelength;
     }
     if (uv_filter_max < 0.0 || uv_filter_max > FLT_MAX)
+    {
         uv_filter_max = FLT_MAX;
+    }
 
     /* Check data locations. */
     const int location = oskar_jones_mem_location(jones);
@@ -498,43 +500,75 @@ void oskar_cross_correlate(
             {
             case OSKAR_SINGLE_COMPLEX_MATRIX:
                 if (frac_bandwidth == 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_gaussian_float";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_gaussian_bs_float";
+                }
                 else if (frac_bandwidth == 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_gaussian_ts_float";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_gaussian_bs_ts_float";
+                }
                 break;
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
                 if (frac_bandwidth == 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_gaussian_double";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_gaussian_bs_double";
+                }
                 else if (frac_bandwidth == 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_gaussian_ts_double";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_gaussian_bs_ts_double";
+                }
                 break;
             case OSKAR_SINGLE_COMPLEX:
                 if (frac_bandwidth == 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_scalar_gaussian_float";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_scalar_gaussian_bs_float";
+                }
                 else if (frac_bandwidth == 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_scalar_gaussian_ts_float";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_scalar_gaussian_bs_ts_float";
+                }
                 break;
             case OSKAR_DOUBLE_COMPLEX:
                 if (frac_bandwidth == 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_scalar_gaussian_double";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_scalar_gaussian_bs_double";
+                }
                 else if (frac_bandwidth == 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_scalar_gaussian_ts_double";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_scalar_gaussian_bs_ts_double";
+                }
                 break;
             default:
                 *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -547,43 +581,75 @@ void oskar_cross_correlate(
             {
             case OSKAR_SINGLE_COMPLEX_MATRIX:
                 if (frac_bandwidth == 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_point_float";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_point_bs_float";
+                }
                 else if (frac_bandwidth == 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_point_ts_float";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_point_bs_ts_float";
+                }
                 break;
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
                 if (frac_bandwidth == 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_point_double";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_point_bs_double";
+                }
                 else if (frac_bandwidth == 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_point_ts_double";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_point_bs_ts_double";
+                }
                 break;
             case OSKAR_SINGLE_COMPLEX:
                 if (frac_bandwidth == 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_scalar_point_float";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_scalar_point_bs_float";
+                }
                 else if (frac_bandwidth == 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_scalar_point_ts_float";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_scalar_point_bs_ts_float";
+                }
                 break;
             case OSKAR_DOUBLE_COMPLEX:
                 if (frac_bandwidth == 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_scalar_point_double";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg == 0.0)
+                {
                     k = "xcorr_scalar_point_bs_double";
+                }
                 else if (frac_bandwidth == 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_scalar_point_ts_double";
+                }
                 else if (frac_bandwidth != 0.0 && time_avg != 0.0)
+                {
                     k = "xcorr_scalar_point_bs_ts_double";
+                }
                 break;
             default:
                 *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -631,9 +697,13 @@ void oskar_cross_correlate(
                 {PTR_SZ, oskar_mem_buffer(vis)}
         };
         if (oskar_device_is_cpu(location))
+        {
             local_size[0] = 8;
+        }
         else if (is_matrix && is_dbl && time_avg != 0.0)
+        {
             local_size[0] = 64;
+        }
         oskar_device_check_local_size(location, 0, local_size);
         const size_t arg_size_local[] = {
                 local_size[0] * oskar_mem_element_size(oskar_mem_type(vis))

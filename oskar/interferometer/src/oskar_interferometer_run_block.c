@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -11,10 +11,10 @@
 #include "convert/oskar_convert_mjd_to_gast_fast.h"
 #include "correlate/oskar_auto_correlate.h"
 #include "correlate/oskar_cross_correlate.h"
-#include "interferometer/oskar_evaluate_jones_R.h"
-#include "interferometer/oskar_evaluate_jones_Z.h"
 #include "interferometer/oskar_evaluate_jones_E.h"
 #include "interferometer/oskar_evaluate_jones_K.h"
+#include "interferometer/oskar_evaluate_jones_R.h"
+#include "interferometer/oskar_evaluate_jones_Z.h"
 #include "utility/oskar_device.h"
 
 #ifdef __cplusplus
@@ -29,8 +29,9 @@ static unsigned int disp_width(unsigned int v);
 void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
         int device_id, int* status)
 {
-    int chan_index_start, chan_index_end, time_index_start, time_index_end;
-    DeviceData* d;
+    int chan_index_start = 0, chan_index_end = 0;
+    int time_index_start = 0, time_index_end = 0;
+    DeviceData* d = 0;
     if (*status) return;
 
     /* Check that initialisation has happened. We can't initialise here,
@@ -45,7 +46,9 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
 
     /* Set the GPU to use. (Supposed to be a very low-overhead call.) */
     if (device_id >= 0 && device_id < h->num_gpus)
+    {
         oskar_device_set(h->dev_loc, h->gpu_ids[device_id], status);
+    }
 
     /* Clear the visibility block. */
     d = &(h->d[device_id]);
@@ -67,9 +70,13 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
     time_index_start = i_block_time * h->max_times_per_block;
     time_index_end = time_index_start + h->max_times_per_block - 1;
     if (time_index_end >= total_times)
+    {
         time_index_end = total_times - 1;
+    }
     if (chan_index_end >= total_chans)
+    {
         chan_index_end = total_chans - 1;
+    }
     const int num_times_block = 1 + time_index_end - time_index_start;
     const int num_chans_block = 1 + chan_index_end - chan_index_start;
 
@@ -83,8 +90,8 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
      * as the simulation for one time and one sky chunk. */
     while (!h->coords_only)
     {
-        oskar_Sky* sky;
-        int i_channel;
+        oskar_Sky* sky = 0;
+        int i_channel = 0;
 
         oskar_mutex_lock(h->mutex);
         const int i_work_unit = (h->work_unit_index)++;
@@ -108,7 +115,7 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
         /* Apply horizon clip if required. */
         if (h->apply_horizon_clip)
         {
-            double gast, mjd;
+            double gast = 0.0, mjd = 0.0;
             mjd = obs_start_mjd + dt_dump_days * (sim_time_idx + 0.5);
             gast = oskar_convert_mjd_to_gast_fast(mjd);
             oskar_timer_resume(d->tmr_clip);
@@ -161,7 +168,9 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     if (num_src == 0 ||
             time_index_block >= num_times_block ||
             channel_index_block >= num_chans_block)
+    {
         return;
+    }
 
     /* Get the time and frequency of the visibility slice being simulated. */
     const double dt_dump_days = h->time_inc_sec / 86400.0;
@@ -214,7 +223,9 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
 
     /* Set dimensions of Jones matrices. */
     if (d->R)
+    {
         oskar_jones_set_size(d->R, num_stations, num_src, status);
+    }
     oskar_jones_set_size(d->J, num_stations, num_src, status);
     oskar_jones_set_size(d->E, num_stations, num_src, status);
     oskar_jones_set_size(d->K, num_stations, num_src, status);
@@ -274,8 +285,10 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
 
     /* Auto-correlate for this time and channel. */
     if (oskar_vis_block_has_auto_correlations(d->vis_block))
+    {
         oskar_auto_correlate(num_src, d->J, src_flux, num_stations * offset,
                 oskar_vis_block_auto_correlations(d->vis_block), status);
+    }
 
     /* Cross-correlate for this time and channel. */
     if (oskar_vis_block_has_cross_correlations(d->vis_block))

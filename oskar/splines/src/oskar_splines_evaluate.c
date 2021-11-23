@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "splines/oskar_dierckx_bispev.h"
@@ -60,11 +37,11 @@ void oskar_splines_evaluate(const oskar_Splines* spline,
     }
     if (location == OSKAR_CPU)
     {
-        int i;
+        int i = 0;
         if (type == OSKAR_SINGLE)
         {
-            const float *tx_, *ty_, *coeff_, *x_, *y_;
-            float *out;
+            const float *tx_ = 0, *ty_ = 0, *coeff_ = 0, *x_ = 0, *y_ = 0;
+            float *out = 0;
             tx_    = oskar_mem_float_const(tx, status);
             ty_    = oskar_mem_float_const(ty, status);
             coeff_ = oskar_mem_float_const(coeff, status);
@@ -72,10 +49,12 @@ void oskar_splines_evaluate(const oskar_Splines* spline,
             y_     = oskar_mem_float_const(y, status);
             out    = oskar_mem_float(output, status) + offset_out;
             if (nx == 0 || ny == 0 || !tx_ || !ty_ || !coeff_)
+            {
                 for (i = 0; i < num_points; ++i) out[i * stride_out] = 0.0f;
+            }
             else
             {
-                float x1, y1, wrk[8];
+                float x1 = 0.0, y1 = 0.0, wrk[8];
                 int iwrk1[2], kwrk1 = 2, lwrk = 8, err = 0;
                 for (i = 0; i < num_points; ++i)
                 {
@@ -94,8 +73,8 @@ void oskar_splines_evaluate(const oskar_Splines* spline,
         }
         else if (type == OSKAR_DOUBLE)
         {
-            const double *tx_, *ty_, *coeff_, *x_, *y_;
-            double *out;
+            const double *tx_ = 0, *ty_ = 0, *coeff_ = 0, *x_ = 0, *y_ = 0;
+            double *out = 0;
             tx_    = oskar_mem_double_const(tx, status);
             ty_    = oskar_mem_double_const(ty, status);
             coeff_ = oskar_mem_double_const(coeff, status);
@@ -103,10 +82,12 @@ void oskar_splines_evaluate(const oskar_Splines* spline,
             y_     = oskar_mem_double_const(y, status);
             out    = oskar_mem_double(output, status) + offset_out;
             if (nx == 0 || ny == 0 || !tx_ || !ty_ || !coeff_)
+            {
                 for (i = 0; i < num_points; ++i) out[i * stride_out] = 0.0;
+            }
             else
             {
-                double x1, y1, wrk[8];
+                double x1 = 0.0, y1 = 0.0, wrk[8];
                 int iwrk1[2], kwrk1 = 2, lwrk = 8, err = 0;
                 for (i = 0; i < num_points; ++i)
                 {
@@ -124,7 +105,9 @@ void oskar_splines_evaluate(const oskar_Splines* spline,
             }
         }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
     else
     {
@@ -132,8 +115,14 @@ void oskar_splines_evaluate(const oskar_Splines* spline,
         const char* k = 0;
         if (nx == 0 || ny == 0)
         {
-            if (type == OSKAR_DOUBLE)      k = "set_zeros_stride_double";
-            else if (type == OSKAR_SINGLE) k = "set_zeros_stride_float";
+            if (type == OSKAR_DOUBLE)
+            {
+                k = "set_zeros_stride_double";
+            }
+            else if (type == OSKAR_SINGLE)
+            {
+                k = "set_zeros_stride_float";
+            }
             else
             {
                 *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -153,8 +142,14 @@ void oskar_splines_evaluate(const oskar_Splines* spline,
         }
         else
         {
-            if (type == OSKAR_DOUBLE)      k = "dierckx_bispev_bicubic_double";
-            else if (type == OSKAR_SINGLE) k = "dierckx_bispev_bicubic_float";
+            if (type == OSKAR_DOUBLE)
+            {
+                k = "dierckx_bispev_bicubic_double";
+            }
+            else if (type == OSKAR_SINGLE)
+            {
+                k = "dierckx_bispev_bicubic_float";
+            }
             else
             {
                 *status = OSKAR_ERR_BAD_DATA_TYPE;

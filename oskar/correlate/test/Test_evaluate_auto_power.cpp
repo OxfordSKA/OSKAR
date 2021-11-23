@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2018, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2018-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <gtest/gtest.h>
@@ -40,7 +17,8 @@
 static void check_values(const oskar_Mem* approx, const oskar_Mem* accurate)
 {
     int status = 0;
-    double min_rel_error, max_rel_error, avg_rel_error, std_rel_error, tol;
+    double min_rel_error = 0.0, max_rel_error = 0.0;
+    double avg_rel_error = 0.0, std_rel_error = 0.0, tol = 0.0;
     oskar_mem_evaluate_relative_error(approx, accurate, &min_rel_error,
             &max_rel_error, &avg_rel_error, &std_rel_error, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -68,7 +46,7 @@ protected:
 protected:
     void createTestData(int precision, int location, int matrix)
     {
-        int status = 0, type;
+        int status = 0, type = 0;
 
         // Allocate memory for data structures.
         type = precision | OSKAR_COMPLEX;
@@ -92,10 +70,10 @@ protected:
 
     void runTest(int prec1, int prec2, int loc1, int loc2, int matrix)
     {
-        int status = 0, type;
-        oskar_Mem *beam1, *beam2;
-        oskar_Timer *timer1, *timer2;
-        double time1, time2;
+        int status = 0, type = 0;
+        oskar_Mem *beam1 = 0, *beam2 = 0;
+        oskar_Timer *timer1 = 0, *timer2 = 0;
+        double time1 = 0.0, time2 = 0.0;
 
         // Create the timers.
         timer1 = oskar_timer_create(loc1 == OSKAR_GPU ?

@@ -45,18 +45,41 @@ bool IntRange::init(const char* s)
     bool ok = true;
     vector<string> p = oskar_settings_utility_string_get_type_params(s);
     if (p.size() == 0u)
-        return true;
-    else if (p.size() == 1u) {
-        if (p[0] == "MIN") min_ = -INT_MAX;
-        else min_ = oskar_settings_utility_string_to_int(p[0], &ok);
+    {
         return true;
     }
-    else if (p.size() == 2u) {
-        if (p[0] == "MIN") min_ = -INT_MAX;
-        else min_ = oskar_settings_utility_string_to_int(p[0], &ok);
+    else if (p.size() == 1u)
+    {
+        if (p[0] == "MIN")
+        {
+            min_ = -INT_MAX;
+        }
+        else
+        {
+            min_ = oskar_settings_utility_string_to_int(p[0], &ok);
+        }
+        return true;
+    }
+    else if (p.size() == 2u)
+    {
+        if (p[0] == "MIN")
+        {
+            min_ = -INT_MAX;
+        }
+        else
+        {
+            min_ = oskar_settings_utility_string_to_int(p[0], &ok);
+        }
         if (!ok) return false;
-        if (p[1] == "MAX") max_ = INT_MAX;
-        else max_ = oskar_settings_utility_string_to_int(p[1], &ok);
+
+        if (p[1] == "MAX")
+        {
+            max_ = INT_MAX;
+        }
+        else
+        {
+            max_ = oskar_settings_utility_string_to_int(p[1], &ok);
+        }
         return true;
     }
 
@@ -68,8 +91,7 @@ bool IntRange::set_default(const char* value)
 {
     bool ok = from_string_(value, default_);
     str_default_ = oskar_settings_utility_int_to_string(default_);
-    if (ok)
-        set_value(value);
+    if (ok) set_value(value);
     return ok;
 } // LCOV_EXCL_LINE
 
@@ -121,12 +143,19 @@ bool IntRange::from_string_(const string& s, int& value) const
     int i = oskar_settings_utility_string_to_int(s, &ok);
     if (!ok) return false;
 
-    if (i >= min_ && i <= max_) {
+    if (i >= min_ && i <= max_)
+    {
         value = i;
         return true;
     }
-    else if (i < min_) value = min_;
-    else if (i > max_) value = max_;
+    else if (i < min_)
+    {
+        value = min_;
+    }
+    else if (i > max_)
+    {
+        value = max_;
+    }
     return false;
 }
 

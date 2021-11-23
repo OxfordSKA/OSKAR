@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2015-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "utility/oskar_get_memory_usage.h"
@@ -124,7 +101,7 @@ size_t oskar_get_total_swap_memory(void)
 {
 #ifdef OSKAR_OS_LINUX
     struct sysinfo memInfo;
-    size_t totalSwapMem;
+    size_t totalSwapMem = 0;
     sysinfo(&memInfo);
     totalSwapMem = memInfo.totalswap;
     return totalSwapMem * memInfo.mem_unit;
@@ -157,7 +134,7 @@ size_t oskar_get_free_swap_memory(void)
 {
 #ifdef OSKAR_OS_LINUX
     struct sysinfo memInfo;
-    size_t freeSwapMem;
+    size_t freeSwapMem = 0;
     sysinfo(&memInfo);
     freeSwapMem = memInfo.freeswap;
     return freeSwapMem * memInfo.mem_unit;
@@ -227,7 +204,8 @@ size_t oskar_get_memory_usage(void)
 
 void oskar_print_memory_info(void)
 {
-    size_t totalSwapMem, freeSwapMem, totalPhysMem, freePhysMem, usedMem;
+    size_t totalSwapMem = 0, freeSwapMem = 0;
+    size_t totalPhysMem = 0, freePhysMem = 0, usedMem = 0;
     totalPhysMem = oskar_get_total_physical_memory();
     freePhysMem = oskar_get_free_physical_memory();
     totalSwapMem = oskar_get_total_swap_memory();

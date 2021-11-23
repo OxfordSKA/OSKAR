@@ -147,8 +147,11 @@ int main(int argc, char** argv)
     }
 
     // Check for errors.
-    if (e) oskar_log_error(log, "Run failed with code %i: %s.", e,
+    if (e)
+    {
+        oskar_log_error(log, "Run failed with code %i: %s.", e,
             oskar_get_error_string(e));
+    }
 
     // Free memory.
     oskar_element_free(element, &e);
@@ -164,11 +167,17 @@ static string construct_element_pathname(string output_dir,
     std::ostringstream stream;
     stream << "element_pattern_fit_";
     if (port == 0)
+    {
         stream << "scalar_";
+    }
     else if (port == 1)
+    {
         stream << "x_";
+    }
     else if (port == 2)
+    {
         stream << "y_";
+    }
 
     // Append the element type index.
     stream << element_type_index << "_";
@@ -186,4 +195,3 @@ static string construct_element_pathname(string output_dir,
     free(path);
     return p;
 }
-

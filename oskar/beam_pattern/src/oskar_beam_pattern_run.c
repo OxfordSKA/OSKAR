@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -63,8 +63,8 @@ typedef struct ThreadArgs ThreadArgs;
 
 void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 {
-    int i;
-    oskar_Timer* tmr;
+    int i = 0;
+    oskar_Timer* tmr = 0;
     oskar_Thread** threads = 0;
     ThreadArgs* args = 0;
     if (*status || !h) return;
@@ -100,7 +100,9 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 #if defined(OSKAR_HAVE_CUDA) || defined(OSKAR_HAVE_OPENCL)
         oskar_log_section(h->log, 'M', "Initial memory usage");
         for (i = 0; i < h->num_gpus; ++i)
+        {
             oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);
+        }
 #endif
         oskar_log_section(h->log, 'M', "Starting simulation...");
     }
@@ -113,7 +115,9 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 
     /* Start the worker threads. */
     for (i = 0; i < num_threads; ++i)
+    {
         threads[i] = oskar_thread_create(run_blocks, (void*)&args[i], 0);
+    }
 
     /* Wait for worker threads to finish. */
     for (i = 0; i < num_threads; ++i)
@@ -133,7 +137,9 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 #if defined(OSKAR_HAVE_CUDA) || defined(OSKAR_HAVE_OPENCL)
         oskar_log_section(h->log, 'M', "Final memory usage");
         for (i = 0; i < h->num_gpus; ++i)
+        {
             oskar_device_log_mem(h->dev_loc, 0, h->gpu_ids[i], h->log);
+        }
 #endif
         /* Record time taken. */
         oskar_log_set_value_width(h->log, 25);
@@ -145,11 +151,15 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 
     /* Check for errors. */
     if (!*status)
+    {
         oskar_log_message(h->log, 'M', 0, "Run completed in %.3f sec.",
                 oskar_timer_elapsed(tmr));
+    }
     else
+    {
         oskar_log_error(h->log, "Run failed with code %i: %s.", *status,
                 oskar_get_error_string(*status));
+    }
     oskar_timer_free(tmr);
 
     /* Close the log. */
@@ -161,8 +171,9 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 
 static void* run_blocks(void* arg)
 {
-    oskar_BeamPattern* h;
-    int i_inner, i_outer, num_inner, num_outer, c, t, f, *status;
+    oskar_BeamPattern* h = 0;
+    int i_inner = 0, i_outer = 0, num_inner = 0, num_outer = 0;
+    int c = 0, t = 0, f = 0, *status = 0;
 
     /* Loop indices for previous iteration (accessed only by thread 0). */
     int cp = 0, tp = 0, fp = 0;
@@ -181,7 +192,9 @@ static void* run_blocks(void* arg)
 #endif
 
     if (device_id >= 0 && device_id < h->num_gpus)
+    {
         oskar_device_set(h->dev_loc, h->gpu_ids[device_id], status);
+    }
 
     /* Set ranges of inner and outer loops based on averaging mode. */
     if (h->average_single_axis != 'T')
@@ -220,9 +233,13 @@ static void* run_blocks(void* arg)
                     t = i_inner;
                 }
                 if (thread_id > 0 || num_threads == 1)
+                {
                     sim_chunks(h, c, t, f, h->i_global & 1, device_id, status);
+                }
                 if (thread_id == 0 && h->i_global > 0)
+                {
                     write_chunks(h, cp, tp, fp, h->i_global & 1, status);
+                }
 
                 /* Barrier 1: Set indices of the previous chunk(s). */
                 oskar_barrier_wait(h->barrier);
@@ -242,7 +259,9 @@ static void* run_blocks(void* arg)
 
     /* Write the very last chunk(s). */
     if (thread_id == 0)
+    {
         write_chunks(h, cp, tp, fp, h->i_global & 1, status);
+    }
 
     return 0;
 }
@@ -251,8 +270,8 @@ static void* run_blocks(void* arg)
 static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
         int i_channel, int i_active, int device_id, int* status)
 {
-    DeviceData* d;
-    int chunk_size, i;
+    DeviceData* d = 0;
+    int chunk_size = 0, i = 0;
     int num_models_evaluated = 0;
     int *models_evaluated = 0, *model_offsets = 0;
     if (*status) return;
@@ -275,7 +294,9 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
     /* Work out the size of the chunk. */
     chunk_size = h->max_chunk_size;
     if ((i_chunk + 1) * h->max_chunk_size > h->num_pixels)
+    {
         chunk_size = h->num_pixels - i_chunk * h->max_chunk_size;
+    }
 
     /* Copy pixel chunk coordinate data to GPU only if chunk is different. */
     if (i_chunk != d->previous_chunk_index)
@@ -301,7 +322,9 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
             const oskar_Station* station =
                     oskar_telescope_station_const(d->tel, h->station_ids[i]);
             if (!station)
+            {
                 station = oskar_telescope_station_const(d->tel, 0);
+            }
             oskar_station_beam(station,
                     d->work, h->source_coord_type, chunk_size,
                     source_coords, h->lon0, h->lat0,
@@ -352,10 +375,13 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
             }
         }
         if (d->auto_power[0])
+        {
             oskar_evaluate_auto_power(chunk_size,
                     offset, d->jones_data, 1.0, 0.0, 0.0, 0.0,
                     offset, d->auto_power[0], status);
+        }
         if (d->auto_power[1])
+        {
             oskar_evaluate_auto_power(chunk_size,
                     offset, d->jones_data,
                     h->test_source_stokes[0],
@@ -363,14 +389,18 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
                     h->test_source_stokes[2],
                     h->test_source_stokes[3],
                     offset, d->auto_power[1], status);
+        }
     }
     free(models_evaluated);
     free(model_offsets);
     if (d->cross_power[0])
+    {
         oskar_evaluate_cross_power(chunk_size, h->num_active_stations,
                 d->jones_data, 1.0, 0.0, 0.0, 0.0,
                 0, d->cross_power[0], status);
+    }
     if (d->cross_power[1])
+    {
         oskar_evaluate_cross_power(chunk_size, h->num_active_stations,
                 d->jones_data,
                 h->test_source_stokes[0],
@@ -378,20 +408,27 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
                 h->test_source_stokes[2],
                 h->test_source_stokes[3],
                 0, d->cross_power[1], status);
+    }
 
     /* Copy the output data into host memory. */
     if (d->jones_data_cpu[i_active])
+    {
         oskar_mem_copy_contents(d->jones_data_cpu[i_active], d->jones_data,
                 0, 0, chunk_size * h->num_active_stations, status);
+    }
     for (i = 0; i < 2; ++i)
     {
         if (d->auto_power[i])
+        {
             oskar_mem_copy_contents(d->auto_power_cpu[i][i_active],
                     d->auto_power[i], 0, 0,
                     chunk_size * h->num_active_stations, status);
+        }
         if (d->cross_power[i])
+        {
             oskar_mem_copy_contents(d->cross_power_cpu[i][i_active],
                     d->cross_power[i], 0, 0, chunk_size, status);
+        }
     }
     oskar_mutex_lock(h->mutex);
     oskar_log_message(h->log, 'S', 1, "Chunk %*i/%i, "
@@ -408,7 +445,7 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
 static void write_chunks(oskar_BeamPattern* h, int i_chunk_start,
         int i_time, int i_channel, int i_active, int* status)
 {
-    int i, chunk_sources, stokes;
+    int i = 0, chunk_sources = 0, stokes = 0;
     if (*status) return;
 
     /* Write inactive chunk(s) from all GPUs. */
@@ -424,7 +461,9 @@ static void write_chunks(oskar_BeamPattern* h, int i_chunk_start,
         /* Get the size of the chunk. */
         chunk_sources = h->max_chunk_size;
         if ((i_chunk + 1) * h->max_chunk_size > h->num_pixels)
+        {
             chunk_sources = h->num_pixels - i_chunk * h->max_chunk_size;
+        }
         const int chunk_size = chunk_sources * h->num_active_stations;
 
         /* Write non-averaged raw data, if required. */
@@ -444,39 +483,51 @@ static void write_chunks(oskar_BeamPattern* h, int i_chunk_start,
 
             /* Time-average the data if required. */
             if (d->auto_power_time_avg[stokes])
+            {
                 oskar_mem_add(d->auto_power_time_avg[stokes],
                         d->auto_power_time_avg[stokes],
                         d->auto_power_cpu[stokes][!i_active],
                         0, 0, 0, chunk_size, status);
+            }
             if (d->cross_power_time_avg[stokes])
+            {
                 oskar_mem_add(d->cross_power_time_avg[stokes],
                         d->cross_power_time_avg[stokes],
                         d->cross_power_cpu[stokes][!i_active],
                         0, 0, 0, chunk_sources, status);
+            }
 
             /* Channel-average the data if required. */
             if (d->auto_power_channel_avg[stokes])
+            {
                 oskar_mem_add(d->auto_power_channel_avg[stokes],
                         d->auto_power_channel_avg[stokes],
                         d->auto_power_cpu[stokes][!i_active],
                         0, 0, 0, chunk_size, status);
+            }
             if (d->cross_power_channel_avg[stokes])
+            {
                 oskar_mem_add(d->cross_power_channel_avg[stokes],
                         d->cross_power_channel_avg[stokes],
                         d->cross_power_cpu[stokes][!i_active],
                         0, 0, 0, chunk_sources, status);
+            }
 
             /* Channel- and time-average the data if required. */
             if (d->auto_power_channel_and_time_avg[stokes])
+            {
                 oskar_mem_add(d->auto_power_channel_and_time_avg[stokes],
                         d->auto_power_channel_and_time_avg[stokes],
                         d->auto_power_cpu[stokes][!i_active],
                         0, 0, 0, chunk_size, status);
+            }
             if (d->cross_power_channel_and_time_avg[stokes])
+            {
                 oskar_mem_add(d->cross_power_channel_and_time_avg[stokes],
                         d->cross_power_channel_and_time_avg[stokes],
                         d->cross_power_cpu[stokes][!i_active],
                         0, 0, 0, chunk_sources, status);
+            }
 
             /* Write time-averaged data. */
             if (i_time == h->num_time_steps - 1)
@@ -569,16 +620,16 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
         int i_channel, int num_pix, int channel_average, int time_average,
         const oskar_Mem* in, int chunk_desc, int stokes_in, int* status)
 {
-    int i;
+    int i = 0;
     if (!in) return;
 
     /* Loop over data products. */
     const int num_pol = h->pol_mode == OSKAR_POL_MODE_FULL ? 4 : 1;
     for (i = 0; i < h->num_data_products; ++i)
     {
-        fitsfile* f;
-        FILE* t;
-        int dp, stokes_out, i_station, off;
+        fitsfile* f = 0;
+        FILE* t = 0;
+        int dp = 0, stokes_out = 0, i_station = 0, off = 0;
 
         /* Get data product info. */
         f          = h->data_products[i].fits_file;
@@ -591,12 +642,14 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
         if (h->data_products[i].time_average != time_average ||
                 h->data_products[i].channel_average != channel_average ||
                 h->data_products[i].stokes_in != stokes_in)
+        {
             continue;
+        }
 
         /* Treat raw data output as special case, as it doesn't go via pix. */
         if (dp == RAW_COMPLEX && chunk_desc == JONES_DATA && t)
         {
-            oskar_Mem* station_data;
+            oskar_Mem* station_data = 0;
             station_data = oskar_mem_create_alias(in, i_station * num_pix,
                     num_pix, status);
             oskar_mem_save_ascii(t, 1, 0, num_pix, status, station_data);
@@ -616,52 +669,96 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
         {
             off = i_station * num_pix * num_pol;
             if (stokes_out == XX || stokes_out == -1)
+            {
                 complex_to_amp(in, off, num_pol, num_pix, h->pix, status);
+            }
             else if (stokes_out == XY)
+            {
                 complex_to_amp(in, off + 1, num_pol, num_pix, h->pix, status);
+            }
             else if (stokes_out == YX)
+            {
                 complex_to_amp(in, off + 2, num_pol, num_pix, h->pix, status);
+            }
             else if (stokes_out == YY)
+            {
                 complex_to_amp(in, off + 3, num_pol, num_pix, h->pix, status);
-            else continue;
+            }
+            else
+            {
+                continue;
+            }
         }
         else if (chunk_desc == JONES_DATA && dp == PHASE)
         {
             off = i_station * num_pix * num_pol;
             if (stokes_out == XX || stokes_out == -1)
+            {
                 complex_to_phase(in, off, num_pol, num_pix, h->pix, status);
+            }
             else if (stokes_out == XY)
+            {
                 complex_to_phase(in, off + 1, num_pol, num_pix, h->pix, status);
+            }
             else if (stokes_out == YX)
+            {
                 complex_to_phase(in, off + 2, num_pol, num_pix, h->pix, status);
+            }
             else if (stokes_out == YY)
+            {
                 complex_to_phase(in, off + 3, num_pol, num_pix, h->pix, status);
-            else continue;
+            }
+            else
+            {
+                continue;
+            }
         }
         else if (chunk_desc == JONES_DATA && dp == IXR)
+        {
             jones_to_ixr(in, i_station * num_pix, num_pix, h->pix, status);
+        }
         else if (chunk_desc == AUTO_POWER_DATA ||
                 chunk_desc == CROSS_POWER_DATA)
         {
             off = i_station * num_pix; /* Station offset. */
             if (off < 0 || chunk_desc == CROSS_POWER_DATA) off = 0;
             if (chunk_desc == CROSS_POWER_DATA && (dp & AUTO_POWER))
+            {
                 continue;
+            }
             if (chunk_desc == AUTO_POWER_DATA && (dp & CROSS_POWER))
+            {
                 continue;
+            }
             if (stokes_out >= I && stokes_out <= V)
+            {
                 oskar_convert_linear_to_stokes(num_pix, off, in,
                         stokes_out, h->ctemp, status);
-            else continue;
+            }
+            else
+            {
+                continue;
+            }
             if (dp & AMP)
+            {
                 complex_to_amp(h->ctemp, 0, 1, num_pix, h->pix, status);
+            }
             else if (dp & PHASE)
+            {
                 complex_to_phase(h->ctemp, 0, 1, num_pix, h->pix, status);
+            }
             else if (dp & REAL)
+            {
                 complex_to_real(h->ctemp, 0, 1, num_pix, h->pix, status);
+            }
             else if (dp & IMAG)
+            {
                 complex_to_imag(h->ctemp, 0, 1, num_pix, h->pix, status);
-            else continue;
+            }
+            else
+            {
+                continue;
+            }
         }
         else continue;
 
@@ -686,11 +783,11 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
 static void complex_to_amp(const oskar_Mem* complex_in, const int offset,
         const int stride, const int num_points, oskar_Mem* output, int* status)
 {
-    int i, j;
+    int i = 0, j = 0;
     if (oskar_mem_precision(output) == OSKAR_SINGLE)
     {
-        float *out, x, y;
-        const float2* in;
+        float *out = 0, x = 0.0f, y = 0.0f;
+        const float2* in = 0;
         in = oskar_mem_float2_const(complex_in, status) + offset;
         out = oskar_mem_float(output, status);
         for (i = 0; i < num_points; ++i)
@@ -703,8 +800,8 @@ static void complex_to_amp(const oskar_Mem* complex_in, const int offset,
     }
     else
     {
-        double *out, x, y;
-        const double2* in;
+        double *out = 0, x = 0.0, y = 0.0;
+        const double2* in = 0;
         in = oskar_mem_double2_const(complex_in, status) + offset;
         out = oskar_mem_double(output, status);
         for (i = 0; i < num_points; ++i)
@@ -721,11 +818,11 @@ static void complex_to_amp(const oskar_Mem* complex_in, const int offset,
 static void complex_to_phase(const oskar_Mem* complex_in, const int offset,
         const int stride, const int num_points, oskar_Mem* output, int* status)
 {
-    int i, j;
+    int i = 0, j = 0;
     if (oskar_mem_precision(output) == OSKAR_SINGLE)
     {
-        float *out;
-        const float2* in;
+        float *out = 0;
+        const float2* in = 0;
         in = oskar_mem_float2_const(complex_in, status) + offset;
         out = oskar_mem_float(output, status);
         for (i = 0; i < num_points; ++i)
@@ -736,8 +833,8 @@ static void complex_to_phase(const oskar_Mem* complex_in, const int offset,
     }
     else
     {
-        double *out;
-        const double2* in;
+        double *out = 0;
+        const double2* in = 0;
         in = oskar_mem_double2_const(complex_in, status) + offset;
         out = oskar_mem_double(output, status);
         for (i = 0; i < num_points; ++i)
@@ -752,19 +849,19 @@ static void complex_to_phase(const oskar_Mem* complex_in, const int offset,
 static void complex_to_real(const oskar_Mem* complex_in, const int offset,
         const int stride, const int num_points, oskar_Mem* output, int* status)
 {
-    int i;
+    int i = 0;
     if (oskar_mem_precision(output) == OSKAR_SINGLE)
     {
-        float *out;
-        const float2* in;
+        float *out = 0;
+        const float2* in = 0;
         in = oskar_mem_float2_const(complex_in, status) + offset;
         out = oskar_mem_float(output, status);
         for (i = 0; i < num_points; ++i) out[i] = in[i * stride].x;
     }
     else
     {
-        double *out;
-        const double2* in;
+        double *out = 0;
+        const double2* in = 0;
         in = oskar_mem_double2_const(complex_in, status) + offset;
         out = oskar_mem_double(output, status);
         for (i = 0; i < num_points; ++i) out[i] = in[i * stride].x;
@@ -775,19 +872,19 @@ static void complex_to_real(const oskar_Mem* complex_in, const int offset,
 static void complex_to_imag(const oskar_Mem* complex_in, const int offset,
         const int stride, const int num_points, oskar_Mem* output, int* status)
 {
-    int i;
+    int i = 0;
     if (oskar_mem_precision(output) == OSKAR_SINGLE)
     {
-        float *out;
-        const float2* in;
+        float *out = 0;
+        const float2* in = 0;
         in = oskar_mem_float2_const(complex_in, status) + offset;
         out = oskar_mem_float(output, status);
         for (i = 0; i < num_points; ++i) out[i] = in[i * stride].y;
     }
     else
     {
-        double *out;
-        const double2* in;
+        double *out = 0;
+        const double2* in = 0;
         in = oskar_mem_double2_const(complex_in, status) + offset;
         out = oskar_mem_double(output, status);
         for (i = 0; i < num_points; ++i) out[i] = in[i * stride].y;
@@ -798,15 +895,15 @@ static void complex_to_imag(const oskar_Mem* complex_in, const int offset,
 static void jones_to_ixr(const oskar_Mem* jones, const int offset,
         const int num_points, oskar_Mem* output, int* status)
 {
-    int i;
+    int i = 0;
 
     /* Check for fully polarised data. */
     if (!oskar_mem_is_matrix(jones) || !oskar_mem_is_complex(jones)) return;
 
     if (oskar_mem_precision(output) == OSKAR_SINGLE)
     {
-        float *out, cond, ixr;
-        const float4c* in;
+        float *out = 0, cond = 0.0f, ixr = 0.0f;
+        const float4c* in = 0;
         in = oskar_mem_float4c_const(jones, status) + offset;
         out = oskar_mem_float(output, status);
         for (i = 0; i < num_points; ++i)
@@ -820,8 +917,8 @@ static void jones_to_ixr(const oskar_Mem* jones, const int offset,
     }
     else
     {
-        double *out, cond, ixr;
-        const double4c* in;
+        double *out = 0, cond = 0.0, ixr = 0.0;
+        const double4c* in = 0;
         in = oskar_mem_double4c_const(jones, status) + offset;
         out = oskar_mem_double(output, status);
         for (i = 0; i < num_points; ++i)
@@ -881,24 +978,28 @@ void oskar_convert_linear_to_stokes(const int num_points,
     if (!oskar_mem_is_matrix(linear))
     {
         if (stokes_index == 0)
+        {
             oskar_mem_copy_contents(output, linear, 0, offset_in, num_points,
                     status);
+        }
         else
+        {
             *status = OSKAR_ERR_INVALID_ARGUMENT;
+        }
         return;
     }
     if (oskar_mem_is_double(linear))
     {
-        double2* out;
-        const double4c* in;
+        double2* out = 0;
+        const double4c* in = 0;
         out = oskar_mem_double2(output, status);
         in = oskar_mem_double4c_const(linear, status) + offset_in;
         LINEAR_TO_STOKES(num_points, in, out)
     }
     else
     {
-        float2* out;
-        const float4c* in;
+        float2* out = 0;
+        const float4c* in = 0;
         out = oskar_mem_float2(output, status);
         in = oskar_mem_float4c_const(linear, status) + offset_in;
         LINEAR_TO_STOKES(num_points, in, out)
@@ -908,7 +1009,7 @@ void oskar_convert_linear_to_stokes(const int num_points,
 
 static void record_timing(oskar_BeamPattern* h)
 {
-    int i;
+    int i = 0;
     oskar_log_section(h->log, 'M', "Simulation timing");
     oskar_log_value(h->log, 'M', 0, "Total wall time", "%.3f s",
             oskar_timer_elapsed(h->tmr_sim));

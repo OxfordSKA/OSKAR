@@ -1,9 +1,8 @@
-/* Copyright (c) 2020, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2020, The OSKAR Developers. See LICENSE file. */
 
 #define OSKAR_CONVERT_THETA_PHI_TO_LUDWIG3(NAME, FP, FP2, FP4c) KERNEL(NAME) (\
         const int num,\
         GLOBAL_IN(FP, phi_x),\
-        GLOBAL_IN(FP, phi_y),\
         const int swap_xy,\
         const int offset,\
         GLOBAL FP4c *jones)\

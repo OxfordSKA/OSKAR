@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2016-2017, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "settings/oskar_SettingsFileHandlerIni.h"
@@ -92,13 +69,17 @@ char* SettingsFileHandlerIni::read(const char* file_name,
 
             // Prepend group to key.
             if (!group.empty() && group != "General")
+            {
                 k = group + '/' + k;
+            }
 
             // Set key separators to forward slashes.
-            size_t i, len;
+            size_t i = 0, len = 0;
             len = k.size();
             for (i = 0; i < len; ++i)
+            {
                 if (k[i] == '\\' || k[i] == '.') k[i] = '/';
+            }
 
             // Check if we have found the required key.
             if (k == key_)
@@ -145,20 +126,24 @@ bool SettingsFileHandlerIni::read_all(SettingsTree* tree)
 
             // Prepend group to key.
             if (!group.empty() && group != "General")
+            {
                 k = group + '/' + k;
+            }
 
             // Set key separators to forward slashes.
-            size_t i, len;
+            size_t i = 0, len = 0;
             len = k.size();
             for (i = 0; i < len; ++i)
+            {
                 if (k[i] == '\\' || k[i] == '.') k[i] = '/';
+            }
 
             // Try to set the item, and record if it fails.
-            if (k == "version" || k == "app")
-                continue;
-
+            if (k == "version" || k == "app") continue;
             if (!tree->set_value(k.c_str(), v.c_str(), false))
+            {
                 tree->add_failed(k.c_str(), v.c_str());
+            }
         }
         else if (!line.empty() && line[0] == '[')
         {
@@ -209,7 +194,9 @@ void SettingsFileHandlerIni::write(const SettingsNode* node)
         }
     }
     for (int i = 0; i < node->num_children(); ++i)
+    {
         write(node->child(i));
+    }
 }
 
 void SettingsFileHandlerIni::write_header()

@@ -58,10 +58,14 @@ void OptionParser::add_flag(const char* flag1, const char* help,
     int expectedArgs = 0;
     char delim = 0;
     if (flag2)
+    {
         p->add(defaults, required, expectedArgs, delim,
                 help, flag1, flag2);
+    }
     else
+    {
         p->add(defaults, required, expectedArgs, delim, help, flag1);
+    }
 }
 
 // Wrapper to define flags with arguments with default values.
@@ -72,13 +76,19 @@ void OptionParser::add_flag(const char* flag1, const char* help,
     char delim = 0;
     string strHelp = help;
     if (strlen(defaults) > 0 && expected_args == 1 && required == false)
+    {
         strHelp += " (default = " + string(defaults) + ")";
+    }
     if (flag2)
+    {
         p->add(defaults, required, expected_args, delim,
                 strHelp.c_str(), flag1, flag2);
+    }
     else
+    {
         p->add(defaults, required, expected_args, delim,
                 strHelp.c_str(), flag1);
+    }
 }
 
 void OptionParser::add_optional(const char* name, const char* help)
@@ -170,10 +180,14 @@ const char* OptionParser::get_arg(int i) const
     vector<string*>& first = p->firstArgs;
     vector<string*>& last = p->lastArgs;
     if ((int)first.size() - 1 > i)
+    {
         return first[i + 1]->c_str();
+    }
     // Requested index is in the last argument set.
     else if (((int)first.size() - 1 + (int)last.size()) > i)
+    {
         return last[i - ((int)first.size() - 1)]->c_str();
+    }
     return 0;
 }
 
@@ -209,12 +223,16 @@ const char* const* OptionParser::get_input_files(int min_required,
     {
         // Note: starts at 1 as index 0 is the binary name.
         for (int i = 1; i < (int)first.size(); ++i)
+        {
             p->input_files_.push_back(first[i]->c_str());
+        }
     }
     else
     {
         for (int i = 0; i < (int)last.size(); ++i)
+        {
             p->input_files_.push_back(last[i]->c_str());
+        }
     }
     *num_files = (int) p->input_files_.size();
     return (p->input_files_.size() > 0) ? &(p->input_files_)[0] : 0;
@@ -230,9 +248,13 @@ void OptionParser::print_usage()
     string usage;
     p->syntax = p->title + " [OPTIONS]";
     for (int i = 0; i < (int)p->required_.size(); ++i)
+    {
         p->syntax += " <" + p->required_[i] + ">";
+    }
     for (int i = 0; i < (int)p->optional_.size(); ++i)
+    {
         p->syntax += " [" + p->optional_[i] + "]";
+    }
     // TODO(BM) overload here rather than editing the library header...!
     p->getUsage(usage);
     cout << usage;
@@ -261,7 +283,9 @@ void OptionParser::set_title(const char* text)
 void OptionParser::set_version(const char* version, bool show)
 {
     if (show)
+    {
         p->version = version;
+    }
     p->version_ = version;
 }
 

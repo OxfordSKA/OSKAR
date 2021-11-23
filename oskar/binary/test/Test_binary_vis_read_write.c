@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2015-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <stdio.h>
@@ -105,15 +82,18 @@ static void write_test_vis(const char* filename)
 
     /* Data to write. */
     const char* telescope_model_path = "my_telescope_model";
-    int amp_type, coord_precision, num_tags_per_block = 5, max_times_per_block;
-    int num_baselines, num_channels_total, num_stations, num_times_total;
-    int num_blocks, num_times_baselines, dim_start_and_size[6];
-    int phase_centre_coord_type;
+    int amp_type = 0, coord_precision = 0;
+    int num_tags_per_block = 5, max_times_per_block = 0;
+    int num_stations = 0, num_baselines = 0;
+    int num_channels_total = 0, num_times_total = 0;
+    int num_blocks = 0, num_times_baselines = 0, dim_start_and_size[6];
+    int phase_centre_coord_type = 0;
     double phase_centre_deg[2];
-    double telescope_ref_lon_deg, telescope_ref_lat_deg, telescope_ref_alt_m;
-    double freq_start_hz, freq_inc_hz, channel_bandwidth_hz;
-    double time_start_mjd_utc, time_inc_sec, time_average_sec;
-    void *station_x, *station_y, *station_z, *vis_block, *uu, *vv, *ww;
+    double telescope_ref_lon_deg = 0.0, telescope_ref_lat_deg = 0.0, telescope_ref_alt_m = 0.0;
+    double freq_start_hz = 0.0, freq_inc_hz = 0.0, channel_bandwidth_hz = 0.0;
+    double time_start_mjd_utc = 0.0, time_inc_sec = 0.0, time_average_sec = 0.0;
+    void *station_x = 0, *station_y = 0, *station_z = 0;
+    void *vis_block = 0, *uu = 0, *vv = 0, *ww = 0;
 
     /* Set input metadata. */
     amp_type = OSKAR_DOUBLE_COMPLEX_MATRIX;
@@ -258,12 +238,14 @@ static void write_test_vis(const char* filename)
     /* Loop over blocks and write each one. */
     for (i = 0; i < num_blocks; ++i)
     {
-        int num_times;
+        int num_times = 0;
 
         /* Write block metadata. */
         num_times = max_times_per_block;
         if ((i + 1) * max_times_per_block > num_times_total)
+        {
             num_times = num_times_total - i * max_times_per_block;
+        }
         dim_start_and_size[0] = i * max_times_per_block;
         dim_start_and_size[1] = 0;
         dim_start_and_size[2] = num_times;
@@ -294,9 +276,13 @@ static void write_test_vis(const char* filename)
 
     /* Print status message. */
     if (status != 0)
+    {
         printf("Failure writing test file.\n");
+    }
     else
+    {
         printf("Test file written successfully.\n");
+    }
 
     /* Free local arrays. */
     free(station_x);
@@ -312,21 +298,25 @@ static void write_test_vis(const char* filename)
 
 static void read_test_vis(const char* filename)
 {
-    int i, j, coord_element_size, vis_element_size, vis_precision, status = 0;
-    oskar_Binary* h;
+    int i = 0, j = 0, coord_element_size = 0, vis_element_size = 0;
+    int vis_precision = 0, status = 0;
+    oskar_Binary* h = 0;
     const unsigned char vis_header_group = OSKAR_TAG_GROUP_VIS_HEADER;
     const unsigned char vis_block_group = OSKAR_TAG_GROUP_VIS_BLOCK;
 
     /* Data to read. */
-    int amp_type, coord_precision, max_times_per_block, num_tags_per_block;
-    int num_baselines, num_channels, num_stations, num_times_total;
-    int num_blocks, num_times_baselines, dim_start_and_size[6];
-    int phase_centre_coord_type, write_autocorr, write_crosscorr;
+    int amp_type = 0, coord_precision = 0;
+    int max_times_per_block = 0, num_tags_per_block = 0;
+    int num_stations = 0, num_baselines = 0;
+    int num_channels = 0, num_times_total = 0;
+    int num_blocks = 0, num_times_baselines = 0, dim_start_and_size[6];
+    int phase_centre_coord_type = 0, write_autocorr = 0, write_crosscorr = 0;
     double phase_centre_deg[2];
-    double telescope_ref_lon_deg, telescope_ref_lat_deg, telescope_ref_alt_m;
-    double freq_start_hz, freq_inc_hz, channel_bandwidth_hz;
-    double time_start_mjd_utc, time_inc_sec, time_average_sec;
-    void *station_x, *station_y, *station_z, *vis_block, *uu, *vv, *ww;
+    double telescope_ref_lon_deg = 0.0, telescope_ref_lat_deg = 0.0, telescope_ref_alt_m = 0.0;
+    double freq_start_hz = 0.0, freq_inc_hz = 0.0, channel_bandwidth_hz = 0.0;
+    double time_start_mjd_utc = 0.0, time_inc_sec = 0.0, time_average_sec = 0.0;
+    void *station_x = 0, *station_y = 0, *station_z = 0;
+    void *vis_block = 0, *uu = 0, *vv = 0, *ww = 0;
 
     /* Open the test file for reading. */
     printf("Reading test file...\n");
@@ -452,7 +442,8 @@ static void read_test_vis(const char* filename)
     /* Loop over blocks and read each one. */
     for (i = 0; i < num_blocks; ++i)
     {
-        int b, c, t, num_times, start_time_idx, start_channel_idx;
+        int b = 0, c = 0, t = 0, num_times = 0;
+        int start_time_idx = 0, start_channel_idx = 0;
 
         /* Set search start index. */
         oskar_binary_set_query_search_start(h, i * num_tags_per_block, &status);
@@ -490,7 +481,7 @@ static void read_test_vis(const char* filename)
         /* Print contents of the block. */
         for (t = 0; t < num_times; ++t)
         {
-            double mjd_utc, freq_hz;
+            double mjd_utc = 0.0, freq_hz = 0.0;
 
             /* Get the actual time of the sample. */
             mjd_utc = time_start_mjd_utc +
@@ -499,7 +490,7 @@ static void read_test_vis(const char* filename)
 
             if (coord_precision == OSKAR_DOUBLE)
             {
-                const double *u, *v, *w;
+                const double *u = 0, *v = 0, *w = 0;
                 u = (const double*) uu;
                 v = (const double*) vv;
                 w = (const double*) ww;
@@ -512,7 +503,7 @@ static void read_test_vis(const char* filename)
             }
             else if (coord_precision == OSKAR_SINGLE)
             {
-                const float *u, *v, *w;
+                const float *u = 0, *v = 0, *w = 0;
                 u = (const float*) uu;
                 v = (const float*) vv;
                 w = (const float*) ww;
@@ -533,7 +524,7 @@ static void read_test_vis(const char* filename)
 
                 if (vis_precision == OSKAR_DOUBLE)
                 {
-                    const double *d;
+                    const double *d = 0;
                     d = (const double*) vis_block;
                     for (b = 0; b < num_baselines; ++b)
                     {
@@ -547,7 +538,7 @@ static void read_test_vis(const char* filename)
                 }
                 else if (vis_precision == OSKAR_SINGLE)
                 {
-                    const float *d;
+                    const float *d = 0;
                     d = (const float*) vis_block;
                     for (b = 0; b < num_baselines; ++b)
                     {
@@ -569,9 +560,13 @@ static void read_test_vis(const char* filename)
 
     /* Print status message. */
     if (status != 0)
+    {
         printf("Failure reading test file.\n");
+    }
     else
+    {
         printf("Test file read successfully.\n");
+    }
 
     /* Free local arrays. */
     free(station_x);
@@ -582,4 +577,3 @@ static void read_test_vis(const char* filename)
     free(ww);
     free(vis_block);
 }
-

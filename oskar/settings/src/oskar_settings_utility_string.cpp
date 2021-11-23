@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2014-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "settings/oskar_settings_utility_string.h"
@@ -68,7 +45,9 @@ std::string oskar_settings_utility_string_replace(std::string& s,
     {
         p = s.find(to_replace);
         if (p != std::string::npos)
+        {
             s.replace(p, to_replace.length(), replace_with);
+        }
     }
     return s;
 }
@@ -109,7 +88,7 @@ std::vector<std::string> oskar_settings_utility_string_get_type_params(
 int oskar_settings_utility_string_to_int(const std::string& s, bool *ok)
 {
     int base = 10;
-    char *endptr;
+    char *endptr = 0;
 
     errno = 0;  // To distinguish success/failure after call
     long int val = strtol(s.c_str(), &endptr, base);
@@ -120,7 +99,9 @@ int oskar_settings_utility_string_to_int(const std::string& s, bool *ok)
         //  Check for various possible errors
         if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN))
                         || (errno != 0 && val == 0))
+        {
             *ok = false;
+        }
         // No digits found.
         if (endptr == s.c_str()) *ok = false;
         // Further characters found in the string
@@ -148,8 +129,7 @@ std::string oskar_settings_utility_int_to_string(int i)
 std::string oskar_settings_utility_string_to_upper(const std::string& s)
 {
     std::string s_(s);
-    for (size_t i = 0; i < s_.length(); ++i)
-        s_[i] = toupper(s_[i]);
+    for (size_t i = 0; i < s_.length(); ++i) s_[i] = toupper(s_[i]);
     return s_;
 }
 
@@ -162,8 +142,7 @@ bool oskar_settings_utility_string_starts_with(const std::string& full_string,
         full_ = oskar_settings_utility_string_to_upper(full_string);
         frag_ = oskar_settings_utility_string_to_upper(fragment);
     }
-    if (full_.find(frag_) == 0) return true;
-    else return false;
+    return (full_.find(frag_) == 0) ? true : false;
 }
 
 enum DoubleForm { DFDecimal, DFExponent, DFSignificantDigits };
@@ -223,13 +202,21 @@ static std::string longlongToString(long long int l, int precision,
     std::string num_str;
     num_str = lltoa(l);
     for (int i = (int) num_str.length(); i < precision; ++i)
+    {
         num_str.insert(0, "0");
+    }
     if (negative)
+    {
         num_str.insert(0, "-");
+    }
     else if (flags & AlwaysShowSign)
+    {
         num_str.insert(0, "+");
+    }
     else if (flags & BlankBeforePositive)
+    {
         num_str.insert(0, " ");
+    }
     return num_str;
 }
 
@@ -238,33 +225,47 @@ static std::string decimalForm(std::string& digits, int decpt,
                                PrecisionMode pm,
                                bool always_show_decpt)
 {
-    if (decpt < 0) {
+    if (decpt < 0)
+    {
         for (int i = 0; i < -decpt; ++i)
+        {
             digits.insert(0, "0");
+        }
         decpt = 0;
     }
-    else if (decpt > (int) digits.length()) {
+    else if (decpt > (int) digits.length())
+    {
         for (int i = (int) digits.length(); i < decpt; ++i)
+        {
             digits.append("0");
+        }
     }
 
-    if (pm == PMDecimalDigits) {
+    if (pm == PMDecimalDigits)
+    {
         unsigned int decimal_digits = (unsigned int) digits.length() - decpt;
         for (unsigned int i = decimal_digits; i < precision; ++i)
+        {
             digits.append("0");
+        }
     }
-    else if (pm == PMSignificaintDigits) {
+    else if (pm == PMSignificaintDigits)
+    {
         for (unsigned int i = (unsigned int) digits.length(); i < precision; ++i)
+        {
             digits.append("0");
+        }
     }
-    else { // pm == PMChopTrailingZeros
+    else
+    { // pm == PMChopTrailingZeros
     }
     if (always_show_decpt || decpt < (int)digits.length())
+    {
         digits.insert(decpt, ".");
-    if (decpt == 0)
-        digits.insert(0, "0");
-    if (digits[digits.length() - 1] == '.')
-        digits.append("0");
+    }
+    if (decpt == 0) digits.insert(0, "0");
+    if (digits[digits.length() - 1] == '.') digits.append("0");
+
     return digits;
 }
 
@@ -273,30 +274,35 @@ static std::string exponentForm(std::string& digits, int decpt,
                                 bool always_show_decpt)
 {
     int exp = decpt - 1;
-    if (pm == PMDecimalDigits) {
+    if (pm == PMDecimalDigits)
+    {
         for (unsigned i = (unsigned) digits.length(); i < precision + 1; ++i)
+        {
             digits.append("0");
+        }
     }
-    else if (pm == PMSignificaintDigits) {
+    else if (pm == PMSignificaintDigits)
+    {
         for (unsigned i = (unsigned) digits.length(); i < precision; ++i)
+        {
             digits.append("0");
+        }
     }
-    else {
-
+    else
+    {
     }
-    if (always_show_decpt || digits.length() > 1) {
-        digits.insert(1, ".");
-    }
+    if (always_show_decpt || digits.length() > 1) digits.insert(1, ".");
     // Chop trailing 0's
-    if (digits.length() > 0) {
+    if (digits.length() > 0)
+    {
         int last_nonzero_idx = (int) digits.length() - 1;
-        while (last_nonzero_idx > 0 && digits[last_nonzero_idx] == '0') {
+        while (last_nonzero_idx > 0 && digits[last_nonzero_idx] == '0')
+        {
             --last_nonzero_idx;
         }
         digits = digits.substr(0, last_nonzero_idx + 1);
     }
-    if (digits[digits.length() - 1] == '.')
-        digits.append("0");
+    if (digits[digits.length() - 1] == '.') digits.append("0");
     digits.append("e");
     digits.append(longlongToString(exp, 2, -1, AlwaysShowSign));
     return digits;
@@ -306,42 +312,50 @@ static std::string doubleToString(double d, int precision, DoubleForm form,
                                   int width, unsigned flags)
 {
     std::string num_str;
-    if (precision == -1) {
-        precision = 6;
-    }
-    if (width == -1) {
-        width = 0;
-    }
+    if (precision == -1) precision = 6;
+    if (width == -1) width = 0;
+
     bool negative = false;
     bool special_number = false; // nan, +/- inf
 
-    if (std::isinf(d)) {
+    if (std::isinf(d))
+    {
         num_str = "inf";
         special_number = true;
         negative = d < 0;
     }
-    if (std::isnan(d)) {
+    if (std::isnan(d))
+    {
         num_str = "nan";
         special_number = true;
     }
 
-    if (!special_number) {
-        int decpt, sign;
+    if (!special_number)
+    {
+        int decpt = 0, sign = 0;
         std::string digits;
-        if (form == DFDecimal) {
+        if (form == DFDecimal)
+        {
             digits = std::string(fcvt(d, precision, &decpt, &sign));
         }
-        else {
+        else
+        {
             int pr = precision;
             if (form == DFExponent)
+            {
                 ++pr;
+            }
             else if (form == DFSignificantDigits && pr == 0)
+            {
                 pr = 1;
+            }
             digits = std::string(ecvt(d, pr, &decpt, &sign));
             // Chop the trailing zeros.
-            if (digits.length() > 0) {
+            if (digits.length() > 0)
+            {
                 int last_nonzero_idx = (int) digits.length() - 1;
-                while (last_nonzero_idx > 0 && digits[last_nonzero_idx] == '0') {
+                while (last_nonzero_idx > 0 && digits[last_nonzero_idx] == '0')
+                {
                     --last_nonzero_idx;
                 }
                 digits = digits.substr(0, last_nonzero_idx + 1);
@@ -351,7 +365,8 @@ static std::string doubleToString(double d, int precision, DoubleForm form,
 
         // bool always_show_decpt = ((flags & Alternate) || (flags & ForcePoint));
         bool always_show_decpt = true;
-        switch (form) {
+        switch (form)
+        {
             case DFExponent:
                 num_str = exponentForm(digits, decpt, precision,
                                        PMDecimalDigits,
@@ -361,45 +376,57 @@ static std::string doubleToString(double d, int precision, DoubleForm form,
                 num_str = decimalForm(digits, decpt, precision,
                                       PMDecimalDigits, always_show_decpt);
                 // Chop the trailing zeros.
-                if (num_str.length() > 0) {
+                if (num_str.length() > 0)
+                {
                     int last_nonzero_idx = (int) num_str.length() - 1;
-                    while (last_nonzero_idx > 0 && num_str[last_nonzero_idx] == '0') {
+                    while (last_nonzero_idx > 0 && num_str[last_nonzero_idx] == '0')
+                    {
                         --last_nonzero_idx;
                     }
                     num_str = num_str.substr(0, last_nonzero_idx + 1);
                     if (num_str[num_str.length() - 1] == '.')
+                    {
                         num_str.append("0");
+                    }
                 }
                 break;
-            case DFSignificantDigits: {
+            case DFSignificantDigits:
+            {
                 PrecisionMode mode = (flags & Alternate) ?
                                 PMSignificaintDigits : PMChopTrailingZeros;
                 if (decpt != static_cast<int>(digits.length()) &&
                                 (decpt <= -4 || decpt > precision))
+                {
                     num_str = exponentForm(digits, decpt, precision, mode,
                                            always_show_decpt);
+                }
                 else
+                {
                     num_str = decimalForm(digits, decpt, precision, mode,
                                           always_show_decpt);
+                }
                 break;
             }
         };
         negative = sign != 0 && (d != 0.0 || d != -0.0);
     }
 
-    if (negative)
+    if (negative) {
         num_str.insert(0, "-");
-    else if (flags & AlwaysShowSign)
+    } else if (flags & AlwaysShowSign) {
         num_str.insert(0, "+");
-    else if (flags & BlankBeforePositive)
+    } else if (flags & BlankBeforePositive) {
         num_str.insert(0, " ");
+    }
 
     return num_str;
 }
 
-static int get_precision(double value) {
+static int get_precision(double value)
+{
     int n = 17;
-    if (value != 0.0 && value > 1.0) {
+    if (value != 0.0 && value > 1.0)
+    {
         n -= (floor(log10(value)) + 1);
     }
     return n;
@@ -409,8 +436,10 @@ static int get_precision(double value) {
 std::string oskar_settings_utility_double_to_string_2(double d, char format,
                                                       int precision)
 {
-    if (precision < 0) {
-        switch (format) {
+    if (precision < 0)
+    {
+        switch (format)
+        {
             case 'f':
                 precision = get_precision(d);
                 break;
@@ -425,7 +454,8 @@ std::string oskar_settings_utility_double_to_string_2(double d, char format,
     std::ostringstream ss;
     std::string s;
     DoubleForm f;
-    switch (format) {
+    switch (format)
+    {
         case 'f':
             f = DFDecimal;
             break;
@@ -443,7 +473,7 @@ std::string oskar_settings_utility_double_to_string_2(double d, char format,
 
 double oskar_settings_utility_string_to_double(const std::string& s, bool *ok)
 {
-    char *endptr;
+    char *endptr = 0;
 
     // TODO(BM) return nan on failure rather than 0?
 
@@ -451,12 +481,14 @@ double oskar_settings_utility_string_to_double(const std::string& s, bool *ok)
     double val = strtod(s.c_str(), &endptr);
 
     // If argument ok is not null, check for various possible errors.
-    if (ok) {
+    if (ok)
+    {
         *ok = true;
         //  Check for various possible errors
         if ((errno != 0 && val == 0.0) ||
                         (errno == ERANGE && (val == HUGE_VAL ||
-                            val == -HUGE_VAL))) {
+                            val == -HUGE_VAL)))
+        {
             *ok = false;
         }
         // No digits found.
@@ -479,7 +511,9 @@ std::string oskar_format_string(const std::string fmt, ...)
     va_list vl;
     va_start(vl, fmt);
     int nsize = vsnprintf(buffer, size, fmt.c_str(), vl);
-    if (size <= nsize) {  // fail? delete buffer and try again
+    if (size <= nsize)
+    {
+        // fail? delete buffer and try again
         delete[] buffer;
         buffer = 0;
         buffer = new char[nsize+1];  //+1 for /0

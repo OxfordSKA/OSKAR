@@ -1,36 +1,13 @@
 /*
- * Copyright (c) 2012-2016, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "math/oskar_fit_ellipse.h"
-#include "math/oskar_matrix_multiply.h"
 #include "math/oskar_lapack_subset.h"
-
+#include "math/oskar_matrix_multiply.h"
 #include "math/oskar_cmath.h"
+
 #include <string.h> /* For memset() */
 
 #define MAX( a, b ) ( ((a) > (b)) ? (a) : (b) )
@@ -45,8 +22,9 @@ void oskar_fit_ellipse_f(float* major, float* minor,
         float* position_angle_rad, int num_points, const float* x,
         const float* y, float* work1_X, float* work2_XX, int* status)
 {
-    int i, j;
-    float a, b, c, d, e, mean_x = 0.0, mean_y = 0.0, sumX[5];
+    int i = 0, j = 0;
+    float a = 0.0f, b = 0.0f, c = 0.0f, d = 0.0f, e = 0.0f;
+    float mean_x = 0.0f, mean_y = 0.0f, sumX[5];
 
     if (num_points < 5)
     {
@@ -70,11 +48,11 @@ void oskar_fit_ellipse_f(float* major, float* minor,
 
     for (i = 0; i < num_points; ++i)
     {
-        float x_, y_, t[5];
+        float t[5];
 
         /* Construct a row in the temporary matrix. */
-        x_ = x[i] - mean_x;
-        y_ = y[i] - mean_y;
+        const float x_ = x[i] - mean_x;
+        const float y_ = y[i] - mean_y;
         t[0] = x_ * x_;
         t[1] = x_ * y_;
         t[2] = y_ * y_;
@@ -95,14 +73,16 @@ void oskar_fit_ellipse_f(float* major, float* minor,
     if (*status) return;
 
     {
-        int ipiv[5], n, m = 5, lda = 5, ldb = 5, info = 0, nrhs = 1;
+        int ipiv[5], n = 0, m = 5, lda = 5, ldb = 5, info = 0, nrhs = 1;
         char trans = 'N';
         /* Solve system of linear equations using LU factorisation in XX. */
         memset(ipiv, 0, sizeof(ipiv));
         n = num_points;
         oskar_sgetrf(m, n, work2_XX, lda, ipiv, &info); /* LU factorisation. */
         if (info != 0)
+        {
             *status = OSKAR_ERR_ELLIPSE_FIT_FAILED;
+        }
         oskar_sgetrs(&trans, m, nrhs, work2_XX, lda, ipiv, sumX, ldb);
     }
 
@@ -112,10 +92,10 @@ void oskar_fit_ellipse_f(float* major, float* minor,
     /* Remove the orientation from the ellipse. */
     if (MIN(fabs(b / a), fabs(b / c)) > 1e-3 /* orientation tolerance */)
     {
-        float cos_phi, sin_phi, a2, c2, d2, e2;
+        float a2 = 0.0f, c2 = 0.0f, d2 = 0.0f, e2 = 0.0f;
         *position_angle_rad = 0.5 * atan2(b, (c - a)) - M_PI / 2.0;
-        cos_phi = cos(*position_angle_rad);
-        sin_phi = sin(*position_angle_rad);
+        const float cos_phi = (float)cos(*position_angle_rad);
+        const float sin_phi = (float)sin(*position_angle_rad);
         a2 = a*cos_phi*cos_phi - b*cos_phi*sin_phi + c*sin_phi*sin_phi;
         c2 = a*sin_phi*sin_phi + b*cos_phi*sin_phi + c*cos_phi*cos_phi;
         d2 = d*cos_phi - e*sin_phi;
@@ -134,7 +114,6 @@ void oskar_fit_ellipse_f(float* major, float* minor,
     }
     else
     {
-        float F;
         if (a < 0.0)
         {
             a = -a;
@@ -144,7 +123,7 @@ void oskar_fit_ellipse_f(float* major, float* minor,
         }
 
         /* Major and minor axes. */
-        F = 1.0 + (d * d) / (4.0 * a) + (e * e) / (4.0 * c);
+        const float F = 1.0 + (d * d) / (4.0 * a) + (e * e) / (4.0 * c);
         a = sqrt(F / a);
         b = sqrt(F / c);
         *major = 2.0 * MAX(a, b);
@@ -158,8 +137,9 @@ void oskar_fit_ellipse_d(double* major, double* minor,
         double* position_angle_rad, int num_points, const double* x,
         const double* y, double* work1_X, double* work2_XX, int* status)
 {
-    int i, j;
-    double a, b, c, d, e, mean_x = 0.0, mean_y = 0.0, sumX[5];
+    int i = 0, j = 0;
+    double a = 0.0, b = 0.0, c = 0.0, d = 0.0, e = 0.0;
+    double mean_x = 0.0, mean_y = 0.0, sumX[5];
 
     if (num_points < 5)
     {
@@ -183,11 +163,11 @@ void oskar_fit_ellipse_d(double* major, double* minor,
 
     for (i = 0; i < num_points; ++i)
     {
-        double x_, y_, t[5];
+        double t[5];
 
         /* Construct a row in the temporary matrix. */
-        x_ = x[i] - mean_x;
-        y_ = y[i] - mean_y;
+        const double x_ = x[i] - mean_x;
+        const double y_ = y[i] - mean_y;
         t[0] = x_ * x_;
         t[1] = x_ * y_;
         t[2] = y_ * y_;
@@ -208,14 +188,16 @@ void oskar_fit_ellipse_d(double* major, double* minor,
     if (*status) return;
 
     {
-        int ipiv[5], n, m = 5, lda = 5, ldb = 5, info = 0, nrhs = 1;
+        int ipiv[5], n = 0, m = 5, lda = 5, ldb = 5, info = 0, nrhs = 1;
         char trans = 'N';
         /* Solve system of linear equations using LU factorisation in XX. */
         memset(ipiv, 0, sizeof(ipiv));
         n = num_points;
         oskar_dgetrf(m, n, work2_XX, lda, ipiv, &info); /* LU factorisation. */
         if (info != 0)
+        {
             *status = OSKAR_ERR_ELLIPSE_FIT_FAILED;
+        }
         oskar_dgetrs(&trans, m, nrhs, work2_XX, lda, ipiv, sumX, ldb);
     }
 
@@ -225,10 +207,10 @@ void oskar_fit_ellipse_d(double* major, double* minor,
     /* Remove the orientation from the ellipse. */
     if (MIN(fabs(b / a), fabs(b / c)) > 1e-3 /* orientation tolerance */)
     {
-        double cos_phi, sin_phi, a2, c2, d2, e2;
+        double a2 = 0.0, c2 = 0.0, d2 = 0.0, e2 = 0.0;
         *position_angle_rad = 0.5 * atan2(b, (c - a)) - M_PI / 2.0;
-        cos_phi = cos(*position_angle_rad);
-        sin_phi = sin(*position_angle_rad);
+        const double cos_phi = cos(*position_angle_rad);
+        const double sin_phi = sin(*position_angle_rad);
         a2 = a*cos_phi*cos_phi - b*cos_phi*sin_phi + c*sin_phi*sin_phi;
         c2 = a*sin_phi*sin_phi + b*cos_phi*sin_phi + c*cos_phi*cos_phi;
         d2 = d*cos_phi - e*sin_phi;
@@ -247,7 +229,6 @@ void oskar_fit_ellipse_d(double* major, double* minor,
     }
     else
     {
-        double F;
         if (a < 0.0)
         {
             a = -a;
@@ -257,7 +238,7 @@ void oskar_fit_ellipse_d(double* major, double* minor,
         }
 
         /* Major and minor axes. */
-        F = 1.0 + (d * d) / (4.0 * a) + (e * e) / (4.0 * c);
+        const double F = 1.0 + (d * d) / (4.0 * a) + (e * e) / (4.0 * c);
         a = sqrt(F / a);
         b = sqrt(F / c);
         *major = 2.0 * MAX(a, b);

@@ -18,7 +18,7 @@ extern "C" {
 
 void oskar_imager_reset_cache(oskar_Imager* h, int* status)
 {
-    int i;
+    int i = 0;
 
     /* Clear all device data. */
     oskar_imager_free_device_data(h, status);
@@ -44,18 +44,24 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
 
     /* Free the image planes. */
     if (h->planes)
+    {
         for (i = 0; i < h->num_planes; ++i)
+        {
             oskar_mem_free(h->planes[i], status);
+        }
+    }
     free(h->planes); h->planes = 0;
     free(h->plane_norm); h->plane_norm = 0;
 
     /* Free the weights grids if they exist. */
     if (h->weights_grids)
+    {
         for (i = 0; i < h->num_planes; ++i)
         {
             oskar_mem_free(h->weights_grids[i], status);
             oskar_mem_free(h->weights_guard[i], status);
         }
+    }
     free(h->weights_grids); h->weights_grids = 0;
     free(h->weights_guard); h->weights_guard = 0;
 
@@ -76,7 +82,9 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     for (i = 0; i < h->num_im_pols; ++i)
     {
         if (h->fits_file[i])
+        {
             ffclos(h->fits_file[i], status);
+        }
         h->fits_file[i] = 0;
         free(h->output_name[i]); h->output_name[i] = 0;
     }

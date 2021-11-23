@@ -93,7 +93,9 @@ bool SettingsTree::add_setting(const char* key,
         sub_key += k[i];
         SettingsNode* child = parent->child(sub_key.c_str());
         if (child)
+        {
             parent = child;
+        }
         else
         {
             p->num_items_++;
@@ -114,7 +116,9 @@ bool SettingsTree::add_setting(const char* key,
     p->current_node_ = parent->add_child(new_item);
     p->num_items_++;
     if (new_item->item_type() == SettingsItem::SETTING)
+    {
         p->num_settings_++;
+    }
     return true;
 }
 
@@ -130,7 +134,9 @@ void SettingsTree::begin_group(const char* name)
     p->group_.push_back(name);
     p->group_prefix_.clear();
     for (unsigned i = 0; i < p->group_.size(); ++i)
+    {
         p->group_prefix_ += p->group_[i] + p->sep_;
+    }
 }
 
 void SettingsTree::clear()
@@ -165,7 +171,9 @@ bool SettingsTree::dependencies_satisfied(const char* key) const
     {
         const SettingsNode* parent = node->parent();
         if (parent && !parent_dependencies_satisfied_(parent))
+        {
             return false;
+        }
         const SettingsDependencyGroup* deps_ = node->dependency_tree();
         if (!deps_) return true;
         return dependencies_satisfied_(deps_);
@@ -187,7 +195,9 @@ void SettingsTree::end_group()
     p->group_.pop_back();
     p->group_prefix_.clear();
     for (unsigned i = 0; i < p->group_.size(); ++i)
+    {
         p->group_prefix_ += p->group_[i] + p->sep_;
+    }
 }
 
 const char* SettingsTree::failed_key(int i) const
@@ -246,7 +256,9 @@ bool SettingsTree::is_critical(const char* key) const
                     dependencies_satisfied(k))
     {
         if (node->is_required() && !node->is_set())
+        {
             item_critical = true;
+        }
     }
     bool critical_children = is_critical_(node);
     return (item_critical || critical_children);
@@ -263,7 +275,9 @@ const SettingsItem* SettingsTree::item(const char* key) const
     SettingsKey k(current_key.c_str(), p->sep_);
     const SettingsNode* node = find_(p->root_, k, 0);
     if (node)
+    {
         return node;
+    }
     else
     {
         cerr << "ERROR: failed to find node with key = '" << key << "'" << endl;
@@ -342,13 +356,14 @@ bool SettingsTree::set_default(const char* key, bool write)
         {
             bool write_ok = false;
             if (write && p->file_handler_)
+            {
                 write_ok = p->file_handler_->write_all(this);
+            }
             modified_ = !write_ok;
         }
         return item_ok;
     }
-    else
-        return false;
+    return false;
 }
 
 void SettingsTree::set_defaults()
@@ -368,7 +383,9 @@ void SettingsTree::set_file_handler(SettingsFileHandler* handler,
 void SettingsTree::set_file_name(const char* name)
 {
     if (p->file_handler_ && name && strlen(name) > 0)
+    {
         p->file_handler_->set_file_name(name);
+    }
 }
 
 bool SettingsTree::set_value(const char* key, const char* value, bool write)
@@ -383,20 +400,20 @@ bool SettingsTree::set_value(const char* key, const char* value, bool write)
         {
             bool write_ok = false;
             if (write && p->file_handler_)
+            {
                 write_ok = p->file_handler_->write_all(this);
+            }
             modified_ = !write_ok;
         }
         return item_ok;
     }
-    else
-        return false;
+    return false;
 }
 
 bool SettingsTree::set_values(int num_strings, const char* const* list,
         bool write)
 {
-    if (num_strings % 2 != 0)
-        return false;
+    if (num_strings % 2 != 0) return false;
     const int num_items = num_strings / 2;
     bool ok = true;
     for (int i = 0; i < num_items || (num_items == 0); ++i)
@@ -406,7 +423,9 @@ bool SettingsTree::set_values(int num_strings, const char* const* list,
         if (!key || strlen(key) == 0) break;
         bool item_ok = set_value(key, value, write);
         if (!item_ok)
+        {
             add_failed(key, value);
+        }
         ok &= item_ok;
     }
     return ok;
@@ -582,9 +601,13 @@ const SettingsNode* SettingsTree::find_(const SettingsNode* node,
                 oskar_settings_utility_string_to_upper(current_key))
         {
             if (child->settings_key() == full_key)
+            {
                 return child;
+            }
             else
+            {
                 return find_(child, full_key, depth + 1);
+            }
         }
     }
     return 0;
@@ -602,9 +625,13 @@ SettingsNode* SettingsTree::find_(SettingsNode* node,
                 oskar_settings_utility_string_to_upper(current_key))
         {
             if (child->settings_key() == full_key)
+            {
                 return child;
+            }
             else
+            {
                 return find_(child, full_key, depth + 1);
+            }
         }
     }
     return 0;
@@ -632,11 +659,15 @@ bool SettingsTree::parent_dependencies_satisfied_(const SettingsNode* node) cons
     if (deps_)
     {
         if (!dependencies_satisfied_(deps_))
+        {
             return false;
+        }
     }
     // Otherwise keep going up to the next parent.
     if (node->parent())
+    {
         return parent_dependencies_satisfied_(node->parent());
+    }
     return true;
 }
 

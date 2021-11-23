@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -51,27 +51,39 @@ void oskar_update_horizon_mask(int num_sources, const oskar_Mem* l,
                     oskar_mem_int(mask, status));
 #endif
         if (type == OSKAR_SINGLE)
+        {
             update_horizon_mask_float(num_sources,
                     oskar_mem_float_const(l, status),
                     oskar_mem_float_const(m, status),
                     oskar_mem_float_const(n, status), ll_, mm_, nn_,
                     oskar_mem_int(mask, status));
+        }
         else if (type == OSKAR_DOUBLE)
+        {
             update_horizon_mask_double(num_sources,
                     oskar_mem_double_const(l, status),
                     oskar_mem_double_const(m, status),
                     oskar_mem_double_const(n, status), ll_, mm_, nn_,
                     oskar_mem_int(mask, status));
+        }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
     else
     {
         size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
         const char* k = 0;
         const int is_dbl = (type == OSKAR_DOUBLE);
-        if (type == OSKAR_DOUBLE)      k = "update_horizon_mask_double";
-        else if (type == OSKAR_SINGLE) k = "update_horizon_mask_float";
+        if (type == OSKAR_DOUBLE)
+        {
+            k = "update_horizon_mask_double";
+        }
+        else if (type == OSKAR_SINGLE)
+        {
+            k = "update_horizon_mask_float";
+        }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;

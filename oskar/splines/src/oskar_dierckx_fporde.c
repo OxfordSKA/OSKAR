@@ -9,8 +9,9 @@ void oskar_dierckx_fporde(const double *x, const double *y, int m, int kx,
         int *nummer, int *index, int nreg)
 {
     /* Local variables */
-    int i, k, l, im, kx1, ky1, num, nyy, nk1x, nk1y;
-    double xi, yi;
+    int i = 0, k = 0, l = 0, im = 0, kx1 = 0, ky1 = 0;
+    int num = 0, nyy = 0, nk1x = 0, nk1y = 0;
+    double xi = 0.0, yi = 0.0;
 
     /* Parameter adjustments */
     --nummer;

@@ -69,14 +69,19 @@ int main(int argc, char** argv)
     oskar_Telescope* tel = 0;
     oskar_Sky* sky = oskar_settings_to_sky(s, log, &status);
     if (!sky || status)
+    {
         oskar_log_error(log, "Failed to set up sky model: %s.",
                 oskar_get_error_string(status));
+    }
     else
     {
         tel = oskar_settings_to_telescope(s, log, &status);
         if (!tel || status)
+        {
             oskar_log_error(log, "Failed to set up telescope model: %s.",
                     oskar_get_error_string(status));
+
+        }
     }
 
     // Set sky and telescope models.

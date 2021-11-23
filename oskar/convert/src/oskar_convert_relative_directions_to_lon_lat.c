@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -38,6 +38,7 @@ void oskar_convert_relative_directions_to_lon_lat(int num_points,
         if (type == OSKAR_SINGLE)
         {
             if (is_3d)
+            {
                 oskar_convert_relative_directions_to_lon_lat_3d_f(num_points,
                         oskar_mem_float_const(l, status),
                         oskar_mem_float_const(m, status),
@@ -45,17 +46,21 @@ void oskar_convert_relative_directions_to_lon_lat(int num_points,
                         lon0_rad_f, cos_lat0_f, sin_lat0_f,
                         oskar_mem_float(lon_rad, status),
                         oskar_mem_float(lat_rad, status));
+            }
             else
+            {
                 oskar_convert_relative_directions_to_lon_lat_2d_f(num_points,
                         oskar_mem_float_const(l, status),
                         oskar_mem_float_const(m, status), 0,
                         lon0_rad_f, cos_lat0_f, sin_lat0_f,
                         oskar_mem_float(lon_rad, status),
                         oskar_mem_float(lat_rad, status));
+            }
         }
         else if (type == OSKAR_DOUBLE)
         {
             if (is_3d)
+            {
                 oskar_convert_relative_directions_to_lon_lat_3d_d(num_points,
                         oskar_mem_double_const(l, status),
                         oskar_mem_double_const(m, status),
@@ -63,16 +68,21 @@ void oskar_convert_relative_directions_to_lon_lat(int num_points,
                         lon0_rad, cos_lat0, sin_lat0,
                         oskar_mem_double(lon_rad, status),
                         oskar_mem_double(lat_rad, status));
+            }
             else
+            {
                 oskar_convert_relative_directions_to_lon_lat_2d_d(num_points,
                         oskar_mem_double_const(l, status),
                         oskar_mem_double_const(m, status), 0,
                         lon0_rad, cos_lat0, sin_lat0,
                         oskar_mem_double(lon_rad, status),
                         oskar_mem_double(lat_rad, status));
+            }
         }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
     else
     {
@@ -81,13 +91,17 @@ void oskar_convert_relative_directions_to_lon_lat(int num_points,
         const void* nullp = 0;
         const int is_dbl = oskar_mem_is_double(lon_rad);
         if (type == OSKAR_SINGLE)
+        {
             k = is_3d ?
                     "convert_relative_directions_to_lon_lat_3d_float" :
                     "convert_relative_directions_to_lon_lat_2d_float";
+        }
         else if (type == OSKAR_DOUBLE)
+        {
             k = is_3d ?
                     "convert_relative_directions_to_lon_lat_3d_double" :
                     "convert_relative_directions_to_lon_lat_2d_double";
+        }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;

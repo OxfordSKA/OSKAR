@@ -26,7 +26,7 @@ void oskar_evaluate_jones_E(
         oskar_StationWork* work,
         int* status)
 {
-    int i, j;
+    int i = 0, j = 0;
     if (*status) return;
     const int num_stations = oskar_telescope_num_stations(tel);
     const int num_sources = oskar_jones_num_sources(E);
@@ -45,6 +45,7 @@ void oskar_evaluate_jones_E(
     {
         /* Evaluate all the station beams. */
         for (i = 0; i < num_stations; ++i)
+        {
             oskar_station_beam(
                     oskar_telescope_station_const(tel, i),
                     work, coord_type, num_points, source_coords,
@@ -54,6 +55,7 @@ void oskar_evaluate_jones_E(
                     oskar_telescope_phase_centre_latitude_rad(tel),
                     time_index, gast_rad, frequency_hz,
                     i * num_sources, oskar_jones_mem(E), status);
+        }
     }
     else
     {

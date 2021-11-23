@@ -28,11 +28,10 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
 {
     char* line = 0;
     size_t bufsize = 0, size_id = 0, num_par = 0;
-    FILE* file;
+    FILE* file = 0;
     char** par = 0;
     int* id = 0;
-    if (*status || !filename || strlen(filename) == 0)
-        return;
+    if (*status || !filename || strlen(filename) == 0) return;
 
     /* Check type. */
     const int type = oskar_telescope_precision(telescope);
@@ -53,7 +52,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        int coordsys;
+        int coordsys = 0;
         size_t i = 0, read = 0;
         double lon = 0.0, lat = 0.0;
 
@@ -70,7 +69,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
             /* Ensure enough space in ID array. */
             if (i >= size_id)
             {
-                void* t;
+                void* t = 0;
                 t = realloc(id, (size_id + 1) * sizeof(int));
                 if (!t)
                 {
@@ -83,17 +82,25 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
 
             /* Store the ID, checking for '*' wildcard. */
             if (!par[i] || par[i][0] == '*')
+            {
                 id[i] = -1;
+            }
             else
+            {
                 sscanf(par[i], "%d", &(id[i]));
+            }
         }
         if (*status) break;
 
         /* Get coordinate system type. */
         if (!par[i] || (par[i][0] != 'A' && par[i][0] != 'a'))
+        {
             coordsys = OSKAR_COORDS_RADEC;
+        }
         else
+        {
             coordsys = OSKAR_COORDS_AZEL;
+        }
 
         /* Get longitude and latitude values. */
         ++i;
@@ -157,7 +164,7 @@ static void set_coords(oskar_Station* station, int set_recursive,
         /* Set pointing data recursively for all child stations. */
         if (oskar_station_has_child(station))
         {
-            size_t i, num_elements;
+            size_t i = 0, num_elements = 0;
             num_elements = (size_t)oskar_station_num_elements(station);
             for (i = 0; i < num_elements; ++i)
             {
@@ -177,11 +184,13 @@ static void set_coords(oskar_Station* station, int set_recursive,
         }
         else if (oskar_station_has_child(station))
         {
-            int id;
+            int id = 0;
 
             /* Get the ID at this depth. */
             if (current_depth < num_sub_ids)
+            {
                 id = sub_ids[current_depth];
+            }
             else
             {
                 *status = OSKAR_ERR_BAD_POINTING_FILE;
@@ -190,7 +199,7 @@ static void set_coords(oskar_Station* station, int set_recursive,
 
             if (id < 0)
             {
-                size_t i, num_elements;
+                size_t i = 0, num_elements = 0;
                 num_elements = (size_t)oskar_station_num_elements(station);
                 for (i = 0; i < num_elements; ++i)
                 {

@@ -8,8 +8,9 @@ void oskar_dierckx_fpdisc(const double *t, int n, int k2, double *b, int nest)
 {
     /* Local variables */
     double h[12];
-    int i, j, k, l, k1, ik, jk, lj, lk, lp, nk1, lmk, nrint;
-    double an, fac, prod;
+    int i = 0, j = 0, k = 0, l = 0, k1 = 0, ik = 0, jk = 0;
+    int lj = 0, lk = 0, lp = 0, nk1 = 0, lmk = 0, nrint = 0;
+    double an = 0.0, fac = 0.0, prod = 0.0;
 
     /* Parameter adjustments */
     --t;

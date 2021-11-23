@@ -77,8 +77,7 @@ void TelescopeLoaderElementPattern::load_element_patterns(
 
     // FIXME(FD) Return if element patterns are disabled.
     // FIXME(FD) Don't do this here, if loading functional data...
-    if (!oskar_telescope_enable_numerical_patterns(telescope_))
-        return;
+    if (!oskar_telescope_enable_numerical_patterns(telescope_)) return;
 
     // Get lists of all paths in the map that have keys starting with the
     // right root name.
@@ -142,7 +141,9 @@ void TelescopeLoaderElementPattern::load_element_patterns(
         load_fitted_data(2, station, keys_fit_y, paths_fit_y, status);
     }
     else
+    {
         load_fitted_data(0, station, keys_fit_scalar, paths_fit_scalar, status);
+    }
 
     // Load functional data.
     load_functional_data(1, station, keys_x, paths_x, status);
@@ -153,9 +154,9 @@ void TelescopeLoaderElementPattern::load_fitted_data(int feed,
         oskar_Station* station, const vector<string>& keys,
         const vector<string>& paths, int* status)
 {
+    if (*status || !station) return;
     size_t buflen = 0;
     char* buffer = 0;
-    if (*status || !station) return;
     for (size_t i = 0; i < keys.size(); ++i)
     {
         int ind = 0;
@@ -169,7 +170,9 @@ void TelescopeLoaderElementPattern::load_fitted_data(int feed,
         // Load the file.
         if (*status) break;
         if (oskar_station_num_element_types(station) < ind + 1)
+        {
             oskar_station_resize_element_types(station, ind + 1, status);
+        }
         oskar_element_read(oskar_station_element(station, ind), path.c_str(),
                 feed, freq, status);
     }
@@ -180,9 +183,9 @@ void TelescopeLoaderElementPattern::load_functional_data(int feed,
         oskar_Station* station, const vector<string>& keys,
         const vector<string>& paths, int* status)
 {
+    if (*status || !station) return;
     size_t buflen = 0;
     char* buffer = 0;
-    if (*status || !station) return;
     for (size_t i = 0; i < keys.size(); ++i)
     {
         int ind = 0;
@@ -195,7 +198,9 @@ void TelescopeLoaderElementPattern::load_functional_data(int feed,
         // Load the file.
         if (*status) break;
         if (oskar_station_num_element_types(station) < ind + 1)
+        {
             oskar_station_resize_element_types(station, ind + 1, status);
+        }
         oskar_element_load(oskar_station_element(station, ind), path.c_str(),
                 feed == 1 ? 1 : 0, status);
     }
@@ -206,11 +211,11 @@ void TelescopeLoaderElementPattern::load_spherical_wave_data(
         oskar_Station* station, const vector<string>& keys,
         const vector<string>& paths, int* status)
 {
+    if (*status || !station) return;
     size_t buflen = 0;
     char* buffer = 0;
     int num_tmp = 21;
     double* tmp = (double*) calloc((size_t) num_tmp, sizeof(double));
-    if (*status || !station) return;
     for (size_t i = 0; i < keys.size(); ++i)
     {
         int ind = 0;
@@ -224,7 +229,9 @@ void TelescopeLoaderElementPattern::load_spherical_wave_data(
         // Load the file.
         if (*status) break;
         if (oskar_station_num_element_types(station) < ind + 1)
+        {
             oskar_station_resize_element_types(station, ind + 1, status);
+        }
         oskar_element_load_spherical_wave_coeff(
                 oskar_station_element(station, ind), path.c_str(),
                 freq, &num_tmp, &tmp, status);
@@ -237,7 +244,7 @@ void TelescopeLoaderElementPattern::parse_filename(const char* s,
         char** buffer, size_t* buflen, int* index, double* freq)
 {
     size_t i = 0, j = 1, length = 0;
-    char* p;
+    char* p = 0;
     *index = 0;
     if (freq) *freq = 0.0;
 

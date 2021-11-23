@@ -18,7 +18,7 @@ void oskar_telescope_set_station_ids_and_coords(
         oskar_Telescope* model, int* status)
 {
     if (*status) return;
-    int i, j, counter = 0;
+    int i = 0, j = 0, counter = 0;
 
     /* Set coordinates into station models. */
     if (model->allow_station_beam_duplication)
@@ -48,7 +48,9 @@ void oskar_telescope_set_station_ids_and_coords(
         oskar_Station** stations = (oskar_Station**) calloc(
                 old_num_station_models, sizeof(oskar_Station*));
         for (i = 0; i < old_num_station_models; ++i)
+        {
             stations[i] = model->station[i];
+        }
 
         /* Resize the station model array. */
         const int num_stations = model->num_stations;
@@ -60,12 +62,16 @@ void oskar_telescope_set_station_ids_and_coords(
         const int* type_map = oskar_mem_int_const(
                 oskar_telescope_station_type_map_const(model), status);
         for (i = 0; i < num_stations; ++i)
+        {
             model->station[i] = oskar_station_create_copy(
                     stations[type_map[i]], model->mem_location, status);
+        }
 
         /* Free the old station models. */
         for (i = 0; i < old_num_station_models; ++i)
+        {
             oskar_station_free(stations[i], status);
+        }
         free(stations);
 
         /* Reset the type map so we use a unique model per station. */
@@ -90,7 +96,9 @@ void oskar_telescope_set_station_ids_and_coords(
 
     /* Set unique station IDs. */
     for (i = 0; i < model->num_station_models; ++i)
+    {
         oskar_station_set_unique_ids(model->station[i], &counter);
+    }
 }
 
 #ifdef __cplusplus

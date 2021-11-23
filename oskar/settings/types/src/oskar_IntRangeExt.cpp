@@ -63,21 +63,32 @@ bool IntRangeExt::init(const char* s)
     bool ok = true;
     vector<string> p = oskar_settings_utility_string_get_type_params(s);
     // For less than 3 values, just use IntRange instead!
-    if (p.size() < 3u || p.size() > 4u) {
+    if (p.size() < 3u || p.size() > 4u)
+    {
         return false;
     }
     else if (p[0] == "-INT_MAX" || p[0] == "-MAX" ||
                     p[0] == "INT_MIN" || p[0] == "MIN")
+    {
         min_ = -INT_MAX;
+    }
     else
+    {
         min_ = oskar_settings_utility_string_to_int(p[0], &ok);
+    }
     if (!ok) return false;
+
     if (p[1] == "INT_MAX" || p[1] == "MAX")
+    {
         max_ = INT_MAX;
+    }
     else
+    {
         max_ = oskar_settings_utility_string_to_int(p[1], &ok);
+    }
     ext_min_ = p[2];
-    if (p.size() == 4u) {
+    if (p.size() == 4u)
+    {
         if (max_ == INT_MAX) return false;
         ext_max_ = p[3];
     }
@@ -88,8 +99,7 @@ bool IntRangeExt::set_default(const char* value)
 {
     bool ok = from_string(default_, value);
     str_default_ = to_string(default_);
-    if (ok)
-        set_value(value);
+    if (ok) set_value(value);
     return ok;
 } // LCOV_EXCL_LINE
 
@@ -108,9 +118,13 @@ bool IntRangeExt::is_default() const
 int IntRangeExt::value() const
 {
     if (value_.which() == STRING && get<string>(value_) == ext_min_)
+    {
         return min_;
+    }
     if (value_.which() == STRING && get<string>(value_) == ext_max_)
+    {
         return max_;
+    }
     return get<int>(value_);
 }
 
@@ -192,7 +206,9 @@ string IntRangeExt::to_string(const Value& value) const
         return oskar_settings_utility_int_to_string(v_);
     }
     else if (value.which() == STRING)
+    {
         return get<string>(value);
+    }
     return string();
 }
 

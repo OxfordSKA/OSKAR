@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2019-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "log/oskar_log.h"
@@ -54,13 +31,13 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
         const char* filename, double freq_hz, int* num_tmp, double** tmp,
         int* status)
 {
-    int i, j, n, selector = 0, line_counter = 1;
+    int i = 0, j = 0, n = 0, selector = 0, line_counter = 1;
     int offset_complex = -1, offset1 = 0, offset2 = -1;
     oskar_Mem* sw = 0;
     void* sw_p = 0;
     char *line = 0;
     size_t bufsize = 0;
-    FILE* file;
+    FILE* file = 0;
     if (*status) return;
 
     /* Check the location. */
@@ -74,8 +51,7 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     n = data->num_freq;
     for (i = 0; i < n; ++i)
     {
-        if (fabs(data->freqs_hz[i] - freq_hz) <= freq_hz * DBL_EPSILON)
-            break;
+        if (fabs(data->freqs_hz[i] - freq_hz) <= freq_hz * DBL_EPSILON) break;
     }
 
     /* Expand arrays to hold data for a new frequency, if needed. */
@@ -89,17 +65,29 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     /* Get leafname of file and parse it. */
     const char* leafname = oskar_dir_leafname(filename);
     if (strstr(leafname, "_x_") || strstr(leafname, "_X_"))
+    {
         selector |= OPTION_X;
+    }
     if (strstr(leafname, "_y_") || strstr(leafname, "_Y_"))
+    {
         selector |= OPTION_Y;
+    }
     if (strstr(leafname, "_te") || strstr(leafname, "_TE"))
+    {
         selector |= OPTION_TE;
+    }
     if (strstr(leafname, "_tm") || strstr(leafname, "_TM"))
+    {
         selector |= OPTION_TM;
+    }
     if (strstr(leafname, "_re") || strstr(leafname, "_RE"))
+    {
         offset_complex = 0;
+    }
     if (strstr(leafname, "_im") || strstr(leafname, "_IM"))
+    {
         offset_complex = 1;
+    }
     if (offset_complex < 0)
     {
         oskar_log_error(0, "Unknown spherical wave filename pattern '%s'",
@@ -150,8 +138,10 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
     }
     const int type = data->precision;
     if (!data->sph_wave[i])
+    {
         data->sph_wave[i] = oskar_mem_create(
                 type | OSKAR_COMPLEX | OSKAR_MATRIX, OSKAR_CPU, 0, status);
+    }
     sw = data->sph_wave[i];
     sw_p = oskar_mem_void(sw);
 
@@ -200,7 +190,9 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
         else
         {
             for (j = 0; j < n; ++j)
+            {
                 c1[8 * j] = (*tmp)[j];
+            }
         }
     }
     else
@@ -219,7 +211,9 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
         else
         {
             for (j = 0; j < n; ++j)
+            {
                 c1[8 * j] = (float)((*tmp)[j]);
+            }
         }
     }
 
@@ -234,17 +228,25 @@ void oskar_element_load_spherical_wave_coeff(oskar_Element* data,
             data->l_max[i] = l_max;
             const size_t fname_len = 1 + strlen(filename);
             if (!data->filename_x[i])
+            {
                 data->filename_x[i] = oskar_mem_create(
                         OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+            }
             if (!data->filename_y[i])
+            {
                 data->filename_y[i] = oskar_mem_create(
                         OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+            }
             if (selector & OPTION_X)
+            {
                 oskar_mem_append_raw(data->filename_x[i], filename,
                         OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+            }
             else if (selector & OPTION_Y)
+            {
                 oskar_mem_append_raw(data->filename_y[i], filename,
                         OSKAR_CHAR, OSKAR_CPU, fname_len, status);
+            }
             else
             {
                 oskar_mem_append_raw(data->filename_x[i], filename,

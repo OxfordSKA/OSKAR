@@ -230,12 +230,18 @@ TEST(apps, test_imager_modes)
                         string weighting = oskar_imager_weighting(img);
                         std::replace(alg.begin(), alg.end(), ' ', '_');
                         if (oskar_imager_channel_snapshots(img))
+                        {
                             image_root += "_channel_snapshots";
+                        }
                         if (oskar_imager_freq_min_hz(img) > 0.0)
+                        {
                             image_root += "_filtered";
+                        }
                         if (img_settings->first_letter(
                                 "image/direction", &status) == 'R')
+                        {
                             image_root += "_recentred";
+                        }
                         image_root += (string("_") + weighting);
                         image_root += (string("_") + alg);
                         image_root += (string("_") + precs[i_prec]);

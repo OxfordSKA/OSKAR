@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "interferometer/oskar_jones.h"
@@ -44,7 +21,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
         const oskar_Mem* ra_rad, const oskar_Mem* dec_rad,
         const oskar_Telescope* telescope, double gast, int* status)
 {
-    int i;
+    int i = 0;
     if (*status) return;
     const int type = oskar_jones_type(R);
     const int precision = oskar_type_precision(type);
@@ -87,19 +64,23 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
         if (location == OSKAR_CPU)
         {
             if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+            {
                 evaluate_jones_R_float(
                         num_sources,
                         oskar_mem_float_const(ra_rad, status),
                         oskar_mem_float_const(dec_rad, status),
                         cos_lat_f, sin_lat_f, lst_f, offset_out,
                         oskar_mem_float4c(oskar_jones_mem(R), status));
+            }
             else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+            {
                 evaluate_jones_R_double(
                         num_sources,
                         oskar_mem_double_const(ra_rad, status),
                         oskar_mem_double_const(dec_rad, status),
                         cos_lat, sin_lat, lst, offset_out,
                         oskar_mem_double4c(oskar_jones_mem(R), status));
+            }
             else
             {
                 *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -144,11 +125,15 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
 
     /* Copy data for station 0 to stations 1 to n, if using a common sky. */
     if (oskar_telescope_allow_station_beam_duplication(telescope))
+    {
         for (i = 1; i < num_stations; ++i)
+        {
             oskar_mem_copy_contents(
                     oskar_jones_mem(R), oskar_jones_mem(R),
                     (size_t)(i * stride), 0,
                     (size_t)stride, status);
+        }
+    }
 }
 
 #ifdef __cplusplus

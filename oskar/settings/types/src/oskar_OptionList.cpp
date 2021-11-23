@@ -22,16 +22,14 @@ bool OptionList::init(const char* s)
 {
     options_.clear();
     options_ = oskar_settings_utility_string_get_type_params(s);
-    if (options_.size() > 0)
-        set_default(options_[0].c_str());
+    if (options_.size() > 0) set_default(options_[0].c_str());
     return true;
 } // LCOV_EXCL_LINE
 
 bool OptionList::set_default(const char* value)
 {
     bool ok = from_string_(str_default_, value);
-    if (ok)
-        set_value(value);
+    if (ok) set_value(value);
     return ok;
 } // LCOV_EXCL_LINE
 

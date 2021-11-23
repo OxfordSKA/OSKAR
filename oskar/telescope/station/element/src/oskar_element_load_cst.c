@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "log/oskar_log.h"
@@ -53,15 +30,16 @@ void oskar_element_load_cst(oskar_Element* data,
         double closeness, double closeness_inc, int ignore_at_poles,
         int ignore_below_horizon, oskar_Log* log, int* status)
 {
-    int i, n = 0;
+    int i = 0, n = 0;
     oskar_Splines **data_h_re = 0, **data_h_im = 0;
     oskar_Splines **data_v_re = 0, **data_v_im = 0;
-    oskar_Mem *theta, *phi, *h_re, *h_im, *v_re, *v_im, *weight;
+    oskar_Mem *theta = 0, *phi = 0;
+    oskar_Mem *h_re = 0, *h_im = 0, *v_re = 0, *v_im = 0, *weight = 0;
 
     /* Declare the line buffer. */
     char *line = 0, *dbi = 0, *ludwig3 = 0;
     size_t bufsize = 0;
-    FILE* file;
+    FILE* file = 0;
 
     /* Check inputs. */
     if (*status) return;
@@ -86,7 +64,9 @@ void oskar_element_load_cst(oskar_Element* data,
     for (i = 0; i < n; ++i)
     {
         if (fabs(data->freqs_hz[i] - freq_hz) <= freq_hz * DBL_EPSILON)
+        {
             break;
+        }
     }
 
     /* Expand arrays to hold data for a new frequency, if needed. */
@@ -150,9 +130,9 @@ void oskar_element_load_cst(oskar_Element* data,
     n = 0;
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        double t = 0., p = 0., abs_theta_horiz, phase_theta_horiz;
-        double abs_phi_verti, phase_phi_verti;
-        double h_re_, h_im_, v_re_, v_im_;
+        double t = 0., p = 0., abs_theta_horiz = 0.0, phase_theta_horiz = 0.0;
+        double abs_phi_verti = 0.0, phase_phi_verti = 0.0;
+        double h_re_ = 0.0, h_im_ = 0.0, v_re_ = 0.0, v_im_ = 0.0;
         void *p_theta = 0, *p_phi = 0, *p_h_re = 0, *p_h_im = 0, *p_v_re = 0;
         void *p_v_im = 0, *p_weight = 0;
 
@@ -160,14 +140,18 @@ void oskar_element_load_cst(oskar_Element* data,
         if (sscanf(line, "%lf %lf %*f %lf %lf %lf %lf %*f", &t, &p,
                     &abs_theta_horiz, &phase_theta_horiz,
                     &abs_phi_verti, &phase_phi_verti) != 6)
+        {
             continue;
+        }
 
         /* Ignore data below horizon if requested. */
         if (ignore_below_horizon && t > 90.0) continue;
 
         /* Ignore data at poles if requested. */
         if (ignore_at_poles)
+        {
             if (t < 1e-6 || t > (180.0 - 1e-6)) continue;
+        }
 
         /* Convert angular measures to radians. */
         t *= DEG2RAD;
@@ -260,17 +244,25 @@ void oskar_element_load_cst(oskar_Element* data,
     if (port == 0)
     {
         if (!data->y_h_re[i])
+        {
             data->y_h_re[i] = oskar_splines_create(
                     OSKAR_DOUBLE, OSKAR_CPU, status);
+        }
         if (!data->y_h_im[i])
+        {
             data->y_h_im[i] = oskar_splines_create(
                     OSKAR_DOUBLE, OSKAR_CPU, status);
+        }
         if (!data->y_v_re[i])
+        {
             data->y_v_re[i] = oskar_splines_create(
                     OSKAR_DOUBLE, OSKAR_CPU, status);
+        }
         if (!data->y_v_im[i])
+        {
             data->y_v_im[i] = oskar_splines_create(
                     OSKAR_DOUBLE, OSKAR_CPU, status);
+        }
         oskar_splines_copy(data->y_h_re[i], data->x_h_re[i], status);
         oskar_splines_copy(data->y_h_im[i], data->x_h_im[i], status);
         oskar_splines_copy(data->y_v_re[i], data->x_v_re[i], status);
@@ -293,10 +285,12 @@ static void fit_splines(oskar_Splines** splines_ptr, int n,
         double closeness, double closeness_inc, const char* name,
         oskar_Log* log, int* status)
 {
-    double avg_frac_error;
+    double avg_frac_error = 0.0;
     if (*status) return;
     if (!*splines_ptr)
+    {
         *splines_ptr = oskar_splines_create(OSKAR_DOUBLE, OSKAR_CPU, status);
+    }
     oskar_Splines* splines = *splines_ptr;
     if (*status) return;
     avg_frac_error = closeness; /* Copy the fitting parameter. */

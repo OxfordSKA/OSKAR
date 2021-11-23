@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -7,16 +7,18 @@
 
 #include "convert/oskar_convert_station_uvw_to_baseline_uvw.h"
 #include "mem/oskar_mem.h"
-#include "utility/oskar_timer.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_timer.h"
 
 TEST(evaluate_baselines, cpu_gpu)
 {
-    oskar_Mem *u, *v, *w, *uu, *vv, *ww;
-    oskar_Mem *u_gpu, *v_gpu, *w_gpu, *uu_gpu, *vv_gpu, *ww_gpu;
-    oskar_Timer *timer_cpu, *timer_gpu;
-    int num_baselines, num_stations = 512, status = 0, type, location;
-    double *u_, *v_, *w_, *uu_, *vv_, *ww_;
+    oskar_Mem *u = 0, *v = 0, *w = 0, *uu = 0, *vv = 0, *ww = 0;
+    oskar_Mem *u_gpu = 0, *v_gpu = 0, *w_gpu = 0;
+    oskar_Mem *uu_gpu = 0, *vv_gpu = 0, *ww_gpu = 0;
+    oskar_Timer *timer_cpu = 0, *timer_gpu = 0;
+    int num_baselines = 0, num_stations = 512;
+    int status = 0, type = 0, location = 0;
+    double *u_ = 0, *v_ = 0, *w_ = 0, *uu_ = 0, *vv_ = 0, *ww_ = 0;
 
     num_baselines = num_stations * (num_stations - 1) / 2;
 
@@ -88,7 +90,7 @@ TEST(evaluate_baselines, cpu_gpu)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check results are consistent.
-    double max_, avg;
+    double max_ = 0.0, avg = 0.0;
     oskar_mem_evaluate_relative_error(uu_gpu, uu, 0, &max_, &avg, 0, &status);
     ASSERT_LT(max_, 1e-12);
     ASSERT_LT(avg, 1e-12);

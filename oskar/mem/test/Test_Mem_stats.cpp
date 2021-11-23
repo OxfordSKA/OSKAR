@@ -28,14 +28,16 @@
 
 #include <gtest/gtest.h>
 
-#include "mem/oskar_mem.h"
+#include "math.h"
+
+        #include "mem/oskar_mem.h"
 #include "utility/oskar_get_error_string.h"
 #include <cmath>
 
 TEST(Mem, stats)
 {
     int status = 0;
-    oskar_Mem* values;
+    oskar_Mem* values = 0;
     values = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 5, &status);
 
     // Fill an array with the values 1, 2, 3, 4, 5.
@@ -47,7 +49,7 @@ TEST(Mem, stats)
     v[4] = 5.0;
 
     // Compute minimum, maximum, mean and population standard deviation.
-    double min, max, mean, std_dev;
+    double min = 0.0, max = 0.0, mean = 0.0, std_dev = 0.0;
     oskar_mem_stats(values, oskar_mem_length(values), &min, &max, &mean,
             &std_dev, &status);
 

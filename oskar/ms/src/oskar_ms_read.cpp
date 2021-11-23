@@ -25,9 +25,13 @@ void copy_array(const oskar_MeasurementSet* p, const char* column,
         Array<T> a = ac.getColumnRange(slice);
         *required_size = a.size() * sizeof(T);
         if (data_size_bytes >= *required_size)
+        {
             memcpy(data, a.data(), *required_size);
+        }
         else
+        {
             *status = OSKAR_ERR_MS_OUT_OF_RANGE;
+        }
     }
     catch (...)
     {
@@ -48,9 +52,13 @@ void copy_scalar(const oskar_MeasurementSet* p, const char* column,
         Array<T> a = ac.getColumnRange(slice);
         *required_size = a.size() * sizeof(T);
         if (data_size_bytes >= *required_size)
+        {
             memcpy(data, a.data(), *required_size);
+        }
         else
+        {
             *status = OSKAR_ERR_MS_OUT_OF_RANGE;
+        }
     }
     catch (...)
     {
@@ -83,7 +91,9 @@ void oskar_ms_read_column(const oskar_MeasurementSet* p, const char* column,
         return;
     }
     if (start_row + num_rows > total_rows)
+    {
         num_rows = total_rows - start_row;
+    }
 
     // Get column description and data type.
     const ColumnDesc& cdesc = p->ms->tableDesc().columnDesc(column);
@@ -188,7 +198,9 @@ void oskar_ms_read_coords(oskar_MeasurementSet* p,
         return;
     }
     if (start_row + num_baselines > total_rows)
+    {
         num_baselines = total_rows - start_row;
+    }
 
     // Read the coordinate data and copy it into the supplied arrays.
     Slice slice(start_row, num_baselines, 1);
@@ -250,7 +262,9 @@ void oskar_ms_read_vis(oskar_MeasurementSet* p,
         return;
     }
     if (start_row + num_baselines > total_rows)
+    {
         num_baselines = total_rows - start_row;
+    }
 
     // Create the slicers for the column.
     unsigned int num_pols = p->num_pols;

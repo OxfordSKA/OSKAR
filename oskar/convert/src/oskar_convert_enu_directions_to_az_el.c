@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, The OSKAR Developers.
+ * Copyright (c) 2020-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -25,30 +25,40 @@ void oskar_convert_enu_directions_to_az_el(
     if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
+        {
             convert_enu_directions_to_az_el_float(num_points,
                     oskar_mem_float_const(x, status),
                     oskar_mem_float_const(y, status),
                     oskar_mem_float_const(z, status),
                     oskar_mem_float(az_rad, status),
                     oskar_mem_float(el_rad, status));
+        }
         else if (type == OSKAR_DOUBLE)
+        {
             convert_enu_directions_to_az_el_double(num_points,
                     oskar_mem_double_const(x, status),
                     oskar_mem_double_const(y, status),
                     oskar_mem_double_const(z, status),
                     oskar_mem_double(az_rad, status),
                     oskar_mem_double(el_rad, status));
+        }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
     else
     {
         size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
         const char* k = 0;
         if (type == OSKAR_SINGLE)
+        {
             k = "convert_enu_directions_to_az_el_float";
+        }
         else if (type == OSKAR_DOUBLE)
+        {
             k = "convert_enu_directions_to_az_el_double";
+        }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;

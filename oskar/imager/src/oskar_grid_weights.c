@@ -19,7 +19,7 @@ void oskar_grid_weights_write_d(const size_t num_points,
         const int grid_size, size_t* RESTRICT num_skipped,
         double* RESTRICT grid)
 {
-    size_t i;
+    size_t i = 0;
     const int grid_centre = grid_size / 2;
     const double grid_scale = grid_size * cell_size_rad;
 
@@ -53,7 +53,7 @@ void oskar_grid_weights_read_d(const size_t num_points,
         const double cell_size_rad, const int grid_size,
         size_t* RESTRICT num_skipped, const double* RESTRICT grid)
 {
-    size_t i;
+    size_t i = 0;
     const int grid_centre = grid_size / 2;
     const double grid_scale = grid_size * cell_size_rad;
 
@@ -87,7 +87,7 @@ void oskar_grid_weights_write_f(const size_t num_points,
         const int grid_size, size_t* RESTRICT num_skipped,
         float* RESTRICT grid, float* RESTRICT grid_guard)
 {
-    size_t i;
+    size_t i = 0;
     const int grid_centre = grid_size / 2;
     const float grid_scale = grid_size * cell_size_rad;
 
@@ -121,7 +121,7 @@ void oskar_grid_weights_read_f(const size_t num_points,
         const float cell_size_rad, const int grid_size,
         size_t* RESTRICT num_skipped, const float* RESTRICT grid)
 {
-    size_t i;
+    size_t i = 0;
     const int grid_centre = grid_size / 2;
     const float grid_scale = grid_size * cell_size_rad;
 

@@ -301,7 +301,7 @@ static void oskar_telescope_set_gaussian_station_beam_p(oskar_Station* station,
     oskar_station_set_gaussian_beam_values(station, fwhm_rad, ref_freq_hz);
     if (oskar_station_has_child(station))
     {
-        int i;
+        int i = 0;
         const int num_elements = oskar_station_num_elements(station);
         for (i = 0; i < num_elements; ++i)
         {
@@ -314,7 +314,7 @@ static void oskar_telescope_set_gaussian_station_beam_p(oskar_Station* station,
 void oskar_telescope_set_gaussian_station_beam_width(oskar_Telescope* model,
         double fwhm_deg, double ref_freq_hz)
 {
-    int i;
+    int i = 0;
     for (i = 0; i < model->num_station_models; ++i)
     {
         oskar_telescope_set_gaussian_station_beam_p(model->station[i],
@@ -325,7 +325,7 @@ void oskar_telescope_set_gaussian_station_beam_width(oskar_Telescope* model,
 void oskar_telescope_set_noise_freq_file(oskar_Telescope* model,
         const char* filename, int* status)
 {
-    int i;
+    int i = 0;
     if (*status) return;
     for (i = 0; i < model->num_station_models; ++i)
     {
@@ -338,8 +338,8 @@ void oskar_telescope_set_noise_freq_file(oskar_Telescope* model,
 void oskar_telescope_set_noise_freq(oskar_Telescope* model,
         double start_hz, double inc_hz, int num_channels, int* status)
 {
-    int i;
-    oskar_Mem* noise_freq_hz;
+    int i = 0;
+    oskar_Mem* noise_freq_hz = 0;
     noise_freq_hz = oskar_mem_create(model->precision, OSKAR_CPU,
             num_channels, status);
     if (*status) return;
@@ -357,7 +357,7 @@ void oskar_telescope_set_noise_freq(oskar_Telescope* model,
     /* Set noise frequency for all top-level stations. */
     for (i = 0; i < model->num_station_models; ++i)
     {
-        oskar_Mem* t;
+        oskar_Mem* t = 0;
         if (!model->station[i]) continue;
         t = oskar_station_noise_freq_hz(model->station[i]);
         oskar_mem_realloc(t, num_channels, status);
@@ -369,7 +369,7 @@ void oskar_telescope_set_noise_freq(oskar_Telescope* model,
 void oskar_telescope_set_noise_rms_file(oskar_Telescope* model,
         const char* filename, int* status)
 {
-    int i;
+    int i = 0;
     if (*status) return;
     for (i = 0; i < model->num_station_models; ++i)
     {
@@ -382,10 +382,10 @@ void oskar_telescope_set_noise_rms_file(oskar_Telescope* model,
 void oskar_telescope_set_noise_rms(oskar_Telescope* model,
         double start, double end, int* status)
 {
-    int i, j, num_channels;
-    double inc;
-    oskar_Station* s;
-    oskar_Mem *noise_rms_jy, *h;
+    int i = 0, j = 0, num_channels = 0;
+    double inc = 0.0;
+    oskar_Station* s = 0;
+    oskar_Mem *noise_rms_jy = 0, *h = 0;
 
     /* Set noise RMS for all top-level stations. */
     if (*status) return;
@@ -430,7 +430,7 @@ void oskar_telescope_set_position(oskar_Telescope* model,
 void oskar_telescope_set_polar_motion(oskar_Telescope* model,
         double pm_x_rad, double pm_y_rad)
 {
-    int i;
+    int i = 0;
     model->pm_x_rad = pm_x_rad;
     model->pm_y_rad = pm_y_rad;
 
@@ -448,7 +448,7 @@ static void oskar_telescope_set_station_phase_centre(oskar_Station* station,
             latitude_rad);
     if (oskar_station_has_child(station))
     {
-        int i, num_elements;
+        int i = 0, num_elements = 0;
         num_elements = oskar_station_num_elements(station);
         for (i = 0; i < num_elements; ++i)
         {
@@ -462,7 +462,7 @@ static void oskar_telescope_set_station_phase_centre(oskar_Station* station,
 void oskar_telescope_set_phase_centre(oskar_Telescope* model,
         int coord_type, double longitude_rad, double latitude_rad)
 {
-    int i;
+    int i = 0;
     model->phase_centre_coord_type = coord_type;
     model->phase_centre_rad[0] = longitude_rad;
     model->phase_centre_rad[1] = latitude_rad;
@@ -517,7 +517,7 @@ static void oskar_telescope_set_station_type_p(oskar_Station* station, int type)
     oskar_station_set_station_type(station, type);
     if (oskar_station_has_child(station))
     {
-        int i, num_elements;
+        int i = 0, num_elements = 0;
         num_elements = oskar_station_num_elements(station);
         for (i = 0; i < num_elements; ++i)
         {
@@ -530,23 +530,33 @@ static void oskar_telescope_set_station_type_p(oskar_Station* station, int type)
 void oskar_telescope_set_station_type(oskar_Telescope* model, const char* type,
         int* status)
 {
-    int i, t;
+    int i = 0, t = 0;
     if (*status) return;
     if (!strncmp(type, "A", 1) || !strncmp(type, "a", 1))
+    {
         t = OSKAR_STATION_TYPE_AA;
+    }
     else if (!strncmp(type, "G", 1) || !strncmp(type, "g", 1))
+    {
         t = OSKAR_STATION_TYPE_GAUSSIAN_BEAM;
+    }
     else if (!strncmp(type, "I", 1) || !strncmp(type, "i", 1))
+    {
         t = OSKAR_STATION_TYPE_ISOTROPIC;
+    }
     else if (!strncmp(type, "V", 1) || !strncmp(type, "v", 1))
+    {
         t = OSKAR_STATION_TYPE_VLA_PBCOR;
+    }
     else
     {
         *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
     }
     for (i = 0; i < model->num_station_models; ++i)
+    {
         oskar_telescope_set_station_type_p(model->station[i], t);
+    }
 }
 
 void oskar_telescope_set_unique_stations(oskar_Telescope* model,
@@ -559,7 +569,9 @@ void oskar_telescope_set_unique_stations(oskar_Telescope* model,
         for (i = 0; i < model->num_stations; ++i) type_map[i] = i;
     }
     else
+    {
         oskar_mem_clear_contents(model->station_type_map, status);
+    }
 }
 
 void oskar_telescope_set_uv_filter(oskar_Telescope* model,
@@ -567,9 +579,13 @@ void oskar_telescope_set_uv_filter(oskar_Telescope* model,
         int* status)
 {
     if (!strncmp(units, "M", 1) || !strncmp(units, "m", 1))
+    {
         model->uv_filter_units = OSKAR_METRES;
+    }
     else if (!strncmp(units, "W",  1) || !strncmp(units, "w",  1))
+    {
         model->uv_filter_units = OSKAR_WAVELENGTHS;
+    }
     else
     {
         *status = OSKAR_ERR_INVALID_ARGUMENT;
@@ -584,11 +600,17 @@ void oskar_telescope_set_pol_mode(oskar_Telescope* model, const char* mode,
 {
     if (*status) return;
     if (!strncmp(mode, "S", 1) || !strncmp(mode, "s", 1))
+    {
         model->pol_mode = OSKAR_POL_MODE_SCALAR;
+    }
     else if (!strncmp(mode, "F",  1) || !strncmp(mode, "f",  1))
+    {
         model->pol_mode = OSKAR_POL_MODE_FULL;
+    }
     else
+    {
         *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
 }
 
 #ifdef __cplusplus

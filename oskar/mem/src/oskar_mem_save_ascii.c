@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "mem/oskar_mem.h"
@@ -41,12 +18,10 @@ extern "C" {
 void oskar_mem_save_ascii(FILE* file, size_t num_mem,
         size_t offset, size_t num_elements, int* status, ...)
 {
-    int type;
-    size_t i, j;
+    int type = 0;
+    size_t i = 0, j = 0;
     va_list args;
-    oskar_Mem** handles; /* Array of oskar_Mem pointers in CPU memory. */
-
-    /* Check if safe to proceed. */
+    oskar_Mem** handles = 0; /* Array of oskar_Mem pointers in CPU memory. */
     if (*status) return;
 
     /* Check there are at least the number of specified elements in
@@ -54,10 +29,12 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
     va_start(args, status);
     for (i = 0; i < num_mem; ++i)
     {
-        const oskar_Mem* mem;
+        const oskar_Mem* mem = 0;
         mem = va_arg(args, const oskar_Mem*);
         if (oskar_mem_length(mem) < num_elements)
+        {
             *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        }
     }
     va_end(args);
 
@@ -69,7 +46,7 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
     va_start(args, status);
     for (i = 0; i < num_mem; ++i)
     {
-        oskar_Mem* mem;
+        oskar_Mem* mem = 0;
         mem = va_arg(args, oskar_Mem*);
         if (oskar_mem_location(mem) != OSKAR_CPU)
         {
@@ -89,7 +66,7 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
 
         for (i = 0; i < num_mem; ++i)
         {
-            const void* data;
+            const void* data = 0;
             data = oskar_mem_void_const(handles[i]);
             type = oskar_mem_type(handles[i]);
             switch (type)
@@ -158,7 +135,7 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
     va_start(args, status);
     for (i = 0; i < num_mem; ++i)
     {
-        const oskar_Mem* mem;
+        const oskar_Mem* mem = 0;
         mem = va_arg(args, const oskar_Mem*);
         if (oskar_mem_location(mem) != OSKAR_CPU)
         {

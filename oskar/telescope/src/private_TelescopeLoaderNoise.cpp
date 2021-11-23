@@ -42,7 +42,9 @@ void TelescopeLoaderNoise::load(oskar_Telescope* telescope, const string& cwd,
 
     // Load the frequency file if it exists (this only happens at depth = 0).
     if (filemap.count(files_[FREQ]))
+    {
         filename = filemap.at(files_[FREQ]);
+    }
     if (!filename.empty())
     {
         freqs_ = oskar_mem_create(oskar_telescope_precision(telescope),
@@ -76,8 +78,7 @@ void TelescopeLoaderNoise::load(oskar_Station* station,
     // - Currently, noise is implemented as a additive term per station
     //   into the visibilities so using files at any other depth would be
     //   meaningless.
-    if (depth > 1)
-        return;
+    if (depth > 1) return;
 
     // Update the noise files for the current station directory.
     update_map(filemap, cwd);
@@ -106,7 +107,9 @@ void TelescopeLoaderNoise::update_map(map<string, string>& filemap,
     {
         string file = it->second;
         if (oskar_dir_file_exists(cwd.c_str(), file.c_str()))
+        {
             filemap[file] = get_path(cwd, file);
+        }
     }
 }
 
@@ -117,11 +120,10 @@ void TelescopeLoaderNoise::set_noise_rms(oskar_Station* station,
     string filename;
     if (*status) return;
 
-    if (filemap.count(files_[RMS]))
-        filename = filemap.at(files_[RMS]);
-
+    if (filemap.count(files_[RMS])) filename = filemap.at(files_[RMS]);
     if (!filename.empty())
+    {
         oskar_mem_load_ascii(filename.c_str(), 1, status,
                 oskar_station_noise_rms_jy(station), "");
+    }
 }
-

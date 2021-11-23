@@ -12,7 +12,7 @@ extern "C" {
 
 void oskar_vis_header_free(oskar_VisHeader* hdr, int* status)
 {
-    int i, j;
+    int i = 0, j = 0;
     if (!hdr) return;
     oskar_mem_free(hdr->telescope_path, status);
     oskar_mem_free(hdr->settings, status);
@@ -20,7 +20,9 @@ void oskar_vis_header_free(oskar_VisHeader* hdr, int* status)
     {
         oskar_mem_free(hdr->station_offset_ecef_metres[i], status);
         for (j = 0; j < hdr->num_stations; ++j)
+        {
             oskar_mem_free(hdr->element_enu_metres[i][j], status);
+        }
         free(hdr->element_enu_metres[i]);
     }
     free(hdr);

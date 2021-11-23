@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2013-2020, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "settings/oskar_option_parser.h"
@@ -60,8 +37,7 @@ int main(int argc, char** argv)
     opt.add_flag("-e", "Number of element types", 1, "1");
     opt.add_flag("-v", "Display verbose output.");
 
-    if (!opt.check_options(argc, argv))
-        return EXIT_FAILURE;
+    if (!opt.check_options(argc, argv)) return EXIT_FAILURE;
 
     int num_elements = atoi(opt.get_arg(0));
     int num_directions = atoi(opt.get_arg(1));
@@ -79,12 +55,9 @@ int main(int argc, char** argv)
     }
 
     int location = -1;
-    if (opt.is_set("-g"))
-        location = OSKAR_GPU;
-    if (opt.is_set("-c"))
-        location = OSKAR_CPU;
-    if (opt.is_set("-cl"))
-        location = OSKAR_CL;
+    if (opt.is_set("-g")) location = OSKAR_GPU;
+    if (opt.is_set("-c")) location = OSKAR_CPU;
+    if (opt.is_set("-cl")) location = OSKAR_CL;
     if (location < 0)
     {
         opt.error("Please select one of -g, -c or -cl");
@@ -110,9 +83,18 @@ int main(int argc, char** argv)
         printf("- Precision: %s\n", (precision == OSKAR_SINGLE) ? "single" : "double");
         printf("- %s\n", evaluate_2d ? "2D" : "3D");
         printf("- Operation type: ");
-        if (op_type == C2C) printf("c2c\n");
-        else if (op_type == M2M) printf("m2m\n");
-        else printf("Error undefined!\n");
+        if (op_type == C2C)
+        {
+            printf("c2c\n");
+        }
+        else if (op_type == M2M)
+        {
+            printf("m2m\n");
+        }
+        else
+        {
+            printf("Error undefined!\n");
+        }
         printf("- Number of iterations: %i\n", niter);
         printf("\n");
     }
@@ -186,9 +168,11 @@ int benchmark(int num_elements, int num_directions, int num_element_types,
         free(device_name);
         oskar_timer_start(tmr);
         for (int i = 0; i < niter; ++i)
+        {
             oskar_dftw(0, num_elements, 2.0 * M_PI, weights, x_i, y_i, z_i,
                     0, num_directions, x, y, z,
                     element_types, signal, 1, 1, 0, beam, &status);
+        }
         time_taken = oskar_timer_elapsed(tmr);
     }
 

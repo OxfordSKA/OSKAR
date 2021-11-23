@@ -21,7 +21,9 @@ void oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
 
     /* Check that the data types match. */
     if (to->type != from_type)
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
+    }
 
     /* Get source memory size and destination offset. */
     const size_t element_size = oskar_mem_element_size(to->type);
@@ -34,9 +36,13 @@ void oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
 
     /* Append to the memory. */
     if (from_location == OSKAR_CPU && to->location == OSKAR_CPU)
+    {
         memcpy((char*)(to->data) + offset_bytes, from, mem_size);
+    }
     else
+    {
         *status = OSKAR_ERR_BAD_LOCATION;
+    }
 }
 
 #ifdef __cplusplus

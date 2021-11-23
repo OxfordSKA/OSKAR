@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -54,6 +54,7 @@ void oskar_convert_ecef_to_station_uvw(int num_stations,
     if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
+        {
             convert_ecef_to_station_uvw_float(num_stations,
                     oskar_mem_float_const(x, status),
                     oskar_mem_float_const(y, status),
@@ -63,7 +64,9 @@ void oskar_convert_ecef_to_station_uvw(int num_stations,
                     oskar_mem_float(u, status),
                     oskar_mem_float(v, status),
                     oskar_mem_float(w, status));
+        }
         else if (type == OSKAR_DOUBLE)
+        {
             convert_ecef_to_station_uvw_double(num_stations,
                     oskar_mem_double_const(x, status),
                     oskar_mem_double_const(y, status),
@@ -73,8 +76,11 @@ void oskar_convert_ecef_to_station_uvw(int num_stations,
                     oskar_mem_double(u, status),
                     oskar_mem_double(v, status),
                     oskar_mem_double(w, status));
+        }
         else
+        {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
     else
     {
@@ -82,9 +88,13 @@ void oskar_convert_ecef_to_station_uvw(int num_stations,
         const char* k = 0;
         const int is_dbl = oskar_mem_is_double(x);
         if (type == OSKAR_SINGLE)
+        {
             k = "convert_ecef_to_station_uvw_float";
+        }
         else if (type == OSKAR_DOUBLE)
+        {
             k = "convert_ecef_to_station_uvw_double";
+        }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -30,7 +30,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
         int zero_failed_sources, double ra0, double dec0, int* num_failed,
         int* status)
 {
-    int i, j;
+    int i = 0, j = 0;
     if (*status) return;
     if (oskar_sky_mem_location(sky) != OSKAR_CPU)
     {
@@ -43,10 +43,12 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
     if (type == OSKAR_DOUBLE)
     {
         /* Double precision. */
-        const double *ra_, *dec_, *maj_, *min_, *pa_;
-        double *I_, *Q_, *U_, *V_, *a_, *b_, *c_;
-        double cos_pa_2, sin_pa_2, sin_2pa, inv_std_min_2, inv_std_maj_2;
-        double ellipse_a, ellipse_b, maj, min, pa, cos_pa, sin_pa, t;
+        const double *ra_ = 0, *dec_ = 0, *maj_ = 0, *min_ = 0, *pa_ = 0;
+        double *I_ = 0, *Q_ = 0, *U_ = 0, *V_ = 0, *a_ = 0, *b_ = 0, *c_ = 0;
+        double cos_pa_2 = 0.0, sin_pa_2 = 0.0, sin_2pa = 0.0;
+        double inv_std_min_2 = 0.0, inv_std_maj_2 = 0.0;
+        double ellipse_a = 0.0, ellipse_b = 0.0, maj = 0.0, min = 0.0, pa = 0.0;
+        double cos_pa = 0.0, sin_pa = 0.0, t = 0.0;
         double l[ELLIPSE_PTS], m[ELLIPSE_PTS];
         double work1[5 * ELLIPSE_PTS], work2[5 * ELLIPSE_PTS];
         double lon[ELLIPSE_PTS], lat[ELLIPSE_PTS];
@@ -161,10 +163,12 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
     else
     {
         /* Single precision. */
-        const float *ra_, *dec_, *maj_, *min_, *pa_;
-        float *I_, *Q_, *U_, *V_, *a_, *b_, *c_;
-        float cos_pa_2, sin_pa_2, sin_2pa, inv_std_min_2, inv_std_maj_2;
-        float ellipse_a, ellipse_b, maj, min, pa, cos_pa, sin_pa, t;
+        const float *ra_ = 0, *dec_ = 0, *maj_ = 0, *min_ = 0, *pa_ = 0;
+        float *I_ = 0, *Q_ = 0, *U_ = 0, *V_ = 0, *a_ = 0, *b_ = 0, *c_ = 0;
+        float cos_pa_2 = 0.0, sin_pa_2 = 0.0, sin_2pa = 0.0;
+        float inv_std_min_2 = 0.0, inv_std_maj_2 = 0.0;
+        float ellipse_a = 0.0, ellipse_b = 0.0, maj = 0.0, min = 0.0, pa = 0.0;
+        float cos_pa = 0.0, sin_pa = 0.0, t = 0.0;
         float l[ELLIPSE_PTS], m[ELLIPSE_PTS];
         float work1[5 * ELLIPSE_PTS], work2[5 * ELLIPSE_PTS];
         float lon[ELLIPSE_PTS], lat[ELLIPSE_PTS];

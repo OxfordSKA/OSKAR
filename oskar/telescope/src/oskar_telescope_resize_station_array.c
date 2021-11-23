@@ -17,7 +17,7 @@ extern "C" {
 void oskar_telescope_resize_station_array(oskar_Telescope* telescope,
         int size, int* status)
 {
-    int i;
+    int i = 0;
     if (*status) return;
 
     /* Get the old size. */

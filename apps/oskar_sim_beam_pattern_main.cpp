@@ -66,10 +66,14 @@ int main(int argc, char** argv)
     // Set up the telescope model.
     oskar_Telescope* tel = oskar_settings_to_telescope(s, log, &status);
     if (!tel || status)
+    {
         oskar_log_error(log, "Failed to set up telescope model: %s.",
                 oskar_get_error_string(status));
+    }
     else
+    {
         oskar_beam_pattern_set_telescope_model(sim, tel, &status);
+    }
     oskar_telescope_free(tel, &status);
 
     // Run simulation.

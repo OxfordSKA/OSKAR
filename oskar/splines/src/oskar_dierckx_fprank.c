@@ -13,12 +13,13 @@ void oskar_dierckx_fprank(double *a, double *f, int n, int m, int na,
         double *ff, double *h)
 {
     /* System generated locals */
-    int a_dim1, aa_dim1, t;
+    int a_dim1 = 0, aa_dim1 = 0, t = 0;
 
     /* Local variables */
-    int i, j, k, i1, i2, j1, j2, j3 = 0, m1, ii, ij, jj, kk, nl;
-    double yi, fac, cos_, sin_, piv;
-    double stor1, stor2, stor3, store;
+    int i = 0, j = 0, k = 0, i1 = 0, i2 = 0, j1 = 0, j2 = 0, j3 = 0;
+    int m1 = 0, ii = 0, ij = 0, jj = 0, kk = 0, nl = 0;
+    double yi = 0.0, fac = 0.0, cos_ = 0.0, sin_ = 0.0, piv = 0.0;
+    double stor1 = 0.0, stor2 = 0.0, stor3 = 0.0, store = 0.0;
 
     /* Parameter adjustments */
     --ff;

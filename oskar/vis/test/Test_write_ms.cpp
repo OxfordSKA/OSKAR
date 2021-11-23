@@ -31,7 +31,7 @@ TEST(write_ms, test_write)
     oskar_vis_block_set_num_times(blk, num_times, &status);
     double4c* v_ = oskar_mem_double4c(
             oskar_vis_block_cross_correlations(blk), &status);
-    double *uu, *vv, *ww, *x, *y, *z;
+    double *uu = 0, *vv = 0, *ww = 0, *x = 0, *y = 0, *z = 0;
     uu = oskar_mem_double(oskar_vis_block_baseline_uu_metres(blk), &status);
     vv = oskar_mem_double(oskar_vis_block_baseline_vv_metres(blk), &status);
     ww = oskar_mem_double(oskar_vis_block_baseline_ww_metres(blk), &status);
@@ -123,7 +123,7 @@ TEST(write_ms, test_write_partial)
     oskar_vis_block_set_start_channel_index(blk, 4);
     double4c* v_ = oskar_mem_double4c(
             oskar_vis_block_cross_correlations(blk), &status);
-    double *uu, *vv, *ww, *x, *y, *z;
+    double *uu = 0, *vv = 0, *ww = 0, *x = 0, *y = 0, *z = 0;
     uu = oskar_mem_double(oskar_vis_block_baseline_uu_metres(blk), &status);
     vv = oskar_mem_double(oskar_vis_block_baseline_vv_metres(blk), &status);
     ww = oskar_mem_double(oskar_vis_block_baseline_ww_metres(blk), &status);

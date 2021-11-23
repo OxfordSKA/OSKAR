@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <gtest/gtest.h>
@@ -40,37 +17,28 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <vector>
 
 #define D2R M_PI/180.0
 
 TEST(coordinate_conversions, lon_lat_to_xyz)
 {
     int num_pts = 1;
-    double *x, *y, *z, *lon_in, *lat_in, *lon_out, *lat_out;
-    x = (double*)malloc(num_pts * sizeof(double));
-    y = (double*)malloc(num_pts * sizeof(double));
-    z = (double*)malloc(num_pts * sizeof(double));
-    lon_in = (double*)malloc(num_pts * sizeof(double));
-    lat_in = (double*)malloc(num_pts * sizeof(double));
-    lon_out = (double*)malloc(num_pts * sizeof(double));
-    lat_out = (double*)malloc(num_pts * sizeof(double));
+    std::vector<double> x(num_pts), y(num_pts), z(num_pts);
+    std::vector<double> lon_in(num_pts), lat_in(num_pts);
+    std::vector<double> lon_out(num_pts), lat_out(num_pts);
     double delta = 1e-8;
 
     lon_in[0] = 50.0 * M_PI/180.0;
     lat_in[0] = 30.0 * M_PI/180.0;
 
-    oskar_convert_lon_lat_to_xyz_d(num_pts, lon_in, lat_in, x, y, z);
-    oskar_convert_xyz_to_lon_lat_d(num_pts, x, y, z, lon_out, lat_out);
+    oskar_convert_lon_lat_to_xyz_d(num_pts,
+            &lon_in[0], &lat_in[0], &x[0], &y[0], &z[0]);
+    oskar_convert_xyz_to_lon_lat_d(num_pts,
+            &x[0], &y[0], &z[0], &lon_out[0], &lat_out[0]);
 
     ASSERT_NEAR(lon_in[0], lon_out[0], delta);
     ASSERT_NEAR(lat_in[0], lat_out[0], delta);
-    free(x);
-    free(y);
-    free(z);
-    free(lon_in);
-    free(lat_in);
-    free(lon_out);
-    free(lat_out);
 }
 
 TEST(coordinate_conversions, ra_dec_to_directions)
@@ -87,61 +55,50 @@ TEST(coordinate_conversions, ra_dec_to_directions)
 
     // Set up the grid.
     int num_points = num_l * num_m;
-    double *l_1, *m_1, *l_2, *m_2, *n_2, *ra, *dec;
-    l_1 = (double*)malloc(num_points * sizeof(double));
-    m_1 = (double*)malloc(num_points * sizeof(double));
-    l_2 = (double*)malloc(num_points * sizeof(double));
-    m_2 = (double*)malloc(num_points * sizeof(double));
-    n_2 = (double*)malloc(num_points * sizeof(double));
-    ra  = (double*)malloc(num_points * sizeof(double));
-    dec = (double*)malloc(num_points * sizeof(double));
+    std::vector<double> l_1(num_points), m_1(num_points);
+    std::vector<double> l_2(num_points), m_2(num_points), n_2(num_points);
+    std::vector<double> ra(num_points), dec(num_points);
     oskar_evaluate_image_lm_grid_d(num_l, num_m, fov_lon_deg * M_PI / 180.0,
-            fov_lat_deg * M_PI / 180.0, l_1, m_1);
+            fov_lat_deg * M_PI / 180.0, &l_1[0], &m_1[0]);
 
     // Convert from l,m grid to spherical coordinates.
     const double cos_dec0 = cos(dec0);
     const double sin_dec0 = sin(dec0);
     oskar_convert_relative_directions_to_lon_lat_2d_d(num_points,
-            l_1, m_1, 0, ra0, cos_dec0, sin_dec0, ra, dec);
+            &l_1[0], &m_1[0], 0, ra0, cos_dec0, sin_dec0, &ra[0], &dec[0]);
 
     // Check reverse direction.
-    oskar_convert_lon_lat_to_relative_directions_3d_d(num_points,
-            ra, dec, ra0, cos(dec0), sin(dec0), l_2, m_2, n_2);
+    oskar_convert_lon_lat_to_relative_directions_3d_d(num_points, &ra[0],
+            &dec[0], ra0, cos(dec0), sin(dec0), &l_2[0], &m_2[0], &n_2[0]);
 
     for (int i = 0; i < num_points; ++i)
     {
         ASSERT_NEAR(l_1[i], l_2[i], 1e-15);
         ASSERT_NEAR(m_1[i], m_2[i], 1e-15);
-        double n_1 = sqrt(1.0 - l_1[i]*l_1[i] - m_1[i]*m_1[i]);
+        const double n_1 = sqrt(1.0 - l_1[i]*l_1[i] - m_1[i]*m_1[i]);
         ASSERT_NEAR(n_1, n_2[i], 1e-15);
     }
-    free(l_1);
-    free(m_1);
-    free(l_2);
-    free(m_2);
-    free(n_2);
-    free(ra);
-    free(dec);
 }
 
 
 TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
 {
-    int type, loc, num = 1, status = 0;
-    double lon, lat, era, ra0, dec0, tol;
+    int type = 0, loc = 0, num = 1, status = 0;
+    double tol = 0.0;
 
     // Observer's location and ERA.
-    lon = 0.0;
-    lat = 73 * D2R;
-    era = 12 * D2R;
+    const double lon = 0.0;
+    const double lat = 73 * D2R;
+    const double era = 12 * D2R;
 
     // RA and Dec of phase centre.
-    ra0  = 36 * D2R;
-    dec0 = 60 * D2R;
+    const double ra0  = 36 * D2R;
+    const double dec0 = 60 * D2R;
 
     // Single precision.
     {
-        oskar_Mem *ra, *dec, *l, *m, *n, *x, *y, *z, *x_gpu, *y_gpu, *z_gpu;
+        oskar_Mem *ra = 0, *dec = 0, *l = 0, *m = 0, *n = 0;
+        oskar_Mem *x = 0, *y = 0, *z = 0, *x_gpu = 0, *y_gpu = 0, *z_gpu = 0;
         type = OSKAR_SINGLE;
         loc = OSKAR_CPU;
         tol = 1e-5;
@@ -219,7 +176,7 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
-        double max_err, mean_err;
+        double max_err = 0.0, mean_err = 0.0;
         oskar_mem_evaluate_relative_error(x_gpu, x,
                 0, &max_err, &mean_err, 0, &status);
         ASSERT_LT(max_err, tol);
@@ -251,7 +208,8 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
 
     // Double precision.
     {
-        oskar_Mem *ra, *dec, *l, *m, *n, *x, *y, *z, *x_gpu, *y_gpu, *z_gpu;
+        oskar_Mem *ra = 0, *dec = 0, *l = 0, *m = 0, *n = 0;
+        oskar_Mem *x = 0, *y = 0, *z = 0, *x_gpu = 0, *y_gpu = 0, *z_gpu = 0;
         type = OSKAR_DOUBLE;
         loc = OSKAR_CPU;
         tol = 1e-12;
@@ -329,7 +287,7 @@ TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
-        double max_err, mean_err;
+        double max_err = 0.0, mean_err = 0.0;
         oskar_mem_evaluate_relative_error(x_gpu, x,
                 0, &max_err, &mean_err, 0, &status);
         ASSERT_LT(max_err, tol);

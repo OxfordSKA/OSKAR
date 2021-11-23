@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2012-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2012-2021, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <cstdio>
@@ -68,7 +45,9 @@ struct oskar_DeviceKernels
 #ifdef OSKAR_HAVE_OPENCL
         for (std::map<std::string, cl_kernel>::iterator i = kernel.begin();
                 i != kernel.end(); ++i)
+        {
             clReleaseKernel(i->second);
+        }
 #endif
     }
 };
@@ -104,13 +83,19 @@ void oskar_device_check_local_size(int location, unsigned int dim,
 {
     size_t max_size = 1;
     if (location == OSKAR_GPU)
+    {
         max_size = (dim == 0 || dim == 1) ? 1024 : 64;
+    }
     else if (location & OSKAR_CL)
     {
         if (oskar_device_is_cpu(location))
+        {
             max_size = 128;
+        }
         else if (current_device_ < cl_devices_.size() && dim < 3)
+        {
             max_size = cl_devices_[current_device_]->max_local_size[dim];
+        }
     }
     if (local_size[dim] > max_size) local_size[dim] = max_size;
 }
@@ -165,7 +150,9 @@ void oskar_device_init_cl(void)
     oskar_log_section(0, 'S', "OpenCL device set-up");
     oskar_Device** devices = oskar_device_create_list(OSKAR_CL, &num_devices);
     for (int i = 0; i < (int)cl_devices_.size(); ++i)
+    {
         oskar_device_free(cl_devices_[i]);
+    }
     cl_devices_.clear();
     for (int i = 0; i < num_devices; ++i)
     {
@@ -230,7 +217,7 @@ void oskar_device_launch_kernel(const char* name, int location,
     if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        size_t j, shared_mem = 0;
+        size_t j = 0, shared_mem = 0;
         dim3 num_threads, num_blocks;
         void* arg_[40];
         (void) num_dims;
@@ -293,7 +280,7 @@ void oskar_device_launch_kernel(const char* name, int location,
     else if (location & OSKAR_CL)
     {
 #ifdef OSKAR_HAVE_OPENCL
-        size_t i, j, work_group_size = 0;
+        size_t i = 0, j = 0, work_group_size = 0;
         cl_int error = 0;
         cl_kernel k = 0;
         if (cl_devices_.size() == 0) oskar_device_init_cl();
@@ -309,14 +296,18 @@ void oskar_device_launch_kernel(const char* name, int location,
             return;
         }
         for (i = 0; i < num_args; ++i)
+        {
             error |= clSetKernelArg(k, (cl_uint) i, arg[i].size, arg[i].ptr);
+        }
         if (!oskar_device_is_cpu(location))
+        {
             for (j = 0; j < num_local_args; ++j)
             {
                 size_t t = arg_size_local[j];
                 if (t == 0) t = 8;
                 error |= clSetKernelArg(k, (cl_uint) (i + j), t, 0);
             }
+        }
         if (error != CL_SUCCESS)
         {
             *status = OSKAR_ERR_INVALID_ARGUMENT;
@@ -346,7 +337,9 @@ void oskar_device_launch_kernel(const char* name, int location,
 #endif
     }
     else
+    {
         *status = OSKAR_ERR_BAD_LOCATION;
+    }
 }
 
 char* oskar_device_name(int location, int id)
@@ -396,7 +389,9 @@ void oskar_device_reset_all(void)
 #endif
     mutex_.lock();
     for (size_t i = 0; i < cl_devices_.size(); ++i)
+    {
         oskar_device_free(cl_devices_[i]);
+    }
     cl_devices_.clear();
     current_device_ = 0;
     mutex_.unlock();
@@ -465,8 +460,12 @@ static char* oskar_device_cache_path(const oskar_Device* device,
 {
     std::string t = std::string(".oskar_cache_") + std::string(device->name);
     for (size_t i = 0; i < t.length(); ++i)
+    {
         if (t[i] == ' ' || t[i] == '@' || t[i] == '(' || t[i] == ')')
+        {
             t[i] = '_';
+        }
+    }
     return oskar_dir_get_home_path(t.c_str(), cache_exists);
 }
 
@@ -550,7 +549,9 @@ static void oskar_device_binary_save_cl(const oskar_Device* device)
         unsigned char** binaries =
                 (unsigned char**) malloc(num_devices * sizeof(unsigned char*));
         for (cl_uint i = 0; i < num_devices; ++i)
+        {
             binaries[i] = (unsigned char*) malloc(binary_sizes[i]);
+        }
         clGetProgramInfo(device->program, CL_PROGRAM_BINARIES,
                 num_devices * sizeof(unsigned char*), binaries, 0);
         const int program_source_len = (int) device->kern->src.length();
@@ -597,9 +598,13 @@ static void oskar_device_set_up_cl(oskar_Device* device)
 {
     int error = 0;
     if (!device->init)
+    {
         oskar_device_get_info_cl(device);
+    }
     if (!device->kern)
+    {
         device->kern = new oskar_DeviceKernels;
+    }
     std::vector<const char*>& sv = oskar::CLRegistrar::sources();
     std::deque<std::string> headers, sources;
     enum {HEADER, SOURCE};
@@ -608,33 +613,55 @@ static void oskar_device_set_up_cl(oskar_Device* device)
         std::string s(*i);
         int fragment_type = SOURCE;
         if (strstr(s.c_str(), "typedef") || strstr(s.c_str(), "#define"))
+        {
             fragment_type = HEADER;
+        }
         if (fragment_type == SOURCE)
         {
             if ((strstr(s.c_str(), "_CPU") && device->device_type != 'C') ||
                     (strstr(s.c_str(), "_GPU") && device->device_type != 'G'))
+            {
                 continue;
+            }
         }
         if (strstr(s.c_str(), "Real"))
         {
             std::string orig(s);
             s = find_replace(orig, "Real", "float");
             if (device->supports_double)
+            {
                 s.append(find_replace(orig, "Real", "double"));
+            }
         }
-        if (fragment_type == HEADER) headers.push_back(s);
-        else sources.push_back(s);
+        if (fragment_type == HEADER)
+        {
+            headers.push_back(s);
+        }
+        else
+        {
+            sources.push_back(s);
+        }
     }
     if (device->supports_atomic64)
+    {
         headers.push_front("#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable\n");
+    }
     if (device->supports_atomic32)
+    {
         headers.push_front("#pragma OPENCL EXTENSION cl_khr_global_int32_base_atomics : enable\n");
+    }
     if (device->supports_double)
+    {
         headers.push_front("#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n");
+    }
     if (device->supports_double && device->supports_atomic64)
+    {
         headers.push_front("#define PREFER_DOUBLE double\n");
+    }
     else
+    {
         headers.push_front("#define PREFER_DOUBLE float\n");
+    }
     std::string& src = device->kern->src;
     src.clear();
     for (size_t i = 0; i < headers.size(); ++i) src.append(headers[i]);
@@ -655,7 +682,10 @@ static void oskar_device_set_up_cl(oskar_Device* device)
     };
     device->context = clCreateContext(props,
             1, &device->device_id_cl, 0, 0, &error);
-    if (error != CL_SUCCESS) func = "clCreateContext";
+    if (error != CL_SUCCESS)
+    {
+        func = "clCreateContext";
+    }
     else
     {
         cl_int binary_status = CL_SUCCESS;
@@ -665,8 +695,14 @@ static void oskar_device_set_up_cl(oskar_Device* device)
             const unsigned char* bin[] = { program_binary };
             device->program = clCreateProgramWithBinary(device->context, 1,
                     &device->device_id_cl, len, bin, &binary_status, &error);
-            if (error != CL_SUCCESS) func = "clCreateProgramWithBinary";
-            else if (binary_status == CL_SUCCESS) used_binary = 1;
+            if (error != CL_SUCCESS)
+            {
+                func = "clCreateProgramWithBinary";
+            }
+            else if (binary_status == CL_SUCCESS)
+            {
+                used_binary = 1;
+            }
         }
         if (!program_binary || binary_status != CL_SUCCESS)
         {
@@ -693,12 +729,18 @@ static void oskar_device_set_up_cl(oskar_Device* device)
         {
             if ((error = clCreateKernelsInProgram(device->program,
                     0, NULL, &num_kernels)) != CL_SUCCESS)
+            {
                 func = "clCreateKernelsInProgram";
+            }
             kernels.resize(num_kernels);
             if (error == CL_SUCCESS && num_kernels > 0)
+            {
                 if ((error = clCreateKernelsInProgram(device->program,
                         num_kernels, &kernels[0], NULL)) != CL_SUCCESS)
+                {
                     func = "clCreateKernelsInProgram";
+                }
+            }
         }
         else
         {
@@ -738,5 +780,7 @@ static void oskar_device_set_up_cl(oskar_Device* device)
 
     // Save program binary to file if it was built from source.
     if (!used_binary && !error)
+    {
         oskar_device_binary_save_cl(device);
+    }
 }

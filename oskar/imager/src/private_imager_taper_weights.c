@@ -14,7 +14,7 @@ void oskar_imager_taper_weights(size_t num_points, const oskar_Mem* uu,
         const oskar_Mem* vv, const oskar_Mem* weight_in, oskar_Mem* weight_out,
         const double uv_taper[2], int* status)
 {
-    size_t i;
+    size_t i = 0;
     if (*status) return;
 
     /* Size the output array. */

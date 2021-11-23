@@ -27,23 +27,33 @@ oskar_Imager* oskar_settings_to_imager(oskar::SettingsTree* s,
     // Set GPU IDs.
     s->begin_group("image");
     if (!s->to_int("use_gpus", status))
+    {
         oskar_imager_set_gpus(h, 0, 0, status);
+    }
     else
     {
         if (s->starts_with("cuda_device_ids", "all", status))
+        {
             oskar_imager_set_gpus(h, -1, 0, status);
+        }
         else
         {
             int size = 0;
             const int* ids = s->to_int_list("cuda_device_ids", &size, status);
             if (size > 0)
+            {
                 oskar_imager_set_gpus(h, size, ids, status);
+            }
         }
     }
     if (s->starts_with("num_devices", "auto", status))
+    {
         oskar_imager_set_num_devices(h, -1);
+    }
     else
+    {
         oskar_imager_set_num_devices(h, s->to_int("num_devices", status));
+    }
 
     // Set input and output files.
     int num_files = 0;
@@ -60,9 +70,13 @@ oskar_Imager* oskar_settings_to_imager(oskar::SettingsTree* s,
     oskar_imager_set_image_type(h,
             s->to_string("image_type", status), status);
     if (s->to_int("specify_cellsize", status))
+    {
         oskar_imager_set_cellsize(h, s->to_double("cellsize_arcsec", status));
+    }
     else
+    {
         oskar_imager_set_fov(h, s->to_double("fov_deg", status));
+    }
     oskar_imager_set_size(h, s->to_int("size", status), status);
     oskar_imager_set_channel_snapshots(h,
             s->to_int("channel_snapshots", status));
@@ -88,16 +102,20 @@ oskar_Imager* oskar_settings_to_imager(oskar::SettingsTree* s,
                 s->to_int("fft/oversample", status), status);
     }
     if (!s->starts_with("wproj/num_w_planes", "auto", status))
+    {
         oskar_imager_set_num_w_planes(h,
                 s->to_int("wproj/num_w_planes", status));
+    }
     oskar_imager_set_fft_on_gpu(h, s->to_int("fft/use_gpu", status));
     oskar_imager_set_grid_on_gpu(h, s->to_int("fft/grid_on_gpu", status));
     oskar_imager_set_generate_w_kernels_on_gpu(h,
             s->to_int("wproj/generate_w_kernels_on_gpu", status));
     if (s->first_letter("direction", status) == 'R')
+    {
         oskar_imager_set_direction(h,
                 s->to_double("direction/ra_deg", status),
                 s->to_double("direction/dec_deg", status));
+    }
 
     // Return handle to imager.
     s->clear_group();

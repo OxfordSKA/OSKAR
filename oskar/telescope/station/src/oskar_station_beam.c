@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -83,8 +83,8 @@ void oskar_station_beam(
         oskar_Mem* beam,
         int* status)
 {
-    int i;
-    oskar_Mem *out, *enu[3], *lmn[3];
+    int i = 0;
+    oskar_Mem *out = 0, *enu[3], *lmn[3];
     const size_t num_points_orig = (size_t)num_points;
     if (*status) return;
 
@@ -154,8 +154,10 @@ void oskar_station_beam(
 
         /* Copy normalisation source to ENU source coordinates. */
         for (i = 0; i < 3; ++i)
+        {
             oskar_mem_copy_contents(enu[i],
                     work->temp_dir_out[i], num_points, 0, 1, status);
+        }
 
         /* Increment number of points to evaluate. */
         num_points++;
@@ -264,8 +266,10 @@ void oskar_station_beam(
         }
 
         if (tec_phase)
+        {
             oskar_mem_multiply(out, tec_phase, out,
                     0, 0, 0, num_points_orig, status);
+        }
     }
 
     /* Copy output beam data. */
@@ -275,4 +279,3 @@ void oskar_station_beam(
 #ifdef __cplusplus
 }
 #endif
-

@@ -23,18 +23,26 @@ void oskar_dierckx_fpsurf(int iopt, int m, double *x, double *y,
         int *index, int *nummer, double *wrk, int lwrk, int *ier)
 {
     /* System generated locals */
-    int a_offset, q_offset, bx_offset, by_offset;
-    double r1;
+    int a_offset = 0, q_offset = 0, bx_offset = 0, by_offset = 0;
+    double r1 = 0.0;
 
     /* Local variables */
-    int i, iband = 0, iband1 = 0, iband3, iband4, ibb, ichang, ich1, ich3, ii;
-    int in, irot, iter, i1, i2, i3, j, jrot, jxy, j1, kx, kx1, kx2, ky, ky1;
-    int ky2, l, la, lf, lh, lwest, lx, ly, l1, l2, n, ncof = 0, nk1x = 0;
-    int nk1y = 0, nminx, nminy, nreg = 0, nrint, num, num1, nx, nxe, nxx, ny;
-    int nye, nyy = 0, n1, rank;
-    double acc = 0.0, arg, cos_, dmax, fac1, fac2, fpmax, fpms = 0.0, f1, f2;
-    double f3, eps, hxi, p, pinv, piv, p1, p2, p3, sigma, sin_, sq, store, wi;
-    double rn, hx[6], hy[6], x0, x1, y0, y1, zi, con1, con4, con9;
+    int i = 0, iband = 0, iband1 = 0, iband3 = 0, iband4 = 0, ibb = 0;
+    int ichang = 0, ich1 = 0, ich3 = 0, ii = 0;
+    int in = 0, irot = 0, iter = 0, i1 = 0, i2 = 0, i3 = 0, j = 0;
+    int jrot = 0, jxy = 0, j1 = 0, kx = 0, kx1 = 0, kx2 = 0, ky = 0, ky1 = 0;
+    int ky2 = 0, l = 0, la = 0, lf = 0, lh = 0, lwest = 0, lx = 0, ly = 0;
+    int l1 = 0, l2 = 0, n = 0, ncof = 0, nk1x = 0;
+    int nk1y = 0, nminx = 0, nminy = 0, nreg = 0, nrint = 0, num = 0, num1 = 0;
+    int nx = 0, nxe = 0, nxx = 0, ny = 0;
+    int nye = 0, nyy = 0, n1 = 0, rank = 0;
+    double acc = 0.0, arg = 0.0, cos_ = 0.0, dmax = 0.0;
+    double fac1 = 0.0, fac2 = 0.0, fpmax = 0.0, fpms = 0.0, f1 = 0.0, f2 = 0.0;
+    double f3 = 0.0, eps = 0.0, hxi = 0.0, p = 0.0, pinv = 0.0, piv = 0.0;
+    double p1 = 0.0, p2 = 0.0, p3 = 0.0, sigma = 0.0, sin_ = 0.0, sq = 0.0;
+    double store = 0.0, wi = 0.0;
+    double rn = 0.0, hx[6], hy[6], x0 = 0.0, x1 = 0.0, y0 = 0.0, y1 = 0.0;
+    double zi = 0.0, con1 = 0.0, con4 = 0.0, con9 = 0.0;
 
     /* Parameter adjustments */
     --nummer;

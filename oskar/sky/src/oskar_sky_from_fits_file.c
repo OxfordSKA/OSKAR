@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The OSKAR Developers.
+ * Copyright (c) 2016-2021, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -26,7 +26,7 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
     int image_size[2];
     oskar_Sky* t = 0;
     oskar_Mem* data = 0;
-    fitsfile* fptr;
+    fitsfile* fptr = 0;
 
     /* Determine whether this is a regular FITS image or HEALPix data. */
     fits_open_file(&fptr, filename, READONLY, status);
@@ -43,7 +43,9 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
         data = oskar_mem_read_healpix_fits(filename, 0,
                 &nside, &ordering, &coordsys, &reported_map_units, status);
         if (data)
+        {
             pixel_area_sr = (4.0 * M_PI) / oskar_mem_length(data);
+        }
 
         /* Check HEALPix ordering scheme. */
         if (!*status && ordering != 'R')
@@ -64,19 +66,25 @@ oskar_Sky* oskar_sky_from_fits_file(int precision, const char* filename,
 
     /* Make sure pixels are in Jy. */
     if (image_freq_hz == 0.0)
+    {
         image_freq_hz = frequency_hz;
+    }
     oskar_convert_brightness_to_jy(data, beam_area_pixels, pixel_area_sr,
             image_freq_hz, min_peak_fraction, min_abs_val, reported_map_units,
             default_map_units, override_units, status);
 
     /* Convert the image into a sky model. */
     if (naxis == 0)
+    {
         t = oskar_sky_from_healpix_ring(precision, data, image_freq_hz,
                 spectral_index, nside, (coordsys == 'G'), status);
+    }
     else
+    {
         t = oskar_sky_from_image(precision, data,
                 image_size, image_crval_deg, image_crpix,
                 image_cellsize_deg, image_freq_hz, spectral_index, status);
+    }
 
     /* Free pixel data and return sky model. */
     free(reported_map_units);
