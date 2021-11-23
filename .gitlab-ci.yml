@@ -61,7 +61,8 @@ linting:
     - cd release/
     - cmake ../ -DCUDA_ARCH=6.1 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
   script:
-    - run-clang-tidy -quiet -checks='google-readability-braces-around-statements,cppcoreguidelines-init-variables' oskar > clang-tidy.out
+    - echo "Running lint check"
+    - run-clang-tidy -quiet -checks='google-readability-braces-around-statements,cppcoreguidelines-init-variables' '^(?:(?!extern).)*$\r?\n?' > clang-tidy.out
     - cat clang-tidy.out | ../cmake/clang-tidy-to-junit/clang-tidy-to-junit.py ../ > linting.xml
   after_script:
     - mv release/linting.xml build/reports/

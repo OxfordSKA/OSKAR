@@ -151,6 +151,9 @@ About::About(QString app_name, QString app_version, QWidget *parent)
     html.append("<li>The NVIDIA CUDA toolkit: "
                 "<a href=\"https://developer.nvidia.com/cuda-zone\">"
                 "https://developer.nvidia.com/cuda-zone</a></li>");
+    html.append("<li>The HDF 5 library: "
+                "<a href=\"http://www.hdfgroup.org/\">"
+                "http://www.hdfgroup.org/</a></li>");
     html.append("<li>The FFTPACK 5 FFT library: "
                 "<a href=\"https://www2.cisl.ucar.edu/resources/legacy/fft5\">"
                 "https://www2.cisl.ucar.edu/resources/legacy/fft5</a></li>");
