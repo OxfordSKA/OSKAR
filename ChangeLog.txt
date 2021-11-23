@@ -1,4 +1,4 @@
-2021-XX-YY  OSKAR-2.8.0
+2021-11-23  OSKAR-2.8.0
 
     * Fix read of ionosphere pixel size from FITS header.
 
