@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -43,7 +43,7 @@ static string to_string(const vector<double>& values, char delimiter)
 
 DoubleList::DoubleList()
 {
-    (void) init(0);
+    (void) DoubleList::init(0);
 }
 
 // LCOV_EXCL_START

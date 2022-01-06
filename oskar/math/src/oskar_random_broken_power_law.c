@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -54,7 +54,8 @@ double oskar_random_broken_power_law(double min, double max, double breakpoint,
                     pow(breakpoint, index1 - index2) / index2p1;
         }
 
-        const double r = rand() / ((double)RAND_MAX + 1.0);
+        /* NOLINTNEXTLINE: We can use rand() here without concern. */
+        const double r = (double)rand() / ((double)RAND_MAX + 1.0);
         if (r > b1 / (b1 + b2))
         {
             return oskar_random_power_law(breakpoint, max, index2);

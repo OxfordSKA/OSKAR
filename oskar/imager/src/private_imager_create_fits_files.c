@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -26,8 +26,8 @@ extern "C" {
 #endif
 
 static fitsfile* create_fits_file(const char* filename, int precision,
-        int width, int height, int num_channels, double centre_deg[2],
-        double fov_deg[2], double start_freq_hz, double delta_freq_hz,
+        int width, int height, int num_channels, const double centre_deg[2],
+        const double fov_deg[2], double start_freq_hz, double delta_freq_hz,
         int* status);
 static void write_axis_header(fitsfile* fptr, int axis_id,
         const char* ctype, const char* ctype_comment, double crval,
@@ -79,16 +79,18 @@ void oskar_imager_create_fits_files(oskar_Imager* h, int* status)
         h->fits_file[i] = create_fits_file(f, h->imager_prec, h->image_size,
                 h->image_size, h->num_im_channels, h->im_centre_deg, fov_deg,
                 h->im_freqs[0], h->freq_inc_hz, status);
-        h->output_name[i] = (char*) realloc(h->output_name[i], 1 + strlen(f));
-        strcpy(h->output_name[i], f);
+        const size_t buffer_size = 1 + strlen(f);
+        free(h->output_name[i]);
+        h->output_name[i] = (char*) calloc(buffer_size, sizeof(char));
+        if (h->output_name[i]) memcpy(h->output_name[i], f, buffer_size);
     }
     oskar_timer_pause(h->tmr_write);
 }
 
 
 fitsfile* create_fits_file(const char* filename, int precision,
-        int width, int height, int num_channels, double centre_deg[2],
-        double fov_deg[2], double start_freq_hz, double delta_freq_hz,
+        int width, int height, int num_channels, const double centre_deg[2],
+        const double fov_deg[2], double start_freq_hz, double delta_freq_hz,
         int* status)
 {
     long naxes[3];

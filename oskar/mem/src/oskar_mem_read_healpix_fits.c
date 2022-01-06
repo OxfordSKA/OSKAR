@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -151,7 +151,7 @@ oskar_Mem* oskar_mem_read_healpix_fits(const char* filename,
     if (!status1 && len > 0)
     {
         *brightness_units = (char*) realloc (*brightness_units, len + 1);
-        strcpy(*brightness_units, card1);
+        memcpy(*brightness_units, card1, len + 1);
     }
 
     /* Read the FITS binary table into memory, and close the file. */

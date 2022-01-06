@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, The OSKAR Developers.
+ * Copyright (c) 2020-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -299,7 +299,7 @@ static oskar_Mem* read_hyperslab(const oskar_HDF5* h, const hid_t dataset,
 }
 
 static void read_dims(const oskar_HDF5* h, const hid_t dataset,
-        int* num_dims, size_t** dims, int* status)
+        int* num_dims, size_t** dims, const int* status)
 {
     if (*status || !h) return;
     const hid_t dataspace = H5Dget_space(dataset);
@@ -416,9 +416,10 @@ void oskar_hdf5_read_attributes(const oskar_HDF5* h, const char* object_path,
                 hdf5_error = H5Aread(attribute, datatype, &data);
                 if (hdf5_error >= 0)
                 {
+                    const size_t buffer_size = 1 + strlen(data);
                     (*values)[i] = oskar_mem_create(OSKAR_CHAR,
-                            OSKAR_CPU, 1 + strlen(data), status);
-                    strcpy(oskar_mem_char((*values)[i]), data);
+                            OSKAR_CPU, buffer_size, status);
+                    memcpy(oskar_mem_char((*values)[i]), data, buffer_size);
                 }
                 H5free_memory(data);
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -43,11 +43,11 @@ void oskar_convert_brightness_to_jy(oskar_Mem* data, double beam_area_pixels,
             val = img[i];
             if (val < min_abs_val)
             {
-                img[i] = 0.0;
+                img[i] = 0.0f;
             }
             if (min_peak_fraction > 0.0 && val < peak_min)
             {
-                img[i] = 0.0;
+                img[i] = 0.0f;
             }
         }
     }

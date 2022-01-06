@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -219,8 +219,8 @@ void oskar_beam_pattern_generate_coordinates(oskar_BeamPattern* h,
                 float* el_ = oskar_mem_float(el, status);
                 for (i = 0; i < num_pixels; ++i)
                 {
-                    az_[i] = (M_PI / 2.0) - az_[i]; /* phi = 90 - az. */
-                    el_[i] = (M_PI / 2.0) - el_[i]; /* theta = 90 - el. */
+                    az_[i] = (float)(M_PI / 2.0) - az_[i]; /* phi = 90 - az. */
+                    el_[i] = (float)(M_PI / 2.0) - el_[i]; /* theta = 90 - el. */
                 }
             }
             else
@@ -301,15 +301,17 @@ static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
         }
 
         /* Store the coordinates in radians. */
+        const double current_lon_rad = par[0] * (M_PI / 180.0);
+        const double current_lat_rad = par[1] * (M_PI / 180.0);
         if (type == OSKAR_DOUBLE)
         {
-            oskar_mem_double(lon, status)[n] = par[0] * (M_PI / 180.0);
-            oskar_mem_double(lat, status)[n] = par[1] * (M_PI / 180.0);
+            oskar_mem_double(lon, status)[n] = current_lon_rad;
+            oskar_mem_double(lat, status)[n] = current_lat_rad;
         }
         else
         {
-            oskar_mem_float(lon, status)[n] = par[0] * (M_PI / 180.0);
-            oskar_mem_float(lat, status)[n] = par[1] * (M_PI / 180.0);
+            oskar_mem_float(lon, status)[n] = (float)current_lon_rad;
+            oskar_mem_float(lat, status)[n] = (float)current_lat_rad;
         }
 
         ++n;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -46,7 +46,7 @@ bool StringList::set_default(const char* s)
 {
     default_ = oskar_settings_utility_string_get_type_params(s);
     str_default_ = to_string(default_, delimiter_);
-    set_value(s);
+    this->set_value(s);
     return true;
 } // LCOV_EXCL_LINE
 

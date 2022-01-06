@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -28,14 +28,14 @@ bool OptionList::init(const char* s)
 
 bool OptionList::set_default(const char* value)
 {
-    bool ok = from_string_(str_default_, value);
-    if (ok) set_value(value);
+    bool ok = this->from_string(str_default_, value);
+    if (ok) this->set_value(value);
     return ok;
 } // LCOV_EXCL_LINE
 
 bool OptionList::set_value(const char* value)
 {
-    return from_string_(str_value_, value);
+    return this->from_string(str_value_, value);
 } // LCOV_EXCL_LINE
 
 bool OptionList::is_default() const { return str_value_ == str_default_; }
@@ -57,7 +57,7 @@ const char* OptionList::option(int i) const
     return i < (int) options_.size() ? options_[i].c_str() : 0;
 }
 
-bool OptionList::from_string_(std::string& value, const std::string& s) const
+bool OptionList::from_string(std::string& value, const std::string& s) const
 {
     for (size_t i = 0; i < options_.size(); ++i)
     {

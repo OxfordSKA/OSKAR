@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -18,7 +18,7 @@ namespace oskar {
 
 DoubleRange::DoubleRange()
 {
-    init("");
+    DoubleRange::init("");
 }
 
 // LCOV_EXCL_START
@@ -92,7 +92,7 @@ bool DoubleRange::set_default(const char* s)
 {
     string v(s);
     format_ = (v.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
-    bool ok = from_string_(default_, v);
+    bool ok = this->from_string(default_, v);
     str_default_ = oskar_settings_utility_double_to_string_2(default_,
             (format_ == AUTO ? 'g' : 'e'));
     if (ok) set_value(s);
@@ -103,7 +103,7 @@ bool DoubleRange::set_value(const char* s)
 {
     string v(s);
     format_ = (v.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
-    bool ok = from_string_(value_, v);
+    bool ok = this->from_string(value_, v);
     str_value_ = oskar_settings_utility_double_to_string_2(value_,
             (format_ == AUTO ? 'g' : 'e'));
     return ok;
@@ -134,7 +134,7 @@ double DoubleRange::default_value() const
     return default_;
 }
 
-bool DoubleRange::from_string_(double& value, const string& s) const
+bool DoubleRange::from_string(double& value, const string& s) const
 {
     bool ok = true;
     double d = oskar_settings_utility_string_to_double(s, &ok);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -503,7 +503,7 @@ void MainWindow::appChanged(QString text)
     model_->beginReset();
     try
     {
-        settings_declare_xml(settings_, settings.constData());
+        oskar_settings_declare_xml(settings_, settings.constData());
     }
     catch (std::exception& e)
     {

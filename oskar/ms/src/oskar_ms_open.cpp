@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -14,7 +14,8 @@
 
 using namespace casacore;
 
-static oskar_MeasurementSet* _oskar_ms_open(const char* filename, bool readonly)
+static oskar_MeasurementSet* oskar_ms_open_private(
+        const char* filename, bool readonly)
 {
     oskar_MeasurementSet* p = (oskar_MeasurementSet*)
             calloc(1, sizeof(oskar_MeasurementSet));
@@ -33,7 +34,7 @@ static oskar_MeasurementSet* _oskar_ms_open(const char* filename, bool readonly)
         }
 #ifdef OSKAR_MS_NEW
         p->ms = new Table(filename, lock, mode);
-        bind_refs(p);
+        oskar_ms_bind_refs(p);
 #else
         p->ms = new MeasurementSet(filename, lock, mode);
 
@@ -167,10 +168,10 @@ static oskar_MeasurementSet* _oskar_ms_open(const char* filename, bool readonly)
 
 oskar_MeasurementSet* oskar_ms_open(const char* filename)
 {
-    return _oskar_ms_open(filename, false);
+    return oskar_ms_open_private(filename, false);
 }
 
 oskar_MeasurementSet* oskar_ms_open_readonly(const char* filename)
 {
-    return _oskar_ms_open(filename, true);
+    return oskar_ms_open_private(filename, true);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 void oskar_telescope_log_summary(const oskar_Telescope* telescope,
-        oskar_Log* log, int* status)
+        oskar_Log* log, const int* status)
 {
     if (*status) return;
     oskar_log_section(log, 'M', "Telescope model summary");

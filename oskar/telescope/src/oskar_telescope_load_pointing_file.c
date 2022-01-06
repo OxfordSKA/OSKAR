@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -27,7 +27,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
         const char* filename, int* status)
 {
     char* line = 0;
-    size_t bufsize = 0, size_id = 0, num_par = 0;
+    size_t bufsize = 0, size_id = 0, i = 0, num_par = 0;
     FILE* file = 0;
     char** par = 0;
     int* id = 0;
@@ -53,11 +53,12 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
         int coordsys = 0;
-        size_t i = 0, read = 0;
-        double lon = 0.0, lat = 0.0;
+        char* end_ptr = 0;
+        const int base = 10;
 
         /* Split into string array and check for required number of fields. */
-        read = oskar_string_to_array_realloc_s(line, &num_par, &par);
+        const size_t read = oskar_string_to_array_realloc_s(
+                line, &num_par, &par);
         if (read < 4) continue;
 
         /* Get number of IDs. */
@@ -69,8 +70,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
             /* Ensure enough space in ID array. */
             if (i >= size_id)
             {
-                void* t = 0;
-                t = realloc(id, (size_id + 1) * sizeof(int));
+                void* t = realloc(id, (size_id + 1) * sizeof(int));
                 if (!t)
                 {
                     *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
@@ -87,7 +87,12 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
             }
             else
             {
-                sscanf(par[i], "%d", &(id[i]));
+                id[i] = (int) strtol(par[i], &end_ptr, base);
+                if (end_ptr == par[i])
+                {
+                    *status = OSKAR_ERR_BAD_POINTING_FILE;
+                    break;
+                }
             }
         }
         if (*status) break;
@@ -104,14 +109,22 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
 
         /* Get longitude and latitude values. */
         ++i;
-        sscanf(par[i], "%lf", &lon);
+        const double lon = strtod(par[i], &end_ptr) * DEG2RAD;
+        if (end_ptr == par[i])
+        {
+            *status = OSKAR_ERR_BAD_POINTING_FILE;
+            break;
+        }
         ++i;
-        sscanf(par[i], "%lf", &lat);
+        const double lat = strtod(par[i], &end_ptr) * DEG2RAD;
+        if (end_ptr == par[i])
+        {
+            *status = OSKAR_ERR_BAD_POINTING_FILE;
+            break;
+        }
 
         /* Set the data into the telescope model. */
-        lon *= DEG2RAD;
-        lat *= DEG2RAD;
-        if (num_ids > 0)
+        if ((num_ids > 0) && id)
         {
             int* sub_id = 0;
             if (num_ids > 1) sub_id = &id[1];

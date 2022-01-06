@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -36,8 +36,9 @@ static void write_axis(fitsfile* fptr, int axis_id, const char* ctype,
         int* status);
 static fitsfile* create_fits_file(const char* filename, int precision,
         int width, int height, int num_times, int num_channels,
-        double centre_deg[2], double fov_deg[2], double start_time_mjd,
-        double delta_time_sec, double start_freq_hz, double delta_freq_hz,
+        const double centre_deg[2], const double fov_deg[2],
+        double start_time_mjd, double delta_time_sec,
+        double start_freq_hz, double delta_freq_hz,
         int horizon_mode, const char* settings_log, size_t settings_log_length,
         int* status);
 static int data_product_index(oskar_BeamPattern* h, int data_product_type,
@@ -341,13 +342,14 @@ static void write_axis(fitsfile* fptr, int axis_id, const char* ctype,
 
 static fitsfile* create_fits_file(const char* filename, int precision,
         int width, int height, int num_times, int num_channels,
-        double centre_deg[2], double fov_deg[2], double start_time_mjd,
-        double delta_time_sec, double start_freq_hz, double delta_freq_hz,
+        const double centre_deg[2], const double fov_deg[2],
+        double start_time_mjd, double delta_time_sec,
+        double start_freq_hz, double delta_freq_hz,
         int horizon_mode, const char* settings_log, size_t settings_log_length,
         int* status)
 {
     int imagetype = 0;
-    long naxes[4], naxes_dummy[4] = {1l, 1l, 1l, 1l};
+    long naxes[4], naxes_dummy[4] = {1L, 1L, 1L, 1L};
     double delta = 0.0;
     const double deg2rad = M_PI / 180.0;
     const double rad2deg = 180.0 / M_PI;
@@ -438,7 +440,7 @@ static int data_product_index(oskar_BeamPattern* h, int data_product_type,
         int channel_average)
 {
     int i = 0;
-    for (i = 0; i < h->num_data_products; ++i)
+    for (i = 0; (i < h->num_data_products) && h->data_products; ++i)
     {
         if (h->data_products[i].type == data_product_type &&
                 h->data_products[i].stokes_in == stokes_in &&
@@ -446,7 +448,9 @@ static int data_product_index(oskar_BeamPattern* h, int data_product_type,
                 h->data_products[i].i_station == i_station &&
                 h->data_products[i].time_average == time_average &&
                 h->data_products[i].channel_average == channel_average)
+        {
             break;
+        }
     }
     if (i == h->num_data_products)
     {
@@ -492,7 +496,7 @@ static char* construct_filename(oskar_BeamPattern* h, int data_product_type,
     if (stokes_out >= 0)
         start += SNPRINTF(name + start, buflen - start, "_%s",
                 stokes_type_to_string(stokes_out));
-    start += SNPRINTF(name + start, buflen - start, ".%s", ext);
+    (void) SNPRINTF(name + start, buflen - start, ".%s", ext);
     return name;
 }
 
@@ -532,7 +536,7 @@ static void new_fits_file(oskar_BeamPattern* h, int data_product_type,
     }
     i = data_product_index(h, data_product_type, stokes_in, stokes_out,
             i_station, time_average, channel_average);
-    h->data_products[i].fits_file = f;
+    if (h->data_products) h->data_products[i].fits_file = f;
     free(name);
 }
 
@@ -592,7 +596,7 @@ static void new_text_file(oskar_BeamPattern* h, int data_product_type,
     fprintf(f, "# Total number of pixels: %d\n", h->num_pixels);
     i = data_product_index(h, data_product_type, stokes_in, stokes_out,
             i_station, time_average, channel_average);
-    h->data_products[i].text_file = f;
+    if (h->data_products) h->data_products[i].text_file = f;
     free(name);
 }
 

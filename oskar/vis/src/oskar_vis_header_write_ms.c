@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -15,6 +15,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#if __STDC_VERSION__ >= 199901L
+#define SNPRINTF(BUF, SIZE, FMT, ...) snprintf(BUF, SIZE, FMT, __VA_ARGS__);
+#else
+#define SNPRINTF(BUF, SIZE, FMT, ...) sprintf(BUF, FMT, __VA_ARGS__);
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -114,16 +120,22 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
 
     /* Check and add '.MS' file extension if necessary. */
     const size_t len = strlen(ms_path);
-    output_path = (char*) calloc(6 + len, 1);
+    const size_t buffer_size = 6 + len;
+    output_path = (char*) calloc(buffer_size, sizeof(char));
+    if (!output_path)
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        return 0;
+    }
     if ((len >= 3) && (
             !strcmp(&(ms_path[len-3]), ".MS") ||
             !strcmp(&(ms_path[len-3]), ".ms") ))
     {
-        strcpy(output_path, ms_path);
+        memcpy(output_path, ms_path, len);
     }
     else
     {
-        sprintf(output_path, "%s.MS", ms_path);
+        SNPRINTF(output_path, buffer_size, "%s.MS", ms_path);
     }
 
     /* Remove any existing directory. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021, The OSKAR Developers.
+ * Copyright (c) 2014-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -12,17 +12,17 @@
 #include <stdio.h>
 
 template<typename T1, typename T2>
-struct is_same
+struct oskar_IsSame
 {
-    enum { value = false }; // is_same represents a bool.
-    typedef is_same<T1,T2> type; // to qualify as a metafunction.
+    enum { value = false }; // oskar_IsSame represents a bool.
+    typedef oskar_IsSame<T1,T2> type; // to qualify as a metafunction.
 };
 
 template<typename T>
-struct is_same<T,T>
+struct oskar_IsSame<T,T>
 {
     enum { value = true };
-    typedef is_same<T,T> type;
+    typedef oskar_IsSame<T,T> type;
 };
 
 template
@@ -70,7 +70,7 @@ void oskar_xcorr_scalar_omp(
             REAL uv_len, uu, vv, ww, uu2, vv2, uuvv, du, dv, dw;
             REAL2 t1, t2, sum, guard;
             sum.x = sum.y = (REAL) 0;
-            if (is_same<REAL, float>::value)
+            if (oskar_IsSame<REAL, float>::value)
             {
                 guard.x = guard.y = (REAL) 0;
             }
@@ -129,7 +129,7 @@ void oskar_xcorr_scalar_omp(
                 OSKAR_MUL_COMPLEX_CONJUGATE_IN_PLACE(REAL2, t1, t2)
 
                 // Multiply result by smearing term and accumulate.
-                if (is_same<REAL, float>::value)
+                if (oskar_IsSame<REAL, float>::value)
                 {
                     OSKAR_KAHAN_SUM_MULTIPLY_COMPLEX(
                             REAL, sum, t1, smearing, guard)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -12,7 +12,7 @@ namespace oskar {
 
 UnsignedInt::UnsignedInt()
 {
-    (void) init(0);
+    (void) UnsignedInt::init(0);
 }
 
 // LCOV_EXCL_START
@@ -37,7 +37,7 @@ bool UnsignedInt::set_default(const char* value)
     if (!ok || i < 0) return false;
     default_ = i;
     str_default_ = oskar_settings_utility_int_to_string(default_);
-    set_value(value);
+    this->set_value(value);
     return true;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, The OSKAR Developers.
+ * Copyright (c) 2018-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -101,10 +101,15 @@ void oskar_device_get_info_cuda(oskar_Device* device)
     cudaDriverGetVersion(&device->cuda_driver_version);
     cudaRuntimeGetVersion(&device->cuda_runtime_version);
     cudaGetDeviceProperties(&prop, device->index);
-    device->name = (char*) realloc(device->name, 1 + strlen(prop.name));
-    device->vendor = (char*) realloc(device->vendor, 1 + strlen("NVIDIA"));
-    strcpy(device->name, prop.name);
-    strcpy(device->vendor, "NVIDIA");
+    const char* vendor_name = "NVIDIA";
+    const size_t name_length = 1 + strlen(prop.name);
+    const size_t vendor_length = 1 + strlen(vendor_name);
+    free(device->name);
+    free(device->vendor);
+    device->name = (char*) calloc(name_length, sizeof(char));
+    device->vendor = (char*) calloc(vendor_length, sizeof(char));
+    if (device->name) memcpy(device->name, prop.name, name_length);
+    if (device->vendor) memcpy(device->vendor, vendor_name, vendor_length);
     device->is_nv = 1;
     device->platform_type = 'C';
     device->device_type = 'G';

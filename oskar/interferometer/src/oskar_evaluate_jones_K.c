@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -15,12 +15,22 @@ extern "C" {
 OSKAR_JONES_K_CPU(evaluate_jones_K_float, float, float2)
 OSKAR_JONES_K_CPU(evaluate_jones_K_double, double, double2)
 
-void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
-        double frequency_hz, const oskar_Mem* source_filter,
-        double source_filter_min, double source_filter_max,
-        int ignore_w_components, int* status)
+/* NOLINTNEXTLINE(readability-identifier-naming) */
+void oskar_evaluate_jones_K(
+        oskar_Jones* K,
+        int num_sources,
+        const oskar_Mem* l,
+        const oskar_Mem* m,
+        const oskar_Mem* n,
+        const oskar_Mem* u,
+        const oskar_Mem* v,
+        const oskar_Mem* w,
+        double frequency_hz,
+        const oskar_Mem* source_filter,
+        double source_filter_min,
+        double source_filter_max,
+        int ignore_w_components,
+        int* status)
 {
     if (*status) return;
     const int type = oskar_jones_type(K);

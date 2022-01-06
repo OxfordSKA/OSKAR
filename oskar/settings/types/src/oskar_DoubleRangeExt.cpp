@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -17,7 +17,8 @@ namespace oskar {
 
 enum value_types { DOUBLE, STRING };
 
-bool compare(const DoubleRangeExt::Value& a, const DoubleRangeExt::Value& b)
+static bool compare(
+        const DoubleRangeExt::Value& a, const DoubleRangeExt::Value& b)
 {
     if (a.is_singular() || b.is_singular()) return false;
     if (a.which() != b.which()) return false;
@@ -34,7 +35,7 @@ bool compare(const DoubleRangeExt::Value& a, const DoubleRangeExt::Value& b)
 
 DoubleRangeExt::DoubleRangeExt()
 {
-    (void) init("");
+    (void) DoubleRangeExt::init("");
 }
 
 // LCOV_EXCL_START
@@ -98,12 +99,12 @@ bool DoubleRangeExt::init(const char* s)
 bool DoubleRangeExt::set_default(const char* value)
 {
     string v(value);
-    bool ok = from_string_(default_, v);
+    bool ok = this->from_string(default_, v);
     if (default_.which() == DOUBLE)
     {
         format_ = (v.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
     }
-    str_default_ = to_string_(default_);
+    str_default_ = this->to_string(default_);
     if (ok) set_value(value);
     return ok;
 }
@@ -111,12 +112,12 @@ bool DoubleRangeExt::set_default(const char* value)
 bool DoubleRangeExt::set_value(const char* value)
 {
     string v(value);
-    bool ok = from_string_(value_, v);
+    bool ok = this->from_string(value_, v);
     if (value_.which() == DOUBLE)
     {
         format_ = (v.find_first_of('e') != string::npos) ? EXPONENT : AUTO;
     }
-    str_value_ = to_string_(value_);
+    str_value_ = this->to_string(value_);
     return ok;
 }
 
@@ -174,7 +175,7 @@ bool DoubleRangeExt::operator>(const DoubleRangeExt& other) const
     return false;
 }
 
-bool DoubleRangeExt::from_string_(Value& value, const string& s) const
+bool DoubleRangeExt::from_string(Value& value, const string& s) const
 {
     if (s.empty()) return false;
 
@@ -218,20 +219,14 @@ bool DoubleRangeExt::from_string_(Value& value, const string& s) const
     return true;
 }
 
-string DoubleRangeExt::to_string_(const Value& value) const
+string DoubleRangeExt::to_string(const Value& value) const
 {
     if (value.is_singular()) return string();
     if (value.which() == DOUBLE)
     {
         double v = get<double>(value);
-        int n = 16;
-        if (v != 0.0 && v > 1.0)
-        {
-            n -= (floor(log10(v)) + 1);
-        }
-        string s = oskar_settings_utility_double_to_string_2(v,
+        return oskar_settings_utility_double_to_string_2(v,
                 format_ == AUTO ? 'g' : 'e');
-        return s;
     }
     else if (value.which() == STRING)
     {

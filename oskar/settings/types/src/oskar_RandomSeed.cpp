@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -29,7 +29,7 @@ static std::string to_string(int value)
 
 RandomSeed::RandomSeed()
 {
-    (void) init(0);
+    (void) RandomSeed::init(0);
 }
 
 // LCOV_EXCL_START
@@ -62,7 +62,10 @@ bool RandomSeed::set_value(const char* s)
     return ok;
 } // LCOV_EXCL_LINE
 
-bool RandomSeed::is_default() const { return value_ == default_; }
+bool RandomSeed::is_default() const
+{
+    return value_ == default_;
+}
 
 int RandomSeed::value() const
 {

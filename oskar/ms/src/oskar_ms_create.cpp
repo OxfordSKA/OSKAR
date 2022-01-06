@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -11,6 +11,7 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
@@ -64,7 +65,7 @@ static void add_column_frequency(TableDesc& desc, const String& column)
     desc.rwColumnDesc(column).rwKeywordSet().defineRecord("MEASINFO", rec);
 }
 
-void bind_refs(oskar_MeasurementSet* p)
+void oskar_ms_bind_refs(oskar_MeasurementSet* p)
 {
     p->msmc.antenna1.attach(*(p->ms), "ANTENNA1");
     p->msmc.antenna2.attach(*(p->ms), "ANTENNA2");
@@ -610,9 +611,11 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         create_subtables(p);
 
         // Bind main table column references.
-        bind_refs(p);
-        p->app_name = (char*) realloc(p->app_name, strlen(app_name) + 1);
-        strcpy(p->app_name, app_name);
+        oskar_ms_bind_refs(p);
+        const size_t app_name_len = 1 + strlen(app_name);
+        free(p->app_name);
+        p->app_name = (char*) calloc(app_name_len, sizeof(char));
+        if (p->app_name) memcpy(p->app_name, app_name, app_name_len);
     }
     catch (AipsError& e)
     {
@@ -1021,13 +1024,13 @@ void oskar_ms_add_band(oskar_MeasurementSet* p, int pol_id,
 }
 
 #ifdef OSKAR_MS_NEW
-int receptor1(int stokes_type)
+static int receptor1(int stokes_type)
 {
     const int rec1 = (stokes_type - 1) % 4;
     return (rec1 < 2) ? 0 : 1;
 }
 
-int receptor2(int stokes_type)
+static int receptor2(int stokes_type)
 {
     const int rec2 = (stokes_type - 1) % 4;
     return (rec2 == 0 || rec2 == 2) ? 0 : 1;

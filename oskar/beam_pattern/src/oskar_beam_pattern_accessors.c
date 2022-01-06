@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -145,11 +145,13 @@ void oskar_beam_pattern_set_gpus(oskar_BeamPattern* h, int num,
     if (*status) return;
     if (num < 0)
     {
-        h->num_gpus = h->num_gpus_avail;
-        h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
-        for (i = 0; i < h->num_gpus; ++i)
+        free(h->gpu_ids);
+        h->gpu_ids = (int*) calloc(h->num_gpus_avail, sizeof(int));
+        h->num_gpus = 0;
+        if (h->gpu_ids)
         {
-            h->gpu_ids[i] = i;
+            h->num_gpus = h->num_gpus_avail;
+            for (i = 0; i < h->num_gpus; ++i) h->gpu_ids[i] = i;
         }
     }
     else if (num > 0)
@@ -160,11 +162,13 @@ void oskar_beam_pattern_set_gpus(oskar_BeamPattern* h, int num,
             *status = OSKAR_ERR_COMPUTE_DEVICES;
             return;
         }
-        h->num_gpus = num;
-        h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
-        for (i = 0; i < h->num_gpus; ++i)
+        free(h->gpu_ids);
+        h->gpu_ids = (int*) calloc(num, sizeof(int));
+        h->num_gpus = 0;
+        if (h->gpu_ids)
         {
-            h->gpu_ids[i] = ids[i];
+            h->num_gpus = num;
+            for (i = 0; i < h->num_gpus; ++i) h->gpu_ids[i] = ids[i];
         }
     }
     else /* num == 0 */
@@ -173,7 +177,7 @@ void oskar_beam_pattern_set_gpus(oskar_BeamPattern* h, int num,
         h->gpu_ids = 0;
         h->num_gpus = 0;
     }
-    for (i = 0; i < h->num_gpus; ++i)
+    for (i = 0; (i < h->num_gpus) && h->gpu_ids; ++i)
     {
         oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
         if (*status) return;
@@ -240,8 +244,8 @@ void oskar_beam_pattern_set_num_devices(oskar_BeamPattern* h, int value)
     }
     if (value < 1) value = 1;
     h->num_devices = value;
-    h->d = (DeviceData*) realloc(h->d, h->num_devices * sizeof(DeviceData));
-    memset(h->d, 0, h->num_devices * sizeof(DeviceData));
+    free(h->d);
+    h->d = (DeviceData*) calloc(h->num_devices, sizeof(DeviceData));
 }
 
 
@@ -266,8 +270,10 @@ void oskar_beam_pattern_set_observation_time(oskar_BeamPattern* h,
 void oskar_beam_pattern_set_root_path(oskar_BeamPattern* h, const char* path)
 {
     if (!path) return;
-    h->root_path = (char*) realloc(h->root_path, 1 + strlen(path));
-    strcpy(h->root_path, path);
+    const size_t buffer_size = 1 + strlen(path);
+    free(h->root_path);
+    h->root_path = (char*) calloc(buffer_size, sizeof(char));
+    if (h->root_path) memcpy(h->root_path, path, buffer_size);
 }
 
 
@@ -282,8 +288,10 @@ void oskar_beam_pattern_set_sky_model_file(oskar_BeamPattern* h,
         const char* path)
 {
     if (!path) return;
-    h->sky_model_file = (char*) realloc(h->sky_model_file, 1 + strlen(path));
-    strcpy(h->sky_model_file, path);
+    const size_t buffer_size = 1 + strlen(path);
+    free(h->sky_model_file);
+    h->sky_model_file = (char*) calloc(buffer_size, sizeof(char));
+    if (h->sky_model_file) memcpy(h->sky_model_file, path, buffer_size);
 }
 
 
@@ -293,8 +301,12 @@ void oskar_beam_pattern_set_station_ids(oskar_BeamPattern* h,
     int i = 0;
     h->num_active_stations = num_stations;
     if (num_stations < 0) return;
-    h->station_ids = (int*) realloc(h->station_ids, num_stations * sizeof(int));
-    for (i = 0; i < num_stations; ++i) h->station_ids[i] = ids[i];
+    free(h->station_ids);
+    h->station_ids = (int*) calloc(num_stations, sizeof(int));
+    if (h->station_ids)
+    {
+        for (i = 0; i < num_stations; ++i) h->station_ids[i] = ids[i];
+    }
 }
 
 

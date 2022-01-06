@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -60,15 +60,15 @@ static std::vector<oskar_Device*> cl_devices_;
 static std::map<std::string, const void*> cuda_kernels_;
 static int require_double_ = 1; // Set if double precision is required.
 
-struct LocalMutex
+struct oskar_LocalMutex
 {
     oskar_Mutex* m;
-    LocalMutex()  { this->m = oskar_mutex_create(); }
-    ~LocalMutex() { oskar_mutex_free(this->m); }
-    void lock()   { oskar_mutex_lock(this->m); }
-    void unlock() { oskar_mutex_unlock(this->m); }
+    oskar_LocalMutex()  { this->m = oskar_mutex_create(); }
+    ~oskar_LocalMutex() { oskar_mutex_free(this->m); }
+    void lock() const   { oskar_mutex_lock(this->m); }
+    void unlock() const { oskar_mutex_unlock(this->m); }
 };
-static LocalMutex mutex_;
+static oskar_LocalMutex mutex_; // NOLINT: This constructor will not throw.
 
 void oskar_device_check_error_cuda(int* status)
 {
@@ -350,16 +350,18 @@ char* oskar_device_name(int location, int id)
         oskar_Device* device = oskar_device_create();
         device->index = id;
         oskar_device_get_info_cuda(device);
-        name = (char*) malloc(1 + strlen(device->name));
-        if (name) strcpy(name, device->name);
+        const size_t buffer_size = 1 + strlen(device->name);
+        name = (char*) calloc(buffer_size, 1);
+        if (name) memcpy(name, device->name, buffer_size);
         oskar_device_free(device);
     }
     else if (location & OSKAR_CL)
     {
         if (cl_devices_.size() == 0) oskar_device_init_cl();
         if (id >= (int) cl_devices_.size()) return name;
-        name = (char*) malloc(1 + strlen(cl_devices_[id]->name));
-        if (name) strcpy(name, cl_devices_[id]->name);
+        const size_t buffer_size = 1 + strlen(cl_devices_[id]->name);
+        name = (char*) calloc(buffer_size, 1);
+        if (name) memcpy(name, cl_devices_[id]->name, buffer_size);
     }
     return name;
 }

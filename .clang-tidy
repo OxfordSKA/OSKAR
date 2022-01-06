@@ -1,0 +1,30 @@
+---
+Checks: "cert-*,
+  clang-analyzer-*,
+  bugprone-incorrect-roundings,
+  bugprone-macro-repeated-side-effects,
+  bugprone-multiple-statement-macro,
+  bugprone-not-null-terminated-result,
+  bugprone-suspicious-missing-comma,
+  bugprone-suspicious-semicolon,
+  cppcoreguidelines-init-variables,
+  google-global-names-in-headers,
+  google-readability-braces-around-statements,
+  readability-function-size,
+  readability-identifier-naming,
+  readability-make-member-function-const,
+  readability-misleading-indentation,
+  readability-non-const-parameter"
+CheckOptions:
+    - key: readability-identifier-naming.FunctionCase
+      value: 'lower_case'
+    - key: readability-identifier-naming.GlobalFunctionCase
+      value: 'lower_case'
+    - key: readability-identifier-naming.GlobalFunctionPrefix
+      value: 'oskar_'
+    - key: readability-identifier-naming.StructCase
+      value: 'CamelCase'
+    - key: readability-identifier-naming.StructPrefix
+      value: 'oskar_'
+    - key: readability-function-size.StatementThreshold
+      value: 300

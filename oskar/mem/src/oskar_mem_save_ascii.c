@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -18,19 +18,24 @@ extern "C" {
 void oskar_mem_save_ascii(FILE* file, size_t num_mem,
         size_t offset, size_t num_elements, int* status, ...)
 {
-    int type = 0;
     size_t i = 0, j = 0;
     va_list args;
     oskar_Mem** handles = 0; /* Array of oskar_Mem pointers in CPU memory. */
     if (*status) return;
+
+    /* Check for at least one array. */
+    if (num_mem == 0)
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
 
     /* Check there are at least the number of specified elements in
      * each array. */
     va_start(args, status);
     for (i = 0; i < num_mem; ++i)
     {
-        const oskar_Mem* mem = 0;
-        mem = va_arg(args, const oskar_Mem*);
+        const oskar_Mem* mem = va_arg(args, const oskar_Mem*);
         if (oskar_mem_length(mem) < num_elements)
         {
             *status = OSKAR_ERR_DIMENSION_MISMATCH;
@@ -42,12 +47,11 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
     if (*status) return;
 
     /* Allocate and set up the handle array. */
-    handles = (oskar_Mem**) malloc(num_mem * sizeof(oskar_Mem*));
+    handles = (oskar_Mem**) calloc(num_mem, sizeof(oskar_Mem*));
     va_start(args, status);
     for (i = 0; i < num_mem; ++i)
     {
-        oskar_Mem* mem = 0;
-        mem = va_arg(args, oskar_Mem*);
+        oskar_Mem* mem = va_arg(args, oskar_Mem*);
         if (oskar_mem_location(mem) != OSKAR_CPU)
         {
             handles[i] = oskar_mem_create_copy(mem, OSKAR_CPU, status);
@@ -66,10 +70,8 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
 
         for (i = 0; i < num_mem; ++i)
         {
-            const void* data = 0;
-            data = oskar_mem_void_const(handles[i]);
-            type = oskar_mem_type(handles[i]);
-            switch (type)
+            const void* data = oskar_mem_void_const(handles[i]);
+            switch (oskar_mem_type(handles[i]))
             {
             case OSKAR_SINGLE:
             {

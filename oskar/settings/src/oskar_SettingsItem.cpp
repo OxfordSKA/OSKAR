@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -99,8 +99,11 @@ bool SettingsItem::add_dependency(const char* dependency_key,
         if (!ok) return false;
     }
     SettingsDependency d = SettingsDependency(dependency_key, value, logic);
-    p->current_group_->add_dependency(d);
-    p->num_dependencies_++;
+    if (p->current_group_)
+    {
+        p->current_group_->add_dependency(d);
+        p->num_dependencies_++;
+    }
     return true;
 }
 
@@ -114,7 +117,7 @@ bool SettingsItem::begin_dependency_group(const char* logic)
         p->current_group_ = p->root_;
     }
     // Add the group below the current group.
-    else {
+    else if (p->current_group_) {
         p->current_group_ = p->current_group_->add_child(logic);
     }
 

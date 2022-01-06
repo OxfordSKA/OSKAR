@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -19,6 +19,7 @@ double oskar_random_power_law(double min, double max, double index)
     {
         return 0.0;
     }
+    /* NOLINTNEXTLINE: We can use rand() here without concern. */
     const double r = (double)rand() / ((double)RAND_MAX + 1.0);
     if (fabs(index + 1.0) < DBL_EPSILON)
     {

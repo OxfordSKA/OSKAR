@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -99,7 +99,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
 
 // Private functions.
 
-struct ThreadArgs
+struct oskar_ThreadArgs
 {
     oskar_Telescope* telescope;
     const string* cwd;
@@ -108,7 +108,7 @@ struct ThreadArgs
     oskar_Log* log;
     int *status, i_thread, num_threads, num_dirs;
     const char* const* children;
-    ThreadArgs(oskar_Telescope* telescope,
+    oskar_ThreadArgs(oskar_Telescope* telescope,
             const string& cwd,
             const vector<oskar_TelescopeLoadAbstract*>& loaders,
             map<string, string>& filemap, oskar_Log* log, int* status,
@@ -118,11 +118,11 @@ struct ThreadArgs
       log(log), status(status), i_thread(i_thread), num_threads(num_threads),
       num_dirs(num_dirs), children(children) {}
 };
-typedef struct ThreadArgs ThreadArgs;
+typedef struct oskar_ThreadArgs oskar_ThreadArgs;
 
 static void* thread_func(void* arg)
 {
-    ThreadArgs* a = (ThreadArgs*) arg;
+    oskar_ThreadArgs* a = (oskar_ThreadArgs*) arg;
     for (int i = a->i_thread; i < a->num_dirs; i += a->num_threads)
     {
         load_directories(a->telescope,
@@ -188,7 +188,7 @@ static void load_directories(oskar_Telescope* telescope,
         {
             const int num_procs = oskar_get_num_procs();
             vector<oskar_Thread*> threads(num_procs);
-            vector<ThreadArgs> args;
+            vector<oskar_ThreadArgs> args;
 
             // Check if "station_type_map.txt" exists.
             if (!oskar_dir_file_exists(cwd.c_str(), "station_type_map.txt"))
@@ -212,8 +212,9 @@ static void load_directories(oskar_Telescope* telescope,
             // Use multi-threading for load at top level only.
             for (int i = 0; i < num_procs; ++i)
             {
-                args.push_back(ThreadArgs(telescope, cwd, loaders, filemap,
-                        log, status, i, num_procs, num_dirs, children));
+                args.push_back(oskar_ThreadArgs(telescope, cwd, loaders,
+                        filemap, log, status, i, num_procs, num_dirs,
+                        children));
             }
             for (int i = 0; i < num_procs; ++i)
             {

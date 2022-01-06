@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, The University of Oxford
+ * Copyright (c) 2015-2022, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,7 @@ class OSKAR_SETTINGS_EXPORT SettingsNode : public SettingsItem
     /* Disable copy constructor. */
     SettingsNode(const SettingsNode&);
 
-    void update_value_set_counter_(bool increment_counter);
+    void update_value_set_counter(bool increment_counter);
     void update_priority(int priority);
 
     SettingsNodePrivate* p;

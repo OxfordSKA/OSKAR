@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -97,63 +97,6 @@ size_t oskar_get_free_physical_memory(void)
 #endif
 }
 
-size_t oskar_get_total_swap_memory(void)
-{
-#ifdef OSKAR_OS_LINUX
-    struct sysinfo memInfo;
-    size_t totalSwapMem = 0;
-    sysinfo(&memInfo);
-    totalSwapMem = memInfo.totalswap;
-    return totalSwapMem * memInfo.mem_unit;
-#elif defined(OSKAR_OS_MAC)
-#if 0
-    struct statfs stats;
-    if (0 == statfs("/", &stats))
-    {
-        uint64_t myFreeSwap = (uint64_t)stats.f_bsize * stats.f_bfree;
-        return myFreeSwap;
-    }
-    return -1;
-#endif
-    struct xsw_usage vmusage;
-    size_t size = sizeof(vmusage);
-    if (sysctlbyname("vm.swapusage", &vmusage, &size, NULL, 0)!=0)
-        return 0;
-    return (size_t)vmusage.xsu_total;
-#elif defined(OSKAR_OS_WIN)
-    MEMORYSTATUSEX memInfo;
-    DWORDLONG totalSwap;
-    memInfo.dwLength = sizeof(MEMORYSTATUSEX);
-    GlobalMemoryStatusEx(&memInfo);
-    totalSwap = memInfo.ullTotalPageFile - memInfo.ullTotalPhys;
-    return (size_t)totalSwap;
-#endif
-}
-
-size_t oskar_get_free_swap_memory(void)
-{
-#ifdef OSKAR_OS_LINUX
-    struct sysinfo memInfo;
-    size_t freeSwapMem = 0;
-    sysinfo(&memInfo);
-    freeSwapMem = memInfo.freeswap;
-    return freeSwapMem * memInfo.mem_unit;
-#elif defined(OSKAR_OS_MAC)
-    struct xsw_usage vmusage;
-    size_t size = sizeof(vmusage);
-    if (sysctlbyname("vm.swapusage", &vmusage, &size, NULL, 0)!=0)
-        return -1;
-    return (size_t)vmusage.xsu_avail;
-#elif defined(OSKAR_OS_WIN)
-    MEMORYSTATUSEX memInfo;
-    DWORDLONG freeSwap;
-    memInfo.dwLength = sizeof(MEMORYSTATUSEX);
-    GlobalMemoryStatusEx(&memInfo);
-    freeSwap = memInfo.ullAvailPageFile - memInfo.ullAvailPhys;
-    return (size_t)freeSwap;
-#endif
-}
-
 #ifdef OSKAR_OS_LINUX
 static size_t parse_line(char* line)
 {
@@ -200,25 +143,6 @@ size_t oskar_get_memory_usage(void)
 #else
     return 0L;
 #endif
-}
-
-void oskar_print_memory_info(void)
-{
-    size_t totalSwapMem = 0, freeSwapMem = 0;
-    size_t totalPhysMem = 0, freePhysMem = 0, usedMem = 0;
-    totalPhysMem = oskar_get_total_physical_memory();
-    freePhysMem = oskar_get_free_physical_memory();
-    totalSwapMem = oskar_get_total_swap_memory();
-    freeSwapMem = oskar_get_free_swap_memory();
-    usedMem = oskar_get_memory_usage();
-    printf("Memory used by current process: %lu MB\n",
-           (unsigned long) (usedMem/(1024*1024)));
-    printf("Free physical memory: %lu MB (of %lu MB)\n",
-            (unsigned long) (freePhysMem/(1024*1024)),
-            (unsigned long) (totalPhysMem/(1024*1024)));
-    printf("Free swap memory: %lu MB (of %lu MB)\n",
-            (unsigned long) (freeSwapMem/(1024*1024)),
-            (unsigned long) (totalSwapMem/(1024*1024)));
 }
 
 void oskar_log_mem(oskar_Log* log)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -21,9 +21,11 @@ SettingsValue::~SettingsValue()
 {
 }
 
-void SettingsValue::operator=(const SettingsValue& other)
+SettingsValue& SettingsValue::operator=(const SettingsValue& other)
 {
+    if (this == &other) return *this;
     value_ = other.value_;
+    return *this;
 }
 
 void SettingsValue::operator=(const value_t& other)
@@ -113,15 +115,15 @@ bool SettingsValue::init(const char* type, const char* param)
         cerr << "ERROR: Failed to initialise settings value, undefined type." << endl;
         return false;
     }
-    create_(id);
-    AbstractSettingsType* t = get_(id);
+    create(id);
+    AbstractSettingsType* t = get(id);
     string par = param ? string(param) : string();
     return t ? t->init(par.c_str()) : false;
 }
 
 bool SettingsValue::set_default(const char* value)
 {
-    AbstractSettingsType* t = get_(type());
+    AbstractSettingsType* t = get(type());
     string val = value ? string(value) : string();
     return t ? t->set_default(val.c_str()) : false;
 }
@@ -129,7 +131,7 @@ bool SettingsValue::set_default(const char* value)
 const char* SettingsValue::get_value() const
 {
     const AbstractSettingsType* t =
-            const_cast<SettingsValue*>(this)->get_(type());
+            const_cast<SettingsValue*>(this)->get(type());
     // Note: The type would not exist if there is no default and no default init
     return t ? t->get_value() : "";
 }
@@ -137,13 +139,13 @@ const char* SettingsValue::get_value() const
 const char* SettingsValue::get_default() const
 {
     const AbstractSettingsType* t =
-            const_cast<SettingsValue*>(this)->get_(type());
+            const_cast<SettingsValue*>(this)->get(type());
     return t ? t->get_default() : "";
 }
 
 bool SettingsValue::set_value(const char* value)
 {
-    AbstractSettingsType* t = get_(type());
+    AbstractSettingsType* t = get(type());
     string val = value ? string(value) : string();
     return t ? t->set_value(val.c_str()) : false;
 }
@@ -151,7 +153,7 @@ bool SettingsValue::set_value(const char* value)
 bool SettingsValue::is_default() const
 {
     const AbstractSettingsType* t =
-            const_cast<SettingsValue*>(this)->get_(type());
+            const_cast<SettingsValue*>(this)->get(type());
     return t ? t->is_default() : true;
 }
 
@@ -459,7 +461,7 @@ bool SettingsValue::operator<=(const SettingsValue& other) const
     return !(*this > other);
 }
 
-void SettingsValue::create_(TypeId type)
+void SettingsValue::create(TypeId type)
 {
     switch (type)
     {
@@ -490,7 +492,7 @@ void SettingsValue::create_(TypeId type)
     }
 }
 
-AbstractSettingsType* SettingsValue::get_(TypeId type)
+AbstractSettingsType* SettingsValue::get(TypeId type)
 {
     using ttl::var::get;
     switch (type)

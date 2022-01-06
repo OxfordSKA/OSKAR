@@ -106,10 +106,10 @@ TEST(beam_pattern_coordinates, HEALPix_horizontal)
 
     for (int i = 0; i < num_pixels; ++i)
     {
-        oskar_convert_healpix_ring_to_theta_phi_d(nside, i, &b_[i], &l_[i]);
+        oskar_convert_healpix_ring_to_theta_phi_pixel(nside, i, &b_[i], &l_[i]);
         b_[i] = (M_PI / 2.0) - b_[i]; /* Co-latitude to latitude. */
         // Convert from galactic lon, lat to J2000 RA,Dec
-        oskar_convert_galactic_to_fk5_d(1, &l_[i], &b_[i], &RA_[i], &Dec_[i]);
+        oskar_convert_galactic_to_fk5(1, &l_[i], &b_[i], &RA_[i], &Dec_[i]);
     }
 
     const char* filename = "test_healpix_coords.dat";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -383,7 +383,7 @@ static void gen_healpix(oskar_Sky* sky, SettingsTree* s,
     for (int i = 0; i < npix; ++i)
     {
         double ra = 0.0, dec = 0.0;
-        oskar_convert_healpix_ring_to_theta_phi_d(nside, i, &dec, &ra);
+        oskar_convert_healpix_ring_to_theta_phi_pixel(nside, i, &dec, &ra);
         dec = M_PI / 2.0 - dec;
         oskar_sky_set_source(t, i, ra, dec, amplitude,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);

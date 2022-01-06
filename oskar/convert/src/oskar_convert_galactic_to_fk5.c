@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -16,73 +16,32 @@ static const double rmat[3][3] =
       { 0.494109453312, -0.444829589425,  0.746982251810},
       {-0.867666135858, -0.198076386122,  0.455983795705} };
 
-void oskar_convert_galactic_to_fk5_f(int num_points, const float* l,
-        const float* b, float* ra, float* dec)
-{
-    int i = 0, j = 0;
-
-    for (j = 0; j < num_points; ++j)
-    {
-        double p[3];  /* Input */
-        double p1[3]; /* Output */
-        double t = 0.0;
-
-        /* Convert Galactic coordinates to Cartesian vector. */
-        t = cos(b[j]);
-        p[0] = cos(l[j]) * t;
-        p[1] = sin(l[j]) * t;
-        p[2] = sin(b[j]);
-
-        /* Rotate to equatorial frame. */
-        for (i = 0; i < 3; i++)
-        {
-            p1[i] = p[0] * rmat[0][i] + p[1] * rmat[1][i] + p[2] * rmat[2][i];
-        }
-
-        /* Convert Cartesian vector to equatorial coordinates. */
-        /* RA = atan2(y, x) */
-        ra[j] = atan2(p1[1], p1[0]);
-        /* DEC = atan2(z, sqrt(x*x + y*y)) */
-        dec[j] = atan2(p1[2], sqrt(p1[0]*p1[0] + p1[1]*p1[1]));
-
-        /* Check range of RA (0 to 2pi). */
-        t = fmod(ra[j], 2.0 * M_PI);
-        ra[j] = (t >= 0.0) ? t : t + 2.0 * M_PI;
-    }
-}
-
-void oskar_convert_galactic_to_fk5_d(int num_points, const double* l,
+void oskar_convert_galactic_to_fk5(int num_points, const double* l,
         const double* b, double* ra, double* dec)
 {
-    int i = 0, j = 0;
-
-    for (j = 0; j < num_points; ++j)
+    int i = 0;
+    for (i = 0; i < num_points; ++i)
     {
-        double p[3];  /* Input */
-        double p1[3]; /* Output */
-        double t = 0.0;
+        double out_x = 0.0, out_y = 0.0, out_z = 0.0, t = 0.0;
 
         /* Convert Galactic coordinates to Cartesian vector. */
-        t = cos(b[j]);
-        p[0] = cos(l[j]) * t;
-        p[1] = sin(l[j]) * t;
-        p[2] = sin(b[j]);
+        t = cos(b[i]);
+        const double in_x = cos(l[i]) * t;
+        const double in_y = sin(l[i]) * t;
+        const double in_z = sin(b[i]);
 
         /* Rotate to equatorial frame. */
-        for (i = 0; i < 3; i++)
-        {
-            p1[i] = p[0] * rmat[0][i] + p[1] * rmat[1][i] + p[2] * rmat[2][i];
-        }
+        out_x = in_x * rmat[0][0] + in_y * rmat[1][0] + in_z * rmat[2][0];
+        out_y = in_x * rmat[0][1] + in_y * rmat[1][1] + in_z * rmat[2][1];
+        out_z = in_x * rmat[0][2] + in_y * rmat[1][2] + in_z * rmat[2][2];
 
         /* Convert Cartesian vector to equatorial coordinates. */
-        /* RA = atan2(y, x) */
-        ra[j] = atan2(p1[1], p1[0]);
-        /* DEC = atan2(z, sqrt(x*x + y*y)) */
-        dec[j] = atan2(p1[2], sqrt(p1[0]*p1[0] + p1[1]*p1[1]));
+        ra[i] = atan2(out_y, out_x);
+        dec[i] = atan2(out_z, sqrt(out_x * out_x + out_y * out_y));
 
         /* Check range of RA (0 to 2pi). */
-        t = fmod(ra[j], 2.0 * M_PI);
-        ra[j] = (t >= 0.0) ? t : t + 2.0 * M_PI;
+        t = fmod(ra[i], 2.0 * M_PI);
+        ra[i] = (t >= 0.0) ? t : t + 2.0 * M_PI;
     }
 }
 

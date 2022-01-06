@@ -112,7 +112,7 @@ static void cmf5kb(const int lot, const int ido, const int l1, const int na,
         const int im2, const int in2, const double *RESTRICT wa);
 static void cmfgkb(const int lot, const int ido, const int ip, const int l1,
         const int lid, const int na, double *cc, double *cc1,
-        const int im1, const int in1, double *ch, double *ch1,
+        const int im1, const int in1, const double *ch, double *ch1,
         const int im2, const int in2, const double *RESTRICT wa);
 
 static void cmf2kf(const int lot, const int ido, const int l1, const int na,
@@ -129,7 +129,7 @@ static void cmf5kf(const int lot, const int ido, const int l1, const int na,
         const int im2, const int in2, const double *RESTRICT wa);
 static void cmfgkf(const int lot, const int ido, const int ip, const int l1,
         const int lid, const int na, double *cc, double *cc1,
-        const int im1, const int in1, double *ch, double *ch1,
+        const int im1, const int in1, const double *ch, double *ch1,
         const int im2, const int in2, const double *RESTRICT wa);
 
 static void tables(const int ido, const int ip, double *RESTRICT wa);
@@ -1341,7 +1341,7 @@ void cmf5kf(const int lot, const int ido, const int l1, const int na,
 
 void cmfgkb(const int lot, const int ido, const int ip, const int l1,
         const int lid, const int na, double *cc, double *cc1,
-        const int im1, const int in1, double *ch, double *ch1,
+        const int im1, const int in1, const double *ch, double *ch1,
         const int im2, const int in2, const double *RESTRICT wa)
 {
     int i = 0, j = 0, k = 0, l = 0, m1 = 0, m2 = 0, jc = 0, lc = 0, ki = 0;
@@ -1565,7 +1565,7 @@ void cmfgkb(const int lot, const int ido, const int ip, const int l1,
 
 void cmfgkf(const int lot, const int ido, const int ip, const int l1,
         const int lid, const int na, double *cc, double *cc1,
-        const int im1, const int in1, double *ch, double *ch1,
+        const int im1, const int in1, const double *ch, double *ch1,
         const int im2, const int in2, const double *RESTRICT wa)
 {
     int i = 0, j = 0, k = 0, l = 0, m1 = 0, m2 = 0, jc = 0, lc = 0, ki = 0;

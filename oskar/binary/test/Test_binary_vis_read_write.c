@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -387,6 +387,11 @@ static void read_test_vis(const char* filename)
     coord_element_size = (coord_precision == OSKAR_DOUBLE ? DBL : FLT);
 
     /* Read the station coordinates. */
+    if (num_stations < 2)
+    {
+        oskar_binary_free(h);
+        return;
+    }
     station_x = calloc(num_stations, coord_element_size);
     station_y = calloc(num_stations, coord_element_size);
     station_z = calloc(num_stations, coord_element_size);
@@ -401,6 +406,7 @@ static void read_test_vis(const char* filename)
             num_stations * coord_element_size, station_z, &status);
 
     /* Print header data. */
+    if (max_times_per_block < 1) max_times_per_block = 1;
     printf("Max. number of times per block: %d\n", max_times_per_block);
     printf("Total number of times: %d\n", num_times_total);
     printf("Number of stations: %d\n", num_stations);

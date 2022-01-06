@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -44,4 +44,4 @@ struct oskar_MeasurementSet
 typedef struct oskar_MeasurementSet oskar_MeasurementSet;
 #endif /* OSKAR_MEASUREMENT_SET_TYPEDEF_ */
 
-void bind_refs(oskar_MeasurementSet* p);
+void oskar_ms_bind_refs(oskar_MeasurementSet* p);

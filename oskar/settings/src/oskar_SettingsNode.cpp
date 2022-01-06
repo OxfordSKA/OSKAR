@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -126,11 +126,11 @@ bool SettingsNode::set_value(const char* v)
     bool now_set = is_set();
     // Only update the counter if the set state has changed.
     // ie. changed from default to non default.
-    if (was_set != now_set) update_value_set_counter_(now_set);
+    if (was_set != now_set) update_value_set_counter(now_set);
     return ok;
 }
 
-void SettingsNode::update_value_set_counter_(bool increment_counter)
+void SettingsNode::update_value_set_counter(bool increment_counter)
 {
     if (increment_counter)
     {
@@ -142,7 +142,7 @@ void SettingsNode::update_value_set_counter_(bool increment_counter)
     }
 
     // Recursively set the counter for parents.
-    if (p->parent) p->parent->update_value_set_counter_(increment_counter);
+    if (p->parent) p->parent->update_value_set_counter(increment_counter);
 }
 
 void SettingsNode::update_priority(int priority)

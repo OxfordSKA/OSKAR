@@ -209,7 +209,7 @@ TEST(SettingsTree, xml)
 
     // Create the settings tree and declare settings using XML.
     SettingsTree s;
-    ASSERT_TRUE(settings_declare_xml(&s, temp));
+    ASSERT_TRUE(oskar_settings_declare_xml(&s, temp));
 
     // Get a value out of the tree and check it.
     int status = 0;

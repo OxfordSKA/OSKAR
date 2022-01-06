@@ -13,6 +13,7 @@
 extern "C" {
 #endif
 
+/* NOLINTNEXTLINE(readability-function-size) */
 void oskar_dierckx_fpsurf(int iopt, int m, double *x, double *y,
         const double *z, const double *w, double xb, double xe, double yb,
         double ye, int kxx, int kyy, double s, int nxest, int nyest,

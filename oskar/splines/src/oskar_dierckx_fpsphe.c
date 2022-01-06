@@ -14,6 +14,7 @@
 extern "C" {
 #endif
 
+/* NOLINTNEXTLINE(readability-function-size) */
 void oskar_dierckx_fpsphe(int iopt, int m, const double* theta,
         const double* phi, const double* r, const double* w, double s,
         int ntest, int npest, double eta, double tol, int maxit, int ncc,

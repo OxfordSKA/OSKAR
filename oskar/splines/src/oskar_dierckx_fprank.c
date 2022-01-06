@@ -278,7 +278,6 @@ void oskar_dierckx_fprank(double *a, double *f, int n, int m, int na,
                 store -= stor1 * stor2;
             }
         }
-        fac = a[i + a_dim1] * c[i];
         stor1 = a[i + a_dim1];
         stor2 = c[i];
         stor1 *= stor2;

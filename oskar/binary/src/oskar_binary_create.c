@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -343,7 +343,7 @@ static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,
 
     /* Construct binary header. */
     memset(header, 0, sizeof(oskar_BinaryHeader));
-    strcpy(header->magic, magic);
+    memcpy(header->magic, magic, sizeof(magic));
     header->bin_version = OSKAR_BINARY_FORMAT_VERSION;
 
     /* Write header to stream. */

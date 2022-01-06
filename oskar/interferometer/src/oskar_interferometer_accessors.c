@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -11,6 +11,12 @@
 #include "interferometer/oskar_interferometer.h"
 #include "utility/oskar_get_num_procs.h"
 #include "utility/oskar_device.h"
+
+#if __STDC_VERSION__ >= 199901L
+#define SNPRINTF(BUF, SIZE, FMT, ...) snprintf(BUF, SIZE, FMT, __VA_ARGS__);
+#else
+#define SNPRINTF(BUF, SIZE, FMT, ...) sprintf(BUF, FMT, __VA_ARGS__);
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,7 +61,7 @@ void oskar_interferometer_reset_work_unit_index(oskar_Interferometer* h)
 }
 
 void oskar_interferometer_set_coords_only(oskar_Interferometer* h, int value,
-        int* status)
+        int* status) /* NOLINT */
 {
     (void)status;
     h->coords_only = value;
@@ -98,11 +104,13 @@ void oskar_interferometer_set_gpus(oskar_Interferometer* h, int num,
     if (*status) return;
     if (num < 0)
     {
-        h->num_gpus = h->num_gpus_avail;
-        h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
-        for (i = 0; i < h->num_gpus; ++i)
+        free(h->gpu_ids);
+        h->gpu_ids = (int*) calloc(h->num_gpus_avail, sizeof(int));
+        h->num_gpus = 0;
+        if (h->gpu_ids)
         {
-            h->gpu_ids[i] = i;
+            h->num_gpus = h->num_gpus_avail;
+            for (i = 0; i < h->num_gpus; ++i) h->gpu_ids[i] = i;
         }
     }
     else if (num > 0)
@@ -113,11 +121,13 @@ void oskar_interferometer_set_gpus(oskar_Interferometer* h, int num,
             *status = OSKAR_ERR_COMPUTE_DEVICES;
             return;
         }
-        h->num_gpus = num;
-        h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
-        for (i = 0; i < h->num_gpus; ++i)
+        free(h->gpu_ids);
+        h->gpu_ids = (int*) calloc(num, sizeof(int));
+        h->num_gpus = 0;
+        if (h->gpu_ids)
         {
-            h->gpu_ids[i] = ids[i];
+            h->num_gpus = num;
+            for (i = 0; i < h->num_gpus; ++i) h->gpu_ids[i] = ids[i];
         }
     }
     else /* num == 0 */
@@ -126,7 +136,7 @@ void oskar_interferometer_set_gpus(oskar_Interferometer* h, int num,
         h->gpu_ids = 0;
         h->num_gpus = 0;
     }
-    for (i = 0; i < h->num_gpus; ++i)
+    for (i = 0; (i < h->num_gpus) && h->gpu_ids; ++i)
     {
         oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
         if (*status) return;
@@ -172,8 +182,8 @@ void oskar_interferometer_set_num_devices(oskar_Interferometer* h, int value)
     }
     if (value < 1) value = 1;
     h->num_devices = value;
-    h->d = (DeviceData*) realloc(h->d, h->num_devices * sizeof(DeviceData));
-    memset(h->d, 0, h->num_devices * sizeof(DeviceData));
+    free(h->d);
+    h->d = (DeviceData*) calloc(h->num_devices, sizeof(DeviceData));
 }
 
 void oskar_interferometer_set_observation_frequency(oskar_Interferometer* h,
@@ -204,11 +214,11 @@ void oskar_interferometer_set_settings_path(oskar_Interferometer* h,
         const char* filename)
 {
     if (!filename) return;
-    const int len = (int) strlen(filename);
+    const size_t len = strlen(filename);
     if (len == 0) return;
     free(h->settings_path);
     h->settings_path = (char*) calloc(1 + len, 1);
-    strcpy(h->settings_path, filename);
+    if (h->settings_path) memcpy(h->settings_path, filename, len);
 }
 
 void oskar_interferometer_set_sky_model(oskar_Interferometer* h,
@@ -274,32 +284,34 @@ void oskar_interferometer_set_output_vis_file(oskar_Interferometer* h,
         const char* filename)
 {
     if (!filename) return;
-    const int len = (int) strlen(filename);
+    const size_t len = strlen(filename);
     free(h->vis_name);
     h->vis_name = 0;
     if (len == 0) return;
     h->vis_name = (char*) calloc(1 + len, 1);
-    strcpy(h->vis_name, filename);
+    if (h->vis_name) memcpy(h->vis_name, filename, len);
 }
 
 void oskar_interferometer_set_output_measurement_set(oskar_Interferometer* h,
         const char* filename)
 {
     if (!filename) return;
-    const int len = (int) strlen(filename);
+    const size_t len = strlen(filename);
+    const size_t buffer_size = 6 + len;
     free(h->ms_name);
     h->ms_name = 0;
     if (len == 0) return;
-    h->ms_name = (char*) calloc(6 + len, 1);
+    h->ms_name = (char*) calloc(buffer_size, sizeof(char));
+    if (!h->ms_name) return;
     if ((len >= 3) && (
             !strcmp(&(filename[len-3]), ".MS") ||
             !strcmp(&(filename[len-3]), ".ms") ))
     {
-        strcpy(h->ms_name, filename);
+        memcpy(h->ms_name, filename, len);
     }
     else
     {
-        sprintf(h->ms_name, "%s.MS", filename);
+        SNPRINTF(h->ms_name, buffer_size, "%s.MS", filename);
     }
 }
 

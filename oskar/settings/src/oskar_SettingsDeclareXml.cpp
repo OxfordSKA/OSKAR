@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -302,9 +302,7 @@ bool iterate_settings(oskar::SettingsTree* settings, const doc_t& doc,
 
 } // End anonymous namespace.
 
-namespace oskar {
-
-bool settings_declare_xml(SettingsTree* settings, const char* xml)
+bool oskar_settings_declare_xml(SettingsTree* settings, const char* xml)
 {
     if (!settings) return false;
     doc_t doc;
@@ -314,5 +312,3 @@ bool settings_declare_xml(SettingsTree* settings, const char* xml)
     settings->clear();
     return iterate_settings(settings, doc);
 }
-
-} // namespace oskar

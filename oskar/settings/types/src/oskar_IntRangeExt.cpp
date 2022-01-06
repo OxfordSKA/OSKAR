@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -27,7 +27,7 @@ static bool compare(const IntRangeExt::Value& a, const IntRangeExt::Value& b)
 
 IntRangeExt::IntRangeExt()
 {
-    (void) init("");
+    (void) IntRangeExt::init("");
 }
 
 // LCOV_EXCL_START
@@ -97,16 +97,16 @@ bool IntRangeExt::init(const char* s)
 
 bool IntRangeExt::set_default(const char* value)
 {
-    bool ok = from_string(default_, value);
-    str_default_ = to_string(default_);
-    if (ok) set_value(value);
+    bool ok = this->from_string(default_, value);
+    str_default_ = this->to_string(default_);
+    if (ok) this->set_value(value);
     return ok;
 } // LCOV_EXCL_LINE
 
 bool IntRangeExt::set_value(const char* value)
 {
-    bool ok = from_string(value_, value);
-    str_value_ = to_string(value_);
+    bool ok = this->from_string(value_, value);
+    str_value_ = this->to_string(value_);
     return ok;
 } // LCOV_EXCL_LINE
 

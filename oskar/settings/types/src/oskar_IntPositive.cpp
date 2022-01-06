@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -22,7 +22,7 @@ static bool from_string(const char* s, int& value)
 
 IntPositive::IntPositive() : Int()
 {
-    (void) init(0);
+    (void) IntPositive::init(0);
 }
 
 // LCOV_EXCL_START
@@ -44,7 +44,7 @@ bool IntPositive::set_default(const char* value)
 {
     bool ok = from_string(value, default_);
     str_default_ = oskar_settings_utility_int_to_string(default_);
-    if (ok) set_value(value);
+    if (ok) this->set_value(value);
     return ok;
 } // LCOV_EXCL_LINE
 

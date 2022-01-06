@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -20,7 +20,7 @@ TEST(string_to_array_d, numeric_and_non_numeric)
 {
     // Test comma and space separated values with additional non-numeric fields.
     double list[NUM_DOUBLES];
-    char line[] = "hello 1.0,2.0 3.0, there,4.0     5.0 6.0";
+    char line[] = "hello 1,2 3.0, there,4.0     5.0 6.0";
     size_t filled = oskar_string_to_array_d(line, NUM_DOUBLES, list);
     ASSERT_EQ((size_t)6, filled);
     for (size_t i = 0; i < filled; ++i)

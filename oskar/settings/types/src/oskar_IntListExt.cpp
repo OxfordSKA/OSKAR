@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -14,7 +14,7 @@ using ttl::var::get;
 
 namespace oskar {
 
-bool compare(const IntListExt::Value& a, const IntListExt::Value& b)
+static bool compare(const IntListExt::Value& a, const IntListExt::Value& b)
 {
     if (a.is_singular() || b.is_singular()) return false;
     if (a.which() != b.which()) return false;
@@ -53,16 +53,16 @@ bool IntListExt::init(const char* s)
 
 bool IntListExt::set_default(const char* value)
 {
-    bool ok = from_string_(value, default_);
-    str_default_ = to_string_(default_);
-    if (ok) set_value(value);
+    bool ok = this->from_string(value, default_);
+    str_default_ = this->to_string(default_);
+    if (ok) this->set_value(value);
     return ok;
 } // LCOV_EXCL_LINE
 
 bool IntListExt::set_value(const char* value)
 {
-    bool ok = from_string_(value, value_);
-    str_value_ = to_string_(value_);
+    bool ok = this->from_string(value, value_);
+    str_value_ = this->to_string(value_);
     return ok;
 } // LCOV_EXCL_LINE
 
@@ -106,7 +106,7 @@ bool IntListExt::operator>(const IntListExt&) const
     return false;
 }
 
-bool IntListExt::from_string_(const string& s, Value& val) const
+bool IntListExt::from_string(const string& s, Value& val) const
 {
     if (s.find(delimiter_) == string::npos && s == special_value_)
     {
@@ -129,7 +129,7 @@ bool IntListExt::from_string_(const string& s, Value& val) const
     return true;
 }
 
-string IntListExt::to_string_(const Value& v)
+string IntListExt::to_string(const Value& v) const
 {
     if (v.is_singular()) return string();
     if (v.which() != 0) return get<string>(v);

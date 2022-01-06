@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -13,7 +13,7 @@
 using namespace casacore;
 
 template<typename T>
-void copy_array(const oskar_MeasurementSet* p, const char* column,
+static void copy_array(const oskar_MeasurementSet* p, const char* column,
         unsigned int start_row, unsigned int num_rows,
         size_t data_size_bytes, void* data, size_t* required_size,
         int* status)
@@ -40,7 +40,7 @@ void copy_array(const oskar_MeasurementSet* p, const char* column,
 }
 
 template<typename T>
-void copy_scalar(const oskar_MeasurementSet* p, const char* column,
+static void copy_scalar(const oskar_MeasurementSet* p, const char* column,
         unsigned int start_row, unsigned int num_rows,
         size_t data_size_bytes, void* data, size_t* required_size,
         int* status)
@@ -226,13 +226,6 @@ void oskar_ms_read_coords_d(oskar_MeasurementSet* p,
     oskar_ms_read_coords(p, start_row, num_baselines, uu, vv, ww, status);
 }
 
-void oskar_ms_read_coords_f(oskar_MeasurementSet* p,
-        unsigned int start_row, unsigned int num_baselines,
-        float* uu, float* vv, float* ww, int* status)
-{
-    oskar_ms_read_coords(p, start_row, num_baselines, uu, vv, ww, status);
-}
-
 template <typename T>
 void oskar_ms_read_vis(oskar_MeasurementSet* p,
         unsigned int start_row, unsigned int start_channel,
@@ -295,15 +288,6 @@ void oskar_ms_read_vis(oskar_MeasurementSet* p,
             }
         }
     }
-}
-
-void oskar_ms_read_vis_d(oskar_MeasurementSet* p,
-        unsigned int start_row, unsigned int start_channel,
-        unsigned int num_channels, unsigned int num_baselines,
-        const char* column, double* vis, int* status)
-{
-    oskar_ms_read_vis(p, start_row, start_channel,
-            num_channels, num_baselines, column, vis, status);
 }
 
 void oskar_ms_read_vis_f(oskar_MeasurementSet* p,

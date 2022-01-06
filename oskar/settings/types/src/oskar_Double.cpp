@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -12,7 +12,7 @@ namespace oskar {
 
 Double::Double()
 {
-    (void) init(0);
+    (void) Double::init(0);
 }
 
 // LCOV_EXCL_START
@@ -41,7 +41,7 @@ bool Double::set_default(const char* value)
     default_ = d;
     str_default_ = oskar_settings_utility_double_to_string_2(default_,
             (format_ == AUTO ? 'g' : 'e'));
-    set_value(value);
+    this->set_value(value);
     return true;
 }
 

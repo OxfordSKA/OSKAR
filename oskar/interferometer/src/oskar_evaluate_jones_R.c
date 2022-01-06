@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -17,9 +17,15 @@ extern "C" {
 OSKAR_JONES_R(evaluate_jones_R_float, float, float4c)
 OSKAR_JONES_R(evaluate_jones_R_double, double, double4c)
 
-void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
-        const oskar_Mem* ra_rad, const oskar_Mem* dec_rad,
-        const oskar_Telescope* telescope, double gast, int* status)
+/* NOLINTNEXTLINE(readability-identifier-naming) */
+void oskar_evaluate_jones_R(
+        oskar_Jones* R,
+        int num_sources,
+        const oskar_Mem* ra_rad,
+        const oskar_Mem* dec_rad,
+        const oskar_Telescope* telescope,
+        double gast,
+        int* status)
 {
     int i = 0;
     if (*status) return;

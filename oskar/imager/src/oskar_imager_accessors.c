@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -361,25 +361,30 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
     if (*status) return;
     if (num < 0)
     {
-        h->num_gpus = h->num_gpus_avail;
-        h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
-        for (i = 0; i < h->num_gpus; ++i)
+        free(h->gpu_ids);
+        h->gpu_ids = (int*) calloc(h->num_gpus_avail, sizeof(int));
+        h->num_gpus = 0;
+        if (h->gpu_ids)
         {
-            h->gpu_ids[i] = i;
+            h->num_gpus = h->num_gpus_avail;
+            for (i = 0; i < h->num_gpus; ++i) h->gpu_ids[i] = i;
         }
     }
     else if (num > 0)
     {
         if (num > h->num_gpus_avail)
         {
+            oskar_log_error(h->log, "More GPUs were requested than found.");
             *status = OSKAR_ERR_COMPUTE_DEVICES;
             return;
         }
-        h->num_gpus = num;
-        h->gpu_ids = (int*) realloc(h->gpu_ids, h->num_gpus * sizeof(int));
-        for (i = 0; i < h->num_gpus; ++i)
+        free(h->gpu_ids);
+        h->gpu_ids = (int*) calloc(num, sizeof(int));
+        h->num_gpus = 0;
+        if (h->gpu_ids)
         {
-            h->gpu_ids[i] = ids[i];
+            h->num_gpus = num;
+            for (i = 0; i < h->num_gpus; ++i) h->gpu_ids[i] = ids[i];
         }
     }
     else /* num == 0 */
@@ -388,7 +393,7 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
         h->gpu_ids = 0;
         h->num_gpus = 0;
     }
-    for (i = 0; i < h->num_gpus; ++i)
+    for (i = 0; (i < h->num_gpus) && h->gpu_ids; ++i)
     {
         oskar_device_set(h->dev_loc, h->gpu_ids[i], status);
         if (*status) return;
@@ -515,12 +520,8 @@ void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
         const char* const* filenames, int* status)
 {
     int i = 0;
-    char* ptr = 0;
     if (*status) return;
-    for (i = 0; i < h->num_files; ++i)
-    {
-        free(h->input_files[i]);
-    }
+    for (i = 0; i < h->num_files; ++i) free(h->input_files[i]);
     free(h->input_files);
     free(h->input_root);
     h->input_files = 0;
@@ -528,21 +529,28 @@ void oskar_imager_set_input_files(oskar_Imager* h, int num_files,
     h->num_files = num_files;
     if (num_files == 0 || !filenames) return;
     h->input_files = (char**) calloc(num_files, sizeof(char*));
+    if (!h->input_files) return;
     for (i = 0; i < num_files; ++i)
     {
-        int len = 0;
-        if (filenames[i]) len = (int) strlen(filenames[i]);
-        if (len > 0)
-        {
-            h->input_files[i] = (char*) calloc(1 + len, sizeof(char));
-            strcpy(h->input_files[i], filenames[i]);
-        }
+        if (!filenames[i]) continue;
+        const size_t len = strlen(filenames[i]);
+        if (len == 0) continue;
+        h->input_files[i] = (char*) calloc(1 + len, sizeof(char));
+        if (h->input_files[i]) memcpy(h->input_files[i], filenames[i], len);
     }
     if (!filenames[0]) return;
-    h->input_root = (char*) calloc(1 + strlen(filenames[0]), 1);
-    strcpy(h->input_root, filenames[0]);
-    ptr = strrchr(h->input_root, '.');
-    if (ptr) *ptr = 0;
+    const size_t len = strlen(filenames[0]);
+    h->input_root = (char*) calloc(1 + len, 1);
+    if (h->input_root)
+    {
+        memcpy(h->input_root, filenames[0], len);
+        char* ptr = strrchr(h->input_root, '.');
+        if (ptr) *ptr = 0;
+    }
+    else
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    }
 }
 
 
@@ -550,11 +558,11 @@ void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
         int* status)
 {
     if (*status || !column) return;
-    const int len = (int) strlen(column);
+    const size_t len = strlen(column);
     if (len == 0) { *status = OSKAR_ERR_INVALID_ARGUMENT; return; }
     free(h->ms_column);
     h->ms_column = (char*) calloc(1 + len, 1);
-    strcpy(h->ms_column, column);
+    if (h->ms_column) memcpy(h->ms_column, column, len);
 }
 
 
@@ -568,21 +576,21 @@ void oskar_imager_set_num_devices(oskar_Imager* h, int value)
     }
     if (value < 1) value = 1;
     h->num_devices = value;
-    h->d = (DeviceData*) realloc(h->d, h->num_devices * sizeof(DeviceData));
-    memset(h->d, 0, h->num_devices * sizeof(DeviceData));
+    free(h->d);
+    h->d = (DeviceData*) calloc(h->num_devices, sizeof(DeviceData));
 }
 
 
 void oskar_imager_set_output_root(oskar_Imager* h, const char* filename)
 {
-    int len = 0;
+    size_t len = 0;
     free(h->output_root);
     h->output_root = 0;
-    if (filename) len = (int) strlen(filename);
+    if (filename) len = strlen(filename);
     if (len > 0)
     {
         h->output_root = (char*) calloc(1 + len, 1);
-        strcpy(h->output_root, filename);
+        if (h->output_root) memcpy(h->output_root, filename, len);
     }
 }
 

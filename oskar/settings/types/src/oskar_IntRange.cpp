@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -15,7 +15,7 @@ namespace oskar {
 
 IntRange::IntRange()
 {
-    (void) init("");
+    (void) IntRange::init("");
 }
 
 // LCOV_EXCL_START
@@ -89,15 +89,15 @@ bool IntRange::init(const char* s)
 
 bool IntRange::set_default(const char* value)
 {
-    bool ok = from_string_(value, default_);
+    bool ok = this->from_string(value, default_);
     str_default_ = oskar_settings_utility_int_to_string(default_);
-    if (ok) set_value(value);
+    if (ok) this->set_value(value);
     return ok;
 } // LCOV_EXCL_LINE
 
 bool IntRange::set_value(const char* value)
 {
-    bool ok = from_string_(value, value_);
+    bool ok = this->from_string(value, value_);
     str_value_ = oskar_settings_utility_int_to_string(value_);
     return ok;
 } // LCOV_EXCL_LINE
@@ -137,7 +137,7 @@ bool IntRange::operator>(const IntRange& other) const
     return value_ > other.value_;
 }
 
-bool IntRange::from_string_(const string& s, int& value) const
+bool IntRange::from_string(const string& s, int& value) const
 {
     bool ok = true;
     int i = oskar_settings_utility_string_to_int(s, &ok);

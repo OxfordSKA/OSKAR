@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, The OSKAR Developers.
+ * Copyright (c) 2018-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -164,7 +164,7 @@ bool OptionParser::check_options(int argc, char** argv)
     return true;
 }
 
-void OptionParser::error(const char* format, ...)
+void OptionParser::error(const char* format, ...) // NOLINT
 {
     cerr << "ERROR:\n  ";
     va_list args;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -39,13 +39,13 @@ oskar_Sky* oskar_sky_from_healpix_ring(int precision, const oskar_Mem* data,
         if (val == 0.0) continue;
 
         /* Convert HEALPix index into spherical coordinates. */
-        oskar_convert_healpix_ring_to_theta_phi_d(nside, i, &lat, &lon);
+        oskar_convert_healpix_ring_to_theta_phi_pixel(nside, i, &lat, &lon);
         lat = M_PI / 2.0 - lat; /* Colatitude to latitude. */
 
         /* Convert Galactic coordinates to RA, Dec values if required. */
         if (galactic_coords)
         {
-            oskar_convert_galactic_to_fk5_d(1, &lon, &lat, &lon, &lat);
+            oskar_convert_galactic_to_fk5(1, &lon, &lat, &lon, &lat);
         }
 
         /* Set source data into sky model. */

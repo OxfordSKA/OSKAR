@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -137,6 +137,7 @@ void oskar_element_load_cst(oskar_Element* data,
         void *p_v_im = 0, *p_weight = 0;
 
         /* Parse the line, and skip if data were not read correctly. */
+        /* NOLINTNEXTLINE: Using sscanf() here is clearer than strtod(). */
         if (sscanf(line, "%lf %lf %*f %lf %lf %lf %lf %*f", &t, &p,
                     &abs_theta_horiz, &phase_theta_horiz,
                     &abs_phi_verti, &phase_phi_verti) != 6)

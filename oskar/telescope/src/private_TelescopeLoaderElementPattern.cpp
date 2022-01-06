@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -8,23 +8,25 @@
 #include "utility/oskar_file_exists.h"
 
 #include <sstream>
+#include <cstdlib>
 #include <cstring>
 
 using std::vector;
 using std::map;
 using std::string;
 
-static const string root_name("element_pattern");
+static const char root_name[] = "element_pattern";
 
 TelescopeLoaderElementPattern::TelescopeLoaderElementPattern()
 {
     telescope_ = 0;
-    wildcard = root_name + "*";
-    fit_root_x = root_name + "_fit_x_";
-    fit_root_y = root_name + "_fit_y_";
-    fit_root_scalar = root_name + "_fit_scalar_";
-    root_x = root_name + "_x_";
-    root_y = root_name + "_y_";
+    wildcard = string(root_name) + "*";
+    fit_root_x = string(root_name) + "_fit_x_";
+    fit_root_y = string(root_name) + "_fit_y_";
+    fit_root_scalar = string(root_name) + "_fit_scalar_";
+    root = string(root_name);
+    root_x = string(root_name) + "_x_";
+    root_y = string(root_name) + "_y_";
 }
 
 TelescopeLoaderElementPattern::~TelescopeLoaderElementPattern()
@@ -123,7 +125,7 @@ void TelescopeLoaderElementPattern::load_element_patterns(
         // Check against bare root name last: extended root names will have
         // been caught first, and in those cases we won't get here due to
         // all the else clauses.
-        else if (key.compare(0, root_name.size(), root_name) == 0)
+        else if (key.compare(0, root.size(), root) == 0)
         {
             // Use same parameters for both X and Y.
             keys_x.push_back(key);
@@ -165,7 +167,7 @@ void TelescopeLoaderElementPattern::load_fitted_data(int feed,
         const string path = paths[i];
 
         // Get the element index and frequency from the key.
-        parse_filename(key.c_str(), &buffer, &buflen, &ind, &freq);
+        parse_filename(key.c_str(), &buffer, &buflen, &ind, &freq, status);
 
         // Load the file.
         if (*status) break;
@@ -193,7 +195,7 @@ void TelescopeLoaderElementPattern::load_functional_data(int feed,
         const string path = paths[i];
 
         // Get the element index from the key.
-        parse_filename(key.c_str(), &buffer, &buflen, &ind, 0);
+        parse_filename(key.c_str(), &buffer, &buflen, &ind, 0, status);
 
         // Load the file.
         if (*status) break;
@@ -224,7 +226,7 @@ void TelescopeLoaderElementPattern::load_spherical_wave_data(
         const string path = paths[i];
 
         // Get the element index and frequency from the key.
-        parse_filename(key.c_str(), &buffer, &buflen, &ind, &freq);
+        parse_filename(key.c_str(), &buffer, &buflen, &ind, &freq, status);
 
         // Load the file.
         if (*status) break;
@@ -241,10 +243,11 @@ void TelescopeLoaderElementPattern::load_spherical_wave_data(
 }
 
 void TelescopeLoaderElementPattern::parse_filename(const char* s,
-        char** buffer, size_t* buflen, int* index, double* freq)
+        char** buffer, size_t* buflen, int* index, double* freq, int* status)
 {
     size_t i = 0, j = 1, length = 0;
-    char* p = 0;
+    char *p = 0, *end_ptr = 0;
+    const int base = 10;
     *index = 0;
     if (freq) *freq = 0.0;
 
@@ -252,11 +255,16 @@ void TelescopeLoaderElementPattern::parse_filename(const char* s,
     length = 1 + strlen(s);
     if (*buflen < length)
     {
-        *buffer = (char*) realloc((void*)(*buffer), length);
-        if (!*buffer) return;
+        char* new_buffer = (char*) realloc((void*)(*buffer), length);
+        if (!new_buffer)
+        {
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            return;
+        }
+        *buffer = new_buffer;
         *buflen = length;
     }
-    strcpy(*buffer, s);
+    memcpy(*buffer, s, length);
 
     // Replace underscores with NULL and find out how many words there are.
     for (i = 0; i < length; ++i)
@@ -274,13 +282,13 @@ void TelescopeLoaderElementPattern::parse_filename(const char* s,
     for (i = 0; i < j; ++i)
     {
         length = 1 + strlen(p);
-        if (sscanf(p, "%d", index))
+        *index = (int) strtol(p, &end_ptr, base);
+        if (end_ptr > p)
         {
             if ((i + 1 < j) && freq)
             {
                 p += length;
-                sscanf(p, "%lf", freq);
-                *freq *= 1e6; // Convert from MHz to Hz.
+                *freq = 1e6 * strtod(p, 0); // Convert from MHz to Hz.
             }
             return;
         }

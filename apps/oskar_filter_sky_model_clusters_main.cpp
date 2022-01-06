@@ -34,16 +34,16 @@ using std::unique;
 using std::vector;
 
 template<typename T>
-bool contains(const std::vector<T>& v, const T& val)
+static bool contains(const std::vector<T>& v, const T& val)
 {
     return std::find(v.begin(), v.end(), val) != v.end();
 }
 
 template<typename T>
-struct sort_indices
+struct oskar_SortIndices
 {
     const T* p;
-    sort_indices(const T* v) : p(v) {}
+    oskar_SortIndices(const T* v) : p(v) {}
     bool operator() (int a, int b) const {return p[a] < p[b];}
 };
 
@@ -71,7 +71,7 @@ static void check_overlap(int start_component,
         bin_dist[i] = oskar_angular_distance(ra0, bin_ra[i], dec0, bin_dec[i]);
     }
     sort(bin_index.begin(), bin_index.end(),
-            sort_indices<double>(&bin_dist[0]));
+            oskar_SortIndices<double>(&bin_dist[0]));
 
     // Loop over all unchecked sources in nearby bins (4 bins is worst case).
     for (int b = 0; b < 4; ++b)
@@ -249,7 +249,7 @@ int main(int argc, char** argv)
     vector< vector<int> > bin_indices(num_bins);
     for (int i = 0; i < num_bins; ++i)
     {
-        oskar_convert_healpix_ring_to_theta_phi_d(nside, i,
+        oskar_convert_healpix_ring_to_theta_phi_pixel(nside, i,
                 &bin_dec[i], &bin_ra[i]);
         bin_dec[i] = 0.5 * M_PI - bin_dec[i];
     }
@@ -367,7 +367,7 @@ int main(int argc, char** argv)
 
     // Sort indices by flux.
     sort(output_source_indices.begin(), output_source_indices.end(),
-            sort_indices<double>(&output_source_I[0]));
+            oskar_SortIndices<double>(&output_source_I[0]));
     reverse(output_source_indices.begin(), output_source_indices.end());
 
     // Get all components in clusters above the flux threshold.

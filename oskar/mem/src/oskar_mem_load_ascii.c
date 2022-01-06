@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -43,6 +43,13 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     /* Check if safe to proceed. */
     if (*status) return 0;
 
+    /* Check for at least one array. */
+    if (num_mem == 0)
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return 0;
+    }
+
     /* Open the file. */
     file = fopen(filename, "r");
     if (!file)
@@ -56,6 +63,7 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     if (!mem_handle)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        goto cleanup;
     }
 
     /* Set up handles and default row data, and find the minimum and maximum
@@ -66,10 +74,12 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     va_end(args);
 
     /* Allocate an array to hold numeric data for one row of the file. */
+    if (*status) goto cleanup;
     row_data = (double*) calloc(num_cols_max, sizeof(double));
     if (!row_data)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        goto cleanup;
     }
 
     /* Loop over lines in the file. */
@@ -112,6 +122,7 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     }
 
     /* Ensure that the handle array exists. */
+cleanup:
     if (mem_handle)
     {
         /* Resize all arrays to their actual final length. */
@@ -144,7 +155,7 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     free(row_defaults);
     free(mem_handle);
     fclose(file);
-    return row_index;
+    return *status ? 0 : row_index;
 }
 
 
@@ -159,20 +170,19 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
      * default row data. */
     for (i = 0; i < num_mem; ++i)
     {
+        oskar_Mem* mem = 0;
         size_t num_cols_needed = 1;
 
         /* Break if error. */
         if (*status) break;
 
         /* Get and store a handle to CPU-accessible memory for the array. */
+        mem = va_arg(args, oskar_Mem*);
+        mem_handle[i] = mem;
+        if (oskar_mem_location(mem) != OSKAR_CPU)
         {
-            oskar_Mem* mem = va_arg(args, oskar_Mem*);
-            mem_handle[i] = mem;
-            if (oskar_mem_location(mem) != OSKAR_CPU)
-            {
-                mem_handle[i] = oskar_mem_create(oskar_mem_type(mem),
-                        OSKAR_CPU, oskar_mem_length(mem), status);
-            }
+            mem_handle[i] = oskar_mem_create(oskar_mem_type(mem),
+                    OSKAR_CPU, oskar_mem_length(mem), status);
         }
 
         /* Break if error. */
@@ -194,47 +204,39 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
         }
 
         /* Make a copy of the default string from the argument list. */
+        const char* def = va_arg(args, const char*);
+        const size_t def_len = 1 + strlen(def);
+        if (buffer_size < def_len)
         {
-            size_t def_len = 0;
-            const char* def = va_arg(args, const char*);
-            def_len = 1 + strlen(def);
-            if (buffer_size < def_len)
+            buffer_size = def_len;
+            line = (char*) realloc(line, buffer_size);
+            if (!line)
             {
-                buffer_size = def_len;
-                line = (char*) realloc(line, buffer_size);
-                if (!line)
-                {
-                    *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-                    break;
-                }
+                *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+                break;
             }
-            strcpy(line, def);
         }
+        memcpy(line, def, def_len);
 
         /* Get default value(s) for the array, and store them at the
          * current column start. */
+        const size_t num_defaults = oskar_string_to_array_d(
+                line, num_cols_needed, *row_defaults + col_start);
+        if (num_defaults == 0)
         {
-            size_t num_defaults = 0;
-            num_defaults = oskar_string_to_array_d(line, num_cols_needed,
-                    *row_defaults + col_start);
-
-            /* Sanity checks on defaults. */
-            if (num_defaults == 0)
+            *num_cols_min += num_cols_needed;
+            if (*num_cols_min != *num_cols_max)
             {
-                *num_cols_min += num_cols_needed;
-                if (*num_cols_min != *num_cols_max)
-                {
-                    /* A default value was set for one or more earlier columns,
-                     * which makes no sense. */
-                    *status = OSKAR_ERR_DIMENSION_MISMATCH;
-                }
+                /* A default value was set for one or more earlier columns,
+                 * which makes no sense. */
+                *status = OSKAR_ERR_DIMENSION_MISMATCH;
             }
-            else if (num_defaults != num_cols_needed)
-            {
-                /* The number of defaults provided does not correspond to the
-                 * number required for the data type. */
-                *status = OSKAR_ERR_TYPE_MISMATCH;
-            }
+        }
+        else if (num_defaults != num_cols_needed)
+        {
+            /* The number of defaults provided does not correspond to the
+             * number required for the data type. */
+            *status = OSKAR_ERR_TYPE_MISMATCH;
         }
         col_start += num_cols_needed;
     }

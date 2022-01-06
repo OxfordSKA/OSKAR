@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, The OSKAR Developers.
+ * Copyright (c) 2018-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -23,15 +23,15 @@
 static oskar_Device** oskar_device_create_list_cl(const char* device_type,
         const char* device_vendor, int* device_count);
 
-struct LocalMutex
+struct oskar_LocalMutex
 {
     oskar_Mutex* m;
-    LocalMutex()  { this->m = oskar_mutex_create(); }
-    ~LocalMutex() { oskar_mutex_free(this->m); }
-    void lock()   { oskar_mutex_lock(this->m); }
-    void unlock() { oskar_mutex_unlock(this->m); }
+    oskar_LocalMutex()  { this->m = oskar_mutex_create(); }
+    ~oskar_LocalMutex() { oskar_mutex_free(this->m); }
+    void lock() const   { oskar_mutex_lock(this->m); }
+    void unlock() const { oskar_mutex_unlock(this->m); }
 };
-static LocalMutex mutex_;
+static oskar_LocalMutex mutex_; // NOLINT: This constructor will not throw.
 
 oskar_Device** oskar_device_create_list(int location, int* num_devices)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -159,24 +159,24 @@ bool SettingsTree::contains(const char* key) const
 {
     string current_key = p->group_prefix_ + key;
     SettingsKey k(current_key.c_str(), p->sep_);
-    return find_(p->root_, k, 0) ? true : false;
+    return find_node(p->root_, k, 0) ? true : false;
 }
 
 bool SettingsTree::dependencies_satisfied(const char* key) const
 {
     string current_key = p->group_prefix_ + key;
     SettingsKey k(current_key.c_str(), p->sep_);
-    const SettingsNode* node = find_(p->root_, k, 0);
+    const SettingsNode* node = find_node(p->root_, k, 0);
     if (node)
     {
         const SettingsNode* parent = node->parent();
-        if (parent && !parent_dependencies_satisfied_(parent))
+        if (parent && !parent_dependencies_satisfied(parent))
         {
             return false;
         }
         const SettingsDependencyGroup* deps_ = node->dependency_tree();
         if (!deps_) return true;
-        return dependencies_satisfied_(deps_);
+        return dependencies_satisfied(deps_);
     }
     else
     {
@@ -250,7 +250,7 @@ bool SettingsTree::is_critical(const char* key) const
 {
     string current_key = p->group_prefix_ + key;
     SettingsKey k(current_key.c_str(), p->sep_);
-    const SettingsNode* node = find_(p->root_, k, 0);
+    const SettingsNode* node = find_node(p->root_, k, 0);
     bool item_critical = false;
     if (node->item_type() == SettingsItem::SETTING &&
                     dependencies_satisfied(k))
@@ -260,7 +260,7 @@ bool SettingsTree::is_critical(const char* key) const
             item_critical = true;
         }
     }
-    bool critical_children = is_critical_(node);
+    bool critical_children = is_node_critical(node);
     return (item_critical || critical_children);
 }
 
@@ -273,7 +273,7 @@ const SettingsItem* SettingsTree::item(const char* key) const
 {
     string current_key = p->group_prefix_ + key;
     SettingsKey k(current_key.c_str(), p->sep_);
-    const SettingsNode* node = find_(p->root_, k, 0);
+    const SettingsNode* node = find_node(p->root_, k, 0);
     if (node)
     {
         return node;
@@ -315,7 +315,7 @@ int SettingsTree::num_settings() const
 void SettingsTree::print() const
 {
     cout << string(80, '-') << endl;
-    print_(p->root_, 0);
+    print_from_node(p->root_, 0);
     cout << string(80, '-') << endl;
 }
 
@@ -348,7 +348,7 @@ bool SettingsTree::set_default(const char* key, bool write)
 {
     string current_key = p->group_prefix_ + key;
     SettingsKey k(current_key.c_str(), p->sep_);
-    SettingsNode* node = find_(p->root_, k, 0);
+    SettingsNode* node = find_node(p->root_, k, 0);
     if (node)
     {
         bool item_ok = node->set_value(node->default_value());
@@ -368,7 +368,7 @@ bool SettingsTree::set_default(const char* key, bool write)
 
 void SettingsTree::set_defaults()
 {
-    set_defaults_(p->root_);
+    set_defaults_from_node(p->root_);
     modified_ = false;
 }
 
@@ -392,7 +392,7 @@ bool SettingsTree::set_value(const char* key, const char* value, bool write)
 {
     string current_key = p->group_prefix_ + key;
     SettingsKey k(current_key.c_str(), p->sep_);
-    SettingsNode* node = find_(p->root_, k, 0);
+    SettingsNode* node = find_node(p->root_, k, 0);
     if (node)
     {
         bool item_ok = node->set_value(value);
@@ -524,14 +524,14 @@ const char* SettingsTree::operator[](const char* key) const
 
 /* Private methods ***********************************************************/
 
-bool SettingsTree::dependencies_satisfied_(const SettingsDependencyGroup* group) const
+bool SettingsTree::dependencies_satisfied(const SettingsDependencyGroup* group) const
 {
     SettingsDependencyGroup::GroupLogic logic = group->group_logic();
     bool group_ok = (logic == SettingsDependencyGroup::OR) ? false : true;
     // Loop over child groups and evaluate if satisfied.
     for (int i = 0; i < group->num_children(); ++i)
     {
-        bool child_ok = dependencies_satisfied_(group->get_child(i));
+        bool child_ok = dependencies_satisfied(group->get_child(i));
         switch (logic) {
             case SettingsDependencyGroup::AND:
                 group_ok &= child_ok;
@@ -546,7 +546,7 @@ bool SettingsTree::dependencies_satisfied_(const SettingsDependencyGroup* group)
     // Loop over dependencies and evaluate if satisfied.
     for (int i = 0; i < group->num_dependencies(); ++i)
     {
-        bool dep_ok = dependency_satisfied_(group->get_dependency(i));
+        bool dep_ok = dependency_satisfied(group->get_dependency(i));
         switch (logic) {
             case SettingsDependencyGroup::AND:
                 group_ok &= dep_ok;
@@ -561,18 +561,18 @@ bool SettingsTree::dependencies_satisfied_(const SettingsDependencyGroup* group)
     return group_ok;
 }
 
-bool SettingsTree::dependency_satisfied_(const SettingsDependency* dep) const
+bool SettingsTree::dependency_satisfied(const SettingsDependency* dep) const
 {
     SettingsKey key(dep->key()); // key pointed to.
     // Current value of the dependency.
-    const SettingsNode* node = find_(p->root_, key, 0);
+    const SettingsNode* node = find_node(p->root_, key, 0);
     if (!node)
     {
         cerr << "ERROR: Unable to find dependency key = '" << key << "'" << endl;
         return true;
     }
     const SettingsValue& current_value =
-            find_(p->root_, key, 0)->settings_value();
+            find_node(p->root_, key, 0)->settings_value();
 
     // Construct the value required by the dependency.
     SettingsValue dep_value(current_value);
@@ -589,7 +589,7 @@ bool SettingsTree::dependency_satisfied_(const SettingsDependency* dep) const
     }
 }
 
-const SettingsNode* SettingsTree::find_(const SettingsNode* node,
+const SettingsNode* SettingsTree::find_node(const SettingsNode* node,
         const SettingsKey& full_key, int depth) const
 {
     string current_key = string(full_key[depth]);
@@ -606,14 +606,14 @@ const SettingsNode* SettingsTree::find_(const SettingsNode* node,
             }
             else
             {
-                return find_(child, full_key, depth + 1);
+                return find_node(child, full_key, depth + 1);
             }
         }
     }
     return 0;
 }
 
-SettingsNode* SettingsTree::find_(SettingsNode* node,
+SettingsNode* SettingsTree::find_node(SettingsNode* node,
         const SettingsKey& full_key, int depth)
 {
     string current_key = string(full_key[depth]);
@@ -630,14 +630,14 @@ SettingsNode* SettingsTree::find_(SettingsNode* node,
             }
             else
             {
-                return find_(child, full_key, depth + 1);
+                return find_node(child, full_key, depth + 1);
             }
         }
     }
     return 0;
 }
 
-bool SettingsTree::is_critical_(const SettingsNode* node) const
+bool SettingsTree::is_node_critical(const SettingsNode* node) const
 {
     bool critical = false;
     for (int i = 0; i < node->num_children(); ++i)
@@ -647,18 +647,18 @@ bool SettingsTree::is_critical_(const SettingsNode* node) const
         critical |= (child->is_required() && !child->is_set() && is_satisfied);
         // If a condition is found, no need to continue.
         if (critical) return true;
-        critical |= is_critical_(child);
+        critical |= is_node_critical(child);
     }
     return critical;
 }
 
-bool SettingsTree::parent_dependencies_satisfied_(const SettingsNode* node) const
+bool SettingsTree::parent_dependencies_satisfied(const SettingsNode* node) const
 {
     // If the parent has any dependencies not satisfied return false.
     const SettingsDependencyGroup* deps_ = node->dependency_tree();
     if (deps_)
     {
-        if (!dependencies_satisfied_(deps_))
+        if (!dependencies_satisfied(deps_))
         {
             return false;
         }
@@ -666,12 +666,12 @@ bool SettingsTree::parent_dependencies_satisfied_(const SettingsNode* node) cons
     // Otherwise keep going up to the next parent.
     if (node->parent())
     {
-        return parent_dependencies_satisfied_(node->parent());
+        return parent_dependencies_satisfied(node->parent());
     }
     return true;
 }
 
-void SettingsTree::print_(const SettingsNode* node, int depth) const
+void SettingsTree::print_from_node(const SettingsNode* node, int depth) const
 {
     for (int i = 0; i < node->num_children(); ++i)
     {
@@ -698,17 +698,17 @@ void SettingsTree::print_(const SettingsNode* node, int depth) const
         cout << setw(16) << child->settings_value().type_name();
         cout << setw(10) << "deps:" << child->num_dependencies();
         cout << endl;
-        print_(child, depth + 1);
+        print_from_node(child, depth + 1);
     }
 }
 
-void SettingsTree::set_defaults_(SettingsNode* node)
+void SettingsTree::set_defaults_from_node(SettingsNode* node)
 {
     for (int i = 0; i < node->num_children(); ++i)
     {
         SettingsNode* child_node = node->child(i);
         child_node->set_value(child_node->default_value());
-        set_defaults_(child_node);
+        set_defaults_from_node(child_node);
     }
 }
 

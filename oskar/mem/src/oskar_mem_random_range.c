@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -55,7 +55,8 @@ void oskar_mem_random_range(oskar_Mem* mem, double lo, double hi, int* status)
         p = oskar_mem_float(ptr, status);
         for (i = 0; i < num_elements; ++i)
         {
-            r = lo + (hi - lo) * rand() / (double)RAND_MAX;
+            /* NOLINTNEXTLINE: We can use rand() here without concern. */
+            r = lo + (hi - lo) * (double)rand() / (double)RAND_MAX;
             p[i] = (float)r;
         }
     }
@@ -65,7 +66,8 @@ void oskar_mem_random_range(oskar_Mem* mem, double lo, double hi, int* status)
         p = oskar_mem_double(ptr, status);
         for (i = 0; i < num_elements; ++i)
         {
-            r = lo + (hi - lo) * rand() / (double)RAND_MAX;
+            /* NOLINTNEXTLINE: We can use rand() here without concern. */
+            r = lo + (hi - lo) * (double)rand() / (double)RAND_MAX;
             p[i] = r;
         }
     }

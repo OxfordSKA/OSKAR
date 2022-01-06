@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -32,11 +32,17 @@ char* oskar_dir_cwd(void)
     char* str = 0;
     size_t len = 0;
 #ifndef OSKAR_OS_WIN
+    char* new_str = 0;
     do
     {
         len += 256;
-        str = (char*) realloc(str, len);
-        if (!str) return 0;
+        new_str = (char*) realloc(str, len);
+        if (!new_str)
+        {
+            free(str);
+            return 0;
+        }
+        str = new_str;
     }
     while (getcwd(str, len) == NULL);
 #else
@@ -93,9 +99,8 @@ char* oskar_dir_get_home_path(const char* item_name, int* exists)
 char* oskar_dir_get_path(const char* dir_path, const char* item_name)
 {
     char* buffer = 0;
-    int buf_len = 0, dir_path_len = 0;
-    dir_path_len = (int) strlen(dir_path);
-    buf_len = 2 + dir_path_len + (int) strlen(item_name);
+    const size_t dir_path_len = strlen(dir_path);
+    const size_t buf_len = 2 + dir_path_len + strlen(item_name);
     buffer = (char*) calloc(buf_len, sizeof(char));
     if (!buffer) return 0;
     if (dir_path[dir_path_len - 1] == oskar_dir_separator())
@@ -128,16 +133,18 @@ char* oskar_dir_home(void)
     }
     if (tmp)
     {
-        home_dir = (char*) calloc(1 + strlen(tmp), 1);
-        if (home_dir) strcpy(home_dir, tmp);
+        const size_t buffer_size = 1 + strlen(tmp);
+        home_dir = (char*) calloc(buffer_size, 1);
+        if (home_dir) memcpy(home_dir, tmp, buffer_size);
     }
     free(buffer);
 #else
     tmp = getenv("USERPROFILE");
     if (tmp)
     {
-        home_dir = (char*) calloc(1 + strlen(tmp), 1);
-        if (home_dir) strcpy(home_dir, tmp);
+        const size_t buffer_size = 1 + strlen(tmp);
+        home_dir = (char*) calloc(buffer_size, 1);
+        if (home_dir) memcpy(home_dir, tmp, buffer_size);
     }
 #endif
     return home_dir;
@@ -180,8 +187,14 @@ static void item(const char* dir_path, const char* name, const char* wildcard,
     }
     if (items && *i < num_items)
     {
-        items[*i] = (char*) realloc(items[*i], 1 + strlen(name));
-        if (items[*i]) strcpy(items[*i], name);
+        char* new_item = 0;
+        const size_t buffer_size = 1 + strlen(name);
+        new_item = (char*) realloc(items[*i], buffer_size);
+        if (new_item)
+        {
+            items[*i] = new_item;
+            memcpy(items[*i], name, buffer_size);
+        }
     }
     ++(*i);
 }
@@ -235,16 +248,39 @@ void oskar_dir_items(const char* dir_path, const char* wildcard,
     *num_items = get_items(dir_path, wildcard, match_files, match_dirs, 0, 0);
 
     /* Get the sorted list of names if required. */
-    if (items)
+    if (!items) return;
+    if (*num_items == 0)
     {
+        /* If the new list is empty, free the old one and return. */
+        goto cleanup;
+    }
+    else
+    {
+        char** new_items = 0;
+
+        /* If the old list is larger, free the extra items. */
         for (i = *num_items; i < old_num_items; ++i) free((*items)[i]);
-        *items = (char**) realloc(*items, *num_items * sizeof(char**));
-        if (!*items) return;
+
+        /* Resize the list and check for errors. */
+        new_items = (char**) realloc(*items, *num_items * sizeof(char*));
+        if (!new_items) goto cleanup;
+        *items = new_items;
+
+        /* If the new list is larger, initialise the extra items. */
         for (i = old_num_items; i < *num_items; ++i) (*items)[i] = 0;
+
+        /* Get the items and sort them. */
         (void) get_items(dir_path, wildcard, match_files, match_dirs,
                 *num_items, *items);
         qsort(*items, *num_items, sizeof(char*), name_cmp);
     }
+    return;
+
+cleanup:
+    for (i = 0; i < old_num_items; ++i) free((*items)[i]);
+    free(*items);
+    *items = 0;
+    *num_items = 0;
 }
 
 
@@ -295,7 +331,7 @@ int oskar_dir_mkpath(const char* dir_path)
 
     /* Copy the input path string so it can be modified. */
     const size_t path_len = 1 + strlen(dir_path);
-    dir_path_p = (char*) malloc(path_len);
+    dir_path_p = (char*) calloc(path_len, sizeof(char));
     if (!dir_path_p) return 0;
     memcpy(dir_path_p, dir_path, path_len);
 
@@ -336,14 +372,8 @@ int oskar_dir_remove(const char* dir_path)
         path = oskar_dir_get_path(dir_path, items[i]);
 
         /* Remove files and directories recursively. */
-        if (!oskar_dir_exists(path))
-        {
-            error = remove(path);
-        }
-        else
-        {
-            error = !oskar_dir_remove(path);
-        }
+        error = !oskar_dir_exists(path) ?
+                remove(path) : !oskar_dir_remove(path);
         free(path);
         if (error) break;
     }

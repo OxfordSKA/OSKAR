@@ -111,11 +111,11 @@ static void oskar_sscal(const int n, const float da, float *dx,
         const int incx);
 static void oskar_dgemm(const char *transa, const char *transb,
         const int m, const int n, const int k, const double alpha,
-        double *A, const int lda, double *B, const int ldb,
+        const double *A, const int lda, const double *B, const int ldb,
         const double beta, double *C, const int ldc);
 static void oskar_sgemm(const char *transa, const char *transb,
         const int m, const int n, const int k, const float alpha,
-        float *A, const int lda, float *B, const int ldb,
+        const float *A, const int lda, const float *B, const int ldb,
         const float beta, float *C, const int ldc);
 static void oskar_dtrsm(const char *side, const char *uplo, const char *transa,
         const char *diag, const int m, const int n, const double alpha,
@@ -1295,7 +1295,7 @@ int oskar_isamax(const int n, float *dx, const int incx)
 
 void oskar_dgemm(const char *transa, const char *transb,
         const int m, const int n, const int k, const double alpha,
-        double *A, const int lda, double *B, const int ldb,
+        const double *A, const int lda, const double *B, const int ldb,
         const double beta, double *C, const int ldc)
 {
     double x = 0.0;
@@ -1306,7 +1306,7 @@ void oskar_dgemm(const char *transa, const char *transb,
 
 void oskar_sgemm(const char *transa, const char *transb,
         const int m, const int n, const int k, const float alpha,
-        float *A, const int lda, float *B, const int ldb,
+        const float *A, const int lda, const float *B, const int ldb,
         const float beta, float *C, const int ldc)
 {
     float x = 0.0;

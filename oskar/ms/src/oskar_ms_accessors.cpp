@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -163,7 +163,7 @@ double oskar_ms_phase_centre_dec_rad(const oskar_MeasurementSet* p)
 }
 
 void oskar_ms_set_array_centre(oskar_MeasurementSet* p,
-        double array_centre_itrf[3])
+        const double array_centre_itrf[3])
 {
 #ifdef OSKAR_MS_NEW
     Table observation(p->ms->tableName() + "/OBSERVATION", Table::Update);

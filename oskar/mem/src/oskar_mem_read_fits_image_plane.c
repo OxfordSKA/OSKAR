@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "mem/oskar_mem.h"
 #include "math/oskar_cmath.h"
 #include <fitsio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifdef __cplusplus
@@ -184,8 +185,8 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
             fits_read_record(fptr, i, card, status);
             if (!strncmp(card, "HISTORY AIPS   CLEAN BMAJ", 25))
             {
-                sscanf(card + 26, "%lf", &bmaj);
-                sscanf(card + 44, "%lf", &bmin);
+                bmaj = strtod(card + 26, 0);
+                bmin = strtod(card + 44, 0);
                 break;
             }
         }
@@ -205,7 +206,7 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
     if (!status1 && i > 0 && brightness_units)
     {
         *brightness_units = (char*) realloc (*brightness_units, i + 1);
-        strcpy(*brightness_units, card);
+        memcpy(*brightness_units, card, i + 1);
     }
 
     /* Read image pixel data. */

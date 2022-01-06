@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -352,16 +352,16 @@ class OSKAR_SETTINGS_EXPORT SettingsTree
 
  private:
     SettingsTree(const SettingsTree&);
-    bool dependencies_satisfied_(const SettingsDependencyGroup* group) const;
-    bool dependency_satisfied_(const SettingsDependency* dep) const;
-    const SettingsNode* find_(const SettingsNode* node,
+    bool dependencies_satisfied(const SettingsDependencyGroup* group) const;
+    bool dependency_satisfied(const SettingsDependency* dep) const;
+    const SettingsNode* find_node(const SettingsNode* node,
             const SettingsKey& full_key, int depth) const;
-    SettingsNode* find_(SettingsNode* node,
+    SettingsNode* find_node(SettingsNode* node,
             const SettingsKey& full_key, int depth);
-    bool is_critical_(const SettingsNode* node) const;
-    bool parent_dependencies_satisfied_(const SettingsNode*) const;
-    void print_(const SettingsNode* node, int depth = 0) const;
-    void set_defaults_(SettingsNode* node);
+    bool is_node_critical(const SettingsNode* node) const;
+    bool parent_dependencies_satisfied(const SettingsNode*) const;
+    void print_from_node(const SettingsNode* node, int depth = 0) const;
+    void set_defaults_from_node(SettingsNode* node);
 
  private:
     mutable bool modified_;

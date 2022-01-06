@@ -53,7 +53,7 @@ SettingsTree* oskar_app_settings_tree(const char* app,
 
     // Create the settings tree and declare the settings.
     SettingsTree* s = new SettingsTree;
-    settings_declare_xml(s, settings_str);
+    oskar_settings_declare_xml(s, settings_str);
 
     // If a filename is given, try to load it.
     if (settings_file && strlen(settings_file) > 0)

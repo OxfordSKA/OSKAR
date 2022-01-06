@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -125,8 +125,9 @@ double oskar_timer_elapsed(oskar_Timer* timer)
         /* Increment elapsed time and restart. */
         timer->elapsed += millisec / 1000.0;
         cudaEventRecord(timer->start_cuda, 0);
+        oskar_mutex_unlock(timer->mutex);
+        return timer->elapsed;
     }
-    else
 #endif
 #ifdef OSKAR_HAVE_OPENCL
     if (timer->type == OSKAR_TIMER_CL)
@@ -144,9 +145,11 @@ double oskar_timer_elapsed(oskar_Timer* timer)
         const double now = oskar_get_wtime(timer);
         timer->elapsed += (now - timer->start);
         timer->start = now;
+        oskar_mutex_unlock(timer->mutex);
+        return timer->elapsed;
     }
-    else
 #endif
+    if (timer->type == OSKAR_TIMER_NATIVE)
     {
         oskar_mutex_lock(timer->mutex);
         const double now = oskar_get_wtime(timer);
@@ -154,8 +157,9 @@ double oskar_timer_elapsed(oskar_Timer* timer)
         /* Increment elapsed time and restart. */
         timer->elapsed += (now - timer->start);
         timer->start = now;
+        oskar_mutex_unlock(timer->mutex);
+        return timer->elapsed;
     }
-    oskar_mutex_unlock(timer->mutex);
     return timer->elapsed;
 }
 

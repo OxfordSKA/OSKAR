@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -79,7 +79,7 @@ static string to_string(const Time::Value& val)
 
 Time::Time()
 {
-    (void) init(0);
+    (void) Time::init(0);
 }
 
 // LCOV_EXCL_START

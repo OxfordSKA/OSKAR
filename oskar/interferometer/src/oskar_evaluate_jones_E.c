@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+/* NOLINTNEXTLINE(readability-identifier-naming) */
 void oskar_evaluate_jones_E(
         oskar_Jones* E,
         int coord_type,

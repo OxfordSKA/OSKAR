@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021, The OSKAR Developers.
+ * Copyright (c) 2014-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -190,8 +190,8 @@ static std::string lltoa(long long int l)
 // see:
 // github.com/radekp/qt/blob/master/src/corelib/tools/qlocale.cpp L:4000
 //
-static std::string longlongToString(long long int l, int precision,
-                                    int /*width*/, unsigned flags)
+static std::string longlong_to_string(
+        long long int l, int precision, int /*width*/, unsigned flags)
 {
     //    bool precision_not_specified = false;
     if (precision == -1) {
@@ -220,10 +220,9 @@ static std::string longlongToString(long long int l, int precision,
     return num_str;
 }
 
-static std::string decimalForm(std::string& digits, int decpt,
-                               unsigned int precision,
-                               PrecisionMode pm,
-                               bool always_show_decpt)
+static std::string decimal_form(
+        std::string& digits, int decpt,
+        unsigned int precision, PrecisionMode pm, bool always_show_decpt)
 {
     if (decpt < 0)
     {
@@ -269,9 +268,9 @@ static std::string decimalForm(std::string& digits, int decpt,
     return digits;
 }
 
-static std::string exponentForm(std::string& digits, int decpt,
-                                unsigned int precision, PrecisionMode pm,
-                                bool always_show_decpt)
+static std::string exponent_form(
+        std::string& digits, int decpt,
+        unsigned int precision, PrecisionMode pm, bool always_show_decpt)
 {
     int exp = decpt - 1;
     if (pm == PMDecimalDigits)
@@ -304,16 +303,15 @@ static std::string exponentForm(std::string& digits, int decpt,
     }
     if (digits[digits.length() - 1] == '.') digits.append("0");
     digits.append("e");
-    digits.append(longlongToString(exp, 2, -1, AlwaysShowSign));
+    digits.append(longlong_to_string(exp, 2, -1, AlwaysShowSign));
     return digits;
 }
 
-static std::string doubleToString(double d, int precision, DoubleForm form,
-                                  int width, unsigned flags)
+static std::string double_to_string(
+        double d, int precision, DoubleForm form, unsigned flags)
 {
     std::string num_str;
     if (precision == -1) precision = 6;
-    if (width == -1) width = 0;
 
     bool negative = false;
     bool special_number = false; // nan, +/- inf
@@ -368,12 +366,12 @@ static std::string doubleToString(double d, int precision, DoubleForm form,
         switch (form)
         {
             case DFExponent:
-                num_str = exponentForm(digits, decpt, precision,
+                num_str = exponent_form(digits, decpt, precision,
                                        PMDecimalDigits,
                                        always_show_decpt);
                 break;
             case DFDecimal:
-                num_str = decimalForm(digits, decpt, precision,
+                num_str = decimal_form(digits, decpt, precision,
                                       PMDecimalDigits, always_show_decpt);
                 // Chop the trailing zeros.
                 if (num_str.length() > 0)
@@ -397,12 +395,12 @@ static std::string doubleToString(double d, int precision, DoubleForm form,
                 if (decpt != static_cast<int>(digits.length()) &&
                                 (decpt <= -4 || decpt > precision))
                 {
-                    num_str = exponentForm(digits, decpt, precision, mode,
+                    num_str = exponent_form(digits, decpt, precision, mode,
                                            always_show_decpt);
                 }
                 else
                 {
-                    num_str = decimalForm(digits, decpt, precision, mode,
+                    num_str = decimal_form(digits, decpt, precision, mode,
                                           always_show_decpt);
                 }
                 break;
@@ -453,7 +451,7 @@ std::string oskar_settings_utility_double_to_string_2(double d, char format,
     }
     std::ostringstream ss;
     std::string s;
-    DoubleForm f;
+    DoubleForm f = DFSignificantDigits;
     switch (format)
     {
         case 'f':
@@ -467,7 +465,7 @@ std::string oskar_settings_utility_double_to_string_2(double d, char format,
             f = DFSignificantDigits;
     }
     unsigned int flags = 0;
-    s = doubleToString(d, precision, f, -1, flags);
+    s = double_to_string(d, precision, f, flags);
     return s;
 }
 

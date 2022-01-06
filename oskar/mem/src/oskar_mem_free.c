@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -35,11 +35,9 @@ void oskar_mem_free(oskar_Mem* mem, int* status)
             clReleaseMemObject(mem->buffer);
         }
     }
-
-    /* For bare pointers, free the memory if the structure actually owns it. */
-    else
 #endif
-    if (mem->owner && mem->data)
+    /* For bare pointers, free the memory if the structure actually owns it. */
+    if (mem->owner && mem->data && !(mem->location & OSKAR_CL))
     {
         /* Check whether the memory is on the host or the device. */
         if (mem->location == OSKAR_CPU)
