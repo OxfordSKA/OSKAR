@@ -21,7 +21,7 @@ endif()
 project(OSKAR CXX C)
 
 # === Project version.
-set(OSKAR_VERSION_ID "0x020800")
+set(OSKAR_VERSION_ID "0x020801")
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 8)
 set(OSKAR_VERSION_PATCH 1)
