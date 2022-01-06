@@ -377,7 +377,7 @@ void oskar_hdf5_read_attributes(const oskar_HDF5* h, const char* object_path,
         const ssize_t name_len = 1 + H5Aget_name(attribute, 0, 0);
         oskar_mem_realloc((*names)[i], name_len, status);
         (void) H5Aget_name(attribute, name_len,
-                oskar_mem_void((*names)[i]));
+                oskar_mem_char((*names)[i]));
 
         /* Get the attribute type, dimensions and value. */
         const hid_t dataspace = H5Aget_space(attribute);

@@ -68,6 +68,11 @@ endif()
 # Link with HDF5 if we have it.
 if (HDF5_FOUND)
     target_link_libraries(${libname} ${HDF5_LIBRARIES})
+    if (WIN32)
+        get_target_property(HDF5_lib_location ${HDF5_LIBRARIES} LOCATION)
+        install(FILES ${HDF5_lib_location}
+            DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
+    endif()
 endif()
 
 # Link with OpenCL if we have it.

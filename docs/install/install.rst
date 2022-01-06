@@ -162,6 +162,9 @@ The dependencies are:
 * [Optional] casacore >= 2.0 (`<https://github.com/casacore/casacore>`_),
   required to use CASA Measurement Sets.
 
+* [Optional] HDF5 >= 1.10 (`<https://www.hdfgroup.org>`_),
+  required to use HDF5 files.
+
 Packages for these dependencies are available in the package repositories
 of many recent Linux distributions, including Debian and Ubuntu.
 
@@ -271,4 +274,3 @@ can be installed to make it easier to use from Python scripts.
 Straightforward instructions for installation with ``pip`` can be found in the
 ``python`` subdirectory of the source distribution,
 or on the :ref:`Python interface quick-start <python_quickstart>` page.
-
