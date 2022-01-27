@@ -7,14 +7,11 @@ if (POLICY CMP0068)
     cmake_policy(SET CMP0068 NEW)
 endif()
 
+# CMP0063 is needed to hide symbols in static libraries
+cmake_policy(SET CMP0063 NEW)
+
 # Declare the CMake project.
 project(oskar_beam_utils CXX C)
-
-# Set the version used for dynamic libraries.
-set(OSKAR_BEAM_UTILS_VERSION "1")
-
-# Set the name of the library.
-set(libname ${PROJECT_NAME})
 
 # If OSKAR_VERSION_STR is not defined, we are building a stand-alone library.
 if (NOT OSKAR_VERSION_STR)
@@ -35,7 +32,7 @@ if (STANDALONE_BUILD)
     endif()
 
     # Compiler options for standalone mode.
-    set(BUILD_SHARED_LIBS ON)
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
     include_directories(
         "${PROJECT_SOURCE_DIR}/"
@@ -52,11 +49,14 @@ if (STANDALONE_BUILD)
 
 endif(STANDALONE_BUILD)
 
+# Set the name of the library.
+set(libname ${PROJECT_NAME})
+
 # Declare build and install targets for the library.
 set(${libname}_SRC
     src/oskar_beam_utils.cpp
 )
-add_library(${libname} ${${libname}_SRC})
+add_library(${libname} STATIC ${${libname}_SRC})
 set_target_properties(${libname} PROPERTIES
     SOVERSION ${OSKAR_BEAM_UTILS_VERSION}
     VERSION ${OSKAR_BEAM_UTILS_VERSION})

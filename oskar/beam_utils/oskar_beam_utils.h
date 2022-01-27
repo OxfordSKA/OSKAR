@@ -10,6 +10,8 @@
 
 #include <complex>
 
+namespace oskar{
+namespace beam_utils{
 /* Functions used by EveryBeam. */
 
 void oskar_evaluate_dipole_pattern_double(
@@ -27,7 +29,8 @@ void oskar_evaluate_spherical_wave_sum_double(
         int l_max,
         const std::complex<double>* alpha,
         std::complex<double>* pattern);
-
+} // namespace beam_utils
+} // namespace oskar
 #endif /* __cplusplus */
 
 #endif /* include guard */
