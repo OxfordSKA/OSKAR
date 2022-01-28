@@ -66,8 +66,15 @@ install(TARGETS ${libname}
     RUNTIME DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime
 )
 
-# Install headers.
 if (STANDALONE_BUILD)
+    # When oskar_beam_utils is a target in a larger project, make sure that other targets linking
+    # against oskar_beam_utils can finde the include files without a call to include_directories()
+    target_include_directories(${libname} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/oskar/beam_utils>
+    )
+
+    # Install headers.
     file(GLOB ${libname}_H oskar*.h) # Public headers only.
     install(FILES ${${libname}_H} DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
 endif(STANDALONE_BUILD)
