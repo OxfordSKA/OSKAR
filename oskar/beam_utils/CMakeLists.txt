@@ -67,6 +67,11 @@ install(TARGETS ${libname}
 )
 
 if (STANDALONE_BUILD)
+    find_package(OpenMP QUIET)
+    if (${OpenMP_FOUND})
+        target_link_libraries(${libname} PRIVATE OpenMP::OpenMP_CXX)
+    endif()
+
     # When oskar_beam_utils is a target in a larger project, make sure that other targets linking
     # against oskar_beam_utils can finde the include files without a call to include_directories()
     target_include_directories(${libname} PUBLIC
