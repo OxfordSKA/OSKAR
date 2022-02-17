@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -433,6 +433,15 @@ const oskar_Mem* oskar_station_permitted_beam_el_rad_const(
     return model ? model->permitted_beam_el_rad : 0;
 }
 
+oskar_Gains* oskar_station_gains(oskar_Station* model)
+{
+    return model ? model->gains : 0;
+}
+
+const oskar_Gains* oskar_station_gains_const(const oskar_Station* model)
+{
+    return model ? model->gains : 0;
+}
 
 /* Setters. */
 

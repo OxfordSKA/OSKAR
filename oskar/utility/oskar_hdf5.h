@@ -54,6 +54,15 @@ OSKAR_EXPORT
 void oskar_hdf5_inc_ref(oskar_HDF5* h);
 
 /**
+ * @brief Returns true if the dataset exists.
+ *
+ * @param[in] h  Handle to HDF5 file.
+ * @param[in] name The name (path) of a dataset in the file.
+ */
+OSKAR_EXPORT
+int oskar_hdf5_dataset_exists(const oskar_HDF5* h, const char* name);
+
+/**
  * @brief Returns the name (path) of a dataset in the file.
  *
  * @details

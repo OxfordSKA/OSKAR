@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, The OSKAR Developers.
+ * Copyright (c) 2020-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -49,7 +49,7 @@ int oskar_gains_defined(const oskar_Gains* h)
 }
 
 void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
-        double frequency_hz, oskar_Mem* gains, int* status)
+        double frequency_hz, oskar_Mem* gains, int feed, int* status)
 {
     oskar_Mem *temp_gains = 0, *temp_x = 0, *temp_y = 0;
     oskar_Mem *ptr_gains = 0, *ptr_x = 0, *ptr_y = 0;
@@ -72,16 +72,22 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
     /* Bounds check. */
     if (time_index_sim >= (int) h->dims[0])
     {
-        oskar_log_warning(0,
-                "Time index %d out of range of HDF5 gain table (%d)",
-                time_index_sim, h->dims[0]);
+        if ((int) h->dims[0] > 1)
+        {
+            oskar_log_warning(0,
+                    "Time index %d out of range of HDF5 gain table (%d)",
+                    time_index_sim, h->dims[0]);
+        }
         time_index_sim = (int) h->dims[0] - 1;
     }
     if (channel_index >= (int) h->dims[1])
     {
-        oskar_log_warning(0,
-                "Channel index %d out of range of HDF5 gain table (%d)",
-                channel_index, h->dims[1]);
+        if ((int) h->dims[1] > 1)
+        {
+            oskar_log_warning(0,
+                    "Channel index %d out of range of HDF5 gain table (%d)",
+                    channel_index, h->dims[1]);
+        }
         channel_index = (int) h->dims[1] - 1;
     }
 
@@ -92,22 +98,31 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
     const int out_prec = oskar_mem_precision(gains);
     oskar_mem_ensure(gains, num_antennas, status);
 
-    /* Read gains for X polarisation. */
-    ptr_x = x = oskar_hdf5_read_hyperslab(h->hdf5_file, "gain_xpol",
-            3, offsets, sizes, status);
-    if (oskar_mem_precision(x) != out_prec)
-    {
-        ptr_x = temp_x = oskar_mem_convert_precision(x, out_prec, status);
-    }
-
-    /* Check for the other polarisation. */
+    /* Check if requested gains are fully polarised. */
     if (oskar_mem_is_matrix(gains))
     {
-        ptr_y = y = oskar_hdf5_read_hyperslab(h->hdf5_file, "gain_ypol",
+        /* Read gains for X polarisation. */
+        ptr_x = x = oskar_hdf5_read_hyperslab(h->hdf5_file, "gain_xpol",
                 3, offsets, sizes, status);
-        if (oskar_mem_precision(y) != out_prec)
+        if (oskar_mem_precision(x) != out_prec)
         {
-            ptr_y = temp_y = oskar_mem_convert_precision(y, out_prec, status);
+            ptr_x = temp_x = oskar_mem_convert_precision(x, out_prec, status);
+        }
+
+        /* Read gains for Y polarisation. */
+        if (oskar_hdf5_dataset_exists(h->hdf5_file, "/gain_ypol"))
+        {
+            ptr_y = y = oskar_hdf5_read_hyperslab(h->hdf5_file, "gain_ypol",
+                    3, offsets, sizes, status);
+            if (oskar_mem_precision(y) != out_prec)
+            {
+                ptr_y = temp_y = oskar_mem_convert_precision(
+                        y, out_prec, status);
+            }
+        }
+        else
+        {
+            ptr_y = ptr_x;
         }
 
         /* Check output is writable by the CPU. */
@@ -158,7 +173,16 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
     }
     else
     {
-        /* Just use the X polarisation if in scalar mode. */
+        /* Read gains only for specified polarisation. */
+        const char* dataset = "gain_xpol";
+        if (feed == 1 && oskar_hdf5_dataset_exists(h->hdf5_file, "/gain_ypol"))
+            dataset = "gain_ypol";
+        ptr_x = x = oskar_hdf5_read_hyperslab(h->hdf5_file, dataset,
+                3, offsets, sizes, status);
+        if (oskar_mem_precision(x) != out_prec)
+        {
+            ptr_x = temp_x = oskar_mem_convert_precision(x, out_prec, status);
+        }
         oskar_mem_copy_contents(gains, ptr_x, 0, 0, num_antennas, status);
     }
 

@@ -44,5 +44,6 @@ The following sections describe the currently available settings.
     \clearpage
 
 .. toctree::
+   :maxdepth: 1
 
 SETTINGS_LISTS

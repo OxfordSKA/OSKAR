@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, The OSKAR Developers.
+ * Copyright (c) 2020-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -23,7 +23,19 @@ void TelescopeLoaderGainModel::load(oskar_Telescope* telescope,
     }
 }
 
+void TelescopeLoaderGainModel::load(oskar_Station* station,
+        const string& cwd, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
+{
+    // Check for presence of gain model data.
+    if (oskar_dir_file_exists(cwd.c_str(), gain_model_file))
+    {
+        oskar_gains_open_hdf5(oskar_station_gains(station),
+                get_path(cwd, gain_model_file).c_str(), status);
+    }
+}
+
 string TelescopeLoaderGainModel::name() const
 {
-    return string("element gain model loader");
+    return string("gain model loader");
 }

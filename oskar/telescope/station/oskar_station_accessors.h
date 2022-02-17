@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -11,6 +11,7 @@
  */
 
 #include <oskar_global.h>
+#include <gains/oskar_gains.h>
 #include <mem/oskar_mem.h>
 #include <telescope/station/element/oskar_element.h>
 
@@ -279,6 +280,11 @@ OSKAR_EXPORT
 const oskar_Mem* oskar_station_permitted_beam_el_rad_const(
         const oskar_Station* model);
 
+OSKAR_EXPORT
+oskar_Gains* oskar_station_gains(oskar_Station* model);
+
+OSKAR_EXPORT
+const oskar_Gains* oskar_station_gains_const(const oskar_Station* model);
 
 /* Setters. */
 

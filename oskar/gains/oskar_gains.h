@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, The OSKAR Developers.
+ * Copyright (c) 2020-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -34,7 +34,7 @@ int oskar_gains_defined(const oskar_Gains* h);
 
 OSKAR_EXPORT
 void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
-        double frequency_hz, oskar_Mem* gains, int* status);
+        double frequency_hz, oskar_Mem* gains, int feed, int* status);
 
 OSKAR_EXPORT
 void oskar_gains_free(oskar_Gains* h, int* status);

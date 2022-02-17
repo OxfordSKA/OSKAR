@@ -112,6 +112,16 @@ void oskar_hdf5_inc_ref(oskar_HDF5* h)
 }
 
 
+int oskar_hdf5_dataset_exists(const oskar_HDF5* h, const char* name)
+{
+    for (int i = 0; i < h->num_datasets; ++i)
+    {
+        if (!strcmp(name, h->names[i])) return 1;
+    }
+    return 0;
+}
+
+
 const char* oskar_hdf5_dataset_name(const oskar_HDF5* h, int i)
 {
     return h->names[i];

@@ -99,7 +99,6 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
     const int location = oskar_station_mem_location(station);
     const int num_elements = oskar_station_num_elements(station);
     const int num_points = (int) oskar_mem_length(lon);
-    const double wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
     const double last = gast + oskar_station_lon_rad(station);
     const double st_lat = oskar_station_lat_rad(station);
     *weights = oskar_mem_create(type | OSKAR_COMPLEX, location, num_elements,
@@ -117,7 +116,7 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
     oskar_convert_relative_directions_to_enu_directions(
             0, 0, 0, num_points, l, m, n, last, 0.0, st_lat, 0, *x, *y, *z,
             status);
-    oskar_station_evaluate_element_weights(station, 0, wavenumber,
+    oskar_station_evaluate_element_weights(station, 0, freq_hz,
             beam_x, beam_y, beam_z, 0, *weights, 0, status);
     oskar_mem_free(l, status);
     oskar_mem_free(m, status);

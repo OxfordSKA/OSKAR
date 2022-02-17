@@ -275,7 +275,7 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     if (oskar_gains_defined(oskar_telescope_gains(d->tel)))
     {
         oskar_gains_evaluate(oskar_telescope_gains(d->tel),
-                time_index_sim, freq, d->gains, status);
+                time_index_sim, freq, d->gains, 0, status);
         oskar_jones_apply_station_gains(d->J, d->gains, status);
     }
 

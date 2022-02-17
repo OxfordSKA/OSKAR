@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -42,6 +42,9 @@ void oskar_station_free(oskar_Station* model, int* status)
     /* Free the noise model. */
     oskar_mem_free(model->noise_freq_hz, status);
     oskar_mem_free(model->noise_rms_jy, status);
+
+    /* Free the gain model. */
+    oskar_gains_free(model->gains, status);
 
     /* Free the element pattern data if it exists. */
     if (oskar_station_has_element(model))

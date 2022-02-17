@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -145,7 +145,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
             {
                 const int eval_x = (i == 0 || num_feeds == 1) ? 1 : 0;
                 const int eval_y = (i == 1 || num_feeds == 1) ? 1 : 0;
-                oskar_station_evaluate_element_weights(s, i, wavenumber,
+                oskar_station_evaluate_element_weights(s, i, frequency_hz,
                         beam_x, beam_y, beam_z, time_index,
                         work->weights, work->weights_scratch, status);
                 oskar_dftw(norm_array, num_elements, wavenumber, work->weights,
@@ -209,7 +209,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
         {
             const int eval_x = (i == 0 || num_feeds == 1) ? 1 : 0;
             const int eval_y = (i == 1 || num_feeds == 1) ? 1 : 0;
-            oskar_station_evaluate_element_weights(s, i, wavenumber,
+            oskar_station_evaluate_element_weights(s, i, frequency_hz,
                     beam_x, beam_y, beam_z, time_index,
                     work->weights, work->weights_scratch, status);
             oskar_dftw(norm_array, num_elements, wavenumber, work->weights,

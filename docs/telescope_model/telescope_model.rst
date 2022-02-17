@@ -371,6 +371,24 @@ Station Data
   * **Allowed locations:** Station directory.
 
 
+Gain Data
+---------
+
+* ``gain_model.h5``
+
+  Externally-generated HDF5 file containing antenna or station gains, as
+  a function of time, frequency, antenna/station and polarisation.
+  This file may appear in any directory, but the size of the antenna or
+  station dimension in each file must correspond to the number of antennas
+  or stations in that directory.
+
+  * **See** :ref:`telescope_gain_model`
+
+  * **Required:** No.
+
+  * **Allowed locations:** All directories.
+
+
 Noise Configuration Files
 -------------------------
 * ``noise_frequencies.txt``
@@ -727,6 +745,50 @@ In order, the parameter columns are:
 
    1, "Azimuth coordinate of beam (local East from North) [deg]"
    2, "Elevation coordinate of beam (relative to local horizon) [deg]"
+
+
+.. raw:: latex
+
+    \clearpage
+
+.. _telescope_gain_model:
+
+Gain Model
+==========
+Externally-generated complex gains can be specified for the antennas in
+each station, and/or for each station in the interferometer, as a function
+of time, frequency and polarisation. If supplied, these complex gains must be
+written to a HDF5 file called ``gain_model.h5`` and saved in the appropriate
+station or telescope model directory. The HDF5 file must contain 3 datasets
+under the root group, with the following names and dimensions:
+
+* ``freq (Hz)`` is a 1-dimensional array containing a list of
+  frequencies (in Hz) for each channel in the gain table.
+  The length of this array must be the same as the channel dimension
+  in the following two arrays.
+
+* ``gain_xpol`` is a 3-dimensional array of complex gains for the
+  X-polarisation, with the three dimensions representing
+  (time, channel, antenna/station), where the time index is the slowest
+  varying, and the antenna or station index is the fastest varying.
+  Since HDF5 does not support complex types natively, each element of
+  this array must be a compound type of two floating-point values,
+  which represent the real and imaginary parts of the gain.
+  The time index in this array corresponds to the time index of each
+  snapshot in the simulation, so the gain table should be tailored to
+  the observation parameters.
+  The appropriate channel index will be selected using the list of frequencies,
+  by finding the nearest frequency in the table to the frequency of each
+  channel.
+  If the gain values do not vary with time or channel, the size of the
+  corresponding dimension should be set to 1.
+  The size of the antenna (or station) dimension **must** match the
+  number of antennas (or stations) specified in the layout file in the
+  same directory.
+
+* ``gain_ypol`` is the corresponding 3-dimensional array of complex gains
+  for the Y-polarisation. It may be omitted if running simulations in scalar
+  mode, or if the values should be the same for both polarisations.
 
 
 .. raw:: latex
