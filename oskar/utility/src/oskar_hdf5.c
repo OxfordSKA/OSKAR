@@ -92,7 +92,9 @@ int iter_func(hid_t loc_id, const char* name, const H5O_info_t* info,
 void oskar_hdf5_close(oskar_HDF5* h)
 {
     if (!h) return;
+    oskar_mutex_lock(h->mutex);
     h->refcount--;
+    oskar_mutex_unlock(h->mutex);
     if (h->refcount <= 0)
     {
         oskar_mutex_free(h->mutex);
@@ -108,7 +110,9 @@ void oskar_hdf5_close(oskar_HDF5* h)
 
 void oskar_hdf5_inc_ref(oskar_HDF5* h)
 {
+    oskar_mutex_lock(h->mutex);
     h->refcount++;
+    oskar_mutex_unlock(h->mutex);
 }
 
 
