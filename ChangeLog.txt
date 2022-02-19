@@ -1,3 +1,7 @@
+2022-02-19  OSKAR-2.8.2
+
+    * Fix to make reference counter for HDF5 file handles thread-safe.
+
 2022-02-17  OSKAR-2.8.1
 
     * Allow HDF5 gain tables to be used in station and telescope models.

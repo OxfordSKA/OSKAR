@@ -176,7 +176,9 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
         /* Read gains only for specified polarisation. */
         const char* dataset = "gain_xpol";
         if (feed == 1 && oskar_hdf5_dataset_exists(h->hdf5_file, "/gain_ypol"))
+        {
             dataset = "gain_ypol";
+        }
         ptr_x = x = oskar_hdf5_read_hyperslab(h->hdf5_file, dataset,
                 3, offsets, sizes, status);
         if (oskar_mem_precision(x) != out_prec)
