@@ -106,6 +106,9 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     /* Create the gain model. */
     model->gains = oskar_gains_create(type);
 
+    /* Initialise the HARP data. */
+    model->harp_freq_cpu = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+
     /* Return pointer to station model. */
     return model;
 }

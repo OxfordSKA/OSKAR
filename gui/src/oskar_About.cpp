@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -84,7 +84,7 @@ About::About(QString app_name, QString app_version, QWidget *parent)
         QTextCursor cursor(licenseText);
         cursor.setBlockFormat(paragraph);
         cursor.insertText(
-                "Copyright (c) 2011-2021, The OSKAR Developers.\n"
+                "Copyright (c) 2011-2022, The OSKAR Developers.\n"
                 "All rights reserved.");
         cursor.insertBlock();
         cursor.insertText("Redistribution and use in source and binary forms, "
@@ -183,6 +183,7 @@ About::About(QString app_name, QString app_version, QWidget *parent)
     html.append("<li>The RapidXML XML parser: "
                 "<a href=\"http://rapidxml.sourceforge.net/\">"
                 "http://rapidxml.sourceforge.net/</a></li>");
+    html.append("<li>The HARP beam library</li>");
     html.append("<li>The CMake build system: "
                 "<a href=\"https://cmake.org/\">https://cmake.org/</a></li>");
     html.append("<li>The Google Test framework: "

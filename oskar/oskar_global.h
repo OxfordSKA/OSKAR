@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -112,6 +112,7 @@ enum OSKAR_COORD_TYPE
     #define OSKAR_HAVE_CUDA
     #define OSKAR_HAVE_OPENCL
     #define OSKAR_HAVE_HDF5
+    #define OSKAR_HAVE_HARP
     #define __CUDACC__
     #define __CUDA_ARCH__ 300
     #define _OPENMP

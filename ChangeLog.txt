@@ -1,3 +1,7 @@
+2022-xx-yy  OSKAR-2.8.3
+
+    * Add option to use HARP beam library.
+
 2022-02-19  OSKAR-2.8.2
 
     * Fix to make reference counter for HDF5 file handles thread-safe.

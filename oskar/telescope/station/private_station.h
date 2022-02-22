@@ -6,9 +6,10 @@
 #ifndef OSKAR_PRIVATE_STATION_H_
 #define OSKAR_PRIVATE_STATION_H_
 
+#include <gains/oskar_gains.h>
 #include <mem/oskar_mem.h>
 #include <telescope/station/element/oskar_element.h>
-#include <gains/oskar_gains.h>
+#include <telescope/station/oskar_harp.h>
 
 /* Forward declaration. */
 struct oskar_Station;
@@ -75,6 +76,11 @@ struct oskar_Station
 
     /* Gain model. */
     oskar_Gains* gains;
+
+    /* HARP data. */
+    int harp_num_freq;
+    oskar_Mem* harp_freq_cpu;
+    oskar_Harp** harp_data;
 
     /* Data used only for aperture array stations with fixed beams. */
     int num_permitted_beams;

@@ -389,6 +389,20 @@ Gain Data
   * **Allowed locations:** All directories.
 
 
+HARP Data
+---------
+
+* ``*HARP*.h5``
+
+  HDF5 file containing HARP station beam coefficient data.
+
+  * **See** :ref:`telescope_harp`
+
+  * **Required:** No.
+
+  * **Allowed locations:** Station directory.
+
+
 Noise Configuration Files
 -------------------------
 * ``noise_frequencies.txt``
@@ -790,6 +804,49 @@ under the root group, with the following names and dimensions:
   for the Y-polarisation. It may be omitted if running simulations in scalar
   mode, or if the values should be the same for both polarisations.
 
+.. _telescope_harp:
+
+HARP Data
+=========
+When compiled with the ``harp_beam`` library, OSKAR can use coefficients
+exported by the HARP electromagnetic simulation package to evaluate station
+beams directly, without needing to first evaluate individual element patterns.
+This method of beam evaluation is generally much faster than other methods
+if mutual coupling needs to be taken into account.
+
+Inside each station directory, one or more HDF5 files containing the
+coefficients need to be supplied as a function of frequency. The filename
+must contain the word "HARP", and the last number in the filename will be
+interpreted as the frequency in MHz for which the coefficients apply.
+(For example, "HARP_100.h5" and "data_HARP_SKALA4_rand256_100MHz.h5" are
+equivalent.)
+
+The following attributes and datasets must be present inside each HDF5 file:
+
+* Attribute ``freq`` (floating-point): the simulated frequency in Hz.
+
+* Attribute ``num_ant`` (integer): the number of antennas in the station.
+
+* Attribute ``num_mbf`` (integer): the number of macro basis functions
+  per antenna.
+
+* Attribute ``max_order`` (integer): the maximum order of the spherical-wave
+  decomposition (SHD) of the MBF patterns.
+
+* Dataset ``alpha_te``: 2D complex matrix of size
+  (``num_mbf``, ``max_order`` * (2 * ``max_order`` + 1)) containing the
+  coefficients of the TE spherical modes of the MBF patterns.
+
+* Dataset ``alpha_tm``: As above, but for the TM modes.
+
+* Dataset ``coeffs_pola``: 2D complex matrix of size
+  (``num_ant``, ``num_mbf`` * ``num_ant``) containing the MBF coefficients of
+  each embedded element pattern, associated with the receiving port A (or X).
+
+* Dataset ``coeffs_polb``: As above, but for port B (or Y).
+
+If the station model directory has one of these HDF5 files, OSKAR will use
+the HARP beam evaluation method instead of the default one.
 
 .. raw:: latex
 

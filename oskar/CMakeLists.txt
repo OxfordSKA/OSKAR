@@ -91,6 +91,11 @@ if (CUDA_FOUND)
     endif()
 endif()
 
+# Link with HARP functions if available
+if (HARP_FOUND)
+    target_link_libraries(${libname} ${HARP_LIBRARY})
+endif()
+
 set_target_properties(${libname} PROPERTIES
     SOVERSION ${OSKAR_VERSION}
     VERSION ${OSKAR_VERSION})

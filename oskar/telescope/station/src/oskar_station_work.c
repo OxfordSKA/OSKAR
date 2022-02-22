@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -48,6 +48,16 @@ oskar_StationWork* oskar_station_work_create(int type,
     work->screen_output = oskar_mem_create(complex_type, location, 0, status);
     work->screen_type = 'N'; /* None */
     work->previous_time_index = -1;
+
+    /* HARP data. */
+    work->poly = oskar_mem_create(type, location, 0, status);
+    work->ee = oskar_mem_create(complex_type, location, 0, status);
+    work->qq = oskar_mem_create(complex_type, location, 0, status);
+    work->dd = oskar_mem_create(complex_type, location, 0, status);
+    work->phase_fac = oskar_mem_create(complex_type, location, 0, status);
+    work->beam_coeffs = oskar_mem_create(complex_type, location, 0, status);
+    work->pth = oskar_mem_create(complex_type, location, 0, status);
+    work->pph = oskar_mem_create(complex_type, location, 0, status);
     return work;
 }
 
@@ -77,6 +87,14 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
     {
         oskar_mem_free(work->beam[i], status);
     }
+    oskar_mem_free(work->poly, status);
+    oskar_mem_free(work->ee, status);
+    oskar_mem_free(work->qq, status);
+    oskar_mem_free(work->dd, status);
+    oskar_mem_free(work->phase_fac, status);
+    oskar_mem_free(work->beam_coeffs, status);
+    oskar_mem_free(work->pth, status);
+    oskar_mem_free(work->pph, status);
     free(work);
 }
 

@@ -46,6 +46,14 @@ void oskar_station_free(oskar_Station* model, int* status)
     /* Free the gain model. */
     oskar_gains_free(model->gains, status);
 
+    /* Free the HARP data. */
+    oskar_mem_free(model->harp_freq_cpu, status);
+    for (i = 0; i < model->harp_num_freq; ++i)
+    {
+        oskar_harp_free(model->harp_data[i]);
+    }
+    free(model->harp_data);
+
     /* Free the element pattern data if it exists. */
     if (oskar_station_has_element(model))
     {

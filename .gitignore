@@ -10,6 +10,9 @@
 # PyCharm project files
 /.idea/
 
+# VSCode
+/.vscode/
+
 # Build directories
 /release/
 /debug/

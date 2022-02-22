@@ -86,6 +86,28 @@ OSKAR_EXPORT
 int oskar_hdf5_num_datasets(const oskar_HDF5* h);
 
 /**
+ * @brief Reads a named attribute as a single integer.
+ *
+ * @param[in] h           Handle to HDF5 file.
+ * @param[in] name        The name of the attribute to read.
+ * @param[in,out] status  Status return code.
+ */
+OSKAR_EXPORT
+int oskar_hdf5_read_attribute_int(
+        const oskar_HDF5* h, const char* name, int* status);
+
+/**
+ * @brief Reads a named attribute as a single double.
+ *
+ * @param[in] h           Handle to HDF5 file.
+ * @param[in] name        The name of the attribute to read.
+ * @param[in,out] status  Status return code.
+ */
+OSKAR_EXPORT
+double oskar_hdf5_read_attribute_double(
+        const oskar_HDF5* h, const char* name, int* status);
+
+/**
  * @brief Reads attributes associated with an object in the HDF5 file.
  *
  * @details

@@ -32,7 +32,7 @@ OptionParser::OptionParser(const char* title, const char* ver,
     p->footer =
             "\n" + string(79, '-') + "\n"
             "OSKAR (version " + ver + ")\n"
-            "Copyright (c) 2021, The OSKAR Developers.\n"
+            "Copyright (c) 2022, The OSKAR Developers.\n"
             "This program is free and without warranty.\n"
             "" + string(79, '-') + "\n";
     set_version(ver, false);

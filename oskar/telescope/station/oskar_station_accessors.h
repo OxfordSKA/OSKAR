@@ -14,6 +14,7 @@
 #include <gains/oskar_gains.h>
 #include <mem/oskar_mem.h>
 #include <telescope/station/element/oskar_element.h>
+#include <telescope/station/oskar_harp.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -285,6 +286,14 @@ oskar_Gains* oskar_station_gains(oskar_Station* model);
 
 OSKAR_EXPORT
 const oskar_Gains* oskar_station_gains_const(const oskar_Station* model);
+
+OSKAR_EXPORT
+oskar_Harp* oskar_station_harp_data(oskar_Station* model,
+        double freq_hz);
+
+OSKAR_EXPORT
+const oskar_Harp* oskar_station_harp_data_const(const oskar_Station* model,
+        double freq_hz);
 
 /* Setters. */
 

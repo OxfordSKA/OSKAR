@@ -100,6 +100,20 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     oskar_gains_free(dst->gains, status);
     dst->gains = oskar_gains_create_copy(src->gains, status);
 
+    /* Copy the HARP data. */
+    dst->harp_num_freq = src->harp_num_freq;
+    oskar_mem_copy(dst->harp_freq_cpu, src->harp_freq_cpu, status);
+    if (src->harp_num_freq > 0)
+    {
+        dst->harp_data = (oskar_Harp**) calloc(
+                src->harp_num_freq, sizeof(oskar_Harp*));
+        for (i = 0; i < src->harp_num_freq; ++i)
+        {
+            dst->harp_data[i] = oskar_harp_create_copy(
+                    src->harp_data[i], status);
+        }
+    }
+
     /* Copy element models, if set. */
     if (oskar_station_has_element(src))
     {

@@ -15,6 +15,7 @@
 #include "telescope/private_TelescopeLoaderFeedAngle.h"
 #include "telescope/private_TelescopeLoaderGainModel.h"
 #include "telescope/private_TelescopeLoaderGainPhase.h"
+#include "telescope/private_TelescopeLoaderHarpData.h"
 #include "telescope/private_TelescopeLoaderLayout.h"
 #include "telescope/private_TelescopeLoaderMountTypes.h"
 #include "telescope/private_TelescopeLoaderNoise.h"
@@ -68,6 +69,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
     loaders.push_back(new TelescopeLoaderStationTypeMap);
     loaders.push_back(new TelescopeLoaderGainPhase);
     loaders.push_back(new TelescopeLoaderGainModel);
+    loaders.push_back(new TelescopeLoaderHarpData);
     loaders.push_back(new TelescopeLoaderCableLengthError);
     loaders.push_back(new TelescopeLoaderApodisation);
     loaders.push_back(new TelescopeLoaderFeedAngle);

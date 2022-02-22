@@ -3,6 +3,7 @@
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
+#include "math/oskar_find_closest_match.h"
 #include "telescope/station/private_station.h"
 #include "telescope/station/oskar_station_accessors.h"
 
@@ -441,6 +442,24 @@ oskar_Gains* oskar_station_gains(oskar_Station* model)
 const oskar_Gains* oskar_station_gains_const(const oskar_Station* model)
 {
     return model ? model->gains : 0;
+}
+
+oskar_Harp* oskar_station_harp_data(oskar_Station* model,
+        double freq_hz)
+{
+    int index = 0, status = 0;
+    if (!model || !model->harp_data) return 0;
+    index = oskar_find_closest_match(freq_hz, model->harp_freq_cpu, &status);
+    return model->harp_data[index];
+}
+
+const oskar_Harp* oskar_station_harp_data_const(const oskar_Station* model,
+        double freq_hz)
+{
+    int index = 0, status = 0;
+    if (!model || !model->harp_data) return 0;
+    index = oskar_find_closest_match(freq_hz, model->harp_freq_cpu, &status);
+    return model->harp_data[index];
 }
 
 /* Setters. */

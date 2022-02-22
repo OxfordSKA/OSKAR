@@ -37,6 +37,7 @@ set(telescope_SRC
     src/private_TelescopeLoaderFeedAngle.cpp
     src/private_TelescopeLoaderGainModel.cpp
     src/private_TelescopeLoaderGainPhase.cpp
+    src/private_TelescopeLoaderHarpData.cpp
     src/private_TelescopeLoaderLayout.cpp
     src/private_TelescopeLoaderMountTypes.cpp
     src/private_TelescopeLoaderNoise.cpp

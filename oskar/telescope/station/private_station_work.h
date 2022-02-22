@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -36,6 +36,9 @@ struct oskar_StationWork
 
     int num_depths;
     oskar_Mem** beam;            /* For hierarchical stations. */
+
+    /* HARP data. */
+    oskar_Mem *poly, *ee, *qq, *dd, *phase_fac, *beam_coeffs, *pth, *pph;
 };
 
 #ifndef OSKAR_STATION_WORK_TYPEDEF_

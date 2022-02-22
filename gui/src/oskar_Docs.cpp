@@ -1,13 +1,11 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "gui/oskar_Docs.h"
 
-#include <QApplication>
 #include <QDialogButtonBox>
-#include <QGroupBox>
 #include <QTextBrowser>
 #include <QVBoxLayout>
 
@@ -54,18 +52,6 @@ Docs::Docs(QWidget *parent) : QDialog(parent)
             Qt::Horizontal, this);
     connect(buttons, SIGNAL(accepted()), this, SLOT(accept()));
     vLayoutMain->addWidget(buttons);
-}
-
-void Docs::add_doc(QString& html, const char* title, const char* desc)
-{
-    html.append("<p>");
-    html.append("<li>&nbsp;");
-    html.append(QString("%1").arg(title));
-    html.append("<ul>");
-    html.append(QString("<li>%1.</li>").arg(desc));
-    html.append("</ul>");
-    html.append("</li>");
-    html.append("</p>");
 }
 
 } /* namespace oskar */
