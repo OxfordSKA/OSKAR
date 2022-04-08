@@ -94,6 +94,10 @@ endif()
 # Link with HARP functions if available
 if (HARP_FOUND)
     target_link_libraries(${libname} ${HARP_LIBRARY})
+    if (WIN32)
+        install(FILES ${HARP_DLL}
+            DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
+    endif()
 endif()
 
 set_target_properties(${libname} PROPERTIES
