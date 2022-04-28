@@ -77,51 +77,41 @@ void oskar_convert_healpix_ring_to_theta_phi(unsigned int nside,
 void oskar_convert_healpix_ring_to_theta_phi_pixel(
         unsigned int nside, unsigned int ipix, double* theta, double* phi)
 {
-    int iring = 0, iphi = 0, ip = 0;
-    double fodd = 0.0, hip = 0.0, fihip = 0.0;
-    const unsigned int npix = 12 * nside * nside;
-    const unsigned int ncap = 2 * nside * (nside - 1);
-    const double fact1 = 1.5 * (double)nside;
-    const double fact2 = 3.0 * (double)(nside * nside);
+    const unsigned int num_pix = 12 * nside * nside;
+    const unsigned int num_in_cap = 2 * nside * (nside - 1);
 
     /* Check which region the pixel is in. */
-    if (ipix < ncap)
+    if (ipix < num_in_cap)
     {
-        /* North polar cap. */
-        hip   = (ipix + 1) / 2.0;
-        fihip = floor(hip);
-        /* Ring index counted from North pole. */
-        iring = (int)floor( sqrt(hip - sqrt(fihip)) ) + 1;
-        iphi  = (ipix + 1) - 2 * iring * (iring - 1);
-
-        *theta = acos(1.0 - iring * iring / fact2);
-        *phi   = (iphi - 0.5) * M_PI / (2.0 * iring);
+        /* North polar cap. Ring index from north. */
+        const double i_pix_half = 0.5 * (ipix + 1);
+        const int i_ring = (int)floor(
+                sqrt(i_pix_half - sqrt(floor(i_pix_half)))) + 1;
+        const int i_phi = (ipix + 1) - 2 * i_ring * (i_ring - 1);
+        *theta = acos(1.0 - i_ring * i_ring / (3.0 * nside * nside));
+        *phi = (i_phi - 0.5) * M_PI / (2.0 * i_ring);
     }
-    else if (ipix < (npix - ncap))
+    else if (ipix < (num_pix - num_in_cap))
     {
-        /* Equatorial region. */
-        ip    = ipix - ncap;
-        /* Ring index counted from North pole. */
-        iring = ip / (4 * nside) + nside;
-        iphi  = ip % (4 * nside) + 1;
-        /* fodd = 1 if iring + nside is odd, 0.5 otherwise */
-        fodd  = ((iring + nside) & 1) ? 1.0 : 0.5;
-
-        *theta = acos((2 * nside - iring) / fact1);
-        *phi   = (iphi - fodd) * M_PI / (2.0 * nside);
+        /* Equatorial region. Ring index from north. */
+        const int i_pix_local = ipix - num_in_cap;
+        const int i_ring = i_pix_local / (4 * nside) + nside;
+        const int i_phi = i_pix_local % (4 * nside) + 1;
+        const double f = ((i_ring + nside) & 1) ? 1.0 : 0.5;
+        *theta = acos((2.0 * nside - i_ring) / (1.5 * nside));
+        *phi = (i_phi - f) * M_PI / (2.0 * nside);
     }
     else
     {
-        /* South polar cap. */
-        ip    = npix - ipix;
-        hip   = ip / 2.0;
-        fihip = floor(hip);
-        /* Ring index counted from South pole. */
-        iring = (int)floor( sqrt(hip - sqrt(fihip)) ) + 1;
-        iphi  = (4 * iring + 1) - (ip - 2 * iring * (iring - 1));
-
-        *theta = acos(-1.0 + iring * iring / fact2);
-        *phi   = (iphi - 0.5) * M_PI / (2.0 * iring);
+        /* South polar cap. Ring index from south. */
+        const int i_pix_local = num_pix - ipix;
+        const double i_pix_half = 0.5 * i_pix_local;
+        const int i_ring = (int)floor(
+                sqrt(i_pix_half - sqrt(floor(i_pix_half)))) + 1;
+        const int i_phi = (4 * i_ring + 1) -
+                (i_pix_local - 2 * i_ring * (i_ring - 1));
+        *theta = acos(-1.0 + i_ring * i_ring / (3.0 * nside * nside));
+        *phi = (i_phi - 0.5) * M_PI / (2.0 * i_ring);
     }
 }
 

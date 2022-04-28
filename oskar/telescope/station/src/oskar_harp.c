@@ -20,6 +20,7 @@ oskar_Harp* oskar_harp_create(int precision)
     return h;
 }
 
+/* NOLINTNEXTLINE(readability-non-const-parameter) */
 oskar_Harp* oskar_harp_create_copy(const oskar_Harp* other, int* status)
 {
     (void)status;
