@@ -157,9 +157,11 @@ TEST(apps, test_imager_modes)
         ASSERT_TRUE(sim_settings->set_value(
                 "interferometer/oskar_vis_filename",
                 string(root_name + ".vis").c_str()));
+#ifndef OSKAR_NO_MS
         ASSERT_TRUE(sim_settings->set_value(
                 "interferometer/ms_filename",
                 string(root_name + ".ms").c_str()));
+#endif
 
         // Create an interferometer simulator.
         oskar_Interferometer* sim = oskar_settings_to_interferometer(
@@ -339,8 +341,10 @@ TEST(apps, test_imager_sizes)
     string root_name = test_name;
     ASSERT_TRUE(sim_settings->set_value("interferometer/oskar_vis_filename",
             string(root_name + ".vis").c_str()));
+#ifndef OSKAR_NO_MS
     ASSERT_TRUE(sim_settings->set_value("interferometer/ms_filename",
             string(root_name + ".ms").c_str()));
+#endif
 
     // Create an interferometer simulator.
     oskar_Interferometer* sim = oskar_settings_to_interferometer(

@@ -89,9 +89,11 @@ TEST(apps_test, test_telescope_model_options)
         ASSERT_TRUE(sim_settings->set_value(
                 "interferometer/oskar_vis_filename",
                 string(root_name + ".vis").c_str()));
+#ifndef OSKAR_NO_MS
         ASSERT_TRUE(sim_settings->set_value(
                 "interferometer/ms_filename",
                 string(root_name + ".ms").c_str()));
+#endif
 
         // Create an interferometer simulator.
         oskar_Interferometer* sim = oskar_settings_to_interferometer(
