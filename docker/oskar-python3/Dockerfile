@@ -3,8 +3,13 @@
 #
 # First install required development packages.
 #
-FROM nvidia/cuda:11.4.2-base-ubuntu20.04 AS build
+FROM nvidia/cuda:11.4.3-base-ubuntu20.04 AS build
 ENV DEBIAN_FRONTEND=noninteractive
+RUN rm /etc/apt/sources.list.d/cuda.list && \
+    apt-key del 7fa2af80 && \
+    apt-get update && apt-get install -y --no-install-recommends wget && \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb && \
+    dpkg -i cuda-keyring_1.0-1_all.deb
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
@@ -25,8 +30,13 @@ RUN pip3 install -U astropy numpy matplotlib setuptools && \
     pip3 install 'git+https://github.com/OxfordSKA/OSKAR.git@master#egg=oskarpy&subdirectory=python'
 
 # Copy into a minimal image.
-FROM nvidia/cuda:11.4.2-base-ubuntu20.04
+FROM nvidia/cuda:11.4.3-base-ubuntu20.04
 ENV DEBIAN_FRONTEND=noninteractive
+RUN rm /etc/apt/sources.list.d/cuda.list && \
+    apt-key del 7fa2af80 && \
+    apt-get update && apt-get install -y --no-install-recommends wget && \
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb && \
+    dpkg -i cuda-keyring_1.0-1_all.deb
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libcasa-tables4 \
