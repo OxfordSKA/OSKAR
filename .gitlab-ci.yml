@@ -1,3 +1,8 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  DEBIAN_FRONTEND: "noninteractive"
+  CUDA_ARCH: "7.0"
+
 image: fdulwich/oskar-ci:cuda-11.3-3
 
 stages:
@@ -10,13 +15,13 @@ stages:
 
 build-test-debug:
   stage: build and test
-  tags: [k8srunner-gpu]
+  tags: [k8srunner-gpu-v100]
   before_script:
     - *ready_reports
     - nvidia-smi
     - mkdir debug
     - cd debug/
-    - cmake ../ -DCOVERAGE_REPORT=ON -DCUDA_ARCH=6.1
+    - cmake ../ -DCOVERAGE_REPORT=ON -DCUDA_ARCH=$CUDA_ARCH
   script:
     - make -j
     - ./apps/oskar_system_info
@@ -33,7 +38,7 @@ build-test-debug:
 
 build-test-release:
   stage: build and test
-  tags: [k8srunner-gpu]
+  tags: [k8srunner-gpu-v100]
   before_script:
     - *ready_reports
     # We need CMake >= 3.21.0 for the --output-junit option on CTest.
@@ -41,7 +46,7 @@ build-test-release:
     - nvidia-smi
     - mkdir release
     - cd release/
-    - cmake ../ -DCUDA_ARCH=6.1
+    - cmake ../ -DCUDA_ARCH=$CUDA_ARCH
   script:
     - make -j
     - ctest --output-junit unit-tests.xml
@@ -59,7 +64,7 @@ linting:
     - *ready_reports
     - mkdir release
     - cd release/
-    - cmake ../ -DCUDA_ARCH=6.1 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    - cmake ../ -DCUDA_ARCH=$CUDA_ARCH -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
   script:
     - echo "Running lint check"
     - run-clang-tidy -quiet '^(?:(?!extern/|test/).)*$\r?\n?' > clang-tidy.out
