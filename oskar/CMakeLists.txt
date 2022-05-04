@@ -4,10 +4,15 @@
 
 include(oskar_build_macros)
 
+# Try to build MS library first.
+add_subdirectory(ms)
+if (NOT CASACORE_FOUND)
+    add_definitions(-DOSKAR_NO_MS)
+endif()
+
 # Build OSKAR sub-libraries.
 add_subdirectory(apps)
 add_subdirectory(binary)
-add_subdirectory(ms)
 add_subdirectory(settings)
 
 # Build OSKAR main library.
@@ -61,8 +66,6 @@ endif()
 # Link with oskar_ms if we have casacore.
 if (CASACORE_FOUND)
     target_link_libraries(${libname} oskar_ms)
-else()
-    add_definitions(-DOSKAR_NO_MS)
 endif()
 
 # Link with HDF5 if we have it.
