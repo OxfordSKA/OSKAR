@@ -599,10 +599,11 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         tab.bindColumn("SIGMA", sigmaStorageManager);
 
         // Create tiled column storage managers for DATA and FLAG columns.
-        IPosition dataTileShape(3, num_pols, num_channels, 2 * num_baselines);
+        const int tile_channels = num_channels > 8 ? 8 : num_channels;
+        IPosition dataTileShape(3, num_pols, tile_channels, 2 * num_baselines);
         TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
         tab.bindColumn("DATA", dataStorageManager);
-        IPosition flagTileShape(3, num_pols, num_channels, 16 * num_baselines);
+        IPosition flagTileShape(3, num_pols, tile_channels, 16 * num_baselines);
         TiledColumnStMan flagStorageManager("TiledFlag", flagTileShape);
         tab.bindColumn("FLAG", flagStorageManager);
 
