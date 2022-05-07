@@ -34,7 +34,9 @@ build-test-debug:
       - build/
       - coverage/
     reports:
-      cobertura: build/reports/code-coverage.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: build/reports/code-coverage.xml
 
 build-test-release:
   stage: build and test
