@@ -1,8 +1,9 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
+#include "math/oskar_find_closest_match.h"
 #include "telescope/private_telescope.h"
 #include "telescope/oskar_telescope.h"
 
@@ -260,6 +261,24 @@ oskar_Gains* oskar_telescope_gains(oskar_Telescope* model)
 const oskar_Gains* oskar_telescope_gains_const(const oskar_Telescope* model)
 {
     return model->gains;
+}
+
+oskar_Harp* oskar_telescope_harp_data(oskar_Telescope* model,
+        double freq_hz)
+{
+    int index = 0, status = 0;
+    if (!model || !model->harp_data) return 0;
+    index = oskar_find_closest_match(freq_hz, model->harp_freq_cpu, &status);
+    return model->harp_data[index];
+}
+
+const oskar_Harp* oskar_telescope_harp_data_const(const oskar_Telescope* model,
+        double freq_hz)
+{
+    int index = 0, status = 0;
+    if (!model || !model->harp_data) return 0;
+    index = oskar_find_closest_match(freq_hz, model->harp_freq_cpu, &status);
+    return model->harp_data[index];
 }
 
 

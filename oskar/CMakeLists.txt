@@ -22,6 +22,7 @@ set(${libname}_folders
     convert
     correlate
     gains
+    harp
     imager
     interferometer
     log

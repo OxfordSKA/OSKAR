@@ -17,7 +17,6 @@ set(station_SRC
     src/oskar_evaluate_station_beam_gaussian.c
     #src/oskar_evaluate_station_from_telescope_dipole_azimuth.c
     src/oskar_evaluate_vla_beam_pbcor.c
-    src/oskar_harp.c
     src/oskar_station_accessors.c
     src/oskar_station_analyse.c
     src/oskar_station_beam.c

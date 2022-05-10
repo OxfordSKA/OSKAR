@@ -19,6 +19,7 @@ set(${name}_SRC
     define_convert_relative_directions_to_lon_lat.h
     define_convert_station_uvw_to_baseline_uvw.h
     define_convert_theta_phi_to_ludwig3_components.h
+    src/oskar_convert_any_to_enu_directions.c
     src/oskar_convert_apparent_ra_dec_to_enu_directions.c
     src/oskar_convert_az_el_to_enu_directions.c
     src/oskar_convert_brightness_to_jy.c

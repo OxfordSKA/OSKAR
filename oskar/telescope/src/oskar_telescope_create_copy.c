@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -75,6 +75,20 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     /* Copy the gain model. */
     oskar_gains_free(telescope->gains, status);
     telescope->gains = oskar_gains_create_copy(src->gains, status);
+
+    /* Copy the HARP data. */
+    telescope->harp_num_freq = src->harp_num_freq;
+    oskar_mem_copy(telescope->harp_freq_cpu, src->harp_freq_cpu, status);
+    if (src->harp_num_freq > 0)
+    {
+        telescope->harp_data = (oskar_Harp**) calloc(
+                src->harp_num_freq, sizeof(oskar_Harp*));
+        for (i = 0; i < src->harp_num_freq; ++i)
+        {
+            telescope->harp_data[i] = oskar_harp_create_copy(
+                    src->harp_data[i], status);
+        }
+    }
 
     /* Copy each station. */
     telescope->station = (oskar_Station**) calloc(

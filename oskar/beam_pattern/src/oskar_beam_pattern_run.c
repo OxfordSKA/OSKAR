@@ -1,15 +1,20 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "beam_pattern/oskar_beam_pattern.h"
 #include "beam_pattern/private_beam_pattern.h"
 #include "convert/oskar_convert_mjd_to_gast_fast.h"
+#include "convert/oskar_convert_any_to_enu_directions.h"
+#include "convert/oskar_convert_enu_directions_to_theta_phi.h"
+#include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
 #include "correlate/oskar_evaluate_auto_power.h"
 #include "correlate/oskar_evaluate_cross_power.h"
 #include "math/oskar_cmath.h"
 #include "math/private_cond2_2x2.h"
+#include "telescope/station/oskar_blank_below_horizon.h"
+#include "telescope/station/private_station_work.h"
 #include "utility/oskar_device.h"
 #include "utility/oskar_file_exists.h"
 #include "utility/oskar_get_error_string.h"
@@ -311,13 +316,71 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
         oskar_mem_copy_contents(d->y, h->y, 0, offset, chunk_size, status);
         oskar_mem_copy_contents(d->z, h->z, 0, offset, chunk_size, status);
     }
+    const oskar_Harp* harp_data = oskar_telescope_harp_data_const(
+            d->tel, freq_hz);
 
     /* Generate beam for this pixel chunk, for all active stations. */
     for (i = 0; i < h->num_active_stations; ++i)
     {
         const int offset = i * chunk_size;
         const oskar_Mem* const source_coords[] = {d->x, d->y, d->z};
-        if (!oskar_telescope_allow_station_beam_duplication(d->tel))
+
+        /* Check if HARP data exist. */
+        if (harp_data)
+        {
+            int dim = 0, feed = 0;
+            oskar_Mem *enu[] = {0, 0, 0}, *theta = 0, *phi_x = 0, *phi_y = 0;
+            oskar_StationWork* work = d->work;
+
+            /* Get source ENU coordinates. */
+            for (dim = 0; dim < 3; ++dim)
+            {
+                enu[dim] = oskar_station_work_enu_direction(
+                        work, dim, chunk_size + 1, status);
+            }
+            const double lst_rad = gast_rad + oskar_telescope_lon_rad(d->tel);
+            const double lat_rad = oskar_telescope_lat_rad(d->tel);
+            oskar_convert_any_to_enu_directions(h->source_coord_type,
+                    chunk_size, source_coords, h->lon0, h->lat0,
+                    lst_rad, lat_rad, enu, status);
+
+            /* Get theta and phi directions. */
+            theta = work->theta_modified;
+            phi_x = work->phi_x;
+            phi_y = work->phi_y;
+            oskar_mem_ensure(theta, chunk_size, status);
+            oskar_mem_ensure(phi_x, chunk_size, status);
+            oskar_mem_ensure(phi_y, chunk_size, status);
+            oskar_convert_enu_directions_to_theta_phi(
+                            0, chunk_size, enu[0], enu[1], enu[2], 0,
+                            0.0, M_PI / 2.0, theta, phi_x, phi_y, status);
+            oskar_harp_evaluate_smodes(harp_data, chunk_size, theta, phi_x,
+                    work->poly, work->ee, work->qq, work->dd,
+                    work->pth, work->pph, status);
+
+            /* Evaluate the selected element beams. */
+            const int num_stations = oskar_telescope_num_stations(d->tel);
+            for (feed = 0; feed < 2; ++feed)
+            {
+                oskar_harp_evaluate_element_beam(harp_data,
+                        chunk_size, theta, phi_x, freq_hz,
+                        feed, h->station_ids[i], num_stations,
+                        oskar_telescope_station_true_enu_metres_const(d->tel, 0),
+                        oskar_telescope_station_true_enu_metres_const(d->tel, 1),
+                        oskar_telescope_station_true_enu_metres_const(d->tel, 2),
+                        work->pth, work->pph, work->phase_fac,
+                        offset, d->jones_data, status);
+            }
+            oskar_convert_theta_phi_to_ludwig3_components(chunk_size,
+                    phi_x, phi_y, 1, offset, d->jones_data, status);
+            oskar_blank_below_horizon(0, chunk_size, enu[2],
+                    offset, d->jones_data, status);
+            oskar_mem_conjugate(work->phase_fac, status);
+            oskar_mem_multiply(d->jones_data, d->jones_data, work->phase_fac,
+                    offset, offset, h->station_ids[i] * chunk_size,
+                    chunk_size, status);
+        }
+        else if (!oskar_telescope_allow_station_beam_duplication(d->tel))
         {
             const oskar_Station* station =
                     oskar_telescope_station_const(d->tel, h->station_ids[i]);

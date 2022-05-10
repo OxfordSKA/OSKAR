@@ -4,6 +4,7 @@
 
 set(mem_SRC
     define_mem_add.h
+    define_mem_conjugate.h
     define_mem_multiply.h
     define_mem_normalise.h
     define_mem_scale_real.h
@@ -15,6 +16,7 @@ set(mem_SRC
     src/oskar_mem_add_real.c
     src/oskar_mem_append_raw.c
     src/oskar_mem_clear_contents.c
+    src/oskar_mem_conjugate.c
     src/oskar_mem_convert_precision.c
     src/oskar_mem_copy.c
     src/oskar_mem_copy_contents.c

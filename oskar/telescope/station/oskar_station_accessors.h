@@ -12,9 +12,9 @@
 
 #include <oskar_global.h>
 #include <gains/oskar_gains.h>
+#include <harp/oskar_harp.h>
 #include <mem/oskar_mem.h>
 #include <telescope/station/element/oskar_element.h>
-#include <telescope/station/oskar_harp.h>
 
 #ifdef __cplusplus
 extern "C" {

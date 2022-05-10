@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -59,6 +59,8 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->tec_screen_path =
             oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
     telescope->gains = oskar_gains_create(type);
+    telescope->harp_freq_cpu = oskar_mem_create(
+            OSKAR_DOUBLE, OSKAR_CPU, 0, status);
     return telescope;
 }
 

@@ -4,6 +4,7 @@
  */
 
 #include "telescope/private_TelescopeLoaderHarpData.h"
+#include "telescope/private_telescope.h"
 #include "telescope/station/private_station.h"
 #include "utility/oskar_dir.h"
 
@@ -33,6 +34,48 @@ TelescopeLoaderHarpData::TelescopeLoaderHarpData()
 
 TelescopeLoaderHarpData::~TelescopeLoaderHarpData()
 {
+}
+
+void TelescopeLoaderHarpData::load(oskar_Telescope* telescope,
+        const string& cwd, int num_subdirs,
+        map<string, string>& /*filemap*/, int* status)
+{
+    // Get items in directory starting with root name.
+    int num_items = 0;
+    char** items = 0;
+    oskar_dir_items(cwd.c_str(), wildcard.c_str(), 1, 0, &num_items, &items);
+
+    if (num_items > 0)
+    {
+        if (num_subdirs == 0)
+        {
+            // Allocate space for data per frequency.
+            telescope->harp_num_freq = num_items;
+            telescope->harp_data = (oskar_Harp**) calloc(
+                    num_items, sizeof(oskar_Harp*));
+            oskar_mem_realloc(telescope->harp_freq_cpu, num_items, status);
+            double* freqs = oskar_mem_double(telescope->harp_freq_cpu, status);
+
+            // Iterate matched files.
+            for (int i = 0; i < num_items; ++i)
+            {
+                telescope->harp_data[i] = oskar_harp_create(telescope->precision);
+                oskar_harp_open_hdf5(telescope->harp_data[i],
+                        get_path(cwd, items[i]).c_str(), status);
+                freqs[i] = get_freq(string(items[i]));
+            }
+        }
+        else
+        {
+            oskar_log_warning(0, "Ignoring HARP data in telescope model, "
+                    "as the number of station directories is nonzero.");
+        }
+    }
+    for (int i = 0; i < num_items; ++i)
+    {
+        free(items[i]);
+    }
+    free(items);
 }
 
 void TelescopeLoaderHarpData::load(oskar_Station* station,

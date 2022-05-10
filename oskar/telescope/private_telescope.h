@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -8,6 +8,7 @@
 
 #include <telescope/station/oskar_station.h>
 #include <gains/oskar_gains.h>
+#include <harp/oskar_harp.h>
 
 struct oskar_Telescope
 {
@@ -34,6 +35,11 @@ struct oskar_Telescope
 
     /* Gain model. */
     oskar_Gains* gains;
+
+    /* HARP data. */
+    int harp_num_freq;
+    oskar_Mem* harp_freq_cpu;
+    oskar_Harp** harp_data;
 
     /* Ionosphere parameters. */
     int ionosphere_screen_type;

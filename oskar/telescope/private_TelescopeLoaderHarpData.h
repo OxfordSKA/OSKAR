@@ -13,6 +13,9 @@ class TelescopeLoaderHarpData : public oskar_TelescopeLoadAbstract
 public:
     TelescopeLoaderHarpData();
     virtual ~TelescopeLoaderHarpData();
+    virtual void load(oskar_Telescope* telescope,
+            const std::string& cwd, int num_subdirs,
+            std::map<std::string, std::string>& /*filemap*/, int* status);
     virtual void load(oskar_Station* station, const std::string& cwd,
             int num_subdirs, int depth,
             std::map<std::string, std::string>& filemap, int* status);

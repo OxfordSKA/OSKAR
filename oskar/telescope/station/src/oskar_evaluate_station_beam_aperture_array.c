@@ -127,7 +127,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
             oskar_station_evaluate_element_weights(s, i, frequency_hz,
                     beam_x, beam_y, beam_z, time_index,
                     work->weights, work->weights_scratch, status);
-            oskar_harp_evaluate_beam(
+            oskar_harp_evaluate_station_beam(
                     harp_data,
                     num_points,
                     theta,

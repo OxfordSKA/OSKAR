@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -12,6 +12,7 @@
 
 #include <oskar_global.h>
 #include <gains/oskar_gains.h>
+#include <harp/oskar_harp.h>
 #include <mem/oskar_mem.h>
 #include <telescope/station/oskar_station.h>
 
@@ -675,6 +676,38 @@ oskar_Gains* oskar_telescope_gains(oskar_Telescope* model);
  */
 OSKAR_EXPORT
 const oskar_Gains* oskar_telescope_gains_const(const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns the HARP data model.
+ *
+ * @details
+ * Returns the HARP data model.
+ *
+ * @param[in] model    Pointer to telescope model.
+ * @param[in] freq_hz  The current observing frequency, in Hz.
+ *
+ * @return The HARP data model.
+ */
+OSKAR_EXPORT
+oskar_Harp* oskar_telescope_harp_data(oskar_Telescope* model,
+        double freq_hz);
+
+/**
+ * @brief
+ * Returns the HARP data model.
+ *
+ * @details
+ * Returns the HARP data model.
+ *
+ * @param[in] model    Pointer to telescope model.
+ * @param[in] freq_hz  The current observing frequency, in Hz.
+ *
+ * @return The HARP data model.
+ */
+OSKAR_EXPORT
+const oskar_Harp* oskar_telescope_harp_data_const(const oskar_Telescope* model,
+        double freq_hz);
 
 
 /* Setters. */

@@ -3,14 +3,94 @@
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
+#include "convert/oskar_convert_any_to_enu_directions.h"
+#include "convert/oskar_convert_enu_directions_to_theta_phi.h"
+#include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
 #include "interferometer/oskar_evaluate_jones_E.h"
 #include "interferometer/oskar_jones_accessors.h"
+#include "math/oskar_cmath.h"
+#include "telescope/station/oskar_blank_below_horizon.h"
+#include "telescope/station/private_station_work.h"
 
 #include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+static void oskar_evaluate_element_beams_harp(
+        const oskar_Harp* harp_data,
+        int coord_type,
+        int num_points,
+        const oskar_Mem* const source_coords[3],
+        double ref_lon_rad,
+        double ref_lat_rad,
+        const oskar_Telescope* tel,
+        double gast_rad,
+        double frequency_hz,
+        oskar_StationWork* work,
+        oskar_Mem* beam,
+        int* status)
+{
+    int dim = 0, feed = 0, i_station = 0;
+    oskar_Mem *enu[] = {0, 0, 0}, *theta = 0, *phi_x = 0, *phi_y = 0;
+
+    /* Get source ENU coordinates. */
+    for (dim = 0; dim < 3; ++dim)
+    {
+        enu[dim] = oskar_station_work_enu_direction(
+                work, dim, num_points + 1, status);
+    }
+    const double lst_rad = gast_rad + oskar_telescope_lon_rad(tel);
+    const double lat_rad = oskar_telescope_lat_rad(tel);
+    oskar_convert_any_to_enu_directions(coord_type,
+            num_points, source_coords, ref_lon_rad, ref_lat_rad,
+            lst_rad, lat_rad, enu, status);
+
+    /* Get theta and phi directions. */
+    theta = work->theta_modified;
+    phi_x = work->phi_x;
+    phi_y = work->phi_y;
+    oskar_mem_ensure(theta, num_points, status);
+    oskar_mem_ensure(phi_x, num_points, status);
+    oskar_mem_ensure(phi_y, num_points, status);
+    oskar_convert_enu_directions_to_theta_phi(
+                    0, num_points, enu[0], enu[1], enu[2], 0,
+                    0.0, M_PI / 2.0, theta, phi_x, phi_y, status);
+    oskar_harp_evaluate_smodes(harp_data, num_points, theta, phi_x,
+            work->poly, work->ee, work->qq, work->dd,
+            work->pth, work->pph, status);
+
+    /* Evaluate all the element beams. */
+    const int num_stations = oskar_telescope_num_stations(tel);
+    for (i_station = 0; i_station < num_stations; ++i_station)
+    {
+        const int offset_out = i_station * num_points;
+        for (feed = 0; feed < 2; ++feed)
+        {
+            oskar_harp_evaluate_element_beam(harp_data,
+                    num_points, theta, phi_x, frequency_hz,
+                    feed, i_station, num_stations,
+                    oskar_telescope_station_true_enu_metres_const(tel, 0),
+                    oskar_telescope_station_true_enu_metres_const(tel, 1),
+                    oskar_telescope_station_true_enu_metres_const(tel, 2),
+                    work->pth, work->pph, work->phase_fac,
+                    offset_out, beam, status);
+        }
+        oskar_convert_theta_phi_to_ludwig3_components(num_points,
+                phi_x, phi_y, 1, offset_out, beam, status);
+        oskar_blank_below_horizon(0, num_points, enu[2],
+                offset_out, beam, status);
+    }
+    oskar_mem_conjugate(work->phase_fac, status);
+    for (i_station = 0; i_station < num_stations; ++i_station)
+    {
+        const int offset_out = i_station * num_points;
+        oskar_mem_multiply(beam, beam, work->phase_fac,
+                offset_out, offset_out, offset_out, num_points, status);
+    }
+}
+
 
 /* NOLINTNEXTLINE(readability-identifier-naming) */
 void oskar_evaluate_jones_E(
@@ -42,7 +122,16 @@ void oskar_evaluate_jones_E(
         return;
     }
 
-    if (!oskar_telescope_allow_station_beam_duplication(tel))
+    /* Check if HARP data exist. */
+    const oskar_Harp* harp_data = oskar_telescope_harp_data_const(
+            tel, frequency_hz);
+    if (harp_data)
+    {
+        oskar_evaluate_element_beams_harp(harp_data, coord_type, num_points,
+                source_coords, ref_lon_rad, ref_lat_rad, tel, gast_rad,
+                frequency_hz, work, oskar_jones_mem(E), status);
+    }
+    else if (!oskar_telescope_allow_station_beam_duplication(tel))
     {
         /* Evaluate all the station beams. */
         for (i = 0; i < num_stations; ++i)
