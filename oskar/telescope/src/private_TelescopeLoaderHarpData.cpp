@@ -23,8 +23,10 @@ static string remove_extension(const string& filename)
 static double get_freq(const string& str)
 {
     string without_extension = remove_extension(str);
-    size_t digit_position = str.find_last_not_of(".0123456789") + 1;
-    return 1e6 * strtod(without_extension.c_str() + digit_position, 0);
+    string stripped = without_extension.substr(
+            0, without_extension.find_last_of(".0123456789") + 1);
+    size_t digit_position = stripped.find_last_not_of(".0123456789") + 1;
+    return 1e6 * strtod(stripped.c_str() + digit_position, 0);
 }
 
 TelescopeLoaderHarpData::TelescopeLoaderHarpData()
