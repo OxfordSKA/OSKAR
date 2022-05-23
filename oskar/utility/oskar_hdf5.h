@@ -51,7 +51,7 @@ void oskar_hdf5_close(oskar_HDF5* h);
  * @param[in] h  Handle to HDF5 file.
  */
 OSKAR_EXPORT
-void oskar_hdf5_inc_ref(oskar_HDF5* h);
+void oskar_hdf5_ref_inc(oskar_HDF5* h);
 
 /**
  * @brief Returns true if the dataset exists.

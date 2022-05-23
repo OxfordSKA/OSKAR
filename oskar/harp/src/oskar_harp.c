@@ -8,6 +8,7 @@
 #include "harp/oskar_harp.h"
 #include "harp/private_harp.h"
 #include "log/oskar_log.h"
+#include "utility/oskar_thread.h"
 
 #ifdef OSKAR_HAVE_HARP
 #include "harp_beam.h"
@@ -30,11 +31,16 @@ oskar_Harp* oskar_harp_create_copy(const oskar_Harp* other, int* status)
     h->num_mbf = other->num_mbf;
     h->max_order = other->max_order;
     h->freq = other->freq;
-    if (other->hdf5_file)
-    {
-        h->hdf5_file = other->hdf5_file;
-        oskar_hdf5_inc_ref(h->hdf5_file);
-    }
+    h->hdf5_file = other->hdf5_file;
+    oskar_hdf5_ref_inc(h->hdf5_file);
+    h->alpha_te = other->alpha_te;
+    oskar_mem_ref_inc(h->alpha_te);
+    h->alpha_tm = other->alpha_tm;
+    oskar_mem_ref_inc(h->alpha_tm);
+    h->coeffs_pola = other->coeffs_pola;
+    oskar_mem_ref_inc(h->coeffs_pola);
+    h->coeffs_polb = other->coeffs_polb;
+    oskar_mem_ref_inc(h->coeffs_polb);
     return h;
 }
 
@@ -68,27 +74,9 @@ void oskar_harp_evaluate_smodes(
     if (*status) return;
     const int precision = oskar_mem_precision(pth);
     const int location = oskar_mem_location(pth);
-    oskar_Mem *conv_te = 0, *conv_tm = 0;
     oskar_Mem *gpu_te = 0, *gpu_tm = 0;
-    oskar_Mem* alpha_te = oskar_hdf5_read_dataset(
-            h->hdf5_file, "alpha_te", 0, 0, status);
-    oskar_Mem* alpha_tm = oskar_hdf5_read_dataset(
-            h->hdf5_file, "alpha_tm", 0, 0, status);
-    if (*status)
-    {
-        oskar_mem_free(alpha_te, status);
-        oskar_mem_free(alpha_tm, status);
-        return;
-    }
-    oskar_Mem *ptr_te = alpha_te, *ptr_tm = alpha_tm;
-    if (oskar_mem_precision(alpha_te) != precision)
-    {
-        conv_te = oskar_mem_convert_precision(ptr_te, precision, status);
-        conv_tm = oskar_mem_convert_precision(ptr_tm, precision, status);
-        ptr_te = conv_te;
-        ptr_tm = conv_tm;
-    }
-    if (oskar_mem_location(alpha_te) != location)
+    oskar_Mem *ptr_te = h->alpha_te, *ptr_tm = h->alpha_tm;
+    if (oskar_mem_location(h->alpha_te) != location)
     {
         gpu_te = oskar_mem_create_copy(ptr_te, location, status);
         gpu_tm = oskar_mem_create_copy(ptr_tm, location, status);
@@ -157,10 +145,6 @@ void oskar_harp_evaluate_smodes(
     {
         *status = OSKAR_ERR_BAD_LOCATION;
     }
-    oskar_mem_free(alpha_te, status);
-    oskar_mem_free(alpha_tm, status);
-    oskar_mem_free(conv_te, status);
-    oskar_mem_free(conv_tm, status);
     oskar_mem_free(gpu_te, status);
     oskar_mem_free(gpu_tm, status);
 #else
@@ -209,22 +193,9 @@ void oskar_harp_evaluate_station_beam(
     const int location = oskar_mem_location(beam);
     const int stride = 4;
     const int offset_out_cplx = offset_out * stride + 2 * feed;
-    oskar_Mem *conv_coeffs = 0;
     oskar_Mem *gpu_coeffs = 0;
-    oskar_Mem* coeffs = oskar_hdf5_read_dataset(h->hdf5_file,
-            (feed == 0 ? "coeffs_pola" : "coeffs_polb"), 0, 0, status);
-    if (*status)
-    {
-        oskar_mem_free(coeffs, status);
-        return;
-    }
-    oskar_Mem *ptr_coeffs = coeffs;
-    if (oskar_mem_precision(coeffs) != precision)
-    {
-        ptr_coeffs = conv_coeffs = oskar_mem_convert_precision(
-                ptr_coeffs, precision, status);
-    }
-    if (oskar_mem_location(coeffs) != location)
+    oskar_Mem *ptr_coeffs = (feed == 0 ? h->coeffs_pola : h->coeffs_polb);
+    if (oskar_mem_location(ptr_coeffs) != location)
     {
         ptr_coeffs = gpu_coeffs = oskar_mem_create_copy(
                 ptr_coeffs, location, status);
@@ -311,8 +282,6 @@ void oskar_harp_evaluate_station_beam(
     {
         *status = OSKAR_ERR_BAD_LOCATION;
     }
-    oskar_mem_free(coeffs, status);
-    oskar_mem_free(conv_coeffs, status);
     oskar_mem_free(gpu_coeffs, status);
 #else
     (void)h;
@@ -366,22 +335,9 @@ void oskar_harp_evaluate_element_beam(
     const int location = oskar_mem_location(beam);
     const int stride = 4;
     const int offset_out_cplx = offset_out * stride + 2 * feed;
-    oskar_Mem *conv_coeffs = 0;
     oskar_Mem *gpu_coeffs = 0;
-    oskar_Mem* coeffs = oskar_hdf5_read_dataset(h->hdf5_file,
-            (feed == 0 ? "coeffs_pola" : "coeffs_polb"), 0, 0, status);
-    if (*status)
-    {
-        oskar_mem_free(coeffs, status);
-        return;
-    }
-    oskar_Mem *ptr_coeffs = coeffs;
-    if (oskar_mem_precision(coeffs) != precision)
-    {
-        ptr_coeffs = conv_coeffs = oskar_mem_convert_precision(
-                ptr_coeffs, precision, status);
-    }
-    if (oskar_mem_location(coeffs) != location)
+    oskar_Mem *ptr_coeffs = (feed == 0 ? h->coeffs_pola : h->coeffs_polb);
+    if (oskar_mem_location(ptr_coeffs) != location)
     {
         ptr_coeffs = gpu_coeffs = oskar_mem_create_copy(
                 ptr_coeffs, location, status);
@@ -457,8 +413,6 @@ void oskar_harp_evaluate_element_beam(
     {
         *status = OSKAR_ERR_BAD_LOCATION;
     }
-    oskar_mem_free(coeffs, status);
-    oskar_mem_free(conv_coeffs, status);
     oskar_mem_free(gpu_coeffs, status);
 #else
     (void)h;
@@ -484,8 +438,13 @@ void oskar_harp_evaluate_element_beam(
 
 void oskar_harp_free(oskar_Harp* h)
 {
+    int status = 0;
     if (!h) return;
     oskar_hdf5_close(h->hdf5_file);
+    oskar_mem_free(h->alpha_te, &status);
+    oskar_mem_free(h->alpha_tm, &status);
+    oskar_mem_free(h->coeffs_pola, &status);
+    oskar_mem_free(h->coeffs_polb, &status);
     free(h);
 }
 
@@ -503,4 +462,50 @@ void oskar_harp_open_hdf5(oskar_Harp* h, const char* path, int* status)
             h->hdf5_file, "num_mbf", status);
     h->max_order = oskar_hdf5_read_attribute_int(
             h->hdf5_file, "max_order", status);
+
+    /* Load the data. */
+    oskar_Mem* alpha_te = oskar_hdf5_read_dataset(
+            h->hdf5_file, "alpha_te", 0, 0, status);
+    oskar_Mem* alpha_tm = oskar_hdf5_read_dataset(
+            h->hdf5_file, "alpha_tm", 0, 0, status);
+    oskar_Mem* coeffs_pola = oskar_hdf5_read_dataset(
+            h->hdf5_file, "coeffs_pola", 0, 0, status);
+    oskar_Mem* coeffs_polb = oskar_hdf5_read_dataset(
+            h->hdf5_file, "coeffs_polb", 0, 0, status);
+    if (*status)
+    {
+        oskar_mem_free(alpha_te, status);
+        oskar_mem_free(alpha_tm, status);
+        oskar_mem_free(coeffs_pola, status);
+        oskar_mem_free(coeffs_polb, status);
+        return;
+    }
+    h->alpha_te = alpha_te;
+    if (oskar_mem_precision(alpha_te) != h->precision)
+    {
+        h->alpha_te = oskar_mem_convert_precision(
+                alpha_te, h->precision, status);
+        oskar_mem_free(alpha_te, status);
+    }
+    h->alpha_tm = alpha_tm;
+    if (oskar_mem_precision(alpha_tm) != h->precision)
+    {
+        h->alpha_tm = oskar_mem_convert_precision(
+                alpha_tm, h->precision, status);
+        oskar_mem_free(alpha_tm, status);
+    }
+    h->coeffs_pola = coeffs_pola;
+    if (oskar_mem_precision(coeffs_pola) != h->precision)
+    {
+        h->coeffs_pola = oskar_mem_convert_precision(
+                coeffs_pola, h->precision, status);
+        oskar_mem_free(coeffs_pola, status);
+    }
+    h->coeffs_polb = coeffs_polb;
+    if (oskar_mem_precision(coeffs_polb) != h->precision)
+    {
+        h->coeffs_polb = oskar_mem_convert_precision(
+                coeffs_polb, h->precision, status);
+        oskar_mem_free(coeffs_polb, status);
+    }
 }

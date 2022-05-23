@@ -108,8 +108,9 @@ void oskar_hdf5_close(oskar_HDF5* h)
 }
 
 
-void oskar_hdf5_inc_ref(oskar_HDF5* h)
+void oskar_hdf5_ref_inc(oskar_HDF5* h)
 {
+    if (!h) return;
     oskar_mutex_lock(h->mutex);
     h->refcount++;
     oskar_mutex_unlock(h->mutex);

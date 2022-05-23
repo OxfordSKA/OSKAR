@@ -26,11 +26,8 @@ oskar_Gains* oskar_gains_create_copy(const oskar_Gains* other, int* status)
     {
         h->freqs = oskar_mem_create_copy(other->freqs, OSKAR_CPU, status);
     }
-    if (other->hdf5_file)
-    {
-        h->hdf5_file = other->hdf5_file;
-        oskar_hdf5_inc_ref(h->hdf5_file);
-    }
+    h->hdf5_file = other->hdf5_file;
+    oskar_hdf5_ref_inc(h->hdf5_file);
     if (other->dims)
     {
         int i = 0;
