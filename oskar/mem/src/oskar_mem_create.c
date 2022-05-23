@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -35,6 +35,8 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
     mem->num_elements = 0;
     mem->owner = 1;
     mem->data = NULL;
+    mem->ref_count = 1;
+    mem->mutex = oskar_mutex_create();
 
     /* Check if allocation should happen or not. */
     if (!status || *status || num_elements == 0)

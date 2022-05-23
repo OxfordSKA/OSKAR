@@ -21,6 +21,15 @@ void oskar_mem_free(oskar_Mem* mem, int* status)
     /* Will be safe to call with null pointers. */
     if (!mem) return;
 
+    /* Decrement reference count and return if there are still references. */
+    oskar_mutex_lock(mem->mutex);
+    mem->ref_count--;
+    oskar_mutex_unlock(mem->mutex);
+    if (mem->ref_count > 0)
+    {
+        return;
+    }
+
     /* Must proceed with trying to free the memory, regardless of the
      * status code value. */
 

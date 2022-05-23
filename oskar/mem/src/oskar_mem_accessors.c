@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -277,6 +277,19 @@ const double4c* oskar_mem_double4c_const(const oskar_Mem* mem, int* status)
     return (const double4c*) mem->data;
 }
 
+void oskar_mem_ref_inc(oskar_Mem* mem)
+{
+    if (!mem) return;
+    oskar_mutex_lock(mem->mutex);
+    mem->ref_count++;
+    oskar_mutex_unlock(mem->mutex);
+}
+
+void oskar_mem_ref_dec(oskar_Mem* mem)
+{
+    int status = 0;
+    oskar_mem_free(mem, &status);
+}
 
 #ifdef __cplusplus
 }

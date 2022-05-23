@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021, The OSKAR Developers.
+ * Copyright (c) 2014-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -15,10 +15,7 @@ extern "C" {
 oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
         size_t num_elements, int* status)
 {
-    oskar_Mem* mem = 0;
-
-    /* Create the structure, initialised with all bits zero. */
-    mem = (oskar_Mem*) calloc(1, sizeof(oskar_Mem));
+    oskar_Mem* mem = (oskar_Mem*) calloc(1, sizeof(oskar_Mem));
     if (!mem)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
@@ -28,6 +25,8 @@ oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
     /* Initialise meta-data.
      * (This must happen regardless of the status code.) */
     mem->owner = 0; /* Structure does not own the memory. */
+    mem->ref_count = 1;
+    mem->mutex = oskar_mutex_create();
     if (src)
     {
         size_t element_size = oskar_mem_element_size(src->type);
