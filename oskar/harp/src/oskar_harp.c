@@ -44,9 +44,9 @@ oskar_Harp* oskar_harp_create_copy(const oskar_Harp* other, int* status)
     return h;
 }
 
-int oskar_harp_defined(const oskar_Harp* h)
+const oskar_Mem* oskar_harp_coeffs(const oskar_Harp* h, int feed)
 {
-    return (h->hdf5_file != 0);
+    return feed == 0 ? h->coeffs_pola : h->coeffs_polb;
 }
 
 void oskar_harp_evaluate_smodes(
@@ -319,6 +319,7 @@ void oskar_harp_evaluate_element_beam(
         const oskar_Mem* antenna_x,
         const oskar_Mem* antenna_y,
         const oskar_Mem* antenna_z,
+        const oskar_Mem* coeffs,
         const oskar_Mem* pth,
         const oskar_Mem* pph,
         oskar_Mem* phase_fac,
@@ -335,13 +336,6 @@ void oskar_harp_evaluate_element_beam(
     const int location = oskar_mem_location(beam);
     const int stride = 4;
     const int offset_out_cplx = offset_out * stride + 2 * feed;
-    oskar_Mem *gpu_coeffs = 0;
-    oskar_Mem *ptr_coeffs = (feed == 0 ? h->coeffs_pola : h->coeffs_polb);
-    if (oskar_mem_location(ptr_coeffs) != location)
-    {
-        ptr_coeffs = gpu_coeffs = oskar_mem_create_copy(
-                ptr_coeffs, location, status);
-    }
     const int offset_coeff = i_antenna * num_antennas * h->num_mbf;
     if (location == OSKAR_CPU)
     {
@@ -361,7 +355,7 @@ void oskar_harp_evaluate_element_beam(
                     h->num_mbf,
                     num_antennas,
                     num_dir,
-                    oskar_mem_double2_const(ptr_coeffs, status) + offset_coeff,
+                    oskar_mem_double2_const(coeffs, status) + offset_coeff,
                     oskar_mem_double2_const(pth, status),
                     oskar_mem_double2_const(pph, status),
                     oskar_mem_double2_const(phase_fac, status),
@@ -394,7 +388,7 @@ void oskar_harp_evaluate_element_beam(
                     h->num_mbf,
                     num_antennas,
                     num_dir,
-                    oskar_mem_double2_const(ptr_coeffs, status) + offset_coeff,
+                    oskar_mem_double2_const(coeffs, status) + offset_coeff,
                     oskar_mem_double2_const(pth, status),
                     oskar_mem_double2_const(pph, status),
                     oskar_mem_double2_const(phase_fac, status),
@@ -413,7 +407,6 @@ void oskar_harp_evaluate_element_beam(
     {
         *status = OSKAR_ERR_BAD_LOCATION;
     }
-    oskar_mem_free(gpu_coeffs, status);
 #else
     (void)h;
     (void)num_dir;
@@ -426,6 +419,7 @@ void oskar_harp_evaluate_element_beam(
     (void)antenna_x;
     (void)antenna_y;
     (void)antenna_z;
+    (void)coeffs;
     (void)pth;
     (void)pph;
     (void)phase_fac;

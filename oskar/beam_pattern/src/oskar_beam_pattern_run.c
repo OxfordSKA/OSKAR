@@ -319,6 +319,16 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
     const oskar_Harp* harp_data = oskar_telescope_harp_data_const(
             d->tel, freq_hz);
 
+    /* Copy coefficients to device. */
+    oskar_Mem* coeffs[] = {0, 0};
+    if (harp_data)
+    {
+        coeffs[0] = oskar_mem_create_copy(
+                oskar_harp_coeffs(harp_data, 0), h->dev_loc, status);
+        coeffs[1] = oskar_mem_create_copy(
+                oskar_harp_coeffs(harp_data, 1), h->dev_loc, status);
+    }
+
     /* Generate beam for this pixel chunk, for all active stations. */
     for (i = 0; i < h->num_active_stations; ++i)
     {
@@ -368,7 +378,7 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
                         oskar_telescope_station_true_enu_metres_const(d->tel, 0),
                         oskar_telescope_station_true_enu_metres_const(d->tel, 1),
                         oskar_telescope_station_true_enu_metres_const(d->tel, 2),
-                        work->pth, work->pph, work->phase_fac,
+                        coeffs[feed], work->pth, work->pph, work->phase_fac,
                         offset, d->jones_data, status);
             }
             oskar_convert_theta_phi_to_ludwig3_components(chunk_size,
@@ -454,6 +464,8 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
                     offset, d->auto_power[1], status);
         }
     }
+    oskar_mem_free(coeffs[0], status);
+    oskar_mem_free(coeffs[1], status);
     free(models_evaluated);
     free(model_offsets);
     if (d->cross_power[0])

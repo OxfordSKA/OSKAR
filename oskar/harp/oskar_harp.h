@@ -30,7 +30,7 @@ OSKAR_EXPORT
 oskar_Harp* oskar_harp_create_copy(const oskar_Harp* other, int* status);
 
 OSKAR_EXPORT
-int oskar_harp_defined(const oskar_Harp* h);
+const oskar_Mem* oskar_harp_coeffs(const oskar_Harp* h, int feed);
 
 OSKAR_EXPORT
 void oskar_harp_evaluate_smodes(
@@ -80,6 +80,7 @@ void oskar_harp_evaluate_element_beam(
         const oskar_Mem* antenna_x,
         const oskar_Mem* antenna_y,
         const oskar_Mem* antenna_z,
+        const oskar_Mem* coeffs,
         const oskar_Mem* pth,
         const oskar_Mem* pph,
         oskar_Mem* phase_fac,
