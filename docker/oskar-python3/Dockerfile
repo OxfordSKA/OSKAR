@@ -5,6 +5,7 @@
 #
 FROM nvidia/cuda:11.4.3-base-ubuntu20.04 AS build
 ENV DEBIAN_FRONTEND=noninteractive
+ENV CUDA_ARCH="ALL;8.0;8.6"
 RUN rm /etc/apt/sources.list.d/cuda.list && \
     apt-key del 7fa2af80 && \
     apt-get update && apt-get install -y --no-install-recommends wget && \
@@ -22,9 +23,13 @@ RUN apt-get update && \
     libhdf5-dev \
     python3-dev \
     python3-pip
-WORKDIR /home/build
+WORKDIR /home/build/harp_beam
+RUN git clone https://gitlab.com/quentingueuning/harp_beam.git harp_beam.git && \
+    cmake harp_beam.git/ -DCUDA_ARCH="${CUDA_ARCH}" && \
+    make -j4 && make install
+WORKDIR /home/build/oskar
 RUN git clone https://github.com/OxfordSKA/OSKAR.git OSKAR.git && \
-    cmake OSKAR.git/ -DCUDA_ARCH="ALL;8.0;8.6" -DBUILD_TESTING=OFF && \
+    cmake OSKAR.git/ -DCUDA_ARCH="${CUDA_ARCH}" -DBUILD_TESTING=OFF && \
     make -j4 && make install
 RUN pip3 install -U astropy numpy matplotlib setuptools && \
     pip3 install 'git+https://github.com/OxfordSKA/OSKAR.git@master#egg=oskarpy&subdirectory=python'

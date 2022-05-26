@@ -4,6 +4,7 @@ Stage: one
 
 %post
     export DEBIAN_FRONTEND=noninteractive
+    export CUDA_ARCH="ALL;8.0;8.6"
     rm /etc/apt/sources.list.d/cuda.list && \
         apt-key del 7fa2af80 && \
         apt-get update && apt-get install -y --no-install-recommends wget && \
@@ -20,10 +21,15 @@ Stage: one
         libhdf5-dev \
         python3-dev \
         python3-pip
-    mkdir -p /home/build
-    cd /home/build
+    mkdir -p /home/build/harp_beam
+    cd /home/build/harp_beam
+    git clone https://gitlab.com/quentingueuning/harp_beam.git harp_beam.git
+    cmake harp_beam.git/ -DCUDA_ARCH="${CUDA_ARCH}"
+    make -j16 && make install
+    mkdir -p /home/build/oskar
+    cd /home/build/oskar
     git clone https://github.com/OxfordSKA/OSKAR.git OSKAR.git
-    cmake OSKAR.git/ -DCUDA_ARCH="ALL;8.0;8.6" -DBUILD_TESTING=OFF
+    cmake OSKAR.git/ -DCUDA_ARCH="${CUDA_ARCH}" -DBUILD_TESTING=OFF
     make -j16 && make install
     pip3 install -U astropy numpy matplotlib setuptools && \
     pip3 install 'git+https://github.com/OxfordSKA/OSKAR.git@master#egg=oskarpy&subdirectory=python'
