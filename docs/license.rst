@@ -38,7 +38,7 @@ Third-party Licenses
 --------------------
 
 Third-party licenses are reproduced in this section in order to allow
-binary distributions of the OSKAR command-line applications and
+binary distributions of the OSKAR command-line applications, GUI, and
 Python bindings.
 
 The NVIDIA CUDA toolkit
@@ -420,6 +420,20 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+The Qt Toolkit
+++++++++++++++
+
+| The Qt Toolkit is Copyright (C) 2016 The Qt Company Ltd.
+| Contact: http://www.qt.io/licensing/
+
+| You may use, distribute and copy the Qt Toolkit under the terms of
+| GNU Lesser General Public License version 3.
+
+Reference: GNU Lesser General Public License, version 3:
+
+https://www.gnu.org/licenses/lgpl-3.0.html
 
 
 Python
