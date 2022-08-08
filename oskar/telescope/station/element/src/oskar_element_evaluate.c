@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -79,10 +79,9 @@ void oskar_element_evaluate(
         oskar_mem_set_value_real(output,
                 1.0, offset_out, num_points_norm, status);
     }
-
-    /* Evaluate polarised response if output array is matrix type. */
-    if (oskar_mem_is_matrix(output))
+    else if (oskar_mem_is_matrix(output))
     {
+        /* Evaluate polarised response if output array is matrix type. */
         if (oskar_element_has_spherical_wave_data(model, id))
         {
             oskar_evaluate_spherical_wave_sum(num_points_norm, theta, phi_x,

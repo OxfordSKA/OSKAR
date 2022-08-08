@@ -1,3 +1,7 @@
+2022-xx-yy  OSKAR-2.8.4
+
+    * Fix isotropic element patterns.
+
 2022-05-26  OSKAR-2.8.3
 
     * Add option to use HARP beam library.
