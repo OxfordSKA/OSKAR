@@ -95,10 +95,10 @@ static oskar_MeasurementSet* oskar_ms_open_private(
     if (num_spectral_windows > 0)
     {
         ScalarColumn<Int> numChan(spw, "NUM_CHAN");
-        ScalarColumn<Double> refFrequency(spw, "REF_FREQUENCY");
+        ArrayColumn<Double> chanFreq(spw, "CHAN_FREQ");
         ArrayColumn<Double> chanWidth(spw, "CHAN_WIDTH");
         p->num_channels = numChan.get(0);
-        p->freq_start_hz = refFrequency.get(0);
+        p->freq_start_hz = (chanFreq.get(0))(IPosition(1, 0));
         p->freq_inc_hz = (chanWidth.get(0))(IPosition(1, 0));
     }
     Table antenna(p->ms->tableName() + "/ANTENNA", Table::Old);
