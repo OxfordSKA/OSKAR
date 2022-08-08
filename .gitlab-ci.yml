@@ -45,12 +45,12 @@ build-test-release:
     - *ready_reports
     # We need CMake >= 3.21.0 for the --output-junit option on CTest.
     - cmake --version
-    - nvidia-smi
     - mkdir release
     - cd release/
     - cmake ../ -DCUDA_ARCH=$CUDA_ARCH
   script:
     - make -j
+    - ./apps/oskar_system_info
     - ctest --output-junit unit-tests.xml
   after_script:
     - mv release/unit-tests.xml build/reports/
