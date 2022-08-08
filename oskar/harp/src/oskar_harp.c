@@ -114,6 +114,7 @@ void oskar_harp_evaluate_smodes(
     }
     else if (location == OSKAR_GPU)
     {
+#ifdef OSKAR_HAVE_CUDA
         if (precision == OSKAR_DOUBLE)
         {
             harp_precompute_smodes_mbf_cuda_double(
@@ -140,6 +141,7 @@ void oskar_harp_evaluate_smodes(
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
+#endif
     }
     else
     {
@@ -241,6 +243,7 @@ void oskar_harp_evaluate_station_beam(
     }
     else if (location == OSKAR_GPU)
     {
+#ifdef OSKAR_HAVE_CUDA
         if (precision == OSKAR_DOUBLE)
         {
             harp_evaluate_beam_coeffs_cuda_double(
@@ -277,6 +280,7 @@ void oskar_harp_evaluate_station_beam(
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
+#endif
     }
     else
     {
@@ -372,6 +376,7 @@ void oskar_harp_evaluate_element_beam(
     }
     else if (location == OSKAR_GPU)
     {
+#ifdef OSKAR_HAVE_CUDA
         if (precision == OSKAR_DOUBLE)
         {
             harp_evaluate_phase_fac_cuda_double(
@@ -402,6 +407,7 @@ void oskar_harp_evaluate_element_beam(
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
+#endif
     }
     else
     {
