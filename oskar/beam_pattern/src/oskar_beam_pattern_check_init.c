@@ -695,6 +695,7 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
         {
             d->jones_data = oskar_mem_create(beam_type, dev_loc, max_size,
                     status);
+            d->jones_temp = oskar_mem_create(beam_type, dev_loc, 0, status);
             d->lon_rad = oskar_mem_create(h->prec, dev_loc, 1 + max_src, status);
             d->lat_rad = oskar_mem_create(h->prec, dev_loc, 1 + max_src, status);
             d->x    = oskar_mem_create(h->prec, dev_loc, 1 + max_src, status);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The OSKAR Developers.
+ * Copyright (c) 2016-2022, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -40,7 +40,7 @@ struct DeviceData
     int previous_chunk_index;
     oskar_Telescope* tel;
     oskar_StationWork* work;
-    oskar_Mem *x, *y, *z, *lon_rad, *lat_rad, *jones_data;
+    oskar_Mem *x, *y, *z, *lon_rad, *lat_rad, *jones_data, *jones_temp;
     oskar_Mem *auto_power[2], *cross_power[2]; /* Per Stokes type. */
 
     /* Timers. */

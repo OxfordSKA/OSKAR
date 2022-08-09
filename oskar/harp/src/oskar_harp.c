@@ -436,6 +436,129 @@ void oskar_harp_evaluate_element_beam(
 #endif
 }
 
+
+void oskar_harp_evaluate_element_beams(
+        const oskar_Harp* h,
+        int num_dir,
+        const oskar_Mem* theta,
+        const oskar_Mem* phi,
+        double frequency_hz,
+        int feed,
+        int num_antennas,
+        const oskar_Mem* antenna_x,
+        const oskar_Mem* antenna_y,
+        const oskar_Mem* antenna_z,
+        const oskar_Mem* coeffs,
+        const oskar_Mem* pth,
+        const oskar_Mem* pph,
+        oskar_Mem* phase_fac,
+        int offset_out,
+        oskar_Mem* beam,
+        int* status)
+{
+    if (*status) return;
+#ifdef OSKAR_HAVE_HARP
+    oskar_mem_ensure(phase_fac, num_dir * num_antennas, status);
+    oskar_mem_ensure(beam, num_dir, status);
+    if (*status) return;
+    const int precision = oskar_mem_precision(beam);
+    const int location = oskar_mem_location(beam);
+    const int stride = 4;
+    const int offset_out_cplx = offset_out * stride + 2 * feed;
+    if (location == OSKAR_CPU)
+    {
+        if (precision == OSKAR_DOUBLE)
+        {
+            harp_evaluate_phase_fac_double(
+                    num_dir,
+                    num_antennas,
+                    frequency_hz,
+                    oskar_mem_double_const(theta, status),
+                    oskar_mem_double_const(phi, status),
+                    oskar_mem_double_const(antenna_x, status),
+                    oskar_mem_double_const(antenna_y, status),
+                    oskar_mem_double_const(antenna_z, status),
+                    oskar_mem_double2(phase_fac, status));
+            harp_assemble_beam_double(
+                    h->num_mbf,
+                    num_antennas,
+                    num_dir,
+                    oskar_mem_double2_const(coeffs, status),
+                    oskar_mem_double2_const(pth, status),
+                    oskar_mem_double2_const(pph, status),
+                    oskar_mem_double2_const(phase_fac, status),
+                    stride,
+                    offset_out_cplx,
+                    offset_out_cplx + 1,
+                    oskar_mem_double2(beam, status),
+                    oskar_mem_double2(beam, status));
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
+    }
+    else if (location == OSKAR_GPU)
+    {
+#ifdef OSKAR_HAVE_CUDA
+        if (precision == OSKAR_DOUBLE)
+        {
+            harp_evaluate_phase_fac_cuda_double(
+                    num_dir,
+                    num_antennas,
+                    frequency_hz,
+                    oskar_mem_double_const(theta, status),
+                    oskar_mem_double_const(phi, status),
+                    oskar_mem_double_const(antenna_x, status),
+                    oskar_mem_double_const(antenna_y, status),
+                    oskar_mem_double_const(antenna_z, status),
+                    oskar_mem_double2(phase_fac, status));
+            harp_assemble_beam_cuda_double(
+                    h->num_mbf,
+                    num_antennas,
+                    num_dir,
+                    oskar_mem_double2_const(coeffs, status),
+                    oskar_mem_double2_const(pth, status),
+                    oskar_mem_double2_const(pph, status),
+                    oskar_mem_double2_const(phase_fac, status),
+                    stride,
+                    offset_out_cplx,
+                    offset_out_cplx + 1,
+                    oskar_mem_double2(beam, status),
+                    oskar_mem_double2(beam, status));
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
+#endif
+    }
+    else
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+    }
+#else
+    (void)h;
+    (void)num_dir;
+    (void)theta;
+    (void)phi;
+    (void)frequency_hz;
+    (void)feed;
+    (void)num_antennas;
+    (void)antenna_x;
+    (void)antenna_y;
+    (void)antenna_z;
+    (void)coeffs;
+    (void)pth;
+    (void)pph;
+    (void)phase_fac;
+    (void)offset_out;
+    (void)beam;
+    *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+    oskar_log_error(0, "OSKAR was compiled without HARP support");
+#endif
+}
+
 void oskar_harp_free(oskar_Harp* h)
 {
     int status = 0;
