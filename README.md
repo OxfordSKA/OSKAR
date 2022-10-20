@@ -12,8 +12,10 @@ Singularity), macOS and Windows platforms are available to download from
 
 - [https://github.com/OxfordSKA/OSKAR/releases](https://github.com/OxfordSKA/OSKAR/releases)
 
-OSKAR is licensed under the terms of the 3-clause BSD License.
-Please see the [LICENSE](LICENSE) file for details.
+OSKAR is licensed under the terms of the 3-clause BSD License,
+and makes use of a number of third-party libraries.
+Please see the OSKAR documentation for license details
+of third-party libraries used by OSKAR.
 
 ## Documentation
 

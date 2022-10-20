@@ -1,5 +1,5 @@
 Copyright (c) 2011-2020, The University of Oxford.
-Copyright (c) 2020-2021, Fred Dulwich.
+Copyright (c) 2020-2022, Fred Dulwich.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,3 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
 USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 OF SUCH DAMAGE.
-
----------------------------------------------------------------
-
-OSKAR makes use of a number of third-party libraries.
-
-Please see the OSKAR documentation for license details
-of third-party libraries used by OSKAR.
