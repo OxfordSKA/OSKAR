@@ -11,7 +11,14 @@
 #include <complex>
 
 namespace oskar{
+
+/// C++ alias of the double4c type. The types should have the same alignment.
+struct alignas(4 * sizeof(std::complex<double>)) Double4C {
+    std::complex<double> a, b, c, d;
+};
+
 namespace beam_utils{
+
 /* Functions used by EveryBeam. */
 
 void oskar_evaluate_dipole_pattern_double(
@@ -27,8 +34,8 @@ void oskar_evaluate_spherical_wave_sum_double(
         double phi_x,
         double phi_y,
         int l_max,
-        const std::complex<double>* alpha,
-        std::complex<double>* pattern);
+        const Double4C* alpha,
+        Double4C* pattern);
 } // namespace beam_utils
 } // namespace oskar
 #endif /* __cplusplus */
