@@ -21,7 +21,7 @@ OSKAR_EVALUATE_SPHERICAL_WAVE_SUM(evaluate_spherical_wave_sum, double, double2, 
 
 namespace oskar{
 namespace beam_utils{
-void oskar_evaluate_dipole_pattern_double(
+void evaluate_dipole_pattern_double(
         const int num_points,
         const double* theta,
         const double* phi,
@@ -37,7 +37,7 @@ void oskar_evaluate_dipole_pattern_double(
             stride, 0, 1, pattern_ptr, pattern_ptr);
 }
 
-void oskar_evaluate_spherical_wave_sum_double(
+void evaluate_spherical_wave_sum_double(
         double theta,
         double phi_x,
         double phi_y,

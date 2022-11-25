@@ -21,7 +21,7 @@ namespace beam_utils{
 
 /* Functions used by EveryBeam. */
 
-void oskar_evaluate_dipole_pattern_double(
+void evaluate_dipole_pattern_double(
         const int num_points,
         const double* theta,
         const double* phi,
@@ -29,7 +29,7 @@ void oskar_evaluate_dipole_pattern_double(
         const double dipole_length_m,
         std::complex<double>* pattern);
 
-void oskar_evaluate_spherical_wave_sum_double(
+void evaluate_spherical_wave_sum_double(
         double theta,
         double phi_x,
         double phi_y,
