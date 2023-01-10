@@ -5,7 +5,7 @@
 # === Set the project name and specify the required CMake version.
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 if (APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum macOS version")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum macOS version")
 endif()
 
 # Set policies to avoid CMake warnings.
@@ -161,4 +161,3 @@ include(oskar_packaging)
 
 # === Must be added last to run after all other install commands.
 add_subdirectory(${PROJECT_SOURCE_DIR}/cmake/post_install)
-

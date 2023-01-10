@@ -126,9 +126,9 @@ singularity-release:
 mac-release:
   stage: publish
   tags: [shared-macos-amd64]
-  image: macos-11-xcode-12
+  image: macos-12-xcode-14
   before_script:
-    - export MACOSX_DEPLOYMENT_TARGET="10.9"
+    - export MACOSX_DEPLOYMENT_TARGET="10.13"
     - brew update
     - brew install cmake hdf5 qt@5
     - mkdir build-casacore && cd build-casacore/
