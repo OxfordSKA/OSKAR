@@ -110,7 +110,7 @@ class BuildExt(build_ext):
         if not self._checked_lib:
             self._checked_lib = True
             if os.getenv('OSKAR_LIB_DIR'):
-                self.library_dirs.append(os.getenv('OSKAR_LIB_DIR'))
+                self.library_dirs.insert(0, os.getenv('OSKAR_LIB_DIR'))
             if platform.system() == 'Windows':
                 self.library_dirs.append('C:\\Program Files\\OSKAR\\lib')
             for i, test_dir in enumerate(self.library_dirs):
@@ -137,7 +137,7 @@ class BuildExt(build_ext):
             from numpy import get_include
             self._checked_inc = True
             if os.getenv('OSKAR_INC_DIR'):
-                self.include_dirs.append(os.getenv('OSKAR_INC_DIR'))
+                self.include_dirs.insert(0, os.getenv('OSKAR_INC_DIR'))
             if platform.system() == 'Windows':
                 self.include_dirs.append('C:\\Program Files\\OSKAR\\include')
             header = self.find_file(
