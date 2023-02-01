@@ -1,3 +1,1 @@
-Random123 1.08
-
-Modified to remove warnings when compiling in C90 mode.
+Random123 1.14.0

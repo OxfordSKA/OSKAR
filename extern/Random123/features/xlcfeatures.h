@@ -1,3 +1,4 @@
+/* This derivative file contributed via email by Gabriel Rockefeller on 8/5/2013 */
 /*
 Copyright 2010-2011, D. E. Shaw Research.
 All rights reserved.
@@ -158,7 +159,11 @@ so as not to confuse it with the version available from LANL.
 #endif
 
 #ifndef R123_USE_MULHILO64_MULHI_INTRIN
-#define R123_USE_MULHILO64_MULHI_INTRIN (defined(__powerpc64__))
+#if (defined(__powerpc64__))
+#define R123_USE_MULHILO64_MULHI_INTRIN 1
+#else
+#define R123_USE_MULHILO64_MULHI_INTRIN 0
+#endif
 #endif
 
 #ifndef R123_MULHILO64_MULHI_INTRIN
@@ -174,7 +179,11 @@ so as not to confuse it with the version available from LANL.
 #endif
 
 #ifndef R123_USE_MULHILO64_ASM
-#define R123_USE_MULHILO64_ASM (defined(__powerpc64__) && !(R123_USE_MULHILO64_MULHI_INTRIN))
+#if defined(__powerpc64__)
+#define R123_USE_MULHILO64_ASM (1 /*defined(__powerpc64__)*/ && !(R123_USE_MULHILO64_MULHI_INTRIN))
+#else
+#define R123_USE_MULHILO64_ASM (0 /*defined(__powerpc64__)*/ && !(R123_USE_MULHILO64_MULHI_INTRIN))
+#endif
 #endif
 
 #ifndef R123_USE_MULHILO64_MSVC_INTRIN

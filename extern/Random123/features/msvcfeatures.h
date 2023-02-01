@@ -32,21 +32,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __msvcfeatures_dot_hpp
 #define __msvcfeatures_dot_hpp
 
-#include <intrin.h>
-
-/*
-#if _MSVC_FULL_VER <= 15
-error "We've only tested MSVC_FULL_VER==15."
-#endif
-*/
+//#if _MSVC_FULL_VER <= 15
+//#error "We've only tested MSVC_FULL_VER==15."
+//#endif
 
 #if !defined(_M_IX86) && !defined(_M_X64)
 #  error "This code has only been tested on x86 platforms."
-{ /* maybe an unbalanced brace will terminate the compilation */
-/* You are invited to try Random123 on other architectures, by changing
-   the conditions that reach this error, but you should consider it a
-   porting exercise and expect to encounter bugs and deficiencies.
-   Please let the authors know of any successes (or failures). */
+{ // maybe an unbalanced brace will terminate the compilation
+// You are invited to try Random123 on other architectures, by changing
+// the conditions that reach this error, but you should consider it a
+// porting exercise and expect to encounter bugs and deficiencies.
+// Please let the authors know of any successes (or failures).
 #endif
 
 #ifndef R123_STATIC_INLINE
@@ -70,23 +66,23 @@ error "We've only tested MSVC_FULL_VER==15."
 #define R123_BUILTIN_EXPECT(expr,likely) expr
 #endif
 
-/* The basic idiom is:
-   #ifndef R123_SOMETHING
-   #if some condition
-   #define R123_SOMETHING 1
-   #else
-   #define R123_SOMETHING 0
-   #endif
-   #endif
-   This idiom allows an external user to override any decision
-   in this file with a command-line -DR123_SOMETHING=1 or -DR123_SOMETHINE=0
+// The basic idiom is:
+// #ifndef R123_SOMETHING
+// #if some condition
+// #define R123_SOMETHING 1
+// #else
+// #define R123_SOMETHING 0
+// #endif
+// #endif
+// This idiom allows an external user to override any decision
+// in this file with a command-line -DR123_SOMETHING=1 or -DR123_SOMETHINE=0
 
-   An alternative idiom is:
-   #ifndef R123_SOMETHING
-   #define R123_SOMETHING (some boolean expression)
-   #endif
-   where the boolean expression might contain previously-defined R123_SOMETHING_ELSE
-   pp-symbols. */
+// An alternative idiom is:
+// #ifndef R123_SOMETHING
+// #define R123_SOMETHING (some boolean expression)
+// #endif
+// where the boolean expression might contain previously-defined R123_SOMETHING_ELSE
+// pp-symbols.
 
 #ifndef R123_USE_AES_NI
 #if defined(_M_X64)
@@ -97,7 +93,7 @@ error "We've only tested MSVC_FULL_VER==15."
 #endif
 
 #ifndef R123_USE_SSE4_2
-#if defined(_M_X64)
+#if defined(_M_X64) || _MSC_VER > 1899
 #define R123_USE_SSE4_2 1
 #else
 #define R123_USE_SSE4_2 0
@@ -105,7 +101,7 @@ error "We've only tested MSVC_FULL_VER==15."
 #endif
 
 #ifndef R123_USE_SSE4_1
-#if defined(_M_X64)
+#if defined(_M_X64) || _MSC_VER > 1899
 #define R123_USE_SSE4_1 1
 #else
 #define R123_USE_SSE4_1 0
@@ -199,6 +195,6 @@ error "We've only tested MSVC_FULL_VER==15."
 #pragma warning(disable:4244)
 #pragma warning(disable:4996)
 
-/* If you add something, it must go in all the other XXfeatures.hpp
-   and in ../ut_features.cpp */
+// If you add something, it must go in all the other XXfeatures.hpp
+// and in ../ut_features.cpp
 #endif

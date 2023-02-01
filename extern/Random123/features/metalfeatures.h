@@ -29,8 +29,13 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef __openclfeatures_dot_hpp
-#define __openclfeatures_dot_hpp
+
+/*
+ * Written by Tom Schoonjans <Tom.Schoonjans@me.com>
+ */
+
+#ifndef __metalfeatures_dot_hpp
+#define __metalfeatures_dot_hpp
 
 #ifndef R123_STATIC_INLINE
 #define R123_STATIC_INLINE inline
@@ -42,6 +47,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef R123_CUDA_DEVICE
 #define R123_CUDA_DEVICE
+#endif
+
+#ifndef R123_METAL_THREAD_ADDRESS_SPACE
+#define R123_METAL_THREAD_ADDRESS_SPACE thread
+#endif
+
+#ifndef R123_METAL_CONSTANT_ADDRESS_SPACE
+#define R123_METAL_CONSTANT_ADDRESS_SPACE constant
 #endif
 
 #ifndef R123_ASSERT
@@ -69,21 +82,30 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifndef R123_USE_MULHILO64_OPENCL_INTRIN
-#define R123_USE_MULHILO64_OPENCL_INTRIN 1
+#define R123_USE_MULHILO64_OPENCL_INTRIN 0
+#endif
+
+#ifndef R123_USE_MULHILO32_MULHI_INTRIN
+#define R123_USE_MULHILO32_MULHI_INTRIN 1
+#endif
+
+#if R123_USE_MULHILO32_MULHI_INTRIN
+#include <metal_integer>
+#define R123_MULHILO32_MULHI_INTRIN metal::mulhi
 #endif
 
 #ifndef R123_USE_AES_NI
 #define R123_USE_AES_NI 0
 #endif
 
-// XXX ATI APP SDK 2.4 clBuildProgram SEGVs if one uses uint64_t instead of
-// ulong to mul_hi.  And gets lots of complaints from stdint.h
-// on some machines.
-// But these typedefs mean we cannot include stdint.h with
-// these headers?  Do we need R123_64T, R123_32T, R123_8T?
-typedef ulong uint64_t;
-typedef uint  uint32_t;
-typedef uchar uint8_t;
-#define UINT64_C(x) ((ulong)(x##UL))
+#ifndef R123_USE_64BIT
+#define R123_USE_64BIT 0 /* Metal currently (Feb 2019, Specification-2) does not support 64-bit variable types */
+#endif
+
+#ifndef R123_ULONG_LONG
+/* the longest integer type in Metal (Feb 2019, Specification-2) is a
+ * 32-bit unsigned int.  Let's hope for the best... */
+#define R123_ULONG_LONG unsigned int 
+#endif
 
 #endif
