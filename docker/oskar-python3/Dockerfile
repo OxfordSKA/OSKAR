@@ -3,7 +3,7 @@
 #
 # First install required development packages.
 #
-FROM nvidia/cuda:11.4.3-base-ubuntu20.04 AS build
+FROM nvidia/cuda:11.3.1-base-ubuntu20.04 AS build
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CUDA_ARCH="ALL;8.0;8.6"
 RUN rm /etc/apt/sources.list.d/cuda.list && \
@@ -16,9 +16,9 @@ RUN apt-get update && \
     build-essential \
     casacore-dev \
     cmake \
-    cuda-cudart-dev-11-4 \
-    libcufft-dev-11-4 \
-    cuda-nvcc-11-4 \
+    cuda-cudart-dev-11-3 \
+    libcufft-dev-11-3 \
+    cuda-nvcc-11-3 \
     git \
     libhdf5-dev \
     python3-dev \
@@ -35,7 +35,7 @@ RUN pip3 install -U astropy numpy matplotlib setuptools && \
     pip3 install 'git+https://github.com/OxfordSKA/OSKAR.git@master#egg=oskarpy&subdirectory=python'
 
 # Copy into a minimal image.
-FROM nvidia/cuda:11.4.3-base-ubuntu20.04
+FROM nvidia/cuda:11.3.1-base-ubuntu20.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN rm /etc/apt/sources.list.d/cuda.list && \
     apt-key del 7fa2af80 && \
@@ -45,7 +45,7 @@ RUN rm /etc/apt/sources.list.d/cuda.list && \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libcasa-tables4 \
-    libcufft-11-4 \
+    libcufft-11-3 \
     libgomp1 \
     libhdf5-103 \
     python3 \

@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: nvidia/cuda:11.4.3-base-ubuntu20.04
+From: nvidia/cuda:11.3.1-base-ubuntu20.04
 Stage: one
 
 %post
@@ -14,9 +14,9 @@ Stage: one
         build-essential \
         casacore-dev \
         cmake \
-        cuda-cudart-dev-11-4 \
-        libcufft-dev-11-4 \
-        cuda-nvcc-11-4 \
+        cuda-cudart-dev-11-3 \
+        libcufft-dev-11-3 \
+        cuda-nvcc-11-3 \
         git \
         libhdf5-dev \
         python3-dev \
@@ -35,7 +35,7 @@ Stage: one
     pip3 install 'git+https://github.com/OxfordSKA/OSKAR.git@master#egg=oskarpy&subdirectory=python'
 
 Bootstrap: docker
-From: nvidia/cuda:11.4.3-base-ubuntu20.04
+From: nvidia/cuda:11.3.1-base-ubuntu20.04
 Stage: two
 
 %post
@@ -47,7 +47,7 @@ Stage: two
         dpkg -i cuda-keyring_1.0-1_all.deb
     apt-get update && apt-get install -y --no-install-recommends \
         libcasa-tables4 \
-        libcufft-11-4 \
+        libcufft-11-3 \
         libgomp1 \
         libhdf5-103 \
         python3 \
