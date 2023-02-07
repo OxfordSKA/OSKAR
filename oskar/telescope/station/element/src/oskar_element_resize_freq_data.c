@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021, The OSKAR Developers.
+ * Copyright (c) 2014-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -38,6 +38,8 @@ void oskar_element_resize_freq_data(oskar_Element* model, int size,
             model->scalar_re[i] = 0;
             model->scalar_im[i] = 0;
             model->sph_wave[i] = 0;
+            model->sph_wave_feko[i] = 0;
+            model->sph_wave_galileo[i] = 0;
             model->l_max[i] = 0;
             model->common_phi_coords[i] = 0;
         }
@@ -61,7 +63,8 @@ void oskar_element_resize_freq_data(oskar_Element* model, int size,
             oskar_splines_free(model->scalar_re[i], status);
             oskar_splines_free(model->scalar_im[i], status);
             oskar_mem_free(model->sph_wave[i], status);
-
+            oskar_mem_free(model->sph_wave_feko[i], status);
+            oskar_mem_free(model->sph_wave_galileo[i], status);
         }
         realloc_arrays(model, size);
     }
@@ -89,6 +92,8 @@ static void realloc_arrays(oskar_Element* e, int size)
     e->scalar_re = (oskar_Splines**) realloc(e->scalar_re, sz);
     e->scalar_im = (oskar_Splines**) realloc(e->scalar_im, sz);
     e->sph_wave = (oskar_Mem**) realloc(e->sph_wave, sz);
+    e->sph_wave_feko = (oskar_Mem**) realloc(e->sph_wave_feko, sz);
+    e->sph_wave_galileo = (oskar_Mem**) realloc(e->sph_wave_galileo, sz);
 }
 
 #ifdef __cplusplus

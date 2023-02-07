@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2022, The OSKAR Developers.
+ * Copyright (c) 2012-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -10,6 +10,8 @@
 #include "telescope/station/element/oskar_apply_element_taper_gaussian.h"
 #include "telescope/station/element/oskar_evaluate_dipole_pattern.h"
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum.h"
+#include "telescope/station/element/oskar_evaluate_spherical_wave_sum_feko.h"
+#include "telescope/station/element/oskar_evaluate_spherical_wave_sum_galileo.h"
 #include "convert/oskar_convert_enu_directions_to_theta_phi.h"
 #include "convert/oskar_convert_ludwig3_to_theta_phi_components.h"
 #include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
@@ -86,6 +88,20 @@ void oskar_element_evaluate(
         {
             oskar_evaluate_spherical_wave_sum(num_points_norm, theta, phi_x,
                     (model->common_phi_coords[id] ? phi_x : phi_y),
+                    model->l_max[id], model->sph_wave[id],
+                    offset_out, output, status);
+        }
+        else if (oskar_element_has_spherical_wave_feko_data(model, id))
+        {
+            oskar_evaluate_spherical_wave_sum_feko(num_points_norm, theta,
+                    phi_x, (model->common_phi_coords[id] ? phi_x : phi_y),
+                    model->l_max[id], model->sph_wave[id],
+                    offset_out, output, status);
+        }
+        else if (oskar_element_has_spherical_wave_galileo_data(model, id))
+        {
+            oskar_evaluate_spherical_wave_sum_galileo(num_points_norm, theta,
+                    phi_x, (model->common_phi_coords[id] ? phi_x : phi_y),
                     model->l_max[id], model->sph_wave[id],
                     offset_out, output, status);
         }

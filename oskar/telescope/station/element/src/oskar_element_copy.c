@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -68,6 +68,22 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
             dst->sph_wave[i] = oskar_mem_create(sph_wave_type, loc, 0, status);
         }
         oskar_mem_copy(dst->sph_wave[i], src->sph_wave[i], status);
+        if (src->sph_wave_feko[i] && !dst->sph_wave_feko[i])
+        {
+            dst->sph_wave_feko[i] = oskar_mem_create(
+                    sph_wave_type, loc, 0, status
+            );
+        }
+        oskar_mem_copy(dst->sph_wave_feko[i], src->sph_wave_feko[i], status);
+        if (src->sph_wave_galileo[i] && !dst->sph_wave_galileo[i])
+        {
+            dst->sph_wave_galileo[i] = oskar_mem_create(
+                    sph_wave_type, loc, 0, status
+            );
+        }
+        oskar_mem_copy(
+                dst->sph_wave_galileo[i], src->sph_wave_galileo[i], status
+        );
     }
 }
 

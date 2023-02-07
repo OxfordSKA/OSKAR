@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -55,7 +55,21 @@ int oskar_element_has_spherical_wave_data(const oskar_Element* data,
         int freq_id)
 {
     return (data->num_freq > freq_id) && ( /* Safe short-circuit. */
-            data->l_max[freq_id] > 0);
+            data->sph_wave[freq_id]);
+}
+
+int oskar_element_has_spherical_wave_feko_data(const oskar_Element* data,
+        int freq_id)
+{
+    return (data->num_freq > freq_id) && ( /* Safe short-circuit. */
+            data->sph_wave_feko[freq_id]);
+}
+
+int oskar_element_has_spherical_wave_galileo_data(const oskar_Element* data,
+        int freq_id)
+{
+    return (data->num_freq > freq_id) && ( /* Safe short-circuit. */
+            data->sph_wave_galileo[freq_id]);
 }
 
 int oskar_element_num_freq(const oskar_Element* data)

@@ -66,14 +66,12 @@ enum OSKAR_ELEMENT_COORD_SYS
     OSKAR_ELEMENT_COORD_SYS_TANGENT_PLANE = 1
 };
 
-/* FIXME(FD) Deprecated. */
 enum OSKAR_ELEMENT_TYPE
 {
     OSKAR_ELEMENT_TYPE_DIPOLE,
     OSKAR_ELEMENT_TYPE_ISOTROPIC
 };
 
-/* FIXME(FD) Deprecated. */
 enum OSKAR_ELEMENT_TAPER
 {
     OSKAR_ELEMENT_TAPER_NONE,
@@ -91,13 +89,13 @@ enum OSKAR_ELEMENT_TAPER
 #include <telescope/station/element/oskar_element_different.h>
 #include <telescope/station/element/oskar_element_evaluate.h>
 #include <telescope/station/element/oskar_element_free.h>
-#include <telescope/station/element/oskar_element_load.h>
 #include <telescope/station/element/oskar_element_load_cst.h>
 #include <telescope/station/element/oskar_element_load_scalar.h>
 #include <telescope/station/element/oskar_element_load_spherical_wave_coeff.h>
+#include <telescope/station/element/oskar_element_load_spherical_wave_coeff_feko.h>
+#include <telescope/station/element/oskar_element_load_spherical_wave_coeff_galileo.h>
 #include <telescope/station/element/oskar_element_resize_freq_data.h>
 #include <telescope/station/element/oskar_element_read.h>
-#include <telescope/station/element/oskar_element_save.h>
 #include <telescope/station/element/oskar_element_write.h>
 
 #endif /* OSKAR_ELEMENT_H_ */

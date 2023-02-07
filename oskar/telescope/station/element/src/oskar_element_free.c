@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -32,6 +32,8 @@ void oskar_element_free(oskar_Element* data, int* status)
         oskar_splines_free(data->scalar_re[i], status);
         oskar_splines_free(data->scalar_im[i], status);
         oskar_mem_free(data->sph_wave[i], status);
+        oskar_mem_free(data->sph_wave_feko[i], status);
+        oskar_mem_free(data->sph_wave_galileo[i], status);
     }
     free(data->freqs_hz);
     free(data->l_max);
@@ -50,6 +52,8 @@ void oskar_element_free(oskar_Element* data, int* status)
     free(data->scalar_re);
     free(data->scalar_im);
     free(data->sph_wave);
+    free(data->sph_wave_feko);
+    free(data->sph_wave_galileo);
 
     /* Free the structure itself. */
     free(data);

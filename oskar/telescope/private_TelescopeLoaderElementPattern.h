@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2022, The OSKAR Developers.
+ * Copyright (c) 2013-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -29,10 +29,13 @@ private:
     void load_fitted_data(int feed, oskar_Station* station,
             const std::vector<std::string>& keys,
             const std::vector<std::string>& paths, int* status);
-    void load_functional_data(int feed, oskar_Station* station,
+    void load_spherical_wave_data(oskar_Station* station,
             const std::vector<std::string>& keys,
             const std::vector<std::string>& paths, int* status);
-    void load_spherical_wave_data(oskar_Station* station,
+    void load_spherical_wave_feko_data(oskar_Station* station,
+            const std::vector<std::string>& keys,
+            const std::vector<std::string>& paths, int* status);
+    void load_spherical_wave_galileo_data(oskar_Station* station,
             const std::vector<std::string>& keys,
             const std::vector<std::string>& paths, int* status);
     static void parse_filename(const char* s, char** buffer, size_t* buflen,
@@ -43,7 +46,6 @@ private:
 private:
     std::string wildcard;
     std::string fit_root_x, fit_root_y, fit_root_scalar;
-    std::string root, root_x, root_y;
     oskar_Telescope* telescope_;
 };
 
