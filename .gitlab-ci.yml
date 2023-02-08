@@ -129,9 +129,9 @@ mac-release:
   image: macos-11-xcode-12
   before_script:
     - export MACOSX_DEPLOYMENT_TARGET="10.9"
-    # Install CMake from Homebrew.
+    # Install CMake and gfortran (needed for casacore) from Homebrew.
     - brew update
-    - brew install cmake
+    - brew install cmake gfortran
     # Install HDF5 from source.
     - mkdir build-hdf5 && cd build-hdf5/
     - wget -O hdf5.tar.gz https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/src/CMake-hdf5-1.14.0.tar.gz
