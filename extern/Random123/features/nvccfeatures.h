@@ -126,4 +126,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "msvcfeatures.h"
 #endif
 
+// Added (FD): SSE seems to cause a problem on some systems
+// when included by nvcc, so disable it.
+// This shouldn't be a problem for us, since we are using nvcc only for
+// device code in any case.
+#ifdef R123_USE_SSE
+#undef R123_USE_SSE
+#endif
+#define R123_USE_SSE 0
+
 #endif
