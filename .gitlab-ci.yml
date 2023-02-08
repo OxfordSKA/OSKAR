@@ -129,9 +129,9 @@ mac-release:
   image: macos-11-xcode-12
   before_script:
     - export MACOSX_DEPLOYMENT_TARGET="10.9"
-    # Install CMake and gfortran (needed for casacore) from Homebrew.
+    # Install CMake from Homebrew.
     - brew update
-    - brew install cmake gfortran
+    - brew install cmake
     # Install HDF5 from source.
     - mkdir build-hdf5 && cd build-hdf5/
     - wget -O hdf5.tar.gz https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/src/CMake-hdf5-1.14.0.tar.gz
@@ -163,17 +163,19 @@ mac-release:
     - cd ../
     # Install casacore tables from source.
     - mkdir build-casacore && cd build-casacore/
-    - wget -O casacore.tar.gz https://github.com/casacore/casacore/archive/v3.2.1.tar.gz
+    - wget -O casacore.tar.gz https://github.com/casacore/casacore/archive/v3.5.0.tar.gz
     - mkdir casacore-src
     - tar zxf casacore.tar.gz -C casacore-src --strip-components 1
     - cmake casacore-src/
       -DMODULE=tables
       -DBUILD_TESTING=OFF
+      -DBUILD_DYSCO=OFF
       -DBUILD_PYTHON=OFF
       -DBUILD_PYTHON3=OFF
       -DUSE_FFTW3=OFF
       -DUSE_OPENMP=OFF
       -DUSE_HDF5=OFF
+      -DUSE_READLINE=OFF
       -DUSE_THREADS=ON
       -DCMAKE_INSTALL_PREFIX="$HOME/local"
       -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
