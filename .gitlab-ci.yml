@@ -157,6 +157,7 @@ mac-release:
       -DONLY_SHARED_LIBS=ON
       -DHDF5_DISABLE_COMPILER_WARNINGS=ON
       -DHDF5_NO_PACKAGES=ON
+      -DCMAKE_INSTALL_PREFIX="$HOME/local"
       -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
     - make -j4 && make install
     - cd ../
@@ -174,6 +175,7 @@ mac-release:
       -DUSE_OPENMP=OFF
       -DUSE_HDF5=OFF
       -DUSE_THREADS=ON
+      -DCMAKE_INSTALL_PREFIX="$HOME/local"
       -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
     - make -j4 && make install
     - cd ../
@@ -183,7 +185,7 @@ mac-release:
     - mkdir build-mac && cd build-mac/
     - cmake ../
       -DFIND_OPENCL=ON
-      -DCMAKE_PREFIX_PATH=/usr/local/opt/qt5/
+      -DCMAKE_PREFIX_PATH="/usr/local/opt/qt5/;$HOME/local"
       -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
     - make -j4
   script:
