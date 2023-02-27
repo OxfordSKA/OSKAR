@@ -95,14 +95,14 @@ void oskar_element_evaluate(
         {
             oskar_evaluate_spherical_wave_sum_feko(num_points_norm, theta,
                     phi_x, (model->common_phi_coords[id] ? phi_x : phi_y),
-                    model->l_max[id], model->sph_wave[id],
+                    model->l_max[id], model->sph_wave_feko[id],
                     offset_out, output, status);
         }
         else if (oskar_element_has_spherical_wave_galileo_data(model, id))
         {
             oskar_evaluate_spherical_wave_sum_galileo(num_points_norm, theta,
                     phi_x, (model->common_phi_coords[id] ? phi_x : phi_y),
-                    model->l_max[id], model->sph_wave[id],
+                    model->l_max[id], model->sph_wave_galileo[id],
                     offset_out, output, status);
         }
         else
