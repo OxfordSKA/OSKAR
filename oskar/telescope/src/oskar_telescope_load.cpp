@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2022, The OSKAR Developers.
+ * Copyright (c) 2013-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -22,6 +22,7 @@
 #include "telescope/private_TelescopeLoaderPermittedBeams.h"
 #include "telescope/private_TelescopeLoaderPosition.h"
 #include "telescope/private_TelescopeLoaderStationTypeMap.h"
+#include "telescope/private_TelescopeLoaderVirtualAntennaAngle.h"
 
 #include <cstdlib>
 #include <map>
@@ -78,6 +79,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
     loaders.push_back(new TelescopeLoaderPermittedBeams);
     loaders.push_back(new TelescopeLoaderElementPattern);
     loaders.push_back(new TelescopeLoaderNoise);
+    loaders.push_back(new TelescopeLoaderVirtualAntennaAngle);
 
     // Load everything recursively from the telescope directory tree.
     map<string, string> filemap;

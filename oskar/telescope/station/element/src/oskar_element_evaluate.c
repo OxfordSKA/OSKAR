@@ -12,6 +12,7 @@
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum.h"
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum_feko.h"
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum_galileo.h"
+#include "telescope/station/element/oskar_rotate_virtual_antenna.h"
 #include "convert/oskar_convert_enu_directions_to_theta_phi.h"
 #include "convert/oskar_convert_ludwig3_to_theta_phi_components.h"
 #include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
@@ -31,6 +32,7 @@ void oskar_element_evaluate(
         int swap_xy,
         double orientation_x,
         double orientation_y,
+        double virtual_antenna_angle,
         int offset_points,
         int num_points,
         const oskar_Mem* x,
@@ -69,11 +71,13 @@ void oskar_element_evaluate(
         dipole_length_m *= (C_0 / frequency_hz);
     }
 
-    /* Compute theta and phi coordinates. */
-    oskar_convert_enu_directions_to_theta_phi(offset_points, num_points,
-            x, y, z, normalise,
-            (M_PI/2) - orientation_x, (M_PI/2) - orientation_y,
-            theta, phi_x, phi_y, status);
+    /* Compute (effective) theta and phi coordinates. */
+    oskar_convert_enu_directions_to_theta_phi(
+            offset_points, num_points, x, y, z, normalise,
+            (M_PI/2) - orientation_x + virtual_antenna_angle,
+            (M_PI/2) - orientation_y + virtual_antenna_angle,
+            theta, phi_x, phi_y, status
+    );
 
     /* Check if element type is isotropic. */
     if (element_type == OSKAR_ELEMENT_TYPE_ISOTROPIC)
@@ -148,6 +152,11 @@ void oskar_element_evaluate(
                         phi_y, frequency_hz, dipole_length_m,
                         4, offset_out_cplx + 2, output, status);
             }
+        }
+        if (virtual_antenna_angle != 0.0)
+        {
+            oskar_rotate_virtual_antenna(num_points_norm,
+                    offset_out, -virtual_antenna_angle, output, status);
         }
         oskar_convert_theta_phi_to_ludwig3_components(num_points_norm,
                 phi_x, phi_y, swap_xy, offset_out, output, status);

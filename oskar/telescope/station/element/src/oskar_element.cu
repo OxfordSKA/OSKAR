@@ -10,6 +10,7 @@
 #include "telescope/station/element/define_evaluate_spherical_wave.h"
 #include "telescope/station/element/define_evaluate_spherical_wave_feko.h"
 #include "telescope/station/element/define_evaluate_spherical_wave_galileo.h"
+#include "telescope/station/element/define_rotate_virtual_antenna.h"
 #include "utility/oskar_cuda_registrar.h"
 #include "utility/oskar_kernel_macros.h"
 #include "utility/oskar_vector_types.h"

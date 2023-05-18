@@ -10,6 +10,7 @@ set(element_SRC
     define_evaluate_spherical_wave.h
     define_evaluate_spherical_wave_feko.h
     define_evaluate_spherical_wave_galileo.h
+    define_rotate_virtual_antenna.h
     src/oskar_apply_element_taper_cosine.c
     src/oskar_apply_element_taper_gaussian.c
     src/oskar_element_accessors.c
@@ -32,6 +33,7 @@ set(element_SRC
     src/oskar_evaluate_spherical_wave_sum.c
     src/oskar_evaluate_spherical_wave_sum_feko.c
     src/oskar_evaluate_spherical_wave_sum_galileo.c
+    src/oskar_rotate_virtual_antenna.c
 )
 
 if (CUDA_FOUND)

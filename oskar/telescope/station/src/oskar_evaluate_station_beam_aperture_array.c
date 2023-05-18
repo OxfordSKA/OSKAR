@@ -172,6 +172,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                         norm_element, swap_xy,
                         oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, 0),
+                        oskar_station_virtual_antenna_angle_rad(s),
                         offset_points, num_points, x, y, z, frequency_hz,
                         theta, phi_x, phi_y, i * num_points, signal, status);
             }
@@ -194,6 +195,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                         norm_element, swap_xy,
                         oskar_station_element_euler_index_rad(s, 0, 0, i) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, i),
+                        oskar_station_virtual_antenna_angle_rad(s),
                         offset_points, num_points, x, y, z, frequency_hz,
                         theta, phi_x, phi_y, i * num_points, signal, status);
             }

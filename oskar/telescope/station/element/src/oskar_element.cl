@@ -10,3 +10,4 @@ OSKAR_EVALUATE_DIPOLE_PATTERN_SCALAR( M_CAT(evaluate_dipole_pattern_scalar_, Rea
 OSKAR_EVALUATE_SPHERICAL_WAVE_SUM( M_CAT(evaluate_spherical_wave_sum_, Real), Real, Real2, Real4c)
 OSKAR_EVALUATE_SPHERICAL_WAVE_SUM_FEKO( M_CAT(evaluate_spherical_wave_sum_feko_, Real), Real, Real2, Real4c)
 OSKAR_EVALUATE_SPHERICAL_WAVE_SUM_GALILEO( M_CAT(evaluate_spherical_wave_sum_galileo_, Real), Real, Real2, Real4c)
+OSKAR_ROTATE_VIRTUAL_ANTENNA( M_CAT(rotate_virtual_antenna_, Real), Real, Real2, Real4c)
