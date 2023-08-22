@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2022, The OSKAR Developers.
+ * Copyright (c) 2012-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -84,6 +84,7 @@ enum OSKAR_MEM_LOCATION
 #include <mem/oskar_mem_set_element.h>
 #include <mem/oskar_mem_set_value_real.h>
 #include <mem/oskar_mem_stats.h>
+#include <mem/oskar_mem_to_sdp_mem.h>
 #include <mem/oskar_mem_write_fits_cube.h>
 #include <mem/oskar_mem_write_healpix_fits.h>
 

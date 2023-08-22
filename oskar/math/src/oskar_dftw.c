@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, The OSKAR Developers.
+ * Copyright (c) 2017-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -10,6 +10,10 @@
 #include "utility/oskar_device.h"
 #include "utility/oskar_kernel_macros.h"
 #include "utility/oskar_vector_types.h"
+
+#ifdef OSKAR_HAVE_SKA_SDP_FUNC
+#include "ska-sdp-func/station_beam/sdp_station.h"
+#endif
 
 #define DBL (1 << 0)
 #define FLT (0 << 0)
@@ -114,6 +118,46 @@ void oskar_dftw(
     }
     oskar_mem_ensure(output, (size_t) offset_out + num_out, status);
     if (*status) return;
+
+    /* Check if we can use SKA SDP function library. */
+#ifdef OSKAR_HAVE_SKA_SDP_FUNC
+    if (location == OSKAR_CPU || location == OSKAR_GPU)
+    {
+        sdp_Error s_status = SDP_SUCCESS;
+        sdp_Mem* s_weights_in = oskar_mem_to_sdp_mem(weights_in, status);
+        sdp_Mem* s_x_in = oskar_mem_to_sdp_mem(x_in, status);
+        sdp_Mem* s_y_in = oskar_mem_to_sdp_mem(y_in, status);
+        sdp_Mem* s_z_in = oskar_mem_to_sdp_mem(z_in, status);
+        sdp_Mem* s_x_out = oskar_mem_to_sdp_mem(x_out, status);
+        sdp_Mem* s_y_out = oskar_mem_to_sdp_mem(y_out, status);
+        sdp_Mem* s_z_out = oskar_mem_to_sdp_mem(z_out, status);
+        sdp_Mem* s_data = oskar_mem_to_sdp_mem(data, status);
+        sdp_Mem* s_data_index = oskar_mem_to_sdp_mem(data_idx, status);
+        sdp_Mem* s_output = oskar_mem_to_sdp_mem(output, status);
+        sdp_station_beam_aperture_array(
+                wavenumber, s_weights_in, s_x_in, s_y_in, s_z_in,
+                offset_coord_out, num_out, s_x_out, s_y_out, s_z_out,
+                s_data_index, s_data, offset_out, s_output,
+                normalise, eval_x, eval_y, &s_status
+        );
+        if (s_status != SDP_SUCCESS)
+        {
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            oskar_log_error(0, "Error calling sdp_station_beam_aperture_array");
+        }
+        sdp_mem_free(s_weights_in);
+        sdp_mem_free(s_x_in);
+        sdp_mem_free(s_y_in);
+        sdp_mem_free(s_z_in);
+        sdp_mem_free(s_x_out);
+        sdp_mem_free(s_y_out);
+        sdp_mem_free(s_z_out);
+        sdp_mem_free(s_data);
+        sdp_mem_free(s_data_index);
+        sdp_mem_free(s_output);
+    }
+    else
+#endif
     if (location == OSKAR_CPU)
     {
         const int* data_idx_p =

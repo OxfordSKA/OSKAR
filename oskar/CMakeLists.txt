@@ -104,6 +104,15 @@ if (HARP_FOUND)
     endif()
 endif()
 
+# Link with SKA SDP functions if available
+if (SKA_SDP_FUNC_FOUND)
+    target_link_libraries(${libname} ${SKA_SDP_FUNC_LIBRARIES})
+    if (WIN32)
+        install(FILES ${SKA_SDP_FUNC_DLL}
+            DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
+    endif()
+endif()
+
 set_target_properties(${libname} PROPERTIES
     SOVERSION ${OSKAR_VERSION}
     VERSION ${OSKAR_VERSION})
@@ -138,7 +147,7 @@ endif ()
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/oskar"
     DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
     COMPONENT headers
-    FILES_MATCHING REGEX "(oskar.*h)|(.*hpp)"
+    FILES_MATCHING REGEX "(oskar.*h$)|(.*hpp$)"
     PATTERN ${install_include_dir} EXCLUDE
     PATTERN define* EXCLUDE
     PATTERN private* EXCLUDE
