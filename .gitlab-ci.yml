@@ -1,7 +1,7 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   DEBIAN_FRONTEND: "noninteractive"
-  CUDA_ARCH: "7.0"
+  CUDA_ARCH: "7.0;8.0"
 
 image: fdulwich/oskar-ci:cuda-11.3-3
 
