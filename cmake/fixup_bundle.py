@@ -265,10 +265,11 @@ def fixup(bundle_info, bundle_root, file_path, output_dir=None, depth=""):
         # Recursive call.
         fixup(bundle_info, bundle_root, dep_path, depth=depth+"    ")
 
-    # Delete /usr/local or @executable_path RPATHs from the bundled item.
+    # Delete local or @executable_path RPATHs from the bundled item.
     for rpath in bundle_info[local_path]['rpaths']:
         if 'libcudart' not in local_path and (
                 rpath.startswith('/usr/local') or
+                rpath.startswith('/Users/') or
                 rpath.startswith('@executable_path')):
             bundle_info[local_path]['rpaths'].remove(rpath)
             print(depth + "In %s, removing %s from RPATH" %
