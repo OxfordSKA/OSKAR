@@ -133,6 +133,8 @@ mac-release:
     # Install CMake and Qt 5 from Homebrew.
     - brew install wget
     - NONINTERACTIVE=1 arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    - (echo; echo 'eval "$(/usr/local/bin/brew shellenv)"') >> $HOME/.zprofile
+    - eval "$(/usr/local/bin/brew shellenv)"
     - arch -x86_64 brew install cmake pcre2 qt@5 || true  # Ignore Homebrew errors.
     # Install HDF5 from source.
     - mkdir build-hdf5 && cd build-hdf5/
