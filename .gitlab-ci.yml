@@ -129,15 +129,18 @@ mac-release:
   image: macos-12-xcode-13
   before_script:
     - export MACOSX_DEPLOYMENT_TARGET="10.13"
+    - export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
     # Install CMake and Qt 5 from Homebrew.
     - brew update
-    - brew install wget cmake qt@5 || true  # Ignore Homebrew errors.
+    - brew install wget
+    - arch -x86_64 brew update
+    - arch -x86_64 brew install cmake pcre2 qt@5 || true  # Ignore Homebrew errors.
     # Install HDF5 from source.
     - mkdir build-hdf5 && cd build-hdf5/
     - wget -O hdf5.tar.gz https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/src/CMake-hdf5-1.14.0.tar.gz
     - mkdir hdf5-src
     - tar zxf hdf5.tar.gz -C hdf5-src --strip-components 2
-    - cmake hdf5-src/hdf5-1.14.0/
+    - arch -x86_64 cmake hdf5-src/hdf5-1.14.0/
       -DCMAKE_BUILD_TYPE=Release
       -DBUILD_SHARED_LIBS=ON
       -DBUILD_STATIC_LIBS=OFF
@@ -166,7 +169,7 @@ mac-release:
     - wget -O casacore.tar.gz https://github.com/casacore/casacore/archive/v3.5.0.tar.gz
     - mkdir casacore-src
     - tar zxf casacore.tar.gz -C casacore-src --strip-components 1
-    - cmake casacore-src/
+    - arch -x86_64 cmake casacore-src/
       -DMODULE=tables
       -DBUILD_TESTING=OFF
       -DBUILD_DYSCO=OFF
@@ -183,7 +186,7 @@ mac-release:
     - cd ../ && rm -rf build-casacore/
     # Build OSKAR.
     - mkdir build-mac && cd build-mac/
-    - cmake ../
+    - arch -x86_64 cmake ../
       -DFIND_OPENCL=ON
       -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5/;$HOME/local"
       -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
