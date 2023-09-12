@@ -131,7 +131,7 @@ mac-release:
     - export MACOSX_DEPLOYMENT_TARGET="10.13"
     # Install CMake and Qt 5 from Homebrew.
     - brew update
-    - brew install cmake qt@5 || true  # Ignore Homebrew errors.
+    - brew install wget cmake qt@5 || true  # Ignore Homebrew errors.
     # Install HDF5 from source.
     - mkdir build-hdf5 && cd build-hdf5/
     - wget -O hdf5.tar.gz https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/src/CMake-hdf5-1.14.0.tar.gz
