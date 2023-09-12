@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2017-2019, The University of Oxford
+# Copyright (c) 2017-2023, The OSKAR Developers.
 # All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -11,7 +11,7 @@
 #  2. Redistributions in binary form must reproduce the above copyright notice,
 #     this list of conditions and the following disclaimer in the documentation
 #     and/or other materials provided with the distribution.
-#  3. Neither the name of the University of Oxford nor the names of its
+#  3. Neither the name of the copyright holder nor the names of its
 #     contributors may be used to endorse or promote products derived from this
 #     software without specific prior written permission.
 #
@@ -36,60 +36,144 @@ import subprocess
 import sys
 
 
-def get_dependencies(file_name):
-    """Gets dylib dependencies and rpaths in a Mach-O file."""
-    # Define the Mach-O constants that we care about.
-    MH_MAGIC = 0xfeedface
-    MH_MAGIC_64 = 0xfeedfacf
-    LC_LOAD_DYLIB = 0xc
-    LC_RPATH = (0x1c | 0x80000000)
-    file_header = struct.Struct('=IiiIIII')
-    cmd_header = struct.Struct('=II')
+# Define the Mach-O constants that we care about.
+FAT_MAGIC = 0xcafebabe
+FAT_CIGAM = 0xbebafeca
+FAT_MAGIC_64 = 0xcafebabf
+FAT_CIGAM_64 = 0xbfbafeca
+MH_MAGIC = 0xfeedface
+MH_MAGIC_64 = 0xfeedfacf
+LC_REQ_DYLD = 0x80000000
+LC_LOAD_DYLIB = 0xc
+LC_RPATH = (0x1c | LC_REQ_DYLD)
 
-    # Open the file and try to read the Mach-O header.
-    if not os.path.exists(file_name) or os.path.islink(file_name):
+
+def merge_dicts(dict1, dict2):
+    """
+    Recursively merge two dictionaries.
+
+    The first is updated with the contents of the second.
+    Duplicates in lists are removed.
+    """
+    for key, value in dict1.items():
+        if key in dict2:
+            if type(value) is dict:
+                merge_dicts(dict1[key], dict2[key])
+            else:
+                if type(value) in (int, float, str):
+                    dict1[key] = [value]
+                if type(dict2[key]) is list:
+                    dict1[key].extend(dict2[key])
+                else:
+                    dict1[key].append(dict2[key])
+                dict1[key] = list(set(dict1[key]))
+    for key, value in dict2.items():
+        if key not in dict1:
+            dict1[key] = value
+
+
+def get_mach_dependencies(file_handle, magic):
+    """Gets dylib dependencies and rpaths in a Mach-O file section."""
+    mach_header = struct.Struct("=iiIIII")  # Without the magic number.
+    mach_header_64 = struct.Struct("=iiIIIII")  # Without the magic number.
+    load_command = struct.Struct("=II")
+    if magic == MH_MAGIC:
+        data = file_handle.read(mach_header.size)
+        (_, _, _, num_cmds, _, _) = mach_header.unpack(data)
+    elif magic == MH_MAGIC_64:
+        data = file_handle.read(mach_header_64.size)
+        (_, _, _, num_cmds, _, _) = mach_header_64.unpack(data)
+    else:
         return None
-    with open(file_name, 'rb') as file_handle:
-        data = file_handle.read(file_header.size)
+
+    # Iterate load commands, storing dylib and rpath entries.
+    deps = []
+    rpath = []
+    for _ in range(num_cmds):
+        # Read the load command header.
+        data = file_handle.read(load_command.size)
+        (cmd_type, cmd_size) = load_command.unpack(data)
+
+        # Read the load command payload.
+        data = file_handle.read(cmd_size - load_command.size)
+        # print(list('%2x'%b for b in data))
+
+        # Record non-system LC_LOAD_DYLIB and all LC_RPATH entries.
+        if cmd_type == LC_LOAD_DYLIB:
+            offset = struct.unpack_from("=I", data[0:4])[0]
+            path = data[(offset - load_command.size):]
+            path = path[:path.find(b'\x00')]
+            if path.startswith(b"/usr/lib") or \
+                    path.startswith(b"/System"):
+                continue
+            deps.append(path.decode("utf-8"))
+        elif cmd_type == LC_RPATH:
+            offset = struct.unpack_from("=I", data[0:4])[0]
+            path = data[(offset - load_command.size):]
+            path = path[:path.find(b"\x00")]
+            rpath.append(path.decode("utf-8"))
+    return {"deps": deps, "rpaths": rpath}
+
+
+def get_dependencies(file_name):
+    """Gets dylib dependencies and rpaths in a Mach-O file or fat binary."""
+    fat_arch = struct.Struct("=iiIII")
+    fat_arch_64 = struct.Struct("=iiQQII")
+    deps = {}
+
+    # Open the file.
+    if not os.path.exists(file_name) or os.path.islink(file_name):
+        return deps
+    with open(file_name, "rb") as file_handle:
+        # Try to read the magic number (always uint32_t).
+        data = file_handle.read(4)
         if not data:
-            return None
-        (magic, _, _, _, num_cmds, _, _) = file_header.unpack(data)
+            return deps
+        magic = struct.unpack_from("=I", data)[0]
 
         # Check the magic number.
-        if magic == MH_MAGIC:
-            pass
-        elif magic == MH_MAGIC_64:
-            data = file_handle.read(4)  # Read 4-byte padding.
-        else:
-            return None
+        # This may be either:
+        # FAT_MAGIC / FAT_MAGIC_64 if the file is a fat binary, or
+        # MH_MAGIC / MH_MAGIC_64 if the file is a straightforward Mach-O file.
+        if magic == FAT_MAGIC or magic == FAT_CIGAM:
+            data = file_handle.read(4)
+            num_arch = struct.unpack_from("=I", data)[0]
+            for _ in range(num_arch):
+                # Get the offset to the start of the Mach-O section.
+                data = file_handle.read(fat_arch.size)
+                (_, _, offset, _, _) = fat_arch.unpack(data)
 
-        # Iterate load commands, storing dylib and rpath entries.
-        deps = []
-        rpath = []
-        for _ in range(num_cmds):
-            # Read the load command header.
-            data = file_handle.read(cmd_header.size)
-            (cmd_type, cmd_size) = cmd_header.unpack(data)
+                # Read the Mach-O magic number.
+                file_handle.seek(offset)
+                data = file_handle.read(4)
+                magic = struct.unpack_from("=I", data)[0]
 
-            # Read the load command payload.
-            data = file_handle.read(cmd_size - cmd_header.size)
-            # print(list('%2x'%b for b in data))
+                # Get dependencies in this Mach-O section.
+                merge_dicts(
+                    deps, get_mach_dependencies(file_handle, magic)
+                )
 
-            # Record non-system LC_LOAD_DYLIB and all LC_RPATH entries.
-            if cmd_type == LC_LOAD_DYLIB:
-                offset = struct.unpack_from('=I', data[0:4])[0]
-                path = data[(offset - cmd_header.size):]
-                path = path[:path.find(b'\x00')]
-                if path.startswith(b'/usr/lib') or \
-                        path.startswith(b'/System'):
-                    continue
-                deps.append(path.decode('utf-8'))
-            elif cmd_type == LC_RPATH:
-                offset = struct.unpack_from('=I', data[0:4])[0]
-                path = data[(offset - cmd_header.size):]
-                path = path[:path.find(b'\x00')]
-                rpath.append(path.decode('utf-8'))
-        return {'deps': deps, 'rpaths': rpath}
+        elif magic == FAT_MAGIC_64 or magic == FAT_CIGAM_64:
+            data = file_handle.read(4)
+            num_arch = struct.unpack_from("=I", data)[0]
+            for _ in range(num_arch):
+                # Get the offset to the start of the Mach-O section.
+                data = file_handle.read(fat_arch_64.size)
+                (_, _, offset, _, _, _) = fat_arch_64.unpack(data)
+
+                # Read the Mach-O magic number.
+                file_handle.seek(offset)
+                data = file_handle.read(4)
+                magic = struct.unpack_from("=I", data)[0]
+
+                # Get dependencies in this Mach-O section.
+                merge_dicts(
+                    deps, get_mach_dependencies(file_handle, magic)
+                )
+
+        elif magic == MH_MAGIC or magic == MH_MAGIC_64:
+            deps = get_mach_dependencies(file_handle, magic)
+    return deps
 
 
 def get_copy_path(file_path):
@@ -134,7 +218,7 @@ def fixup(bundle_info, bundle_root, file_path, output_dir=None, depth=""):
     # Get dependencies of the item.
     if local_path not in bundle_info:
         bundle_info[local_path] = get_dependencies(file_path)
-    if bundle_info[local_path] is None:
+    if not bundle_info[local_path]:
         return
 
     # Iterate dependencies of the item.
