@@ -37,7 +37,10 @@ if (Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Network_FOUND)
     if (APPLE)
         add_executable(${target} ${gui_SRC})
         set_target_properties(${target}
-            PROPERTIES OUTPUT_NAME oskar OSX_ARCHITECTURES x86_64)
+            PROPERTIES
+            OUTPUT_NAME oskar
+            OSX_ARCHITECTURES ${CMAKE_HOST_SYSTEM_PROCESSOR}
+        )
     elseif (WIN32)
         set(gui_ICON icons/oskar.rc)
         add_executable(${target} WIN32 ${gui_ICON} ${gui_SRC})
