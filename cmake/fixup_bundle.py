@@ -55,6 +55,8 @@ def merge_dicts(dict1, dict2):
     The first is updated with the contents of the second.
     Duplicates in lists are removed.
     """
+    if not dict2:
+        return
     for key, value in dict1.items():
         if key in dict2:
             if type(value) is dict:
@@ -82,7 +84,7 @@ def get_mach_dependencies(file_handle, magic):
         (_, _, _, num_cmds, _, _) = mach_header.unpack(data)
     elif magic == MH_MAGIC_64:
         data = file_handle.read(mach_header_64.size)
-        (_, _, _, num_cmds, _, _) = mach_header_64.unpack(data)
+        (_, _, _, num_cmds, _, _, _) = mach_header_64.unpack(data)
     else:
         return None
 
@@ -117,8 +119,8 @@ def get_mach_dependencies(file_handle, magic):
 
 def get_dependencies(file_name):
     """Gets dylib dependencies and rpaths in a Mach-O file or fat binary."""
-    fat_arch = struct.Struct("=iiIII")
-    fat_arch_64 = struct.Struct("=iiQQII")
+    fat_arch = struct.Struct(">iiIII")  # Big-endian.
+    fat_arch_64 = struct.Struct(">iiQQII")  # Big-endian.
     deps = {}
 
     # Open the file.
@@ -137,7 +139,7 @@ def get_dependencies(file_name):
         # MH_MAGIC / MH_MAGIC_64 if the file is a straightforward Mach-O file.
         if magic == FAT_MAGIC or magic == FAT_CIGAM:
             data = file_handle.read(4)
-            num_arch = struct.unpack_from("=I", data)[0]
+            num_arch = struct.unpack_from(">I", data)[0]  # Big-endian.
             for _ in range(num_arch):
                 # Get the offset to the start of the Mach-O section.
                 data = file_handle.read(fat_arch.size)
@@ -155,7 +157,7 @@ def get_dependencies(file_name):
 
         elif magic == FAT_MAGIC_64 or magic == FAT_CIGAM_64:
             data = file_handle.read(4)
-            num_arch = struct.unpack_from("=I", data)[0]
+            num_arch = struct.unpack_from(">I", data)[0]  # Big-endian.
             for _ in range(num_arch):
                 # Get the offset to the start of the Mach-O section.
                 data = file_handle.read(fat_arch_64.size)
