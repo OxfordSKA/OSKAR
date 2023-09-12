@@ -131,9 +131,8 @@ mac-release:
     - export MACOSX_DEPLOYMENT_TARGET="10.13"
     - export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
     # Install CMake and Qt 5 from Homebrew.
-    - brew update
     - brew install wget
-    - arch -x86_64 brew update
+    - arch -x86_64 NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     - arch -x86_64 brew install cmake pcre2 qt@5 || true  # Ignore Homebrew errors.
     # Install HDF5 from source.
     - mkdir build-hdf5 && cd build-hdf5/
@@ -188,7 +187,7 @@ mac-release:
     - mkdir build-mac && cd build-mac/
     - arch -x86_64 cmake ../
       -DFIND_OPENCL=ON
-      -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5/;$HOME/local"
+      -DCMAKE_PREFIX_PATH="/usr/local/opt/qt5/;$HOME/local"
       -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
     - make -j4
   script:
