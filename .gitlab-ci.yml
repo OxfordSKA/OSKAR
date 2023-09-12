@@ -132,7 +132,7 @@ mac-release:
     - export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
     # Install CMake and Qt 5 from Homebrew.
     - brew install wget
-    - arch -x86_64 NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    - NONINTERACTIVE=1 arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     - arch -x86_64 brew install cmake pcre2 qt@5 || true  # Ignore Homebrew errors.
     # Install HDF5 from source.
     - mkdir build-hdf5 && cd build-hdf5/
