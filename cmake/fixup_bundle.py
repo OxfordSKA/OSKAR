@@ -45,6 +45,7 @@ MH_MAGIC = 0xfeedface
 MH_MAGIC_64 = 0xfeedfacf
 LC_REQ_DYLD = 0x80000000
 LC_LOAD_DYLIB = 0xc
+LC_ID_DYLIB = 0xd
 LC_RPATH = (0x1c | LC_REQ_DYLD)
 
 
@@ -75,7 +76,7 @@ def merge_dicts(dict1, dict2):
 
 
 def get_mach_dependencies(file_handle, magic):
-    """Gets dylib dependencies and rpaths in a Mach-O file section."""
+    """Gets dylib ID, dependencies and rpaths in a Mach-O file section."""
     mach_header = struct.Struct("=iiIIII")  # Without the magic number.
     mach_header_64 = struct.Struct("=iiIIIII")  # Without the magic number.
     load_command = struct.Struct("=II")
@@ -91,6 +92,7 @@ def get_mach_dependencies(file_handle, magic):
     # Iterate load commands, storing dylib and rpath entries.
     deps = []
     rpath = []
+    id = ""
     for _ in range(num_cmds):
         # Read the load command header.
         data = file_handle.read(load_command.size)
@@ -100,7 +102,7 @@ def get_mach_dependencies(file_handle, magic):
         data = file_handle.read(cmd_size - load_command.size)
         # print(list('%2x'%b for b in data))
 
-        # Record non-system LC_LOAD_DYLIB and all LC_RPATH entries.
+        # Record non-system LC_LOAD_DYLIB, LC_ID_DYLIB and all LC_RPATH entries.
         if cmd_type == LC_LOAD_DYLIB:
             offset = struct.unpack_from("=I", data[0:4])[0]
             path = data[(offset - load_command.size):]
@@ -109,12 +111,20 @@ def get_mach_dependencies(file_handle, magic):
                     path.startswith(b"/System"):
                 continue
             deps.append(path.decode("utf-8"))
+        elif cmd_type == LC_ID_DYLIB:
+            offset = struct.unpack_from("=I", data[0:4])[0]
+            path = data[(offset - load_command.size):]
+            path = path[:path.find(b'\x00')]
+            if path.startswith(b"/usr/lib") or \
+                    path.startswith(b"/System"):
+                continue
+            id = path.decode("utf-8")
         elif cmd_type == LC_RPATH:
             offset = struct.unpack_from("=I", data[0:4])[0]
             path = data[(offset - load_command.size):]
             path = path[:path.find(b"\x00")]
             rpath.append(path.decode("utf-8"))
-    return {"deps": deps, "rpaths": rpath}
+    return {"deps": deps, "rpaths": rpath, "id": id}
 
 
 def get_dependencies(file_name):
@@ -217,11 +227,20 @@ def fixup(bundle_info, bundle_root, file_path, output_dir=None, depth=""):
             os.chmod(local_path,
                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
-    # Get dependencies of the item.
+    # Get ID and dependencies of the item.
     if local_path not in bundle_info:
         bundle_info[local_path] = get_dependencies(file_path)
     if not bundle_info[local_path]:
         return
+
+    # Check if item ID needs updating.
+    current_id = bundle_info[local_path]['id']
+    if not current_id.startswith('@rpath'):
+        new_name = current_id.replace(os.path.dirname(current_id), '@rpath')
+        bundle_info[local_path]['id'] = new_name
+        print(depth + "In %s, changing ID from %s to %s" %
+                (os.path.basename(local_path), current_id, new_name))
+        subprocess.call(['install_name_tool', '-id', new_name, local_path])
 
     # Iterate dependencies of the item.
     loader_path = os.path.dirname(file_path)
