@@ -135,7 +135,8 @@ mac-release:
     - NONINTERACTIVE=1 arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     - (echo; echo 'eval "$(/usr/local/bin/brew shellenv)"') >> $HOME/.zprofile
     - eval "$(/usr/local/bin/brew shellenv)"
-    - arch -x86_64 brew install --build-from-source libpng  # Needed by Qt.
+    # Install Qt dependencies from source.
+    - arch -x86_64 brew install --build-from-source libpng freetype gettext glib jpeg-turbo giflib xz lz4 zstd libtiff webp
     - arch -x86_64 brew install cmake pcre2 qt@5 || true  # Ignore Homebrew errors.
     # Install HDF5 from source.
     - mkdir build-hdf5 && cd build-hdf5/
