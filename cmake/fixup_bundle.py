@@ -235,7 +235,7 @@ def fixup(bundle_info, bundle_root, file_path, output_dir=None, depth=""):
 
     # Check if item ID needs updating.
     current_id = bundle_info[local_path]['id']
-    if not current_id.startswith('@rpath'):
+    if current_id and not current_id.startswith('@rpath'):
         new_name = current_id.replace(os.path.dirname(current_id), '@rpath')
         bundle_info[local_path]['id'] = new_name
         print(depth + "In %s, changing ID from %s to %s" %
