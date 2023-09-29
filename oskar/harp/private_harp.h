@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, The OSKAR Developers.
+ * Copyright (c) 2022-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -18,7 +18,8 @@ struct oskar_Harp
     double freq;
     oskar_HDF5* hdf5_file;
     oskar_Mem *alpha_te, *alpha_tm;
-    oskar_Mem *coeffs_pola, *coeffs_polb;
+    oskar_Mem *coeffs[2];
+    oskar_Mem *coeffs_reordered[2];
 };
 
 #ifndef OSKAR_HARP_TYPEDEF_

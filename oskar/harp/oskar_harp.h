@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, The OSKAR Developers.
+ * Copyright (c) 2022-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -28,9 +28,6 @@ oskar_Harp* oskar_harp_create(int precision);
 
 OSKAR_EXPORT
 oskar_Harp* oskar_harp_create_copy(const oskar_Harp* other, int* status);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_harp_coeffs(const oskar_Harp* h, int feed);
 
 OSKAR_EXPORT
 void oskar_harp_evaluate_smodes(
@@ -68,29 +65,8 @@ void oskar_harp_evaluate_station_beam(
         int* status);
 
 OSKAR_EXPORT
-void oskar_harp_evaluate_element_beam(
-        const oskar_Harp* h,
-        int num_dir,
-        const oskar_Mem* theta,
-        const oskar_Mem* phi,
-        double frequency_hz,
-        int feed,
-        int i_antenna,
-        int num_antennas,
-        const oskar_Mem* antenna_x,
-        const oskar_Mem* antenna_y,
-        const oskar_Mem* antenna_z,
-        const oskar_Mem* coeffs,
-        const oskar_Mem* pth,
-        const oskar_Mem* pph,
-        oskar_Mem* phase_fac,
-        int offset_out,
-        oskar_Mem* beam,
-        int* status);
-
-OSKAR_EXPORT
 void oskar_harp_evaluate_element_beams(
-        const oskar_Harp* h,
+        oskar_Harp* h,
         int num_dir,
         const oskar_Mem* theta,
         const oskar_Mem* phi,
@@ -100,7 +76,6 @@ void oskar_harp_evaluate_element_beams(
         const oskar_Mem* antenna_x,
         const oskar_Mem* antenna_y,
         const oskar_Mem* antenna_z,
-        const oskar_Mem* coeffs,
         const oskar_Mem* pth,
         const oskar_Mem* pph,
         oskar_Mem* phase_fac,
@@ -113,6 +88,9 @@ void oskar_harp_free(oskar_Harp* h);
 
 OSKAR_EXPORT
 void oskar_harp_open_hdf5(oskar_Harp* h, const char* path, int* status);
+
+OSKAR_EXPORT
+void oskar_harp_reorder_coeffs(oskar_Harp* h, int feed, int* status);
 
 #ifdef __cplusplus
 }

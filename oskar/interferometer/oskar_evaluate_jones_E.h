@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -51,7 +51,7 @@ void oskar_evaluate_jones_E(
         const oskar_Mem* const source_coords[3],
         double ref_lon_rad,
         double ref_lat_rad,
-        const oskar_Telescope* tel,
+        oskar_Telescope* tel,
         int time_index,
         double gast_rad,
         double frequency_hz,

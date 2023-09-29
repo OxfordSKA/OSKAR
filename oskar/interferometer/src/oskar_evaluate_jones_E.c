@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -19,13 +19,13 @@ extern "C" {
 #endif
 
 static void oskar_evaluate_element_beams_harp(
-        const oskar_Harp* harp_data,
+        oskar_Harp* harp_data,
         int coord_type,
         int num_points,
         const oskar_Mem* const source_coords[3],
         double ref_lon_rad,
         double ref_lat_rad,
-        const oskar_Telescope* tel,
+        oskar_Telescope* tel,
         double gast_rad,
         double frequency_hz,
         oskar_StationWork* work,
@@ -61,14 +61,6 @@ static void oskar_evaluate_element_beams_harp(
             work->poly, work->ee, work->qq, work->dd,
             work->pth, work->pph, status);
 
-    /* Copy coefficients to device. */
-    const int dev_loc = oskar_telescope_mem_location(tel);
-    oskar_Mem* coeffs[] = {0, 0};
-    coeffs[0] = oskar_mem_create_copy(
-            oskar_harp_coeffs(harp_data, 0), dev_loc, status);
-    coeffs[1] = oskar_mem_create_copy(
-            oskar_harp_coeffs(harp_data, 1), dev_loc, status);
-
     /* Evaluate all the element beams. */
     const int num_stations = oskar_telescope_num_stations(tel);
     for (feed = 0; feed < 2; ++feed)
@@ -79,11 +71,9 @@ static void oskar_evaluate_element_beams_harp(
                 oskar_telescope_station_true_enu_metres_const(tel, 0),
                 oskar_telescope_station_true_enu_metres_const(tel, 1),
                 oskar_telescope_station_true_enu_metres_const(tel, 2),
-                coeffs[feed], work->pth, work->pph, work->phase_fac,
+                work->pth, work->pph, work->phase_fac,
                 0, beam, status);
     }
-    oskar_mem_free(coeffs[0], status);
-    oskar_mem_free(coeffs[1], status);
     for (i_station = 0; i_station < num_stations; ++i_station)
     {
         const int offset_out = i_station * num_points;
@@ -103,7 +93,7 @@ void oskar_evaluate_jones_E(
         const oskar_Mem* const source_coords[3],
         double ref_lon_rad,
         double ref_lat_rad,
-        const oskar_Telescope* tel,
+        oskar_Telescope* tel,
         int time_index,
         double gast_rad,
         double frequency_hz,
@@ -126,8 +116,7 @@ void oskar_evaluate_jones_E(
     }
 
     /* Check if HARP data exist. */
-    const oskar_Harp* harp_data = oskar_telescope_harp_data_const(
-            tel, frequency_hz);
+    oskar_Harp* harp_data = oskar_telescope_harp_data(tel, frequency_hz);
     if (harp_data)
     {
         oskar_evaluate_element_beams_harp(harp_data, coord_type, num_points,

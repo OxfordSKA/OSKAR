@@ -319,8 +319,7 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
     const oskar_Mem* const source_coords[] = {d->x, d->y, d->z};
 
     /* Check if HARP data exist. */
-    const oskar_Harp* harp_data = oskar_telescope_harp_data_const(
-            d->tel, freq_hz);
+    oskar_Harp* harp_data = oskar_telescope_harp_data(d->tel, freq_hz);
     if (harp_data)
     {
         int dim = 0, feed = 0, i_station = 0;
@@ -353,13 +352,6 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
                 work->poly, work->ee, work->qq, work->dd,
                 work->pth, work->pph, status);
 
-        /* Copy coefficients to device. */
-        oskar_Mem* coeffs[] = {0, 0};
-        coeffs[0] = oskar_mem_create_copy(
-                oskar_harp_coeffs(harp_data, 0), h->dev_loc, status);
-        coeffs[1] = oskar_mem_create_copy(
-                oskar_harp_coeffs(harp_data, 1), h->dev_loc, status);
-
         /* Evaluate all the element beams into a temporary array. */
         const int num_stations = oskar_telescope_num_stations(d->tel);
         oskar_mem_ensure(d->jones_temp,
@@ -372,11 +364,9 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
                     oskar_telescope_station_true_enu_metres_const(d->tel, 0),
                     oskar_telescope_station_true_enu_metres_const(d->tel, 1),
                     oskar_telescope_station_true_enu_metres_const(d->tel, 2),
-                    coeffs[feed], work->pth, work->pph, work->phase_fac,
+                    work->pth, work->pph, work->phase_fac,
                     0, d->jones_temp, status);
         }
-        oskar_mem_free(coeffs[0], status);
-        oskar_mem_free(coeffs[1], status);
         for (i_station = 0; i_station < num_stations; ++i_station)
         {
             const int offset_out = i_station * chunk_size;
