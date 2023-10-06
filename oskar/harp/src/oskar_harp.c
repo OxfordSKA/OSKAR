@@ -109,6 +109,28 @@ void oskar_harp_evaluate_smodes(
                     oskar_mem_double2(pth, status),
                     oskar_mem_double2(pph, status));
         }
+        else if (precision == OSKAR_SINGLE)
+        {
+            harp_precompute_smodes_mbf_float(
+                    h->max_order,
+                    num_dir,
+                    oskar_mem_float_const(theta, status),
+                    oskar_mem_float_const(phi, status),
+                    oskar_mem_float(poly, status),
+                    oskar_mem_float2(ee, status),
+                    oskar_mem_float2(qq, status),
+                    oskar_mem_float2(dd, status));
+            harp_reconstruct_smodes_mbf_float(
+                    h->max_order,
+                    num_dir,
+                    h->num_mbf,
+                    oskar_mem_float2_const(ptr_te, status),
+                    oskar_mem_float2_const(ptr_tm, status),
+                    oskar_mem_float2_const(qq, status),
+                    oskar_mem_float2_const(dd, status),
+                    oskar_mem_float2(pth, status),
+                    oskar_mem_float2(pph, status));
+        }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -138,6 +160,28 @@ void oskar_harp_evaluate_smodes(
                     oskar_mem_double2_const(dd, status),
                     oskar_mem_double2(pth, status),
                     oskar_mem_double2(pph, status));
+        }
+        else if (precision == OSKAR_SINGLE)
+        {
+            harp_precompute_smodes_mbf_cuda_float(
+                    h->max_order,
+                    num_dir,
+                    oskar_mem_float_const(theta, status),
+                    oskar_mem_float_const(phi, status),
+                    oskar_mem_float(poly, status),
+                    oskar_mem_float2(ee, status),
+                    oskar_mem_float2(qq, status),
+                    oskar_mem_float2(dd, status));
+            harp_reconstruct_smodes_mbf_cuda_float(
+                    h->max_order,
+                    num_dir,
+                    h->num_mbf,
+                    oskar_mem_float2_const(ptr_te, status),
+                    oskar_mem_float2_const(ptr_tm, status),
+                    oskar_mem_float2_const(qq, status),
+                    oskar_mem_float2_const(dd, status),
+                    oskar_mem_float2(pth, status),
+                    oskar_mem_float2(pph, status));
         }
         else
         {
@@ -231,6 +275,38 @@ void oskar_harp_evaluate_station_beam(
                     oskar_mem_double2(beam, status),
                     oskar_mem_double2(beam, status));
         }
+        else if (precision == OSKAR_SINGLE)
+        {
+            harp_evaluate_beam_coeffs_float(
+                    h->num_mbf,
+                    num_antennas,
+                    oskar_mem_float2_const(weights, status),
+                    oskar_mem_float2_const(h->coeffs[feed], status),
+                    oskar_mem_float2(beam_coeffs, status));
+            harp_evaluate_phase_fac_float(
+                    num_dir,
+                    num_antennas,
+                    frequency_hz,
+                    oskar_mem_float_const(theta, status),
+                    oskar_mem_float_const(phi, status),
+                    oskar_mem_float_const(antenna_x, status),
+                    oskar_mem_float_const(antenna_y, status),
+                    oskar_mem_float_const(antenna_z, status),
+                    oskar_mem_float2(phase_fac, status));
+            harp_assemble_station_beam_float(
+                    h->num_mbf,
+                    num_antennas,
+                    num_dir,
+                    oskar_mem_float2_const(beam_coeffs, status),
+                    oskar_mem_float2_const(pth, status),
+                    oskar_mem_float2_const(pph, status),
+                    oskar_mem_float2_const(phase_fac, status),
+                    stride,
+                    offset_out_cplx,
+                    offset_out_cplx + 1,
+                    oskar_mem_float2(beam, status),
+                    oskar_mem_float2(beam, status));
+        }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -273,6 +349,38 @@ void oskar_harp_evaluate_station_beam(
                     offset_out_cplx + 1,
                     oskar_mem_double2(beam, status),
                     oskar_mem_double2(beam, status));
+        }
+        else if (precision == OSKAR_SINGLE)
+        {
+            harp_evaluate_beam_coeffs_cuda_float(
+                    h->num_mbf,
+                    num_antennas,
+                    oskar_mem_float2_const(weights, status),
+                    oskar_mem_float2_const(gpu_coeffs, status),
+                    oskar_mem_float2(beam_coeffs, status));
+            harp_evaluate_phase_fac_cuda_float(
+                    num_dir,
+                    num_antennas,
+                    frequency_hz,
+                    oskar_mem_float_const(theta, status),
+                    oskar_mem_float_const(phi, status),
+                    oskar_mem_float_const(antenna_x, status),
+                    oskar_mem_float_const(antenna_y, status),
+                    oskar_mem_float_const(antenna_z, status),
+                    oskar_mem_float2(phase_fac, status));
+            harp_assemble_station_beam_cuda_float(
+                    h->num_mbf,
+                    num_antennas,
+                    num_dir,
+                    oskar_mem_float2_const(beam_coeffs, status),
+                    oskar_mem_float2_const(pth, status),
+                    oskar_mem_float2_const(pph, status),
+                    oskar_mem_float2_const(phase_fac, status),
+                    stride,
+                    offset_out_cplx,
+                    offset_out_cplx + 1,
+                    oskar_mem_float2(beam, status),
+                    oskar_mem_float2(beam, status));
         }
         else
         {
@@ -363,6 +471,32 @@ void oskar_harp_evaluate_element_beams(
                     oskar_mem_double2(beam, status),
                     oskar_mem_double2(beam, status));
         }
+        else if (precision == OSKAR_SINGLE)
+        {
+            harp_evaluate_phase_fac_float(
+                    num_dir,
+                    num_antennas,
+                    frequency_hz,
+                    oskar_mem_float_const(theta, status),
+                    oskar_mem_float_const(phi, status),
+                    oskar_mem_float_const(antenna_x, status),
+                    oskar_mem_float_const(antenna_y, status),
+                    oskar_mem_float_const(antenna_z, status),
+                    oskar_mem_float2(phase_fac, status));
+            harp_assemble_element_beams_float(
+                    h->num_mbf,
+                    num_antennas,
+                    num_dir,
+                    oskar_mem_float2_const(h->coeffs[feed], status),
+                    oskar_mem_float2_const(pth, status),
+                    oskar_mem_float2_const(pph, status),
+                    oskar_mem_float2_const(phase_fac, status),
+                    stride,
+                    offset_out_cplx,
+                    offset_out_cplx + 1,
+                    oskar_mem_float2(beam, status),
+                    oskar_mem_float2(beam, status));
+        }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -400,6 +534,32 @@ void oskar_harp_evaluate_element_beams(
                     offset_out_cplx + 1,
                     oskar_mem_double2(beam, status),
                     oskar_mem_double2(beam, status));
+        }
+        else if (precision == OSKAR_SINGLE)
+        {
+            harp_evaluate_phase_fac_cuda_float(
+                    num_dir,
+                    num_antennas,
+                    frequency_hz,
+                    oskar_mem_float_const(theta, status),
+                    oskar_mem_float_const(phi, status),
+                    oskar_mem_float_const(antenna_x, status),
+                    oskar_mem_float_const(antenna_y, status),
+                    oskar_mem_float_const(antenna_z, status),
+                    oskar_mem_float2(phase_fac, status));
+            harp_assemble_element_beams_cuda_float(
+                    h->num_mbf,
+                    num_antennas,
+                    num_dir,
+                    oskar_mem_float2_const(gpu_coeffs, status),
+                    oskar_mem_float2_const(pth, status),
+                    oskar_mem_float2_const(pph, status),
+                    oskar_mem_float2_const(phase_fac, status),
+                    stride,
+                    offset_out_cplx,
+                    offset_out_cplx + 1,
+                    oskar_mem_float2(beam, status),
+                    oskar_mem_float2(beam, status));
         }
         else
         {
