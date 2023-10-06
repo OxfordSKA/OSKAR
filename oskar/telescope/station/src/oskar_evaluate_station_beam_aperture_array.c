@@ -9,6 +9,7 @@
 #include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
 #include "telescope/station/oskar_station_evaluate_element_weights.h"
 #include "telescope/station/element/oskar_element_evaluate.h"
+#include "telescope/station/element/oskar_rotate_virtual_antenna.h"
 #include "telescope/station/oskar_blank_below_horizon.h"
 #include "telescope/station/private_station_work.h"
 
