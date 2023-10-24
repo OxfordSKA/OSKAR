@@ -118,10 +118,26 @@ const oskar_Mem* oskar_station_noise_rms_jy_const(const oskar_Station* model);
 /* Data used only for Gaussian beam stations. */
 
 OSKAR_EXPORT
-double oskar_station_gaussian_beam_fwhm_rad(const oskar_Station* model);
+double oskar_station_gaussian_beam_fwhm_rad(
+        const oskar_Station* model, int feed, int dim
+);
 
 OSKAR_EXPORT
 double oskar_station_gaussian_beam_reference_freq_hz(const oskar_Station* model);
+
+OSKAR_EXPORT
+double oskar_station_gaussian_beam_sincos_sq_pa(
+        const oskar_Station* model, int feed, int dim
+);
+
+OSKAR_EXPORT
+double oskar_station_gaussian_beam_sin_2_pa(
+        const oskar_Station* model, int feed
+);
+
+OSKAR_EXPORT
+int oskar_station_gaussian_beam_use_ellipse(const oskar_Station* model);
+
 
 /* Data used only for aperture array stations. */
 
@@ -396,18 +412,25 @@ void oskar_station_set_phase_centre(oskar_Station* model,
 
 /**
  * @brief
- * Sets the parameters of the Gaussian beam used for Gaussian beam stations.
+ * Sets the parameters of the Gaussian station beam.
  *
  * @details
- * Sets the parameters of the Gaussian beam used for Gaussian beam stations.
+ * Sets the parameters of the Gaussian station beam.
  *
- * @param[in] model       Pointer to station model.
- * @param[in] fwhm_rad    Full-width-half-maximum of the Gaussian beam, in radians.
- * @param[in] ref_freq_hz Reference frequency at which FWHM applies, in Hz.
+ * @param[in] model        Pointer to station model.
+ * @param[in] fwhm_maj_rad Full-width-half-maximum of the
+ *                         Gaussian beam major axis, in radians.
+ * @param[in] fwhm_min_rad Full-width-half-maximum of the Gaussian beam
+ *                         minor axis, in radians.
+ * @param[in] pa_rad       Position angle of the Gaussian beam
+ *                         major axis, in radians.
+ * @param[in] ref_freq_hz  Reference frequency at which FWHM applies, in Hz.
+ * @param[in] feed         Feed index for which values apply.
  */
 OSKAR_EXPORT
 void oskar_station_set_gaussian_beam_values(oskar_Station* model,
-        double fwhm_rad, double ref_freq_hz);
+        double fwhm_maj_rad, double fwhm_min_rad, double pa_rad,
+        double ref_freq_hz, int feed);
 
 /**
  * @brief

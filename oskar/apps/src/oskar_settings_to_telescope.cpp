@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -69,9 +69,32 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     /* Set remaining options after the stations have been defined. */
     oskar_telescope_set_station_type(t,
             s->to_string("telescope/station_type", status), status);
-    oskar_telescope_set_gaussian_station_beam_width(t,
-            s->to_double("telescope/gaussian_beam/fwhm_deg", status),
-            s->to_double("telescope/gaussian_beam/ref_freq_hz", status));
+
+    /* Gaussian beam parameters. */
+    s->begin_group("telescope/gaussian_beam");
+    const int use_ellipse = s->to_int("elliptical", status);
+    if (use_ellipse)
+    {
+        const char* k_fwhm_maj[] = {"x_fwhm_major_deg", "y_fwhm_major_deg"};
+        const char* k_fwhm_min[] = {"x_fwhm_minor_deg", "y_fwhm_minor_deg"};
+        const char* k_pa[] = {"x_angle_deg", "y_angle_deg"};
+        for (int feed = 0; feed < 2; feed++)
+        {
+            oskar_telescope_set_gaussian_station_beam_values(t,
+                    s->to_double(k_fwhm_maj[feed], status),
+                    s->to_double(k_fwhm_min[feed], status),
+                    s->to_double(k_pa[feed], status),
+                    s->to_double("ref_freq_hz", status), feed);
+        }
+    }
+    else
+    {
+        oskar_telescope_set_gaussian_station_beam_values(t,
+                s->to_double("fwhm_deg", status), 0.0, 0.0,
+                s->to_double("ref_freq_hz", status), 0);
+    }
+    s->clear_group();
+
     if (s->contains("observation"))
     {
         if (s->starts_with("observation/mode", "Drift", status))

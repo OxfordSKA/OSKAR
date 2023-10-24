@@ -72,8 +72,20 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     dst->virtual_antenna_angle_rad = src->virtual_antenna_angle_rad;
 
     /* Copy Gaussian station beam data. */
-    dst->gaussian_beam_fwhm_rad = src->gaussian_beam_fwhm_rad;
+    dst->gaussian_beam_use_ellipse = src->gaussian_beam_use_ellipse;
     dst->gaussian_beam_reference_freq_hz = src->gaussian_beam_reference_freq_hz;
+    for (feed = 0; feed < 2; feed++)
+    {
+        for (dim = 0; dim < 2; dim++)
+        {
+            dst->gaussian_beam_fwhm_rad[feed][dim] =
+                    src->gaussian_beam_fwhm_rad[feed][dim];
+            dst->gaussian_beam_sincos_sq_pa[feed][dim] =
+                    src->gaussian_beam_sincos_sq_pa[feed][dim];
+        }
+        dst->gaussian_beam_sin_2_pa[feed] =
+                src->gaussian_beam_sin_2_pa[feed];
+    }
 
     /* Copy arrays. */
     for (feed = 0; feed < 2; feed++)

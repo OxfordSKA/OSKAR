@@ -314,30 +314,37 @@ void oskar_telescope_set_enable_numerical_patterns(oskar_Telescope* model,
     model->enable_numerical_patterns = value;
 }
 
-static void oskar_telescope_set_gaussian_station_beam_p(oskar_Station* station,
-        double fwhm_rad, double ref_freq_hz)
+static void oskar_telescope_set_gaussian_station_beam_values_p(
+        oskar_Station* station,
+        double fwhm_maj_rad, double fwhm_min_rad, double pa_rad,
+        double ref_freq_hz, int feed)
 {
-    oskar_station_set_gaussian_beam_values(station, fwhm_rad, ref_freq_hz);
+    oskar_station_set_gaussian_beam_values(station,
+            fwhm_maj_rad, fwhm_min_rad, pa_rad, ref_freq_hz, feed);
     if (oskar_station_has_child(station))
     {
         int i = 0;
         const int num_elements = oskar_station_num_elements(station);
         for (i = 0; i < num_elements; ++i)
         {
-            oskar_telescope_set_gaussian_station_beam_p(
-                    oskar_station_child(station, i), fwhm_rad, ref_freq_hz);
+            oskar_telescope_set_gaussian_station_beam_values_p(
+                    oskar_station_child(station, i),
+                    fwhm_maj_rad, fwhm_min_rad, pa_rad, ref_freq_hz, feed);
         }
     }
 }
 
-void oskar_telescope_set_gaussian_station_beam_width(oskar_Telescope* model,
-        double fwhm_deg, double ref_freq_hz)
+void oskar_telescope_set_gaussian_station_beam_values(oskar_Telescope* model,
+        double fwhm_maj_deg, double fwhm_min_deg, double pa_deg,
+        double ref_freq_hz, int feed)
 {
+    static const double d2r = M_PI / 180.0;
     int i = 0;
     for (i = 0; i < model->num_station_models; ++i)
     {
-        oskar_telescope_set_gaussian_station_beam_p(model->station[i],
-                fwhm_deg * M_PI / 180.0, ref_freq_hz);
+        oskar_telescope_set_gaussian_station_beam_values_p(model->station[i],
+                fwhm_maj_deg * d2r, fwhm_min_deg * d2r, pa_deg * d2r,
+                ref_freq_hz, feed);
     }
 }
 

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="gaussian_beam"><label>Gaussian station beam settings</label>
+    <depends k="telescope/station_type" v="Gaussian beam" />
+    <s k="elliptical">
+        <label>Use elliptical Gaussians</label>
+        <type name="bool" default="false" />
+        <desc>If set, elliptical Gaussians are used to model station beams.
+        </desc></s>
+    <s k="ref_freq_hz"><label>Reference frequency [Hz]</label>
+        <type name="double" default="0.0" />
+        <desc>The reference frequency of the specified FWHM, in Hz.</desc></s>
+    <s k="fwhm_deg"><label>Gaussian FWHM [deg]</label>
+        <depends k="telescope/gaussian_beam/elliptical" v="false" />
+        <type name="double" default="0.0" />
+        <desc>For stations using a simple Gaussian beam, this is the
+            full-width half maximum of the Gaussian station beam at the
+            reference frequency, in degrees.</desc></s>
+    <s k="x_fwhm_major_deg"><label>X Gaussian FWHM major axis [deg]</label>
+        <depends k="telescope/gaussian_beam/elliptical" v="true" />
+        <type name="double" default="0.0" />
+        <desc>The full-width half maximum of the X-polarised Gaussian station
+            beam major axis at the reference frequency, in degrees.</desc></s>
+    <s k="x_fwhm_minor_deg"><label>X Gaussian FWHM minor axis [deg]</label>
+        <depends k="telescope/gaussian_beam/elliptical" v="true" />
+        <type name="double" default="0.0" />
+        <desc>The full-width half maximum of the X-polarised Gaussian station
+            beam minor axis at the reference frequency, in degrees.</desc></s>
+    <s k="x_angle_deg"><label>X Gaussian position angle [deg]</label>
+        <depends k="telescope/gaussian_beam/elliptical" v="true" />
+        <type name="double" default="0.0" />
+        <desc>The position angle of the X-polarised Gaussian station beam
+            major axis at the reference frequency, in degrees.</desc></s>
+    <s k="y_fwhm_major_deg"><label>Y Gaussian FWHM major axis [deg]</label>
+        <depends k="telescope/gaussian_beam/elliptical" v="true" />
+        <type name="double" default="0.0" />
+        <desc>The full-width half maximum of the Y-polarised Gaussian station
+            beam major axis at the reference frequency, in degrees.</desc></s>
+    <s k="y_fwhm_minor_deg"><label>Y Gaussian FWHM minor axis [deg]</label>
+        <depends k="telescope/gaussian_beam/elliptical" v="true" />
+        <type name="double" default="0.0" />
+        <desc>The full-width half maximum of the Y-polarised Gaussian station
+            beam minor axis at the reference frequency, in degrees.</desc></s>
+    <s k="y_angle_deg"><label>Y Gaussian position angle [deg]</label>
+        <depends k="telescope/gaussian_beam/elliptical" v="true" />
+        <type name="double" default="0.0" />
+        <desc>The position angle of the Y-polarised Gaussian station beam
+            major axis at the reference frequency, in degrees.</desc></s>
+</s>

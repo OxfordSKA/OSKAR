@@ -1,12 +1,14 @@
 /*
- * Copyright (c) 2013-2022, The OSKAR Developers.
+ * Copyright (c) 2013-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
+#include "math/oskar_gaussian_circular.h"
+#include "math/oskar_gaussian_ellipse.h"
 #include "telescope/station/private_station_work.h"
 #include "telescope/station/oskar_station.h"
+#include "telescope/station/oskar_blank_below_horizon.h"
 #include "telescope/station/oskar_evaluate_station_beam_aperture_array.h"
-#include "telescope/station/oskar_evaluate_station_beam_gaussian.h"
 #include "telescope/station/oskar_evaluate_vla_beam_pbcor.h"
 #include "convert/oskar_convert_any_to_enu_directions.h"
 #include "convert/oskar_convert_enu_directions_to_local_tangent_plane.h"
@@ -14,9 +16,21 @@
 
 #include <math.h>
 
+#define M_4_LN_2 2.7725887222397812376689284858327
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+static void oskar_station_beam_gaussian(
+        const oskar_Station* station,
+        int num_points,
+        const oskar_Mem* l,
+        const oskar_Mem* m,
+        double frequency_hz,
+        oskar_Mem* out,
+        int* status
+);
 
 void oskar_station_beam(
         const oskar_Station* station,
@@ -132,8 +146,6 @@ void oskar_station_beam(
     }
     else
     {
-        double fwhm_rad = 0.0;
-
         /* Convert source ENU coordinates to local tangent plane,
          * relative to station beam direction. */
         oskar_convert_enu_directions_to_local_tangent_plane(num_points,
@@ -144,11 +156,8 @@ void oskar_station_beam(
         switch (station_type)
         {
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
-            fwhm_rad = oskar_station_gaussian_beam_fwhm_rad(station) * (
-                    oskar_station_gaussian_beam_reference_freq_hz(station) /
-                    frequency_hz);
-            oskar_evaluate_station_beam_gaussian(num_points,
-                    lmn[0], lmn[1], enu[2], fwhm_rad, out, status);
+            oskar_station_beam_gaussian(station, num_points,
+                    lmn[0], lmn[1], frequency_hz, out, status);
             break;
         case OSKAR_STATION_TYPE_VLA_PBCOR:
             oskar_evaluate_vla_beam_pbcor(num_points,
@@ -158,6 +167,7 @@ void oskar_station_beam(
             *status = OSKAR_ERR_SETTINGS_TELESCOPE;
             break;
         }
+        oskar_blank_below_horizon(0, num_points, enu[2], 0, out, status);
     }
 
     /* Scale beam by amplitude of the last source if required. */
@@ -227,6 +237,58 @@ void oskar_station_beam(
 
     /* Copy output beam data. */
     oskar_mem_copy_contents(beam, out, offset_out, 0, num_points_orig, status);
+}
+
+void oskar_station_beam_gaussian(
+        const oskar_Station* station,
+        int num_points,
+        const oskar_Mem* l,
+        const oskar_Mem* m,
+        double frequency_hz,
+        oskar_Mem* out,
+        int* status
+)
+{
+    if (*status) return;
+    double scale = 1.0;
+    const double ref_freq_hz =
+            oskar_station_gaussian_beam_reference_freq_hz(station);
+    if (ref_freq_hz != 0.0) scale = ref_freq_hz / frequency_hz;
+    if (oskar_station_gaussian_beam_use_ellipse(station))
+    {
+        double a[2] = {0.0, 0.0}, b[2] = {0.0, 0.0}, c[2] = {0.0, 0.0};
+        for (int feed = 0; feed < 2; feed++)
+        {
+            const double fwhm_maj_rad = scale *
+                    oskar_station_gaussian_beam_fwhm_rad(station, feed, 0);
+            const double fwhm_min_rad = scale *
+                    oskar_station_gaussian_beam_fwhm_rad(station, feed, 1);
+            const double fwhm_maj_lm = sin(fwhm_maj_rad);
+            const double fwhm_min_lm = sin(fwhm_min_rad);
+            const double inv_2_var_maj = M_4_LN_2 / (fwhm_maj_lm * fwhm_maj_lm);
+            const double inv_2_var_min = M_4_LN_2 / (fwhm_min_lm * fwhm_min_lm);
+            const double sin_sq_pa =
+                    oskar_station_gaussian_beam_sincos_sq_pa(station, feed, 0);
+            const double cos_sq_pa =
+                    oskar_station_gaussian_beam_sincos_sq_pa(station, feed, 1);
+            const double sin_2_pa =
+                    oskar_station_gaussian_beam_sin_2_pa(station, feed);
+            a[feed] = cos_sq_pa * inv_2_var_min + sin_sq_pa * inv_2_var_maj;
+            b[feed] = 0.5 * sin_2_pa * (inv_2_var_maj - inv_2_var_min);
+            c[feed] = sin_sq_pa * inv_2_var_min + cos_sq_pa * inv_2_var_maj;
+        }
+        oskar_gaussian_ellipse(num_points, l, m,
+                a[0], b[0], c[0], a[1], b[1], c[1], out, status
+        );
+    }
+    else
+    {
+        const double fwhm_rad = scale *
+                oskar_station_gaussian_beam_fwhm_rad(station, 0, 0);
+        const double fwhm_lm = sin(fwhm_rad);
+        const double std = fwhm_lm / (2.0 * sqrt(2.0 * log(2.0)));
+        oskar_gaussian_circular(num_points, l, m, std, out, status);
+    }
 }
 
 #ifdef __cplusplus

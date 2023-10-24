@@ -8,6 +8,7 @@
 #include "telescope/station/private_station.h"
 #include "telescope/station/oskar_station_accessors.h"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -117,14 +118,35 @@ const oskar_Mem* oskar_station_noise_rms_jy_const(const oskar_Station* model)
 
 /* Data used only for Gaussian beam stations. */
 
-double oskar_station_gaussian_beam_fwhm_rad(const oskar_Station* model)
+double oskar_station_gaussian_beam_fwhm_rad(const oskar_Station* model,
+        int feed, int dim
+)
 {
-    return model ? model->gaussian_beam_fwhm_rad : 0.0;
+    return model ? model->gaussian_beam_fwhm_rad[feed][dim] : 0.0;
 }
 
 double oskar_station_gaussian_beam_reference_freq_hz(const oskar_Station* model)
 {
     return model ? model->gaussian_beam_reference_freq_hz : 0.0;
+}
+
+double oskar_station_gaussian_beam_sincos_sq_pa(
+        const oskar_Station* model, int feed, int dim
+)
+{
+    return model ? model->gaussian_beam_sincos_sq_pa[feed][dim] : 0.0;
+}
+
+double oskar_station_gaussian_beam_sin_2_pa(
+        const oskar_Station* model, int feed
+)
+{
+    return model ? model->gaussian_beam_sin_2_pa[feed] : 0.0;
+}
+
+int oskar_station_gaussian_beam_use_ellipse(const oskar_Station* model)
+{
+    return model ? model->gaussian_beam_use_ellipse : 0;
 }
 
 /* Data used only for aperture array stations. */
@@ -537,10 +559,16 @@ void oskar_station_set_phase_centre(oskar_Station* model,
 }
 
 void oskar_station_set_gaussian_beam_values(oskar_Station* model,
-        double fwhm_rad, double ref_freq_hz)
+        double fwhm_maj_rad, double fwhm_min_rad, double pa_rad,
+        double ref_freq_hz, int feed)
 {
     if (!model) return;
-    model->gaussian_beam_fwhm_rad = fwhm_rad;
+    model->gaussian_beam_use_ellipse = (fwhm_min_rad > 0.0) ? 1 : 0;
+    model->gaussian_beam_fwhm_rad[feed][0] = fwhm_maj_rad;
+    model->gaussian_beam_fwhm_rad[feed][1] = fwhm_min_rad;
+    model->gaussian_beam_sin_2_pa[feed] = sin(2.0 * pa_rad);
+    model->gaussian_beam_sincos_sq_pa[feed][0] = sin(pa_rad) * sin(pa_rad);
+    model->gaussian_beam_sincos_sq_pa[feed][1] = cos(pa_rad) * cos(pa_rad);
     model->gaussian_beam_reference_freq_hz = ref_freq_hz;
 }
 

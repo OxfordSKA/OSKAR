@@ -804,13 +804,17 @@ void oskar_telescope_set_enable_numerical_patterns(oskar_Telescope* model,
  * Sets the Gaussian station beam parameters.
  * These are only used if the station type is "Gaussian beam"
  *
- * @param[in] model       Pointer to telescope model.
- * @param[in] fwhm_deg    The Gaussian FWHM value of the beam, in degrees.
- * @param[in] ref_freq_hz Reference frequency at which the FWHM applies, in Hz.
+ * @param[in] model        Pointer to telescope model.
+ * @param[in] fwhm_maj_deg The FWHM value of the major axis, in degrees.
+ * @param[in] fwhm_min_deg The FWHM value of the minor axis, in degrees.
+ * @param[in] pa_deg       The position angle of the major axis, in degrees.
+ * @param[in] ref_freq_hz  Reference frequency at which the FWHM applies, in Hz.
+ * @param[in] feed         Feed index for which values apply.
  */
 OSKAR_EXPORT
-void oskar_telescope_set_gaussian_station_beam_width(oskar_Telescope* model,
-        double fwhm_deg, double ref_freq_hz);
+void oskar_telescope_set_gaussian_station_beam_values(oskar_Telescope* model,
+        double fwhm_maj_deg, double fwhm_min_deg, double pa_deg,
+        double ref_freq_hz, int feed);
 
 /**
  * @brief

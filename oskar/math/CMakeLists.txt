@@ -8,6 +8,7 @@ set(math_SRC
     define_dftw_m2m.h
     define_fftphase.h
     define_gaussian_circular.h
+    define_gaussian_ellipse.h
     define_legendre_polynomial.h
     define_multiply.h
     define_prefix_sum.h
@@ -27,6 +28,7 @@ set(math_SRC
     src/oskar_find_closest_match.c
     src/oskar_fit_ellipse.c
     src/oskar_gaussian_circular.c
+    src/oskar_gaussian_ellipse.c
     src/oskar_healpix_npix_to_nside.c
     src/oskar_lapack_subset.c
     src/oskar_linspace.c
