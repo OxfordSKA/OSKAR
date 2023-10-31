@@ -740,6 +740,27 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         numReceptors.put(a, p->num_receptors);
     }
 
+    // Add a row to the STATE subtable.
+    {
+        Table state(p->ms->tableName() + "/STATE", Table::Update);
+        unsigned int row = state.nrow();
+        state.addRow();
+        ScalarColumn<Double> cal(state, "CAL");
+        ScalarColumn<Bool> flagRow(state, "FLAG_ROW");
+        ScalarColumn<Double> load(state, "LOAD");
+        ScalarColumn<String> obsMode(state, "OBS_MODE");
+        ScalarColumn<Bool> ref(state, "REF");
+        ScalarColumn<Bool> sig(state, "SIG");
+        ScalarColumn<Int> subScan(state, "SUB_SCAN");
+        cal.put(row, 0.0);
+        flagRow.put(row, false);
+        load.put(row, 0.0);
+        obsMode.put(row, "OBSERVE_TARGET#ON_SOURCE");
+        ref.put(row, false);
+        sig.put(row, true);
+        subScan.put(row, 0);
+    }
+
 #else
     // Create the table descriptor and use it to set up a new main table.
     TableDesc desc = MS::requiredTableDesc();
