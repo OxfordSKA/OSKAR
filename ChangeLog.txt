@@ -1,6 +1,14 @@
-2022-xx-yy  OSKAR-2.8.4
+2023-11-12  OSKAR-2.9.0
 
     * Fix isotropic element patterns.
+
+    * Fix empty STATE table in MS output.
+
+    * Use latest version of HARP beam library.
+
+    * Add options to use a polarised elliptical Gaussian station beam.
+
+    * Add experimental option for virtual antenna rotation.
 
 2022-05-26  OSKAR-2.8.3
 

@@ -328,7 +328,13 @@ static PyObject* set_gaussian_station_beam_width(PyObject* self,
         PyErr_Format(PyExc_RuntimeError, "No stations in telescope model!");
         return 0;
     }
+#if OSKAR_VERSION >= 0x020900
+    oskar_telescope_set_gaussian_station_beam_values(
+            h, fwhm_deg, 0.0, 0.0, ref_freq_hz, 0
+    );
+#else
     oskar_telescope_set_gaussian_station_beam_width(h, fwhm_deg, ref_freq_hz);
+#endif
     return Py_BuildValue("");
 }
 
@@ -900,4 +906,3 @@ PyMODINIT_FUNC init_telescope_lib(void)
     return;
 }
 #endif
-

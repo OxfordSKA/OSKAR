@@ -105,8 +105,8 @@ if (HARP_FOUND)
 endif()
 
 # Link with SKA SDP functions if available
-if (SKA_SDP_FUNC_FOUND)
-    target_link_libraries(${libname} ${SKA_SDP_FUNC_LIBRARIES})
+if (ska-sdp-func_FOUND)
+    target_link_libraries(${libname} ska-sdp-func::ska_sdp_func)
     if (WIN32)
         install(FILES ${SKA_SDP_FUNC_DLL}
             DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)

@@ -13,7 +13,7 @@ except ImportError:
 
 # Define the versions of OSKAR this is compatible with.
 OSKAR_COMPATIBILITY_VERSION_MIN = '0x020700'
-OSKAR_COMPATIBILITY_VERSION_MAX = '0x0208FF'
+OSKAR_COMPATIBILITY_VERSION_MAX = '0x0209FF'
 
 # Define the extension modules to build.
 MODULES = [
