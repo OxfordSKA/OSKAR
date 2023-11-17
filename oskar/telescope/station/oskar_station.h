@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2023, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -54,6 +54,7 @@ enum OSKAR_STATION_TYPE
 #include <telescope/station/oskar_station_load_layout.h>
 #include <telescope/station/oskar_station_load_mount_types.h>
 #include <telescope/station/oskar_station_load_permitted_beams.h>
+#include <telescope/station/oskar_station_load_virtual_antenna_angle.h>
 #include <telescope/station/oskar_station_override_element_cable_length_errors.h>
 #include <telescope/station/oskar_station_override_element_feed_angle.h>
 #include <telescope/station/oskar_station_override_element_gains.h>
