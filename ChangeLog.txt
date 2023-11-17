@@ -1,3 +1,7 @@
+2023-11-17  OSKAR-2.9.1
+
+    * Additionally allow virtual antenna rotation file in station model folders.
+
 2023-11-12  OSKAR-2.9.0
 
     * Fix isotropic element patterns.
