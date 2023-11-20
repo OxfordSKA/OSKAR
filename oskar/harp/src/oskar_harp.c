@@ -8,6 +8,7 @@
 #include "harp/oskar_harp.h"
 #include "harp/private_harp.h"
 #include "log/oskar_log.h"
+#include "utility/oskar_hdf5.h"
 #include "utility/oskar_thread.h"
 
 #ifdef OSKAR_HAVE_HARP
@@ -32,8 +33,6 @@ oskar_Harp* oskar_harp_create_copy(const oskar_Harp* other, int* status)
     h->num_mbf = other->num_mbf;
     h->max_order = other->max_order;
     h->freq = other->freq;
-    h->hdf5_file = other->hdf5_file;
-    oskar_hdf5_ref_inc(h->hdf5_file);
     h->alpha_te = other->alpha_te;
     oskar_mem_ref_inc(h->alpha_te);
     h->alpha_tm = other->alpha_tm;
@@ -597,7 +596,6 @@ void oskar_harp_free(oskar_Harp* h)
 {
     int feed = 0, status = 0;
     if (!h) return;
-    oskar_hdf5_close(h->hdf5_file);
     oskar_mem_free(h->alpha_te, &status);
     oskar_mem_free(h->alpha_tm, &status);
     for (feed = 0; feed < 2; feed++)
@@ -612,28 +610,29 @@ void oskar_harp_open_hdf5(oskar_Harp* h, const char* path, int* status)
 {
     int feed = 0;
     if (*status) return;
-    h->hdf5_file = oskar_hdf5_open(path, status);
+    oskar_HDF5* hdf5_file = oskar_hdf5_open(path, status);
 
     /* Load the attributes. */
     h->freq = oskar_hdf5_read_attribute_double(
-            h->hdf5_file, "freq", status);
+            hdf5_file, "freq", status);
     h->num_antennas = oskar_hdf5_read_attribute_int(
-            h->hdf5_file, "num_ant", status);
+            hdf5_file, "num_ant", status);
     h->num_mbf = oskar_hdf5_read_attribute_int(
-            h->hdf5_file, "num_mbf", status);
+            hdf5_file, "num_mbf", status);
     h->max_order = oskar_hdf5_read_attribute_int(
-            h->hdf5_file, "max_order", status);
+            hdf5_file, "max_order", status);
 
     /* Load the data. */
     oskar_Mem* coeffs[] = {0, 0};
     oskar_Mem* alpha_te = oskar_hdf5_read_dataset(
-            h->hdf5_file, "alpha_te", 0, 0, status);
+            hdf5_file, "alpha_te", 0, 0, status);
     oskar_Mem* alpha_tm = oskar_hdf5_read_dataset(
-            h->hdf5_file, "alpha_tm", 0, 0, status);
+            hdf5_file, "alpha_tm", 0, 0, status);
     coeffs[0] = oskar_hdf5_read_dataset(
-            h->hdf5_file, "coeffs_pola", 0, 0, status);
+            hdf5_file, "coeffs_pola", 0, 0, status);
     coeffs[1] = oskar_hdf5_read_dataset(
-            h->hdf5_file, "coeffs_polb", 0, 0, status);
+            hdf5_file, "coeffs_polb", 0, 0, status);
+    oskar_hdf5_close(hdf5_file);
     if (*status)
     {
         oskar_mem_free(alpha_te, status);
