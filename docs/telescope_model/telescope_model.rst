@@ -839,11 +839,11 @@ The following attributes and datasets must be present inside each HDF5 file:
 
 * Dataset ``alpha_tm``: As above, but for the TM modes.
 
-* Dataset ``coeffs_pola``: 2D complex matrix of size
+* Dataset ``coeffs_polX``: 2D complex matrix of size
   (``num_ant``, ``num_mbf`` * ``num_ant``) containing the MBF coefficients of
-  each embedded element pattern, associated with the receiving port A (or X).
+  each embedded element pattern, associated with the X polarisation.
 
-* Dataset ``coeffs_polb``: As above, but for port B (or Y).
+* Dataset ``coeffs_polY``: As above, but for the Y polarisation.
 
 If the station model directory has one of these HDF5 files, OSKAR will use
 the HARP beam evaluation method instead of the default one.

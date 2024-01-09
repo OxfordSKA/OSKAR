@@ -629,9 +629,9 @@ void oskar_harp_open_hdf5(oskar_Harp* h, const char* path, int* status)
     oskar_Mem* alpha_tm = oskar_hdf5_read_dataset(
             hdf5_file, "alpha_tm", 0, 0, status);
     coeffs[0] = oskar_hdf5_read_dataset(
-            hdf5_file, "coeffs_pola", 0, 0, status);
+            hdf5_file, "coeffs_polX", 0, 0, status);
     coeffs[1] = oskar_hdf5_read_dataset(
-            hdf5_file, "coeffs_polb", 0, 0, status);
+            hdf5_file, "coeffs_polY", 0, 0, status);
     oskar_hdf5_close(hdf5_file);
     if (*status)
     {
