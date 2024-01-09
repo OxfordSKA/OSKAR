@@ -1,3 +1,7 @@
+2024-01-09  OSKAR-2.9.3
+
+    * Update HARP data loader for new dataset names (coeffs_polX / Y).
+
 2023-11-20  OSKAR-2.9.2
 
     * Avoid keeping HARP HDF5 files open for longer than necessary.
