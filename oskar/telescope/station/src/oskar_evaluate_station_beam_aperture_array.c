@@ -109,8 +109,8 @@ static void oskar_evaluate_station_beam_aperture_array_private(
         oskar_mem_ensure(phi_y, num_points, status);
         oskar_convert_enu_directions_to_theta_phi(
                 offset_points, num_points, x, y, z, 0,
-                virtual_angle + M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0),
-                virtual_angle + M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 1, 0, 0)),
+                M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0) - virtual_angle,
+                M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 1, 0, 0)) - virtual_angle,
                 theta, phi_x, phi_y, status);
         oskar_harp_evaluate_smodes(
                 harp_data,
@@ -153,6 +153,12 @@ static void oskar_evaluate_station_beam_aperture_array_private(
         {
             oskar_rotate_virtual_antenna(num_points,
                     offset_out, -virtual_angle, beam, status);
+            oskar_convert_enu_directions_to_theta_phi(
+                    offset_points, num_points, x, y, z, 0,
+                    M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0),
+                    M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 1, 0, 0)),
+                    theta, phi_x, phi_y, status
+            );
         }
         oskar_convert_theta_phi_to_ludwig3_components(num_points,
                 phi_x, phi_y, swap_xy, offset_out, beam, status);

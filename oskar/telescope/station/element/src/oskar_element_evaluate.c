@@ -74,8 +74,8 @@ void oskar_element_evaluate(
     /* Compute (effective) theta and phi coordinates. */
     oskar_convert_enu_directions_to_theta_phi(
             offset_points, num_points, x, y, z, normalise,
-            (M_PI/2) - orientation_x + virtual_antenna_angle,
-            (M_PI/2) - orientation_y + virtual_antenna_angle,
+            (M_PI/2) - orientation_x - virtual_antenna_angle,
+            (M_PI/2) - orientation_y - virtual_antenna_angle,
             theta, phi_x, phi_y, status
     );
 
@@ -157,6 +157,12 @@ void oskar_element_evaluate(
         {
             oskar_rotate_virtual_antenna(num_points_norm,
                     offset_out, -virtual_antenna_angle, output, status);
+            oskar_convert_enu_directions_to_theta_phi(
+                    offset_points, num_points, x, y, z, normalise,
+                    (M_PI/2) - orientation_x,
+                    (M_PI/2) - orientation_y,
+                    theta, phi_x, phi_y, status
+            );
         }
         oskar_convert_theta_phi_to_ludwig3_components(num_points_norm,
                 phi_x, phi_y, swap_xy, offset_out, output, status);
