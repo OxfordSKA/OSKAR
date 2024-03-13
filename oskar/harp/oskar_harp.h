@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, The OSKAR Developers.
+ * Copyright (c) 2022-2024, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -31,7 +31,7 @@ oskar_Harp* oskar_harp_create_copy(const oskar_Harp* other, int* status);
 
 OSKAR_EXPORT
 void oskar_harp_evaluate_smodes(
-        const oskar_Harp* h,
+        oskar_Harp* h,
         int num_dir,
         const oskar_Mem* theta,
         const oskar_Mem* phi,
@@ -45,7 +45,7 @@ void oskar_harp_evaluate_smodes(
 
 OSKAR_EXPORT
 void oskar_harp_evaluate_station_beam(
-        const oskar_Harp* h,
+        oskar_Harp* h,
         int num_dir,
         const oskar_Mem* theta,
         const oskar_Mem* phi,

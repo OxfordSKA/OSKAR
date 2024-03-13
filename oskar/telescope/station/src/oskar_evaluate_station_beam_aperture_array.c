@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2023, The OSKAR Developers.
+ * Copyright (c) 2012-2024, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -23,7 +23,7 @@ extern "C" {
 #define MAX_CHUNK_SIZE 49152
 
 static void oskar_evaluate_station_beam_aperture_array_private(
-        const oskar_Station* s, oskar_StationWork* work, int offset_points,
+        oskar_Station* s, oskar_StationWork* work, int offset_points,
         int num_points, const oskar_Mem* x, const oskar_Mem* y,
         const oskar_Mem* z, int time_index, double gast_rad,
         double frequency_hz, int depth, int offset_out, oskar_Mem* beam,
@@ -31,7 +31,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
 
 
 void oskar_evaluate_station_beam_aperture_array(
-        const oskar_Station* station,
+        oskar_Station* station,
         oskar_StationWork* work,
         int num_points,
         const oskar_Mem* x,
@@ -70,7 +70,7 @@ void oskar_evaluate_station_beam_aperture_array(
 }
 
 static void oskar_evaluate_station_beam_aperture_array_private(
-        const oskar_Station* s, oskar_StationWork* work, int offset_points,
+        oskar_Station* s, oskar_StationWork* work, int offset_points,
         int num_points, const oskar_Mem* x, const oskar_Mem* y,
         const oskar_Mem* z, int time_index, double gast_rad,
         double frequency_hz, int depth, int offset_out, oskar_Mem* beam,
@@ -100,8 +100,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
             &beam_x, &beam_y, &beam_z, status);
 
     /* Check if HARP data exist. */
-    const oskar_Harp* harp_data = oskar_station_harp_data_const(
-            s, frequency_hz);
+    oskar_Harp* harp_data = oskar_station_harp_data(s, frequency_hz);
     if (harp_data)
     {
         oskar_mem_ensure(theta, num_points, status);
@@ -260,7 +259,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
         if (oskar_station_identical_children(s))
         {
             oskar_evaluate_station_beam_aperture_array_private(
-                    oskar_station_child_const(s, 0), work, offset_points,
+                    oskar_station_child(s, 0), work, offset_points,
                     num_points, x, y, z, time_index, gast_rad, frequency_hz,
                     depth + 1, 0, signal, status);
             for (i = 1; i < num_elements; ++i)
@@ -274,7 +273,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
             for (i = 0; i < num_elements; ++i)
             {
                 oskar_evaluate_station_beam_aperture_array_private(
-                        oskar_station_child_const(s, i), work, offset_points,
+                        oskar_station_child(s, i), work, offset_points,
                         num_points, x, y, z, time_index, gast_rad, frequency_hz,
                         depth + 1, i * num_points, signal, status);
             }

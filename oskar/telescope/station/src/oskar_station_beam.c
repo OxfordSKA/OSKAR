@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2023, The OSKAR Developers.
+ * Copyright (c) 2013-2024, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -33,7 +33,7 @@ static void oskar_station_beam_gaussian(
 );
 
 void oskar_station_beam(
-        const oskar_Station* station,
+        oskar_Station* station,
         oskar_StationWork* work,
         int source_coord_type,
         int num_points,

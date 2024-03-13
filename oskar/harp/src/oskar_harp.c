@@ -1,23 +1,26 @@
 /*
- * Copyright (c) 2022-2023, The OSKAR Developers.
+ * Copyright (c) 2022-2024, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <stdlib.h>
+#include <string.h>
 
-#include "harp/oskar_harp.h"
-#include "harp/private_harp.h"
-#include "log/oskar_log.h"
-#include "utility/oskar_hdf5.h"
-#include "utility/oskar_thread.h"
+#include "oskar/harp/oskar_harp.h"
+#include "oskar/harp/private_harp.h"
+#include "oskar/log/oskar_log.h"
+#include "oskar/utility/oskar_hdf5.h"
 
 #ifdef OSKAR_HAVE_HARP
 #include "harp_beam.h"
 #endif
 
+void oskar_harp_load_hdf5(oskar_Harp* h, int* status);
+
 oskar_Harp* oskar_harp_create(int precision)
 {
     oskar_Harp* h = (oskar_Harp*) calloc(1, sizeof(oskar_Harp));
+    h->mutex = oskar_mutex_create();
     h->precision = precision;
     return h;
 }
@@ -28,6 +31,8 @@ oskar_Harp* oskar_harp_create_copy(const oskar_Harp* other, int* status)
     int feed = 0;
     (void)status;
     oskar_Harp* h = (oskar_Harp*) calloc(1, sizeof(oskar_Harp));
+    h->filename = (char*) calloc(1 + strlen(other->filename), sizeof(char));
+    strcpy(h->filename, other->filename);
     h->precision = other->precision;
     h->num_antennas = other->num_antennas;
     h->num_mbf = other->num_mbf;
@@ -51,7 +56,7 @@ oskar_Harp* oskar_harp_create_copy(const oskar_Harp* other, int* status)
 }
 
 void oskar_harp_evaluate_smodes(
-        const oskar_Harp* h,
+        oskar_Harp* h,
         int num_dir,
         const oskar_Mem* theta,
         const oskar_Mem* phi,
@@ -65,6 +70,7 @@ void oskar_harp_evaluate_smodes(
 {
     if (*status) return;
 #ifdef OSKAR_HAVE_HARP
+    if (!h->num_mbf) oskar_harp_load_hdf5(h, status);
     const int max_order = h->max_order;
     oskar_mem_ensure(poly, num_dir * max_order * (max_order + 1), status);
     oskar_mem_ensure(ee, num_dir * (2 * max_order + 1), status);
@@ -211,7 +217,7 @@ void oskar_harp_evaluate_smodes(
 }
 
 void oskar_harp_evaluate_station_beam(
-        const oskar_Harp* h,
+        oskar_Harp* h,
         int num_dir,
         const oskar_Mem* theta,
         const oskar_Mem* phi,
@@ -232,6 +238,7 @@ void oskar_harp_evaluate_station_beam(
 {
     if (*status) return;
 #ifdef OSKAR_HAVE_HARP
+    if (!h->num_mbf) oskar_harp_load_hdf5(h, status);
     oskar_mem_ensure(phase_fac, num_dir * num_antennas, status);
     oskar_mem_ensure(beam_coeffs, h->num_mbf * num_antennas, status);
     oskar_mem_ensure(beam, num_dir, status);
@@ -435,6 +442,7 @@ void oskar_harp_evaluate_element_beams(
 {
     if (*status) return;
 #ifdef OSKAR_HAVE_HARP
+    if (!h->num_mbf) oskar_harp_load_hdf5(h, status);
     oskar_mem_ensure(phase_fac, num_dir * num_antennas, status);
     oskar_mem_ensure(beam, num_dir, status);
     if (*status) return;
@@ -596,6 +604,7 @@ void oskar_harp_free(oskar_Harp* h)
 {
     int feed = 0, status = 0;
     if (!h) return;
+    free(h->filename);
     oskar_mem_free(h->alpha_te, &status);
     oskar_mem_free(h->alpha_tm, &status);
     for (feed = 0; feed < 2; feed++)
@@ -603,68 +612,83 @@ void oskar_harp_free(oskar_Harp* h)
         oskar_mem_free(h->coeffs[feed], &status);
         oskar_mem_free(h->coeffs_reordered[feed], &status);
     }
+    oskar_mutex_free(h->mutex);
     free(h);
+}
+
+void oskar_harp_load_hdf5(oskar_Harp* h, int* status)
+{
+    if (*status) return;
+    oskar_mutex_lock(h->mutex);
+    if (!h->num_mbf)
+    {
+        int feed = 0;
+        oskar_HDF5* hdf5_file = oskar_hdf5_open(h->filename, status);
+
+        /* Load the attributes. */
+        h->freq = oskar_hdf5_read_attribute_double(
+                hdf5_file, "freq", status);
+        h->num_antennas = oskar_hdf5_read_attribute_int(
+                hdf5_file, "num_ant", status);
+        h->num_mbf = oskar_hdf5_read_attribute_int(
+                hdf5_file, "num_mbf", status);
+        h->max_order = oskar_hdf5_read_attribute_int(
+                hdf5_file, "max_order", status);
+
+        /* Load the data. */
+        oskar_Mem* coeffs[] = {0, 0};
+        oskar_Mem* alpha_te = oskar_hdf5_read_dataset(
+                hdf5_file, "alpha_te", 0, 0, status);
+        oskar_Mem* alpha_tm = oskar_hdf5_read_dataset(
+                hdf5_file, "alpha_tm", 0, 0, status);
+        coeffs[0] = oskar_hdf5_read_dataset(
+                hdf5_file, "coeffs_polX", 0, 0, status);
+        coeffs[1] = oskar_hdf5_read_dataset(
+                hdf5_file, "coeffs_polY", 0, 0, status);
+        oskar_hdf5_close(hdf5_file);
+        if (*status)
+        {
+            oskar_mem_free(alpha_te, status);
+            oskar_mem_free(alpha_tm, status);
+            oskar_mem_free(coeffs[0], status);
+            oskar_mem_free(coeffs[1], status);
+            oskar_mutex_unlock(h->mutex);
+            return;
+        }
+        h->alpha_te = alpha_te;
+        if (oskar_mem_precision(alpha_te) != h->precision)
+        {
+            h->alpha_te = oskar_mem_convert_precision(
+                    alpha_te, h->precision, status);
+            oskar_mem_free(alpha_te, status);
+        }
+        h->alpha_tm = alpha_tm;
+        if (oskar_mem_precision(alpha_tm) != h->precision)
+        {
+            h->alpha_tm = oskar_mem_convert_precision(
+                    alpha_tm, h->precision, status);
+            oskar_mem_free(alpha_tm, status);
+        }
+        for (feed = 0; feed < 2; feed++)
+        {
+            h->coeffs[feed] = coeffs[feed];
+            if (oskar_mem_precision(coeffs[feed]) != h->precision)
+            {
+                h->coeffs[feed] = oskar_mem_convert_precision(
+                        coeffs[feed], h->precision, status);
+                oskar_mem_free(coeffs[feed], status);
+            }
+        }
+    }
+    oskar_mutex_unlock(h->mutex);
 }
 
 void oskar_harp_open_hdf5(oskar_Harp* h, const char* path, int* status)
 {
-    int feed = 0;
     if (*status) return;
-    oskar_HDF5* hdf5_file = oskar_hdf5_open(path, status);
-
-    /* Load the attributes. */
-    h->freq = oskar_hdf5_read_attribute_double(
-            hdf5_file, "freq", status);
-    h->num_antennas = oskar_hdf5_read_attribute_int(
-            hdf5_file, "num_ant", status);
-    h->num_mbf = oskar_hdf5_read_attribute_int(
-            hdf5_file, "num_mbf", status);
-    h->max_order = oskar_hdf5_read_attribute_int(
-            hdf5_file, "max_order", status);
-
-    /* Load the data. */
-    oskar_Mem* coeffs[] = {0, 0};
-    oskar_Mem* alpha_te = oskar_hdf5_read_dataset(
-            hdf5_file, "alpha_te", 0, 0, status);
-    oskar_Mem* alpha_tm = oskar_hdf5_read_dataset(
-            hdf5_file, "alpha_tm", 0, 0, status);
-    coeffs[0] = oskar_hdf5_read_dataset(
-            hdf5_file, "coeffs_polX", 0, 0, status);
-    coeffs[1] = oskar_hdf5_read_dataset(
-            hdf5_file, "coeffs_polY", 0, 0, status);
-    oskar_hdf5_close(hdf5_file);
-    if (*status)
-    {
-        oskar_mem_free(alpha_te, status);
-        oskar_mem_free(alpha_tm, status);
-        oskar_mem_free(coeffs[0], status);
-        oskar_mem_free(coeffs[1], status);
-        return;
-    }
-    h->alpha_te = alpha_te;
-    if (oskar_mem_precision(alpha_te) != h->precision)
-    {
-        h->alpha_te = oskar_mem_convert_precision(
-                alpha_te, h->precision, status);
-        oskar_mem_free(alpha_te, status);
-    }
-    h->alpha_tm = alpha_tm;
-    if (oskar_mem_precision(alpha_tm) != h->precision)
-    {
-        h->alpha_tm = oskar_mem_convert_precision(
-                alpha_tm, h->precision, status);
-        oskar_mem_free(alpha_tm, status);
-    }
-    for (feed = 0; feed < 2; feed++)
-    {
-        h->coeffs[feed] = coeffs[feed];
-        if (oskar_mem_precision(coeffs[feed]) != h->precision)
-        {
-            h->coeffs[feed] = oskar_mem_convert_precision(
-                    coeffs[feed], h->precision, status);
-            oskar_mem_free(coeffs[feed], status);
-        }
-    }
+    /* Just store the filename. The file should only be opened if necessary. */
+    h->filename = (char*) calloc(1 + strlen(path), sizeof(char));
+    strcpy(h->filename, path);
 }
 
 void oskar_harp_reorder_coeffs(oskar_Harp* h, int feed, int* status)

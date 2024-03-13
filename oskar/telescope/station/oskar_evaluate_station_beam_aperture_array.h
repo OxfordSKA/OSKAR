@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2024, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -52,7 +52,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_evaluate_station_beam_aperture_array(
-        const oskar_Station* station,
+        oskar_Station* station,
         oskar_StationWork* work,
         int num_points,
         const oskar_Mem* x,

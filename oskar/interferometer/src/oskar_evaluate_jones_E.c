@@ -129,7 +129,7 @@ void oskar_evaluate_jones_E(
         for (i = 0; i < num_stations; ++i)
         {
             oskar_station_beam(
-                    oskar_telescope_station_const(tel, i),
+                    oskar_telescope_station(tel, i),
                     work, coord_type, num_points, source_coords,
                     ref_lon_rad, ref_lat_rad,
                     oskar_telescope_phase_centre_coord_type(tel),
@@ -169,7 +169,7 @@ void oskar_evaluate_jones_E(
             else
             {
                 oskar_station_beam(
-                        oskar_telescope_station_const(tel, station_model_type),
+                        oskar_telescope_station(tel, station_model_type),
                         work, coord_type, num_points, source_coords,
                         ref_lon_rad, ref_lat_rad,
                         oskar_telescope_phase_centre_coord_type(tel),

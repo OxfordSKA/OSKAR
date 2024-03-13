@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2022, The OSKAR Developers.
+ * Copyright (c) 2012-2024, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -392,11 +392,11 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
         }
         else if (!oskar_telescope_allow_station_beam_duplication(d->tel))
         {
-            const oskar_Station* station =
-                    oskar_telescope_station_const(d->tel, h->station_ids[i]);
+            oskar_Station* station =
+                    oskar_telescope_station(d->tel, h->station_ids[i]);
             if (!station)
             {
-                station = oskar_telescope_station_const(d->tel, 0);
+                station = oskar_telescope_station(d->tel, 0);
             }
             oskar_station_beam(station,
                     d->work, h->source_coord_type, chunk_size,
@@ -430,7 +430,7 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
             else
             {
                 oskar_station_beam(
-                        oskar_telescope_station_const(d->tel, station_model_type),
+                        oskar_telescope_station(d->tel, station_model_type),
                         d->work, h->source_coord_type, chunk_size,
                         source_coords, h->lon0, h->lat0,
                         oskar_telescope_phase_centre_coord_type(d->tel),
