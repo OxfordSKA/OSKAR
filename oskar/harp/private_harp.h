@@ -12,6 +12,7 @@
 struct oskar_Harp
 {
     char* filename;
+    int ref_count;
     int precision;
     int num_antennas;
     int num_mbf;

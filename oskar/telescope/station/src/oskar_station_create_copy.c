@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2023, The OSKAR Developers.
+ * Copyright (c) 2013-2024, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -122,8 +122,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
                 src->harp_num_freq, sizeof(oskar_Harp*));
         for (i = 0; i < src->harp_num_freq; ++i)
         {
-            dst->harp_data[i] = oskar_harp_create_copy(
-                    src->harp_data[i], status);
+            dst->harp_data[i] = oskar_harp_ref_inc(src->harp_data[i]);
         }
     }
 

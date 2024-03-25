@@ -15,43 +15,14 @@
 #include "harp_beam.h"
 #endif
 
-void oskar_harp_load_hdf5(oskar_Harp* h, int* status);
+static void oskar_harp_load_hdf5(oskar_Harp* h, int* status);
 
 oskar_Harp* oskar_harp_create(int precision)
 {
     oskar_Harp* h = (oskar_Harp*) calloc(1, sizeof(oskar_Harp));
     h->mutex = oskar_mutex_create();
     h->precision = precision;
-    return h;
-}
-
-/* NOLINTNEXTLINE(readability-non-const-parameter) */
-oskar_Harp* oskar_harp_create_copy(const oskar_Harp* other, int* status)
-{
-    int feed = 0;
-    (void)status;
-    oskar_Harp* h = (oskar_Harp*) calloc(1, sizeof(oskar_Harp));
-    h->filename = (char*) calloc(1 + strlen(other->filename), sizeof(char));
-    strcpy(h->filename, other->filename);
-    h->precision = other->precision;
-    h->num_antennas = other->num_antennas;
-    h->num_mbf = other->num_mbf;
-    h->max_order = other->max_order;
-    h->freq = other->freq;
-    h->alpha_te = other->alpha_te;
-    oskar_mem_ref_inc(h->alpha_te);
-    h->alpha_tm = other->alpha_tm;
-    oskar_mem_ref_inc(h->alpha_tm);
-    for (feed = 0; feed < 2; feed++)
-    {
-        h->coeffs[feed] = other->coeffs[feed];
-        h->coeffs_reordered[feed] = other->coeffs_reordered[feed];
-        oskar_mem_ref_inc(h->coeffs[feed]);
-        if (h->coeffs_reordered[feed])
-        {
-            oskar_mem_ref_inc(h->coeffs_reordered[feed]);
-        }
-    }
+    h->ref_count = 1;
     return h;
 }
 
@@ -604,6 +575,14 @@ void oskar_harp_free(oskar_Harp* h)
 {
     int feed = 0, status = 0;
     if (!h) return;
+
+    /* Decrement reference count and return if there are still references. */
+    oskar_mutex_lock(h->mutex);
+    h->ref_count--;
+    oskar_mutex_unlock(h->mutex);
+    if (h->ref_count > 0) return;
+
+    /* Free everything. */
     free(h->filename);
     oskar_mem_free(h->alpha_te, &status);
     oskar_mem_free(h->alpha_tm, &status);
@@ -683,12 +662,18 @@ void oskar_harp_load_hdf5(oskar_Harp* h, int* status)
     oskar_mutex_unlock(h->mutex);
 }
 
-void oskar_harp_open_hdf5(oskar_Harp* h, const char* path, int* status)
+void oskar_harp_ref_dec(oskar_Harp* h)
 {
-    if (*status) return;
-    /* Just store the filename. The file should only be opened if necessary. */
-    h->filename = (char*) calloc(1 + strlen(path), sizeof(char));
-    strcpy(h->filename, path);
+    oskar_harp_free(h);
+}
+
+oskar_Harp* oskar_harp_ref_inc(oskar_Harp* h)
+{
+    if (!h) return 0;
+    oskar_mutex_lock(h->mutex);
+    h->ref_count++;
+    oskar_mutex_unlock(h->mutex);
+    return h;
 }
 
 void oskar_harp_reorder_coeffs(oskar_Harp* h, int feed, int* status)
@@ -746,4 +731,12 @@ void oskar_harp_reorder_coeffs(oskar_Harp* h, int feed, int* status)
             }
         }
     }
+}
+
+void oskar_harp_set_file(oskar_Harp* h, const char* path)
+{
+    /* Just store the filename. The file should only be opened if necessary. */
+    const size_t len = strlen(path);
+    h->filename = (char*) calloc(1 + len, sizeof(char));
+    memcpy(h->filename, path, len);
 }

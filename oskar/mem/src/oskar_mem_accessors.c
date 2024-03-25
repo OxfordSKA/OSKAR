@@ -277,12 +277,13 @@ const double4c* oskar_mem_double4c_const(const oskar_Mem* mem, int* status)
     return (const double4c*) mem->data;
 }
 
-void oskar_mem_ref_inc(oskar_Mem* mem)
+oskar_Mem* oskar_mem_ref_inc(oskar_Mem* mem)
 {
-    if (!mem) return;
+    if (!mem) return 0;
     oskar_mutex_lock(mem->mutex);
     mem->ref_count++;
     oskar_mutex_unlock(mem->mutex);
+    return mem;
 }
 
 void oskar_mem_ref_dec(oskar_Mem* mem)

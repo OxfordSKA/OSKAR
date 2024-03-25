@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2022, The OSKAR Developers.
+ * Copyright (c) 2013-2024, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -550,9 +550,11 @@ void oskar_mem_ref_dec(oskar_Mem* mem);
  * the cost of an actual copy.
  *
  * @param[in]     mem    Pointer to data structure.
+ *
+ * @return The handle that was passed.
  */
 OSKAR_EXPORT
-void oskar_mem_ref_inc(oskar_Mem* mem);
+oskar_Mem* oskar_mem_ref_inc(oskar_Mem* mem);
 
 #ifdef __cplusplus
 }

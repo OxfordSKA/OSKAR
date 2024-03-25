@@ -27,9 +27,6 @@ OSKAR_EXPORT
 oskar_Harp* oskar_harp_create(int precision);
 
 OSKAR_EXPORT
-oskar_Harp* oskar_harp_create_copy(const oskar_Harp* other, int* status);
-
-OSKAR_EXPORT
 void oskar_harp_evaluate_smodes(
         oskar_Harp* h,
         int num_dir,
@@ -87,10 +84,16 @@ OSKAR_EXPORT
 void oskar_harp_free(oskar_Harp* h);
 
 OSKAR_EXPORT
-void oskar_harp_open_hdf5(oskar_Harp* h, const char* path, int* status);
+void oskar_harp_ref_dec(oskar_Harp* h);
+
+OSKAR_EXPORT
+oskar_Harp* oskar_harp_ref_inc(oskar_Harp* h);
 
 OSKAR_EXPORT
 void oskar_harp_reorder_coeffs(oskar_Harp* h, int feed, int* status);
+
+OSKAR_EXPORT
+void oskar_harp_set_file(oskar_Harp* h, const char* path);
 
 #ifdef __cplusplus
 }
