@@ -123,6 +123,11 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                 work->pth,
                 work->pph,
                 status);
+        oskar_convert_enu_directions_to_theta_phi(
+                offset_points, num_points, x, y, z, 0,
+                M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0),
+                M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 1, 0, 0)),
+                theta, phi_x, phi_y, status);
         for (i = 0; i < 2; ++i)
         {
             oskar_station_evaluate_element_weights(s, i, frequency_hz,
@@ -148,19 +153,13 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                     beam,
                     status);
         }
+        oskar_convert_theta_phi_to_ludwig3_components(num_points,
+                phi_x, phi_y, swap_xy, offset_out, beam, status);
         if (virtual_angle != 0.0)
         {
             oskar_rotate_virtual_antenna(num_points,
-                    offset_out, -virtual_angle, beam, status);
-            oskar_convert_enu_directions_to_theta_phi(
-                    offset_points, num_points, x, y, z, 0,
-                    M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0),
-                    M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 1, 0, 0)),
-                    theta, phi_x, phi_y, status
-            );
+                    offset_out, virtual_angle, beam, status);
         }
-        oskar_convert_theta_phi_to_ludwig3_components(num_points,
-                phi_x, phi_y, swap_xy, offset_out, beam, status);
         oskar_blank_below_horizon(offset_points, num_points, z,
                 offset_out, beam, status);
         return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2023, The OSKAR Developers.
+ * Copyright (c) 2012-2024, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -153,19 +153,18 @@ void oskar_element_evaluate(
                         4, offset_out_cplx + 2, output, status);
             }
         }
+        oskar_convert_enu_directions_to_theta_phi(
+                offset_points, num_points, x, y, z, normalise,
+                (M_PI/2) - orientation_x,
+                (M_PI/2) - orientation_y,
+                theta, phi_x, phi_y, status);
+        oskar_convert_theta_phi_to_ludwig3_components(num_points_norm,
+                phi_x, phi_y, swap_xy, offset_out, output, status);
         if (virtual_antenna_angle != 0.0)
         {
             oskar_rotate_virtual_antenna(num_points_norm,
-                    offset_out, -virtual_antenna_angle, output, status);
-            oskar_convert_enu_directions_to_theta_phi(
-                    offset_points, num_points, x, y, z, normalise,
-                    (M_PI/2) - orientation_x,
-                    (M_PI/2) - orientation_y,
-                    theta, phi_x, phi_y, status
-            );
+                    offset_out, virtual_antenna_angle, output, status);
         }
-        oskar_convert_theta_phi_to_ludwig3_components(num_points_norm,
-                phi_x, phi_y, swap_xy, offset_out, output, status);
     }
     else /* Scalar response. */
     {
