@@ -7,9 +7,9 @@ from astropy.io import fits
 import astropy.constants as const
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
+# from matplotlib.colors import LogNorm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from math import radians, degrees, sin, fabs
+from math import radians, degrees, fabs#, sin
 from oskar import Imager
 
 
