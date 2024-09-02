@@ -54,6 +54,11 @@ void oskar_harp_evaluate_smodes(
     const int location = oskar_mem_location(pth);
     oskar_Mem *gpu_te = 0, *gpu_tm = 0;
     oskar_Mem *ptr_te = h->alpha_te, *ptr_tm = h->alpha_tm;
+    if (!h->alpha_te || !h->alpha_tm)
+    {
+        oskar_log_error(0, "Unknown error reading HDF5 file '%s'", h->filename);
+        return;
+    }
     if (oskar_mem_location(h->alpha_te) != location)
     {
         gpu_te = oskar_mem_create_copy(ptr_te, location, status);
@@ -605,13 +610,13 @@ void oskar_harp_load_hdf5(oskar_Harp* h, int* status)
         oskar_HDF5* hdf5_file = oskar_hdf5_open(h->filename, status);
 
         /* Load the attributes. */
-        h->freq = oskar_hdf5_read_attribute_double(
+        const double freq = oskar_hdf5_read_attribute_double(
                 hdf5_file, "freq", status);
-        h->num_antennas = oskar_hdf5_read_attribute_int(
+        const int num_antennas = oskar_hdf5_read_attribute_int(
                 hdf5_file, "num_ant", status);
-        h->num_mbf = oskar_hdf5_read_attribute_int(
+        const int num_mbf = oskar_hdf5_read_attribute_int(
                 hdf5_file, "num_mbf", status);
-        h->max_order = oskar_hdf5_read_attribute_int(
+        const int max_order = oskar_hdf5_read_attribute_int(
                 hdf5_file, "max_order", status);
 
         /* Load the data. */
@@ -627,6 +632,7 @@ void oskar_harp_load_hdf5(oskar_Harp* h, int* status)
         oskar_hdf5_close(hdf5_file);
         if (*status)
         {
+            oskar_log_error(0, "Error reading HDF5 file '%s'", h->filename);
             oskar_mem_free(alpha_te, status);
             oskar_mem_free(alpha_tm, status);
             oskar_mem_free(coeffs[0], status);
@@ -634,6 +640,10 @@ void oskar_harp_load_hdf5(oskar_Harp* h, int* status)
             oskar_mutex_unlock(h->mutex);
             return;
         }
+        h->num_antennas = num_antennas;
+        h->num_mbf = num_mbf;
+        h->max_order = max_order;
+        h->freq = freq;
         h->alpha_te = alpha_te;
         if (oskar_mem_precision(alpha_te) != h->precision)
         {
