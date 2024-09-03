@@ -1,3 +1,7 @@
+2024-XX-YY  OSKAR-2.9.6
+
+    * Ensure thread safety when loading HARP coefficient data from HDF5 files.
+
 2024-05-03  OSKAR-2.9.5
 
     * Fix virtual antenna rotation when using either

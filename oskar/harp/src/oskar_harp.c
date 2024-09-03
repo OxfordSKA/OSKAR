@@ -640,10 +640,6 @@ void oskar_harp_load_hdf5(oskar_Harp* h, int* status)
             oskar_mutex_unlock(h->mutex);
             return;
         }
-        h->num_antennas = num_antennas;
-        h->num_mbf = num_mbf;
-        h->max_order = max_order;
-        h->freq = freq;
         h->alpha_te = alpha_te;
         if (oskar_mem_precision(alpha_te) != h->precision)
         {
@@ -668,6 +664,10 @@ void oskar_harp_load_hdf5(oskar_Harp* h, int* status)
                 oskar_mem_free(coeffs[feed], status);
             }
         }
+        h->num_antennas = num_antennas;
+        h->max_order = max_order;
+        h->freq = freq;
+        h->num_mbf = num_mbf;
     }
     oskar_mutex_unlock(h->mutex);
 }
