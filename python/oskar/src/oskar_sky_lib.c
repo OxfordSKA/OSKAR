@@ -91,7 +91,7 @@ static PyObject* append_sources(PyObject* self, PyObject* args)
     PyObject *obj[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     oskar_Mem *ra_c, *dec_c, *I_c, *Q_c, *U_c, *V_c;
     oskar_Mem *ref_c, *spix_c, *rm_c, *maj_c, *min_c, *pa_c;
-    PyArrayObject *ra = 0, *dec = 0, *I = 0, *Q = 0, *U = 0, *V = 0;
+    PyArrayObject *ra = 0, *dec = 0, *I_a = 0, *Q = 0, *U = 0, *V = 0;
     PyArrayObject *ref = 0, *spix = 0, *rm = 0, *maj = 0, *min = 0, *pa = 0;
     int status = 0, npy_type, type, flags, num_sources, old_num;
 
@@ -108,7 +108,7 @@ static PyObject* append_sources(PyObject* self, PyObject* args)
     npy_type = numpy_type_from_oskar(type);
     ra   = (PyArrayObject*) PyArray_FROM_OTF(obj[1], npy_type, flags);
     dec  = (PyArrayObject*) PyArray_FROM_OTF(obj[2], npy_type, flags);
-    I    = (PyArrayObject*) PyArray_FROM_OTF(obj[3], npy_type, flags);
+    I_a    = (PyArrayObject*) PyArray_FROM_OTF(obj[3], npy_type, flags);
     Q    = (PyArrayObject*) PyArray_FROM_OTF(obj[4], npy_type, flags);
     U    = (PyArrayObject*) PyArray_FROM_OTF(obj[5], npy_type, flags);
     V    = (PyArrayObject*) PyArray_FROM_OTF(obj[6], npy_type, flags);
@@ -118,12 +118,12 @@ static PyObject* append_sources(PyObject* self, PyObject* args)
     maj  = (PyArrayObject*) PyArray_FROM_OTF(obj[10], npy_type, flags);
     min  = (PyArrayObject*) PyArray_FROM_OTF(obj[11], npy_type, flags);
     pa   = (PyArrayObject*) PyArray_FROM_OTF(obj[12], npy_type, flags);
-    if (!ra || !dec || !I || !Q || !U || !V ||
+    if (!ra || !dec || !I_a || !Q || !U || !V ||
             !ref || !spix || !rm || !maj || !min || !pa)
         goto fail;
 
     /* Check size of input arrays. */
-    num_sources = (int) PyArray_SIZE(I);
+    num_sources = (int) PyArray_SIZE(I_a);
     if (num_sources != (int) PyArray_SIZE(ra) ||
             num_sources != (int) PyArray_SIZE(dec) ||
             num_sources != (int) PyArray_SIZE(Q) ||
@@ -145,7 +145,7 @@ static PyObject* append_sources(PyObject* self, PyObject* args)
             type, OSKAR_CPU, num_sources, &status);
     dec_c = oskar_mem_create_alias_from_raw(PyArray_DATA(dec),
             type, OSKAR_CPU, num_sources, &status);
-    I_c = oskar_mem_create_alias_from_raw(PyArray_DATA(I),
+    I_c = oskar_mem_create_alias_from_raw(PyArray_DATA(I_a),
             type, OSKAR_CPU, num_sources, &status);
     Q_c = oskar_mem_create_alias_from_raw(PyArray_DATA(Q),
             type, OSKAR_CPU, num_sources, &status);
@@ -219,7 +219,7 @@ static PyObject* append_sources(PyObject* self, PyObject* args)
 
     Py_XDECREF(ra);
     Py_XDECREF(dec);
-    Py_XDECREF(I);
+    Py_XDECREF(I_a);
     Py_XDECREF(Q);
     Py_XDECREF(U);
     Py_XDECREF(V);
@@ -234,7 +234,7 @@ static PyObject* append_sources(PyObject* self, PyObject* args)
 fail:
     Py_XDECREF(ra);
     Py_XDECREF(dec);
-    Py_XDECREF(I);
+    Py_XDECREF(I_a);
     Py_XDECREF(Q);
     Py_XDECREF(U);
     Py_XDECREF(V);
