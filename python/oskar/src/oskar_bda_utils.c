@@ -97,13 +97,6 @@ static PyObject* apply_gains(PyObject* self, PyObject* args)
     Py_XDECREF(pyo_gains);
     return Py_BuildValue("N", pyo_vis_out);
 
-    /*
-    printf("  - Ref count: %zi, %zi, %zi\n",
-            PyArray_REFCOUNT(pyo_vis_in),
-            PyArray_REFCOUNT(pyo_gains),
-            PyArray_REFCOUNT(pyo_vis_out));
-    */
-
 fail:
     Py_XDECREF(pyo_gains);
     Py_XDECREF(pyo_vis_in);
@@ -277,7 +270,7 @@ static PyObject* check_ref_count(PyObject* self, PyObject* args)
     /* Reference count is not increased by 'O' for PyArg_ParseTyple */
     if (!PyArg_ParseTuple(args, "O", &obj))
         return NULL;
-    return Py_BuildValue("ii", PyArray_REFCOUNT(obj), Py_REFCNT(obj));
+    return Py_BuildValue("i", Py_REFCNT(obj));
 }
 
 
