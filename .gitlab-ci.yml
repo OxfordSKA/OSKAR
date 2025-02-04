@@ -2,11 +2,14 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   DEBIAN_FRONTEND: "noninteractive"
   CUDA_ARCH: "7.0;8.0"
+  CONTAINER_SCANNING_DISABLED: 'true'
+  DEPENDENCY_SCANNING_DISABLED: 'true'
 
 image: fdulwich/oskar-ci:cuda-11.3-3
 
 stages:
   - build and test
+  - scan
   - doc
   - publish
 
