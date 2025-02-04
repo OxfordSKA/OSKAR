@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -36,17 +36,17 @@ static void oskar_ms_create_baseline_indices(oskar_MeasurementSet* p,
     }
     if (write_cross_corr || write_auto_corr)
     {
-        for (unsigned int s1 = 0, i = 0; s1 < num_stations; ++s1)
+        for (unsigned int s2 = 0, i = 0; s2 < num_stations; ++s2)
         {
             if (write_auto_corr)
             {
-                p->a1[i] = s1;
-                p->a2[i] = s1;
+                p->a1[i] = s2;
+                p->a2[i] = s2;
                 ++i;
             }
             if (write_cross_corr)
             {
-                for (unsigned int s2 = s1 + 1; s2 < num_stations; ++i, ++s2)
+                for (unsigned int s1 = s2 + 1; s1 < num_stations; ++i, ++s1)
                 {
                     p->a1[i] = s1;
                     p->a2[i] = s2;

@@ -170,42 +170,66 @@ void oskar_log_error(oskar_Log* log, const char* format, ...)
 char* oskar_log_file_data(oskar_Log* log, size_t* size)
 {
     char* data = 0;
-    if (!size) return 0;
+    FILE* handle = 0;
     if (!log) log = &log_;
+    if (!size || !log->file) return 0;
 
-    /* If log exists, then read the whole file. */
-    if (log->file)
+    /* Determine the size of the file. */
+    fflush(log->file);
+    handle = fopen(log->name, "rb");
+    if (!handle) return 0;
+    fseek(handle, 0, SEEK_END);
+    const size_t file_size = ftell(handle);
+    rewind(handle);
+
+    /* Read the whole file if it's small enough. */
+    const size_t max_log_size = 20000;
+    if (file_size > 0 && file_size <= max_log_size)
     {
-        FILE* temp_handle = 0;
-
-        /* Determine the current size of the file. */
-        fflush(log->file);
-        temp_handle = fopen(log->name, "rb");
-        if (temp_handle)
+        *size = file_size;
+        data = (char*) calloc(10 + *size * sizeof(char), 1);
+        if (data == 0 || fread(data, 1, file_size, handle) != file_size)
         {
-            fseek(temp_handle, 0, SEEK_END);
-            *size = ftell(temp_handle);
-
-            /* Read the file into memory. */
-            if (*size != 0)
-            {
-                size_t bytes_read = 0;
-                data = (char*) calloc(10 + *size * sizeof(char), 1);
-                if (data != 0)
-                {
-                    rewind(temp_handle);
-                    bytes_read = fread(data, 1, *size, temp_handle);
-                    if (bytes_read != *size)
-                    {
-                        free(data);
-                        data = 0;
-                    }
-                }
-            }
-            fclose(temp_handle);
+            free(data);
+            fclose(handle);
+            return 0;
         }
     }
+    else if (file_size > max_log_size)
+    {
+        char* ptr = 0;
+        const char message[] = "...\n(Centre section of log skipped)\n...";
+        const size_t len_head = 12000;
+        const size_t len_tail = 4000;
+        const size_t len_message = strlen(message);
+        *size = len_head + len_tail + len_message;
+        data = (char*) calloc(10 + *size * sizeof(char), 1);
+        ptr = data;
 
+        /* Read the head of the log file. */
+        if (data == 0 || fread(ptr, 1, len_head, handle) != len_head)
+        {
+            free(data);
+            fclose(handle);
+            return 0;
+        }
+        ptr += len_head;
+
+        /* Add a message to indicate that the log has been truncated. */
+        memcpy(ptr, message, len_message);
+        ptr += len_message;
+
+        /* Read the tail of the log file. */
+        fseek(handle, -len_tail, SEEK_END);
+        if (fread(ptr, 1, len_tail, handle) != len_tail)
+        {
+            free(data);
+            fclose(handle);
+            return 0;
+        }
+        ptr += len_tail;
+    }
+    fclose(handle);
     return data;
 }
 

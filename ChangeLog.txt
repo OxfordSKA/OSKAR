@@ -1,6 +1,12 @@
-2024-XX-YY  OSKAR-2.9.6
+2025-02-04  OSKAR-2.9.6
 
     * Ensure thread safety when loading HARP coefficient data from HDF5 files.
+
+    * Fix Measurement Set output by swapping the ANTENNA1 and ANTENNA2 index
+      columns. This allows DP3 to apply gains correctly.
+
+    * Write only head and tail of log to output files, if the log is larger
+      than 20 kB.
 
 2024-05-03  OSKAR-2.9.5
 
