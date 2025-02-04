@@ -1,11 +1,11 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   DEBIAN_FRONTEND: "noninteractive"
-  CUDA_ARCH: "7.0;8.0"
+  CUDA_ARCH: "8.0"
   CONTAINER_SCANNING_DISABLED: 'true'
   DEPENDENCY_SCANNING_DISABLED: 'true'
 
-image: fdulwich/oskar-ci:cuda-11.3-3
+image: fdulwich/oskar-ci:cuda-12.5
 
 stages:
   - build and test
@@ -18,7 +18,7 @@ stages:
 
 build-test-debug:
   stage: build and test
-  tags: [k8srunner-gpu-v100]
+  tags: [ska-gpu-a100]
   before_script:
     - *ready_reports
     - nvidia-smi
@@ -43,7 +43,7 @@ build-test-debug:
 
 build-test-release:
   stage: build and test
-  tags: [k8srunner-gpu-v100]
+  tags: [ska-gpu-a100]
   before_script:
     - *ready_reports
     # We need CMake >= 3.21.0 for the --output-junit option on CTest.
