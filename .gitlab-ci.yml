@@ -5,7 +5,7 @@ variables:
   CONTAINER_SCANNING_DISABLED: 'true'
   DEPENDENCY_SCANNING_DISABLED: 'true'
 
-image: fdulwich/oskar-ci:cuda-12.5
+image: fdulwich/oskar-ci:cuda-11.4
 
 stages:
   - build and test
