@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -54,7 +54,11 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
     /* Calculate (u,v,w) coordinates for the block. */
     if (oskar_vis_block_has_cross_correlations(b0))
     {
-        oskar_telescope_uvw(h->tel, 0, h->ignore_w_components,
+        oskar_telescope_uvw(
+                h->tel,
+                h->casa_phase_convention,
+                0, /* Use measured coordinates. */
+                h->ignore_w_components,
                 oskar_vis_block_num_times(b0),
                 oskar_vis_header_time_start_mjd_utc(h->header),
                 oskar_vis_header_time_inc_sec(h->header) / 86400.0,
@@ -64,7 +68,9 @@ oskar_VisBlock* oskar_interferometer_finalise_block(oskar_Interferometer* h,
                 oskar_vis_block_station_uvw_metres(b0, 2),
                 oskar_vis_block_baseline_uvw_metres(b0, 0),
                 oskar_vis_block_baseline_uvw_metres(b0, 1),
-                oskar_vis_block_baseline_uvw_metres(b0, 2), status);
+                oskar_vis_block_baseline_uvw_metres(b0, 2),
+                status
+        );
     }
 
     /* Add uncorrelated system noise to the combined visibilities. */

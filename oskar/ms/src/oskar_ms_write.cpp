@@ -36,20 +36,43 @@ static void oskar_ms_create_baseline_indices(oskar_MeasurementSet* p,
     }
     if (write_cross_corr || write_auto_corr)
     {
-        for (unsigned int s2 = 0, i = 0; s2 < num_stations; ++s2)
+        if (p->casa_phase_convention)
         {
-            if (write_auto_corr)
+            for (unsigned int s1 = 0, i = 0; s1 < num_stations; ++s1)
             {
-                p->a1[i] = s2;
-                p->a2[i] = s2;
-                ++i;
-            }
-            if (write_cross_corr)
-            {
-                for (unsigned int s1 = s2 + 1; s1 < num_stations; ++i, ++s1)
+                if (write_auto_corr)
                 {
                     p->a1[i] = s1;
+                    p->a2[i] = s1;
+                    ++i;
+                }
+                if (write_cross_corr)
+                {
+                    for (unsigned int s2 = s1 + 1; s2 < num_stations; ++i, ++s2)
+                    {
+                        p->a1[i] = s1;
+                        p->a2[i] = s2;
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (unsigned int s2 = 0, i = 0; s2 < num_stations; ++s2)
+            {
+                if (write_auto_corr)
+                {
+                    p->a1[i] = s2;
                     p->a2[i] = s2;
+                    ++i;
+                }
+                if (write_cross_corr)
+                {
+                    for (unsigned int s1 = s2 + 1; s1 < num_stations; ++i, ++s1)
+                    {
+                        p->a1[i] = s1;
+                        p->a2[i] = s2;
+                    }
                 }
             }
         }
@@ -72,7 +95,6 @@ void oskar_ms_write_coords(oskar_MeasurementSet* p,
     Vector<Float> weight(p->num_pols, 1.0), sigma(p->num_pols, 1.0);
 
     // Get references to columns.
-#ifdef OSKAR_MS_NEW
     ArrayColumn<Double>& col_uvw = p->msmc.uvw;
     ScalarColumn<Int>& col_antenna1 = p->msmc.antenna1;
     ScalarColumn<Int>& col_antenna2 = p->msmc.antenna2;
@@ -82,19 +104,6 @@ void oskar_ms_write_coords(oskar_MeasurementSet* p,
     ScalarColumn<Double>& col_interval = p->msmc.interval;
     ScalarColumn<Double>& col_time = p->msmc.time;
     ScalarColumn<Double>& col_timeCentroid = p->msmc.timeCentroid;
-#else
-    MSMainColumns* msmc = p->msmc;
-    if (!msmc) return;
-    ArrayColumn<Double>& col_uvw = msmc->uvw();
-    ScalarColumn<Int>& col_antenna1 = msmc->antenna1();
-    ScalarColumn<Int>& col_antenna2 = msmc->antenna2();
-    ArrayColumn<Float>& col_weight = msmc->weight();
-    ArrayColumn<Float>& col_sigma = msmc->sigma();
-    ScalarColumn<Double>& col_exposure = msmc->exposure();
-    ScalarColumn<Double>& col_interval = msmc->interval();
-    ScalarColumn<Double>& col_time = msmc->time();
-    ScalarColumn<Double>& col_timeCentroid = msmc->timeCentroid();
-#endif
 
     // Add new rows if required.
     oskar_ms_ensure_num_rows(p, start_row + num_baselines);
@@ -192,11 +201,7 @@ void oskar_ms_write_vis(oskar_MeasurementSet* p,
     Slicer array_section(start2, length2);
 
     // Write visibilities to DATA column.
-#ifdef OSKAR_MS_NEW
     ArrayColumn<Complex>& col_data = p->msmc.data;
-#else
-    ArrayColumn<Complex>& col_data = p->msmc->data();
-#endif
     col_data.putColumnRange(row_range, array_section, vis_data);
     p->data_written = 1;
 }

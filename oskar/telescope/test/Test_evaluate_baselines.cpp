@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -18,6 +18,7 @@ TEST(evaluate_baselines, cpu_gpu)
     oskar_Timer *timer_cpu = 0, *timer_gpu = 0;
     int num_baselines = 0, num_stations = 512;
     int status = 0, type = 0, location = 0;
+    int use_casa_phase_convention = 0;
     double *u_ = 0, *v_ = 0, *w_ = 0, *uu_ = 0, *vv_ = 0, *ww_ = 0;
 
     num_baselines = num_stations * (num_stations - 1) / 2;
@@ -51,8 +52,10 @@ TEST(evaluate_baselines, cpu_gpu)
     // Evaluate baseline coordinates on CPU.
     timer_cpu = oskar_timer_create(location);
     oskar_timer_start(timer_cpu);
-    oskar_convert_station_uvw_to_baseline_uvw(num_stations,
-            0, u, v, w, 0, uu, vv, ww, &status);
+    oskar_convert_station_uvw_to_baseline_uvw(
+            use_casa_phase_convention,
+            num_stations, 0, u, v, w, 0, uu, vv, ww, &status
+    );
     printf("Station (u,v,w) to baseline (u,v,w) with %d stations (CPU): "
             "%.4f sec\n", num_stations, oskar_timer_elapsed(timer_cpu));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -83,8 +86,12 @@ TEST(evaluate_baselines, cpu_gpu)
     // Evaluate baseline coordinates on device.
     timer_gpu = oskar_timer_create(location);
     oskar_timer_start(timer_gpu);
-    oskar_convert_station_uvw_to_baseline_uvw(num_stations,
-            0, u_gpu, v_gpu, w_gpu, 0, uu_gpu, vv_gpu, ww_gpu, &status);
+    oskar_convert_station_uvw_to_baseline_uvw(
+            use_casa_phase_convention,
+            num_stations,
+            0, u_gpu, v_gpu, w_gpu,
+            0, uu_gpu, vv_gpu, ww_gpu, &status
+    );
     printf("Station (u,v,w) to baseline (u,v,w) with %d stations (device): "
             "%.4f sec\n", num_stations, oskar_timer_elapsed(timer_gpu));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);

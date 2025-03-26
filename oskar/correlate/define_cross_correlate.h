@@ -1,6 +1,7 @@
-/* Copyright (c) 2011-2019, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2011-2025, The OSKAR Developers. See LICENSE file. */
 
 #define OSKAR_XCORR_ARGS(FP)\
+        const int use_casa_phase_convention,\
         const int num_src, const int num_stations, const int offset_out,\
         GLOBAL_IN(FP, src_I), GLOBAL_IN(FP, src_Q),\
         GLOBAL_IN(FP, src_U), GLOBAL_IN(FP, src_V),\
@@ -49,8 +50,12 @@ KERNEL(NAME) (OSKAR_XCORR_ARGS(FP)\
     }\
     BARRIER;\
     if (uv_len < uv_min_lambda || uv_len > uv_max_lambda) return;\
-    GLOBAL_IN(FP4c, st_p) = &jones[num_src * SP];\
-    GLOBAL_IN(FP4c, st_q) = &jones[num_src * SQ];\
+    GLOBAL_IN(FP4c, st_p) = (\
+            &jones[num_src * (use_casa_phase_convention ? SQ : SP)]\
+    );\
+    GLOBAL_IN(FP4c, st_q) = (\
+            &jones[num_src * (use_casa_phase_convention ? SP : SQ)]\
+    );\
     OSKAR_CLEAR_COMPLEX_MATRIX(FP, sum)\
     for (int i = tid; i < num_src; i += bdim) {\
         OSKAR_XCORR_SMEARING(BANDWIDTH_SMEARING, TIME_SMEARING, GAUSSIAN, FP)\
@@ -85,8 +90,12 @@ KERNEL(NAME) (OSKAR_XCORR_ARGS(FP)\
         OSKAR_BASELINE_DELTAS(FP, st_x[SP], st_x[SQ],\
                 st_y[SP], st_y[SQ], du, dv, dw)\
     if (uv_len < uv_min_lambda || uv_len > uv_max_lambda) return;\
-    GLOBAL_IN(FP4c, st_p) = &jones[num_src * SP];\
-    GLOBAL_IN(FP4c, st_q) = &jones[num_src * SQ];\
+    GLOBAL_IN(FP4c, st_p) = (\
+            &jones[num_src * (use_casa_phase_convention ? SQ : SP)]\
+    );\
+    GLOBAL_IN(FP4c, st_q) = (\
+            &jones[num_src * (use_casa_phase_convention ? SP : SQ)]\
+    );\
     const int j = OSKAR_BASELINE_INDEX(num_stations, SP, SQ) + offset_out;\
     OSKAR_CLEAR_COMPLEX_MATRIX(FP, sum)\
     for (int i = 0; i < num_src; i++) {\
@@ -120,8 +129,12 @@ KERNEL(NAME) (OSKAR_XCORR_ARGS(FP)\
     }\
     BARRIER;\
     if (uv_len < uv_min_lambda || uv_len > uv_max_lambda) return;\
-    GLOBAL_IN(FP2, st_p) = &jones[num_src * SP];\
-    GLOBAL_IN(FP2, st_q) = &jones[num_src * SQ];\
+    GLOBAL_IN(FP2, st_p) = (\
+            &jones[num_src * (use_casa_phase_convention ? SQ : SP)]\
+    );\
+    GLOBAL_IN(FP2, st_q) = (\
+            &jones[num_src * (use_casa_phase_convention ? SP : SQ)]\
+    );\
     MAKE_ZERO2(FP, sum);\
     for (int i = tid; i < num_src; i += bdim) {\
         OSKAR_XCORR_SMEARING(BANDWIDTH_SMEARING, TIME_SMEARING, GAUSSIAN, FP)\
@@ -155,8 +168,12 @@ KERNEL(NAME) (OSKAR_XCORR_ARGS(FP)\
         OSKAR_BASELINE_DELTAS(FP, st_x[SP], st_x[SQ],\
                 st_y[SP], st_y[SQ], du, dv, dw)\
     if (uv_len < uv_min_lambda || uv_len > uv_max_lambda) return;\
-    GLOBAL_IN(FP2, st_p) = &jones[num_src * SP];\
-    GLOBAL_IN(FP2, st_q) = &jones[num_src * SQ];\
+    GLOBAL_IN(FP2, st_p) = (\
+            &jones[num_src * (use_casa_phase_convention ? SQ : SP)]\
+    );\
+    GLOBAL_IN(FP2, st_q) = (\
+            &jones[num_src * (use_casa_phase_convention ? SP : SQ)]\
+    );\
     const int j = OSKAR_BASELINE_INDEX(num_stations, SP, SQ) + offset_out;\
     MAKE_ZERO2(FP, sum);\
     for (int i = 0; i < num_src; i++) {\

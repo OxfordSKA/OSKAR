@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -29,7 +29,8 @@ extern "C" {
  * The baseline coordinates are not computed if \p uu, \p vv or \p ww are NULL.
  *
  * @param[in]  tel              Telescope model.
- * @param[in]  use_true coords  If set, use true station coordinates.
+ * @param[in]  use_casa_phase_convention If set, use the CASA phase convention.
+ * @param[in]  use_true_coords  If set, use true station coordinates.
  * @param[in]  ignore_w_components If true, set all output w coordinates to 0.
  * @param[in]  num_times        Number of time steps to loop over.
  * @param[in]  time_ref_mjd_utc Start time of the observation.
@@ -46,6 +47,7 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_telescope_uvw(
         const oskar_Telescope* tel,
+        int use_casa_phase_convention,
         int use_true_coords,
         int ignore_w_components,
         int num_times,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, The OSKAR Developers.
+ * Copyright (c) 2020-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -11,8 +11,11 @@
 extern "C" {
 #endif
 
-void oskar_vis_block_station_to_baseline_coords(oskar_VisBlock* vis,
-        int* status)
+void oskar_vis_block_station_to_baseline_coords(
+        oskar_VisBlock* vis,
+        const oskar_VisHeader* hdr,
+        int* status
+)
 {
     int i = 0;
     if (*status) return;
@@ -24,6 +27,7 @@ void oskar_vis_block_station_to_baseline_coords(oskar_VisBlock* vis,
     for (i = 0; i < num_times; ++i)
     {
         oskar_convert_station_uvw_to_baseline_uvw(
+                oskar_vis_header_casa_phase_convention(hdr),
                 num_stations,
                 num_stations * i,
                 oskar_vis_block_station_uvw_metres(vis, 0),
@@ -33,7 +37,8 @@ void oskar_vis_block_station_to_baseline_coords(oskar_VisBlock* vis,
                 oskar_vis_block_baseline_uvw_metres(vis, 0),
                 oskar_vis_block_baseline_uvw_metres(vis, 1),
                 oskar_vis_block_baseline_uvw_metres(vis, 2),
-                status);
+                status
+        );
     }
 }
 

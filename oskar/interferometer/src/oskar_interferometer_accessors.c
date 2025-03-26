@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -22,6 +22,11 @@
 extern "C" {
 #endif
 
+int oskar_interferometer_casa_phase_convention(const oskar_Interferometer* h)
+{
+    return h->casa_phase_convention;
+}
+
 int oskar_interferometer_coords_only(const oskar_Interferometer* h)
 {
     return h->coords_only;
@@ -30,6 +35,11 @@ int oskar_interferometer_coords_only(const oskar_Interferometer* h)
 oskar_Log* oskar_interferometer_log(oskar_Interferometer* h)
 {
     return h->log;
+}
+
+double oskar_interferometer_ms_dish_diameter(const oskar_Interferometer* h)
+{
+    return h->ms_dish_diameter;
 }
 
 int oskar_interferometer_num_devices(const oskar_Interferometer* h)
@@ -58,6 +68,13 @@ int oskar_interferometer_num_vis_blocks(const oskar_Interferometer* h)
 void oskar_interferometer_reset_work_unit_index(oskar_Interferometer* h)
 {
     h->work_unit_index = 0;
+}
+
+void oskar_interferometer_set_casa_phase_convention(
+        oskar_Interferometer* h, int value
+)
+{
+    h->casa_phase_convention = value;
 }
 
 void oskar_interferometer_set_coords_only(oskar_Interferometer* h, int value,
@@ -170,6 +187,14 @@ void oskar_interferometer_set_max_times_per_block(oskar_Interferometer* h,
         int value)
 {
     h->max_times_per_block = value;
+}
+
+void oskar_interferometer_set_ms_dish_diameter(
+        oskar_Interferometer* h,
+        double value
+)
+{
+    h->ms_dish_diameter = value;
 }
 
 void oskar_interferometer_set_num_devices(oskar_Interferometer* h, int value)

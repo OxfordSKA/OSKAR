@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -140,7 +140,8 @@ protected:
         int num_baselines = 0, status = 0, type = 0;
         oskar_Mem *vis1 = 0, *vis2 = 0;
         oskar_Timer *timer1 = 0, *timer2 = 0;
-        double time1 = 0.0, time2 = 0.0, frequency = 100e6;
+        double time1 = 0.0, time2 = 0.0, gast = 1.0, frequency = 100e6;
+        int use_casa_phase_convention = 1;
 
         // Create the timers.
         timer1 = oskar_timer_create(loc1);
@@ -157,9 +158,22 @@ protected:
         oskar_telescope_set_channel_bandwidth(tel, freq_average);
         oskar_telescope_set_time_average(tel, time_average);
         oskar_timer_start(timer1);
-        oskar_cross_correlate(extended, num_sources, jones,
-                src_flux, src_dir, src_ext,
-                tel, uvw, 1.0, frequency, 0, vis1, &status);
+        oskar_cross_correlate(
+                use_casa_phase_convention,
+                extended,
+                num_sources,
+                jones,
+                src_flux,
+                src_dir,
+                src_ext,
+                tel,
+                uvw,
+                gast,
+                frequency,
+                0,
+                vis1,
+                &status
+        );
         time1 = oskar_timer_elapsed(timer1);
         destroy_test_data();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -175,9 +189,22 @@ protected:
         oskar_telescope_set_channel_bandwidth(tel, freq_average);
         oskar_telescope_set_time_average(tel, time_average);
         oskar_timer_start(timer2);
-        oskar_cross_correlate(extended, num_sources, jones,
-                src_flux, src_dir, src_ext,
-                tel, uvw, 1.0, frequency, 0, vis2, &status);
+        oskar_cross_correlate(
+                use_casa_phase_convention,
+                extended,
+                num_sources,
+                jones,
+                src_flux,
+                src_dir,
+                src_ext,
+                tel,
+                uvw,
+                gast,
+                frequency,
+                0,
+                vis2,
+                &status
+        );
         time2 = oskar_timer_elapsed(timer2);
         destroy_test_data();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);

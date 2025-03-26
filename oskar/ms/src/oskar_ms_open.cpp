@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -17,8 +17,10 @@ using namespace casacore;
 static oskar_MeasurementSet* oskar_ms_open_private(
         const char* filename, bool readonly)
 {
-    oskar_MeasurementSet* p = (oskar_MeasurementSet*)
-            calloc(1, sizeof(oskar_MeasurementSet));
+    oskar_MeasurementSet* p = ((oskar_MeasurementSet*)
+            calloc(1, sizeof(oskar_MeasurementSet))
+    );
+    p->casa_phase_convention = 1;
     p->num_receptors = 2;
     Vector<Double> range(2, 0.0);
 
@@ -32,17 +34,8 @@ static oskar_MeasurementSet* oskar_ms_open_private(
             lock = TableLock::NoLocking;
             mode = Table::Old;
         }
-#ifdef OSKAR_MS_NEW
         p->ms = new Table(filename, lock, mode);
         oskar_ms_bind_refs(p);
-#else
-        p->ms = new MeasurementSet(filename, lock, mode);
-
-        // Create the MSMainColumns and MSColumns objects for accessing data
-        // in the main table and subtables.
-        p->msc = new MSColumns(*(p->ms));
-        p->msmc = new MSMainColumns(*(p->ms));
-#endif
     }
     catch (AipsError& e)
     {
@@ -52,15 +45,10 @@ static oskar_MeasurementSet* oskar_ms_open_private(
         return 0;
     }
 
-#ifdef OSKAR_MS_NEW
     Table spw(p->ms->tableName() + "/SPECTRAL_WINDOW", Table::Old);
     Table field(p->ms->tableName() + "/FIELD", Table::Old);
     const int num_spectral_windows = spw.nrow();
     const int num_fields = field.nrow();
-#else
-    const int num_spectral_windows = p->ms->spectralWindow().nrow();
-    const int num_fields = p->ms->field().nrow();
-#endif
 
     // Refuse to open if there is more than one spectral window.
     if (num_spectral_windows != 1)
@@ -84,7 +72,6 @@ static oskar_MeasurementSet* oskar_ms_open_private(
         return 0;
     }
 
-#ifdef OSKAR_MS_NEW
     // Get the data dimensions.
     Table pol(p->ms->tableName() + "/POLARIZATION", Table::Old);
     ScalarColumn<Int> numCorr(pol, "NUM_CORR");
@@ -128,38 +115,6 @@ static oskar_MeasurementSet* oskar_ms_open_private(
     {
         timeRange.get(0, range);
     }
-#else
-    // Get the data dimensions.
-    if (p->ms->polarization().nrow() > 0)
-        p->num_pols = p->msc->polarization().numCorr().get(0);
-    if (num_spectral_windows > 0)
-    {
-        p->num_channels = p->msc->spectralWindow().numChan().get(0);
-        p->freq_start_hz = p->msc->spectralWindow().refFrequency().get(0);
-        p->freq_inc_hz = (p->msc->spectralWindow().chanWidth().get(0))(
-                IPosition(1, 0));
-    }
-    p->num_stations = p->ms->antenna().nrow();
-    if (p->ms->nrow() > 0)
-        p->time_inc_sec = p->msc->interval().get(0);
-
-    // Get the phase centre.
-    if (num_fields > 0)
-    {
-        Vector<MDirection> dir;
-        p->msc->field().phaseDirMeasCol().get(0, dir, true);
-        if (dir.size() > 0)
-        {
-            Vector<Double> v = dir(0).getAngle().getValue();
-            p->phase_centre_rad[0] = v(0);
-            p->phase_centre_rad[1] = v(1);
-        }
-    }
-
-    // Get the time range.
-    if (p->msc->observation().nrow() > 0)
-        p->msc->observation().timeRange().get(0, range);
-#endif
     p->start_time = range[0];
     p->end_time = range[1];
 

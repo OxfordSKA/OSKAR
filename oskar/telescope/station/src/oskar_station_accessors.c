@@ -1,7 +1,9 @@
 /*
- * Copyright (c) 2013-2023, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <string.h>
 
 #include "math/oskar_cmath.h"
 #include "math/oskar_find_closest_match.h"
@@ -29,6 +31,11 @@ int oskar_station_precision(const oskar_Station* model)
 int oskar_station_mem_location(const oskar_Station* model)
 {
     return model ? model->mem_location : 0;
+}
+
+const char* oskar_station_name(const oskar_Station* model)
+{
+    return oskar_mem_char_const(model->name);
 }
 
 int oskar_station_type(const oskar_Station* model)
@@ -503,6 +510,20 @@ void oskar_station_set_unique_ids(oskar_Station* model, int* counter)
         {
             oskar_station_set_unique_ids(model->child[i], counter);
         }
+    }
+}
+
+void oskar_station_set_name(
+        oskar_Station* model,
+        const char* name,
+        int* status
+)
+{
+    const size_t len = 1 + strlen(name);
+    oskar_mem_realloc(model->name, len, status);
+    if (!*status)
+    {
+        memcpy(oskar_mem_void(model->name), name, len);
     }
 }
 

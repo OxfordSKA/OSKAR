@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -16,7 +16,7 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
         int max_channels_per_block, int num_channels_total, int num_stations,
         int write_autocorr, int write_crosscor, int* status)
 {
-    int i = 0, j = 0;
+    int i = 0, j = 0, k = 0;
     oskar_VisHeader* hdr = 0;
     if (*status) return 0;
 
@@ -64,28 +64,61 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
     /* Set default polarisation type. */
     if (oskar_type_is_matrix(amp_type))
     {
-        oskar_vis_header_set_pol_type(hdr,
-                OSKAR_VIS_POL_TYPE_LINEAR_XX_XY_YX_YY, status);
+        oskar_vis_header_set_pol_type(
+                hdr, OSKAR_VIS_POL_TYPE_LINEAR_XX_XY_YX_YY, status
+        );
     }
     else
     {
-        oskar_vis_header_set_pol_type(hdr,
-                OSKAR_VIS_POL_TYPE_STOKES_I, status);
+        oskar_vis_header_set_pol_type(
+                hdr, OSKAR_VIS_POL_TYPE_STOKES_I, status
+        );
     }
+    /* Must assume the old behaviour unless explicitly set,
+     * otherwise loading of old files will break. */
+    hdr->casa_phase_convention = 0;
 
     /* Initialise arrays. */
     hdr->telescope_path = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
     hdr->settings = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
+    hdr->station_diameter_m = oskar_mem_create(
+            OSKAR_DOUBLE, OSKAR_CPU, num_stations, status
+    );
+    hdr->station_name = (oskar_Mem**) calloc(num_stations, sizeof(oskar_Mem*));
+    for (i = 0; i < num_stations; ++i)
+    {
+        hdr->station_name[i] = oskar_mem_create(
+                OSKAR_CHAR, OSKAR_CPU, 1, status
+        );
+    }
     for (i = 0; i < 3; ++i)
     {
-        hdr->station_offset_ecef_metres[i] = oskar_mem_create(coord_precision,
-                OSKAR_CPU, num_stations, status);
+        hdr->station_offset_ecef_metres[i] = oskar_mem_create(
+                coord_precision, OSKAR_CPU, num_stations, status
+        );
         hdr->element_enu_metres[i] = (oskar_Mem**) calloc(
-                num_stations, sizeof(oskar_Mem*));
+                num_stations, sizeof(oskar_Mem*)
+        );
         for (j = 0; j < num_stations; ++j)
         {
-            hdr->element_enu_metres[i][j] = oskar_mem_create(coord_precision,
-                    OSKAR_CPU, 0, status);
+            hdr->element_enu_metres[i][j] = oskar_mem_create(
+                    coord_precision, OSKAR_CPU, 0, status
+            );
+        }
+    }
+    for (i = 0; i < 2; ++i)
+    {
+        for (j = 0; j < 3; ++j)
+        {
+            hdr->element_euler_angle_rad[i][j] = (oskar_Mem**) calloc(
+                    num_stations, sizeof(oskar_Mem*)
+            );
+            for (k = 0; k < num_stations; ++k)
+            {
+                hdr->element_euler_angle_rad[i][j][k] = oskar_mem_create(
+                        OSKAR_DOUBLE, OSKAR_CPU, 0, status
+                );
+            }
         }
     }
 

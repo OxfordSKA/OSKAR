@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -14,6 +14,7 @@ extern "C" {
 
 void oskar_telescope_uvw(
         const oskar_Telescope* tel,
+        int use_casa_phase_convention,
         int use_true_coords,
         int ignore_w_components,
         int num_times,
@@ -90,9 +91,12 @@ void oskar_telescope_uvw(
         }
         if (uu && vv && ww)
         {
-            oskar_convert_station_uvw_to_baseline_uvw(num_stations,
+            oskar_convert_station_uvw_to_baseline_uvw(
+                    use_casa_phase_convention,
+                    num_stations,
                     i * num_stations, u, v, w,
-                    i * num_baselines, uu, vv, ww, status);
+                    i * num_baselines, uu, vv, ww, status
+            );
         }
     }
 }

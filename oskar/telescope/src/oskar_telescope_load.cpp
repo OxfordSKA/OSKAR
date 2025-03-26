@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2023, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -236,6 +236,11 @@ static void load_directories(oskar_Telescope* telescope,
     // At some other depth.
     else if (station)
     {
+        // Set the station name.
+        oskar_station_set_name(
+                station, oskar_dir_leafname(cwd.c_str()), status
+        );
+
         // Load everything at this level.
         for (size_t i = 0; i < loaders.size(); ++i)
         {

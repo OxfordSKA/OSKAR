@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2024, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -39,6 +39,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     dst->mem_location = location;
 
     /* Copy common station parameters. */
+    oskar_mem_copy(dst->name, src->name, status);
     dst->station_type = src->station_type;
     dst->normalise_final_beam = src->normalise_final_beam;
     dst->offset_ecef[0] = src->offset_ecef[0];

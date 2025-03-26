@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2022, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -145,6 +145,9 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     ms = oskar_ms_create(output_path, "OSKAR " OSKAR_VERSION_STR,
             num_stations, num_channels, num_pols,
             freq_start_hz, freq_inc_hz, autocorr, crosscorr);
+    oskar_ms_set_casa_phase_convention(
+            ms, oskar_vis_header_casa_phase_convention(hdr)
+    );
     free(output_path);
     if (!ms)
     {
@@ -190,6 +193,42 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     /* Write the absolute station positions to the ANTENNA table. */
     oskar_ms_set_station_coords_d(ms,
             num_stations, station_ecef[0], station_ecef[1], station_ecef[2]);
+
+    /* Write the DISH_DIAMETER values to the ANTENNA table. */
+    oskar_ms_set_station_dish_diameters(
+            ms, num_stations, oskar_vis_header_station_diameters_const(hdr)
+    );
+
+    /* Write the station names to the ANTENNA table. */
+    const char** names = (const char**) calloc(num_stations, sizeof(char*));
+    for (i = 0; i < num_stations; ++i)
+    {
+        names[i] = oskar_vis_header_station_name(hdr, i);
+    }
+    oskar_ms_set_station_names(ms, num_stations, names);
+    free(names);
+
+    /* Write the RECEPTOR_ANGLE values to the FEED table. */
+    double* angle_x = (double*) calloc(num_stations, sizeof(double));
+    double* angle_y = (double*) calloc(num_stations, sizeof(double));
+    for (i = 0; i < num_stations; ++i)
+    {
+        const oskar_Mem* alpha_x = oskar_vis_header_element_feed_angles_const(
+                hdr, 0, 0, i
+        );
+        const oskar_Mem* alpha_y = oskar_vis_header_element_feed_angles_const(
+                hdr, 1, 0, i
+        );
+        /* Get the angle from the first element in each station. */
+        if (oskar_mem_length(alpha_x) > 0 && oskar_mem_length(alpha_y) > 0)
+        {
+            angle_x[i] = ((const double*)oskar_mem_void_const(alpha_x))[0];
+            angle_y[i] = ((const double*)oskar_mem_void_const(alpha_y))[0];
+        }
+    }
+    oskar_ms_set_receptor_angles(ms, num_stations, angle_x, angle_y);
+    free(angle_x);
+    free(angle_y);
 
     /* Write PHASED_ARRAY table, one row per station. */
     for (i = 0; i < num_stations; ++i)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -65,7 +65,7 @@ void oskar_vis_block_read(oskar_VisBlock* vis, const oskar_VisHeader* hdr,
             oskar_binary_read_mem(h, vis->station_uvw_metres[2],
                     OSKAR_TAG_GROUP_VIS_BLOCK,
                     OSKAR_VIS_BLOCK_TAG_STATION_W, block_index, status);
-            oskar_vis_block_station_to_baseline_coords(vis, status);
+            oskar_vis_block_station_to_baseline_coords(vis, hdr, status);
         }
         else
         {

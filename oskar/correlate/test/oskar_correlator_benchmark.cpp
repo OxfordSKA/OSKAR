@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -18,11 +18,21 @@
 #include <string>
 #include <vector>
 
-static void benchmark(int num_stations, int num_sources, int type,
-        int jones_type, int location, int use_extended,
-        int use_bandwidth_smearing, int use_time_smearing,
-        int niter, std::vector<double>& times, const std::string& ascii_file,
-        int* status);
+static void benchmark(
+        int use_casa_phase_convention,
+        int num_stations,
+        int num_sources,
+        int type,
+        int jones_type,
+        int location,
+        int use_extended,
+        int use_bandwidth_smearing,
+        int use_time_smearing,
+        int niter,
+        std::vector<double>& times,
+        const std::string& ascii_file,
+        int* status
+);
 
 int main(int argc, char** argv)
 {
@@ -34,6 +44,7 @@ int main(int argc, char** argv)
     opt.add_flag("-g", "Run on the GPU");
     opt.add_flag("-c", "Run on the CPU");
     opt.add_flag("-cl", "Run using OpenCL");
+    opt.add_flag("-p", "Use CASA phase convention.");
     opt.add_flag("-e", "Use Gaussian sources (default: point sources).");
     opt.add_flag("-b", "Use bandwidth smearing (default: no bandwidth smearing).");
     opt.add_flag("-t", "Use time smearing (default: no time smearing).");
@@ -59,6 +70,7 @@ int main(int argc, char** argv)
         jones_type |= OSKAR_MATRIX;
     }
     int niter = opt.get_int("-n");
+    int use_casa_phase_convention = opt.is_set("-p") ? OSKAR_TRUE : OSKAR_FALSE;
     int use_extended = opt.is_set("-e") ? OSKAR_TRUE : OSKAR_FALSE;
     int use_bandwidth_smearing = opt.is_set("-b") ? OSKAR_TRUE : OSKAR_FALSE;
     int use_time_smearing = opt.is_set("-t") ? OSKAR_TRUE : OSKAR_FALSE;
@@ -121,9 +133,21 @@ int main(int argc, char** argv)
     oskar_device_set_require_double_precision(type == OSKAR_DOUBLE);
     double time_taken_sec = 0.0, average_time_sec = 0.0;
     std::vector<double> times;
-    benchmark(num_stations, num_sources, type, jones_type, location,
-            use_extended, use_bandwidth_smearing, use_time_smearing,
-            niter, times, ascii_file, &status);
+    benchmark(
+            use_casa_phase_convention,
+            num_stations,
+            num_sources,
+            type,
+            jones_type,
+            location,
+            use_extended,
+            use_bandwidth_smearing,
+            use_time_smearing,
+            niter,
+            times,
+            ascii_file,
+            &status
+    );
 
     // Compute total time taken.
     for (int i = 0; i < niter; ++i)
@@ -211,11 +235,21 @@ int main(int argc, char** argv)
 }
 
 
-void benchmark(int num_stations, int num_sources, int type,
-        int jones_type, int location, int use_extended,
-        int use_bandwidth_smearing, int use_time_smearing,
-        int niter, std::vector<double>& times, const std::string& ascii_file,
-        int* status)
+void benchmark(
+        int use_casa_phase_convention,
+        int num_stations,
+        int num_sources,
+        int type,
+        int jones_type,
+        int location,
+        int use_extended,
+        int use_bandwidth_smearing,
+        int use_time_smearing,
+        int niter,
+        std::vector<double>& times,
+        const std::string& ascii_file,
+        int* status
+)
 {
     oskar_Timer* timer = oskar_timer_create(location);
 
@@ -263,9 +297,22 @@ void benchmark(int num_stations, int num_sources, int type,
     {
         oskar_mem_clear_contents(vis, status);
         oskar_timer_start(timer);
-        oskar_cross_correlate(use_extended, num_sources, J,
-                src_flux, src_dir, src_ext,
-                tel, uvw, 0.0, 100e6, 0, vis, status);
+        oskar_cross_correlate(
+                use_casa_phase_convention,
+                use_extended,
+                num_sources,
+                J,
+                src_flux,
+                src_dir,
+                src_ext,
+                tel,
+                uvw,
+                0.0,
+                100e6,
+                0,
+                vis,
+                status
+        );
         times[i] = oskar_timer_elapsed(timer);
     }
 

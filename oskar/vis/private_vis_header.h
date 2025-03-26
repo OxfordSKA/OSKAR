@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -29,6 +29,7 @@ struct oskar_VisHeader
     int num_channels_total;          /* Total no. channels. */
     int num_stations;                /* No. interferometer stations. */
     int pol_type;                    /* Polarisation type enumerator. */
+    int casa_phase_convention;       /* True=CASA, False=old OSKAR. */
 
     int phase_centre_type;           /* Phase centre coordinate type. */
     double phase_centre_deg[2];      /* Phase centre coordinates [deg]. */
@@ -42,8 +43,11 @@ struct oskar_VisHeader
     double telescope_centre_lat_deg; /* Telescope reference latitude [deg]. */
     double telescope_centre_alt_m;   /* Telescope reference altitude [m]. */
 
+    oskar_Mem* station_diameter_m; /* Length num_stations. */
+    oskar_Mem** station_name; /* Length num_stations. */
     oskar_Mem* station_offset_ecef_metres[3]; /* Station coordinates [m] (offset ECEF). */
     oskar_Mem** element_enu_metres[3]; /* Length num_stations. */
+    oskar_Mem** element_euler_angle_rad[2][3]; /* Length num_stations. */
 };
 
 #ifndef OSKAR_VIS_HEADER_TYPEDEF_

@@ -29,6 +29,14 @@
         </type>
         <desc>The type of correlations to produce: either cross-correlations,
             auto-correlations, or both.</desc></s>
+    <s k="use_casa_phase_convention">
+        <label>Use CASA/VLA phase convention</label>
+        <type name="Bool" default="true"/>
+        <desc>If true, then use a CASA-compatible convention for the sign of
+            baseline coordinates and visibility phases. <b>Note that as of
+            OSKAR 2.10, this is now enabled by default - if it is important to
+            maintain the opposite signs for compatibility with data saved from
+            previous versions of OSKAR, set this to false.</b></desc></s>
     <s k="uv_filter_min"><label>UV range filter min</label>
         <type name="DoubleRangeExt" default="min">0,MAX,min,max</type>
         <desc>The minimum value of the baseline UV length allowed by the
@@ -62,6 +70,14 @@
             'Scalar' (or Stokes-I) mode. If <b>False</b>, the size of the
             polarisation dimension in the the Measurement Set will be
             determined by the simulation mode.</desc></s>
+    <s k="ms_dish_diameter">
+        <label>Measurement Set dish diameter [m]</label>
+        <type name="DoubleRangeExt" default="default">0,MAX,default</type>
+        <desc>Use this option if it is important to set the DISH_DIAMETER
+            column in the output Measurement Set's ANTENNA table to a specific
+            value. For aperture array stations, this should be set here, since
+            no shape is assumed or fitted otherwise.
+            The default if not set is 1 metre.</desc></s>
     <s k="ignore_w_components">
         <label>Ignore W-components</label>
         <type name="Bool" default="false"/>

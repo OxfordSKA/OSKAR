@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -94,7 +94,7 @@ void oskar_imager_update_from_block(oskar_Imager* h,
     /* Get baseline coordinates if required. */
     if (oskar_vis_block_has_station_coords(block))
     {
-        oskar_vis_block_station_to_baseline_coords(block, status);
+        oskar_vis_block_station_to_baseline_coords(block, hdr, status);
     }
 
     /* Update the imager with the data. */

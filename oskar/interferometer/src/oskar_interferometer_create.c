@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -31,6 +31,7 @@ oskar_Interferometer* oskar_interferometer_create(int precision, int* status)
     h->num_gpus_avail = oskar_device_count(0, &h->dev_loc);
 
     /* Set sensible defaults. */
+    h->casa_phase_convention = 1;
     h->max_sources_per_chunk = 16384;
     oskar_interferometer_set_gpus(h, -1, 0, status);
     oskar_interferometer_set_num_devices(h, -1);

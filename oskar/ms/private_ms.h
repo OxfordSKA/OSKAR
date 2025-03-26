@@ -1,20 +1,12 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
-// Comment out this line to use the old version (change also FindCASACORE.cmake).
-#define OSKAR_MS_NEW 1
-
-#ifdef OSKAR_MS_NEW
 #include <tables/Tables.h>
-#else
-#include <ms/MeasurementSets.h>
-#endif
 
 struct oskar_MeasurementSet
 {
-#ifdef OSKAR_MS_NEW
     struct MainColumns
     {
         casacore::ScalarColumn<int> antenna1, antenna2;
@@ -25,11 +17,7 @@ struct oskar_MeasurementSet
     };
     casacore::Table* ms;  // Pointer to the Measurement Set main table.
     MainColumns msmc;     // Main table columns.
-#else
-    casacore::MeasurementSet* ms;   // Pointer to the Measurement Set.
-    casacore::MSColumns* msc;       // Pointer to the sub-tables.
-    casacore::MSMainColumns* msmc;  // Pointer to the main columns.
-#endif
+    int casa_phase_convention;
     char* app_name;
     unsigned int *a1, *a2;
     unsigned int num_pols, num_channels, num_stations, num_receptors;

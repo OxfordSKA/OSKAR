@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -189,12 +189,19 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     };
 
     /* Get true station (u,v,w) coordinates. */
-    oskar_telescope_uvw(d->tel,
+    /*
+     * The sign convention doesn't actually matter here, since this is
+     * evaluating just the station rather than the baseline coordinates.
+     */
+    oskar_telescope_uvw(
+            d->tel,
+            h->casa_phase_convention,
             1, /* Use true coordinates. */
             0, /* Do not ignore w-components. */
             1, /* Single time sample. */
             t_start, dt_dump_days, time_index_sim,
-            d->uvw[0], d->uvw[1], d->uvw[2], 0, 0, 0, status);
+            d->uvw[0], d->uvw[1], d->uvw[2], 0, 0, 0, status
+    );
     const oskar_Mem* const uvw[] = { d->uvw[0], d->uvw[1], d->uvw[2] };
 
     /* Get source direction cosines. */
@@ -300,6 +307,7 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
             oskar_sky_gaussian_c_const(sky)
         };
         oskar_cross_correlate(
+                h->casa_phase_convention,
                 source_type, num_src, d->J,
                 src_flux, lmn, src_extended,
                 d->tel, uvw,

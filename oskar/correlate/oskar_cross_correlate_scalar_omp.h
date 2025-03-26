@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2014-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2014-2025, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #ifndef OSKAR_CROSS_CORRELATE_SCALAR_OMP_H_
@@ -50,6 +27,7 @@ extern "C" {
  *
  * Note that the station x, y, z coordinates must be in the ECEF frame.
  *
+ * @param[in] use_casa_phase_convention If set, use the CASA phase convention.
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
  * @param[in] offset_out     Output visibility start offset.
@@ -74,6 +52,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_scalar_point_omp_f(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const float2* jones, const float* I, const float* l,
         const float* m, const float* n,
@@ -93,6 +72,7 @@ void oskar_cross_correlate_scalar_point_omp_f(
  *
  * Note that the station x, y, z coordinates must be in the ECEF frame.
  *
+ * @param[in] use_casa_phase_convention If set, use the CASA phase convention.
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
  * @param[in] offset_out     Output visibility start offset.
@@ -117,6 +97,7 @@ void oskar_cross_correlate_scalar_point_omp_f(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_scalar_point_omp_d(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const double2* jones, const double* I, const double* l,
         const double* m, const double* n,
@@ -139,6 +120,7 @@ void oskar_cross_correlate_scalar_point_omp_d(
  *
  * Note that the station x, y coordinates must be in the ECEF frame.
  *
+ * @param[in] use_casa_phase_convention If set, use the CASA phase convention.
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
  * @param[in] offset_out     Output visibility start offset.
@@ -166,6 +148,7 @@ void oskar_cross_correlate_scalar_point_omp_d(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_scalar_gaussian_omp_f(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const float2* jones, const float* I, const float* l,
         const float* m, const float* n,
@@ -190,6 +173,7 @@ void oskar_cross_correlate_scalar_gaussian_omp_f(
  *
  * Note that the station x, y coordinates must be in the ECEF frame.
  *
+ * @param[in] use_casa_phase_convention If set, use the CASA phase convention.
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
  * @param[in] offset_out     Output visibility start offset.
@@ -217,6 +201,7 @@ void oskar_cross_correlate_scalar_gaussian_omp_f(
  */
 OSKAR_EXPORT
 void oskar_cross_correlate_scalar_gaussian_omp_d(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const double2* jones, const double* I, const double* l,
         const double* m, const double* n,

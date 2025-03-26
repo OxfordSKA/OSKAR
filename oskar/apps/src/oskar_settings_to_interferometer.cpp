@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, The OSKAR Developers.
+ * Copyright (c) 2017-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -84,6 +84,8 @@ oskar_Interferometer* oskar_settings_to_interferometer(oskar::SettingsTree* s,
     s->begin_group("interferometer");
     oskar_interferometer_set_correlation_type(h,
             s->to_string("correlation_type", status), status);
+    oskar_interferometer_set_casa_phase_convention(h,
+            s->to_int("use_casa_phase_convention", status));
     oskar_interferometer_set_max_times_per_block(h,
             s->to_int("max_time_samples_per_block", status));
     oskar_interferometer_set_max_channels_per_block(h,
@@ -94,6 +96,8 @@ oskar_Interferometer* oskar_settings_to_interferometer(oskar::SettingsTree* s,
             s->to_string("ms_filename", status));
     oskar_interferometer_set_force_polarised_ms(h,
             s->to_int("force_polarised_ms", status));
+    oskar_interferometer_set_ms_dish_diameter(h,
+            s->to_double("ms_dish_diameter", status));
     oskar_interferometer_set_ignore_w_components(h,
             s->to_int("ignore_w_components", status));
     s->end_group();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -11,8 +11,10 @@
 
 using namespace casacore;
 
-size_t oskar_ms_column_element_size(const oskar_MeasurementSet* p,
-        const char* column)
+size_t oskar_ms_column_element_size(
+        const oskar_MeasurementSet* p,
+        const char* column
+)
 {
     if (!p->ms || !p->ms->tableDesc().isColumn(column)) return 0;
 
@@ -34,8 +36,10 @@ size_t oskar_ms_column_element_size(const oskar_MeasurementSet* p,
     return 0;
 }
 
-int oskar_ms_column_element_type(const oskar_MeasurementSet* p,
-        const char* column)
+int oskar_ms_column_element_type(
+        const oskar_MeasurementSet* p,
+        const char* column
+)
 {
     if (!p->ms || !p->ms->tableDesc().isColumn(column))
     {
@@ -60,8 +64,11 @@ int oskar_ms_column_element_type(const oskar_MeasurementSet* p,
     return OSKAR_MS_UNKNOWN_TYPE;
 }
 
-size_t* oskar_ms_column_shape(const oskar_MeasurementSet* p, const char* column,
-        size_t* ndim)
+size_t* oskar_ms_column_shape(
+        const oskar_MeasurementSet* p,
+        const char* column,
+        size_t* ndim
+)
 {
     size_t i = 0, *t = 0;
     if (!p->ms || !p->ms->tableDesc().isColumn(column)) return 0;
@@ -162,10 +169,11 @@ double oskar_ms_phase_centre_dec_rad(const oskar_MeasurementSet* p)
     return p->phase_centre_rad[1];
 }
 
-void oskar_ms_set_array_centre(oskar_MeasurementSet* p,
-        const double array_centre_itrf[3])
+void oskar_ms_set_array_centre(
+        oskar_MeasurementSet* p,
+        const double array_centre_itrf[3]
+)
 {
-#ifdef OSKAR_MS_NEW
     Table observation(p->ms->tableName() + "/OBSERVATION", Table::Update);
     ArrayColumn<Double> arrayCentre(observation, "ARRAY_CENTER");
     Vector<Double> centre(3);
@@ -173,15 +181,22 @@ void oskar_ms_set_array_centre(oskar_MeasurementSet* p,
     centre[1] = array_centre_itrf[1];
     centre[2] = array_centre_itrf[2];
     arrayCentre.put(0, centre);
-#endif
 }
 
-void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
-        double longitude_rad, double latitude_rad)
+void oskar_ms_set_casa_phase_convention(oskar_MeasurementSet* p, int value)
+{
+    p->casa_phase_convention = value;
+}
+
+void oskar_ms_set_phase_centre(
+        oskar_MeasurementSet* p,
+        int coord_type,
+        double longitude_rad,
+        double latitude_rad
+)
 {
     if (!p->ms) return;
 
-#ifdef OSKAR_MS_NEW
     // Write data to the last row of the FIELD table.
     Table field(p->ms->tableName() + "/FIELD", Table::Update);
     int row = field.nrow() - 1;
@@ -198,44 +213,21 @@ void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
     delayDir.put((unsigned int)row, dir);
     phaseDir.put((unsigned int)row, dir);
     referenceDir.put((unsigned int)row, dir);
-#else
-    // Set up the field info.
-    Vector<MDirection> direction(1);
-    if (coord_type == 0)
-    {
-        MVDirection radec(Quantity(longitude_rad, "rad"),
-                Quantity(latitude_rad, "rad"));
-        direction(0) = MDirection(radec, MDirection::J2000);
-    }
-    else if (coord_type == 1)
-    {
-        MVDirection azel(Quantity(longitude_rad, "rad"),
-                Quantity(latitude_rad, "rad"));
-        /* FIXME Using MDirection::AZEL causes this to throw! */
-        direction(0) = MDirection(azel, MDirection::J2000);
-    }
-
-    // Write data to the last row of the FIELD table.
-    int row = p->ms->field().nrow() - 1;
-    if (row < 0)
-    {
-        p->ms->field().addRow();
-        row = 0;
-    }
-    p->msc->field().delayDirMeasCol().put((unsigned int)row, direction);
-    p->msc->field().phaseDirMeasCol().put((unsigned int)row, direction);
-    p->msc->field().referenceDirMeasCol().put((unsigned int)row, direction);
-#endif
     p->phase_centre_type = coord_type;
     p->phase_centre_rad[0] = longitude_rad;
     p->phase_centre_rad[1] = latitude_rad;
 }
 
-void oskar_ms_set_element_coords(oskar_MeasurementSet* p, unsigned int station,
-        unsigned int num_elements, const double* x, const double* y,
-        const double* z, const double* matrix)
+void oskar_ms_set_element_coords(
+        oskar_MeasurementSet* p,
+        unsigned int station,
+        unsigned int num_elements,
+        const double* x,
+        const double* y,
+        const double* z,
+        const double* matrix
+)
 {
-#ifdef OSKAR_MS_NEW
     // Copy position from ANTENNA table.
     Table antenna(p->ms->tableName() + "/ANTENNA", Table::Old);
     ArrayColumn<Double> antennaPosition(antenna, "POSITION");
@@ -277,37 +269,93 @@ void oskar_ms_set_element_coords(oskar_MeasurementSet* p, unsigned int station,
     coordinateSystem.put(station, m);
     elementOffset.put(station, offset);
     elementFlag.put(station, flags);
-#endif
 }
 
 template <typename T>
-void oskar_ms_set_station_coords(oskar_MeasurementSet* p,
-        unsigned int num_stations, const T* x, const T* y, const T* z)
+void oskar_ms_set_station_coords_private(
+        oskar_MeasurementSet* p,
+        unsigned int num_stations,
+        const T* x,
+        const T* y,
+        const T* z
+)
 {
     if (!p->ms) return;
     if (num_stations != p->num_stations) return;
-
     Vector<Double> pos(3, 0.0);
-#ifdef OSKAR_MS_NEW
     Table antenna(p->ms->tableName() + "/ANTENNA", Table::Update);
     ArrayColumn<Double> position(antenna, "POSITION");
-#endif
     for (unsigned int a = 0; a < num_stations; ++a)
     {
         pos(0) = x[a]; pos(1) = y[a]; pos(2) = z[a];
-#ifdef OSKAR_MS_NEW
         position.put(a, pos);
-#else
-        p->msc->antenna().position().put(a, pos);
-#endif
     }
 }
 
-void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p,
-        unsigned int num_stations, const double* x, const double* y,
-        const double* z)
+void oskar_ms_set_station_coords_d(
+        oskar_MeasurementSet* p,
+        unsigned int num_stations,
+        const double* x,
+        const double* y,
+        const double* z
+)
 {
-    oskar_ms_set_station_coords(p, num_stations, x, y, z);
+    oskar_ms_set_station_coords_private(p, num_stations, x, y, z);
+}
+
+void oskar_ms_set_station_dish_diameters(
+        oskar_MeasurementSet* p,
+        unsigned int num_stations,
+        const double* diameters
+)
+{
+    if (!p->ms) return;
+    if (num_stations != p->num_stations) return;
+    Table antenna(p->ms->tableName() + "/ANTENNA", Table::Update);
+    ScalarColumn<Double> dish_diameter(antenna, "DISH_DIAMETER");
+    for (unsigned int a = 0; a < num_stations; ++a)
+    {
+        const double value = diameters[a] > 0 ? diameters[a] : 1.0;
+        dish_diameter.put(a, value);
+    }
+}
+
+void oskar_ms_set_station_names(
+        oskar_MeasurementSet* p,
+        unsigned int num_stations,
+        const char* const* names
+)
+{
+    if (!p->ms) return;
+    if (num_stations != p->num_stations) return;
+    Table antenna(p->ms->tableName() + "/ANTENNA", Table::Update);
+    ScalarColumn<String> name(antenna, "NAME");
+    for (unsigned int a = 0; a < num_stations; ++a)
+    {
+        name.put(a, String(names[a]));
+    }
+}
+
+void oskar_ms_set_receptor_angles(
+        oskar_MeasurementSet* p,
+        unsigned int num_stations,
+        const double* angle_x_rad,
+        const double* angle_y_rad
+)
+{
+    if (!p->ms) return;
+    if (num_stations != p->num_stations) return;
+    Table feed(p->ms->tableName() + "/FEED", Table::Update);
+    Vector<Double> feed_angle(p->num_receptors, 0.0);
+    ArrayColumn<Double> receptor_angle(feed, "RECEPTOR_ANGLE");
+    for (unsigned int a = 0; a < num_stations; ++a)
+    {
+        // The x-dipole is along the x-axis,
+        // so presumably we should add on 90 degrees for that one only.
+        feed_angle(0) = angle_x_rad[a] + M_PI / 2.0;
+        if (p->num_receptors > 1) feed_angle(1) = angle_y_rad[a];
+        receptor_angle.put(a, feed_angle);
+    }
 }
 
 void oskar_ms_set_time_range(oskar_MeasurementSet* p)
@@ -316,14 +364,10 @@ void oskar_ms_set_time_range(oskar_MeasurementSet* p)
 
     // Get the old time range.
     Vector<Double> old_range(2, 0.0);
-#ifdef OSKAR_MS_NEW
     Table observation(p->ms->tableName() + "/OBSERVATION", Table::Update);
     ArrayColumn<Double> timeRange(observation, "TIME_RANGE");
     ScalarColumn<Double> releaseDate(observation, "RELEASE_DATE");
     timeRange.get(0, old_range);
-#else
-    p->msc->observation().timeRange().get(0, old_range);
-#endif
 
     // Compute the new time range.
     Vector<Double> range(2, 0.0);
@@ -333,13 +377,8 @@ void oskar_ms_set_time_range(oskar_MeasurementSet* p)
     double release_date = range[1] + 365.25 * 86400.0;
 
     // Fill observation columns.
-#ifdef OSKAR_MS_NEW
     timeRange.put(0, range);
     releaseDate.put(0, release_date);
-#else
-    p->msc->observation().timeRange().put(0, range);
-    p->msc->observation().releaseDate().put(0, release_date);
-#endif
 }
 
 double oskar_ms_time_inc_sec(const oskar_MeasurementSet* p)

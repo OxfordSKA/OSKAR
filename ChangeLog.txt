@@ -1,3 +1,23 @@
+2025-03-26  OSKAR-2.10.0
+
+    * Add option to change the sign convention of baseline coordinates and
+      visibility phases, and the order of antenna indices.
+      Note that the default is now different from previous versions of OSKAR,
+      but more consistent with other software.
+
+    * Add option to set the DISH_DIAMETER value written to a
+      Measurement Set ANTENNA table.
+
+    * Write station directory names to the Measurement Set ANTENNA table.
+
+    * Write values for the feed angle to the Measurement Set FEED table.
+
+    * Allow feed angle files to contain only a single line, which will be
+      used for all elements in the station.
+
+    * Aim to use a storage manager tile size of approximately
+      (and at least) 4 MB when writing a Measurement Set.
+
 2025-02-04  OSKAR-2.9.6
 
     * Ensure thread safety when loading HARP coefficient data from HDF5 files.

@@ -343,7 +343,8 @@ Tags in this group have a group ID of 11.
    :ref:`Visibility Blocks <visibility-block>` [int]."
    11, "Number of stations [int]."
    12, "`Visibility Polarisation Type`_ [int]."
-   13-20, "*Reserved for future use.*"
+   13, "Use CASA/VLA phase convention [int]."
+   14-20, "*Reserved for future use.*"
    21, "`Phase Centre Coordinate Type`_ [int]."
    22, "Phase centre longitude / Right Ascension (deg) and
    latitude / Declination (deg) [double[2]]."
@@ -362,6 +363,15 @@ Tags in this group have a group ID of 11.
    35, "Element X-coordinates in ENU frame, in metres [array]."
    36, "Element Y-coordinates in ENU frame, in metres [array]."
    37, "Element Z-coordinates in ENU frame, in metres [array]."
+   38-40, "*Reserved for future use.*"
+   41, "Station name [string]."
+   42, "Station diameter (if set), in metres [double]."
+   43, "Element feed angle, X pol, alpha, in radians [array]."
+   44, "Element feed angle, Y pol, alpha, in radians [array]."
+   45, "Element feed angle, X pol, beta, in radians [array]."
+   46, "Element feed angle, Y pol, beta, in radians [array]."
+   47, "Element feed angle, X pol, gamma, in radians [array]."
+   48, "Element feed angle, Y pol, gamma, in radians [array]."
 
 The Visibility Header contains static meta-data. It precedes a sequence of
 :ref:`Visibility Blocks <visibility-block>`, which contain the actual

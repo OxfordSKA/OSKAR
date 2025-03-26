@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, The OSKAR Developers.
+ * Copyright (c) 2017-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -232,7 +232,9 @@ void oskar_imager_read_coords_vis(oskar_Imager* h, const char* filename,
             oskar_mem_ensure(ww, num_times * num_baselines, status);
             for (t = 0; t < num_times; ++t)
             {
-                oskar_convert_station_uvw_to_baseline_uvw(num_stations,
+                oskar_convert_station_uvw_to_baseline_uvw(
+                        oskar_vis_header_casa_phase_convention(hdr),
+                        num_stations,
                         num_stations * t, u, v, w,
                         num_baselines * t, uu, vv, ww, status);
             }

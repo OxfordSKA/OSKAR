@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -27,6 +27,7 @@ struct oskar_Station
     int mem_location;             /* Memory location of most arrays. */
 
     /* Data common to all station types -------------------------------------*/
+    oskar_Mem* name;              /* Station folder name in telescope model. */
     int station_type;             /* Type of the station (enumerator). */
     int normalise_final_beam;     /* Flag to specify whether the station beam should be completely normalised. */
     double offset_ecef[3];        /* Offset ECEF coordinates of the station, in metres. */

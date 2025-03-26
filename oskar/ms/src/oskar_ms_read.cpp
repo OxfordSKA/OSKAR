@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -204,11 +204,7 @@ void oskar_ms_read_coords(oskar_MeasurementSet* p,
 
     // Read the coordinate data and copy it into the supplied arrays.
     Slice slice(start_row, num_baselines, 1);
-#ifdef OSKAR_MS_NEW
     Array<Double> column_range = p->msmc.uvw.getColumnRange(slice);
-#else
-    Array<Double> column_range = p->msmc->uvw().getColumnRange(slice);
-#endif
     Matrix<Double> matrix;
     matrix.reference(column_range);
     for (unsigned int i = 0; i < num_baselines; ++i)

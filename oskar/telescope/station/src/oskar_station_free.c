@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -16,6 +16,7 @@ void oskar_station_free(oskar_Station* model, int* status)
 {
     int i = 0, feed = 0, dim = 0;
     if (!model) return;
+    oskar_mem_free(model->name, status);
 
     /* Free the element data. */
     for (feed = 0; feed < 2; feed++)

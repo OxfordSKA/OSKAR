@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2011-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "correlate/define_correlate_utils.h"
@@ -153,8 +130,16 @@ void oskar_xcorr_scalar_NON_SM_cudak(
 
         // Multiply Jones scalars.
         smearing *= src_I[s];
-        t1 = st_p[s];
-        t2 = (st_q[w])[s];
+        if (use_casa_phase_convention)
+        {
+            t1 = (st_q[w])[s];
+            t2 = st_p[s];
+        }
+        else
+        {
+            t1 = st_p[s];
+            t2 = (st_q[w])[s];
+        }
         OSKAR_MUL_COMPLEX_CONJUGATE_IN_PLACE(FP2, t1, t2)
 
         // Multiply result by smearing term and accumulate.
@@ -191,8 +176,16 @@ void oskar_xcorr_scalar_NON_SM_cudak(
 
             // Multiply Jones scalars.
             smearing *= src_I[s];
-            t1 = st_p[s];
-            t2 = (st_q[w])[s];
+            if (use_casa_phase_convention)
+            {
+                t1 = (st_q[w])[s];
+                t2 = st_p[s];
+            }
+            else
+            {
+                t1 = st_p[s];
+                t2 = (st_q[w])[s];
+            }
             OSKAR_MUL_COMPLEX_CONJUGATE_IN_PLACE(FP2, t1, t2)
 
             // Multiply result by smearing term and accumulate.
@@ -336,8 +329,16 @@ void oskar_xcorr_scalar_SM_cudak(
 
         // Multiply Jones scalars.
         smearing *= s_I[i];
-        t1 = s_sp[i];
-        t2 = (st_q[w])[s];
+        if (use_casa_phase_convention)
+        {
+            t1 = (st_q[w])[s];
+            t2 = s_sp[i];
+        }
+        else
+        {
+            t1 = s_sp[i];
+            t2 = (st_q[w])[s];
+        }
         OSKAR_MUL_COMPLEX_CONJUGATE_IN_PLACE(FP2, t1, t2)
 
         // Multiply result by smearing term and accumulate.
@@ -405,8 +406,16 @@ void oskar_xcorr_scalar_SM_cudak(
 
             // Multiply Jones scalars.
             smearing *= s_I[i];
-            t1 = s_sp[i];
-            t2 = (st_q[w])[s];
+            if (use_casa_phase_convention)
+            {
+                t1 = (st_q[w])[s];
+                t2 = s_sp[i];
+            }
+            else
+            {
+                t1 = s_sp[i];
+                t2 = (st_q[w])[s];
+            }
             OSKAR_MUL_COMPLEX_CONJUGATE_IN_PLACE(FP2, t1, t2)
 
             // Multiply result by smearing term and accumulate.
@@ -431,8 +440,9 @@ void oskar_xcorr_scalar_SM_cudak(
 #define XCORR_KERNEL(NAME, BS, TS, GAUSSIAN, FP, FP2)\
         NAME<BS, TS, GAUSSIAN, FP, FP2>\
         OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)\
-        (num_sources, num_stations, offset_out, d_I, 0, 0, 0, d_l, d_m, d_n,\
-                d_a, d_b, d_c, d_station_u, d_station_v, d_station_w,\
+        (use_casa_phase_convention, num_sources, num_stations, offset_out,\
+                d_I, 0, 0, 0, d_l, d_m, d_n, d_a, d_b, d_c,\
+                d_station_u, d_station_v, d_station_w,\
                 d_station_x, d_station_y, uv_min_lambda, uv_max_lambda,\
                 inv_wavelength, frac_bandwidth, time_int_sec,\
                 gha0_rad, dec0_rad, d_jones, d_vis);
@@ -448,6 +458,7 @@ void oskar_xcorr_scalar_SM_cudak(
             XCORR_KERNEL(NAME, true, true, GAUSSIAN, FP, FP2)
 
 void oskar_cross_correlate_scalar_point_cuda_f(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const float2* d_jones, const float* d_I, const float* d_l,
         const float* d_m, const float* d_n,
@@ -481,6 +492,7 @@ void oskar_cross_correlate_scalar_point_cuda_f(
 }
 
 void oskar_cross_correlate_scalar_point_cuda_d(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const double2* d_jones, const double* d_I, const double* d_l,
         const double* d_m, const double* d_n,
@@ -514,6 +526,7 @@ void oskar_cross_correlate_scalar_point_cuda_d(
 }
 
 void oskar_cross_correlate_scalar_gaussian_cuda_f(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const float2* d_jones, const float* d_I, const float* d_l,
         const float* d_m, const float* d_n,
@@ -548,6 +561,7 @@ void oskar_cross_correlate_scalar_gaussian_cuda_f(
 }
 
 void oskar_cross_correlate_scalar_gaussian_cuda_d(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const double2* d_jones, const double* d_I, const double* d_l,
         const double* d_m, const double* d_n,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -27,8 +27,10 @@ extern "C" {
  * @param[in] column     Column name.
  */
 OSKAR_MS_EXPORT
-size_t oskar_ms_column_element_size(const oskar_MeasurementSet* p,
-        const char* column);
+size_t oskar_ms_column_element_size(
+        const oskar_MeasurementSet* p,
+        const char* column
+);
 
 /**
  * @brief
@@ -42,8 +44,10 @@ size_t oskar_ms_column_element_size(const oskar_MeasurementSet* p,
  * @param[in] column     Column name.
  */
 OSKAR_MS_EXPORT
-int oskar_ms_column_element_type(const oskar_MeasurementSet* p,
-        const char* column);
+int oskar_ms_column_element_type(
+        const oskar_MeasurementSet* p,
+        const char* column
+);
 
 /**
  * @brief
@@ -61,8 +65,11 @@ int oskar_ms_column_element_type(const oskar_MeasurementSet* p,
  * Must be freed by the caller using free().
  */
 OSKAR_MS_EXPORT
-size_t* oskar_ms_column_shape(const oskar_MeasurementSet* p, const char* column,
-        size_t* ndim);
+size_t* oskar_ms_column_shape(
+        const oskar_MeasurementSet* p,
+        const char* column,
+        size_t* ndim
+);
 
 /**
  * @brief
@@ -199,8 +206,19 @@ double oskar_ms_phase_centre_dec_rad(const oskar_MeasurementSet* p);
  * @param[in] array_centre_itrf   The ITRF array centre coordinates, in metres.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_set_array_centre(oskar_MeasurementSet* p,
-        const double array_centre_itrf[3]);
+void oskar_ms_set_array_centre(
+        oskar_MeasurementSet* p,
+        const double array_centre_itrf[3]
+);
+
+/**
+ * @brief Sets the flag to control whether CASA antenna index ordering is used.
+ *
+ * @details
+ * @param[in] value If true, use conventional CASA antenna index ordering.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_set_casa_phase_convention(oskar_MeasurementSet* p, int value);
 
 /**
  * @brief
@@ -218,8 +236,12 @@ void oskar_ms_set_array_centre(oskar_MeasurementSet* p,
  * @param[in] latitude_rad   The latitude, in radians.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
-        double longitude_rad, double latitude_rad);
+void oskar_ms_set_phase_centre(
+        oskar_MeasurementSet* p,
+        int coord_type,
+        double longitude_rad,
+        double latitude_rad
+);
 
 /**
  * @brief Writes element positions to the PHASED_ARRAY table.
@@ -235,9 +257,15 @@ void oskar_ms_set_phase_centre(oskar_MeasurementSet* p, int coord_type,
  * @param[in] matrix[9]     Local to ITRF transformation matrix.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_set_element_coords(oskar_MeasurementSet* p, unsigned int station,
-        unsigned int num_elements, const double* x, const double* y,
-        const double* z, const double* matrix);
+void oskar_ms_set_element_coords(
+        oskar_MeasurementSet* p,
+        unsigned int station,
+        unsigned int num_elements,
+        const double* x,
+        const double* y,
+        const double* z,
+        const double* matrix
+);
 
 /**
  * @brief Writes station positions to the ANTENNA table.
@@ -251,9 +279,58 @@ void oskar_ms_set_element_coords(oskar_MeasurementSet* p, unsigned int station,
  * @param[in] z             The station z positions.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p,
-        unsigned int num_stations, const double* x, const double* y,
-        const double* z);
+void oskar_ms_set_station_coords_d(
+        oskar_MeasurementSet* p,
+        unsigned int num_stations,
+        const double* x,
+        const double* y,
+        const double* z
+);
+
+/**
+ * @brief Sets station "dish diameters" in the ANTENNA table.
+ *
+ * @details
+ * @param[in] num_stations  The number of stations.
+ * @param[in] diameter      The list of dish diameters to write, in metres.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_set_station_dish_diameters(
+        oskar_MeasurementSet* p,
+        unsigned int num_stations,
+        const double* diameter
+);
+
+/**
+ * @brief Sets station names in the ANTENNA table.
+ *
+ * @details
+ * @param[in] num_stations  The number of stations.
+ * @param[in] names         The list of station names to write.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_set_station_names(
+        oskar_MeasurementSet* p,
+        unsigned int num_stations,
+        const char* const* names
+);
+
+/**
+ * @brief Writes receptor angles to the FEED table.
+ *
+ * @details
+ *
+ * @param[in] num_stations  The number of stations.
+ * @param[in] angle_x_rad   Receptor angle of the X feed, in radians.
+ * @param[in] angle_y_rad   Receptor angle of the Y feed, in radians.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_set_receptor_angles(
+        oskar_MeasurementSet* p,
+        unsigned int num_stations,
+        const double* angle_x_rad,
+        const double* angle_y_rad
+);
 
 OSKAR_MS_EXPORT
 void oskar_ms_set_time_range(oskar_MeasurementSet* p);

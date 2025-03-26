@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -38,7 +38,8 @@ enum OSKAR_VIS_HEADER_TAGS
     OSKAR_VIS_HEADER_TAG_NUM_CHANNELS_TOTAL       = 10,
     OSKAR_VIS_HEADER_TAG_NUM_STATIONS             = 11,
     OSKAR_VIS_HEADER_TAG_POL_TYPE                 = 12,
-    /* Tags 13-20 are reserved for future use. */
+    OSKAR_VIS_HEADER_TAG_CASA_PHASE_CONVENTION    = 13,
+    /* Tags 14-20 are reserved for future use. */
     OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_COORD_TYPE  = 21,
     OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_DEG         = 22,
     OSKAR_VIS_HEADER_TAG_FREQ_START_HZ            = 23,
@@ -55,7 +56,16 @@ enum OSKAR_VIS_HEADER_TAGS
     OSKAR_VIS_HEADER_TAG_STATION_Z_OFFSET_ECEF    = 34,
     OSKAR_VIS_HEADER_TAG_ELEMENT_X_ENU            = 35,
     OSKAR_VIS_HEADER_TAG_ELEMENT_Y_ENU            = 36,
-    OSKAR_VIS_HEADER_TAG_ELEMENT_Z_ENU            = 37
+    OSKAR_VIS_HEADER_TAG_ELEMENT_Z_ENU            = 37,
+    /* Tags 38-40 are reserved for future use. */
+    OSKAR_VIS_HEADER_TAG_STATION_NAME             = 41,
+    OSKAR_VIS_HEADER_TAG_STATION_DIAMETER         = 42,
+    OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_X_A   = 43,
+    OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_Y_A   = 44,
+    OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_X_B   = 45,
+    OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_Y_B   = 46,
+    OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_X_C   = 47,
+    OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_Y_C   = 48
 };
 
 enum OSKAR_VIS_HEADER_POL_TYPE

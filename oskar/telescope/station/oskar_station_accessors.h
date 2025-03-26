@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2023, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -63,6 +63,18 @@ int oskar_station_precision(const oskar_Station* model);
  */
 OSKAR_EXPORT
 int oskar_station_mem_location(const oskar_Station* model);
+
+/**
+ * @brief
+ * Returns the name of the station.
+ *
+ * @details
+ * Returns the name of the station.
+ *
+ * @param[in] model Pointer to station model.
+ */
+OSKAR_EXPORT
+const char* oskar_station_name(const oskar_Station* model);
 
 OSKAR_EXPORT
 int oskar_station_type(const oskar_Station* model);
@@ -329,6 +341,24 @@ double oskar_station_virtual_antenna_angle_rad(const oskar_Station* model);
  */
 OSKAR_EXPORT
 void oskar_station_set_unique_ids(oskar_Station* model, int* counter);
+
+/**
+ * @brief
+ * Sets the name of the station.
+ *
+ * @details
+ * Sets the name of the station.
+ *
+ * @param[in] model      Pointer to station model.
+ * @param[in] name       Station name.
+ * @param[in,out] status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_station_set_name(
+        oskar_Station* model,
+        const char* name,
+        int* status
+);
 
 /**
  * @brief

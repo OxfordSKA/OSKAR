@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -64,7 +64,6 @@ void oskar_ms_add_history(oskar_MeasurementSet* p, const char* origin,
     std::vector<std::string> v = split_string(std::string(str, size), '\n');
 
     // Add to the HISTORY table.
-#ifdef OSKAR_MS_NEW
     Table history(p->ms->tableName() + "/HISTORY", Table::Update);
     ScalarColumn<String> message(history, "MESSAGE");
     ScalarColumn<String> application(history, "APPLICATION");
@@ -74,12 +73,10 @@ void oskar_ms_add_history(oskar_MeasurementSet* p, const char* origin,
     ScalarColumn<Int> observationId(history, "OBSERVATION_ID");
     ArrayColumn<String> appParams(history, "APP_PARAMS");
     ArrayColumn<String> cliCommand(history, "CLI_COMMAND");
-#endif
     int num_lines = v.size();
     double current_utc = 86400.0 * current_utc_to_mjd();
     for (int i = 0; i < num_lines; ++i)
     {
-#ifdef OSKAR_MS_NEW
         int row = history.nrow();
         history.addRow(1);
         message.put(row, String(v[i]));
@@ -90,18 +87,5 @@ void oskar_ms_add_history(oskar_MeasurementSet* p, const char* origin,
         observationId.put(row, -1);
         appParams.put(row, Vector<String>());
         cliCommand.put(row, Vector<String>()); // Required!
-#else
-        int row = p->ms->history().nrow();
-        p->ms->history().addRow(1);
-        MSHistoryColumns& c = p->msc->history();
-        c.message().put(row, String(v[i]));
-        c.application().put(row, p->app_name);
-        c.priority().put(row, "INFO");
-        c.origin().put(row, origin);
-        c.time().put(row, current_utc);
-        c.observationId().put(row, -1);
-        c.appParams().put(row, Vector<String>());
-        c.cliCommand().put(row, Vector<String>()); // Required!
-#endif
     }
 }

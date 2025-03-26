@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, The OSKAR Developers.
+ * Copyright (c) 2019-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -181,6 +181,22 @@ const char* oskar_get_binary_tag_string(char group, char tag)
             return "Element Y coordinates (ENU) [m]";
         case OSKAR_VIS_HEADER_TAG_ELEMENT_Z_ENU:
             return "Element Z coordinates (ENU) [m]";
+        case OSKAR_VIS_HEADER_TAG_STATION_NAME:
+            return "Station name";
+        case OSKAR_VIS_HEADER_TAG_STATION_DIAMETER:
+            return "Station diameter [m]";
+        case OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_X_A:
+            return "Element Euler angle (X dipole, alpha) [rad]";
+        case OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_Y_A:
+            return "Element Euler angle (Y dipole, alpha) [rad]";
+        case OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_X_B:
+            return "Element Euler angle (X dipole, beta) [rad]";
+        case OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_Y_B:
+            return "Element Euler angle (Y dipole, beta) [rad]";
+        case OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_X_C:
+            return "Element Euler angle (X dipole, gamma) [rad]";
+        case OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_Y_C:
+            return "Element Euler angle (Y dipole, gamma) [rad]";
         default:
             return "Unknown visibility header group tag";
         }

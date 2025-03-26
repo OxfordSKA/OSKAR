@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -12,8 +12,12 @@
 extern "C" {
 #endif
 
-oskar_Station* oskar_station_create(int type, int location, int num_elements,
-        int* status)
+oskar_Station* oskar_station_create(
+        int type,
+        int location,
+        int num_elements,
+        int* status
+)
 {
     int feed = 0, dim = 0;
     oskar_Station* model = 0;
@@ -38,6 +42,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->mem_location = location;
 
     /* Create arrays. */
+    model->name = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 1, status);
     for (feed = 0; feed < 1; feed++)
     {
         for (dim = 0; dim < 3; dim++)

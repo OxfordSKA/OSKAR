@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2022, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -31,6 +31,7 @@ bool BANDWIDTH_SMEARING, bool TIME_SMEARING, bool GAUSSIAN,
 typename REAL, typename REAL2, typename REAL4c
 >
 void oskar_xcorr_omp(
+        const int                    use_casa_phase_convention,
         const int                    num_sources,
         const int                    num_stations,
         const int                    offset_out,
@@ -63,9 +64,6 @@ void oskar_xcorr_omp(
 #pragma omp parallel for schedule(dynamic, 1)
     for (int SQ = 0; SQ < num_stations; ++SQ)
     {
-        // Pointer to source vector for station q.
-        const REAL4c* const station_q = &jones[SQ * num_sources];
-
         // Loop over baselines for this station.
         for (int SP = SQ + 1; SP < num_stations; ++SP)
         {
@@ -77,8 +75,13 @@ void oskar_xcorr_omp(
                 OSKAR_CLEAR_COMPLEX_MATRIX(REAL, guard)
             }
 
-            // Pointer to source vector for station p.
-            const REAL4c* const station_p = &jones[SP * num_sources];
+            // Pointer to source vector for station p and q.
+            const REAL4c* const station_p = (
+                    &jones[num_sources * (use_casa_phase_convention ? SQ : SP)]
+            );
+            const REAL4c* const station_q = (
+                    &jones[num_sources * (use_casa_phase_convention ? SP : SQ)]
+            );
 
             // Get common baseline values.
             OSKAR_BASELINE_TERMS(REAL, station_u[SP], station_u[SQ],
@@ -154,8 +157,8 @@ void oskar_xcorr_omp(
 
 #define XCORR_KERNEL(BS, TS, GAUSSIAN, REAL, REAL2, REAL4c)                 \
         oskar_xcorr_omp<BS, TS, GAUSSIAN, REAL, REAL2, REAL4c>              \
-        (num_sources, num_stations, offset_out, d_jones,                    \
-                d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,           \
+        (use_casa_phase_convention, num_sources, num_stations, offset_out,  \
+                d_jones, d_I, d_Q, d_U, d_V, d_l, d_m, d_n, d_a, d_b, d_c,  \
                 d_station_u, d_station_v, d_station_w,                      \
                 d_station_x, d_station_y, uv_min_lambda, uv_max_lambda,     \
                 inv_wavelength, frac_bandwidth, time_int_sec,               \
@@ -172,6 +175,7 @@ void oskar_xcorr_omp(
             XCORR_KERNEL(true, true, GAUSSIAN, REAL, REAL2, REAL4c)
 
 void oskar_cross_correlate_point_omp_f(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const float4c* d_jones, const float* d_I, const float* d_Q,
         const float* d_U, const float* d_V,
@@ -188,6 +192,7 @@ void oskar_cross_correlate_point_omp_f(
 }
 
 void oskar_cross_correlate_point_omp_d(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const double4c* d_jones, const double* d_I, const double* d_Q,
         const double* d_U, const double* d_V,
@@ -204,6 +209,7 @@ void oskar_cross_correlate_point_omp_d(
 }
 
 void oskar_cross_correlate_gaussian_omp_f(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const float4c* d_jones, const float* d_I, const float* d_Q,
         const float* d_U, const float* d_V,
@@ -219,6 +225,7 @@ void oskar_cross_correlate_gaussian_omp_f(
 }
 
 void oskar_cross_correlate_gaussian_omp_d(
+        int use_casa_phase_convention,
         int num_sources, int num_stations, int offset_out,
         const double4c* d_jones, const double* d_I, const double* d_Q,
         const double* d_U, const double* d_V,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2020, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -22,10 +22,16 @@ extern "C" {
 #endif
 
 OSKAR_EXPORT
+int oskar_interferometer_casa_phase_convention(const oskar_Interferometer* h);
+
+OSKAR_EXPORT
 int oskar_interferometer_coords_only(const oskar_Interferometer* h);
 
 OSKAR_EXPORT
 oskar_Log* oskar_interferometer_log(oskar_Interferometer* h);
+
+OSKAR_EXPORT
+double oskar_interferometer_ms_dish_diameter(const oskar_Interferometer* h);
 
 OSKAR_EXPORT
 int oskar_interferometer_num_devices(const oskar_Interferometer* h);
@@ -41,6 +47,11 @@ void oskar_interferometer_reset_cache(oskar_Interferometer* h, int* status);
 
 OSKAR_EXPORT
 void oskar_interferometer_reset_work_unit_index(oskar_Interferometer* h);
+
+OSKAR_EXPORT
+void oskar_interferometer_set_casa_phase_convention(
+        oskar_Interferometer* h, int value
+);
 
 OSKAR_EXPORT
 void oskar_interferometer_set_coords_only(oskar_Interferometer* h, int value,
@@ -76,6 +87,12 @@ void oskar_interferometer_set_max_channels_per_block(oskar_Interferometer* h,
 OSKAR_EXPORT
 void oskar_interferometer_set_max_times_per_block(oskar_Interferometer* h,
         int value);
+
+OSKAR_EXPORT
+void oskar_interferometer_set_ms_dish_diameter(
+        oskar_Interferometer* h,
+        double value
+);
 
 OSKAR_EXPORT
 void oskar_interferometer_set_num_devices(oskar_Interferometer* h, int value);

@@ -1,7 +1,9 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <string.h>
 
 #include "vis/private_vis_header.h"
 #include "vis/oskar_vis_header.h"
@@ -16,7 +18,9 @@ oskar_Mem* oskar_vis_header_telescope_path(oskar_VisHeader* vis)
     return vis->telescope_path;
 }
 
-const oskar_Mem* oskar_vis_header_telescope_path_const(const oskar_VisHeader* vis)
+const oskar_Mem* oskar_vis_header_telescope_path_const(
+        const oskar_VisHeader* vis
+)
 {
     return vis->telescope_path;
 }
@@ -107,6 +111,11 @@ int oskar_vis_header_pol_type(const oskar_VisHeader* vis)
     return vis->pol_type;
 }
 
+int oskar_vis_header_casa_phase_convention(const oskar_VisHeader* vis)
+{
+    return vis->casa_phase_convention;
+}
+
 int oskar_vis_header_phase_centre_coord_type(const oskar_VisHeader* vis)
 {
     return vis->phase_centre_type;
@@ -177,31 +186,72 @@ double oskar_vis_header_telescope_alt_metres(const oskar_VisHeader* vis)
     return vis->telescope_centre_alt_m;
 }
 
-oskar_Mem* oskar_vis_header_station_offset_ecef_metres(oskar_VisHeader* vis, int dim)
+oskar_Mem* oskar_vis_header_station_offset_ecef_metres(
+        oskar_VisHeader* vis,
+        int dim
+)
 {
     if (dim >= 3) return 0;
     return vis->station_offset_ecef_metres[dim];
 }
 
 const oskar_Mem* oskar_vis_header_station_offset_ecef_metres_const(
-        const oskar_VisHeader* vis, int dim)
+        const oskar_VisHeader* vis,
+        int dim
+)
 {
     if (dim >= 3) return 0;
     return vis->station_offset_ecef_metres[dim];
 }
 
 oskar_Mem* oskar_vis_header_element_enu_metres(
-        oskar_VisHeader* vis, int dim, int station)
+        oskar_VisHeader* vis,
+        int dim,
+        int station
+)
 {
     if (dim >= 3 || station >= vis->num_stations) return 0;
     return vis->element_enu_metres[dim][station];
 }
 
 const oskar_Mem* oskar_vis_header_element_enu_metres_const(
-        const oskar_VisHeader* vis, int dim, int station)
+        const oskar_VisHeader* vis,
+        int dim,
+        int station
+)
 {
     if (dim >= 3 || station >= vis->num_stations) return 0;
     return vis->element_enu_metres[dim][station];
+}
+
+const oskar_Mem* oskar_vis_header_element_feed_angles_const(
+        const oskar_VisHeader* vis,
+        int feed,
+        int dim,
+        int station
+)
+{
+    if (feed < 0 || feed >= 2 || dim < 0 || dim >= 3) return 0;
+    if (station < 0 || station >= vis->num_stations) return 0;
+    return vis->element_euler_angle_rad[feed][dim][station];
+}
+
+const double* oskar_vis_header_station_diameters_const(
+        const oskar_VisHeader* vis
+)
+{
+    int status = 0;
+    return (const double*) oskar_mem_double_const(
+            vis->station_diameter_m, &status
+    );
+}
+
+const char* oskar_vis_header_station_name(
+        const oskar_VisHeader* vis,
+        int station
+)
+{
+    return (const char*) oskar_mem_void_const(vis->station_name[station]);
 }
 
 void oskar_vis_header_set_freq_start_hz(oskar_VisHeader* vis, double value)
@@ -214,14 +264,68 @@ void oskar_vis_header_set_freq_inc_hz(oskar_VisHeader* vis, double value)
     vis->freq_inc_hz = value;
 }
 
-void oskar_vis_header_set_channel_bandwidth_hz(oskar_VisHeader* vis,
-        double value)
+void oskar_vis_header_set_channel_bandwidth_hz(
+        oskar_VisHeader* vis,
+        double value
+)
 {
     vis->channel_bandwidth_hz = value;
 }
 
-void oskar_vis_header_set_time_start_mjd_utc(oskar_VisHeader* vis,
-        double value)
+void oskar_vis_header_set_element_feed_angle(
+        oskar_VisHeader* vis,
+        int feed,
+        int dim,
+        int station,
+        const oskar_Mem* angle_rad
+)
+{
+    int status = 0;
+    if (feed < 0 || feed >= 2 || dim < 0 || dim >= 3) return;
+    if (station < 0 || station >= vis->num_stations) return;
+    oskar_mem_free(vis->element_euler_angle_rad[feed][dim][station], &status);
+    vis->element_euler_angle_rad[feed][dim][station] = (
+            oskar_mem_convert_precision(angle_rad, OSKAR_DOUBLE, &status)
+    );
+}
+
+void oskar_vis_header_set_station_diameter(
+        oskar_VisHeader* vis,
+        int station,
+        double diameter_m
+)
+{
+    int status = 0;
+    if (station < 0 || station >= vis->num_stations) return;
+    double* data = (double*) oskar_mem_double(vis->station_diameter_m, &status);
+    data[station] = diameter_m;
+}
+
+void oskar_vis_header_set_station_name(
+        oskar_VisHeader* vis,
+        int station,
+        const char* name,
+        int* status
+)
+{
+    if (station < 0 || station >= vis->num_stations)
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
+    const size_t len = 1 + strlen(name);
+    oskar_Mem* station_name = vis->station_name[station];
+    oskar_mem_realloc(station_name, len, status);
+    if (!*status)
+    {
+        memcpy(oskar_mem_void(station_name), name, len);
+    }
+}
+
+void oskar_vis_header_set_time_start_mjd_utc(
+        oskar_VisHeader* vis,
+        double value
+)
 {
     vis->time_start_mjd_utc = value;
 }
@@ -236,24 +340,35 @@ void oskar_vis_header_set_time_average_sec(oskar_VisHeader* vis, double value)
     vis->time_average_sec = value;
 }
 
-void oskar_vis_header_set_phase_centre(oskar_VisHeader* vis,
-        int coord_type, double longitude_deg, double latitude_deg)
+void oskar_vis_header_set_phase_centre(
+        oskar_VisHeader* vis,
+        int coord_type,
+        double longitude_deg,
+        double latitude_deg
+)
 {
     vis->phase_centre_type = coord_type;
     vis->phase_centre_deg[0] = longitude_deg;
     vis->phase_centre_deg[1] = latitude_deg;
 }
 
-void oskar_vis_header_set_telescope_centre(oskar_VisHeader* vis,
-        double longitude_deg, double latitude_deg, double alt_metres)
+void oskar_vis_header_set_telescope_centre(
+        oskar_VisHeader* vis,
+        double longitude_deg,
+        double latitude_deg,
+        double alt_metres
+)
 {
     vis->telescope_centre_lon_deg = longitude_deg;
     vis->telescope_centre_lat_deg = latitude_deg;
     vis->telescope_centre_alt_m = alt_metres;
 }
 
-void oskar_vis_header_set_pol_type(oskar_VisHeader* vis, int value,
-        int* status)
+void oskar_vis_header_set_pol_type(
+        oskar_VisHeader* vis,
+        int value,
+        int* status
+)
 {
     if (oskar_type_is_matrix(vis->amp_type))
     {
@@ -285,6 +400,14 @@ void oskar_vis_header_set_pol_type(oskar_VisHeader* vis, int value,
             *status = OSKAR_ERR_TYPE_MISMATCH;
         }
     }
+}
+
+void oskar_vis_header_set_casa_phase_convention(
+        oskar_VisHeader* vis,
+        int value
+)
+{
+    vis->casa_phase_convention = value;
 }
 
 #ifdef __cplusplus

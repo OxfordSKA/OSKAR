@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -18,6 +18,7 @@ extern "C" {
 #endif
 
 void oskar_cross_correlate(
+        int use_casa_phase_convention,
         int source_type,
         int num_sources,
         const oskar_Jones* jones,
@@ -122,6 +123,7 @@ void oskar_cross_correlate(
             {
             case OSKAR_SINGLE_COMPLEX_MATRIX:
                 oskar_cross_correlate_gaussian_omp_f(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_float4c_const(J, status),
                         oskar_mem_float_const(src_flux[0], status),
@@ -145,6 +147,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
                 oskar_cross_correlate_gaussian_omp_d(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_double4c_const(J, status),
                         oskar_mem_double_const(src_flux[0], status),
@@ -168,6 +171,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_SINGLE_COMPLEX:
                 oskar_cross_correlate_scalar_gaussian_omp_f(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_float2_const(J, status),
                         oskar_mem_float_const(src_flux[0], status),
@@ -188,6 +192,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_DOUBLE_COMPLEX:
                 oskar_cross_correlate_scalar_gaussian_omp_d(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_double2_const(J, status),
                         oskar_mem_double_const(src_flux[0], status),
@@ -217,6 +222,7 @@ void oskar_cross_correlate(
             {
             case OSKAR_SINGLE_COMPLEX_MATRIX:
                 oskar_cross_correlate_point_omp_f(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_float4c_const(J, status),
                         oskar_mem_float_const(src_flux[0], status),
@@ -237,6 +243,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
                 oskar_cross_correlate_point_omp_d(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_double4c_const(J, status),
                         oskar_mem_double_const(src_flux[0], status),
@@ -257,6 +264,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_SINGLE_COMPLEX:
                 oskar_cross_correlate_scalar_point_omp_f(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_float2_const(J, status),
                         oskar_mem_float_const(src_flux[0], status),
@@ -274,6 +282,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_DOUBLE_COMPLEX:
                 oskar_cross_correlate_scalar_point_omp_d(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_double2_const(J, status),
                         oskar_mem_double_const(src_flux[0], status),
@@ -304,6 +313,7 @@ void oskar_cross_correlate(
             {
             case OSKAR_SINGLE_COMPLEX_MATRIX:
                 oskar_cross_correlate_gaussian_cuda_f(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_float4c_const(J, status),
                         oskar_mem_float_const(src_flux[0], status),
@@ -327,6 +337,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
                 oskar_cross_correlate_gaussian_cuda_d(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_double4c_const(J, status),
                         oskar_mem_double_const(src_flux[0], status),
@@ -350,6 +361,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_SINGLE_COMPLEX:
                 oskar_cross_correlate_scalar_gaussian_cuda_f(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_float2_const(J, status),
                         oskar_mem_float_const(src_flux[0], status),
@@ -370,6 +382,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_DOUBLE_COMPLEX:
                 oskar_cross_correlate_scalar_gaussian_cuda_d(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_double2_const(J, status),
                         oskar_mem_double_const(src_flux[0], status),
@@ -399,6 +412,7 @@ void oskar_cross_correlate(
             {
             case OSKAR_SINGLE_COMPLEX_MATRIX:
                 oskar_cross_correlate_point_cuda_f(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_float4c_const(J, status),
                         oskar_mem_float_const(src_flux[0], status),
@@ -419,6 +433,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
                 oskar_cross_correlate_point_cuda_d(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_double4c_const(J, status),
                         oskar_mem_double_const(src_flux[0], status),
@@ -439,6 +454,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_SINGLE_COMPLEX:
                 oskar_cross_correlate_scalar_point_cuda_f(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_float2_const(J, status),
                         oskar_mem_float_const(src_flux[0], status),
@@ -456,6 +472,7 @@ void oskar_cross_correlate(
                 break;
             case OSKAR_DOUBLE_COMPLEX:
                 oskar_cross_correlate_scalar_point_cuda_d(
+                        use_casa_phase_convention,
                         num_sources, num_stations, offset_out,
                         oskar_mem_double2_const(J, status),
                         oskar_mem_double_const(src_flux[0], status),
@@ -657,6 +674,7 @@ void oskar_cross_correlate(
             }
         }
         const oskar_Arg args[] = {
+                {INT_SZ, &use_casa_phase_convention},
                 {INT_SZ, &num_sources},
                 {INT_SZ, &num_stations},
                 {INT_SZ, &offset_out},

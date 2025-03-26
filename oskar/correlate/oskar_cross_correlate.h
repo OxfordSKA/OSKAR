@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -30,6 +30,7 @@ extern "C" {
  * The Jones matrices should have dimensions corresponding to the number of
  * sources in the brightness matrix and the number of stations.
  *
+ * @param[in]  use_casa_phase_convention If set, use the CASA phase convention.
  * @param[in]  source_type    Source type (0 = point, 1 = Gaussian).
  * @param[in]  num_sources    Number of sources to use.
  * @param[in]  jones          Set of Jones matrices.
@@ -46,6 +47,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_cross_correlate(
+        int use_casa_phase_convention,
         int source_type,
         int num_sources,
         const oskar_Jones* jones,

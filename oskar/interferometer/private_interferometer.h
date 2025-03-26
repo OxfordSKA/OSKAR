@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -55,8 +55,10 @@ struct oskar_Interferometer
     int max_sources_per_chunk, max_times_per_block, max_channels_per_block;
     int apply_horizon_clip, force_polarised_ms, zero_failed_gaussians;
     int coords_only, ignore_w_components;
+    int casa_phase_convention;
     double freq_start_hz, freq_inc_hz, time_start_mjd_utc, time_inc_sec;
     double source_min_jy, source_max_jy;
+    double ms_dish_diameter;
     char correlation_type, *vis_name, *ms_name, *settings_path;
 
     /* State. */

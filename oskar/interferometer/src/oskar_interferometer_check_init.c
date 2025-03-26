@@ -1,15 +1,22 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "interferometer/private_interferometer.h"
 #include "interferometer/oskar_interferometer.h"
 #include "math/oskar_cmath.h"
 #include "utility/oskar_device.h"
 #include "utility/oskar_get_memory_usage.h"
+
+#if __STDC_VERSION__ >= 199901L
+#define SNPRINTF(BUF, SIZE, FMT, ...) snprintf(BUF, SIZE, FMT, __VA_ARGS__);
+#else
+#define SNPRINTF(BUF, SIZE, FMT, ...) sprintf(BUF, FMT, __VA_ARGS__);
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,7 +98,7 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
 
 static void set_up_vis_header(oskar_Interferometer* h, int* status)
 {
-    int i = 0, j = 0, vis_type = 0;
+    int dim = 0, i_station = 0, vis_type = 0;
     const double rad2deg = 180.0/M_PI;
     int write_autocorr = 0, write_crosscorr = 0;
     if (*status) return;
@@ -124,10 +131,19 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
             num_stations, write_autocorr, write_crosscorr, status);
 
     /* Add metadata from settings. */
+    oskar_vis_header_set_casa_phase_convention(
+            h->header, h->casa_phase_convention
+    );
     oskar_vis_header_set_freq_start_hz(h->header, h->freq_start_hz);
     oskar_vis_header_set_freq_inc_hz(h->header, h->freq_inc_hz);
     oskar_vis_header_set_time_start_mjd_utc(h->header, h->time_start_mjd_utc);
     oskar_vis_header_set_time_inc_sec(h->header, h->time_inc_sec);
+    for (i_station = 0; i_station < num_stations; ++i_station)
+    {
+        oskar_vis_header_set_station_diameter(
+                h->header, i_station, h->ms_dish_diameter
+        );
+    }
 
     /* Add settings file contents if defined. */
     if (h->settings_path)
@@ -154,24 +170,85 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
             oskar_telescope_lon_rad(h->tel) * rad2deg,
             oskar_telescope_lat_rad(h->tel) * rad2deg,
             oskar_telescope_alt_metres(h->tel));
-    for (i = 0; i < 3; ++i)
+
+    /* Copy the station coordinates. */
+    for (dim = 0; dim < 3; ++dim)
     {
-        oskar_mem_copy(oskar_vis_header_station_offset_ecef_metres(h->header, i),
-                oskar_telescope_station_true_offset_ecef_metres_const(h->tel, i),
-                status);
-        const int* type_map = oskar_mem_int_const(
-                oskar_telescope_station_type_map_const(h->tel), status);
-        for (j = 0; j < num_stations; ++j)
+        oskar_mem_copy(
+                oskar_vis_header_station_offset_ecef_metres(h->header, dim),
+                oskar_telescope_station_true_offset_ecef_metres_const(
+                        h->tel, dim
+                ),
+                status
+        );
+    }
+
+    /* Copy data from each station model. */
+    const int* type_map = oskar_mem_int_const(
+            oskar_telescope_station_type_map_const(h->tel), status
+    );
+    for (i_station = 0; i_station < num_stations; ++i_station)
+    {
+        /* Set up the station name. */
+        char* station_name = 0;
+        const oskar_Station* station = oskar_telescope_station_const(
+                h->tel, type_map[i_station]
+        );
+        const char* model_name = oskar_station_name(station);
+        const size_t model_name_len = strlen(model_name);
+        const size_t buf_len = model_name_len + 64;
+        station_name = (char*) calloc(buf_len, sizeof(char));
+        if (model_name_len > 0)
         {
-            const int feed = 0; // Can only save feed 0 positions.
-            const oskar_Station* st =
-                    oskar_telescope_station_const(h->tel, type_map[j]);
-            if (oskar_station_type(st) == OSKAR_STATION_TYPE_AA)
+            const char* copy_of = (
+                    (type_map[i_station] == i_station) ? "" : "copy of "
+            );
+            SNPRINTF(
+                    station_name, buf_len, "s%04d (%s%s)",
+                    i_station, copy_of, model_name
+            );
+        }
+        else
+        {
+            SNPRINTF(station_name, buf_len, "s%04d", i_station);
+        }
+        oskar_vis_header_set_station_name(
+                h->header, i_station, station_name, status
+        );
+        free(station_name);
+
+        /* Copy aperture array data. */
+        if (oskar_station_type(station) == OSKAR_STATION_TYPE_AA)
+        {
+            int feed = 0;
+
+            /* Copy the element coordinates. */
+            for (dim = 0; dim < 3; ++dim)
             {
                 oskar_mem_copy(
-                        oskar_vis_header_element_enu_metres(h->header, i, j),
-                        oskar_station_element_true_enu_metres_const(st, feed, i),
-                        status);
+                        oskar_vis_header_element_enu_metres(
+                                h->header, dim, i_station
+                        ),
+                        /* Can only copy coordinates for feed 0. */
+                        oskar_station_element_true_enu_metres_const(
+                                station, 0, dim
+                        ),
+                        status
+                );
+            }
+
+            /* Copy the element orientations. */
+            for (feed = 0; feed < 2; ++feed)
+            {
+                for (dim = 0; dim < 3; ++dim)
+                {
+                    oskar_vis_header_set_element_feed_angle(
+                            h->header, feed, dim, i_station,
+                            oskar_station_element_euler_rad_const(
+                                    station, feed, dim
+                            )
+                    );
+                }
             }
         }
     }
