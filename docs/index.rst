@@ -46,6 +46,7 @@ used by OSKAR.
    :maxdepth: 1
    :caption: Reference
 
+   FAQ <faq/faq>
    apps/apps
    theory/theory
    binary_file/binary_file

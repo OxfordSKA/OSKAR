@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath(os.path.join("@PROJECT_SOURCE_DIR@", "python"
 # -- Project information -----------------------------------------------------
 
 project = 'OSKAR'
-copyright = '2012-2021, The OSKAR Developers'
+copyright = '2012-2025, The OSKAR Developers'
 author = 'The OSKAR Developers'
 version = '@OSKAR_VERSION_MAJOR@.@OSKAR_VERSION_MINOR@.@OSKAR_VERSION_PATCH@'
 release = '@OSKAR_VERSION_STR@'
@@ -69,7 +69,6 @@ latex_elements = {
 
 pygments_style = 'sphinx'
 autodoc_member_order = 'bysource'
-html4_writer = True
+# html4_writer = True
 html_show_sourcelink = False
 master_doc = 'index'
-
