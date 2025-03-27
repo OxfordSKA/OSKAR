@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'OSKAR'
-copyright = '2012-2021, The OSKAR Developers'
+copyright = '2012-2025, The OSKAR Developers'
 author = 'The OSKAR Developers'
 
 
@@ -66,7 +66,6 @@ latex_elements = {
 
 pygments_style = 'sphinx'
 autodoc_member_order = 'bysource'
-html4_writer = True
+# html4_writer = True
 html_show_sourcelink = False
 master_doc = 'index'
-
