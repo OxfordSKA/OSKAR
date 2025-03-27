@@ -68,7 +68,8 @@ linting:
   stage: build and test
   before_script:
     - *ready_reports
-    - apt install libomp-14-dev # Try to get headers right for clang-tidy.
+    - apt-get update
+    - apt-get install -y libomp-14-dev # Try to get headers right for clang-tidy.
     - mkdir release
     - cd release/
     - cmake ../ -DCUDA_ARCH=$CUDA_ARCH -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
