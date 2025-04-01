@@ -1,22 +1,17 @@
 Bootstrap: docker
-From: nvidia/cuda:11.3.1-base-ubuntu20.04
+From: nvidia/cuda:12.3.2-base-ubuntu22.04
 Stage: one
 
 %post
     export DEBIAN_FRONTEND=noninteractive
-    export CUDA_ARCH="ALL;8.0;8.6"
-    rm /etc/apt/sources.list.d/cuda.list && \
-        apt-key del 7fa2af80 && \
-        apt-get update && apt-get install -y --no-install-recommends wget && \
-        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb && \
-        dpkg -i cuda-keyring_1.0-1_all.deb
+    export CUDA_ARCH="ALL"
     apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         casacore-dev \
         cmake \
-        cuda-cudart-dev-11-3 \
-        libcufft-dev-11-3 \
-        cuda-nvcc-11-3 \
+        cuda-cudart-dev-12-3 \
+        libcufft-dev-12-3 \
+        cuda-nvcc-12-3 \
         git \
         libhdf5-dev \
         python3-dev \
@@ -24,7 +19,7 @@ Stage: one
     mkdir -p /home/build/harp_beam
     cd /home/build/harp_beam
     git clone https://gitlab.com/quentingueuning/harp_beam.git harp_beam.git
-    cmake harp_beam.git/ -DCUDA_ARCH="${CUDA_ARCH}"
+    cmake harp_beam.git/ -DCUDA_ARCH="${CUDA_ARCH};8.0;8.6"
     make -j16 && make install
     mkdir -p /home/build/oskar
     cd /home/build/oskar
@@ -35,19 +30,14 @@ Stage: one
     pip3 install 'git+https://github.com/OxfordSKA/OSKAR.git@master#egg=oskarpy&subdirectory=python'
 
 Bootstrap: docker
-From: nvidia/cuda:11.3.1-base-ubuntu20.04
+From: nvidia/cuda:12.3.2-base-ubuntu22.04
 Stage: two
 
 %post
     export DEBIAN_FRONTEND=noninteractive
-    rm /etc/apt/sources.list.d/cuda.list && \
-        apt-key del 7fa2af80 && \
-        apt-get update && apt-get install -y --no-install-recommends wget && \
-        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb && \
-        dpkg -i cuda-keyring_1.0-1_all.deb
     apt-get update && apt-get install -y --no-install-recommends \
-        libcasa-tables4 \
-        libcufft-11-3 \
+        libcasa-tables6 \
+        libcufft-12-3 \
         libgomp1 \
         libhdf5-103 \
         python3 \
@@ -56,4 +46,4 @@ Stage: two
 %files from one
     /usr/local/bin/oskar* /usr/local/bin/
     /usr/local/lib/* /usr/local/lib/
-    /usr/local/lib/python3.8 /usr/local/lib/python3.8
+    /usr/local/lib/python3.10 /usr/local/lib/python3.10
