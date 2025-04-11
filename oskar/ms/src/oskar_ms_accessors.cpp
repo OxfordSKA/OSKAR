@@ -332,7 +332,8 @@ void oskar_ms_set_station_names(
     ScalarColumn<String> name(antenna, "NAME");
     for (unsigned int a = 0; a < num_stations; ++a)
     {
-        name.put(a, String(names[a]));
+        String name_ = String(names[a]);
+        if (name_.length() > 0) name.put(a, name_);
     }
 }
 
