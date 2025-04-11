@@ -39,6 +39,22 @@ static void cross(const double a[3], const double b[3], double out[3])
     out[2] = a[0] * b[1] - a[1] * b[0];
 }
 
+static void matrix_mul(const double a[9], const double b[9], double out[9])
+{
+    /* 3D matrix-matrix multiply. (Matrices are in row-major "C" order.) */
+    for (int i = 0; i < 3; ++i) /* Row for A and output. */
+    {
+        for (int j = 0; j < 3; ++j) /* Column for B and output. */
+        {
+            out[i * 3 + j] = 0.0;
+            for (int k = 0; k < 3; ++k) /* Column for A, row for B. */
+            {
+                out[i * 3 + j] += a[i * 3 + k] * b[k * 3 + j];
+            }
+        }
+    }
+}
+
 static void mul(const double m[9], const double in[3], double out[3])
 {
     /* 3D matrix-vector multiply. */
@@ -227,8 +243,6 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         }
     }
     oskar_ms_set_receptor_angles(ms, num_stations, angle_x, angle_y);
-    free(angle_x);
-    free(angle_y);
 
     /* Write PHASED_ARRAY table, one row per station. */
     for (i = 0; i < num_stations; ++i)
@@ -236,6 +250,8 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         unsigned int j = 0, dim = 0;
         double *element_ecef[3], station_wgs84[3];
         double local_to_itrf_projection_matrix[9], norm_vec_ellipsoid[3];
+        double local_to_itrf_temp[9], srm[9]; /* Station rotation matrix. */
+        const size_t matrix_sz = sizeof(local_to_itrf_projection_matrix);
 
         /* Get number of elements in the station, and skip if zero. */
         const unsigned int num_elements = (unsigned int)
@@ -258,6 +274,19 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         /* Get local to ITRF (ECEF) projection matrix. */
         projection_matrix(station_xyz, norm_vec_ellipsoid,
                 local_to_itrf_projection_matrix);
+
+        /*
+         * Modify projection matrix by station rotation angle.
+         * (Can just use the angle of the first X receptor in the station.)
+         */
+        const double station_angle_rad = angle_x[i];
+        const double sin_angle = sin(station_angle_rad);
+        const double cos_angle = cos(station_angle_rad);
+        srm[0] = cos_angle;  srm[1] = sin_angle; srm[2] = 0.0;
+        srm[3] = -sin_angle; srm[4] = cos_angle; srm[5] = 0.0;
+        srm[6] = 0.0;        srm[7] = 0.0;       srm[8] = 1.0;
+        memcpy(local_to_itrf_temp, local_to_itrf_projection_matrix, matrix_sz);
+        matrix_mul(srm, local_to_itrf_temp, local_to_itrf_projection_matrix);
 
         /* Allocate space for element ECEF coordinates. */
         element_ecef[0] = (double*) calloc(num_elements, sizeof(double));
@@ -316,6 +345,8 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     free(station_ecef[0]);
     free(station_ecef[1]);
     free(station_ecef[2]);
+    free(angle_x);
+    free(angle_y);
 
     return ms;
 }
