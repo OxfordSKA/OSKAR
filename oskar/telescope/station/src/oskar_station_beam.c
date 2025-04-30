@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2024, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -180,7 +180,7 @@ void oskar_station_beam(
     /* Apply ionospheric screen. */
     if (work->screen_type != 'N')
     {
-        const oskar_Mem* tec_phase = 0;
+        const oskar_Mem* ionosphere = 0;
 
         /* Evaluate the station (u,v) coordinates. */
         if (norm_coord_type == OSKAR_COORDS_RADEC)
@@ -203,10 +203,11 @@ void oskar_station_beam(
                     lha0_rad, norm_lat_rad, lat_rad,
                     0, lmn[0], lmn[1], lmn[2], status);
 
-            /* Evaluate the phase due to the TEC screen. */
-            tec_phase = oskar_station_work_evaluate_tec_screen(work,
-                    (int) num_points_orig, lmn[0], lmn[1], u, v,
-                    time_index, frequency_hz, status);
+            /* Evaluate the effects of the TEC screen (phase and rotation). */
+            ionosphere = oskar_station_work_evaluate_tec_screen(work,
+                    (int) num_points_orig, lmn[0], lmn[1],
+                    enu[0], enu[1], enu[2], u, v, time_index, frequency_hz,
+                    oskar_station_magnetic_field(station), out, status);
         }
         else if (norm_coord_type == OSKAR_COORDS_AZEL)
         {
@@ -222,15 +223,17 @@ void oskar_station_beam(
             const double u = x_ * sin_ha0 + y_ * cos_ha0;
             const double v = z_ * cos_dec0 - x_ * cos_ha0 * sin_dec0 + y_ * sin_ha0 * sin_dec0;
 
-            /* Evaluate the phase due to the TEC screen. */
-            tec_phase = oskar_station_work_evaluate_tec_screen(work,
-                    (int) num_points_orig, enu[0], enu[1], u, v,
-                    time_index, frequency_hz, status);
+            /* Evaluate the effects of the TEC screen (phase and rotation). */
+            ionosphere = oskar_station_work_evaluate_tec_screen(work,
+                    (int) num_points_orig, enu[0], enu[1],
+                    enu[0], enu[1], enu[2], u, v, time_index, frequency_hz,
+                    oskar_station_magnetic_field(station), out, status);
         }
 
-        if (tec_phase)
+        if (ionosphere)
         {
-            oskar_mem_multiply(out, tec_phase, out,
+            /* Output = beam * ionosphere (in that order!). */
+            oskar_mem_multiply(out, out, ionosphere,
                     0, 0, 0, num_points_orig, status);
         }
     }

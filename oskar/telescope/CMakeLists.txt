@@ -7,6 +7,7 @@ set(telescope_SRC
     src/oskar_telescope_analyse.c
     src/oskar_telescope_create.c
     src/oskar_telescope_create_copy.c
+    src/oskar_telescope_evaluate_magnetic_field.c
     src/oskar_telescope_free.c
     src/oskar_telescope_load.cpp
     src/oskar_telescope_load_pointing_file.c

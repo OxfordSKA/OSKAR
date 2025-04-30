@@ -103,6 +103,11 @@ int oskar_station_beam_coord_type(const oskar_Station* model)
     return model ? model->beam_coord_type : 0;
 }
 
+const double* oskar_station_magnetic_field(const oskar_Station* model)
+{
+    return model ? model->magnetic_field : 0;
+}
+
 oskar_Mem* oskar_station_noise_freq_hz(oskar_Station* model)
 {
     return model ? model->noise_freq_hz : 0;

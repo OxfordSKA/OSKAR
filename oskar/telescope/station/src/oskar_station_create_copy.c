@@ -53,6 +53,10 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     dst->beam_lon_rad = src->beam_lon_rad;
     dst->beam_lat_rad = src->beam_lat_rad;
     dst->beam_coord_type = src->beam_coord_type;
+    for (i = 0; i < 4; ++i)
+    {
+        dst->magnetic_field[i] = src->magnetic_field[i];
+    }
     oskar_mem_copy(dst->noise_freq_hz, src->noise_freq_hz, status);
     oskar_mem_copy(dst->noise_rms_jy, src->noise_rms_jy, status);
 

@@ -26,6 +26,7 @@ set(station_SRC
     src/oskar_station_different.c
     src/oskar_station_duplicate_first_child.c
     src/oskar_station_evaluate_element_weights.c
+    src/oskar_station_evaluate_magnetic_field.c
     src/oskar_station_free.c
     src/oskar_station_load_apodisation.c
     src/oskar_station_load_cable_length_error.c

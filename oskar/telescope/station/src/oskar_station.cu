@@ -1,5 +1,6 @@
-/* Copyright (c) 2018-2019, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2018-2025, The OSKAR Developers. See LICENSE file. */
 
+#include "math/define_multiply.h"
 #include "telescope/station/define_blank_below_horizon.h"
 #include "telescope/station/define_evaluate_element_weights_dft.h"
 #include "telescope/station/define_evaluate_element_weights_errors.h"

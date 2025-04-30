@@ -39,6 +39,7 @@ struct oskar_Station
     double beam_lon_rad;          /* Longitude of beam phase centre, in radians. */
     double beam_lat_rad;          /* Latitude of beam phase centre, in radians. */
     int beam_coord_type;          /* Enumerator describing beam spherical coordinate type (from oskar_global.h). */
+    double magnetic_field[4];     /* Components of Earth magnetic field, in nT. */
     oskar_Mem* noise_freq_hz;     /* Frequency values, in Hz, at which noise RMS values are defined. */
     oskar_Mem* noise_rms_jy;      /* RMS noise values, in Jy, as a function of frequency. */
 

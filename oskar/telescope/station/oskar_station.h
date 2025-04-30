@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2023, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -45,6 +45,7 @@ enum OSKAR_STATION_TYPE
 #include <telescope/station/oskar_station_create.h>
 #include <telescope/station/oskar_station_different.h>
 #include <telescope/station/oskar_station_duplicate_first_child.h>
+#include <telescope/station/oskar_station_evaluate_magnetic_field.h>
 #include <telescope/station/oskar_station_free.h>
 #include <telescope/station/oskar_station_load_apodisation.h>
 #include <telescope/station/oskar_station_load_cable_length_error.h>

@@ -37,6 +37,12 @@ void oskar_interferometer_check_init(oskar_Interferometer* h, int* status)
         return;
     }
 
+    /* Evaluate magnetic field at station locations. */
+    /* MJD starts at midnight on 17 November 1858, day number 321.
+     * Reference year is therefore 1858.87945205. */
+    const double year = h->time_start_mjd_utc / 365.25 + 1858.87945205;
+    oskar_telescope_evaluate_magnetic_field(h->tel, year, status);
+
     /* Create the visibility header if required. */
     if (!h->header)
     {

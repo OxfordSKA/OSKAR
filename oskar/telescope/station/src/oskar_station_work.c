@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2022, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -45,7 +45,6 @@ oskar_StationWork* oskar_station_work_create(int type,
     }
     work->tec_screen = oskar_mem_create(type, location, 0, status);
     work->tec_screen_path = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
-    work->screen_output = oskar_mem_create(complex_type, location, 0, status);
     work->screen_type = 'N'; /* None */
     work->previous_time_index = -1;
 
@@ -150,8 +149,10 @@ void oskar_station_work_set_tec_screen_path(oskar_StationWork* work,
 /* FIXME(FD) Pass in a time coordinate here so we use the correct screen. */
 const oskar_Mem* oskar_station_work_evaluate_tec_screen(oskar_StationWork* work,
         int num_points, const oskar_Mem* l, const oskar_Mem* m,
+        const oskar_Mem* hor_x, const oskar_Mem* hor_y, const oskar_Mem* hor_z,
         double station_u_m, double station_v_m, int time_index,
-        double frequency_hz, int* status)
+        double frequency_hz, const double* field, const oskar_Mem* beam,
+        int* status)
 {
     /* Check if we have a phase screen. */
     if (work->screen_type == 'N')
@@ -190,10 +191,17 @@ const oskar_Mem* oskar_station_work_evaluate_tec_screen(oskar_StationWork* work,
                     3, start_index, 0, 0, 0, status);
         }
     }
+    if (!work->screen_output)
+    {
+        work->screen_output = oskar_mem_create(
+                oskar_mem_type(beam), oskar_mem_location(beam), 0, status
+        );
+    }
     oskar_mem_ensure(work->screen_output, (size_t) num_points, status);
     oskar_evaluate_tec_screen(work->isoplanatic_screen,
-            num_points, l, m, station_u_m, station_v_m,
-            frequency_hz, work->screen_height_km * 1000.0,
+            num_points, l, m, hor_x, hor_y, hor_z, station_u_m, station_v_m,
+            frequency_hz, field[0], field[1], field[2],
+            work->screen_height_km * 1000.0,
             work->screen_pixel_size_m,
             work->screen_num_pixels_x, work->screen_num_pixels_y,
             work->tec_screen, 0, work->screen_output, status);

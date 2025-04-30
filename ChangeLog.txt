@@ -1,5 +1,7 @@
 2025-xx-yy  OSKAR-2.10.1
 
+    * Include ionospheric Faraday rotation in TEC screen evaluation.
+
     * Use station orientation information when writing PHASED_ARRAY table.
       Only write COORDINATE_AXES, not COORDINATE_SYSTEM.
 

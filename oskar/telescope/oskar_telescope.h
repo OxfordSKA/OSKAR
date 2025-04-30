@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2023, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -37,6 +37,7 @@ enum OSKAR_POL_MODE_TYPE
 #include <telescope/oskar_telescope_analyse.h>
 #include <telescope/oskar_telescope_create.h>
 #include <telescope/oskar_telescope_create_copy.h>
+#include <telescope/oskar_telescope_evaluate_magnetic_field.h>
 #include <telescope/oskar_telescope_free.h>
 #include <telescope/oskar_telescope_load.h>
 #include <telescope/oskar_telescope_load_pointing_file.h>

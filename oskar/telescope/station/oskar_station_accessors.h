@@ -116,6 +116,9 @@ OSKAR_EXPORT
 int oskar_station_beam_coord_type(const oskar_Station* model);
 
 OSKAR_EXPORT
+const double* oskar_station_magnetic_field(const oskar_Station* model);
+
+OSKAR_EXPORT
 oskar_Mem* oskar_station_noise_freq_hz(oskar_Station* model);
 
 OSKAR_EXPORT
