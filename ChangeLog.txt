@@ -1,5 +1,8 @@
 2025-xx-yy  OSKAR-2.10.1
 
+    * Use station orientation information when writing PHASED_ARRAY table.
+      Only write COORDINATE_AXES, not COORDINATE_SYSTEM.
+
     * Update Singularity / Apptainer build to Ubuntu 22.04 and CUDA 12.
 
 2025-03-26  OSKAR-2.10.0

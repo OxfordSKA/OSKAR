@@ -246,7 +246,6 @@ void oskar_ms_set_element_coords(
     ScalarColumn<Int> antennaId(phasedArray, "ANTENNA_ID");
     ArrayColumn<Double> position(phasedArray, "POSITION");
     ArrayColumn<Double> coordinateAxes(phasedArray, "COORDINATE_AXES");
-    ArrayColumn<Double> coordinateSystem(phasedArray, "COORDINATE_SYSTEM");
     ArrayColumn<Double> elementOffset(phasedArray, "ELEMENT_OFFSET");
     ArrayColumn<Bool> elementFlag(phasedArray, "ELEMENT_FLAG");
     // Should flags be per polarisation, as in the example script?
@@ -266,7 +265,6 @@ void oskar_ms_set_element_coords(
     position.put(station, pos);
     Matrix<Double> m(IPosition(2, 3, 3), matrix);
     coordinateAxes.put(station, m);
-    coordinateSystem.put(station, m);
     elementOffset.put(station, offset);
     elementFlag.put(station, flags);
 }

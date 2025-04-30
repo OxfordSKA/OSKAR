@@ -269,21 +269,14 @@ static void create_table_phased_array(oskar_MeasurementSet* p)
     desc.addColumn(ArrayColumnDesc<Double>(
             "POSITION",
             "Position of antenna field", IPosition(1, 3)));
-    // FIXME(FD) Should this be COORDINATE_AXES or COORDINATE_SYSTEM?
-    // Maybe just add both to be safe.
     desc.addColumn(ArrayColumnDesc<Double>(
             "COORDINATE_AXES",
-            "Local coordinate system", IPosition(2, 3, 3)));
-    desc.addColumn(ArrayColumnDesc<Double>(
-            "COORDINATE_SYSTEM",
             "Local coordinate system", IPosition(2, 3, 3)));
     desc.addColumn(ArrayColumnDesc<Double>(
             "ELEMENT_OFFSET", "Offset per element"));
     desc.addColumn(ArrayColumnDesc<Bool>(
             "ELEMENT_FLAG", "Flag of elements in array"));
     add_column_metadata(desc, "POSITION", 3, "m", "position", "ITRF");
-    add_column_metadata(desc, "COORDINATE_AXES", 3, "m", "direction", "ITRF");
-    add_column_metadata(desc, "COORDINATE_SYSTEM", 3, "m", "direction", "ITRF");
     add_column_metadata(desc, "ELEMENT_OFFSET", 3, "m", "position", "ITRF");
     SetupNewTable tab(p->ms->tableName() + "/PHASED_ARRAY", desc, Table::New);
     p->ms->rwKeywordSet().defineTable("PHASED_ARRAY", Table(tab));
