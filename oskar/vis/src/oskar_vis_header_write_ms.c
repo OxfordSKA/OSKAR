@@ -286,7 +286,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         srm[3] = -sin_angle; srm[4] = cos_angle; srm[5] = 0.0;
         srm[6] = 0.0;        srm[7] = 0.0;       srm[8] = 1.0;
         memcpy(local_to_itrf_temp, local_to_itrf_projection_matrix, matrix_sz);
-        matrix_mul(srm, local_to_itrf_temp, local_to_itrf_projection_matrix);
+        matrix_mul(local_to_itrf_temp, srm, local_to_itrf_projection_matrix);
 
         /* Allocate space for element ECEF coordinates. */
         element_ecef[0] = (double*) calloc(num_elements, sizeof(double));
