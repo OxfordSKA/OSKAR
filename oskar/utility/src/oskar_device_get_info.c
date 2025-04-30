@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, The OSKAR Developers.
+ * Copyright (c) 2018-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -169,6 +169,12 @@ static unsigned int oskar_get_num_cuda_cores(int major, int minor)
     case 0x80:
         return 64;
     case 0x86:
+    case 0x87:
+    case 0x89:
+    case 0x90:
+    case 0xa0:
+    case 0xa1:
+    case 0xc0:
         return 128;
     default:
         return 0;
