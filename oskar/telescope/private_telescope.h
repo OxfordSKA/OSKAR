@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -50,7 +50,6 @@ struct oskar_Telescope
     int isoplanatic_screen;
 
     /* Station data. */
-    int supplied_coord_type;                           /* Type of coordinates specified in telescope model. */
     int num_stations;                                  /* Number of stations in the model. */
     int num_station_models;                            /* Number of station models (size of station array). */
     oskar_Station** station;                           /* Array of station structure handles. */
@@ -60,6 +59,7 @@ struct oskar_Telescope
     oskar_Mem* station_true_enu_metres[3];             /* True station coordinate, in metres (horizon). */
     oskar_Mem* station_measured_offset_ecef_metres[3]; /* Measured station coordinates, in metres (offset ECEF). */
     oskar_Mem* station_measured_enu_metres[3];         /* Measured station coordinate, in metres (horizon). */
+    oskar_Mem* station_cable_length_error[2];          /* Cable length error, in metres. */
     int max_station_size;                              /* Maximum station size (number of elements) */
     int max_station_depth;                             /* Maximum station depth. */
     int allow_station_beam_duplication;                /* True if station beam duplication is allowed. */

@@ -609,6 +609,24 @@ const oskar_Mem* oskar_telescope_station_true_enu_metres_const(
 
 /**
  * @brief
+ * Returns a constant handle to the cable length error array.
+ *
+ * @details
+ * Returns a constant handle to the cable length error array.
+ *
+ * @param[in] model Pointer to telescope model.
+ * @param[in] feed Feed index: 0 = X, 1 = Y.
+ *
+ * @return A constant handle to the cable length error array.
+ */
+OSKAR_EXPORT
+const oskar_Mem* oskar_telescope_station_cable_length_error_const(
+        const oskar_Telescope* model,
+        int feed
+);
+
+/**
+ * @brief
  * Returns the flag specifying whether thermal noise is enabled.
  *
  * @details

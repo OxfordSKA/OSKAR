@@ -1,6 +1,7 @@
-/* Copyright (c) 2018-2020, The OSKAR Developers. See LICENSE file. */
+/* Copyright (c) 2018-2025, The OSKAR Developers. See LICENSE file. */
 
 #include "math/define_multiply.h"
+#include "interferometer/define_jones_apply_cable_length_errors.h"
 #include "interferometer/define_jones_apply_station_gains.h"
 #include "interferometer/define_evaluate_jones_K.h"
 #include "interferometer/define_evaluate_jones_R.h"

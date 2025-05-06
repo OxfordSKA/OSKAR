@@ -40,6 +40,7 @@ enum OSKAR_POL_MODE_TYPE
 #include <telescope/oskar_telescope_evaluate_magnetic_field.h>
 #include <telescope/oskar_telescope_free.h>
 #include <telescope/oskar_telescope_load.h>
+#include <telescope/oskar_telescope_load_cable_length_error.h>
 #include <telescope/oskar_telescope_load_pointing_file.h>
 #include <telescope/oskar_telescope_load_position.h>
 #include <telescope/oskar_telescope_load_station_coords_ecef.h>
@@ -55,6 +56,7 @@ enum OSKAR_POL_MODE_TYPE
 #include <telescope/oskar_telescope_resize_station_array.h>
 #include <telescope/oskar_telescope_save.h>
 #include <telescope/oskar_telescope_save_layout.h>
+#include <telescope/oskar_telescope_set_station_cable_length_error.h>
 #include <telescope/oskar_telescope_set_station_coords.h>
 #include <telescope/oskar_telescope_set_station_coords_ecef.h>
 #include <telescope/oskar_telescope_set_station_coords_enu.h>

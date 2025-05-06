@@ -10,6 +10,7 @@ set(telescope_SRC
     src/oskar_telescope_evaluate_magnetic_field.c
     src/oskar_telescope_free.c
     src/oskar_telescope_load.cpp
+    src/oskar_telescope_load_cable_length_error.c
     src/oskar_telescope_load_pointing_file.c
     src/oskar_telescope_load_position.c
     src/oskar_telescope_load_station_coords_ecef.c
@@ -25,6 +26,7 @@ set(telescope_SRC
     src/oskar_telescope_resize_station_array.c
     src/oskar_telescope_save.c
     src/oskar_telescope_save_layout.c
+    src/oskar_telescope_set_station_cable_length_error.c
     src/oskar_telescope_set_station_coords.c
     src/oskar_telescope_set_station_coords_ecef.c
     src/oskar_telescope_set_station_coords_enu.c

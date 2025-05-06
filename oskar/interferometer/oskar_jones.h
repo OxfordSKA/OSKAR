@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -27,6 +27,7 @@ typedef struct oskar_Jones oskar_Jones;
 #endif
 
 #include <interferometer/oskar_jones_accessors.h>
+#include <interferometer/oskar_jones_apply_cable_length_errors.h>
 #include <interferometer/oskar_jones_apply_station_gains.h>
 #include <interferometer/oskar_jones_create.h>
 #include <interferometer/oskar_jones_create_copy.h>

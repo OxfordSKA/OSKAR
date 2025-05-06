@@ -238,6 +238,14 @@ const oskar_Mem* oskar_telescope_station_true_enu_metres_const(
     return model->station_true_enu_metres[dim];
 }
 
+const oskar_Mem* oskar_telescope_station_cable_length_error_const(
+        const oskar_Telescope* model,
+        int feed
+)
+{
+    return model->station_cable_length_error[feed];
+}
+
 int oskar_telescope_noise_enabled(const oskar_Telescope* model)
 {
     return model->noise_enabled;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2024, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -68,6 +68,15 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
                 src->station_measured_offset_ecef_metres[i], status);
         oskar_mem_copy(telescope->station_measured_enu_metres[i],
                 src->station_measured_enu_metres[i], status);
+    }
+    for (i = 0; i < 2; ++i)
+    {
+        if (src->station_cable_length_error[i])
+        {
+            telescope->station_cable_length_error[i] = oskar_mem_create_copy(
+                    src->station_cable_length_error[i], location, status
+            );
+        }
     }
     oskar_mem_copy(telescope->station_type_map, src->station_type_map, status);
     oskar_mem_copy(telescope->tec_screen_path, src->tec_screen_path, status);

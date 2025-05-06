@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -25,6 +25,10 @@ void oskar_telescope_free(oskar_Telescope* telescope, int* status)
         oskar_mem_free(telescope->station_true_enu_metres[i], status);
         oskar_mem_free(telescope->station_measured_offset_ecef_metres[i], status);
         oskar_mem_free(telescope->station_measured_enu_metres[i], status);
+    }
+    for (i = 0; i < 2; ++i)
+    {
+        oskar_mem_free(telescope->station_cable_length_error[i], status);
     }
     oskar_mem_free(telescope->station_type_map, status);
     oskar_mem_free(telescope->tec_screen_path, status);

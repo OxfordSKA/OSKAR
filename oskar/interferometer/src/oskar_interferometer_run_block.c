@@ -286,6 +286,15 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
         oskar_jones_apply_station_gains(d->J, d->gains, status);
     }
 
+    /* Apply cable length errors if required (no-op if arrays are NULL). */
+    oskar_jones_apply_cable_length_errors(
+            d->J,
+            freq,
+            oskar_telescope_station_cable_length_error_const(d->tel, 0),
+            oskar_telescope_station_cable_length_error_const(d->tel, 1),
+            status
+    );
+
     /* Calculate output offset. */
     const int offset = num_chans_block * time_index_block + channel_index_block;
     oskar_timer_resume(d->tmr_correlate);
