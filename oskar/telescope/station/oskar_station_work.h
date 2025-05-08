@@ -82,12 +82,24 @@ void oskar_station_work_set_tec_screen_path(oskar_StationWork* work,
         const char* path);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_work_evaluate_tec_screen(oskar_StationWork* work,
-        int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* hor_x, const oskar_Mem* hor_y, const oskar_Mem* hor_z,
-        double station_u_m, double station_v_m, int time_index,
-        double frequency_hz, const double* field, const oskar_Mem* beam,
-        int* status);
+const oskar_Mem* oskar_station_work_evaluate_tec_screen(
+        oskar_StationWork* work,
+        int num_points,
+        const oskar_Mem* l,
+        const oskar_Mem* m,
+        const oskar_Mem* hor_x,
+        const oskar_Mem* hor_y,
+        const oskar_Mem* hor_z,
+        double station_u_m,
+        double station_v_m,
+        int time_index,
+        double time_start_mjd_utc,
+        double time_mjd_utc,
+        double frequency_hz,
+        const double* field,
+        const oskar_Mem* beam,
+        int* status
+);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_station_work_beam_out(oskar_StationWork* work,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -67,7 +67,7 @@ static void jones_to_power(const oskar_Mem* jones, oskar_Mem* power,
 TEST(evaluate_jones_E, evaluate_e)
 {
     int error = 0, prec = OSKAR_SINGLE;
-    double gast = 0.0;
+    double time_mjd_start = 0.0, time_mjd = 0.0;
 
     // Construct telescope model.
     int num_stations = 6;
@@ -142,8 +142,11 @@ TEST(evaluate_jones_E, evaluate_e)
     const oskar_Mem* const source_coords[] = {l_gpu, m_gpu, n_gpu};
     oskar_Timer* tmr = oskar_timer_create(device_loc);
     oskar_timer_start(tmr);
-    oskar_evaluate_jones_E(E, OSKAR_COORDS_REL_DIR, num_pts, source_coords,
-            0, M_PI / 2, tel_gpu, 0, gast, frequency, work, &error);
+    oskar_evaluate_jones_E(
+            E, OSKAR_COORDS_REL_DIR, num_pts, source_coords,
+            0, M_PI / 2, tel_gpu, 0, time_mjd_start, time_mjd, frequency, work,
+            &error
+    );
     printf("Jones E evaluation took %.3f s\n", oskar_timer_elapsed(tmr));
     oskar_timer_free(tmr);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);

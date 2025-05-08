@@ -13,6 +13,7 @@
 #include "convert/oskar_convert_any_to_enu_directions.h"
 #include "convert/oskar_convert_enu_directions_to_local_tangent_plane.h"
 #include "convert/oskar_convert_enu_directions_to_relative_directions.h"
+#include "convert/oskar_convert_mjd_to_gast_fast.h"
 
 #include <math.h>
 
@@ -44,7 +45,8 @@ void oskar_station_beam(
         double norm_lon_rad,
         double norm_lat_rad,
         int time_index,
-        double gast_rad,
+        double time_start_mjd_utc,
+        double time_mjd_utc,
         double frequency_hz,
         int offset_out,
         oskar_Mem* beam,
@@ -57,6 +59,7 @@ void oskar_station_beam(
 
     /* Get station properties. */
     const int station_type = oskar_station_type(station);
+    const double gast_rad = oskar_convert_mjd_to_gast_fast(time_mjd_utc);
     const double lat_rad = oskar_station_lat_rad(station);
     const double lst_rad = gast_rad + oskar_station_lon_rad(station);
 
@@ -206,8 +209,10 @@ void oskar_station_beam(
             /* Evaluate the effects of the TEC screen (phase and rotation). */
             ionosphere = oskar_station_work_evaluate_tec_screen(work,
                     (int) num_points_orig, lmn[0], lmn[1],
-                    enu[0], enu[1], enu[2], u, v, time_index, frequency_hz,
-                    oskar_station_magnetic_field(station), out, status);
+                    enu[0], enu[1], enu[2], u, v, time_index,
+                    time_start_mjd_utc, time_mjd_utc, frequency_hz,
+                    oskar_station_magnetic_field(station), out, status
+            );
         }
         else if (norm_coord_type == OSKAR_COORDS_AZEL)
         {
@@ -226,8 +231,10 @@ void oskar_station_beam(
             /* Evaluate the effects of the TEC screen (phase and rotation). */
             ionosphere = oskar_station_work_evaluate_tec_screen(work,
                     (int) num_points_orig, enu[0], enu[1],
-                    enu[0], enu[1], enu[2], u, v, time_index, frequency_hz,
-                    oskar_station_magnetic_field(station), out, status);
+                    enu[0], enu[1], enu[2], u, v, time_index,
+                    time_start_mjd_utc, time_mjd_utc, frequency_hz,
+                    oskar_station_magnetic_field(station), out, status
+            );
         }
 
         if (ionosphere)

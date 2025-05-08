@@ -64,13 +64,11 @@
         <s k="screen_pixel_size_m"><label>Screen pixel size [m]</label>
             <type name="DoubleRangeExt" default="file">0,MAX,file</type>
             <desc>Pixel size of ionospheric screen, in metres.</desc></s>
-        <!--
         <s k="screen_time_interval_sec">
             <label>Screen time interval [sec]</label>
-            <type name="DoubleRangeExt" default="file">0,MAX,file</type>
+            <type name="DoubleRangeExt" default="file">-1,MAX,file</type>
             <desc>Time interval between ionospheric screens,
                 in seconds.</desc></s>
-        -->
     </s>
     <s k="isoplanatic_screen"><label>Assume isoplanatic screen</label>
         <depends k="telescope/ionosphere_screen_type" v="External"/>

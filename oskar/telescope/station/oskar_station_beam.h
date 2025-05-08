@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2024, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -23,25 +23,26 @@ extern "C" {
  * @details
  * Evaluates the beam of a station at the specified positions.
  *
- * @param[in] station           Station model.
- * @param[in] work              Station beam workspace.
- * @param[in] source_coord_type Type of input/source coordinates
- *                              (OSKAR_COORD_TYPE enumerator).
- * @param[in] num_points        Number of points at which to evaluate beam.
- * @param[in] source_coords     Source coordinate values.
- * @param[in] ref_lon_rad       Reference longitude in radians,
- *                              if inputs are direction cosines.
- * @param[in] ref_lat_rad       Reference latitude in radians,
- *                              if inputs are direction cosines.
- * @param[in] norm_coord_type   Type of normalisation coordinates.
- * @param[in] norm_lon_rad      Longitude for beam normalisation, in radians.
- * @param[in] norm_lat_rad      Latitude for beam normalisation, in radians.
- * @param[in] time_index        Simulation time index.
- * @param[in] gast_rad          Greenwich Apparent Sidereal Time, in radians.
- * @param[in] frequency_hz      The observing frequency in Hz.
- * @param[in] offset_out        Output array element offset.
- * @param[out] beam             Output beam data.
- * @param[in,out] status        Status return code.
+ * @param[in] station            Station model.
+ * @param[in] work               Station beam workspace.
+ * @param[in] source_coord_type  Type of input/source coordinates
+ *                               (OSKAR_COORD_TYPE enumerator).
+ * @param[in] num_points         Number of points at which to evaluate beam.
+ * @param[in] source_coords      Source coordinate values.
+ * @param[in] ref_lon_rad        Reference longitude in radians,
+ *                               if inputs are direction cosines.
+ * @param[in] ref_lat_rad        Reference latitude in radians,
+ *                               if inputs are direction cosines.
+ * @param[in] norm_coord_type    Type of normalisation coordinates.
+ * @param[in] norm_lon_rad       Longitude for beam normalisation, in radians.
+ * @param[in] norm_lat_rad       Latitude for beam normalisation, in radians.
+ * @param[in] time_index         Simulation time index.
+ * @param[in] time_start_mjd_utc Simulation start time, as MJD(UTC).
+ * @param[in] time_mjd_utc       Current simulation time, as MJD(UTC).
+ * @param[in] frequency_hz       The observing frequency in Hz.
+ * @param[in] offset_out         Output array element offset.
+ * @param[out] beam              Output beam data.
+ * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
 void oskar_station_beam(
@@ -56,7 +57,8 @@ void oskar_station_beam(
         double norm_lon_rad,
         double norm_lat_rad,
         int time_index,
-        double gast_rad,
+        double time_start_mjd_utc,
+        double time_mjd_utc,
         double frequency_hz,
         int offset_out,
         oskar_Mem* beam,

@@ -7,6 +7,7 @@
 #include "telescope/station/private_station_work.h"
 #include "telescope/station/oskar_evaluate_tec_screen.h"
 
+#include <math.h>
 #include <string.h>
 
 #ifdef __cplusplus
@@ -146,13 +147,24 @@ void oskar_station_work_set_tec_screen_path(oskar_StationWork* work,
     memcpy(oskar_mem_void(work->tec_screen_path), path, len);
 }
 
-/* FIXME(FD) Pass in a time coordinate here so we use the correct screen. */
-const oskar_Mem* oskar_station_work_evaluate_tec_screen(oskar_StationWork* work,
-        int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* hor_x, const oskar_Mem* hor_y, const oskar_Mem* hor_z,
-        double station_u_m, double station_v_m, int time_index,
-        double frequency_hz, const double* field, const oskar_Mem* beam,
-        int* status)
+const oskar_Mem* oskar_station_work_evaluate_tec_screen(
+        oskar_StationWork* work,
+        int num_points,
+        const oskar_Mem* l,
+        const oskar_Mem* m,
+        const oskar_Mem* hor_x,
+        const oskar_Mem* hor_y,
+        const oskar_Mem* hor_z,
+        double station_u_m,
+        double station_v_m,
+        int time_index,
+        double time_start_mjd_utc,
+        double time_mjd_utc,
+        double frequency_hz,
+        const double* field,
+        const oskar_Mem* beam,
+        int* status
+)
 {
     /* Check if we have a phase screen. */
     if (work->screen_type == 'N')
@@ -174,15 +186,31 @@ const oskar_Mem* oskar_station_work_evaluate_tec_screen(oskar_StationWork* work,
             work->screen_num_pixels_t = axis_size[2];
             free(axis_size);
         }
-        if (time_index != work->previous_time_index)
+        int required_time_index = 0;
+        if (work->screen_time_interval_sec <= 0)
         {
-            work->previous_time_index = time_index;
+            /* If screen time interval is not defined,
+             * load a new slice at each time index. */
+            required_time_index = time_index;
+        }
+        else
+        {
+            /* Work out which time index to use. */
+            const double obs_time_sec = 86400.0 * (
+                    time_mjd_utc - time_start_mjd_utc
+            );
+            required_time_index = (int) round(
+                    obs_time_sec / work->screen_time_interval_sec
+            );
+        }
+        if (required_time_index != work->previous_time_index)
+        {
+            work->previous_time_index = required_time_index;
             const size_t num_pixels =
                     work->screen_num_pixels_x * work->screen_num_pixels_y;
-            /* FIXME(FD) Work out which time index to use here!
-             * Also consider loading a few at once? */
-            int start_index[3] = {0, 0, time_index};
-            if (time_index >= work->screen_num_pixels_t)
+            /* FIXME(FD) Consider loading a few screens at once? */
+            int start_index[3] = {0, 0, required_time_index};
+            if (required_time_index >= work->screen_num_pixels_t)
             {
                 start_index[2] = work->screen_num_pixels_t - 1;
             }

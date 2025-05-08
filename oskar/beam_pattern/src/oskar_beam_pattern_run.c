@@ -292,8 +292,7 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
     /* Get time and frequency values. */
     oskar_timer_resume(d->tmr_compute);
     const double dt_dump = h->time_inc_sec / 86400.0;
-    const double mjd = h->time_start_mjd_utc + dt_dump * (i_time + 0.5);
-    const double gast_rad = oskar_convert_mjd_to_gast_fast(mjd);
+    const double time_mjd = h->time_start_mjd_utc + dt_dump * (i_time + 0.5);
     const double freq_hz = h->freq_start_hz + i_channel * h->freq_inc_hz;
 
     /* Work out the size of the chunk. */
@@ -332,6 +331,7 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
             enu[dim] = oskar_station_work_enu_direction(
                     work, dim, chunk_size + 1, status);
         }
+        const double gast_rad = oskar_convert_mjd_to_gast_fast(time_mjd);
         const double lst_rad = gast_rad + oskar_telescope_lon_rad(d->tel);
         const double lat_rad = oskar_telescope_lat_rad(d->tel);
         oskar_convert_any_to_enu_directions(h->source_coord_type,
@@ -404,7 +404,7 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
                     oskar_telescope_phase_centre_coord_type(d->tel),
                     oskar_telescope_phase_centre_longitude_rad(d->tel),
                     oskar_telescope_phase_centre_latitude_rad(d->tel),
-                    i_time, gast_rad, freq_hz,
+                    i_time, h->time_start_mjd_utc, time_mjd, freq_hz,
                     offset, d->jones_data, status);
         }
         else
@@ -436,7 +436,7 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
                         oskar_telescope_phase_centre_coord_type(d->tel),
                         oskar_telescope_phase_centre_longitude_rad(d->tel),
                         oskar_telescope_phase_centre_latitude_rad(d->tel),
-                        i_time, gast_rad, freq_hz,
+                        i_time, h->time_start_mjd_utc, time_mjd, freq_hz,
                         offset, d->jones_data, status);
                 num_models_evaluated++;
                 models_evaluated = (int*) realloc(models_evaluated,

@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2011-2023, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "convert/oskar_convert_any_to_enu_directions.h"
 #include "convert/oskar_convert_enu_directions_to_theta_phi.h"
+#include "convert/oskar_convert_mjd_to_gast_fast.h"
 #include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
 #include "interferometer/oskar_evaluate_jones_E.h"
 #include "interferometer/oskar_jones_accessors.h"
@@ -26,7 +27,7 @@ static void oskar_evaluate_element_beams_harp(
         double ref_lon_rad,
         double ref_lat_rad,
         oskar_Telescope* tel,
-        double gast_rad,
+        double time_mjd_utc,
         double frequency_hz,
         oskar_StationWork* work,
         oskar_Mem* beam,
@@ -41,6 +42,7 @@ static void oskar_evaluate_element_beams_harp(
         enu[dim] = oskar_station_work_enu_direction(
                 work, dim, num_points + 1, status);
     }
+    const double gast_rad = oskar_convert_mjd_to_gast_fast(time_mjd_utc);
     const double lst_rad = gast_rad + oskar_telescope_lon_rad(tel);
     const double lat_rad = oskar_telescope_lat_rad(tel);
     oskar_convert_any_to_enu_directions(coord_type,
@@ -95,7 +97,8 @@ void oskar_evaluate_jones_E(
         double ref_lat_rad,
         oskar_Telescope* tel,
         int time_index,
-        double gast_rad,
+        double time_start_mjd_utc,
+        double time_mjd_utc,
         double frequency_hz,
         oskar_StationWork* work,
         int* status)
@@ -120,7 +123,7 @@ void oskar_evaluate_jones_E(
     if (harp_data)
     {
         oskar_evaluate_element_beams_harp(harp_data, coord_type, num_points,
-                source_coords, ref_lon_rad, ref_lat_rad, tel, gast_rad,
+                source_coords, ref_lon_rad, ref_lat_rad, tel, time_mjd_utc,
                 frequency_hz, work, oskar_jones_mem(E), status);
     }
     else if (!oskar_telescope_allow_station_beam_duplication(tel))
@@ -135,7 +138,7 @@ void oskar_evaluate_jones_E(
                     oskar_telescope_phase_centre_coord_type(tel),
                     oskar_telescope_phase_centre_longitude_rad(tel),
                     oskar_telescope_phase_centre_latitude_rad(tel),
-                    time_index, gast_rad, frequency_hz,
+                    time_index, time_start_mjd_utc, time_mjd_utc, frequency_hz,
                     i * num_sources, oskar_jones_mem(E), status);
         }
     }
@@ -175,8 +178,10 @@ void oskar_evaluate_jones_E(
                         oskar_telescope_phase_centre_coord_type(tel),
                         oskar_telescope_phase_centre_longitude_rad(tel),
                         oskar_telescope_phase_centre_latitude_rad(tel),
-                        time_index, gast_rad, frequency_hz,
-                        i * num_sources, oskar_jones_mem(E), status);
+                        time_index, time_start_mjd_utc, time_mjd_utc,
+                        frequency_hz, i * num_sources, oskar_jones_mem(E),
+                        status
+                );
                 num_models_evaluated++;
                 models_evaluated = (int*) realloc(models_evaluated,
                         num_models_evaluated * sizeof(int));

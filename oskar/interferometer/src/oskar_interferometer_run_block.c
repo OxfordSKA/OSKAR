@@ -244,9 +244,12 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
             oskar_sky_n_const(sky)
     };
     oskar_timer_resume(d->tmr_E);
-    oskar_evaluate_jones_E(d->E, OSKAR_COORDS_REL_DIR, num_src, source_coords,
+    oskar_evaluate_jones_E(
+            d->E, OSKAR_COORDS_REL_DIR, num_src, source_coords,
             oskar_sky_reference_ra_rad(sky), oskar_sky_reference_dec_rad(sky),
-            d->tel, time_index_sim, gast_rad, freq, d->station_work, status);
+            d->tel, time_index_sim, t_start, t_dump, freq, d->station_work,
+            status
+    );
     oskar_timer_pause(d->tmr_E);
 
     /* Evaluate parallactic angle (Jones R: matrix), and join with Jones E.

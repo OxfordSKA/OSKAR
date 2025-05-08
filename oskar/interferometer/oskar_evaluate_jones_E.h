@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -30,18 +30,19 @@ extern "C" {
  * If all stations are marked as identical, the results for the first station
  * are copied into the results for the others.
  *
- * @param[out] E             Output set of Jones matrices.
- * @param[in]  coord_type    Type of coordinates.
- * @param[in]  num_points    Number of coordinates given.
- * @param[in]  source_coords Source coordinate values.
- * @param[in]  ref_lon_rad   Reference longitude in radians, if inputs are direction cosines.
- * @param[in]  ref_lat_rad   Reference latitude in radians, if inputs are direction cosines.
- * @param[in]  tel           Input telescope model.
- * @param[in]  time_index    Simulation time index.
- * @param[in]  gast_rad      The Greenwich Apparent Sidereal Time, in radians.
- * @param[in]  frequency_hz  The observing frequency, in Hz.
- * @param[in]  work          Pointer to structure holding work arrays.
- * @param[in,out] status     Status return code.
+ * @param[out] E                 Output set of Jones matrices.
+ * @param[in] coord_type         Type of coordinates.
+ * @param[in] num_points         Number of coordinates given.
+ * @param[in] source_coords      Source coordinate values.
+ * @param[in] ref_lon_rad        Reference longitude in radians, if inputs are direction cosines.
+ * @param[in] ref_lat_rad        Reference latitude in radians, if inputs are direction cosines.
+ * @param[in] tel                Input telescope model.
+ * @param[in] time_index         Simulation time index.
+ * @param[in] time_start_mjd_utc Simulation start time, as MJD(UTC).
+ * @param[in] time_mjd_utc       Current simulation time, as MJD(UTC).
+ * @param[in] frequency_hz       The observing frequency, in Hz.
+ * @param[in] work               Pointer to structure holding work arrays.
+ * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_E(
@@ -53,10 +54,12 @@ void oskar_evaluate_jones_E(
         double ref_lat_rad,
         oskar_Telescope* tel,
         int time_index,
-        double gast_rad,
+        double time_start_mjd_utc,
+        double time_mjd_utc,
         double frequency_hz,
         oskar_StationWork* work,
-        int* status);
+        int* status
+);
 
 #ifdef __cplusplus
 }

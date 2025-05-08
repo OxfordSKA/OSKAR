@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2023, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -306,8 +306,8 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
                         s->to_double("screen_height_km", status));
                 const double pixel_size =
                         s->to_double("screen_pixel_size_m", status);
-                /*const double time_interval =
-                        s->to_double("screen_time_interval_sec", status);*/
+                const double time_interval =
+                        s->to_double("screen_time_interval_sec", status);
                 if (pixel_size > 0.0)
                 {
                     oskar_telescope_set_tec_screen_pixel_size(t, pixel_size);
@@ -316,14 +316,12 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
                 {
                     oskar_telescope_set_tec_screen_pixel_size(t, axis_inc[0]);
                 }
-#if 0
-                if (time_interval > 0.0)
+                if (time_interval >= 0.0)
                 {
                     oskar_telescope_set_tec_screen_time_interval(t,
                             time_interval);
                 }
                 else
-#endif
                 {
                     oskar_telescope_set_tec_screen_time_interval(t,
                             axis_inc[2]);

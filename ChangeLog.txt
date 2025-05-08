@@ -2,6 +2,9 @@
 
     * Include ionospheric Faraday rotation in TEC screen evaluation.
 
+    * Allow ionospheric TEC screen to be evaluated at a different time
+      interval to the visibility data.
+
     * Use station orientation information when writing PHASED_ARRAY table.
       Only write COORDINATE_AXES, not COORDINATE_SYSTEM.
 
