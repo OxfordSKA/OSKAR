@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2023, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -28,11 +28,6 @@ int oskar_element_different(const oskar_Element* a, const oskar_Element* b,
             return 1;
         }
         if (oskar_mem_different(a->filename_y[i], b->filename_y[i], 0, status))
-        {
-            return 1;
-        }
-        if (oskar_mem_different(a->filename_scalar[i], b->filename_scalar[i],
-                0, status))
         {
             return 1;
         }

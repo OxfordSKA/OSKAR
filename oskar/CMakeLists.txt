@@ -29,7 +29,6 @@ set(${libname}_folders
     math
     mem
     sky
-    splines
     telescope
     utility
     vis)
@@ -151,7 +150,6 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/oskar"
     PATTERN ${install_include_dir} EXCLUDE
     PATTERN define* EXCLUDE
     PATTERN private* EXCLUDE
-    PATTERN *dierckx* EXCLUDE
     PATTERN cmake EXCLUDE
     PATTERN src  EXCLUDE
     PATTERN test EXCLUDE

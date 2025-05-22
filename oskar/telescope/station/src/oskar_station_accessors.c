@@ -497,10 +497,6 @@ const oskar_Harp* oskar_station_harp_data_const(const oskar_Station* model,
     return model->harp_data[index];
 }
 
-double oskar_station_virtual_antenna_angle_rad(const oskar_Station* model)
-{
-    return (!model) ? 0.0 : model->virtual_antenna_angle_rad;
-}
 
 /* Setters. */
 
@@ -627,13 +623,6 @@ void oskar_station_set_swap_xy(oskar_Station* model, int value)
 {
     if (!model) return;
     model->swap_xy = value;
-}
-
-void oskar_station_set_virtual_antenna_angle(oskar_Station* model,
-        double value_deg)
-{
-    if (!model) return;
-    model->virtual_antenna_angle_rad = value_deg * M_PI / 180.0;
 }
 
 #ifdef __cplusplus

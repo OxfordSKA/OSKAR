@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2023, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -30,8 +30,6 @@ extern "C" {
  * @param[in] swap_xy       If true, swap X and Y responses in output.
  * @param[in] orientation_x Azimuth of X dipole in radians.
  * @param[in] orientation_y Azimuth of Y dipole in radians.
- * @param[in] virtual_antenna_angle Angle by which to rotate
- *                                  virtual antenna in radians.
  * @param[in] offset_points Start offset into input coordinate arrays.
  * @param[in] num_points    Number of points at which to evaluate beam.
  * @param[in] x             Pointer to x-direction cosines.
@@ -52,7 +50,6 @@ void oskar_element_evaluate(
         int swap_xy,
         double orientation_x,
         double orientation_y,
-        double virtual_antenna_angle,
         int offset_points,
         int num_points,
         const oskar_Mem* x,

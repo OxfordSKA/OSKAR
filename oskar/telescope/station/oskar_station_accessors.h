@@ -326,8 +326,6 @@ OSKAR_EXPORT
 const oskar_Harp* oskar_station_harp_data_const(const oskar_Station* model,
         double freq_hz);
 
-OSKAR_EXPORT
-double oskar_station_virtual_antenna_angle_rad(const oskar_Station* model);
 
 /* Setters. */
 
@@ -529,20 +527,6 @@ void oskar_station_set_seed_time_variable_errors(oskar_Station* model,
  */
 OSKAR_EXPORT
 void oskar_station_set_swap_xy(oskar_Station* model, int value);
-
-/**
- * @brief
- * Sets the virtual antenna angle for a station.
- *
- * @details
- * This function sets the virtual antenna angle for the station.
- *
- * @param[in] model      Station model to update.
- * @param[in] value_deg  The virtual antenna angle, in degrees.
- */
-OSKAR_EXPORT
-void oskar_station_set_virtual_antenna_angle(oskar_Station* model,
-        double value_deg);
 
 #ifdef __cplusplus
 }

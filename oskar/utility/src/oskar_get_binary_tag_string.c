@@ -6,7 +6,6 @@
 #include "utility/oskar_get_binary_tag_string.h"
 
 #include "binary/oskar_binary.h"
-#include "splines/oskar_splines.h"
 #include "sky/oskar_sky.h"
 #include "telescope/station/element/oskar_element.h"
 #include "vis/oskar_vis_header.h"
@@ -82,40 +81,6 @@ const char* oskar_get_binary_tag_string(char group, char tag)
             return "Gaussian position angle values";
         default:
             return "Unknown sky model group tag";
-        }
-        break;
-    }
-    case OSKAR_TAG_GROUP_SPLINE_DATA:
-    {
-        switch (tag)
-        {
-        case OSKAR_SPLINES_TAG_NUM_KNOTS_X_THETA:
-            return "Number of knots in X or theta";
-        case OSKAR_SPLINES_TAG_NUM_KNOTS_Y_PHI:
-            return "Number of knots in Y or phi";
-        case OSKAR_SPLINES_TAG_KNOTS_X_THETA:
-            return "Knot positions in X or theta";
-        case OSKAR_SPLINES_TAG_KNOTS_Y_PHI:
-            return "Knot positions in Y or phi";
-        case OSKAR_SPLINES_TAG_COEFF:
-            return "Spline coefficient data";
-        case OSKAR_SPLINES_TAG_SMOOTHING_FACTOR:
-            return "Smoothing factor";
-        default:
-            return "Unknown spline data group tag";
-        }
-        break;
-    }
-    case OSKAR_TAG_GROUP_ELEMENT_DATA:
-    {
-        switch (tag)
-        {
-        case OSKAR_ELEMENT_TAG_SURFACE_TYPE:
-            return "Surface type";
-        case OSKAR_ELEMENT_TAG_COORD_SYS:
-            return "Coordinate system";
-        default:
-            return "Unknown element data group tag";
         }
         break;
     }

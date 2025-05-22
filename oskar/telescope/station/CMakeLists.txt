@@ -36,7 +36,6 @@ set(station_SRC
     src/oskar_station_load_layout.c
     src/oskar_station_load_mount_types.c
     src/oskar_station_load_permitted_beams.c
-    src/oskar_station_load_virtual_antenna_angle.c
     src/oskar_station_override_element_cable_length_errors.c
     src/oskar_station_override_element_feed_angle.c
     src/oskar_station_override_element_gains.c

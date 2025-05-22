@@ -5,7 +5,6 @@
 add_subdirectory(xml)
 
 set(apps_SRC
-    src/oskar_app_settings_fit_element_data.cpp
     src/oskar_app_settings_imager.cpp
     src/oskar_app_settings_sim_beam_pattern.cpp
     src/oskar_app_settings_sim_interferometer.cpp

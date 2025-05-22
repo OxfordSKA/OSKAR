@@ -1,3 +1,9 @@
+2025-xx-yy  OSKAR-2.11.0
+
+    * Remove unsupported and unused spline data option for element patterns.
+
+    * Remove unused virtual antenna angle option.
+
 2025-05-08  OSKAR-2.10.1
 
     * Include ionospheric Faraday rotation in TEC screen evaluation.

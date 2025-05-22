@@ -24,18 +24,6 @@ OSKAR_EXPORT
 int oskar_element_mem_location(const oskar_Element* data);
 
 OSKAR_EXPORT
-int oskar_element_has_x_spline_data(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-int oskar_element_has_y_spline_data(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-int oskar_element_has_scalar_spline_data(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
 int oskar_element_has_spherical_wave_data(const oskar_Element* data,
         int freq_id);
 
@@ -77,10 +65,6 @@ const oskar_Mem* oskar_element_x_filename_const(const oskar_Element* data,
 
 OSKAR_EXPORT
 const oskar_Mem* oskar_element_y_filename_const(const oskar_Element* data,
-        int freq_id);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_element_scalar_filename_const(const oskar_Element* data,
         int freq_id);
 
 

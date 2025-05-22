@@ -17,7 +17,6 @@ set(telescope_SRC
     src/oskar_telescope_load_station_coords_enu.c
     src/oskar_telescope_load_station_coords_wgs84.c
     src/oskar_telescope_load_station_type_map.c
-    src/oskar_telescope_load_virtual_antenna_angle.c
     src/oskar_telescope_log_summary.c
     src/oskar_telescope_override_element_cable_length_errors.c
     src/oskar_telescope_override_element_gains.c
@@ -48,7 +47,6 @@ set(telescope_SRC
     src/private_TelescopeLoaderPermittedBeams.cpp
     src/private_TelescopeLoaderPosition.cpp
     src/private_TelescopeLoaderStationTypeMap.cpp
-    src/private_TelescopeLoaderVirtualAntennaAngle.cpp
 )
 
 # Add contents of station subdirectory.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2023, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -21,34 +21,6 @@ int oskar_element_precision(const oskar_Element* data)
 int oskar_element_mem_location(const oskar_Element* data)
 {
     return data->mem_location;
-}
-
-int oskar_element_has_x_spline_data(const oskar_Element* data,
-        int freq_id)
-{
-    return (data->num_freq > freq_id) && ( /* Safe short-circuit. */
-            oskar_splines_have_coeffs(data->x_h_re[freq_id]) ||
-            oskar_splines_have_coeffs(data->x_h_im[freq_id]) ||
-            oskar_splines_have_coeffs(data->x_v_re[freq_id]) ||
-            oskar_splines_have_coeffs(data->x_v_im[freq_id]));
-}
-
-int oskar_element_has_y_spline_data(const oskar_Element* data,
-        int freq_id)
-{
-    return (data->num_freq > freq_id) && ( /* Safe short-circuit. */
-            oskar_splines_have_coeffs(data->y_h_re[freq_id]) ||
-            oskar_splines_have_coeffs(data->y_h_im[freq_id]) ||
-            oskar_splines_have_coeffs(data->y_v_re[freq_id]) ||
-            oskar_splines_have_coeffs(data->y_v_im[freq_id]));
-}
-
-int oskar_element_has_scalar_spline_data(const oskar_Element* data,
-        int freq_id)
-{
-    return (data->num_freq > freq_id) && ( /* Safe short-circuit. */
-            oskar_splines_have_coeffs(data->scalar_re[freq_id]) ||
-            oskar_splines_have_coeffs(data->scalar_im[freq_id]));
 }
 
 int oskar_element_has_spherical_wave_data(const oskar_Element* data,
@@ -122,12 +94,6 @@ const oskar_Mem* oskar_element_y_filename_const(const oskar_Element* data,
         int freq_id)
 {
     return data->filename_y[freq_id];
-}
-
-const oskar_Mem* oskar_element_scalar_filename_const(const oskar_Element* data,
-        int freq_id)
-{
-    return data->filename_scalar[freq_id];
 }
 
 

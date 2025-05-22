@@ -63,7 +63,6 @@ struct oskar_Station
     int array_is_3d;              /* True if array is 3-dimensional (auto determined; default false). */
     int apply_element_errors;     /* True if element gain and phase errors should be applied (auto determined; default false). */
     int apply_element_weight;     /* True if weights should be modified by user-supplied complex beamforming weights (auto determined; default false). */
-    double virtual_antenna_angle_rad; /* Virtual antenna angle, in radians. */
     unsigned int seed_time_variable_errors;       /* Seed for time variable errors. */
     oskar_Mem* element_true_enu_metres[2][3];     /* True horizon element ENU coordinates, in metres. */
     oskar_Mem* element_measured_enu_metres[2][3]; /* Measured horizon element ENU coordinates, in metres. */

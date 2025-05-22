@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2024, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -12,7 +12,6 @@
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum.h"
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum_feko.h"
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum_galileo.h"
-#include "telescope/station/element/oskar_rotate_virtual_antenna.h"
 #include "convert/oskar_convert_enu_directions_to_theta_phi.h"
 #include "convert/oskar_convert_ludwig3_to_theta_phi_components.h"
 #include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
@@ -32,7 +31,6 @@ void oskar_element_evaluate(
         int swap_xy,
         double orientation_x,
         double orientation_y,
-        double virtual_antenna_angle,
         int offset_points,
         int num_points,
         const oskar_Mem* x,
@@ -74,8 +72,8 @@ void oskar_element_evaluate(
     /* Compute (effective) theta and phi coordinates. */
     oskar_convert_enu_directions_to_theta_phi(
             offset_points, num_points, x, y, z, normalise,
-            (M_PI/2) - orientation_x - virtual_antenna_angle,
-            (M_PI/2) - orientation_y - virtual_antenna_angle,
+            (M_PI/2) - orientation_x,
+            (M_PI/2) - orientation_y,
             theta, phi_x, phi_y, status
     );
 
@@ -109,74 +107,22 @@ void oskar_element_evaluate(
                     model->l_max[id], model->sph_wave_galileo[id],
                     offset_out, output, status);
         }
-        else
+        else if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
         {
-            const int offset_out_real = offset_out * 8;
             const int offset_out_cplx = offset_out * 4;
-            if (oskar_element_has_x_spline_data(model, id))
-            {
-                oskar_splines_evaluate(model->x_h_re[id], num_points_norm,
-                        theta, phi_x, 8, offset_out_real + 0, output, status);
-                oskar_splines_evaluate(model->x_h_im[id], num_points_norm,
-                        theta, phi_x, 8, offset_out_real + 1, output, status);
-                oskar_splines_evaluate(model->x_v_re[id], num_points_norm,
-                        theta, phi_x, 8, offset_out_real + 2, output, status);
-                oskar_splines_evaluate(model->x_v_im[id], num_points_norm,
-                        theta, phi_x, 8, offset_out_real + 3, output, status);
-                oskar_convert_ludwig3_to_theta_phi_components(num_points_norm,
-                        phi_x, 4, offset_out_cplx + 0, output, status);
-            }
-            else if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
-            {
-                oskar_evaluate_dipole_pattern(num_points_norm,
-                        theta, phi_x, frequency_hz, dipole_length_m,
-                        4, offset_out_cplx + 0, output, status);
-            }
-
-            if (oskar_element_has_y_spline_data(model, id))
-            {
-                oskar_splines_evaluate(model->y_h_re[id], num_points_norm,
-                        theta, phi_y, 8, offset_out_real + 4, output, status);
-                oskar_splines_evaluate(model->y_h_im[id], num_points_norm,
-                        theta, phi_y, 8, offset_out_real + 5, output, status);
-                oskar_splines_evaluate(model->y_v_re[id], num_points_norm,
-                        theta, phi_y, 8, offset_out_real + 6, output, status);
-                oskar_splines_evaluate(model->y_v_im[id], num_points_norm,
-                        theta, phi_y, 8, offset_out_real + 7, output, status);
-                oskar_convert_ludwig3_to_theta_phi_components(num_points_norm,
-                        phi_y, 4, offset_out_cplx + 2, output, status);
-            }
-            else if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
-            {
-                oskar_evaluate_dipole_pattern(num_points_norm, theta,
-                        phi_y, frequency_hz, dipole_length_m,
-                        4, offset_out_cplx + 2, output, status);
-            }
+            oskar_evaluate_dipole_pattern(num_points_norm,
+                    theta, phi_x, frequency_hz, dipole_length_m,
+                    4, offset_out_cplx + 0, output, status);
+            oskar_evaluate_dipole_pattern(num_points_norm, theta,
+                    phi_y, frequency_hz, dipole_length_m,
+                    4, offset_out_cplx + 2, output, status);
         }
-        oskar_convert_enu_directions_to_theta_phi(
-                offset_points, num_points, x, y, z, normalise,
-                (M_PI/2) - orientation_x,
-                (M_PI/2) - orientation_y,
-                theta, phi_x, phi_y, status);
         oskar_convert_theta_phi_to_ludwig3_components(num_points_norm,
                 phi_x, phi_y, swap_xy, offset_out, output, status);
-        if (virtual_antenna_angle != 0.0)
-        {
-            oskar_rotate_virtual_antenna(num_points_norm,
-                    offset_out, virtual_antenna_angle, output, status);
-        }
     }
     else /* Scalar response. */
     {
-        const int offset_out_real = offset_out * 2;
-        if (oskar_element_has_scalar_spline_data(model, id))
-        {
-            oskar_splines_evaluate(model->scalar_re[id], num_points_norm,
-                    theta, phi_x, 2, offset_out_real + 0, output, status);
-            oskar_splines_evaluate(model->scalar_im[id], num_points_norm,
-                    theta, phi_x, 2, offset_out_real + 1, output, status);
-        }
-        else if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
+        if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
         {
             oskar_evaluate_dipole_pattern(num_points_norm,
                     theta, phi_x, frequency_hz, dipole_length_m,

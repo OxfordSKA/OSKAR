@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2022, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -65,7 +65,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     selector_->addItem("oskar_sim_interferometer");
     selector_->addItem("oskar_sim_beam_pattern");
     selector_->addItem("oskar_imager");
-    selector_->addItem("oskar_fit_element_data");
     QSizePolicy policy = selector_->sizePolicy();
     policy.setHorizontalStretch(2);
     selector_->setSizePolicy(policy);

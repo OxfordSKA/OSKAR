@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2023, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -7,7 +7,6 @@
 #define OSKAR_PRIVATE_ELEMENT_H_
 
 #include <mem/oskar_mem.h>
-#include <splines/oskar_splines.h>
 
 struct oskar_Element
 {
@@ -23,14 +22,7 @@ struct oskar_Element
     /* The arrays of fitted data are per-frequency. */
     int num_freq;
     double* freqs_hz; /* Array of frequencies in Hz. */
-    oskar_Mem **filename_x, **filename_y, **filename_scalar;
-
-    /* Spline data. */
-    oskar_Splines **x_h_re, **x_h_im;
-    oskar_Splines **x_v_re, **x_v_im;
-    oskar_Splines **y_h_re, **y_h_im;
-    oskar_Splines **y_v_re, **y_v_im;
-    oskar_Splines **scalar_re, **scalar_im;
+    oskar_Mem **filename_x, **filename_y;
 
     /* Spherical wave data. */
     int *common_phi_coords;

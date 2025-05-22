@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -50,8 +50,6 @@ const char* oskar_get_error_string(int error)
     case OSKAR_ERR_COMPUTE_DEVICES:        return "compute device not found";
 
     /* The following enumerators are under review... */
-    case OSKAR_ERR_SPLINE_COEFF_FAIL:      return "spline fitting failed";
-    case OSKAR_ERR_SPLINE_EVAL_FAIL:       return "spline evaluation failed";
     case OSKAR_ERR_ELLIPSE_FIT_FAILED:     return "ellipse fitting failed";
     case OSKAR_ERR_SETTINGS_TELESCOPE:     return "telescope settings error";
     case OSKAR_ERR_SETUP_FAIL:             return "set up failed";

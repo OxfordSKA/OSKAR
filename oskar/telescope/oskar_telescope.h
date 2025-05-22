@@ -47,7 +47,6 @@ enum OSKAR_POL_MODE_TYPE
 #include <telescope/oskar_telescope_load_station_coords_enu.h>
 #include <telescope/oskar_telescope_load_station_coords_wgs84.h>
 #include <telescope/oskar_telescope_load_station_type_map.h>
-#include <telescope/oskar_telescope_load_virtual_antenna_angle.h>
 #include <telescope/oskar_telescope_log_summary.h>
 #include <telescope/oskar_telescope_override_element_cable_length_errors.h>
 #include <telescope/oskar_telescope_override_element_gains.h>

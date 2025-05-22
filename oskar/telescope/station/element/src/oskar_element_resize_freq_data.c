@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023, The OSKAR Developers.
+ * Copyright (c) 2014-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -26,17 +26,6 @@ void oskar_element_resize_freq_data(oskar_Element* model, int size,
         {
             model->filename_x[i] = 0;
             model->filename_y[i] = 0;
-            model->filename_scalar[i] = 0;
-            model->x_v_re[i] = 0;
-            model->x_v_im[i] = 0;
-            model->x_h_re[i] = 0;
-            model->x_h_im[i] = 0;
-            model->y_v_re[i] = 0;
-            model->y_v_im[i] = 0;
-            model->y_h_re[i] = 0;
-            model->y_h_im[i] = 0;
-            model->scalar_re[i] = 0;
-            model->scalar_im[i] = 0;
             model->sph_wave[i] = 0;
             model->sph_wave_feko[i] = 0;
             model->sph_wave_galileo[i] = 0;
@@ -51,17 +40,6 @@ void oskar_element_resize_freq_data(oskar_Element* model, int size,
         {
             oskar_mem_free(model->filename_x[i], status);
             oskar_mem_free(model->filename_y[i], status);
-            oskar_mem_free(model->filename_scalar[i], status);
-            oskar_splines_free(model->x_v_re[i], status);
-            oskar_splines_free(model->x_v_im[i], status);
-            oskar_splines_free(model->x_h_re[i], status);
-            oskar_splines_free(model->x_h_im[i], status);
-            oskar_splines_free(model->y_v_re[i], status);
-            oskar_splines_free(model->y_v_im[i], status);
-            oskar_splines_free(model->y_h_re[i], status);
-            oskar_splines_free(model->y_h_im[i], status);
-            oskar_splines_free(model->scalar_re[i], status);
-            oskar_splines_free(model->scalar_im[i], status);
             oskar_mem_free(model->sph_wave[i], status);
             oskar_mem_free(model->sph_wave_feko[i], status);
             oskar_mem_free(model->sph_wave_galileo[i], status);
@@ -80,17 +58,6 @@ static void realloc_arrays(oskar_Element* e, int size)
             e->common_phi_coords, size * sizeof(int));
     e->filename_x = (oskar_Mem**) realloc(e->filename_x, sz);
     e->filename_y = (oskar_Mem**) realloc(e->filename_y, sz);
-    e->filename_scalar = (oskar_Mem**) realloc(e->filename_scalar, sz);
-    e->x_v_re = (oskar_Splines**) realloc(e->x_v_re, sz);
-    e->x_v_im = (oskar_Splines**) realloc(e->x_v_im, sz);
-    e->x_h_re = (oskar_Splines**) realloc(e->x_h_re, sz);
-    e->x_h_im = (oskar_Splines**) realloc(e->x_h_im, sz);
-    e->y_v_re = (oskar_Splines**) realloc(e->y_v_re, sz);
-    e->y_v_im = (oskar_Splines**) realloc(e->y_v_im, sz);
-    e->y_h_re = (oskar_Splines**) realloc(e->y_h_re, sz);
-    e->y_h_im = (oskar_Splines**) realloc(e->y_h_im, sz);
-    e->scalar_re = (oskar_Splines**) realloc(e->scalar_re, sz);
-    e->scalar_im = (oskar_Splines**) realloc(e->scalar_im, sz);
     e->sph_wave = (oskar_Mem**) realloc(e->sph_wave, sz);
     e->sph_wave_feko = (oskar_Mem**) realloc(e->sph_wave_feko, sz);
     e->sph_wave_galileo = (oskar_Mem**) realloc(e->sph_wave_galileo, sz);

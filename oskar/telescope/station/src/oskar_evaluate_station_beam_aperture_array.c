@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2024, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -9,7 +9,6 @@
 #include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
 #include "telescope/station/oskar_station_evaluate_element_weights.h"
 #include "telescope/station/element/oskar_element_evaluate.h"
-#include "telescope/station/element/oskar_rotate_virtual_antenna.h"
 #include "telescope/station/oskar_blank_below_horizon.h"
 #include "telescope/station/private_station_work.h"
 
@@ -83,7 +82,6 @@ static void oskar_evaluate_station_beam_aperture_array_private(
     if (*status) return;
 
     const double wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
-    const double virtual_angle = oskar_station_virtual_antenna_angle_rad(s);
     const int swap_xy       = oskar_station_swap_xy(s);
     const int is_3d         = oskar_station_array_is_3d(s);
     const int norm_array    = oskar_station_normalise_array_pattern(s);
@@ -108,8 +106,8 @@ static void oskar_evaluate_station_beam_aperture_array_private(
         oskar_mem_ensure(phi_y, num_points, status);
         oskar_convert_enu_directions_to_theta_phi(
                 offset_points, num_points, x, y, z, 0,
-                M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0) - virtual_angle,
-                M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 1, 0, 0)) - virtual_angle,
+                M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0),
+                M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 1, 0, 0)),
                 theta, phi_x, phi_y, status);
         oskar_harp_evaluate_smodes(
                 harp_data,
@@ -155,11 +153,6 @@ static void oskar_evaluate_station_beam_aperture_array_private(
         }
         oskar_convert_theta_phi_to_ludwig3_components(num_points,
                 phi_x, phi_y, swap_xy, offset_out, beam, status);
-        if (virtual_angle != 0.0)
-        {
-            oskar_rotate_virtual_antenna(num_points,
-                    offset_out, virtual_angle, beam, status);
-        }
         oskar_blank_below_horizon(offset_points, num_points, z,
                 offset_out, beam, status);
         return;
@@ -183,7 +176,6 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                         norm_element, swap_xy,
                         oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, 0),
-                        virtual_angle,
                         offset_points, num_points, x, y, z, frequency_hz,
                         theta, phi_x, phi_y, i * num_points, signal, status);
             }
@@ -206,7 +198,6 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                         norm_element, swap_xy,
                         oskar_station_element_euler_index_rad(s, 0, 0, i) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, i),
-                        virtual_angle,
                         offset_points, num_points, x, y, z, frequency_hz,
                         theta, phi_x, phi_y, i * num_points, signal, status);
             }

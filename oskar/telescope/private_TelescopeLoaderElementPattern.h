@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2023, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -26,9 +26,6 @@ public:
 private:
     void load_element_patterns(oskar_Station* station,
             const std::map<std::string, std::string>& filemap, int* status);
-    void load_fitted_data(int feed, oskar_Station* station,
-            const std::vector<std::string>& keys,
-            const std::vector<std::string>& paths, int* status);
     void load_spherical_wave_data(oskar_Station* station,
             const std::vector<std::string>& keys,
             const std::vector<std::string>& paths, int* status);
@@ -45,7 +42,6 @@ private:
 
 private:
     std::string wildcard;
-    std::string fit_root_x, fit_root_y, fit_root_scalar;
     oskar_Telescope* telescope_;
 };
 

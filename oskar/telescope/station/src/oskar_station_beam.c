@@ -3,6 +3,7 @@
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
+#include "log/oskar_log.h"
 #include "math/oskar_gaussian_circular.h"
 #include "math/oskar_gaussian_ellipse.h"
 #include "telescope/station/private_station_work.h"

@@ -6,7 +6,7 @@ License
 OSKAR is made available under the 3-clause BSD License, as follows:
 
 | Copyright (c) 2011-2020, The University of Oxford
-| Copyright (c) 2020-2022, Fred Dulwich
+| Copyright (c) 2020-2025, Fred Dulwich
 | All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -239,15 +239,6 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
-The DIERCKX spline fitting library
-++++++++++++++++++++++++++++++++++
-
-Copyright (c) Paul Dierckx, 1993
-
-Reference:
-Paul Dierckx, Curve and Surface Fitting with Splines, Oxford University Press, 1993
 
 
 The casacore Measurement Set library

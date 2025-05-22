@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2023, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -21,9 +21,6 @@ TelescopeLoaderElementPattern::TelescopeLoaderElementPattern()
 {
     telescope_ = 0;
     wildcard = string(root_name) + "*";
-    fit_root_x = string(root_name) + "_fit_x_";
-    fit_root_y = string(root_name) + "_fit_y_";
-    fit_root_scalar = string(root_name) + "_fit_scalar_";
 }
 
 TelescopeLoaderElementPattern::~TelescopeLoaderElementPattern()
@@ -83,28 +80,11 @@ void TelescopeLoaderElementPattern::load_element_patterns(
     vector<string> keys_sw_fit, paths_sw_fit;
     vector<string> keys_sw_feko, paths_sw_feko;
     vector<string> keys_sw_galileo, paths_sw_galileo;
-    vector<string> keys_fit_x, keys_fit_y, keys_fit_scalar;
-    vector<string> paths_fit_x, paths_fit_y, paths_fit_scalar;
     for (map<string, string>::const_iterator i = filemap.begin();
             i != filemap.end(); ++i)
     {
         string key = i->first;
-        if (key.compare(0, fit_root_x.size(), fit_root_x) == 0)
-        {
-            keys_fit_x.push_back(key);
-            paths_fit_x.push_back(i->second);
-        }
-        else if (key.compare(0, fit_root_y.size(), fit_root_y) == 0)
-        {
-            keys_fit_y.push_back(key);
-            paths_fit_y.push_back(i->second);
-        }
-        else if (key.compare(0, fit_root_scalar.size(), fit_root_scalar) == 0)
-        {
-            keys_fit_scalar.push_back(key);
-            paths_fit_scalar.push_back(i->second);
-        }
-        else if (key.find("_feko", 0) != string::npos)
+        if (key.find("_feko", 0) != string::npos)
         {
             keys_sw_feko.push_back(key);
             paths_sw_feko.push_back(i->second);
@@ -127,44 +107,6 @@ void TelescopeLoaderElementPattern::load_element_patterns(
     load_spherical_wave_galileo_data(
             station, keys_sw_galileo, paths_sw_galileo, status
     );
-    if (oskar_telescope_pol_mode(telescope_) == OSKAR_POL_MODE_FULL)
-    {
-        load_fitted_data(1, station, keys_fit_x, paths_fit_x, status);
-        load_fitted_data(2, station, keys_fit_y, paths_fit_y, status);
-    }
-    else
-    {
-        load_fitted_data(0, station, keys_fit_scalar, paths_fit_scalar, status);
-    }
-}
-
-void TelescopeLoaderElementPattern::load_fitted_data(int feed,
-        oskar_Station* station, const vector<string>& keys,
-        const vector<string>& paths, int* status)
-{
-    if (*status || !station) return;
-    size_t buflen = 0;
-    char* buffer = 0;
-    for (size_t i = 0; i < keys.size(); ++i)
-    {
-        int ind = 0;
-        double freq = 0.0;
-        const string key = keys[i];
-        const string path = paths[i];
-
-        // Get the element index and frequency from the key.
-        parse_filename(key.c_str(), &buffer, &buflen, &ind, &freq, status);
-
-        // Load the file.
-        if (*status) break;
-        if (oskar_station_num_element_types(station) < ind + 1)
-        {
-            oskar_station_resize_element_types(station, ind + 1, status);
-        }
-        oskar_element_read(oskar_station_element(station, ind), path.c_str(),
-                feed, freq, status);
-    }
-    free(buffer);
 }
 
 void TelescopeLoaderElementPattern::load_spherical_wave_data(

@@ -5,7 +5,6 @@
     <import filename="oskar_sky_model.xml" />
     <import filename="oskar_observation.xml" />
     <import filename="oskar_telescope_model.xml" />
-    <import filename="oskar_element_fit.xml" />
     <import filename="oskar_interferometer.xml" />
     <import filename="oskar_beam_pattern.xml" />
     <import filename="oskar_image.xml" />

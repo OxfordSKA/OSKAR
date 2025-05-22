@@ -311,17 +311,6 @@ Element Data
 
 Element Type Data
 -----------------
-* ``element_pattern_fit_*.bin``
-
-  Fitted element X-or Y-dipole responses for the station, as a function of frequency.
-
-  * **See** :ref:`telescope_element_patterns_numerical`
-
-  * **Required:** No.
-
-  * **Allowed locations:** Any. (Inherited.)
-
-
 * ``element_pattern_spherical_wave_*.txt``
 
   Fitted spherical wave element coefficient data, as a function of frequency.
@@ -856,81 +845,6 @@ the HARP beam evaluation method instead of the default one.
 
 Element Pattern Files
 =====================
-
-.. _telescope_element_patterns_numerical:
-
-Numerical Element Patterns
---------------------------
-Numerically-defined antenna element pattern data can be used for the
-simulation. OSKAR currently supports the loading of ASCII text files produced
-by the CST (Computer Simulation Technology) software package. Since
-version 2.7.0, either the theta-phi or the Ludwig-3 polarisation system can
-be used to represent the data. These files must contain eight columns,
-in the following order:
-
-#. Theta [deg]
-#. Phi [deg]
-#. Abs dir *
-#. Abs theta (if theta-phi) / Abs horizontal (if Ludwig-3)
-#. Phase theta [deg] (if theta-phi) / Phase horizontal [deg] (if Ludwig-3)
-#. Abs phi (if theta-phi) / Abs vertical (if Ludwig-3)
-#. Phase phi [deg] (if theta-phi) / Phase vertical [deg] (if Ludwig-3)
-#. Ax. ratio *
-
-(Columns marked * are ignored during the load, but must still be present.)
-
-Ludwig-3-format data are detected by the presence of the word "Horiz" on the
-first (header) line of the file; otherwise, the theta-phi system is assumed.
-
-Since version 2.6.0, "unpolarised" (scalar) numerical element pattern data
-files can be supplied, and these will be used if OSKAR is running in a scalar
-or Stokes-I-only mode. Data files for scalar numerical element responses must
-contain three or four columns, in the following order:
-
-#. Theta [deg]
-#. Phi [deg]
-#. Amplitude
-#. Phase [deg] (optional)
-
-Before being used in the simulation, the element pattern data must be fitted
-with B-splines. The fitting procedure is performed using the
-``oskar_fit_element_data`` application which is built as part of the
-OSKAR package. Please see the settings file documentation for a description
-of the options used by this application.
-
-To be recognised and loaded, the fitted element data must be supplied in
-files that use the following name pattern, which is created
-automatically by the fitting procedure:
-
-.. code-block:: text
-
-   element_pattern_fit_[x|y|scalar]_<element type index>_<frequency in MHz>.bin
-
-**The element type index should be 0 unless there is more than one type of
-element in the station** (as specified in the station's ``element_types.txt``),
-and the frequency is the frequency in MHz for which
-the element pattern data are valid: so, for example,
-``element_pattern_fit_x_0_600.bin`` would contain fitted
-coefficients to the data for the first type of X-dipole at 600 MHz.
-The frequency nearest to the current observing frequency is used when
-evaluating the response.
-
-These files define the patterns used for the nominal X- and Y-dipoles.
-The location of these files defines their scope: if placed in the top-level
-directory, then they are used for all stations; if placed in a station
-directory, they are used only for that station. In this way, it is possible
-to specify different element patterns for each station.
-
-.. note::
-
-   Surfaces are fitted to the numerically-defined antenna data using bicubic
-   B-splines. Since the quality of the fit depends critically on the fitting
-   parameters (adjustable using the OSKAR settings file), **it is essential that
-   each fitted surface is inspected graphically to ensure that there are no
-   artefacts introduced by the fitting process**. This can be done by saving a
-   FITS image of the element pattern (created by evaluating the fitted
-   coefficients) by making an image of the station beam from a single-element
-   station.
 
 .. _telescope_element_patterns_spherical_wave:
 

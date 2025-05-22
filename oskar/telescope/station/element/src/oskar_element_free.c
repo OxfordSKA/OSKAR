@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2023, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -20,17 +20,6 @@ void oskar_element_free(oskar_Element* data, int* status)
     {
         oskar_mem_free(data->filename_x[i], status);
         oskar_mem_free(data->filename_y[i], status);
-        oskar_mem_free(data->filename_scalar[i], status);
-        oskar_splines_free(data->x_v_re[i], status);
-        oskar_splines_free(data->x_v_im[i], status);
-        oskar_splines_free(data->x_h_re[i], status);
-        oskar_splines_free(data->x_h_im[i], status);
-        oskar_splines_free(data->y_v_re[i], status);
-        oskar_splines_free(data->y_v_im[i], status);
-        oskar_splines_free(data->y_h_re[i], status);
-        oskar_splines_free(data->y_h_im[i], status);
-        oskar_splines_free(data->scalar_re[i], status);
-        oskar_splines_free(data->scalar_im[i], status);
         oskar_mem_free(data->sph_wave[i], status);
         oskar_mem_free(data->sph_wave_feko[i], status);
         oskar_mem_free(data->sph_wave_galileo[i], status);
@@ -40,17 +29,6 @@ void oskar_element_free(oskar_Element* data, int* status)
     free(data->common_phi_coords);
     free(data->filename_x);
     free(data->filename_y);
-    free(data->filename_scalar);
-    free(data->x_h_re);
-    free(data->x_h_im);
-    free(data->x_v_re);
-    free(data->x_v_im);
-    free(data->y_h_re);
-    free(data->y_h_im);
-    free(data->y_v_re);
-    free(data->y_v_im);
-    free(data->scalar_re);
-    free(data->scalar_im);
     free(data->sph_wave);
     free(data->sph_wave_feko);
     free(data->sph_wave_galileo);

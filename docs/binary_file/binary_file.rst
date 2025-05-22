@@ -278,47 +278,6 @@ Tags in this group have a group ID of 7.
    14, "Rotation measure, in radians / :math:`\mathrm{m}^2`
    [array; type given by tag ID 2]."
 
-Spline Data
------------
-Tags in this group have a group ID of 9.
-Arrays will be present in both single and double precision.
-
-.. csv-table::
-   :header: "Tag ID", "Description"
-   :widths: 10, 90
-
-   1, "Number of knots in X or theta coordinate [int]."
-   2, "Number of knots in Y or phi coordinate [int]."
-   3, "Knot positions in X or theta [real array]."
-   4, "Knot positions in Y or phi [real array]."
-   5, "Spline coefficients [real array]."
-   6, "Smoothing factor [double]."
-
-Element Data
-------------
-Tags in this group have a group ID of 10.
-
-.. csv-table::
-   :header: "Tag ID", "Description"
-   :widths: 10, 90
-
-   1, "Surface type [int]. 1 = Ludwig-3"
-
-Element data files will contain a number of spline data tag groups, which are
-identified by an index.
-
-For fitted coefficients in the Ludwig-3 system, the spline tags will have the
-following index values:
-
-.. csv-table::
-   :header: "Code", "Meaning"
-   :widths: 10, 90
-
-   0, "H (real)."
-   1, "H (imag)."
-   2, "V (real)."
-   3, "V (imag)."
-
 Visibility Header
 -----------------
 Tags in this group have a group ID of 11.

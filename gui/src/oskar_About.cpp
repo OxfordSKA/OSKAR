@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2022, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -84,7 +84,7 @@ About::About(QString app_name, QString app_version, QWidget *parent)
         QTextCursor cursor(licenseText);
         cursor.setBlockFormat(paragraph);
         cursor.insertText(
-                "Copyright (c) 2011-2022, The OSKAR Developers.\n"
+                "Copyright (c) 2011-2025, The OSKAR Developers.\n"
                 "All rights reserved.");
         cursor.insertBlock();
         cursor.insertText("Redistribution and use in source and binary forms, "
@@ -160,9 +160,6 @@ About::About(QString app_name, QString app_version, QWidget *parent)
     html.append("<li>The LAPACK linear algebra library: "
                 "<a href=\"http://www.netlib.org/lapack/\">"
                 "http://www.netlib.org/lapack/</a></li>");
-    html.append("<li>The DIERCKX spline fitting library: "
-                "<a href=\"http://netlib.org/dierckx/\">"
-                "http://netlib.org/dierckx/</a></li>");
     html.append("<li>The Qt GUI framework: "
                 "<a href=\"https://www.qt.io/\">https://www.qt.io/</a></li>");
     html.append("<li>The casacore Measurement Set library: "

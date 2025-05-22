@@ -7,13 +7,12 @@ Applications
 This document briefly summarises the current applications included in the
 OSKAR package. It assumes that OSKAR has already been built and installed.
 
-Currently, there are 12 OSKAR application binaries available, listed below
+Currently, there are 11 OSKAR application binaries available, listed below
 in alphabetical order. Applications that can be used to perform simulations
 with OSKAR are marked with ``*``.
 
 #. `oskar`_ ``*``
 #. `oskar_binary_file_query`_
-#. `oskar_fit_element_data`_
 #. `oskar_fits_image_to_sky_model`_
 #. `oskar_imager`_
 #. `oskar_sim_beam_pattern`_ ``*``
@@ -53,23 +52,6 @@ can be run using the syntax:
   .. code-block:: bash
 
      oskar_binary_file_query <binary file path>
-
-oskar_fit_element_data
-----------------------
-This application must be used if numerically-defined element pattern data
-should be used in a simulation. It performs spline fitting to tabulated data,
-and stores the fitted coefficients to files inside the telescope model. All
-options are configured using the element fit group of the specified settings
-file. The application is run using the following syntax:
-
-  .. code-block:: bash
-
-     oskar_fit_element_data [--set] <settings file path> [key] [value]
-
-Note that this application can be configured and run via the oskar GUI
-application, described above. If required, settings files can be modified
-via the command line using the --set option, with the key and new value given
-after the path to the settings file.
 
 oskar_fits_image_to_sky_model
 -----------------------------

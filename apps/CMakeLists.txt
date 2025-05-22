@@ -23,7 +23,6 @@ declare_oskar_apps(
     oskar_convert_geodetic_to_ecef
     oskar_binary_file_query
     oskar_filter_sky_model_clusters
-    oskar_fit_element_data
     oskar_fits_image_to_sky_model
     oskar_imager
     oskar_sim_beam_pattern

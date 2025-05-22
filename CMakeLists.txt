@@ -21,11 +21,11 @@ endif()
 project(OSKAR CXX C)
 
 # === Project version.
-set(OSKAR_VERSION_ID "0x020A01")
+set(OSKAR_VERSION_ID "0x020B01")
 set(OSKAR_VERSION_MAJOR 2)
-set(OSKAR_VERSION_MINOR 10)
-set(OSKAR_VERSION_PATCH 1)
-set(OSKAR_VERSION_SUFFIX "")
+set(OSKAR_VERSION_MINOR 11)
+set(OSKAR_VERSION_PATCH 0)
+set(OSKAR_VERSION_SUFFIX "dev")
 
 # === Add local CMake module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake)
@@ -140,7 +140,6 @@ if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
             "${PROJECT_SOURCE_DIR}/gui/*"
             "${PROJECT_SOURCE_DIR}/oskar/math/src/oskar_lapack_subset.c"
             "${PROJECT_SOURCE_DIR}/oskar/settings/extern/*"
-            "${PROJECT_SOURCE_DIR}/oskar/splines/*"
             "${PROJECT_SOURCE_DIR}/.*/test/.*"
             "${PROJECT_SOURCE_DIR}/*/test/*"
             ".*.h"

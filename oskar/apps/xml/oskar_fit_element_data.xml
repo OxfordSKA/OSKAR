@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<root version="@OSKAR_VERSION_STR@">
-    <import filename="oskar_element_fit.xml" />
-</root>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -41,8 +41,6 @@ enum OSKAR_ERROR_CODES
     OSKAR_ERR_COMPUTE_DEVICES                          = -19,
 
     /* The following enumerators are under review... */
-    OSKAR_ERR_SPLINE_COEFF_FAIL                        = -20,
-    OSKAR_ERR_SPLINE_EVAL_FAIL                         = -21,
     OSKAR_ERR_ELLIPSE_FIT_FAILED                       = -22,
     OSKAR_ERR_SETTINGS_TELESCOPE                       = -23,
     OSKAR_ERR_SETUP_FAIL                               = -24,
