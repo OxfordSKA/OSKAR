@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2024, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -8,7 +8,6 @@
 #include "convert/oskar_convert_mjd_to_gast_fast.h"
 #include "convert/oskar_convert_any_to_enu_directions.h"
 #include "convert/oskar_convert_enu_directions_to_theta_phi.h"
-#include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
 #include "correlate/oskar_evaluate_auto_power.h"
 #include "correlate/oskar_evaluate_cross_power.h"
 #include "math/oskar_cmath.h"
@@ -370,8 +369,6 @@ static void sim_chunks(oskar_BeamPattern* h, int i_chunk_start, int i_time,
         for (i_station = 0; i_station < num_stations; ++i_station)
         {
             const int offset_out = i_station * chunk_size;
-            oskar_convert_theta_phi_to_ludwig3_components(chunk_size,
-                    phi_x, phi_y, 1, offset_out, d->jones_temp, status);
             oskar_blank_below_horizon(0, chunk_size, enu[2],
                     offset_out, d->jones_temp, status);
         }
@@ -741,19 +738,19 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
         if (chunk_desc == JONES_DATA && dp == AMP)
         {
             off = i_station * num_pix * num_pol;
-            if (stokes_out == XX || stokes_out == -1)
+            if (stokes_out == X_THETA || stokes_out == -1)
             {
                 complex_to_amp(in, off, num_pol, num_pix, h->pix, status);
             }
-            else if (stokes_out == XY)
+            else if (stokes_out == X_PHI)
             {
                 complex_to_amp(in, off + 1, num_pol, num_pix, h->pix, status);
             }
-            else if (stokes_out == YX)
+            else if (stokes_out == Y_THETA)
             {
                 complex_to_amp(in, off + 2, num_pol, num_pix, h->pix, status);
             }
-            else if (stokes_out == YY)
+            else if (stokes_out == Y_PHI)
             {
                 complex_to_amp(in, off + 3, num_pol, num_pix, h->pix, status);
             }
@@ -765,19 +762,19 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
         else if (chunk_desc == JONES_DATA && dp == PHASE)
         {
             off = i_station * num_pix * num_pol;
-            if (stokes_out == XX || stokes_out == -1)
+            if (stokes_out == X_THETA || stokes_out == -1)
             {
                 complex_to_phase(in, off, num_pol, num_pix, h->pix, status);
             }
-            else if (stokes_out == XY)
+            else if (stokes_out == X_PHI)
             {
                 complex_to_phase(in, off + 1, num_pol, num_pix, h->pix, status);
             }
-            else if (stokes_out == YX)
+            else if (stokes_out == Y_THETA)
             {
                 complex_to_phase(in, off + 2, num_pol, num_pix, h->pix, status);
             }
-            else if (stokes_out == YY)
+            else if (stokes_out == Y_PHI)
             {
                 complex_to_phase(in, off + 3, num_pol, num_pix, h->pix, status);
             }

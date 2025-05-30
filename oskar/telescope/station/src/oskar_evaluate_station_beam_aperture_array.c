@@ -6,7 +6,6 @@
 #include "telescope/station/oskar_evaluate_station_beam_aperture_array.h"
 
 #include "convert/oskar_convert_enu_directions_to_theta_phi.h"
-#include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
 #include "telescope/station/oskar_station_evaluate_element_weights.h"
 #include "telescope/station/element/oskar_element_evaluate.h"
 #include "telescope/station/oskar_blank_below_horizon.h"
@@ -151,8 +150,6 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                     beam,
                     status);
         }
-        oskar_convert_theta_phi_to_ludwig3_components(num_points,
-                phi_x, phi_y, swap_xy, offset_out, beam, status);
         oskar_blank_below_horizon(offset_points, num_points, z,
                 offset_out, beam, status);
         return;

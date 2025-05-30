@@ -138,7 +138,7 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
                 }
                 else
                 {
-                    for (k = XX; k <= YY; ++k)
+                    for (k = X_THETA; k <= Y_PHI; ++k)
                     {
                         new_text_file(h, AMP, -1, k, i, 0, 0, status);
                     }
@@ -152,7 +152,7 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
                 }
                 else
                 {
-                    for (k = XX; k <= YY; ++k)
+                    for (k = X_THETA; k <= Y_PHI; ++k)
                     {
                         new_text_file(h, PHASE, -1, k, i, 0, 0, status);
                     }
@@ -175,7 +175,7 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
                 }
                 else
                 {
-                    for (k = XX; k <= YY; ++k)
+                    for (k = X_THETA; k <= Y_PHI; ++k)
                     {
                         new_fits_file(h, AMP, -1, k, i, 0, 0, status);
                     }
@@ -189,7 +189,7 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
                 }
                 else
                 {
-                    for (k = XX; k <= YY; ++k)
+                    for (k = X_THETA; k <= Y_PHI; ++k)
                     {
                         new_fits_file(h, PHASE, -1, k, i, 0, 0, status);
                     }
@@ -611,20 +611,34 @@ static const char* data_type_to_string(int type)
 {
     switch (type)
     {
-    case RAW_COMPLEX:                return "RAW_COMPLEX";
-    case AMP:                        return "AMP";
-    case PHASE:                      return "PHASE";
-    case AUTO_POWER_AMP:             return "AUTO_POWER_AMP";
-    case AUTO_POWER_PHASE:           return "AUTO_POWER_PHASE";
-    case AUTO_POWER_REAL:            return "AUTO_POWER_REAL";
-    case AUTO_POWER_IMAG:            return "AUTO_POWER_IMAG";
-    case CROSS_POWER_RAW_COMPLEX:    return "CROSS_POWER_RAW_COMPLEX";
-    case CROSS_POWER_AMP:            return "CROSS_POWER_AMP";
-    case CROSS_POWER_PHASE:          return "CROSS_POWER_PHASE";
-    case CROSS_POWER_REAL:           return "CROSS_POWER_REAL";
-    case CROSS_POWER_IMAG:           return "CROSS_POWER_IMAG";
-    case IXR:                        return "IXR";
-    default:                         return "";
+    case RAW_COMPLEX:
+        return "RAW_COMPLEX";
+    case AMP:
+        return "AMP";
+    case PHASE:
+        return "PHASE";
+    case AUTO_POWER_AMP:
+        return "AUTO_POWER_AMP";
+    case AUTO_POWER_PHASE:
+        return "AUTO_POWER_PHASE";
+    case AUTO_POWER_REAL:
+        return "AUTO_POWER_REAL";
+    case AUTO_POWER_IMAG:
+        return "AUTO_POWER_IMAG";
+    case CROSS_POWER_RAW_COMPLEX:
+        return "CROSS_POWER_RAW_COMPLEX";
+    case CROSS_POWER_AMP:
+        return "CROSS_POWER_AMP";
+    case CROSS_POWER_PHASE:
+        return "CROSS_POWER_PHASE";
+    case CROSS_POWER_REAL:
+        return "CROSS_POWER_REAL";
+    case CROSS_POWER_IMAG:
+        return "CROSS_POWER_IMAG";
+    case IXR:
+        return "IXR";
+    default:
+        return "";
     }
 }
 
@@ -633,15 +647,24 @@ static const char* stokes_type_to_string(int type)
 {
     switch (type)
     {
-    case I:  return "I";
-    case Q:  return "Q";
-    case U:  return "U";
-    case V:  return "V";
-    case XX: return "XX";
-    case XY: return "XY";
-    case YX: return "YX";
-    case YY: return "YY";
-    default: return "";
+    case I:
+        return "I";
+    case Q:
+        return "Q";
+    case U:
+        return "U";
+    case V:
+        return "V";
+    case X_THETA:
+        return "X_THETA";
+    case X_PHI:
+        return "X_PHI";
+    case Y_THETA:
+        return "Y_THETA";
+    case Y_PHI:
+        return "Y_PHI";
+    default:
+        return "";
     }
 }
 

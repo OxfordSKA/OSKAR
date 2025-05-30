@@ -6,7 +6,6 @@
 #include "convert/oskar_convert_any_to_enu_directions.h"
 #include "convert/oskar_convert_enu_directions_to_theta_phi.h"
 #include "convert/oskar_convert_mjd_to_gast_fast.h"
-#include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
 #include "interferometer/oskar_evaluate_jones_E.h"
 #include "interferometer/oskar_jones_accessors.h"
 #include "math/oskar_cmath.h"
@@ -79,8 +78,6 @@ static void oskar_evaluate_element_beams_harp(
     for (i_station = 0; i_station < num_stations; ++i_station)
     {
         const int offset_out = i_station * num_points;
-        oskar_convert_theta_phi_to_ludwig3_components(num_points,
-                phi_x, phi_y, 1, offset_out, beam, status);
         oskar_blank_below_horizon(0, num_points, enu[2],
                 offset_out, beam, status);
     }

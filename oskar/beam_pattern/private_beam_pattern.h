@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -157,10 +157,10 @@ enum OSKAR_STOKES
     Q  = 1,
     U  = 2,
     V  = 3,
-    XX = 4,
-    XY = 5,
-    YX = 6,
-    YY = 7
+    X_THETA = 4,
+    X_PHI = 5,
+    Y_THETA = 6,
+    Y_PHI = 7
 };
 
 #ifdef __cplusplus

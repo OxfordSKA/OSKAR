@@ -13,8 +13,6 @@
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum_feko.h"
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum_galileo.h"
 #include "convert/oskar_convert_enu_directions_to_theta_phi.h"
-#include "convert/oskar_convert_ludwig3_to_theta_phi_components.h"
-#include "convert/oskar_convert_theta_phi_to_ludwig3_components.h"
 #include "math/oskar_find_closest_match.h"
 
 #include "math/oskar_cmath.h"
@@ -60,9 +58,6 @@ void oskar_element_evaluate(
     /* Get the element model properties. */
     const int element_type = model->element_type;
     const int taper_type   = model->taper_type;
-    const int id = oskar_find_closest_match_d(frequency_hz,
-            oskar_element_num_freq(model),
-            oskar_element_freqs_hz_const(model));
     dipole_length_m = model->dipole_length;
     if (model->dipole_length_units == OSKAR_WAVELENGTHS)
     {
@@ -80,73 +75,87 @@ void oskar_element_evaluate(
     /* Check if element type is isotropic. */
     if (element_type == OSKAR_ELEMENT_TYPE_ISOTROPIC)
     {
-        oskar_mem_set_value_real(output,
-                1.0, offset_out, num_points_norm, status);
+        oskar_mem_set_value_real(
+                output, 1.0, offset_out, num_points_norm, status
+        );
     }
     else if (oskar_mem_is_matrix(output))
     {
         /* Evaluate polarised response if output array is matrix type. */
+        const int id = oskar_find_closest_match_d(
+                frequency_hz,
+                oskar_element_num_freq(model),
+                oskar_element_freqs_hz_const(model)
+        );
         if (oskar_element_has_spherical_wave_data(model, id))
         {
-            oskar_evaluate_spherical_wave_sum(num_points_norm, theta, phi_x,
+            oskar_evaluate_spherical_wave_sum(
+                    num_points_norm, theta, phi_x,
                     (model->common_phi_coords[id] ? phi_x : phi_y),
                     model->l_max[id], model->sph_wave[id],
-                    offset_out, output, status);
+                    swap_xy, offset_out, output, status
+            );
         }
         else if (oskar_element_has_spherical_wave_feko_data(model, id))
         {
-            oskar_evaluate_spherical_wave_sum_feko(num_points_norm, theta,
-                    phi_x, (model->common_phi_coords[id] ? phi_x : phi_y),
+            oskar_evaluate_spherical_wave_sum_feko(
+                    num_points_norm, theta, phi_x,
+                    (model->common_phi_coords[id] ? phi_x : phi_y),
                     model->l_max[id], model->sph_wave_feko[id],
-                    offset_out, output, status);
+                    swap_xy, offset_out, output, status
+            );
         }
         else if (oskar_element_has_spherical_wave_galileo_data(model, id))
         {
-            oskar_evaluate_spherical_wave_sum_galileo(num_points_norm, theta,
-                    phi_x, (model->common_phi_coords[id] ? phi_x : phi_y),
+            oskar_evaluate_spherical_wave_sum_galileo(
+                    num_points_norm, theta, phi_x,
+                    (model->common_phi_coords[id] ? phi_x : phi_y),
                     model->l_max[id], model->sph_wave_galileo[id],
-                    offset_out, output, status);
+                    swap_xy, offset_out, output, status
+            );
         }
         else if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
         {
-            const int offset_out_cplx = offset_out * 4;
-            oskar_evaluate_dipole_pattern(num_points_norm,
-                    theta, phi_x, frequency_hz, dipole_length_m,
-                    4, offset_out_cplx + 0, output, status);
-            oskar_evaluate_dipole_pattern(num_points_norm, theta,
-                    phi_y, frequency_hz, dipole_length_m,
-                    4, offset_out_cplx + 2, output, status);
+            oskar_evaluate_dipole_pattern(
+                    num_points_norm, theta, phi_x, phi_y,
+                    frequency_hz, dipole_length_m,
+                    swap_xy, offset_out, output, status
+            );
         }
-        oskar_convert_theta_phi_to_ludwig3_components(num_points_norm,
-                phi_x, phi_y, swap_xy, offset_out, output, status);
     }
     else /* Scalar response. */
     {
         if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
         {
-            oskar_evaluate_dipole_pattern(num_points_norm,
-                    theta, phi_x, frequency_hz, dipole_length_m,
-                    1, offset_out, output, status);
+            oskar_evaluate_dipole_pattern(
+                    num_points_norm, theta, phi_x, phi_y, frequency_hz,
+                    dipole_length_m, swap_xy, offset_out, output, status
+            );
         }
     }
 
     /* Apply element pattern normalisation, if specified. */
     if (normalise)
     {
-        oskar_mem_normalise(output,
-                offset_out, num_points, offset_out + num_points, status);
+        oskar_mem_normalise(
+                output, offset_out, num_points, offset_out + num_points, status
+        );
     }
 
     /* Apply element tapering, if specified. */
     if (taper_type == OSKAR_ELEMENT_TAPER_COSINE)
     {
-        oskar_apply_element_taper_cosine(num_points,
-                model->cosine_power, theta, offset_out, output, status);
+        oskar_apply_element_taper_cosine(
+                num_points, model->cosine_power, theta,
+                offset_out, output, status
+        );
     }
     else if (taper_type == OSKAR_ELEMENT_TAPER_GAUSSIAN)
     {
-        oskar_apply_element_taper_gaussian(num_points,
-                model->gaussian_fwhm_rad, theta, offset_out, output, status);
+        oskar_apply_element_taper_gaussian(
+                num_points, model->gaussian_fwhm_rad, theta,
+                offset_out, output, status
+        );
     }
 }
 

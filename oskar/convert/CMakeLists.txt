@@ -14,11 +14,9 @@ set(${name}_SRC
     define_convert_enu_directions_to_relative_directions.h
     define_convert_enu_directions_to_theta_phi.h
     define_convert_lon_lat_to_relative_directions.h
-    define_convert_ludwig3_to_theta_phi_components.h
     define_convert_relative_directions_to_enu_directions.h
     define_convert_relative_directions_to_lon_lat.h
     define_convert_station_uvw_to_baseline_uvw.h
-    define_convert_theta_phi_to_ludwig3_components.h
     src/oskar_convert_any_to_enu_directions.c
     src/oskar_convert_apparent_ra_dec_to_enu_directions.c
     src/oskar_convert_az_el_to_enu_directions.c
@@ -42,7 +40,6 @@ set(${name}_SRC
     src/oskar_convert_healpix_ring_to_theta_phi.c
     src/oskar_convert_lon_lat_to_relative_directions.c
     src/oskar_convert_lon_lat_to_xyz.c
-    src/oskar_convert_ludwig3_to_theta_phi_components.c
     src/oskar_convert_mjd_to_gast_fast.c
     src/oskar_convert_mjd_to_gmst.c
     #src/oskar_convert_mjd_ut1_to_era.c
@@ -52,7 +49,6 @@ set(${name}_SRC
     src/oskar_convert_relative_directions_to_lon_lat.c
     src/oskar_convert_station_uvw_to_baseline_uvw.c
     src/oskar_convert_theta_phi_to_enu_directions.c
-    src/oskar_convert_theta_phi_to_ludwig3_components.c
     src/oskar_convert_xyz_to_lon_lat.c
     src/oskar_convert.cl
     #src/oskar_evaluate_diurnal_aberration.c

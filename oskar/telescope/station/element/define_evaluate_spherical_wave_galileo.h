@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2023, The OSKAR Developers. See LICENSE file. */
+/* Copyright (c) 2019-2025, The OSKAR Developers. See LICENSE file. */
 
 /* Spherical wave evaluation method based on Matlab code by
  * Christophe Craeye, Quentin Gueuning and Eloy de Lera Acedo.
@@ -40,6 +40,7 @@ KERNEL(NAME) (\
         GLOBAL_IN(FP, phi_y),\
         const int l_max,\
         GLOBAL_IN(FP4c, alpha),\
+        const int swap_xy,\
         const int offset,\
         GLOBAL_OUT(FP4c, pattern))\
 {\
@@ -135,10 +136,18 @@ KERNEL(NAME) (\
     Xp.y *= -1.0;\
     Yt.y *= -1.0;\
     Yp.y *= -1.0;\
-    pattern[i + offset].a = Xt;\
-    pattern[i + offset].b = Xp;\
-    pattern[i + offset].c = Yt;\
-    pattern[i + offset].d = Yp;\
+    if (swap_xy) {\
+        pattern[i + offset].a = Yt;\
+        pattern[i + offset].b = Yp;\
+        pattern[i + offset].c = Xt;\
+        pattern[i + offset].d = Xp;\
+    }\
+    else {\
+        pattern[i + offset].a = Xt;\
+        pattern[i + offset].b = Xp;\
+        pattern[i + offset].c = Yt;\
+        pattern[i + offset].d = Yp;\
+    }\
     KERNEL_LOOP_END\
 }\
 OSKAR_REGISTER_KERNEL(NAME)

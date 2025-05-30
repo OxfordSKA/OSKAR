@@ -1,29 +1,6 @@
 /*
- * Copyright (c) 2014-2019, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2014-2025, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #ifndef OSKAR_EVALUATE_DIPOLE_PATTERN_H_
@@ -59,24 +36,36 @@ extern "C" {
  * where phi and theta are the angles measured from x to y and from z to xy,
  * respectively.
  *
- * The supplied theta and phi positions of the sources are the <b>modified</b>
+ * The supplied theta and phi_x positions of the sources are the <b>modified</b>
  * source positions. They must be adjusted relative to a dipole with its axis
  * oriented along the x-direction.
+ * The phi_y angles would usually be 90 degrees larger, if the dipoles are
+ * perpendicular.
  *
- * @param[in] num_points         Number of points.
- * @param[in] theta              Point position (modified) theta values in rad.
- * @param[in] phi                Point position (modified) phi values in rad.
- * @param[in] freq_hz            Observing frequency in Hz.
- * @param[in] dipole_length_m    Length of dipole in metres.
- * @param[in] stride             Stride into output array (normally 1 or 4).
- * @param[in] offset             Start offset into output array.
- * @param[out] pattern           Array of output Jones matrices/scalars per source.
- * @param[in,out] status         Status return code.
+ * @param[in] num_points      Number of points.
+ * @param[in] theta           Source theta values in rad.
+ * @param[in] phi_x           Source phi values relative to X dipole in rad.
+ * @param[in] phi_y           Source phi values relative to Y dipole in rad.
+ * @param[in] freq_hz         Observing frequency in Hz.
+ * @param[in] dipole_length_m Length of dipole in metres.
+ * @param[in] swap_xy         If true, swap the X and Y dipole in the output.
+ * @param[in] offset_out      Start offset into output array.
+ * @param[out] pattern        Array of output Jones matrices/scalars per source.
+ * @param[in,out] status      Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_dipole_pattern(int num_points, const oskar_Mem* theta,
-        const oskar_Mem* phi, double freq_hz, double dipole_length_m,
-        int stride, int offset, oskar_Mem* pattern, int* status);
+void oskar_evaluate_dipole_pattern(
+        int num_points,
+        const oskar_Mem* theta,
+        const oskar_Mem* phi_x,
+        const oskar_Mem* phi_y,
+        double freq_hz,
+        double dipole_length_m,
+        int swap_xy,
+        int offset_out,
+        oskar_Mem* pattern,
+        int* status
+);
 
 /*
  * Algorithm is as follows.

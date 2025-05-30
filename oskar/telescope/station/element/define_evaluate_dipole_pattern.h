@@ -1,73 +1,76 @@
-/* Copyright (c) 2014-2019, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2014-2025, The OSKAR Developers. See LICENSE file. */
 
 #define OSKAR_DIPOLE(FP, PHI, E_THETA, E_PHI) {\
     SINCOS(PHI, sin_phi, cos_phi);\
     const FP denom = (FP)1 + cos_phi*cos_phi * (cos_theta*cos_theta - (FP)1);\
-    if (denom == (FP)0)\
+    if (denom == (FP)0) {\
         E_THETA.x = E_THETA.y = E_PHI.x = E_PHI.y = (FP)0;\
+    }\
     else {\
-        const FP q = kL * cos_phi * sin_theta;\
-        const FP cos_q = cos(q);\
-        const FP t = (cos_q - cos_kL) / denom;\
+        const FP t = (cos(kL * cos_phi * sin_theta) - cos_kL) / denom;\
         E_THETA.x = -cos_phi * cos_theta * t;\
         E_PHI.x = sin_phi * t;\
         E_PHI.y = E_THETA.y = (FP)0;\
     }\
     }\
 
-#define OSKAR_EVALUATE_DIPOLE_PATTERN(NAME, FP, FP2)\
+#define OSKAR_EVALUATE_DIPOLE_PATTERN(NAME, FP, FP2, FP4c)\
 KERNEL(NAME) (\
         const int n,\
         GLOBAL_IN(FP, theta),\
-        GLOBAL_IN(FP, phi),\
+        GLOBAL_IN(FP, phi_x),\
+        GLOBAL_IN(FP, phi_y),\
         const FP kL,\
         const FP cos_kL,\
-        const int stride,\
-        const int E_theta_offset,\
-        const int E_phi_offset,\
-        GLOBAL FP2* E_theta,\
-        GLOBAL FP2* E_phi)\
+        const int swap_xy,\
+        const int offset_out,\
+        GLOBAL_OUT(FP4c, pattern))\
 {\
+    FP sin_theta = (FP)0, cos_theta = (FP)0, sin_phi = (FP)0, cos_phi = (FP)0;\
+    FP2 x_th, x_ph, y_th, y_ph;\
     KERNEL_LOOP_X(int, i, 0, n)\
-    FP sin_theta, cos_theta, sin_phi, cos_phi;\
-    const int i_out = i * stride;\
-    const int theta_out = i_out + E_theta_offset;\
-    const int phi_out   = i_out + E_phi_offset;\
-    const FP theta_ = theta[i];\
-    SINCOS(theta_, sin_theta, cos_theta);\
-    const FP phi_ = phi[i];\
-    OSKAR_DIPOLE(FP, phi_, E_theta[theta_out], E_phi[phi_out])\
+    SINCOS(theta[i], sin_theta, cos_theta);\
+    OSKAR_DIPOLE(FP, phi_x[i], x_th, x_ph)\
+    OSKAR_DIPOLE(FP, phi_y[i], y_th, y_ph)\
+    if (swap_xy) {\
+        pattern[i + offset_out].a = y_th;\
+        pattern[i + offset_out].b = y_ph;\
+        pattern[i + offset_out].c = x_th;\
+        pattern[i + offset_out].d = x_ph;\
+    }\
+    else {\
+        pattern[i + offset_out].a = x_th;\
+        pattern[i + offset_out].b = x_ph;\
+        pattern[i + offset_out].c = y_th;\
+        pattern[i + offset_out].d = y_ph;\
+    }\
     KERNEL_LOOP_END\
 }\
 OSKAR_REGISTER_KERNEL(NAME)
 
-#define OSKAR_EVALUATE_DIPOLE_PATTERN_SCALAR(NAME, FP, FP2, FP4c)\
+#define OSKAR_EVALUATE_DIPOLE_PATTERN_SCALAR(NAME, FP, FP2)\
 KERNEL(NAME) (\
         const int n,\
         GLOBAL_IN(FP, theta),\
-        GLOBAL_IN(FP, phi),\
+        GLOBAL_IN(FP, phi_x),\
+        GLOBAL_IN(FP, phi_y),\
         const FP kL,\
         const FP cos_kL,\
-        const int stride,\
-        const int offset,\
+        const int swap_xy,\
+        const int offset_out,\
         GLOBAL_OUT(FP2, pattern))\
 {\
+    (void) swap_xy;\
+    FP sin_theta = (FP)0, cos_theta = (FP)0, sin_phi = (FP)0, cos_phi = (FP)0;\
+    FP2 x_th, x_ph, y_th, y_ph;\
     KERNEL_LOOP_X(int, i, 0, n)\
-    FP amp, sin_theta, cos_theta, sin_phi, cos_phi, phi_;\
-    FP4c val;\
-    const int i_out = i * stride + offset;\
-    const FP theta_ = theta[i];\
-    SINCOS(theta_, sin_theta, cos_theta);\
-    phi_ = phi[i];\
-    OSKAR_DIPOLE(FP, phi_, val.a, val.b)\
-    phi_ += ((FP) M_PI / (FP)2);\
-    OSKAR_DIPOLE(FP, phi_, val.c, val.d)\
-    amp = val.a.x * val.a.x + val.b.x * val.b.x +\
-            val.c.x * val.c.x + val.d.x * val.d.x;\
-    amp /= (FP)2;\
-    amp = sqrt(amp);\
-    pattern[i_out].x = amp;\
-    pattern[i_out].y = (FP)0;\
+    SINCOS(theta[i], sin_theta, cos_theta);\
+    OSKAR_DIPOLE(FP, phi_x[i], x_th, x_ph)\
+    OSKAR_DIPOLE(FP, phi_y[i], y_th, y_ph)\
+    const FP amp = sqrt((x_th.x * x_th.x + x_ph.x * x_ph.x +\
+            y_th.x * y_th.x + y_ph.x * y_ph.x) / (FP)2);\
+    pattern[i + offset_out].x = amp;\
+    pattern[i + offset_out].y = (FP)0;\
     KERNEL_LOOP_END\
 }\
 OSKAR_REGISTER_KERNEL(NAME)

@@ -31,15 +31,24 @@ extern "C" {
  * @param[in] phi_y         Coordinate phi (azimuthal) values for Y, in radians.
  * @param[in] l_max         Maximum order of spherical wave.
  * @param[in] alpha         TE and TM mode coefficients for X and Y antennas.
- * @param[in] offset        Offset into output data array.
+ * @param[in] swap_xy       If true, swap the X and Y antenna in the output.
+ * @param[in] offset_out    Offset into output data array.
  * @param[in,out] pattern   Output data array of length at least \p num_points.
  * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_spherical_wave_sum_feko(int num_points,
-        const oskar_Mem* theta, const oskar_Mem* phi_x, const oskar_Mem* phi_y,
-        int l_max, const oskar_Mem* alpha, int offset, oskar_Mem* pattern,
-        int* status);
+void oskar_evaluate_spherical_wave_sum_feko(
+        int num_points,
+        const oskar_Mem* theta,
+        const oskar_Mem* phi_x,
+        const oskar_Mem* phi_y,
+        int l_max,
+        const oskar_Mem* alpha,
+        int swap_xy,
+        int offset_out,
+        oskar_Mem* pattern,
+        int* status
+);
 
 #ifdef __cplusplus
 }
