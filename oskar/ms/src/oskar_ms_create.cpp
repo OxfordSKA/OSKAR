@@ -579,7 +579,7 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
 
         // Work out suitable tile dimensions based on a tile size in bytes.
         size_t tile_size_bytes = 0;
-        const size_t min_tile_size_bytes = 4 * 1024 * 1024;
+        const size_t min_tile_size_bytes = 1 * 1024 * 1024; // 1 MiB.
         unsigned int tile_rows = 0;
         unsigned int tile_channels = 0;
         while (tile_size_bytes < min_tile_size_bytes)
@@ -611,7 +611,7 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
         IPosition dataTileShape(3, num_pols, tile_channels, tile_rows);
         TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
         tab.bindColumn("DATA", dataStorageManager);
-        IPosition flagTileShape(3, num_pols, tile_channels, 8 * tile_rows);
+        IPosition flagTileShape(3, num_pols, tile_channels, tile_rows);
         TiledColumnStMan flagStorageManager("TiledFlag", flagTileShape);
         tab.bindColumn("FLAG", flagStorageManager);
 

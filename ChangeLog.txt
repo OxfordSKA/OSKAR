@@ -9,6 +9,9 @@
 
     * Remove unused virtual antenna angle option.
 
+    * Change MS storage manager tile size for DATA column to approximately 1 MB
+      and keep the tile dimensions the same for all relevant columns.
+
 2025-05-08  OSKAR-2.10.1
 
     * Include ionospheric Faraday rotation in TEC screen evaluation.
