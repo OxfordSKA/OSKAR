@@ -5,6 +5,11 @@
       and fixes simulation of polarisation leakage.
       Thanks to Daniel Mitchell for identifying this issue.
 
+    * Fix incorrect absolute station/antenna coordinates in output files
+      when using positions specified in a layout_wgs84.txt file.
+      This includes the POSITION columns in the ANTENNA and PHASED_ARRAY
+      tables in an output Measurement Set.
+
     * Remove unsupported and unused spline data option for element patterns.
 
     * Remove unused virtual antenna angle option.

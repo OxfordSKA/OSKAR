@@ -68,7 +68,7 @@ void oskar_telescope_set_station_coords_wgs84(oskar_Telescope* telescope,
 
         /* Store the coordinates. */
         oskar_telescope_set_station_coords(telescope, i, wgs,
-                &ecef[0], &ecef[0], &hor[0], &hor[0], status);
+                &offset_ecef[0], &offset_ecef[0], &hor[0], &hor[0], status);
     }
 }
 
