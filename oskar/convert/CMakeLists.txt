@@ -45,6 +45,7 @@ set(${name}_SRC
     #src/oskar_convert_mjd_ut1_to_era.c
     #src/oskar_convert_mjd_utc_to_mjd_tt.c
     src/oskar_convert_offset_ecef_to_ecef.c
+    src/oskar_convert_pqr_to_ecef_matrix.c
     src/oskar_convert_relative_directions_to_enu_directions.c
     src/oskar_convert_relative_directions_to_lon_lat.c
     src/oskar_convert_station_uvw_to_baseline_uvw.c

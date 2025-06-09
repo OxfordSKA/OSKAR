@@ -5,6 +5,7 @@
 set(name convert_test)
 set(${name}_SRC
     main.cpp
+    Test_convert_pqr_to_ecef_matrix.cpp
     Test_coordinate_conversions.cpp
     #Test_sofa.cpp
 )

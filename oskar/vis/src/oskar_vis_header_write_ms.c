@@ -6,8 +6,8 @@
 #include "vis/oskar_vis_header.h"
 
 #include "oskar_version.h"
-#include "convert/oskar_convert_ecef_to_geodetic_spherical.h"
 #include "convert/oskar_convert_geodetic_spherical_to_ecef.h"
+#include "convert/oskar_convert_pqr_to_ecef_matrix.h"
 #include "math/oskar_cmath.h"
 #include "ms/oskar_measurement_set.h"
 #include "utility/oskar_dir.h"
@@ -28,77 +28,18 @@ extern "C" {
 
 #define D2R (M_PI / 180.0)
 
-/* Local functions to calculate required projection matrices
- * for PHASED_ARRAY table. */
-
-static void cross(const double a[3], const double b[3], double out[3])
+/* 3D matrix-vector multiply: out = m * v. */
+static void matrix_vector_mul(
+        const double m[9],
+        const double v[3],
+        double out[3]
+)
 {
-    /* 3D vector cross-product. */
-    out[0] = a[1] * b[2] - a[2] * b[1];
-    out[1] = a[2] * b[0] - a[0] * b[2];
-    out[2] = a[0] * b[1] - a[1] * b[0];
+    out[0] = m[0] * v[0] + m[1] * v[1] + m[2] * v[2];
+    out[1] = m[3] * v[0] + m[4] * v[1] + m[5] * v[2];
+    out[2] = m[6] * v[0] + m[7] * v[1] + m[8] * v[2];
 }
 
-static void matrix_mul(const double a[9], const double b[9], double out[9])
-{
-    /* 3D matrix-matrix multiply. (Matrices are in row-major "C" order.) */
-    for (int i = 0; i < 3; ++i) /* Row for A and output. */
-    {
-        for (int j = 0; j < 3; ++j) /* Column for B and output. */
-        {
-            out[i * 3 + j] = 0.0;
-            for (int k = 0; k < 3; ++k) /* Column for A, row for B. */
-            {
-                out[i * 3 + j] += a[i * 3 + k] * b[k * 3 + j];
-            }
-        }
-    }
-}
-
-static void mul(const double m[9], const double in[3], double out[3])
-{
-    /* 3D matrix-vector multiply. */
-    out[0] = m[0] * in[0] + m[1] * in[1] + m[2] * in[2];
-    out[1] = m[3] * in[0] + m[4] * in[1] + m[5] * in[2];
-    out[2] = m[6] * in[0] + m[7] * in[1] + m[8] * in[2];
-}
-
-static void norm(double v[3])
-{
-    /* Normalise length of 3D vector. */
-    const double scale = 1.0 / sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-    v[0] *= scale; v[1] *= scale; v[2] *= scale;
-}
-
-static void transpose(double m[9])
-{
-    double t = 0.0;
-    t = m[1]; m[1] = m[3]; m[3] = t;
-    t = m[2]; m[2] = m[6]; m[6] = t;
-    t = m[5]; m[5] = m[7]; m[7] = t;
-}
-
-static void normal_vector_meridian_plane(const double ecef[3], double out[3])
-{
-    const double x = ecef[0], y = ecef[1], scale = 1.0 / sqrt(x*x + y*y);
-    out[0] = y * scale; out[1] = -x * scale; out[2] = 0.0;
-}
-
-static void projection_matrix(
-        const double ecef[3], const double norm_vec[3], double m[9])
-{
-    /* Following exact method in lofarantpos-0.4.1 for consistency. */
-    double p_unit[3], q_unit[3], meridian_normal[3];
-    const double r_unit[3] = {norm_vec[0], norm_vec[1], norm_vec[2]};
-    normal_vector_meridian_plane(ecef, meridian_normal);
-    cross(meridian_normal, r_unit, q_unit);
-    norm(q_unit);
-    cross(q_unit, r_unit, p_unit);
-    norm(p_unit);
-    m[0] = p_unit[0]; m[1] = q_unit[0]; m[2] = r_unit[0];
-    m[3] = p_unit[1]; m[4] = q_unit[1]; m[5] = r_unit[1];
-    m[6] = p_unit[2]; m[7] = q_unit[2]; m[8] = r_unit[2];
-}
 
 oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         const char* ms_path, int force_polarised, int* status)
@@ -248,10 +189,8 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     for (i = 0; i < num_stations; ++i)
     {
         unsigned int j = 0, dim = 0;
-        double *element_ecef[3], station_wgs84[3];
-        double local_to_itrf_projection_matrix[9], norm_vec_ellipsoid[3];
-        double local_to_itrf_temp[9], srm[9]; /* Station rotation matrix. */
-        const size_t matrix_sz = sizeof(local_to_itrf_projection_matrix);
+        double *element_ecef[3];
+        double pqr_to_ecef[9];
 
         /* Get number of elements in the station, and skip if zero. */
         const unsigned int num_elements = (unsigned int)
@@ -259,34 +198,14 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         if (num_elements == 0) continue;
 
         /* Get longitude, latitude, altitude of the station. */
-        const double station_xyz[3] = {
+        const double station_ecef_coords[3] = {
                 station_ecef[0][i], station_ecef[1][i], station_ecef[2][i]
         };
-        oskar_convert_ecef_to_geodetic_spherical(1,
-                &station_xyz[0], &station_xyz[1], &station_xyz[2],
-                &station_wgs84[0], &station_wgs84[1], &station_wgs84[2]);
 
-        /* Get station vector from longitude and latitude. */
-        norm_vec_ellipsoid[0] = cos(station_wgs84[1]) * cos(station_wgs84[0]);
-        norm_vec_ellipsoid[1] = cos(station_wgs84[1]) * sin(station_wgs84[0]);
-        norm_vec_ellipsoid[2] = sin(station_wgs84[1]);
-
-        /* Get local to ITRF (ECEF) projection matrix. */
-        projection_matrix(station_xyz, norm_vec_ellipsoid,
-                local_to_itrf_projection_matrix);
-
-        /*
-         * Modify projection matrix by station rotation angle.
-         * (Can just use the angle of the first X receptor in the station.)
-         */
-        const double station_angle_rad = angle_x[i];
-        const double sin_angle = sin(station_angle_rad);
-        const double cos_angle = cos(station_angle_rad);
-        srm[0] = cos_angle;  srm[1] = sin_angle; srm[2] = 0.0;
-        srm[3] = -sin_angle; srm[4] = cos_angle; srm[5] = 0.0;
-        srm[6] = 0.0;        srm[7] = 0.0;       srm[8] = 1.0;
-        memcpy(local_to_itrf_temp, local_to_itrf_projection_matrix, matrix_sz);
-        matrix_mul(local_to_itrf_temp, srm, local_to_itrf_projection_matrix);
+        /* Get matrix to convert from rotated station frame to ECEF frame. */
+        oskar_convert_pqr_to_ecef_matrix(
+                station_ecef_coords, angle_x[i], pqr_to_ecef
+        );
 
         /* Allocate space for element ECEF coordinates. */
         element_ecef[0] = (double*) calloc(num_elements, sizeof(double));
@@ -296,39 +215,44 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         /* Loop over elements within station. */
         for (j = 0; j < num_elements; j++)
         {
-            double hor_xyz[3], ecef_xyz[3];
+            double pqr_coords[3], ecef_coords[3];
 
-            /* Get element coordinate vector. */
+            /* Get 3D element PQR coordinates. */
             for (dim = 0; dim < 3; ++dim)
             {
                 const oskar_Mem* t =
                         oskar_vis_header_element_enu_metres_const(hdr, dim, i);
                 if (oskar_mem_precision(t) == OSKAR_DOUBLE)
                 {
-                    hor_xyz[dim] = oskar_mem_double_const(t, status)[j];
+                    pqr_coords[dim] = oskar_mem_double_const(t, status)[j];
                 }
                 else
                 {
-                    hor_xyz[dim] = oskar_mem_float_const(t, status)[j];
+                    pqr_coords[dim] = oskar_mem_float_const(t, status)[j];
                 }
             }
 
-            /* Apply projection matrix. */
-            mul(local_to_itrf_projection_matrix, hor_xyz, ecef_xyz);
+            /* Apply matrix to get 3D element ECEF coordinates. */
+            matrix_vector_mul(pqr_to_ecef, pqr_coords, ecef_coords);
 
             /* Save new coordinates. */
-            element_ecef[0][j] = ecef_xyz[0];
-            element_ecef[1][j] = ecef_xyz[1];
-            element_ecef[2][j] = ecef_xyz[2];
+            element_ecef[0][j] = ecef_coords[0];
+            element_ecef[1][j] = ecef_coords[1];
+            element_ecef[2][j] = ecef_coords[2];
         }
 
-        /* Get transpose of projection matrix for writing. */
-        transpose(local_to_itrf_projection_matrix);
-
-        /* Write row to PHASED_ARRAY table. */
-        oskar_ms_set_element_coords(ms, i, num_elements,
-                element_ecef[0], element_ecef[1], element_ecef[2],
-                local_to_itrf_projection_matrix);
+        /*
+         * Write row to PHASED_ARRAY table.
+         *
+         * Although the thing that gets written to the table is actually
+         * ecef_to_pqr rather than pqr_to_ecef, we don't take the transpose,
+         * since casacore stores its arrays in column-major order.
+         * So we would end up needing to transpose twice.
+         */
+        oskar_ms_set_element_coords(
+                ms, i, num_elements,
+                element_ecef[0], element_ecef[1], element_ecef[2], pqr_to_ecef
+        );
 
         /* Free element ECEF coordinates. */
         free(element_ecef[0]);
