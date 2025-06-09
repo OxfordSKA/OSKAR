@@ -31,6 +31,7 @@
 #include "math/oskar_matrix_multiply.h"
 #include "math/define_multiply.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_kernel_macros.h"
 #include "utility/oskar_vector_types.h"
 
 #include <cstdlib>
@@ -170,4 +171,44 @@ TEST(matrix_multiply, matrix2x2)
     EXPECT_NEAR(a.c.y, 0.0, tol);
     EXPECT_NEAR(a.d.x, 1.74, tol);
     EXPECT_NEAR(a.d.y, 0.0, tol);
+}
+
+TEST(matrix_multiply, jones_to_visibility)
+{
+    const double tol = 1e-6;
+    double4c b, jp, jq;
+    OSKAR_CLEAR_COMPLEX_MATRIX(double, b)
+    OSKAR_CLEAR_COMPLEX_MATRIX(double, jp)
+    OSKAR_CLEAR_COMPLEX_MATRIX(double, jq)
+
+    // Brightness matrix.
+    b.a = {1.0, 0.0};  b.b = {2.0, 3.0};
+    b.c = {2.0, -3.0}; b.d = {6.0, 0.0};
+
+    // Jones matrix 1.
+    jp.a = {1.2, 2.3}; jp.b = {3.4, 4.5};
+    jp.c = {5.6, 6.7}; jp.d = {7.8, 8.9};
+
+    // Jones matrix 2.
+    jq.a = {0.11, 1.22}; jq.b = {2.33, 3.44};
+    jq.c = {4.55, 5.66}; jq.d = {6.77, 7.88};
+
+    // Multiply first Jones matrix with source brightness matrix.
+    // jp = jp * b
+    OSKAR_MUL_COMPLEX_MATRIX_HERMITIAN_IN_PLACE(double2, jp, b)
+    // jp = jp * jq^H
+    OSKAR_MUL_COMPLEX_MATRIX_CONJUGATE_TRANSPOSE_IN_PLACE(double2, jp, jq)
+
+    // array([[ 161.842+1.211j,  489.07 -3.673j],
+    //        [ 382.502+6.095j, 1139.522+1.211j]])
+
+    // jp should now contain jp * b * jq^H.
+    EXPECT_NEAR(jp.a.x, 161.842, tol);
+    EXPECT_NEAR(jp.a.y, 1.211, tol);
+    EXPECT_NEAR(jp.b.x, 489.07, tol);
+    EXPECT_NEAR(jp.b.y, -3.673, tol);
+    EXPECT_NEAR(jp.c.x, 382.502, tol);
+    EXPECT_NEAR(jp.c.y, 6.095, tol);
+    EXPECT_NEAR(jp.d.x, 1139.522, tol);
+    EXPECT_NEAR(jp.d.y, 1.211, tol);
 }
