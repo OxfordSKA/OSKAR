@@ -202,9 +202,19 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
                 station_ecef[0][i], station_ecef[1][i], station_ecef[2][i]
         };
 
+        /*
+         * Get the station rotation angle.
+         * Note that values given in angle_x and angle_y are copied from the
+         * element angles, and go in the same direction as phi, not the azimuth.
+         * But the function to get the conversion matrix from PQR coordinates
+         * to ECEF coordinates expects an azimuth value for the rotation angle.
+         * So it must be negated for the PHASED_ARRAY table.
+         */
+        const double station_rotation_angle_rad = -angle_x[i];
+
         /* Get matrix to convert from rotated station frame to ECEF frame. */
         oskar_convert_pqr_to_ecef_matrix(
-                station_ecef_coords, angle_x[i], pqr_to_ecef
+                station_ecef_coords, station_rotation_angle_rad, pqr_to_ecef
         );
 
         /* Allocate space for element ECEF coordinates. */

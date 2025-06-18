@@ -163,6 +163,10 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                     num_element_types * (num_points + 1), 0, status);
             for (i = 0; i < num_element_types; ++i)
             {
+                /*
+                 * TODO CHECK: Euler angles below may need to be negated,
+                 * since they go in the opposite direction to azimuth.
+                 */
                 oskar_element_evaluate(
                         oskar_station_element_const(s, i),
                         norm_element, swap_xy,
@@ -185,6 +189,10 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                     *status = OSKAR_ERR_OUT_OF_RANGE;
                     break;
                 }
+                /*
+                 * TODO CHECK: Euler angles below may need to be negated,
+                 * since they go in the opposite direction to azimuth.
+                 */
                 oskar_element_evaluate(
                         oskar_station_element_const(s, element_type[i]),
                         norm_element, swap_xy,

@@ -65,6 +65,11 @@ void oskar_element_evaluate(
     }
 
     /* Compute (effective) theta and phi coordinates. */
+    /*
+     * TODO CHECK: delta_phi values may need to be negative to match proposed
+     * changes in orientation angle in
+     * oskar_evaluate_station_beam_aperture_array().
+     */
     oskar_convert_enu_directions_to_theta_phi(
             offset_points, num_points, x, y, z, normalise,
             (M_PI/2) - orientation_x,

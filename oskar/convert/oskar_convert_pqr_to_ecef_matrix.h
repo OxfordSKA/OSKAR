@@ -24,10 +24,13 @@ extern "C" {
  * Calculate the conversion matrix from PQR frame in a rotated station
  * to ECEF frame for PHASED_ARRAY table.
  *
+ * Note that the station rotation angle is in the direction of the azimuth,
+ * where positive values are East of North.
+ *
  * The output matrix is in row-major ("C") order.
  *
  * @param[in] station_ecef_coords  ECEF coordinates of station centre.
- * @param[in] station_rotation_angle_rad  Station rotation angle, in radians.
+ * @param[in] station_rotation_angle_rad  Station azimuth angle, in radians.
  * @param[out] pqr_to_ecef  Output matrix to convert from PQR to ECEF frame.
  */
 OSKAR_EXPORT
@@ -45,9 +48,12 @@ void oskar_convert_pqr_to_ecef_matrix(
  * Helper function for oskar_convert_pqr_to_ecef_matrix().
  * This just corresponds to a rotation around the zenith by the given angle.
  *
+ * Note that the station rotation angle is in the direction of the azimuth,
+ * where positive values are East of North.
+ *
  * The output matrix is in row-major ("C") order.
  *
- * @param[in] station_rotation_angle_rad  Station rotation angle, in radians.
+ * @param[in] station_rotation_angle_rad  Station azimuth angle, in radians.
  * @param[out] pqr_to_enu  Output matrix to convert from PQR to ENU frame.
  */
 OSKAR_EXPORT
