@@ -28,6 +28,17 @@ extern "C" {
 
 #define D2R (M_PI / 180.0)
 
+static void transpose(const double in[9], double out[9])
+{
+    double t = 0.0; // Use temporary, in case in and out are really the same.
+    t = in[1]; out[1] = in[3]; out[3] = t;
+    t = in[2]; out[2] = in[6]; out[6] = t;
+    t = in[5]; out[5] = in[7]; out[7] = t;
+    out[0] = in[0]; // Just copy the diagonals.
+    out[4] = in[4];
+    out[8] = in[8];
+}
+
 /* 3D matrix-vector multiply: out = m * v. */
 static void matrix_vector_mul(
         const double m[9],
@@ -255,10 +266,14 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
          * Write row to PHASED_ARRAY table.
          *
          * Although the thing that gets written to the table is actually
-         * ecef_to_pqr rather than pqr_to_ecef, we don't take the transpose,
+         * ecef_to_pqr rather than pqr_to_ecef, we should not need a transpose,
          * since casacore stores its arrays in column-major order.
          * So we would end up needing to transpose twice.
+         *
+         * Despite the above, tests show that EveryBeam is in fact expecting
+         * a transposed matrix here. So the transpose is currently required.
          */
+        transpose(pqr_to_ecef, pqr_to_ecef);
         oskar_ms_set_element_coords(
                 ms, i, num_elements,
                 element_ecef[0], element_ecef[1], element_ecef[2], pqr_to_ecef

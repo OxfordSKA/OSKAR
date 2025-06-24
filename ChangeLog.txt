@@ -10,7 +10,8 @@
       This includes the POSITION columns in the ANTENNA and PHASED_ARRAY
       tables in an output Measurement Set.
 
-    * Fix COORDINATE_AXES in the PHASED_ARRAY to have the expected transpose.
+    * Fix COORDINATE_AXES in the PHASED_ARRAY to have the expected
+      direction for the station rotation.
       Thanks to Tammo Jan Dijkema for identifying this issue.
 
     * Remove unsupported and unused spline data option for element patterns.
