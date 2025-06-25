@@ -674,11 +674,12 @@ int oskar_ieeeck(const int ispec, const float zero, const float one)
 int oskar_ilaenv(const int ispec, const char *name,
         const int n1, const int n2, const int n3, const int n4)
 {
-    char c2[2], c3[3], c4[2], subnam[6];
+    char c2[2], c3[3], c4[2], subnam[7];
     int i = 0, nb = 0, nx = 0, nbmin = 0, cname = 0, sname = 0;
 
     /* Convert NAME to upper case if the first character is lower case. */
-    strncpy(subnam, name, sizeof(subnam));
+    memset(subnam, 0, sizeof(subnam));
+    strncpy(subnam, name, sizeof(subnam) - 1);
     if (subnam[0] == tolower(subnam[0]))
     {
         for (i = 0; i < 6 && subnam[i] != 0; ++i)
@@ -693,9 +694,9 @@ int oskar_ilaenv(const int ispec, const char *name,
     {
         return 1;
     }
-    strncpy(c2, subnam + 1, sizeof(c2));
-    strncpy(c3, subnam + 3, sizeof(c3));
-    strncpy(c4, c3 + 1, sizeof(c4));
+    memcpy(c2, subnam + 1, sizeof(c2));
+    memcpy(c3, subnam + 3, sizeof(c3));
+    memcpy(c4, c3 + 1, sizeof(c4));
 
     switch (ispec)
     {

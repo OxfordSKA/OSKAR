@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2016-2022, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "utility/oskar_dir.h"
 
 #ifndef OSKAR_OS_WIN
+#define _DEFAULT_SOURCE
 #define _BSD_SOURCE
 #include <dirent.h>
 #include <errno.h>

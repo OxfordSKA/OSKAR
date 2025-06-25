@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2022, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -340,6 +340,13 @@ void oskar_device_launch_kernel(const char* name, int location,
     {
         *status = OSKAR_ERR_BAD_LOCATION;
     }
+#if !defined(OSKAR_HAVE_CUDA) and !defined(OSKAR_HAVE_OPENCL)
+    (void) num_dims;
+    (void) num_args;
+    (void) arg;
+    (void) num_local_args;
+    (void) arg_size_local;
+#endif
 }
 
 char* oskar_device_name(int location, int id)

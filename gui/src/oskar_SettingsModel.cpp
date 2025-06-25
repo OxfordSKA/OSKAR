@@ -262,7 +262,7 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
 Qt::ItemFlags SettingsModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
-        return 0;
+        return Qt::ItemFlags();
 
     const SettingsNode* node = get_node(index);
     if (!settings_->dependencies_satisfied(node->key()))

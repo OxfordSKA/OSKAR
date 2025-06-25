@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2022, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -15,6 +15,11 @@ namespace oskar {
 
 SettingsValue::SettingsValue()
 {
+}
+
+SettingsValue::SettingsValue(const SettingsValue& other)
+{
+    value_ = other.value_;
 }
 
 SettingsValue::~SettingsValue()
