@@ -1,4 +1,4 @@
-2025-xx-yy  OSKAR-2.11.0
+2025-06-25  OSKAR-2.11.0
 
     * Revert back to using (theta, phi) instead of Ludwig-3 polarisation basis
       for element pattern evaluation. This reverts a change made in OSKAR-2.8.0
