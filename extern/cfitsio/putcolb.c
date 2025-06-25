@@ -356,6 +356,7 @@ int ffpclb( fitsfile *fptr,  /* I - FITS file pointer                       */
   and will be inverse-scaled by the FITS TSCALn and TZEROn values if necessary.
 */
 {
+    int writemode;
     int tcode, maxelem2, hdutype, writeraw;
     long twidth, incre;
     long  ntodo;
@@ -363,6 +364,7 @@ int ffpclb( fitsfile *fptr,  /* I - FITS file pointer                       */
     double scale, zero;
     char tform[20], cform[20];
     char message[FLEN_ERRMSG];
+    size_t formlen;
 
     char snull[20];   /*  the FITS null value  */
 
@@ -377,7 +379,15 @@ int ffpclb( fitsfile *fptr,  /* I - FITS file pointer                       */
     /*---------------------------------------------------*/
     /*  Check input and get parameters about the column: */
     /*---------------------------------------------------*/
-    if (ffgcprll( fptr, colnum, firstrow, firstelem, nelem, 1, &scale, &zero,
+
+    /* IMPORTANT NOTE: that the special case of using this subroutine
+       to write bytes to a character column are handled internally
+       by the call to ffgcprll() below.  It will adjust the effective
+       *tcode, repeats, etc, to appear as a TBYTE column. */
+
+    writemode = 17; /* Equivalent to writemode = 1 but allow TSTRING -> TBYTE */
+
+    if (ffgcprll( fptr, colnum, firstrow, firstelem, nelem, writemode, &scale, &zero,
         tform, &twidth, &tcode, &maxelem2, &startpos,  &elemnum, &incre,
         &repeat, &rowlen, &hdutype, &tnull, snull, status) > 0)
         return(*status);
@@ -481,30 +491,35 @@ int ffpclb( fitsfile *fptr,  /* I - FITS file pointer                       */
 
             case (TSTRING):  /* numerical column in an ASCII table */
 
-                if (strchr(tform,'A'))
+                formlen = strlen(cform);
+	        if (strchr(tform,'A')) 
                 {
                     /* write raw input bytes without conversion        */
                     /* This case is a hack to let users write a stream */
                     /* of bytes directly to the 'A' format column      */
 
-                    if (incre == twidth)
+		  if (incre == twidth) {
                         ffpbyt(fptr, ntodo, &array[next], status);
-                    else
+		  } else {
                         ffpbytoff(fptr, twidth, ntodo/twidth, incre - twidth, 
                                 &array[next], status);
-                    break;
+		  }
+		  break;
                 }
-                else if (cform[1] != 's')  /*  "%s" format is a string */
+                else if (hdutype == ASCII_TBL && formlen > 1)
                 {
-                  ffi1fstr(&array[next], ntodo, scale, zero, cform,
-                          twidth, (char *) buffer, status);
+                   if (cform[formlen-1] == 'f' || cform[formlen-1] == 'E')
+                   {
+                     ffi1fstr(&array[next], ntodo, scale, zero, cform,
+                             twidth, (char *) buffer, status);
 
-                  if (incre == twidth)    /* contiguous bytes */
-                     ffpbyt(fptr, ntodo * twidth, buffer, status);
-                  else
-                     ffpbytoff(fptr, twidth, ntodo, incre - twidth, buffer,
-                            status);
-                  break;
+                     if (incre == twidth)    /* contiguous bytes */
+                        ffpbyt(fptr, ntodo * twidth, buffer, status);
+                     else
+                        ffpbytoff(fptr, twidth, ntodo, incre - twidth, buffer,
+                               status);
+                     break;
+                   }
                 }
                 /* can't write to string column, so fall thru to default: */
 
@@ -1003,7 +1018,7 @@ int ffi1fstr(unsigned char *input, /* I - array of values to be converted  */
     {       
         for (ii = 0; ii < ntodo; ii++)
         {
-           sprintf(output, cform, (double) input[ii]);
+           snprintf(output, DBUFFSIZE, cform, (double) input[ii]);
            output += twidth;
 
            if (*output)  /* if this char != \0, then overflow occurred */
@@ -1015,7 +1030,7 @@ int ffi1fstr(unsigned char *input, /* I - array of values to be converted  */
         for (ii = 0; ii < ntodo; ii++)
         {
           dvalue = ((double) input[ii] - zero) / scale;
-          sprintf(output, cform, dvalue);
+          snprintf(output, DBUFFSIZE, cform, dvalue);
           output += twidth;
 
           if (*output)  /* if this char != \0, then overflow occurred */

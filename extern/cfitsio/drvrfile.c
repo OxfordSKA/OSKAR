@@ -19,6 +19,18 @@
 
 #endif
 
+#if defined(_WIN32)
+/*
+*  The following #undef is required before the #include <windows.h> 
+*  because the TBYTE definition in fitsio.h conflicts with the usage
+*  of TBYTE as a typedef name in winnt.h.
+*  
+*/ 
+#undef TBYTE
+#include <windows.h>
+#include <malloc.h>
+#endif
+
 #ifdef HAVE_FTRUNCATE
 #if defined(unix) || defined(__unix__)  || defined(__unix) || defined(HAVE_UNISTD_H)
 #include <unistd.h>  /* needed for getcwd prototype on unix machines */
@@ -160,7 +172,12 @@ int file_openfile(char *filename, int rwmode, FILE **diskfile)
    lowest level routine to physically open a disk file
 */
 {
+#if defined(_WIN32)
+    wchar_t mode[4];
+#else
     char mode[4];
+#endif
+
 
 #if defined(unix) || defined(__unix__) || defined(__unix)
     char tempname[1024], *cptr, user[80];
@@ -177,6 +194,16 @@ int file_openfile(char *filename, int rwmode, FILE **diskfile)
 
 #endif
 
+#if defined(_WIN32)
+    if (rwmode == READWRITE)
+    {
+        wcscpy(mode, L"r+b");    /* open existing file with read-write */
+    }
+    else
+    {
+        wcscpy(mode, L"rb");     /* open existing file readonly */
+    }
+#else
     if (rwmode == READWRITE)
     {
           strcpy(mode, "r+b");    /* open existing file with read-write */
@@ -185,6 +212,7 @@ int file_openfile(char *filename, int rwmode, FILE **diskfile)
     {
           strcpy(mode, "rb");     /* open existing file readonly */
     }
+#endif
 
 #if MACHINE == ALPHAVMS || MACHINE == VAXVMS
         /* specify VMS record structure: fixed format, 2880 byte records */
@@ -299,12 +327,58 @@ int file_openfile(char *filename, int rwmode, FILE **diskfile)
 
     }
 
+#elif defined(_WIN32)
+    /* Windows 
+    * 
+	*  Assume that the input filename is in UTF-8 encoding and convert to UTF-16.
+   	*/
+    {
+        UINT inputCodePage = CP_UTF8;
+        /*
+        *  For UTF-8, dwFlags must be set to either 0 or
+        *  MB_ERR_INVALID_CHARS.
+        */
+        DWORD flags = 0;
+        int outputLength = 0, rc = 0;
+        /*
+        *  Call MultiByteToWideChar with an output buffer size of zero to determine
+        *  how large an output buffer is actually necessary.
+        */
+        outputLength = MultiByteToWideChar(
+            inputCodePage,
+            flags,
+            filename,
+            -1,
+            NULL,
+            0
+        );
+
+        /*
+        *  Actually convert the file name to UTF-16
+        */
+        wchar_t *wideFilename = (wchar_t*)malloc(sizeof(wchar_t) * outputLength);
+
+        rc = MultiByteToWideChar(
+            inputCodePage,
+            flags,
+            filename,
+            -1,
+            wideFilename,
+            outputLength
+        );
+
+        /*
+        *  If the conversion worked, open the file.
+        */
+        if (0 != rc)
+            *diskfile = _wfopen(wideFilename, mode);
+        free(wideFilename);
+    }
 #else
-
     /* other non-UNIX machines */
-    *diskfile = fopen(filename, mode); 
-
+	*diskfile = fopen(filename, mode);
 #endif
+
 
     if (!(*diskfile))           /* couldn't open file */
     {
@@ -317,7 +391,11 @@ int file_create(char *filename, int *handle)
 {
     FILE *diskfile;
     int ii;
+#if defined(_WIN32)
+    wchar_t mode[4];
+#else
     char mode[4];
+#endif
  
     int status = 0, rootlen, rootlen2, slen;
     char *cptr, *cpos;
@@ -422,20 +500,77 @@ printf("ABS = %s\n", absURL);
     if (*handle == -1)
        return(TOO_MANY_FILES);    /* too many files opened */
 
+#if defined(_WIN32)
+    wcscpy(mode, L"w+b");    /* create new file with read-write */
+    /* Windows
+    *
+    *  Assume that the input filename is in UTF-8 encoding and convert to UTF-16.
+    */
+    UINT inputCodePage = CP_UTF8;
+    /*
+    *  For UTF-8, dwFlags must be set to either 0 or
+    *  MB_ERR_INVALID_CHARS.
+    */
+    DWORD flags = 0;
+    int outputLength = 0, rc = 0;
+
+    /*
+    *  Call MultiByteToWideChar with an output buffer size of zero to determine
+    *  how large an output buffer is actually necessary.
+    */
+    outputLength = MultiByteToWideChar(
+        inputCodePage,
+        flags,
+        filename,
+        -1,
+        NULL,
+        0
+    );
+
+    /*
+    *  Actually convert the file name to UTF-16
+    */
+    wchar_t* wideFilename = (wchar_t*)malloc(sizeof(wchar_t) * outputLength);
+
+    rc = MultiByteToWideChar(
+        inputCodePage,
+        flags,
+        filename,
+        -1,
+        wideFilename,
+        outputLength
+    );
+    
+    if (0 == rc) return (FILE_NOT_CREATED);
+
+#else
     strcpy(mode, "w+b");    /* create new file with read-write */
+#endif
 
+#if defined(_WIN32)
+    diskfile = _wfopen(wideFilename, L"r");  /* does file already exist? */
+    if (diskfile)
+    {
+        fclose(diskfile);         /* close file and exit with error */
+        free(wideFilename);
+        return(FILE_NOT_CREATED); 
+    }
+#else
     diskfile = fopen(filename, "r"); /* does file already exist? */
-
     if (diskfile)
     {
         fclose(diskfile);         /* close file and exit with error */
         return(FILE_NOT_CREATED); 
     }
+#endif
 
 #if MACHINE == ALPHAVMS || MACHINE == VAXVMS
         /* specify VMS record structure: fixed format, 2880 byte records */
         /* but force stream mode access to enable random I/O access      */
     diskfile = fopen(filename, mode, "rfm=fix", "mrs=2880", "ctx=stm"); 
+#elif defined (_WIN32)
+    diskfile = _wfopen(wideFilename, mode);
+    free(wideFilename);
 #else
     diskfile = fopen(filename, mode); 
 #endif
@@ -998,7 +1133,4 @@ int stream_write(int hdl, void *buffer, long nbytes)
 
     return(0);
 }
-
-
-
 

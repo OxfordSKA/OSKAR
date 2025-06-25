@@ -361,6 +361,7 @@ int ffpclsb( fitsfile *fptr,  /* I - FITS file pointer                      */
     double scale, zero;
     char tform[20], cform[20];
     char message[FLEN_ERRMSG];
+    size_t formlen;
 
     char snull[20];   /*  the FITS null value  */
 
@@ -452,6 +453,7 @@ int ffpclsb( fitsfile *fptr,  /* I - FITS file pointer                      */
 
             case (TSTRING):  /* numerical column in an ASCII table */
 
+                formlen = strlen(cform);
                 if (strchr(tform,'A'))
                 {
                     /* write raw input bytes without conversion        */
@@ -465,17 +467,20 @@ int ffpclsb( fitsfile *fptr,  /* I - FITS file pointer                      */
                                 &array[next], status);
                     break;
                 }
-                else if (cform[1] != 's')  /*  "%s" format is a string */
+                else if (hdutype == ASCII_TBL && formlen > 1)
                 {
-                  ffs1fstr(&array[next], ntodo, scale, zero, cform,
-                          twidth, (char *) buffer, status);
+                   if (cform[formlen-1] == 'f' || cform[formlen-1] == 'E')
+                   {
+                     ffs1fstr(&array[next], ntodo, scale, zero, cform,
+                             twidth, (char *) buffer, status);
 
-                  if (incre == twidth)    /* contiguous bytes */
-                     ffpbyt(fptr, ntodo * twidth, buffer, status);
-                  else
-                     ffpbytoff(fptr, twidth, ntodo, incre - twidth, buffer,
-                            status);
-                  break;
+                     if (incre == twidth)    /* contiguous bytes */
+                        ffpbyt(fptr, ntodo * twidth, buffer, status);
+                     else
+                        ffpbytoff(fptr, twidth, ntodo, incre - twidth, buffer,
+                               status);
+                     break;
+                   }
                 }
                 /* can't write to string column, so fall thru to default: */
 
@@ -962,7 +967,7 @@ int ffs1fstr(signed char *input, /* I - array of values to be converted  */
     {       
         for (ii = 0; ii < ntodo; ii++)
         {
-           sprintf(output, cform, (double) input[ii]);
+           snprintf(output, DBUFFSIZE, cform, (double) input[ii]);
            output += twidth;
 
            if (*output)  /* if this char != \0, then overflow occurred */
@@ -974,7 +979,7 @@ int ffs1fstr(signed char *input, /* I - array of values to be converted  */
         for (ii = 0; ii < ntodo; ii++)
         {
           dvalue = ((double) input[ii] - zero) / scale;
-          sprintf(output, cform, dvalue);
+          snprintf(output, DBUFFSIZE, cform, dvalue);
           output += twidth;
 
           if (*output)  /* if this char != \0, then overflow occurred */

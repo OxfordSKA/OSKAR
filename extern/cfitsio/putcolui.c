@@ -361,6 +361,7 @@ int ffpclui( fitsfile *fptr,  /* I - FITS file pointer                       */
     double scale, zero;
     char tform[20], cform[20];
     char message[FLEN_ERRMSG];
+    size_t formlen;
 
     char snull[20];   /*  the FITS null value  */
 
@@ -451,19 +452,23 @@ int ffpclui( fitsfile *fptr,  /* I - FITS file pointer                       */
 
             case (TSTRING):  /* numerical column in an ASCII table */
 
-                if (cform[1] != 's')  /*  "%s" format is a string */
+                formlen = strlen(cform);
+                if (hdutype == ASCII_TBL && formlen > 1)
                 {
-                  ffu2fstr(&array[next], ntodo, scale, zero, cform,
-                          twidth, (char *) buffer, status);
+                   if (cform[formlen-1] == 'f' || cform[formlen-1] == 'E')
+                   {
+                     ffu2fstr(&array[next], ntodo, scale, zero, cform,
+                             twidth, (char *) buffer, status);
 
 
-                  if (incre == twidth)    /* contiguous bytes */
-                     ffpbyt(fptr, ntodo * twidth, buffer, status);
-                  else
-                     ffpbytoff(fptr, twidth, ntodo, incre - twidth, buffer,
-                            status);
+                     if (incre == twidth)    /* contiguous bytes */
+                        ffpbyt(fptr, ntodo * twidth, buffer, status);
+                     else
+                        ffpbytoff(fptr, twidth, ntodo, incre - twidth, buffer,
+                               status);
 
-                  break;
+                     break;
+                   }
                 }
                 /* can't write to string column, so fall thru to default: */
 
@@ -955,7 +960,7 @@ int ffu2fstr(unsigned short *input, /* I - array of values to be converted  */
     {       
         for (ii = 0; ii < ntodo; ii++)
         {
-           sprintf(output, cform, (double) input[ii]);
+           snprintf(output, DBUFFSIZE, cform, (double) input[ii]);
            output += twidth;
 
            if (*output)  /* if this char != \0, then overflow occurred */
@@ -967,7 +972,7 @@ int ffu2fstr(unsigned short *input, /* I - array of values to be converted  */
         for (ii = 0; ii < ntodo; ii++)
         {
           dvalue = ((double) input[ii] - zero) / scale;
-          sprintf(output, cform, dvalue);
+          snprintf(output, DBUFFSIZE, cform, dvalue);
           output += twidth;
 
           if (*output)  /* if this char != \0, then overflow occurred */

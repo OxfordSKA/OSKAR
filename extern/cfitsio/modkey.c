@@ -61,7 +61,12 @@ int ffuky( fitsfile *fptr,     /* I - FITS file pointer        */
     }
     else if (datatype == TULONG)
     {
-        ffukyg(fptr, keyname, (double) *(unsigned long *) value, 0,
+        ffukyuj(fptr, keyname, (ULONGLONG) *(unsigned long *) value,
+               comm, status);
+    }
+    else if (datatype == TULONGLONG)
+    {
+        ffukyuj(fptr, keyname, (ULONGLONG) *(ULONGLONG *) value,
                comm, status);
     }
     else if (datatype == TLONG)
@@ -199,6 +204,27 @@ int ffukyj(fitsfile *fptr,     /* I - FITS file pointer  */
     {
         *status = tstatus;
         ffpkyj(fptr, keyname, value, comm, status);
+    }
+    return(*status);
+}
+/*--------------------------------------------------------------------------*/
+int ffukyuj(fitsfile *fptr,     /* I - FITS file pointer  */
+           const char *keyname,/* I - keyword name       */
+           ULONGLONG value,     /* I - keyword value      */
+           const char *comm,   /* I - keyword comment    */
+           int *status)        /* IO - error status      */
+{
+    int tstatus;
+
+    if (*status > 0)           /* inherit input status value if > 0 */
+        return(*status);
+
+    tstatus = *status;
+
+    if (ffmkyuj(fptr, keyname, value, comm, status) == KEY_NO_EXIST)
+    {
+        *status = tstatus;
+        ffpkyuj(fptr, keyname, value, comm, status);
     }
     return(*status);
 }
@@ -648,8 +674,9 @@ int ffmkys(fitsfile *fptr,          /* I - FITS file pointer  */
 
       while (len && valstring[len - 1] == '&')  /* ampersand is continuation char */
       {
+        nextcomm[0]='\0';
         ffgcnt(fptr, valstring, nextcomm, status);
-        if (*valstring)
+        if (*valstring || strlen(nextcomm))
         {
             ffdrec(fptr, keypos, status);  /* delete the continuation */
             len = strlen(valstring);
@@ -681,11 +708,11 @@ int ffmkls( fitsfile *fptr,           /* I - FITS file pointer        */
 {
     char valstring[FLEN_VALUE];
     char card[FLEN_CARD], tmpkeyname[FLEN_CARD];
-    char comm[FLEN_COMMENT];
     char tstring[FLEN_VALUE], *cptr;
-    char *longval;
-    int next, remain, vlen, nquote, nchar, namelen, contin, tstatus = -1;
+    char *comm=0, *tmplongval=0;
+    int next, remain, nquote, nchar, namelen, contin, tstatus = -1;
     int nkeys, keypos;
+    int vlen, commlen, tmpvlen, tmpcommlen;
 
     if (*status > 0)           /* inherit input status value if > 0 */
         return(*status);
@@ -693,11 +720,14 @@ int ffmkls( fitsfile *fptr,           /* I - FITS file pointer        */
     if (!incomm || incomm[0] == '&')  /* preserve the old comment string */
     {
         ffghps(fptr, &nkeys, &keypos, status); /* save current position */
-
-        if (ffgkls(fptr, keyname, &longval, comm, status) > 0)
-            return(*status);            /* keyword doesn't exist */
-
-        free(longval);  /* don't need the old value */
+        
+        if (ffgkcsl(fptr, keyname, &vlen, &commlen, status))
+           return(*status); /* keyword doesn't exist or is bad format */
+        tmplongval = (char *)malloc(vlen+1);
+        comm = (char *)malloc(commlen+1);
+        ffgskyc(fptr, keyname, 1, vlen, commlen, tmplongval, &tmpvlen,
+                comm, &tmpcommlen, status);
+        free(tmplongval); 
 
         /* move back to previous position to ensure that we delete */
         /* the right keyword in case there are more than one keyword */
@@ -705,96 +735,26 @@ int ffmkls( fitsfile *fptr,           /* I - FITS file pointer        */
         ffgrec(fptr, keypos - 1, card, status); 
     } else {
         /* copy the input comment string */
-        strncpy(comm, incomm, FLEN_COMMENT-1);
-        comm[FLEN_COMMENT-1] = '\0';
+        commlen = (int)strlen(incomm);
+        if (commlen)
+        {
+           comm = (char *)malloc(commlen+1);
+           strcpy(comm,incomm);
+        }
     }
 
     /* delete the old keyword */
     if (ffdkey(fptr, keyname, status) > 0)
+    {
+        if (comm)  free(comm);
         return(*status);            /* keyword doesn't exist */
+    }
 
     ffghps(fptr, &nkeys, &keypos, status); /* save current position */
 
-    /* now construct the new keyword, and insert into header */
-    remain = strlen(value);    /* number of characters to write out */
-    next = 0;                  /* pointer to next character to write */
-    
-    /* count the number of single quote characters in the string */
-    nquote = 0;
-    cptr = strchr(value, '\'');   /* search for quote character */
+    fits_make_longstr_key_util(fptr, keyname, value, comm, keypos, status);
 
-    while (cptr)  /* search for quote character */
-    {
-        nquote++;            /*  increment no. of quote characters  */
-        cptr++;              /*  increment pointer to next character */
-        cptr = strchr(cptr, '\'');  /* search for another quote char */
-    }
-
-    strncpy(tmpkeyname, keyname, 80);
-    tmpkeyname[80] = '\0';
-    
-    cptr = tmpkeyname;
-    while(*cptr == ' ')   /* skip over leading spaces in name */
-        cptr++;
-
-    /* determine the number of characters that will fit on the line */
-    /* Note: each quote character is expanded to 2 quotes */
-
-    namelen = strlen(cptr);
-    if (namelen <= 8 && (fftkey(cptr, &tstatus) <= 0) )
-    {
-        /* This a normal 8-character FITS keyword */
-        nchar = 68 - nquote; /*  max of 68 chars fit in a FITS string value */
-    }
-    else
-    {
-	nchar = 80 - nquote - namelen - 5;
-    }
-
-    contin = 0;
-    while (remain > 0)
-    {
-        if (nchar > FLEN_VALUE-1)
-        {
-           ffpmsg("longstr keyword value is too long (ffmkls)");
-           return (*status=BAD_KEYCHAR);
-        }
-        strncpy(tstring, &value[next], nchar); /* copy string to temp buff */
-        tstring[nchar] = '\0';
-        ffs2c(tstring, valstring, status);  /* put quotes around the string */
-
-        if (remain > nchar)   /* if string is continued, put & as last char */
-        {
-            vlen = strlen(valstring);
-            nchar -= 1;        /* outputting one less character now */
-
-            if (valstring[vlen-2] != '\'')
-                valstring[vlen-2] = '&';  /*  over write last char with &  */
-            else
-            { /* last char was a pair of single quotes, so over write both */
-                valstring[vlen-3] = '&';
-                valstring[vlen-1] = '\0';
-            }
-        }
-
-        if (contin)           /* This is a CONTINUEd keyword */
-        {
-           ffmkky("CONTINUE", valstring, comm, card, status); /* make keyword */
-           strncpy(&card[8], "   ",  2);  /* overwrite the '=' */
-        }
-        else
-        {
-           ffmkky(keyname, valstring, comm, card, status);  /* make keyword */
-        }
-
-        ffirec(fptr, keypos, card, status);  /* insert the keyword */
-       
-        keypos++;        /* next insert position */
-        contin = 1;
-        remain -= nchar;
-        next  += nchar;
-        nchar = 68 - nquote;
-    }
+    if (comm)  free(comm);
     return(*status);
 }
 /*--------------------------------------------------------------------------*/
@@ -843,6 +803,34 @@ int ffmkyj(fitsfile *fptr,          /* I - FITS file pointer  */
         return(*status);                               /* get old comment */
 
     ffi2c(value, valstring, status);   /* convert value to a string */
+
+    if (!comm || comm[0] == '&')  /* preserve the current comment string */
+        ffmkky(keyname, valstring, oldcomm, card, status);
+    else
+        ffmkky(keyname, valstring, comm, card, status);
+
+    ffmkey(fptr, card, status);
+
+    return(*status);
+}
+/*--------------------------------------------------------------------------*/
+int ffmkyuj(fitsfile *fptr,          /* I - FITS file pointer  */
+           const char *keyname,     /* I - keyword name       */
+           ULONGLONG value,          /* I - keyword value      */
+           const char *comm,        /* I - keyword comment    */
+           int *status)             /* IO - error status      */
+{
+    char valstring[FLEN_VALUE];
+    char oldcomm[FLEN_COMMENT];
+    char card[FLEN_CARD];
+
+    if (*status > 0)           /* inherit input status value if > 0 */
+        return(*status);
+
+    if (ffgkey(fptr, keyname, valstring, oldcomm, status) > 0)
+        return(*status);                               /* get old comment */
+
+    ffu2c(value, valstring, status);   /* convert value to a string */
 
     if (!comm || comm[0] == '&')  /* preserve the current comment string */
         ffmkky(keyname, valstring, oldcomm, card, status);
@@ -1705,8 +1693,9 @@ int ffdkey(fitsfile *fptr,    /* I - FITS file pointer  */
 
       while (len && value[len - 1] == '&')  /* ampersand used as continuation char */
       {
+        nextcomm[0]='\0';
         ffgcnt(fptr, value, nextcomm, status);
-        if (*value)
+        if (*value || strlen(nextcomm))
         {
             ffdrec(fptr, keypos, status);  /* delete the keyword */
             len = strlen(value);

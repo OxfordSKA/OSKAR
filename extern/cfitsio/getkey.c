@@ -286,6 +286,7 @@ int ffgky( fitsfile *fptr,     /* I - FITS file pointer        */
 */
 {
     LONGLONG longval;
+    ULONGLONG ulongval;
     double doubleval;
 
     if (*status > 0)           /* inherit input status value if > 0 */
@@ -319,7 +320,7 @@ int ffgky( fitsfile *fptr,     /* I - FITS file pointer        */
     {
         if (ffgkyjj(fptr, keyname, &longval, comm, status) <= 0)
         {
-            if (longval > (long) USHRT_MAX || longval < 0)
+            if (longval > (unsigned short) USHRT_MAX || longval < 0)
                 *status = NUM_OVERFLOW;
             else
                 *(unsigned short *) value = (unsigned short) longval;
@@ -339,7 +340,7 @@ int ffgky( fitsfile *fptr,     /* I - FITS file pointer        */
     {
         if (ffgkyjj(fptr, keyname, &longval, comm, status) <= 0)
         {
-            if (longval > (long) UINT_MAX || longval < 0)
+            if (longval > (unsigned int) UINT_MAX || longval < 0)
                 *status = NUM_OVERFLOW;
             else
                 *(unsigned int *) value = longval;
@@ -361,12 +362,12 @@ int ffgky( fitsfile *fptr,     /* I - FITS file pointer        */
     }
     else if (datatype == TULONG)
     {
-        if (ffgkyjj(fptr, keyname, &longval, comm, status) <= 0)
+        if (ffgkyujj(fptr, keyname, &ulongval, comm, status) <= 0)
         {
-            if (longval > ULONG_MAX || longval < 0)
+            if (ulongval > ULONG_MAX)
                 *status = NUM_OVERFLOW;
             else
-                 *(unsigned long *) value = longval;
+                 *(unsigned long *) value = ulongval;
         }
     }
     else if (datatype == TLONG)
@@ -376,9 +377,8 @@ int ffgky( fitsfile *fptr,     /* I - FITS file pointer        */
             if (longval > LONG_MAX || longval < LONG_MIN)
                 *status = NUM_OVERFLOW;
             else
-                *(int *) value = longval;
+                *(long *) value = longval;
         }
-        ffgkyj(fptr, keyname, (long *) value, comm, status);
     }
     else if (datatype == TULONGLONG)
     {
@@ -820,55 +820,33 @@ int ffgksl( fitsfile *fptr,     /* I - FITS file pointer             */
   This routine explicitly supports the CONTINUE convention for long string values.
 */
 {
-    char valstring[FLEN_VALUE], value[FLEN_VALUE];
-    int position, contin, len;
+    int dummy=0;
     
     if (*status > 0)
         return(*status);
-
-    ffgkey(fptr, keyname, valstring, NULL, status);  /* read the keyword */
-
-    if (*status > 0)
-        return(*status);
-
-    ffghps(fptr, NULL,  &position, status); /* save the current header position */
-    
-    if (!valstring[0])  { /* null value string? */
-        *length = 0;
-    } else {
-      ffc2s(valstring, value, status);  /* in case string contains "/" char  */
-      *length = strlen(value);
-
-      /* If last character is a & then value may be continued on next keyword */
-      contin = 1;
-      while (contin)  
-      {
-        len = strlen(value);
-
-        if (len && *(value+len-1) == '&')  /*  is last char an anpersand?  */
-        {
-            ffgcnt(fptr, value, NULL, status);
-            if (*value)    /* a null valstring indicates no continuation */
-            {
-               *length += strlen(value) - 1;
-            }
-            else
-	    {
-                contin = 0;
-            }
-        }
-        else
-	{
-            contin = 0;
-	}
-      }
-    }
-
-    ffmaky(fptr, position - 1, status); /* reset header pointer to the keyword */
-                                        /* since in many cases the program will read */
-					/* the string value after getting the length */
+ 
+    ffgkcsl(fptr, keyname, length, &dummy, status);
     
     return(*status);
+}
+/*--------------------------------------------------------------------------*/
+int ffgkcsl( fitsfile *fptr,     /* I - FITS file pointer             */
+           const char *keyname, /* I - name of keyword to read       */
+           int *length,         /* O - length of the string value    */
+           int *comlength,      /* O - length of comment string      */
+           int  *status)        /* IO - error status                 */
+/*
+  Get the length of the keyword value string and comment string.
+  This routine explicitly supports the CONTINUE convention for long string values.
+*/
+{
+   if (*status > 0)
+      return(*status);
+      
+   ffglkut(fptr, keyname, 0, 0, 0, (char *)0, length, (char *)0,
+           comlength, status); 
+       
+   return(*status);
 }
 /*--------------------------------------------------------------------------*/
 int ffgkls( fitsfile *fptr,     /* I - FITS file pointer             */
@@ -892,24 +870,30 @@ int ffgkls( fitsfile *fptr,     /* I - FITS file pointer             */
   characters long.
 */
 {
-    char valstring[FLEN_VALUE], nextcomm[FLEN_COMMENT];
-    int contin, commspace = 0;
+    char valstring[FLEN_VALUE], nextcomm[FLEN_COMMENT], card[FLEN_CARD];
+    int contin, commSpace = 0, addCommDelim=0, keynum=0;
     size_t len;
 
     if (*status > 0)
         return(*status);
 
     *value = NULL;  /* initialize a null pointer in case of error */
-
-    ffgkey(fptr, keyname, valstring, comm, status);  /* read the keyword */
-
+    card[0] = '\0';
+    if (comm)
+       comm[0] = '\0';
+    ffgcrd(fptr, keyname, card, status);
+    if (*status > 0)
+       return(*status);
+    if (strlen(card) < FLEN_CARD-1)
+       addCommDelim=1;
+    ffpsvc(card,valstring, comm, status);    
     if (*status > 0)
         return(*status);
 
     if (comm)
     {
         /* remaining space in comment string */
-        commspace = FLEN_COMMENT - strlen(comm) - 2;
+        commSpace = FLEN_COMMENT-1 - strlen(comm);
     }
     
     if (!valstring[0])   /* null value string? */
@@ -931,31 +915,47 @@ int ffgkls( fitsfile *fptr,     /* I - FITS file pointer             */
       {
         if (len && *(*value+len-1) == '&')  /*  is last char an ampersand?  */
         {
+            valstring[0] = '\0';
+            nextcomm[0] = '\0';
             ffgcnt(fptr, valstring, nextcomm, status);
-            if (*valstring)    /* a null valstring indicates no continuation */
+            if (*valstring || *nextcomm) /* If either valstring or nextcom
+                                  is filled, this must be a CONTINUE line */
             {
-               *(*value+len-1) = '\0';         /* erase the trailing & char */
-               len += strlen(valstring) - 1;
-               *value = (char *) realloc(*value, len + 1); /* increase size */
-               strcat(*value, valstring);     /* append the continued chars */
+               *(*value+len-1) = '\0'; /* erase the trailing & char */
+               if (*valstring)    
+               {
+                  len += strlen(valstring) - 1;
+                  *value = (char *) realloc(*value, len + 1); /* increase size */
+                  strcat(*value, valstring);     /* append the continued chars */
+               }
+               if (*nextcomm)
+               {
+	          if ((commSpace > 0) && (*nextcomm != 0)) 
+	          {
+                      /* If in here, input 'comm' cannot be 0 */
+                      /* concantenate comment strings (if any) */
+                      if (strlen(comm) && addCommDelim)
+                      {
+                         strcat(comm, " ");
+                         commSpace -=1;
+                      }
+		      strncat(comm, nextcomm, commSpace);
+                      commSpace = FLEN_COMMENT-1 - strlen(comm);
+                  }
+               }
+               /* Determine if a space delimiter is needed for next
+                  comment concatenation (if any).  Assume it is if card length
+                  of the most recently read keyword is less than max. 
+                  keynum is 1-based. */
+               ffghps(fptr,0,&keynum,status);
+               ffgrec(fptr, keynum-1, card, status);
+               addCommDelim = (strlen(card) < FLEN_CARD-1) ? 1 : 0;
             }
             else
 	    {
                 contin = 0;
-                /* Without this, for case of a last CONTINUE statement ending
-                   with a '&', nextcomm would retain the same string from 
-                   from the previous loop iteration and the comment
-                   would get concantenated twice. */
-                nextcomm[0] = 0;
             }
 
-            /* concantenate comment strings (if any) */
-	    if ((commspace > 0) && (*nextcomm != 0)) 
-	    {
-                strcat(comm, " ");
-		strncat(comm, nextcomm, commspace);
-                commspace = FLEN_COMMENT - strlen(comm) - 2;
-            }
         }
         else
 	{
@@ -998,9 +998,9 @@ int ffgsky( fitsfile *fptr,     /* I - FITS file pointer             */
   the calling routine does not need to call fffree to free the memory.
 */
 {
-    char valstring[FLEN_VALUE], nextcomm[FLEN_COMMENT];
+    char valstring[FLEN_VALUE], nextcomm[FLEN_COMMENT], card[FLEN_CARD];
     char *tempstring;
-    int contin, commspace = 0;
+    int contin, commSpace = 0, addCommDelim=0, keynum=0;
     size_t len;
 
     if (*status > 0)
@@ -1010,15 +1010,22 @@ int ffgsky( fitsfile *fptr,     /* I - FITS file pointer             */
     *value = '\0';
     if (valuelen) *valuelen = 0;
     
-    ffgkey(fptr, keyname, valstring, comm, status);  /* read the keyword */
-
+    card[0] = '\0';
+    if (comm)
+       comm[0] = '\0';
+    ffgcrd(fptr, keyname, card, status);
+    if (*status > 0)
+       return(*status);
+    if (strlen(card) < FLEN_CARD-1)
+       addCommDelim=1;
+    ffpsvc(card,valstring, comm, status);    
     if (*status > 0)
         return(*status);
 
     if (comm)
     {
         /* remaining space in comment string */
-        commspace = FLEN_COMMENT - strlen(comm) - 2;
+        commSpace = FLEN_COMMENT-1 - strlen(comm);
     }
     
     if (!valstring[0])   /* null value string? */
@@ -1038,32 +1045,47 @@ int ffgsky( fitsfile *fptr,     /* I - FITS file pointer             */
       contin = 1;
       while (contin && *status <= 0)  
       {
-        if (len && *(tempstring+len-1) == '&')  /*  is last char an anpersand?  */
+        if (len && *(tempstring+len-1) == '&')  /*  is last char an ampersand?  */
         {
+            valstring[0] = '\0';
+            nextcomm[0] = '\0';
             ffgcnt(fptr, valstring, nextcomm, status);
-            if (*valstring)    /* a null valstring indicates no continuation */
+            if (*valstring || *nextcomm)  /* If either valstring or nextcom
+                                  is filled, this must be a CONTINUE line */  
             {
                *(tempstring+len-1) = '\0';         /* erase the trailing & char */
-               len += strlen(valstring) - 1;
-               tempstring = (char *) realloc(tempstring, len + 1); /* increase size */
-               strcat(tempstring, valstring);     /* append the continued chars */
+               if (*valstring)
+               {
+                  len += strlen(valstring) - 1;
+                  tempstring = (char *) realloc(tempstring, len + 1); /* increase size */
+                  strcat(tempstring, valstring);     /* append the continued chars */
+               }
+               if (*nextcomm)
+               {
+	          if ((commSpace > 0) && (*nextcomm != 0)) 
+	          {
+                     /* If in here, input 'comm' cannot be 0 */
+                     /* concantenate comment strings (if any) */
+                     if (strlen(comm) && addCommDelim)
+                     {
+                        strcat(comm, " ");
+                        commSpace -=1;
+                     }
+		     strncat(comm, nextcomm, commSpace);
+                     commSpace = FLEN_COMMENT-1 - strlen(comm);
+                  }
+               }
+               /* Determine if a space delimiter is needed for next
+                  comment concatenation (if any).  Assume it is if card length
+                  of the most recently read keyword is less than max. 
+                  keynum is 1-based. */
+               ffghps(fptr,0,&keynum,status);
+               ffgrec(fptr, keynum-1, card, status);
+               addCommDelim = (strlen(card) < FLEN_CARD-1) ? 1 : 0;
             }
             else
 	    {
                 contin = 0;
-                /* Without this, for case of a last CONTINUE statement ending
-                   with a '&', nextcomm would retain the same string from 
-                   from the previous loop iteration and the comment
-                   would get concantenated twice. */
-                nextcomm[0] = 0;
-            }
-
-            /* concantenate comment strings (if any) */
-	    if ((commspace > 0) && (*nextcomm != 0)) 
-	    {
-                strcat(comm, " ");
-		strncat(comm, nextcomm, commspace);
-                commspace = FLEN_COMMENT - strlen(comm) - 2;
             }
         }
         else
@@ -1082,6 +1104,192 @@ int ffgsky( fitsfile *fptr,     /* I - FITS file pointer             */
 	if (valuelen) *valuelen = len;  /* total length of the keyword value */
     }
     
+    return(*status);
+}
+/*--------------------------------------------------------------------------*/
+int ffgskyc( fitsfile *fptr,     /* I - FITS file pointer             */
+           const char *keyname, /* I - name of keyword to read       */
+           int firstchar,       /* I - first character of string to return */
+           int maxchar,         /* I - maximum length of string to return */
+	                        /*    (string will be null terminated)  */ 
+           int maxcomchar,      /* I - maximum length of comment to return */     
+           char *value,         /* O - pointer to keyword value      */
+           int *valuelen,       /* O - total length of the keyword value string */
+                                /*     The returned 'value' string may only */
+				/*     contain a piece of the total string, depending */
+				/*     on the value of firstchar and maxchar */
+           char *comm,          /* O - keyword comment (may be NULL) */
+           int *comlen,        /* O - total length of the comment string */
+           int  *status)        /* IO - error status                 */
+{
+   if (*status > 0)
+      return(*status);
+
+   ffglkut(fptr,keyname,firstchar,maxchar,maxcomchar,value,valuelen,
+             comm,comlen,status);      
+      
+   return(*status);
+}
+/*--------------------------------------------------------------------------*/
+int ffglkut( fitsfile *fptr,     /* I - FITS file pointer             */
+           const char *keyname, /* I - name of keyword to read       */
+           int firstchar,       /* I - first character of string to return */
+           int maxvalchar,         /* I - maximum length of string to return */
+	                        /*    (string will be null terminated)  */      
+           int maxcomchar,      /* I - maximum length of comment to return */
+           char *value,         /* O - pointer to keyword value (may be NULL) */
+           int *valuelen,       /* O - total length of the keyword value string */
+                                /*     The returned 'value' string may only */
+				/*     contain a piece of the total string, depending */
+				/*     on the value of firstchar and maxvalchar */
+           char *comm,          /* O - keyword comment (may be NULL) */
+           int *comlen,         /* O - total length of comment string */
+           int  *status)        /* IO - error status                 */
+{
+    char valstring[FLEN_VALUE], comstring[FLEN_COMMENT], card[FLEN_CARD];
+    char *dynValStr=0, *dynComStr=0;
+    int contin, addCommDelim=0, keynum=0;
+    int lenOnly=0, savedKeyPos=1;
+    size_t len=0, lenc=0;
+
+    if (*status > 0)
+        return(*status);
+
+    if (maxvalchar==0 && maxcomchar==0)
+       lenOnly = 1;
+    
+    if (value)
+       *value = '\0';
+    if (comm)
+       *comm = '\0';
+    /* If lenOnly, 'value' and 'comm' should not be accessed after this point.*/
+    
+    *valuelen = 0; 
+    *comlen = 0;   
+    card[0] = '\0';
+    valstring[0] = '\0';
+    comstring[0] = '\0';
+       
+    ffgcrd(fptr, keyname, card, status);
+    if (*status > 0)
+       return(*status);
+    ffpsvc(card,valstring, comstring, status);    
+    if (*status > 0)
+        return(*status);
+    if (strlen(card) < FLEN_CARD-1 && *comstring)
+       addCommDelim=1;
+        
+    /* If called in lenOnly mode, there's a good chance the user will soon call
+       this again to read the value string.  Therefore we'll save and later restore
+       the original keyword position. */
+    if (lenOnly)
+    {
+       ffghps(fptr, 0, &savedKeyPos, status);
+       if (savedKeyPos > 1)
+          savedKeyPos -= 1;
+    }
+
+    if (!valstring[0])   /* null value string? */
+    {
+      dynValStr = (char *) malloc(1);  /* allocate and return a null string */
+      *dynValStr = '\0';      
+      dynComStr = (char *)malloc(1);
+      *dynComStr= '\0';
+    }
+    else
+    {
+      /* allocate space,  plus 1 for null */
+      dynValStr = (char *) malloc(strlen(valstring) + 1);
+
+      ffc2s(valstring, dynValStr, status);   /* convert string to value */
+      len = strlen(dynValStr);
+      
+      dynComStr = (char *) malloc(strlen(comstring)+1);
+      dynComStr[0]=0;
+      strcpy(dynComStr, comstring);
+      lenc = strlen(dynComStr);
+
+      /* If last character is a & then value may be continued on next keyword */
+      contin = 1;
+      while (contin && *status <= 0)  
+      {
+        if (len && *(dynValStr+len-1) == '&')  /*  is last char an ampersand?  */
+        {
+            valstring[0] = '\0';
+            comstring[0] = '\0';
+            ffgcnt(fptr, valstring, comstring, status);
+            if (*valstring || *comstring)  /* If either valstring or comstring
+                                  is filled, this must be a CONTINUE line */  
+            {
+               *(dynValStr+len-1) = '\0';         /* erase the trailing & char */
+               len -= 1;
+               if (*valstring)
+               {
+                  len += strlen(valstring);
+                  dynValStr = (char *) realloc(dynValStr, len + 1); /* increase size */
+                  strcat(dynValStr, valstring);     /* append the continued chars */
+               }
+               if (*comstring)
+               {
+                  /* concantenate comment strings */
+                  if (addCommDelim)
+                  {
+                     lenc += strlen(comstring) + 1;
+                     dynComStr = (char *) realloc(dynComStr, lenc + 1);
+                     strcat(dynComStr, " ");
+                     strcat(dynComStr, comstring);
+                  }
+                  else
+                  {
+                     lenc += strlen(comstring);
+                     dynComStr = (char *) realloc(dynComStr, lenc + 1);
+                     strcat(dynComStr, comstring);                     
+                  }
+               }
+               /* Determine if a space delimiter is needed for next
+                  comment concatenation (if any).  Assume it is if card length
+                  of the most recently read keyword is less than max. 
+                  keynum is 1-based. */
+               ffghps(fptr,0,&keynum,status);
+               ffgrec(fptr, keynum-1, card, status);
+               addCommDelim = ((strlen(card) < FLEN_CARD-1) && lenc) ? 1 : 0;
+            }
+            else
+	    {
+                contin = 0;
+            }
+        }
+        else
+	{
+            contin = 0;
+	}
+      }
+    }
+    
+    /* Resetting len and lenc really shouldn't be necessary here, but
+       just to make sure ... */
+    len = strlen(dynValStr);
+    lenc = strlen(dynComStr);
+    *valuelen = len;
+    *comlen = lenc;
+    if (lenOnly)
+       ffmaky(fptr, savedKeyPos, status);
+    else
+    {
+       if (value)
+       {
+          if (firstchar <= len)
+             strncat(value,dynValStr+firstchar-1,maxvalchar);
+       }
+       if (comm)
+       {
+          strncat(comm,dynComStr,maxcomchar);
+       }
+    }
+    
+    free(dynValStr);
+    free(dynComStr);
+        
     return(*status);
 }
 /*--------------------------------------------------------------------------*/

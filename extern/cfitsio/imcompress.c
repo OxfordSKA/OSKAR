@@ -1322,7 +1322,15 @@ int imcomp_init_table(fitsfile *outfptr,
 	
 	    if ( (outfptr->Fptr)->request_quantize_method == 0) 
               (outfptr->Fptr)->request_quantize_method = SUBTRACTIVE_DITHER_1;
-       
+            
+            /* HCompress must not use SUBTRACTIVE_DITHER_2. If user is requesting
+               this, assign SUBTRACTIVE_DITHER_1 instead. */
+            if ((outfptr->Fptr)->request_quantize_method == SUBTRACTIVE_DITHER_2
+              && !(strcmp(zcmptype,"HCOMPRESS_1"))) {
+                 (outfptr->Fptr)->request_quantize_method = SUBTRACTIVE_DITHER_1;
+               fprintf(stderr,"Warning: CFITSIO does not allow subtractive_dither_2 when using Hcompress algorithm.\nWill use subtractive_dither_1 instead.\n");
+            }
+                 
 	    if ((outfptr->Fptr)->request_quantize_method == SUBTRACTIVE_DITHER_1) {
 	      ffpkys(outfptr, "ZQUANTIZ", "SUBTRACTIVE_DITHER_1", 
 	        "Pixel Quantization Algorithm", status);
@@ -4422,7 +4430,7 @@ int fits_read_compressed_img(fitsfile *fptr,   /* I - FITS file pointer      */
     long fpixel[MAX_COMPRESS_DIM], lpixel[MAX_COMPRESS_DIM];
     long inc[MAX_COMPRESS_DIM];
     long i5, i4, i3, i2, i1, i0, irow;
-    int ii, ndim, pixlen, tilenul;
+    int ii, ndim, pixlen, tilenul=0;
     void *buffer;
     char *bnullarray = 0;
     double testnullval = 0.;
@@ -5245,7 +5253,7 @@ int imcomp_get_compressed_image_par(fitsfile *infptr, int *status)
 {
     char keyword[FLEN_KEYWORD];
     char value[FLEN_VALUE];
-    int ii, tstatus, doffset;
+    int ii, tstatus, tstatus2, doffset, oldFormat=0, colNum=0;
     long expect_nrows, maxtilelen;
 
     if (*status > 0)
@@ -5282,26 +5290,47 @@ int imcomp_get_compressed_image_par(fitsfile *infptr, int *status)
         ffpmsg(value);
 	return (*status = DATA_DECOMPRESSION_ERR);
     }
-
-    /* get the floating point to integer quantization type, if present. */
-    /* FITS files produced before 2009 will not have this keyword */
-    tstatus = 0;
-    if (ffgky(infptr, TSTRING, "ZQUANTIZ", value, NULL, &tstatus) > 0)
+    
+    if (ffgky (infptr, TINT,  "ZBITPIX",  &(infptr->Fptr)->zbitpix,  
+               NULL, status) > 0)
     {
-        (infptr->Fptr)->quantize_method = 0;
-        (infptr->Fptr)->quantize_level = 0;
-    } else {
+        ffpmsg("required ZBITPIX compression keyword not found");
+        return(*status);
+    }
 
-        if (!FSTRCMP(value, "NONE") ) {
-            (infptr->Fptr)->quantize_level = NO_QUANTIZE;
-       } else if (!FSTRCMP(value, "SUBTRACTIVE_DITHER_1") )
-            (infptr->Fptr)->quantize_method = SUBTRACTIVE_DITHER_1;
-        else if (!FSTRCMP(value, "SUBTRACTIVE_DITHER_2") )
-            (infptr->Fptr)->quantize_method = SUBTRACTIVE_DITHER_2;
-        else if (!FSTRCMP(value, "NO_DITHER") )
-            (infptr->Fptr)->quantize_method = NO_DITHER;
-        else
-            (infptr->Fptr)->quantize_method = 0;
+    /* If ZZERO and ZSCALE columns don't exist for floating-point types,
+     assume there is NO quantization.  Treat exactly as if it had ZQUANTIZ='NONE'.
+     This is true regardless of whether or not file has a ZQUANTIZ keyword. */
+    tstatus=0;
+    tstatus2=0;
+    if ((infptr->Fptr->zbitpix < 0) &&
+       (fits_get_colnum(infptr,CASEINSEN,"ZZERO",&colNum,&tstatus)
+	      == COL_NOT_FOUND) &&
+       (fits_get_colnum(infptr,CASEINSEN,"ZSCALE",&colNum,&tstatus2)
+	      == COL_NOT_FOUND)) {
+	  (infptr->Fptr)->quantize_level = NO_QUANTIZE;
+    }
+    else {
+       /* get the floating point to integer quantization type, if present. */
+       /* FITS files produced before 2009 will not have this keyword */
+       tstatus = 0;
+       if (ffgky(infptr, TSTRING, "ZQUANTIZ", value, NULL, &tstatus) > 0)
+       {
+           (infptr->Fptr)->quantize_method = 0;
+           (infptr->Fptr)->quantize_level = 0;
+       } else {
+
+           if (!FSTRCMP(value, "NONE") ) {
+               (infptr->Fptr)->quantize_level = NO_QUANTIZE;
+	  } else if (!FSTRCMP(value, "SUBTRACTIVE_DITHER_1") )
+               (infptr->Fptr)->quantize_method = SUBTRACTIVE_DITHER_1;
+           else if (!FSTRCMP(value, "SUBTRACTIVE_DITHER_2") )
+               (infptr->Fptr)->quantize_method = SUBTRACTIVE_DITHER_2;
+           else if (!FSTRCMP(value, "NO_DITHER") )
+               (infptr->Fptr)->quantize_method = NO_DITHER;
+           else
+               (infptr->Fptr)->quantize_method = 0;
+       }
     }
 
     /* get the floating point quantization dithering offset, if present. */
@@ -5313,13 +5342,6 @@ int imcomp_get_compressed_image_par(fitsfile *infptr, int *status)
         (infptr->Fptr)->dither_seed = 1;  
     } else {
         (infptr->Fptr)->dither_seed = doffset;
-    }
-
-    if (ffgky (infptr, TINT,  "ZBITPIX",  &(infptr->Fptr)->zbitpix,  
-               NULL, status) > 0)
-    {
-        ffpmsg("required ZBITPIX compression keyword not found");
-        return(*status);
     }
 
     if (ffgky (infptr,TINT, "ZNAXIS", &(infptr->Fptr)->zndim, NULL, status) > 0)
@@ -5366,7 +5388,11 @@ int imcomp_get_compressed_image_par(fitsfile *infptr, int *status)
         tstatus = 0;
 	ffgky (infptr, TLONG, keyword, &(infptr->Fptr)->tilesize[ii], NULL, 
                &tstatus);
-
+        if ((infptr->Fptr)->tilesize[ii] == 0)
+        {
+           ffpmsg("invalid ZTILE value = 0 in compressed image");
+           return (*status = DATA_DECOMPRESSION_ERR);
+        }
         expect_nrows *= (((infptr->Fptr)->znaxis[ii] - 1) / 
                   (infptr->Fptr)->tilesize[ii]+ 1);
         maxtilelen *= (infptr->Fptr)->tilesize[ii];
@@ -5391,7 +5417,16 @@ int imcomp_get_compressed_image_par(fitsfile *infptr, int *status)
         }
 
         tstatus = 0;
-        if (ffgky(infptr, TINT,"ZVAL2", &(infptr->Fptr)->rice_bytepix,
+        /* First check for very old files, where ZVAL2 wasn't yet designated
+           for bytepix */
+        if (!ffgky(infptr, TSTRING, "ZNAME2", value, NULL, &tstatus)
+                && !FSTRCMP(value, "NOISEBIT"))
+        {
+            oldFormat = 1;
+        }
+                
+        tstatus = 0;
+        if (oldFormat || ffgky(infptr, TINT,"ZVAL2", &(infptr->Fptr)->rice_bytepix,
                   NULL, &tstatus) > 0)
         {
             (infptr->Fptr)->rice_bytepix = 4;  /* default value */
@@ -5422,6 +5457,13 @@ int imcomp_get_compressed_image_par(fitsfile *infptr, int *status)
     /* and max size of the compressed tile buffer */
     (infptr->Fptr)->maxtilelen = maxtilelen;
 
+    /* prevent possible divide by zero in imcomp_calc_max_elem */
+    if ((infptr->Fptr)->compress_type == RICE_1 && 
+        (infptr->Fptr)->rice_blocksize == 0)
+    {
+        ffpmsg("Invalid RICE_1 blocksize = 0  (fits_get_compressed_img_par)");
+        return(*status = DATA_DECOMPRESSION_ERR);
+    }
     (infptr->Fptr)->maxelem = 
            imcomp_calc_max_elem ((infptr->Fptr)->compress_type, maxtilelen, 
                (infptr->Fptr)->zbitpix, (infptr->Fptr)->rice_blocksize);
@@ -5857,6 +5899,7 @@ int imcomp_decompress_tile (fitsfile *infptr,
     int blocksize, ntilebins, tilecol = 0;
     float fnulval=0;
     float *tempfloat = 0;
+    double *tempdouble = 0;
     double dnulval=0;
     double bscale, bzero, actual_bzero, dummy = 0;    /* scaling parameters */
     long tilesize;      /* number of bytes */
@@ -5977,8 +6020,34 @@ int imcomp_decompress_tile (fitsfile *infptr,
                 free (cbuf);
                 return (*status = DATA_DECOMPRESSION_ERR);
             }
+            
+            /* Do not allow image float/doubles into int arrays */
+            if (datatype != TFLOAT && datatype != TDOUBLE)
+            {
+               ffpmsg("attempting to read compressed float or double image into incompatible data type");
+               free(cbuf);
+               return (*status = DATA_DECOMPRESSION_ERR);
+            }
 
-            if (datatype == TDOUBLE && (infptr->Fptr)->zbitpix == FLOAT_IMG) {  
+            if (datatype == TFLOAT && (infptr->Fptr)->zbitpix == DOUBLE_IMG)
+            {
+               tempdouble = (double*)malloc(idatalen);
+               if (tempdouble == NULL) {
+	           ffpmsg("Memory allocation failure for tempdouble. (imcomp_decompress_tile)");
+                   free (cbuf);
+	           return (*status = MEMORY_ALLOCATION);
+               }
+
+               /* uncompress the data into temp buffer */
+               if (uncompress2mem_from_mem ((char *)cbuf, (long) nelemll,
+                    (char **) &tempdouble, &idatalen, NULL, &tilebytesize, status)) {
+                   ffpmsg("failed to gunzip the image tile");
+                   free (tempdouble);
+                   free (cbuf);
+                   return (*status);
+               }
+            }
+            else if (datatype == TDOUBLE && (infptr->Fptr)->zbitpix == FLOAT_IMG) {  
                 /*  have to allocat a temporary buffer for the uncompressed data in the */
                 /*  case where a gzipped "float" tile is returned as a "double" array   */
                 tempfloat = (float*) malloc (idatalen); 
@@ -6045,16 +6114,21 @@ int imcomp_decompress_tile (fitsfile *infptr,
             } else if (tilebytesize == 8 * tilelen) { /* double pixels */
 
 #if BYTESWAPPED
-                ffswap8((double *) buffer, tilelen);
+                if (tempdouble)
+                   ffswap8((double *) tempdouble, tilelen);
+                else
+                   ffswap8((double *) buffer, tilelen);
 #endif
                 if (datatype == TFLOAT) {
                   if (nulval) {
 		    fnulval = *(float *) nulval;
   		  }
 
-                  fffr8r4((double *) buffer, (long) tilelen, 1., 0., nullcheck,   
+                  fffr8r4((double *) tempdouble, (long) tilelen, 1., 0., nullcheck,   
                         fnulval, bnullarray, anynul,
                         (float *) buffer, status);
+                  free(tempdouble);
+                  tempdouble=0;
                 } else if (datatype == TDOUBLE) {
                   if (nulval) {
 		    dnulval = *(double *) nulval;
@@ -6797,7 +6871,7 @@ int imcomp_decompress_tile (fitsfile *infptr,
      if ((infptr->Fptr)->znaxis[0]   != (infptr->Fptr)->tilesize[0] ||
         (infptr->Fptr)->tilesize[1] != 1 )
      {
-      tilesize = pixlen * tilelen;
+      tilesize = (long)pixlen * tilelen;
 
       /* check that tile size/type has not changed */
       if (tilesize != (infptr->Fptr)->tiledatasize[tilecol] ||
@@ -8415,7 +8489,7 @@ int fits_compress_table(fitsfile *infptr, fitsfile *outfptr, int *status)
                            (int) compmemlen, 32);
 		        } else {
 			  /* this should not happen */
-			  ffpmsg(" Error: cannot compress this column type with the RICE algorthm");
+			  ffpmsg(" Error: cannot compress this column type with the RICE algorithm");
 			  free(vlamem); free(cdescript); free(cm_buffer); free(cvlamem);
 			  *status = DATA_COMPRESSION_ERR;
 			  return(*status);
@@ -8435,7 +8509,7 @@ int fits_compress_table(fitsfile *infptr, fitsfile *outfptr, int *status)
 	    		    &cvlamem,  &compmemlen, realloc, &dlen, status);        
 		    } else {
 			  /* this should not happen */
-			  ffpmsg(" Error: unknown compression algorthm");
+			  ffpmsg(" Error: unknown compression algorithm");
 			  free(vlamem); free(cdescript); free(cm_buffer); free(cvlamem);
 			  *status = DATA_COMPRESSION_ERR;
 			  return(*status);
@@ -8567,7 +8641,7 @@ int fits_compress_table(fitsfile *infptr, fitsfile *outfptr, int *status)
   	            dlen = fits_rcomp_byte ((signed char *)(cm_buffer + cm_colstart[ii]), datasize, (unsigned char *) cvlamem,
                        datasize * 2, 32);
 	        } else {  /* this should not happen */
-                    ffpmsg(" Error: cannot compress this column type with the RICE algorthm");
+                    ffpmsg(" Error: cannot compress this column type with the RICE algorithm");
 		    free(cvlamem);  free(cm_buffer);
 	            *status = DATA_COMPRESSION_ERR;
 	            return(*status);
@@ -9226,7 +9300,7 @@ int fits_uncompress_table(fitsfile *infptr, fitsfile *outfptr, int *status)
 					(int) vlalen, 32);
 				} else {
 				    /* this should not happen */
-				    ffpmsg(" Error: cannot uncompress this column type with the RICE algorthm");
+				    ffpmsg(" Error: cannot uncompress this column type with the RICE algorithm");
 
 				    *status = DATA_DECOMPRESSION_ERR;
 			            free(uncompressed_vla); free(compressed_vla); free(rm_buffer);  free(cm_buffer);
@@ -9251,7 +9325,7 @@ int fits_uncompress_table(fitsfile *infptr, fitsfile *outfptr, int *status)
 
 			    } else {
 				/* this should not happen */
-				ffpmsg(" Error: unknown compression algorthm");
+				ffpmsg(" Error: unknown compression algorithm");
 			        free(uncompressed_vla); free(compressed_vla); free(rm_buffer);  free(cm_buffer);
 				*status = DATA_COMPRESSION_ERR;
 				return(*status);

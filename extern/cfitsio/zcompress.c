@@ -118,8 +118,8 @@ int uncompress2mem(char *filename,  /* name of input file                 */
 
             if (err == Z_STREAM_END ) { /* We reached the end of the input */
 	        break; 
-            } else if (err == Z_OK ) { 
-
+            } else if (err == Z_OK || err == Z_BUF_ERROR) { 
+	        /* Z_BUF_ERROR means need more input data to make progress */
                 if (!d_stream.avail_in) break; /* need more input */
 		
                 /* need more space in output buffer */
@@ -221,7 +221,8 @@ int uncompress2mem_from_mem(
 
         if (err == Z_STREAM_END) { /* We reached the end of the input */
 	    break; 
-        } else if (err == Z_OK ) { /* need more space in output buffer */
+        } else if (err == Z_OK || err == Z_BUF_ERROR) { /* need more space in output buffer */
+	    /* Z_BUF_ERROR means need more input data to make progress */
 
             if (mem_realloc) {   
                 *buffptr = mem_realloc(*buffptr,*buffsize + BUFFINCR);
@@ -313,7 +314,8 @@ int uncompress2file(char *filename,  /* name of input file                  */
 
             if (err == Z_STREAM_END ) { /* We reached the end of the input */
 	        break; 
-            } else if (err == Z_OK ) { 
+            } else if (err == Z_OK || err == Z_BUF_ERROR) { 
+	        /* Z_BUF_ERROR means need more input data to make progress */
 
                 if (!d_stream.avail_in) break; /* need more input */
 		
@@ -450,14 +452,15 @@ int compress2file_from_mem(
   Compress the memory file into disk file. 
 */
 {
-    int err;
-    unsigned long bytes_out = 0;
+    int err, flushflag;
     char  *outfilebuff;
+    uLong nPages=1, iPage=0;
+    uInt nBytesToFile=0;
     z_stream c_stream;  /* compression stream */
 
     if (*status > 0)
         return(*status);
-
+    
     /* Allocate buffer to hold compressed bytes */
     outfilebuff = (char*)malloc(GZBUFSIZE);
     if (!outfilebuff) return(*status = 113); /* memory error */
@@ -475,46 +478,49 @@ int compress2file_from_mem(
 
     if (err != Z_OK) return(*status = 413);
 
-    c_stream.next_in = (unsigned char*)inmemptr;
-    c_stream.avail_in = inmemsize;
+    if (inmemsize > 0)
+       nPages = 1 + (uLong)(inmemsize-1)/(uLong)UINT_MAX;
 
-    c_stream.next_out = (unsigned char*) outfilebuff;
-    c_stream.avail_out = GZBUFSIZE;
+    for (iPage=0; iPage<nPages; ++iPage)
+    {
+       c_stream.next_in = (unsigned char*)inmemptr + iPage*UINT_MAX;
+       c_stream.avail_in = (iPage == nPages-1) ? 
+                  inmemsize - iPage*UINT_MAX : UINT_MAX;
+       
+       flushflag = (iPage < nPages-1) ? Z_NO_FLUSH : Z_FINISH; 
+       do {
+           c_stream.next_out = (unsigned char*) outfilebuff;
+           c_stream.avail_out = GZBUFSIZE;
+           
+           /* compress as much of the input as will fit in the output */
+           err = deflate(&c_stream, flushflag);
 
-    for (;;) {
-        /* compress as much of the input as will fit in the output */
-        err = deflate(&c_stream, Z_FINISH);
+           if (err == Z_STREAM_ERROR)
+           {
+               deflateEnd(&c_stream);
+               free(outfilebuff);
+               return(*status = 413);
+           }
+           else
+           {
+              /* c_stream.avail_out will be 0 unless we've reached the end of the avail_in 
+                 stream.  When that happens avail_out MAY also be 0, if by chance the output
+                 buffer fills up just as the input stream ends.  That's OK though, as it will
+                 execute just one more do/while where the deflate call won't actually do
+                 anything.  */
+              nBytesToFile = GZBUFSIZE - c_stream.avail_out;
+              if (nBytesToFile)
+              {
+                 if (fwrite(outfilebuff, 1, nBytesToFile, outdiskfile) != nBytesToFile)
+                 {
+                    deflateEnd(&c_stream);
+                    free(outfilebuff);
+                    return(*status = 413);                 
+                 }
+              }
+           }
+        } while (c_stream.avail_out == 0);
 
-        if (err == Z_STREAM_END) {  /* We reached the end of the input */
-	   break;
-        } else if (err == Z_OK ) { /* need more space in output buffer */
-
-            /* flush out the full output buffer */
-            if ((int)fwrite(outfilebuff, 1, GZBUFSIZE, outdiskfile) != GZBUFSIZE) {
-                deflateEnd(&c_stream);
-                free(outfilebuff);
-                return(*status = 413);
-            }
-            bytes_out += GZBUFSIZE;
-            c_stream.next_out = (unsigned char*) outfilebuff;
-            c_stream.avail_out = GZBUFSIZE;
-
-
-        } else {  /* some other error */
-            deflateEnd(&c_stream);
-            free(outfilebuff);
-            return(*status = 413);
-        }
-    }
-
-    /* write out any remaining bytes in the buffer */
-    if (c_stream.total_out > bytes_out) {
-        if ((int)fwrite(outfilebuff, 1, (c_stream.total_out - bytes_out), outdiskfile) 
-	    != (c_stream.total_out - bytes_out)) {
-            deflateEnd(&c_stream);
-            free(outfilebuff);
-            return(*status = 413);
-        }
     }
 
     free(outfilebuff); /* free temporary output data buffer */

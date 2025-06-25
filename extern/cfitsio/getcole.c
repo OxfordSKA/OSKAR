@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+#include <float.h>
 #include "fitsio2.h"
 
 /*--------------------------------------------------------------------------*/
@@ -1487,19 +1488,43 @@ int fffr8r4(double *input,        /* I - array of values to be converted     */
 {
     long ii;
     short *sptr, iret;
+    double dvalue=0;
 
     if (nullcheck == 0)     /* no null checking required */
     {
         if (scale == 1. && zero == 0.)      /* no scaling */
         {       
             for (ii = 0; ii < ntodo; ii++)
-                output[ii] = (float) input[ii]; /* copy input to output */
+                if (input[ii] < -FLT_MAX)
+                {
+                   *status = OVERFLOW_ERR;
+                   output[ii] = -FLT_MAX;
+                }
+                else if (input[ii] > FLT_MAX)
+                {
+                   *status = OVERFLOW_ERR;
+                   output[ii] = FLT_MAX;
+                }
+                else
+                   output[ii] = (float) input[ii]; /* copy input to output */
         }
         else             /* must scale the data */
         {
             for (ii = 0; ii < ntodo; ii++)
             {
-                output[ii] = (float) (input[ii] * scale + zero);
+                dvalue = input[ii] * scale + zero;
+                if (dvalue < -FLT_MAX)
+                {
+                   *status = OVERFLOW_ERR;
+                   output[ii] = -FLT_MAX;
+                }
+                else if (dvalue > FLT_MAX)
+                {
+                   *status = OVERFLOW_ERR;
+                   output[ii] = FLT_MAX;
+                }
+                else
+                   output[ii] = (float) dvalue;
             }
         }
     }
@@ -1528,7 +1553,20 @@ int fffr8r4(double *input,        /* I - array of values to be converted     */
                      output[ii] = 0;
               }
               else
-                  output[ii] = (float) input[ii];
+              {
+                 if (input[ii] < -FLT_MAX)
+                 {
+                    *status = OVERFLOW_ERR;
+                    output[ii] = -FLT_MAX;
+                 }
+                 else if (input[ii] > FLT_MAX)
+                 {
+                    *status = OVERFLOW_ERR;
+                    output[ii] = FLT_MAX;
+                 }
+                 else
+                    output[ii] = (float) input[ii];
+               }
             }
         }
         else                  /* must scale the data */
@@ -1546,10 +1584,37 @@ int fffr8r4(double *input,        /* I - array of values to be converted     */
                         nullarray[ii] = 1;
                   }
                   else            /* it's an underflow */
-                     output[ii] = (float) zero;
+                  {
+                     if (zero < -FLT_MAX)
+                     {
+                        *status = OVERFLOW_ERR;
+                        output[ii] = -FLT_MAX;
+                     }
+                     else if (zero > FLT_MAX)
+                     {
+                        *status = OVERFLOW_ERR;
+                        output[ii] = FLT_MAX;
+                     }
+                     else
+                        output[ii] = (float) zero;
+                   }
               }
               else
-                  output[ii] = (float) (input[ii] * scale + zero);
+              {
+                  dvalue = input[ii] * scale + zero;
+                  if (dvalue < -FLT_MAX)
+                  {
+                     *status = OVERFLOW_ERR;
+                     output[ii] = -FLT_MAX;
+                  }
+                  else if (dvalue > FLT_MAX)
+                  {
+                     *status = OVERFLOW_ERR;
+                     output[ii] = FLT_MAX;
+                  }
+                  else
+                     output[ii] = (float) dvalue;
+              }
             }
         }
     }
