@@ -6,7 +6,8 @@ variables:
   CONTAINER_SCANNING_DISABLED: 'true'
   DEPENDENCY_SCANNING_DISABLED: 'true'
 
-image: fdulwich/oskar-ci:cuda-12.6-2
+image: fdulwich/oskar-ci:cuda-12.6-3
+tags: [ska-dp-default]
 
 stages:
   - build and test
@@ -19,11 +20,10 @@ stages:
 
 build-test-debug:
   stage: build and test
-  tags: [ska-gpu-a100]
+  tags: [ska-dp-gpu-a100]
   before_script:
     - *ready_reports
     - nvidia-smi
-    - pip3 install fastcov # Could go into the base image at some point.
     - mkdir debug
     - cd debug/
     - cmake ../ -DCOVERAGE_REPORT=ON -DCUDA_ARCH=$CUDA_ARCH
@@ -45,7 +45,7 @@ build-test-debug:
 
 build-test-release:
   stage: build and test
-  tags: [ska-gpu-a100]
+  tags: [ska-dp-gpu-a100]
   before_script:
     - *ready_reports
     # We need CMake >= 3.21.0 for the --output-junit option on CTest.
@@ -114,15 +114,15 @@ docker-release:
     - if: '$CI_COMMIT_TAG'
       when: never  # Disable stage, as it needs updating to run again.
 
-singularity-release:
+apptainer-release:
   stage: publish
   before_script:
     - mkdir build-image && cd build-image/
     - cmake ../
     - export MY_VER=`cmake -LA -N . | grep OSKAR_VERSION_LONG | awk '{split($0,a,"="); print a[2]}'`
-    - cd ../singularity/
+    - cd ../apptainer/
   script:
-    - singularity build OSKAR-${MY_VER}-Python3.sif Singularity.python3
+    - apptainer build OSKAR-${MY_VER}-Python3.sif Apptainer.python3
     - mv OSKAR-${MY_VER}-Python3.sif ../
   artifacts:
     paths:
