@@ -2,11 +2,11 @@
 # Build an image for OSKAR CI.
 # Install the casacore Tables library and its dependencies.
 #
-FROM nvidia/cuda:12.6.3-base-ubuntu22.04 AS build
+FROM nvidia/cuda:12.6.3-base-ubuntu24.04 AS build
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Singularity build dependencies.
-RUN apt-get update && \
+RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
@@ -46,7 +46,7 @@ RUN mkdir casacore-src && \
 
 # Copy casacore and Singularity into a new image with other
 # build dependencies installed.
-FROM nvidia/cuda:12.6.3-base-ubuntu22.04
+FROM nvidia/cuda:12.6.3-base-ubuntu24.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get upgrade -y && \
@@ -54,16 +54,16 @@ RUN apt-get update && \
     build-essential \
     clang-tidy \
     cmake \
-    cuda-cudart-dev-12-5 \
-    cuda-nvcc-12-5 \
+    cuda-cudart-dev-12-6 \
+    cuda-nvcc-12-6 \
     git \
     lcov \
-    libcufft-dev-12-5 \
+    libcufft-dev-12-6 \
     libhdf5-dev \
     nvidia-opencl-dev \
     python3 \
     python3-pip \
-    python3-sphinx \
+    python3-venv \
     libssl-dev \
     uuid-dev \
     libgpgme-dev \
@@ -72,8 +72,12 @@ RUN apt-get update && \
     pkg-config && \
     apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Create a virtual environment and enable it by setting the PATH.
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
 # Install Python packages.
-RUN pip3 install numpy sphinx-rtd-theme
+RUN pip3 install numpy sphinx sphinx-rtd-theme
 
 # Copy casacore and Singularity from build stage.
 COPY --from=build /usr/local/bin/run-singularity /usr/local/bin/
