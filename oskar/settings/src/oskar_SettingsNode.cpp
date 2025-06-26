@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2022, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -7,7 +7,7 @@
 #include <cstring>
 #include <vector>
 
-using namespace std;
+using std::vector;
 
 namespace oskar {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2022, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -75,33 +75,33 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
             {
             case OSKAR_SINGLE:
             {
-                fprintf(file, SDF, ((const float*)data)[j + offset]);
+                (void) fprintf(file, SDF, ((const float*)data)[j + offset]);
                 continue;
             }
             case OSKAR_DOUBLE:
             {
-                fprintf(file, SDD, ((const double*)data)[j + offset]);
+                (void) fprintf(file, SDD, ((const double*)data)[j + offset]);
                 continue;
             }
             case OSKAR_SINGLE_COMPLEX:
             {
                 float2 d;
                 d = ((const float2*)data)[j + offset];
-                fprintf(file, SDF SDF, d.x, d.y);
+                (void) fprintf(file, SDF SDF, d.x, d.y);
                 continue;
             }
             case OSKAR_DOUBLE_COMPLEX:
             {
                 double2 d;
                 d = ((const double2*)data)[j + offset];
-                fprintf(file, SDD SDD, d.x, d.y);
+                (void) fprintf(file, SDD SDD, d.x, d.y);
                 continue;
             }
             case OSKAR_SINGLE_COMPLEX_MATRIX:
             {
                 float4c d;
                 d = ((const float4c*)data)[j + offset];
-                fprintf(file, SDF SDF SDF SDF SDF SDF SDF SDF,
+                (void) fprintf(file, SDF SDF SDF SDF SDF SDF SDF SDF,
                         d.a.x, d.a.y, d.b.x, d.b.y, d.c.x, d.c.y, d.d.x, d.d.y);
                 continue;
             }
@@ -109,18 +109,18 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
             {
                 double4c d;
                 d = ((const double4c*)data)[j + offset];
-                fprintf(file, SDD SDD SDD SDD SDD SDD SDD SDD,
+                (void) fprintf(file, SDD SDD SDD SDD SDD SDD SDD SDD,
                         d.a.x, d.a.y, d.b.x, d.b.y, d.c.x, d.c.y, d.d.x, d.d.y);
                 continue;
             }
             case OSKAR_CHAR:
             {
-                putc(((const char*)data)[j + offset], file);
+                (void) putc(((const char*)data)[j + offset], file);
                 continue;
             }
             case OSKAR_INT:
             {
-                fprintf(file, "%5d ", ((const int*)data)[j + offset]);
+                (void) fprintf(file, "%5d ", ((const int*)data)[j + offset]);
                 continue;
             }
             default:
@@ -130,7 +130,7 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
             }
             }
         }
-        putc('\n', file);
+        (void) putc('\n', file);
     }
 
     /* Free any temporary memory used by this function. */

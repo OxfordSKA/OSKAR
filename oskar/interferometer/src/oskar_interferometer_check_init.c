@@ -209,14 +209,14 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
             const char* copy_of = (
                     (type_map[i_station] == i_station) ? "" : "copy of "
             );
-            SNPRINTF(
+            (void) SNPRINTF(
                     station_name, buf_len, "s%04d (%s%s)",
                     i_station, copy_of, model_name
             );
         }
         else
         {
-            SNPRINTF(station_name, buf_len, "s%04d", i_station);
+            (void) SNPRINTF(station_name, buf_len, "s%04d", i_station);
         }
         oskar_vis_header_set_station_name(
                 h->header, i_station, station_name, status
@@ -261,18 +261,18 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
 }
 
 
-struct ThreadArgs
+struct oskar_ThreadArgs
 {
     oskar_Interferometer* h;
     DeviceData* d;
     int num_threads, thread_id, *status;
 };
-typedef struct ThreadArgs ThreadArgs;
+typedef struct oskar_ThreadArgs oskar_ThreadArgs;
 
 static void* init_device(void* arg)
 {
     int dev_loc = 0, vistype = 0, *status = 0;
-    ThreadArgs* a = (ThreadArgs*)arg;
+    oskar_ThreadArgs* a = (oskar_ThreadArgs*)arg;
     oskar_Interferometer* h = a->h;
     DeviceData* d = a->d;
     status = a->status;
@@ -368,7 +368,7 @@ static void set_up_device_data(oskar_Interferometer* h, int* status)
 {
     int i = 0, init = 1;
     oskar_Thread** threads = 0;
-    ThreadArgs* args = 0;
+    oskar_ThreadArgs* args = 0;
     if (*status) return;
 
     /* Expand the number of devices to the number of selected GPUs,
@@ -381,7 +381,7 @@ static void set_up_device_data(oskar_Interferometer* h, int* status)
     /* Set up devices in parallel. */
     const int num_devices = h->num_devices;
     threads = (oskar_Thread**) calloc(num_devices, sizeof(oskar_Thread*));
-    args = (ThreadArgs*) calloc(num_devices, sizeof(ThreadArgs));
+    args = (oskar_ThreadArgs*) calloc(num_devices, sizeof(oskar_ThreadArgs));
     for (i = 0; i < num_devices; ++i)
     {
         if (h->d[i].tmr_compute) init = 0;

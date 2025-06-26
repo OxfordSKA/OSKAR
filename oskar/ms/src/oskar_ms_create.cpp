@@ -628,14 +628,14 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
     }
     catch (AipsError& e)
     {
-        fprintf(stderr, "Caught AipsError: %s\n", e.what());
-        fflush(stderr);
+        (void) fprintf(stderr, "Caught AipsError: %s\n", e.what());
+        (void) fflush(stderr);
         oskar_ms_close(p);
         return 0;
     }
     catch (...)
     {
-        fprintf(stderr, "Unknown error creating Measurement Set!\n");
+        (void) fprintf(stderr, "Unknown error creating Measurement Set!\n");
         oskar_ms_close(p);
         return 0;
     }
@@ -683,8 +683,10 @@ oskar_MeasurementSet* oskar_ms_create(const char* file_name,
     char time_str[80];
     time_t unix_time = 0;
     unix_time = std::time(NULL);
-    std::strftime(time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)",
-            std::localtime(&unix_time));
+    (void) std::strftime(
+            time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)",
+            std::localtime(&unix_time)
+    );
 
     // Add a row to the HISTORY subtable.
     String msg = String("Measurement Set created at ") + String(time_str);

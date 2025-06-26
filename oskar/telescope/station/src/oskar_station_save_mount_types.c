@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -27,8 +27,11 @@ void oskar_station_save_mount_types(const oskar_Station* station,
     }
     type = oskar_station_element_mount_types_const(station);
     const int num_elements = oskar_station_num_elements(station);
-    for (i = 0; i < num_elements; ++i) fprintf(file, "%c\n", type[i]);
-    fclose(file);
+    for (i = 0; i < num_elements; ++i)
+    {
+        (void) fprintf(file, "%c\n", type[i]);
+    }
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2022, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -56,7 +56,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         oskar_binary_read_header(stream, &header, status);
         if (*status)
         {
-            fclose(stream);
+            (void) fclose(stream);
             return 0;
         }
     }
@@ -80,7 +80,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         }
 
         /* Write header only if the file is empty. */
-        fseek(stream, 0, SEEK_END);
+        (void) fseek(stream, 0, SEEK_END);
         if (FTELL(stream) == 0)
         {
             oskar_binary_write_header(stream, &header, status);
@@ -101,7 +101,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
     handle->crc_data = oskar_crc_create(OSKAR_CRC_32C);
 
     /* Store the contents of the header for later use. */
-    handle->bin_version = header.bin_version;
+    handle->bin_version = (int) header.bin_version;
 
     /* Finish if writing. */
     if (mode == 'w')
@@ -151,7 +151,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
             }
 
             /* Check data size is compatible. */
-            element_size = tag.magic[3];
+            element_size = (int) tag.magic[3];
             if (tag.data_type & OSKAR_MATRIX)
             {
                 element_size /= 4;
@@ -347,7 +347,7 @@ static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,
     header->bin_version = OSKAR_BINARY_FORMAT_VERSION;
 
     /* Write header to stream. */
-    rewind(stream);
+    (void) fseek(stream, 0L, SEEK_SET);
     if (fwrite(header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
     {
         *status = OSKAR_ERR_BINARY_WRITE_FAIL;
@@ -359,7 +359,7 @@ static void oskar_binary_read_header(FILE* stream, oskar_BinaryHeader* header,
         int* status)
 {
     /* Read the header from the stream. */
-    rewind(stream);
+    (void) fseek(stream, 0L, SEEK_SET);
     if (fread(header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
     {
         *status = OSKAR_ERR_BINARY_READ_FAIL;

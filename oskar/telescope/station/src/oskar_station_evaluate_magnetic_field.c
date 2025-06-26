@@ -21,7 +21,8 @@ static void igrf14syn(
         double *x,
         double *y,
         double *z,
-        double *f
+        double *f,
+        int* status
 );
 
 void oskar_station_evaluate_magnetic_field(
@@ -35,7 +36,7 @@ void oskar_station_evaluate_magnetic_field(
     const double alt = oskar_station_alt_metres(station);
     const double colat = 90.0 - (oskar_station_lat_rad(station) * 180 / M_PI);
     const double elong = oskar_station_lon_rad(station) * 180 / M_PI;
-    igrf14syn(0, year, 1, alt, colat, elong, &x, &y, &z, &f);
+    igrf14syn(0, year, 1, alt, colat, elong, &x, &y, &z, &f, status);
     /*
      * Store field components along horizontal ENU directions.
      *   X is north component
@@ -106,7 +107,8 @@ void igrf14syn(
         double *x,
         double *y,
         double *z,
-        double *f
+        double *f,
+        int* status
 )
 {
     static const double gh[3840] = {
@@ -665,6 +667,7 @@ void igrf14syn(
                 "This function will not work with a date of %.3f. "
                 "Date must be in the range 1900.0 <= date < 2035.0.\n", date
         );
+        *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
     if (date >= 2025.0)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -65,7 +65,7 @@ oskar_Sky* oskar_sky_load(const char* filename, int type, int* status)
 
     /* Free the line buffer and close the file. */
     free(line);
-    fclose(file);
+    (void) fclose(file);
 
     /* Check if an error occurred. */
     if (*status)

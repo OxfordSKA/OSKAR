@@ -41,7 +41,9 @@ oskar_Binary* oskar_vis_header_write(
     /* Write the system date and time. */
     const time_t unix_time = time(0);
     timeinfo = localtime(&unix_time);
-    strftime(time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
+    (void) strftime(
+            time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo
+    );
     oskar_binary_write(h, OSKAR_CHAR,
             OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING,
             0, 1 + strlen(time_str), time_str, status

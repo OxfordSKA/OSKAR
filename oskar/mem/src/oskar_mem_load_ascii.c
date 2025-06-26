@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2022, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -154,7 +154,7 @@ cleanup:
     free(row_data);
     free(row_defaults);
     free(mem_handle);
-    fclose(file);
+    (void) fclose(file);
     return *status ? 0 : row_index;
 }
 

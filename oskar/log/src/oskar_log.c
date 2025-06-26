@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -95,20 +95,24 @@ void oskar_log_close(oskar_Log* log)
         char time_str[80];
         const time_t unix_time = time(NULL);
         struct tm* timeinfo = localtime(&unix_time);
-        strftime(time_str, sizeof(time_str),
-                "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
+        (void) strftime(
+                time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo
+        );
         oskar_log_section(log, 'M', "OSKAR-%s ending at %s.",
                 OSKAR_VERSION_STR, time_str);
     }
-    if (log->file) fclose(log->file);
+    if (log->file)
+    {
+        (void) fclose(log->file);
+    }
     log->file = 0;
     if (!log->keep_file && strlen(log->name) > 0)
     {
         FILE* f = fopen(log->name, "r");
         if (f)
         {
-            fclose(f);
-            remove(log->name);
+            (void) fclose(f);
+            (void) remove(log->name);
         }
     }
     log->name[0] = 0;
@@ -128,7 +132,7 @@ oskar_Log* oskar_log_create(int file_priority, int term_priority)
 }
 
 
-double oskar_log_timestamp()
+double oskar_log_timestamp(void)
 {
 #if defined(OSKAR_OS_WIN)
     /* Windows-specific version. */
@@ -175,12 +179,12 @@ char* oskar_log_file_data(oskar_Log* log, size_t* size)
     if (!size || !log->file) return 0;
 
     /* Determine the size of the file. */
-    fflush(log->file);
+    (void) fflush(log->file);
     handle = fopen(log->name, "rb");
     if (!handle) return 0;
-    fseek(handle, 0, SEEK_END);
+    (void) fseek(handle, 0, SEEK_END);
     const size_t file_size = ftell(handle);
-    rewind(handle);
+    (void) fseek(handle, 0, SEEK_SET);
 
     /* Read the whole file if it's small enough. */
     const size_t max_log_size = 20000;
@@ -191,7 +195,7 @@ char* oskar_log_file_data(oskar_Log* log, size_t* size)
         if (data == 0 || fread(data, 1, file_size, handle) != file_size)
         {
             free(data);
-            fclose(handle);
+            (void) fclose(handle);
             return 0;
         }
     }
@@ -210,26 +214,28 @@ char* oskar_log_file_data(oskar_Log* log, size_t* size)
         if (data == 0 || fread(ptr, 1, len_head, handle) != len_head)
         {
             free(data);
-            fclose(handle);
+            (void) fclose(handle);
             return 0;
         }
         ptr += len_head;
 
         /* Add a message to indicate that the log has been truncated. */
+        /* Yes, I know memcpy does not null terminate.
+         * That would be bad here! So turn off the linter for this. */
+        /* NOLINTNEXTLINE */
         memcpy(ptr, message, len_message);
         ptr += len_message;
 
         /* Read the tail of the log file. */
-        fseek(handle, -len_tail, SEEK_END);
+        (void) fseek(handle, -len_tail, SEEK_END);
         if (fread(ptr, 1, len_tail, handle) != len_tail)
         {
             free(data);
-            fclose(handle);
+            (void) fclose(handle);
             return 0;
         }
-        ptr += len_tail;
     }
-    fclose(handle);
+    (void) fclose(handle);
     return data;
 }
 
@@ -381,7 +387,9 @@ void init_log(oskar_Log* log)
     /* Construct log file name root. */
     const time_t unix_time = time(NULL);
     timeinfo = localtime(&unix_time);
-    strftime(time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
+    (void) strftime(
+            time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo
+    );
     timeinfo->tm_mon += 1;
     timeinfo->tm_year += 1900;
     n = SNPRINTF(fname1, sizeof(fname1),
@@ -429,8 +437,8 @@ void init_log(oskar_Log* log)
             FILE* f = fopen(log->name, "rb");
             if (f)
             {
-                fclose(f);
-                remove(log->name);
+                (void) fclose(f);
+                (void) remove(log->name);
             }
         }
     }
@@ -487,13 +495,13 @@ static void write_log(oskar_Log* log, int to_file, char priority, char code,
         FILE* stream = (priority == 'E' ? stderr : stdout);
         print_entry(log, stream,
                 priority, code, depth, prefix, format, args);
-        fflush(stream);
+        (void) fflush(stream);
     }
     else if (to_file && (priority_level <= log->file_priority))
     {
         print_entry(log, log->file,
                 priority, code, depth, prefix, format, args);
-        fflush(log->file);
+        (void) fflush(log->file);
     }
 }
 
@@ -528,25 +536,33 @@ static void print_entry(oskar_Log* log, FILE* stream, char priority, char code,
     /* Check if depth signifies a line. */
     if (depth == OSKAR_LOG_LINE)
     {
-        fprintf(stream, "%c|", get_entry_code(priority));
-        for (i = 0; i < 67; ++i) fprintf(stream, "%c", code);
-        fprintf(stream, "\n");
+        (void) fprintf(stream, "%c|", get_entry_code(priority));
+        for (i = 0; i < 67; ++i)
+        {
+            (void) fprintf(stream, "%c", code);
+        }
+        (void) fprintf(stream, "\n");
         return;
     }
 
     /* Print the message code. */
-    fprintf(stream, "%c|", code);
+    (void) fprintf(stream, "%c|", code);
 
 #if WRITE_TIMESTAMP
     /* Print the timestamp. */
-    fprintf(stream, "%6.1f ", oskar_log_timestamp() - log->timestamp_start);
+    (void) fprintf(
+            stream, "%6.1f ", oskar_log_timestamp() - log->timestamp_start
+    );
 #endif
 
     /* Print leading whitespace and symbol for this depth. */
     if (depth >= 0) {
         char list_symbols[3] = {'+', '-', '*'};
-        for (i = 0; i < depth; ++i) fprintf(stream, "  ");
-        fprintf(stream, " %c ", list_symbols[depth % 3]);
+        for (i = 0; i < depth; ++i)
+        {
+            (void) fprintf(stream, "  ");
+        }
+        (void) fprintf(stream, " %c ", list_symbols[depth % 3]);
     }
     else {
         /* Negative depth codes with special meaning */
@@ -556,8 +572,11 @@ static void print_entry(oskar_Log* log, FILE* stream, char priority, char code,
         case OSKAR_LOG_SECTION:
             break;
         default: /* Negative depth means no symbol. */
-            fprintf(stream, " ");
-            for (i = 0; i < abs(depth); ++i) fprintf(stream, "  ");
+            (void) fprintf(stream, " ");
+            for (i = 0; i < abs(depth); ++i)
+            {
+                (void) fprintf(stream, "  ");
+            }
             break;
         }
     }
@@ -566,20 +585,29 @@ static void print_entry(oskar_Log* log, FILE* stream, char priority, char code,
     if (prefix && *prefix > 0)
     {
         /* Print prefix. */
-        fprintf(stream, "%s", prefix);
+        (void) fprintf(stream, "%s", prefix);
 
         /* Print trailing whitespace if format string is present. */
         if (format && *format > 0)
         {
             const int n = abs(2 * depth + 4 + (int)strlen(prefix));
-            for (i = 0; i < width - n; ++i) fprintf(stream, " ");
-            if (depth != OSKAR_LOG_SECTION) fprintf(stream, ": ");
+            for (i = 0; i < width - n; ++i)
+            {
+                (void) fprintf(stream, " ");
+            }
+            if (depth != OSKAR_LOG_SECTION)
+            {
+                (void) fprintf(stream, ": ");
+            }
         }
     }
 
     /* Print main message from format string and arguments. */
-    if (format && *format > 0) vfprintf(stream, format, args);
-    fprintf(stream, "\n");
+    if (format && *format > 0)
+    {
+        (void) vfprintf(stream, format, args);
+    }
+    (void) fprintf(stream, "\n");
 }
 
 /* Returns the enumerated priority level for the given message code.

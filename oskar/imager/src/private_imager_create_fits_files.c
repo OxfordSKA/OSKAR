@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -49,27 +49,38 @@ void oskar_imager_create_fits_files(oskar_Imager* h, int* status)
         switch (h->im_type)
         {
         case OSKAR_IMAGE_TYPE_STOKES:
-            SNPRINTF(f, sizeof(f), "%s_%s.fits", h->output_root, a[i]); break;
+            (void) SNPRINTF(f, sizeof(f), "%s_%s.fits", h->output_root, a[i]);
+            break;
         case OSKAR_IMAGE_TYPE_I:
-            SNPRINTF(f, sizeof(f), "%s_I.fits", h->output_root); break;
+            (void) SNPRINTF(f, sizeof(f), "%s_I.fits", h->output_root);
+            break;
         case OSKAR_IMAGE_TYPE_Q:
-            SNPRINTF(f, sizeof(f), "%s_Q.fits", h->output_root); break;
+            (void) SNPRINTF(f, sizeof(f), "%s_Q.fits", h->output_root);
+            break;
         case OSKAR_IMAGE_TYPE_U:
-            SNPRINTF(f, sizeof(f), "%s_U.fits", h->output_root); break;
+            (void) SNPRINTF(f, sizeof(f), "%s_U.fits", h->output_root);
+            break;
         case OSKAR_IMAGE_TYPE_V:
-            SNPRINTF(f, sizeof(f), "%s_V.fits", h->output_root); break;
+            (void) SNPRINTF(f, sizeof(f), "%s_V.fits", h->output_root);
+            break;
         case OSKAR_IMAGE_TYPE_LINEAR:
-            SNPRINTF(f, sizeof(f), "%s_%s.fits", h->output_root, b[i]); break;
+            (void) SNPRINTF(f, sizeof(f), "%s_%s.fits", h->output_root, b[i]);
+            break;
         case OSKAR_IMAGE_TYPE_XX:
-            SNPRINTF(f, sizeof(f), "%s_XX.fits", h->output_root); break;
+            (void) SNPRINTF(f, sizeof(f), "%s_XX.fits", h->output_root);
+            break;
         case OSKAR_IMAGE_TYPE_XY:
-            SNPRINTF(f, sizeof(f), "%s_XY.fits", h->output_root); break;
+            (void) SNPRINTF(f, sizeof(f), "%s_XY.fits", h->output_root);
+            break;
         case OSKAR_IMAGE_TYPE_YX:
-            SNPRINTF(f, sizeof(f), "%s_YX.fits", h->output_root); break;
+            (void) SNPRINTF(f, sizeof(f), "%s_YX.fits", h->output_root);
+            break;
         case OSKAR_IMAGE_TYPE_YY:
-            SNPRINTF(f, sizeof(f), "%s_YY.fits", h->output_root); break;
+            (void) SNPRINTF(f, sizeof(f), "%s_YY.fits", h->output_root);
+            break;
         case OSKAR_IMAGE_TYPE_PSF:
-            SNPRINTF(f, sizeof(f), "%s_PSF.fits", h->output_root); break;
+            (void) SNPRINTF(f, sizeof(f), "%s_PSF.fits", h->output_root);
+            break;
         default:
             *status = OSKAR_ERR_INVALID_ARGUMENT;
             break;
@@ -103,8 +114,8 @@ fitsfile* create_fits_file(const char* filename, int precision,
     t = fopen(filename, "rb");
     if (t)
     {
-        fclose(t);
-        remove(filename);
+        (void) fclose(t);
+        (void) remove(filename);
     }
     naxes[0]  = width;
     naxes[1]  = height;

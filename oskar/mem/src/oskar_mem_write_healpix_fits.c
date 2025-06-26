@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -50,7 +50,7 @@ void oskar_mem_write_healpix_fits(oskar_Mem* data, const char* filename,
     {
         if (overwrite)
         {
-            remove(filename);
+            (void) remove(filename);
             fits_create_file(&fptr, filename, status);
         }
         else

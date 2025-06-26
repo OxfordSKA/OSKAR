@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -59,11 +59,11 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
             *status = OSKAR_ERR_FILE_IO;
             return;
         }
-        fprintf(file, "%.12f, %.12f, %.12f\n",
+        (void) fprintf(file, "%.12f, %.12f, %.12f\n",
                 oskar_telescope_lon_rad(telescope) * 180.0 / M_PI,
                 oskar_telescope_lat_rad(telescope) * 180.0 / M_PI,
                 oskar_telescope_alt_metres(telescope));
-        fclose(file);
+        (void) fclose(file);
 
         /* Write the station coordinates. */
         path = oskar_dir_get_path(dir_path, "layout.txt");
@@ -77,7 +77,7 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
         oskar_mem_save_ascii(file, 1, 0,
                 oskar_telescope_num_stations(telescope), status,
                 oskar_telescope_station_type_map_const(telescope));
-        fclose(file);
+        (void) fclose(file);
 
         /* Get the number of stations. */
         num_stations = oskar_telescope_num_station_models(telescope);
@@ -168,7 +168,7 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
         /* Get station name, and a pointer to the station to save. */
         const oskar_Station* s = 0;
         char station_name[128], *path = 0;
-        sprintf(station_name, "level%1d_%03d", depth, i);
+        (void) sprintf(station_name, "level%1d_%03d", depth, i);
         s = (depth == 0) ? oskar_telescope_station_const(telescope, i) :
                 oskar_station_child_const(station, i);
 

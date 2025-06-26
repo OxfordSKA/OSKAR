@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -18,7 +18,7 @@ int oskar_file_exists(const char* filename)
     stream = fopen(filename, "r");
     if (stream)
     {
-        fclose(stream);
+        (void) fclose(stream);
         return 1;
     }
     return 0;

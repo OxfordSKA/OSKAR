@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, The OSKAR Developers.
+ * Copyright (c) 2019-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -27,7 +27,7 @@ void oskar_station_save_cable_length_error(const oskar_Station* station,
     oskar_mem_save_ascii(file, 1, 0, oskar_station_num_elements(station),
             status,
             oskar_station_element_cable_length_error_metres_const(station, feed));
-    fclose(file);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

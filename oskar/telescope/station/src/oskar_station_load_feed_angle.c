@@ -80,7 +80,7 @@ void oskar_station_load_feed_angle(oskar_Station* station, int feed,
 
     /* Free the line buffer and close the file. */
     free(line);
-    fclose(file);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

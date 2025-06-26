@@ -39,8 +39,8 @@ static oskar_MeasurementSet* oskar_ms_open_private(
     }
     catch (AipsError& e)
     {
-        fprintf(stderr, "Caught AipsError: %s\n", e.what());
-        fflush(stderr);
+        (void) fprintf(stderr, "Caught AipsError: %s\n", e.what());
+        (void) fflush(stderr);
         oskar_ms_close(p);
         return 0;
     }
@@ -53,10 +53,12 @@ static oskar_MeasurementSet* oskar_ms_open_private(
     // Refuse to open if there is more than one spectral window.
     if (num_spectral_windows != 1)
     {
-        fprintf(stderr, "OSKAR can read Measurement Sets with one spectral "
+        (void) fprintf(
+                stderr, "OSKAR can read Measurement Sets with one spectral "
                 "window only. Use 'split' or 'mstransform' in CASA to select "
-                "the spectral window first.\n");
-        fflush(stderr);
+                "the spectral window first.\n"
+        );
+        (void) fflush(stderr);
         oskar_ms_close(p);
         return 0;
     }
@@ -64,10 +66,12 @@ static oskar_MeasurementSet* oskar_ms_open_private(
     // Refuse to open if there is more than one field.
     if (num_fields != 1)
     {
-        fprintf(stderr, "OSKAR can read Measurement Sets with one target "
+        (void) fprintf(
+                stderr, "OSKAR can read Measurement Sets with one target "
                 "field only. Use 'split' or 'mstransform' in CASA to select "
-                "the target field first.\n");
-        fflush(stderr);
+                "the target field first.\n"
+        );
+        (void) fflush(stderr);
         oskar_ms_close(p);
         return 0;
     }

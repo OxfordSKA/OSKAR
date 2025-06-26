@@ -336,7 +336,7 @@ void oskar_interferometer_set_output_measurement_set(oskar_Interferometer* h,
     }
     else
     {
-        SNPRINTF(h->ms_name, buffer_size, "%s.MS", filename);
+        (void) SNPRINTF(h->ms_name, buffer_size, "%s.MS", filename);
     }
 }
 

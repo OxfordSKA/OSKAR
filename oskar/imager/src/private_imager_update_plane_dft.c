@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -23,14 +23,14 @@ extern "C" {
 
 static void* run_blocks(void* arg);
 
-struct ThreadArgs
+struct oskar_ThreadArgs
 {
     oskar_Imager* h;
     oskar_Mem *plane;
     const oskar_Mem *uu, *vv, *ww, *amp, *weight;
     int thread_id, num_vis;
 };
-typedef struct ThreadArgs ThreadArgs;
+typedef struct oskar_ThreadArgs oskar_ThreadArgs;
 
 void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
@@ -40,7 +40,7 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
     size_t i = 0, num_pixels = 0;
     oskar_Mem* plane_ptr = 0;
     oskar_Thread** threads = 0;
-    ThreadArgs* args = 0;
+    oskar_ThreadArgs* args = 0;
     if (*status) return;
 
     /* Check the image plane. */
@@ -73,7 +73,7 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, size_t num_vis,
     /* Set up worker threads. */
     const size_t num_threads = (size_t) (h->num_devices);
     threads = (oskar_Thread**) calloc(num_threads, sizeof(oskar_Thread*));
-    args = (ThreadArgs*) calloc(num_threads, sizeof(ThreadArgs));
+    args = (oskar_ThreadArgs*) calloc(num_threads, sizeof(oskar_ThreadArgs));
     for (i = 0; i < num_threads; ++i)
     {
         args[i].h = h;
@@ -132,10 +132,10 @@ static void* run_blocks(void* arg)
     int dev_loc = OSKAR_CPU, *status = 0;
 
     /* Get thread function arguments. */
-    h = ((ThreadArgs*)arg)->h;
-    const int thread_id = ((ThreadArgs*)arg)->thread_id;
-    const int num_vis = ((ThreadArgs*)arg)->num_vis;
-    plane = ((ThreadArgs*)arg)->plane;
+    h = ((oskar_ThreadArgs*)arg)->h;
+    const int thread_id = ((oskar_ThreadArgs*)arg)->thread_id;
+    const int num_vis = ((oskar_ThreadArgs*)arg)->num_vis;
+    plane = ((oskar_ThreadArgs*)arg)->plane;
     status = &(h->status);
 
     /* Set the device used by the thread. */
@@ -146,13 +146,19 @@ static void* run_blocks(void* arg)
     }
 
     /* Copy visibility data to device. */
-    uu = oskar_mem_create_copy(((ThreadArgs*)arg)->uu, dev_loc, status);
-    vv = oskar_mem_create_copy(((ThreadArgs*)arg)->vv, dev_loc, status);
-    amp = oskar_mem_create_copy(((ThreadArgs*)arg)->amp, dev_loc, status);
-    weight = oskar_mem_create_copy(((ThreadArgs*)arg)->weight, dev_loc, status);
+    uu = oskar_mem_create_copy(((oskar_ThreadArgs*)arg)->uu, dev_loc, status);
+    vv = oskar_mem_create_copy(((oskar_ThreadArgs*)arg)->vv, dev_loc, status);
+    amp = oskar_mem_create_copy(
+            ((oskar_ThreadArgs*)arg)->amp, dev_loc, status
+    );
+    weight = oskar_mem_create_copy(
+            ((oskar_ThreadArgs*)arg)->weight, dev_loc, status
+    );
     if (h->algorithm == OSKAR_ALGORITHM_DFT_3D)
     {
-        ww = oskar_mem_create_copy(((ThreadArgs*)arg)->ww, dev_loc, status);
+        ww = oskar_mem_create_copy(
+                ((oskar_ThreadArgs*)arg)->ww, dev_loc, status
+        );
     }
 
 #ifdef _OPENMP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -19,7 +19,7 @@ void oskar_binary_free(oskar_Binary* handle)
     /* Close the file. */
     if (handle->stream)
     {
-        fclose(handle->stream);
+        (void) fclose(handle->stream);
     }
 
     /* Free string data. */

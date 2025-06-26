@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -55,12 +55,14 @@ void oskar_telescope_save_layout(const oskar_Telescope* telescope,
     }
 
     /* Save the position of each station. */
-    fprintf(file, "# Number of stations  = %i\n", num_stations);
-    fprintf(file, "# Longitude [radians] = %f\n", telescope->lon_rad);
-    fprintf(file, "# Latitude [radians]  = %f\n", telescope->lat_rad);
-    fprintf(file, "# Altitude [metres]   = %f\n", telescope->alt_metres);
-    fprintf(file, "# Local horizontal x (east), y (north), z (up) [metres], "
-            "delta x, delta y, delta z [metres]\n");
+    (void) fprintf(file, "# Number of stations  = %i\n", num_stations);
+    (void) fprintf(file, "# Longitude [radians] = %f\n", telescope->lon_rad);
+    (void) fprintf(file, "# Latitude [radians]  = %f\n", telescope->lat_rad);
+    (void) fprintf(file, "# Altitude [metres]   = %f\n", telescope->alt_metres);
+    (void) fprintf(
+            file, "# Local horizontal x (east), y (north), z (up) [metres], "
+            "delta x, delta y, delta z [metres]\n"
+    );
     if (type == OSKAR_DOUBLE)
     {
         const double *x_ = 0, *y_ = 0, *z_ = 0, *xs_ = 0, *ys_ = 0, *zs_ = 0;
@@ -75,8 +77,10 @@ void oskar_telescope_save_layout(const oskar_Telescope* telescope,
         {
             double x = 0.0, y = 0.0, z = 0.0;
             x = x_[i]; y = y_[i]; z = z_[i];
-            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f\n",
-                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z));
+            (void) fprintf(
+                    file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f\n",
+                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z)
+            );
         }
     }
     else if (type == OSKAR_SINGLE)
@@ -93,13 +97,15 @@ void oskar_telescope_save_layout(const oskar_Telescope* telescope,
         {
             float x = 0.0, y = 0.0, z = 0.0;
             x = x_[i]; y = y_[i]; z = z_[i];
-            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f\n",
-                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z));
+            (void) fprintf(
+                    file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f\n",
+                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z)
+            );
         }
     }
 
     /* Close the file. */
-    fclose(file);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

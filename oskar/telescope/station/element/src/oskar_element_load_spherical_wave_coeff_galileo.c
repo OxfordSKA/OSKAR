@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, The OSKAR Developers.
+ * Copyright (c) 2023-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -274,7 +274,7 @@ void oskar_element_load_spherical_wave_coeff_galileo(oskar_Element* data,
 
     /* Free memory. */
     free(line);
-    fclose(file);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

@@ -58,19 +58,19 @@ static void record_timing(oskar_BeamPattern* h);
 static unsigned int disp_width(unsigned int value);
 
 
-struct ThreadArgs
+struct oskar_ThreadArgs
 {
     oskar_BeamPattern* h;
     int num_threads, thread_id;
 };
-typedef struct ThreadArgs ThreadArgs;
+typedef struct oskar_ThreadArgs oskar_ThreadArgs;
 
 void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
 {
     int i = 0;
     oskar_Timer* tmr = 0;
     oskar_Thread** threads = 0;
-    ThreadArgs* args = 0;
+    oskar_ThreadArgs* args = 0;
     if (*status || !h) return;
 
     /* Check root name exists. */
@@ -90,7 +90,7 @@ void oskar_beam_pattern_run(oskar_BeamPattern* h, int* status)
     const int num_threads = h->num_devices + 1;
     oskar_barrier_set_num_threads(h->barrier, num_threads);
     threads = (oskar_Thread**) calloc(num_threads, sizeof(oskar_Thread*));
-    args = (ThreadArgs*) calloc(num_threads, sizeof(ThreadArgs));
+    args = (oskar_ThreadArgs*) calloc(num_threads, sizeof(oskar_ThreadArgs));
     for (i = 0; i < num_threads; ++i)
     {
         args[i].h = h;
@@ -183,10 +183,10 @@ static void* run_blocks(void* arg)
     int cp = 0, tp = 0, fp = 0;
 
     /* Get thread function arguments. */
-    h = ((ThreadArgs*)arg)->h;
+    h = ((oskar_ThreadArgs*)arg)->h;
     status = &(h->status);
-    const int num_threads = ((ThreadArgs*)arg)->num_threads;
-    const int thread_id = ((ThreadArgs*)arg)->thread_id;
+    const int num_threads = ((oskar_ThreadArgs*)arg)->num_threads;
+    const int thread_id = ((oskar_ThreadArgs*)arg)->thread_id;
     const int device_id = thread_id - 1;
 
 #ifdef _OPENMP

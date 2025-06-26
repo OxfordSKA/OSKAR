@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, The OSKAR Developers.
+ * Copyright (c) 2018-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -9,7 +9,8 @@
 #include <vector>
 #include <string>
 
-using namespace std;
+using std::string;
+using std::vector;
 
 namespace oskar {
 
@@ -32,7 +33,7 @@ OptionParser::OptionParser(const char* title, const char* ver,
     p->footer =
             "\n" + string(79, '-') + "\n"
             "OSKAR (version " + ver + ")\n"
-            "Copyright (c) 2022, The OSKAR Developers.\n"
+            "Copyright (c) 2025, The OSKAR Developers.\n"
             "This program is free and without warranty.\n"
             "" + string(79, '-') + "\n";
     set_version(ver, false);
@@ -128,12 +129,12 @@ bool OptionParser::check_options(int argc, char** argv)
     }
     if (is_set("--version"))
     {
-        cout << p->version_ << endl;
+        std::cout << p->version_ << std::endl;
         return false;
     }
     if (is_set("--settings"))
     {
-        cout << string(p->settings_) << endl;
+        std::cout << string(p->settings_) << std::endl;
         return false;
     }
     vector<string> bad_opts;
@@ -166,12 +167,12 @@ bool OptionParser::check_options(int argc, char** argv)
 
 void OptionParser::error(const char* format, ...) // NOLINT
 {
-    cerr << "ERROR:\n  ";
+    std::cerr << "ERROR:\n  ";
     va_list args;
     va_start(args, format);
     vprintf(format, args);
     va_end(args);
-    cerr << "\n\n";
+    std::cerr << "\n\n";
     print_usage();
 }
 
@@ -257,7 +258,7 @@ void OptionParser::print_usage()
     }
     // TODO(BM) overload here rather than editing the library header...!
     p->getUsage(usage);
-    cout << usage;
+    std::cout << usage;
 }
 
 int OptionParser::num_args() const

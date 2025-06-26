@@ -58,7 +58,7 @@ void oskar_telescope_load_cable_length_error(
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
     }
     free(line);
-    fclose(file);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

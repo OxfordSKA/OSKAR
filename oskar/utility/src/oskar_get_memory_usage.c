@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2022, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -118,13 +118,15 @@ size_t oskar_get_memory_usage(void)
     FILE* file = fopen("/proc/self/status", "r");
     size_t result = 0;
     char line[128];
-    while (fgets(line, 128, file) != NULL) {
-        if (strncmp(line, "VmRSS:", 6) == 0) {
+    while (fgets(line, 128, file) != NULL)
+    {
+        if (strncmp(line, "VmRSS:", 6) == 0)
+        {
             result = parse_line(line);
             break;
         }
     }
-    fclose(file);
+    (void) fclose(file);
     /* Value in /proc/self/status is in kB. */
     return result * 1024;
 #elif defined(OSKAR_OS_MAC)
@@ -132,12 +134,16 @@ size_t oskar_get_memory_usage(void)
     mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
     if (KERN_SUCCESS != task_info(mach_task_self(), TASK_BASIC_INFO,
                                   (task_info_t)&t_info, &t_info_count))
+    {
         return 0L;
+    }
     return t_info.resident_size;
 #elif defined(OSKAR_OS_WIN)
     PROCESS_MEMORY_COUNTERS_EX pmc;
-    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc,
-            sizeof(pmc));
+    GetProcessMemoryInfo(
+            GetCurrentProcess(),
+            (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)
+    );
     SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
     return (size_t)physMemUsedByMe;
 #else

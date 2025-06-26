@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021, The OSKAR Developers.
+ * Copyright (c) 2014-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -46,12 +46,14 @@ void oskar_station_save_layout(const oskar_Station* station, int feed,
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-    fprintf(file, "# Number of elements  = %i\n", num_elements);
-    fprintf(file, "# Longitude [radians] = %f\n", station->lon_rad);
-    fprintf(file, "# Latitude [radians]  = %f\n", station->lat_rad);
-    fprintf(file, "# Altitude [metres]   = %f\n", station->alt_metres);
-    fprintf(file, "# Local horizontal x (east), y (north), z (up) [metres], "
-            "delta x, delta y, delta z [metres]\n");
+    (void) fprintf(file, "# Number of elements  = %i\n", num_elements);
+    (void) fprintf(file, "# Longitude [radians] = %f\n", station->lon_rad);
+    (void) fprintf(file, "# Latitude [radians]  = %f\n", station->lat_rad);
+    (void) fprintf(file, "# Altitude [metres]   = %f\n", station->alt_metres);
+    (void) fprintf(
+            file, "# Local horizontal x (east), y (north), z (up) [metres], "
+            "delta x, delta y, delta z [metres]\n"
+    );
     if (type == OSKAR_DOUBLE)
     {
         const double *x_ = 0, *y_ = 0, *z_ = 0, *xs_ = 0, *ys_ = 0, *zs_ = 0;
@@ -64,10 +66,11 @@ void oskar_station_save_layout(const oskar_Station* station, int feed,
 
         for (i = 0; i < num_elements; ++i)
         {
-            double x = 0.0, y = 0.0, z = 0.0;
-            x = x_[i]; y = y_[i]; z = z_[i];
-            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f\n",
-                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z));
+            const double x = x_[i], y = y_[i], z = z_[i];
+            (void) fprintf(
+                    file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f\n",
+                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z)
+            );
         }
     }
     else if (type == OSKAR_SINGLE)
@@ -82,13 +85,14 @@ void oskar_station_save_layout(const oskar_Station* station, int feed,
 
         for (i = 0; i < num_elements; ++i)
         {
-            float x = 0.0, y = 0.0, z = 0.0;
-            x = x_[i]; y = y_[i]; z = z_[i];
-            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f\n",
-                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z));
+            const float x = x_[i], y = y_[i], z = z_[i];
+            (void) fprintf(
+                    file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f\n",
+                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z)
+            );
         }
     }
-    fclose(file);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

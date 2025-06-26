@@ -6,8 +6,10 @@
 #include "utility/oskar_dir.h"
 
 #ifndef OSKAR_OS_WIN
+/* NOLINTBEGIN: Yes, these are reserved identifiers - but that's the point! */
 #define _DEFAULT_SOURCE
 #define _BSD_SOURCE
+/* NOLINTEND */
 #include <dirent.h>
 #include <errno.h>
 #include <limits.h>
@@ -77,7 +79,7 @@ int oskar_dir_file_exists(const char* dir_path, const char* file_name)
     f = fopen(path, "rb");
     if (f)
     {
-        fclose(f);
+        (void) fclose(f);
         free(path);
         return 1;
     }
@@ -106,11 +108,13 @@ char* oskar_dir_get_path(const char* dir_path, const char* item_name)
     if (!buffer) return 0;
     if (dir_path[dir_path_len - 1] == oskar_dir_separator())
     {
-        sprintf(buffer, "%s%s", dir_path, item_name);
+        (void) sprintf(buffer, "%s%s", dir_path, item_name);
     }
     else
     {
-        sprintf(buffer, "%s%c%s", dir_path, oskar_dir_separator(), item_name);
+        (void) sprintf(
+                buffer, "%s%c%s", dir_path, oskar_dir_separator(), item_name
+        );
     }
     return buffer;
 }

@@ -9,7 +9,9 @@
 #include <cstring>
 #include <iostream>
 
-using namespace std;
+using std::cerr;
+using std::endl;
+using std::string;
 
 namespace oskar {
 

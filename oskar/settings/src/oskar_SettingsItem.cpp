@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2022, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 
-using namespace std;
+using std::string;
 
 namespace oskar {
 
@@ -63,19 +63,19 @@ SettingsItem::SettingsItem(const char* key,
         SettingsValue v;
         bool ok = v.init(type_name, type_parameters);
         if (!ok) {
-            cerr << "ERROR: Failed to initialise setting (key='" << key;
-            cerr << "', type='" << type_name << "'" << ", parameters='";
-            cerr << params << "')." << endl;
+            std::cerr << "ERROR: Failed to initialise setting (key='" << key;
+            std::cerr << "', type='" << type_name << "'" << ", parameters='";
+            std::cerr << params << "')." << std::endl;
             return;
         }
         if (!def.empty())
         {
             bool default_ok = v.set_default(type_default);
             if (!default_ok) {
-                cerr << "ERROR: Failed setting default for (key='" << key;
-                cerr << "', type='" << type_name << "', default='";
-                cerr << type_default << "', type_parameters='";
-                cerr << params << "')." << endl;
+                std::cerr << "ERROR: Failed setting default for (key='" << key;
+                std::cerr << "', type='" << type_name << "', default='";
+                std::cerr << type_default << "', type_parameters='";
+                std::cerr << params << "')." << std::endl;
             }
             ok &= default_ok;
         }

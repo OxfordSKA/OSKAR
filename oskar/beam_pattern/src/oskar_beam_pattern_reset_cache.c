@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -34,7 +34,7 @@ void oskar_beam_pattern_reset_cache(oskar_BeamPattern* h, int* status)
     {
         if (h->data_products[i].text_file)
         {
-            fclose(h->data_products[i].text_file);
+            (void) fclose(h->data_products[i].text_file);
         }
         if (h->data_products[i].fits_file)
         {

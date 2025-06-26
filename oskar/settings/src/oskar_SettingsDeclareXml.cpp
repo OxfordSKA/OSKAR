@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2022, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -15,7 +15,11 @@
 #include <rapidxml.hpp>
 #include <rapidxml_print.hpp>
 
-using namespace std;
+using std::cerr;
+using std::endl;
+using std::map;
+using std::string;
+using std::vector;
 using namespace oskar;
 
 // Begin anonymous namespace for file-local helper functions.
@@ -86,7 +90,7 @@ string get_description(node* s)
     if (!n) return "";
 
     // Convert the node to a string.
-    stringstream ss;
+    std::stringstream ss;
     ss << *n;
     string desc = ss.str();
 
@@ -116,7 +120,7 @@ string get_label(node* s)
     if (!n) return "";
 
     // Convert the node to a string.
-    stringstream ss;
+    std::stringstream ss;
     ss << *n;
     string label = ss.str();
 

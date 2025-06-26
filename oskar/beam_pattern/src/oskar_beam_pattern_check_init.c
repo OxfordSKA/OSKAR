@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2022, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -365,7 +365,10 @@ static fitsfile* create_fits_file(const char* filename, int precision,
     if (*status) return 0;
 
     /* Create a new FITS file and write the image headers. */
-    if (oskar_file_exists(filename)) remove(filename);
+    if (oskar_file_exists(filename))
+    {
+        (void) remove(filename);
+    }
     imagetype = (precision == OSKAR_DOUBLE ? DOUBLE_IMG : FLOAT_IMG);
     naxes[0]  = width;
     naxes[1]  = height;
@@ -487,8 +490,10 @@ static char* construct_filename(oskar_BeamPattern* h, int data_product_type,
     name = (char*) calloc(buflen, 1);
     start += SNPRINTF(name + start, buflen - start, "%s", h->root_path);
     if (i_station >= 0)
+    {
         start += SNPRINTF(name + start, buflen - start, "_S%04d",
                 h->station_ids[i_station]);
+    }
     start += SNPRINTF(name + start, buflen - start, "_%s",
             time_average ? "TIME_AVG" : "TIME_SEP");
     start += SNPRINTF(name + start, buflen - start, "_%s",
@@ -496,12 +501,18 @@ static char* construct_filename(oskar_BeamPattern* h, int data_product_type,
     start += SNPRINTF(name + start, buflen - start, "_%s",
             data_type_to_string(data_product_type));
     if (stokes_in == 0)
+    {
         start += SNPRINTF(name + start, buflen - start, "_%s", "I");
+    }
     if (stokes_in == 1)
+    {
         start += SNPRINTF(name + start, buflen - start, "_%s", "CUSTOM");
+    }
     if (stokes_out >= 0)
+    {
         start += SNPRINTF(name + start, buflen - start, "_%s",
                 stokes_type_to_string(stokes_out));
+    }
     (void) SNPRINTF(name + start, buflen - start, ".%s", ext);
     return name;
 }
@@ -576,30 +587,34 @@ static void new_text_file(oskar_BeamPattern* h, int data_product_type,
     }
     if (i_station >= 0)
     {
-        fprintf(f, "# Beam pixel list for station %d\n",
+        (void) fprintf(f, "# Beam pixel list for station %d\n",
                 h->station_ids[i_station]);
     }
     else
     {
-        fprintf(f, "# Beam pixel list for telescope (interferometer)\n");
+        (void) fprintf(f, "# Beam pixel list for telescope (interferometer)\n");
     }
-    fprintf(f, "# Filename is '%s'\n", name);
-    fprintf(f, "# Dimension order (slowest to fastest) is:\n");
+    (void) fprintf(f, "# Filename is '%s'\n", name);
+    (void) fprintf(f, "# Dimension order (slowest to fastest) is:\n");
     if (h->average_single_axis != 'T')
     {
-        fprintf(f, "#     [pixel chunk], [time], [channel], [pixel index]\n");
+        (void) fprintf(
+                f, "#     [pixel chunk], [time], [channel], [pixel index]\n"
+        );
     }
     else
     {
-        fprintf(f, "#     [pixel chunk], [channel], [time], [pixel index]\n");
+        (void) fprintf(
+                f, "#     [pixel chunk], [channel], [time], [pixel index]\n"
+        );
     }
-    fprintf(f, "# Number of pixel chunks: %d\n", h->num_chunks);
-    fprintf(f, "# Number of times (output): %d\n",
+    (void) fprintf(f, "# Number of pixel chunks: %d\n", h->num_chunks);
+    (void) fprintf(f, "# Number of times (output): %d\n",
             time_average ? 1 : h->num_time_steps);
-    fprintf(f, "# Number of channels (output): %d\n",
+    (void) fprintf(f, "# Number of channels (output): %d\n",
             channel_average ? 1 : h->num_channels);
-    fprintf(f, "# Maximum pixel chunk size: %d\n", h->max_chunk_size);
-    fprintf(f, "# Total number of pixels: %d\n", h->num_pixels);
+    (void) fprintf(f, "# Maximum pixel chunk size: %d\n", h->max_chunk_size);
+    (void) fprintf(f, "# Total number of pixels: %d\n", h->num_pixels);
     i = data_product_index(h, data_product_type, stokes_in, stokes_out,
             i_station, time_average, channel_average);
     if (h->data_products) h->data_products[i].text_file = f;

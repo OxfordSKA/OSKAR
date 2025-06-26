@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -40,10 +40,12 @@ void oskar_sky_save(const oskar_Sky* sky, const char* filename, int* status)
     const int num_sources = oskar_sky_num_sources(sky);
 
     /* Print a helpful header. */
-    fprintf(file, "# Number of sources: %i\n", num_sources);
-    fprintf(file, "# RA (deg), Dec (deg), I (Jy), Q (Jy), U (Jy), V (Jy), "
+    (void) fprintf(file, "# Number of sources: %i\n", num_sources);
+    (void) fprintf(
+            file, "# RA (deg), Dec (deg), I (Jy), Q (Jy), U (Jy), V (Jy), "
             "Ref. freq. (Hz), Spectral index, Rotation measure (rad/m^2), "
-            "FWHM major (arcsec), FWHM minor (arcsec), Position angle (deg)\n");
+            "FWHM major (arcsec), FWHM minor (arcsec), Position angle (deg)\n"
+    );
 
     /* Print out sky model in ASCII format. */
     if (type == OSKAR_DOUBLE)
@@ -66,12 +68,14 @@ void oskar_sky_save(const oskar_Sky* sky, const char* filename, int* status)
 
         for (i = 0; i < num_sources; ++i)
         {
-            fprintf(file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,% 12.6e,"
+            (void) fprintf(
+                    file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,% 12.6e,"
                     "% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 11.6f\n",
                     ra_[i] * RAD2DEG, dec_[i] * RAD2DEG,
                     I_[i], Q_[i], U_[i], V_[i], ref_[i], sp_[i], rm_[i],
                     maj_[i] * RAD2ARCSEC, min_[i] * RAD2ARCSEC,
-                    pa_[i] * RAD2DEG);
+                    pa_[i] * RAD2DEG
+            );
         }
     }
     else if (type == OSKAR_SINGLE)
@@ -94,12 +98,14 @@ void oskar_sky_save(const oskar_Sky* sky, const char* filename, int* status)
 
         for (i = 0; i < num_sources; ++i)
         {
-            fprintf(file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,% 12.6e,"
+            (void) fprintf(
+                    file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,% 12.6e,"
                     "% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 11.6f\n",
                     ra_[i] * RAD2DEG, dec_[i] * RAD2DEG,
                     I_[i], Q_[i], U_[i], V_[i], ref_[i], sp_[i], rm_[i],
                     maj_[i] * RAD2ARCSEC, min_[i] * RAD2ARCSEC,
-                    pa_[i] * RAD2DEG);
+                    pa_[i] * RAD2DEG
+            );
         }
     }
     else
@@ -107,7 +113,7 @@ void oskar_sky_save(const oskar_Sky* sky, const char* filename, int* status)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
 
-    fclose(file);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

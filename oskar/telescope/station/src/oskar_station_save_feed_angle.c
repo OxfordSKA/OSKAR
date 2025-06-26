@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -35,10 +35,10 @@ void oskar_station_save_feed_angle(const oskar_Station* station,
     const int num_elements = oskar_station_num_elements(station);
     for (i = 0; i < num_elements; ++i)
     {
-        fprintf(file, "% 14.6f % 14.6f % 14.6f\n",
+        (void) fprintf(file, "% 14.6f % 14.6f % 14.6f\n",
                 a[i] * R2D, b[i] * R2D, c[i] * R2D);
     }
-    fclose(file);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

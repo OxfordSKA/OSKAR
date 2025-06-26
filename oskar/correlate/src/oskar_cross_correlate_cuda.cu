@@ -658,11 +658,17 @@ int correlate_version()
         if (v)
         {
             if (!strcmp(v, "OLD") || !strcmp(v, "old"))
+            {
                 ver_ = VER_OLD;
+            }
             else if (!strcmp(v, "SM") || !strcmp(v, "sm"))
+            {
                 ver_ = VER_SM;
+            }
             else if (strstr(v, "NO") || strstr(v, "no"))
+            {
                 ver_ = VER_NON_SM;
+            }
         }
         if (ver_ == 0)
         {
@@ -672,11 +678,17 @@ int correlate_version()
             cudaDeviceGetAttribute(&mi, cudaDevAttrComputeCapabilityMinor, id);
             const int compute = 10 * ma + mi;
             if (compute >= 70)
+            {
                 ver_ = VER_NON_SM;
+            }
             else if (compute >= 30)
+            {
                 ver_ = VER_SM;
+            }
             else
+            {
                 ver_ = VER_OLD;
+            }
         }
     }
     return ver_;

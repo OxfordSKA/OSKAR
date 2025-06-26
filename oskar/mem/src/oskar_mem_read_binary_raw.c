@@ -29,7 +29,7 @@ oskar_Mem* oskar_mem_read_binary_raw(const char* filename, int type,
     }
 
     /* Get the file size. */
-    fseek(stream, 0, SEEK_END);
+    (void) fseek(stream, 0, SEEK_END);
     size_bytes = ftell(stream);
 
     /* Create memory block of the right size. */
@@ -39,22 +39,22 @@ oskar_Mem* oskar_mem_read_binary_raw(const char* filename, int type,
     if (*status)
     {
         oskar_mem_free(mem, status);
-        fclose(stream);
+        (void) fclose(stream);
         return 0;
     }
 
     /* Read the data. */
-    fseek(stream, 0, SEEK_SET);
+    (void) fseek(stream, 0, SEEK_SET);
     if (fread(oskar_mem_void(mem), 1, size_bytes, stream) != size_bytes)
     {
         oskar_mem_free(mem, status);
-        fclose(stream);
+        (void) fclose(stream);
         *status = OSKAR_ERR_FILE_IO;
         return 0;
     }
 
     /* Close the input file. */
-    fclose(stream);
+    (void) fclose(stream);
 
     /* Copy to GPU memory if required. */
     if (location != OSKAR_CPU)

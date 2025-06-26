@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, The OSKAR Developers.
+ * Copyright (c) 2019-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -58,7 +58,7 @@ void oskar_station_load_cable_length_error(oskar_Station* station, int feed,
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
     }
     free(line);
-    fclose(file);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

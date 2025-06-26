@@ -606,14 +606,22 @@ int correlate_version(bool prec_double,
         if (v)
         {
             if (!strcmp(v, "OLD") || !strcmp(v, "old"))
+            {
                 ver_specified_ = VER_OLD;
+            }
             else if (!strcmp(v, "SM") || !strcmp(v, "sm"))
+            {
                 ver_specified_ = VER_SM;
+            }
             else if (strstr(v, "NO") || strstr(v, "no"))
+            {
                 ver_specified_ = VER_NON_SM;
+            }
         }
         if (ver_specified_ == VER_UNKNOWN)
+        {
             ver_specified_ = VER_NONE;
+        }
     }
     if (ver_specified_ > VER_NONE) return ver_specified_;
 

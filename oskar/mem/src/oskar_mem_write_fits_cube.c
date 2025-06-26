@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, The OSKAR Developers.
+ * Copyright (c) 2017-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -46,7 +46,7 @@ static void write_pixels(oskar_Mem* data, const char* filename, int i_hdu,
         {
             *status = 0;
             fits_close_file(f, status);
-            remove(filename);
+            (void) remove(filename);
             f = 0;
         }
     }
@@ -140,11 +140,11 @@ void oskar_mem_write_fits_cube(oskar_Mem* data, const char* root_name,
             !strcmp(&(root_name[len-5]), ".fits") ||
             !strcmp(&(root_name[len-5]), ".FITS") ))
     {
-        SNPRINTF(fname, buf_len, "%s", root_name);
+        (void) SNPRINTF(fname, buf_len, "%s", root_name);
     }
     else
     {
-        SNPRINTF(fname, buf_len, "%s.fits", root_name);
+        (void) SNPRINTF(fname, buf_len, "%s.fits", root_name);
     }
 
     /* Deal with complex data. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -14,7 +14,7 @@
 #include <sstream>
 #include <string>
 
-using namespace std;
+using std::string;
 
 namespace oskar {
 
@@ -28,7 +28,7 @@ static string trim(const string& s, const string& whitespace)
 
 struct SettingsFileHandlerIniPrivate
 {
-    ofstream file;
+    std::ofstream file;
     string group;
 };
 
@@ -49,7 +49,7 @@ char* SettingsFileHandlerIni::read(const char* file_name,
 {
     // Open the file.
     if (!file_name || strlen(file_name) == 0) return 0;
-    ifstream file;
+    std::ifstream file;
     file.open(file_name);
     if (!file) return 0;
 
@@ -63,7 +63,7 @@ char* SettingsFileHandlerIni::read(const char* file_name,
         // Check if this is a key.
         if (line.find('=') != string::npos)
         {
-            stringstream ss;
+            std::stringstream ss;
             ss.str(line);
             getline(ss, k, '=');
 
@@ -107,7 +107,7 @@ bool SettingsFileHandlerIni::read_all(SettingsTree* tree)
     if (!file_name() || strlen(file_name()) == 0) return false;
 
     // Open the file.
-    ifstream file;
+    std::ifstream file;
     file.open(file_name());
     if (!file) return false;
 
@@ -119,7 +119,7 @@ bool SettingsFileHandlerIni::read_all(SettingsTree* tree)
         // Check if this is a key.
         if (line.find('=') != string::npos)
         {
-            stringstream ss;
+            std::stringstream ss;
             ss.str(line);
             getline(ss, k, '=');
             getline(ss, v);
@@ -160,7 +160,7 @@ bool SettingsFileHandlerIni::write_all(const SettingsTree* tree)
     if (!file_name() || strlen(file_name()) == 0) return false;
 
     // Open the file.
-    p->file.open(file_name(), ofstream::trunc);
+    p->file.open(file_name(), std::ofstream::trunc);
     if (!p->file) return false;
 
     // Recursively write from the root node.
@@ -186,11 +186,11 @@ void SettingsFileHandlerIni::write(const SettingsNode* node)
                 if (group != p->group)
                 {
                     p->group = group;
-                    p->file << endl << "[" << group << "]" << endl;
+                    p->file << std::endl << "[" << group << "]" << std::endl;
                 }
                 k = k.substr(i + 1);
             }
-            p->file << k << "=" << node->value() << endl;
+            p->file << k << "=" << node->value() << std::endl;
         }
     }
     for (int i = 0; i < node->num_children(); ++i)
@@ -201,9 +201,9 @@ void SettingsFileHandlerIni::write(const SettingsNode* node)
 
 void SettingsFileHandlerIni::write_header()
 {
-    p->file << "[General]" << endl;
-    p->file << "app=" << this->app() << endl;
-    p->file << "version=" << this->version() << endl;
+    p->file << "[General]" << std::endl;
+    p->file << "app=" << this->app() << std::endl;
+    p->file << "version=" << this->version() << std::endl;
 }
 
 } // namespace oskar

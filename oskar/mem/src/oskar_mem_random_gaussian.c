@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -163,11 +163,11 @@ void oskar_mem_random_gaussian(oskar_Mem* data, unsigned int seed,
         size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
         if (type == OSKAR_SINGLE)
         {
-            k = "mem_random_gaussian_float";
+            k = "oskar_mem_random_gaussian_float";
         }
         else if (type == OSKAR_DOUBLE)
         {
-            k = "mem_random_gaussian_double";
+            k = "oskar_mem_random_gaussian_double";
         }
         else
         {

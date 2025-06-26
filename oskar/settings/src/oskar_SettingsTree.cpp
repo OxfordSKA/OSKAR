@@ -16,7 +16,11 @@
 #include <cstdlib>
 #include <cstring>
 
-using namespace std;
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
 using namespace oskar;
 
 namespace oskar {
@@ -677,9 +681,9 @@ void SettingsTree::print_from_node(const SettingsNode* node, int depth) const
     {
         const SettingsNode* child = node->child(i);
         const char* key = child->key();
-        cout << left;
+        cout << std::left;
         cout << string(depth * 2, ' ');
-        cout << setw(80 - depth * 2) << key;
+        cout << std::setw(80 - depth * 2) << key;
         cout << ". ";
         switch (child->item_type())
         {
@@ -694,9 +698,9 @@ void SettingsTree::print_from_node(const SettingsNode* node, int depth) const
                 break;
         };
         cout << " . ";
-        // cout << setw(20) << child->item().label();
-        cout << setw(16) << child->settings_value().type_name();
-        cout << setw(10) << "deps:" << child->num_dependencies();
+        // cout << std::setw(20) << child->item().label();
+        cout << std::setw(16) << child->settings_value().type_name();
+        cout << std::setw(10) << "deps:" << child->num_dependencies();
         cout << endl;
         print_from_node(child, depth + 1);
     }

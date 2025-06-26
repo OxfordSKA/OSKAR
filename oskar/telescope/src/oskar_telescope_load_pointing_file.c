@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2022, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -160,7 +160,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
     free(line);
     free(par);
     free(id);
-    fclose(file);
+    (void) fclose(file);
 }
 
 static void set_coords(oskar_Station* station, int set_recursive,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021, The OSKAR Developers.
+ * Copyright (c) 2014-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -56,7 +56,7 @@ void oskar_station_save_gain_phase(const oskar_Station* station, int feed,
 
         for (i = 0; i < num_elements; ++i)
         {
-            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f\n",
+            (void) fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f\n",
                     gain_[i], phase_[i] * R2D,
                     gain_error_[i], phase_error_[i] * R2D);
         }
@@ -72,12 +72,12 @@ void oskar_station_save_gain_phase(const oskar_Station* station, int feed,
 
         for (i = 0; i < num_elements; ++i)
         {
-            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f\n",
+            (void) fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f\n",
                     gain_[i], phase_[i] * R2D,
                     gain_error_[i], phase_error_[i] * R2D);
         }
     }
-    fclose(file);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

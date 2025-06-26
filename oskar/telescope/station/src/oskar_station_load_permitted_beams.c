@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -82,8 +82,8 @@ void oskar_station_load_permitted_beams(oskar_Station* station,
     oskar_mem_realloc(el, n, status);
 
     /* Free the line buffer and close the file. */
-    if (line) free(line);
-    fclose(file);
+    free(line);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

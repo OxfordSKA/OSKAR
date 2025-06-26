@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -428,7 +428,7 @@ static void oskar_imager_trim_and_save_kernel_cube(oskar_Imager* h,
 
     /* Write kernel cube as primary and secondary HDU. */
     fname = (char*) calloc(80, sizeof(char));
-    sprintf(fname, "oskar_w_kernel_cache_%04d.fits", num_w_planes);
+    (void) sprintf(fname, "oskar_w_kernel_cache_%04d.fits", num_w_planes);
     oskar_mem_write_fits_cube(kernel_cube, fname,
             (int) *conv_size_half, (int) *conv_size_half, num_w_planes, -1,
             status);

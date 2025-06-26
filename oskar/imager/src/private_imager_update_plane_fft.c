@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -22,7 +22,7 @@ extern "C" {
 
 static void* run_subset(void* arg);
 
-struct ThreadArgs
+struct oskar_ThreadArgs
 {
     oskar_Imager* h;
     size_t num_vis, num_skipped;
@@ -31,7 +31,7 @@ struct ThreadArgs
     double plane_norm;
     int grid_size, i_plane, thread_id;
 };
-typedef struct ThreadArgs ThreadArgs;
+typedef struct oskar_ThreadArgs oskar_ThreadArgs;
 
 void oskar_imager_update_plane_fft(oskar_Imager* h, size_t num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* amps,
@@ -97,12 +97,14 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, size_t num_vis,
     {
         int i = 0;
         oskar_Thread** threads = 0;
-        ThreadArgs* args = 0;
+        oskar_ThreadArgs* args = 0;
 
         /* Set up worker threads. */
         const int num_threads = h->num_gpus;
         threads = (oskar_Thread**) calloc(num_threads, sizeof(oskar_Thread*));
-        args = (ThreadArgs*) calloc(num_threads, sizeof(ThreadArgs));
+        args = (oskar_ThreadArgs*) calloc(
+                num_threads, sizeof(oskar_ThreadArgs)
+        );
         for (i = 0; i < num_threads; ++i)
         {
             args[i].h = h;
@@ -152,7 +154,7 @@ static void* run_subset(void* arg)
     DeviceData* d = 0;
 
     /* Get thread function arguments. */
-    ThreadArgs* a = (ThreadArgs*) arg;
+    oskar_ThreadArgs* a = (oskar_ThreadArgs*) arg;
     const int i_plane = a->i_plane;
     const int thread_id = a->thread_id;
     const size_t num_vis = a->num_vis;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -16,13 +16,13 @@
 extern "C" {
 #endif
 
-struct ThreadArgs
+struct oskar_ThreadArgs
 {
     oskar_Interferometer* h;
     DeviceData* d;
     int num_threads, thread_id, *status;
 };
-typedef struct ThreadArgs ThreadArgs;
+typedef struct oskar_ThreadArgs oskar_ThreadArgs;
 
 static void* run_blocks(void* arg)
 {
@@ -30,11 +30,11 @@ static void* run_blocks(void* arg)
     int b = 0, *status = 0;
 
     /* Get thread function arguments. */
-    h = ((ThreadArgs*)arg)->h;
-    const int num_threads = ((ThreadArgs*)arg)->num_threads;
-    const int thread_id = ((ThreadArgs*)arg)->thread_id;
+    h = ((oskar_ThreadArgs*)arg)->h;
+    const int num_threads = ((oskar_ThreadArgs*)arg)->num_threads;
+    const int thread_id = ((oskar_ThreadArgs*)arg)->thread_id;
     const int device_id = thread_id - 1;
-    status = ((ThreadArgs*)arg)->status;
+    status = ((oskar_ThreadArgs*)arg)->status;
 
 #ifdef _OPENMP
     /* Disable any nested parallelism. */
@@ -87,7 +87,7 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
 {
     int i = 0;
     oskar_Thread** threads = 0;
-    ThreadArgs* args = 0;
+    oskar_ThreadArgs* args = 0;
     if (*status || !h) return;
 
     /* Check the visibilities are going somewhere. */
@@ -116,7 +116,7 @@ void oskar_interferometer_run(oskar_Interferometer* h, int* status)
     const int num_threads = h->num_devices + 1;
     oskar_barrier_set_num_threads(h->barrier, num_threads);
     threads = (oskar_Thread**) calloc(num_threads, sizeof(oskar_Thread*));
-    args = (ThreadArgs*) calloc(num_threads, sizeof(ThreadArgs));
+    args = (oskar_ThreadArgs*) calloc(num_threads, sizeof(oskar_ThreadArgs));
     for (i = 0; i < num_threads; ++i)
     {
         args[i].h = h;

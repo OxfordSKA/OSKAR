@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021, The OSKAR Developers.
+ * Copyright (c) 2014-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -74,8 +74,8 @@ void oskar_station_load_element_types(oskar_Station* station,
     }
 
     /* Free the line buffer and close the file. */
-    if (line) free(line);
-    fclose(file);
+    free(line);
+    (void) fclose(file);
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2022, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -321,7 +321,7 @@ static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
     oskar_mem_realloc(lon, n, status);
     oskar_mem_realloc(lat, n, status);
 
-    fclose(file);
+    (void) fclose(file);
     free(line);
 }
 
