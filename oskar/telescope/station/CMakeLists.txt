@@ -62,11 +62,8 @@ set(station_SRC
     src/oskar_station_set_element_weight.c
     src/oskar_station_work.c
     src/oskar_station.cl
+    src/oskar_station.cu
 )
-
-if (CUDA_FOUND)
-    list(APPEND station_SRC src/oskar_station.cu)
-endif()
 
 # Add contents of station element subdirectory.
 add_subdirectory(element)

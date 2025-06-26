@@ -1,5 +1,5 @@
 # CMake initialisation.
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 
 # Set policies to avoid CMake warnings.
 if (POLICY CMP0042)

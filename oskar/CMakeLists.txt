@@ -3,6 +3,9 @@
 #
 
 include(oskar_build_macros)
+if (CUDAToolkit_FOUND)
+    enable_language(CUDA)
+endif()
 
 # Try to build MS library first.
 add_subdirectory(ms)
@@ -48,29 +51,25 @@ if (OpenCL_FOUND)
     OSKAR_WRAP_CL(${libname}_SRC ${cl_SRC})
 endif()
 
-if (CUDA_FOUND)
-    set(CUDA_GENERATED_OUTPUT_DIR
-        ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${libname}.dir/src)
-    cuda_add_library(${libname} ${${libname}_SRC})
-else()
-    add_library(${libname} ${${libname}_SRC})
-endif()
+# Build the main library.
+add_library(${libname} ${${libname}_SRC})
 
 # Link libraries.
-target_link_libraries(${libname} cfitsio oskar_binary Threads::Threads)
+target_link_libraries(${libname} PRIVATE cfitsio Threads::Threads)
+target_link_libraries(${libname} PUBLIC oskar_binary)
 if (WIN32)
     add_definitions(-DPSAPI_VERSION=1 -D_CRT_SECURE_NO_WARNINGS)
-    target_link_libraries(${libname} Psapi)
+    target_link_libraries(${libname} PRIVATE Psapi)
 endif()
 
 # Link with oskar_ms if we have casacore.
 if (CASACORE_FOUND)
-    target_link_libraries(${libname} oskar_ms)
+    target_link_libraries(${libname} PUBLIC oskar_ms)
 endif()
 
 # Link with HDF5 if we have it.
 if (HDF5_FOUND)
-    target_link_libraries(${libname} ${HDF5_LIBRARIES})
+    target_link_libraries(${libname} PRIVATE ${HDF5_LIBRARIES})
     if (WIN32)
         get_target_property(HDF5_lib_location ${HDF5_LIBRARIES} LOCATION)
         install(FILES ${HDF5_lib_location}
@@ -80,12 +79,12 @@ endif()
 
 # Link with OpenCL if we have it.
 if (OpenCL_FOUND)
-    target_link_libraries(${libname} ${OpenCL_LIBRARIES})
+    target_link_libraries(${libname} PRIVATE ${OpenCL_LIBRARIES})
 endif()
 
 # Link with cuFFT if we have CUDA.
-if (CUDA_FOUND)
-    target_link_libraries(${libname} ${CUDA_CUFFT_LIBRARIES})
+if (CUDAToolkit_FOUND)
+    target_link_libraries(${libname} PRIVATE CUDA::cufft CUDA::cudart)
     if (WIN32)
         file(GLOB lib_cudart_ "${CUDA_TOOLKIT_ROOT_DIR}/bin/cudart64*")
         file(GLOB lib_cufft_ "${CUDA_TOOLKIT_ROOT_DIR}/bin/cufft64*")
@@ -96,7 +95,7 @@ endif()
 
 # Link with HARP functions if available
 if (HARP_FOUND)
-    target_link_libraries(${libname} ${HARP_LIBRARY})
+    target_link_libraries(${libname} PRIVATE ${HARP_LIBRARY})
     if (WIN32)
         install(FILES ${HARP_DLL}
             DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
@@ -105,7 +104,7 @@ endif()
 
 # Link with SKA SDP functions if available
 if (ska-sdp-func_FOUND)
-    target_link_libraries(${libname} ska-sdp-func::ska_sdp_func)
+    target_link_libraries(${libname} PRIVATE ska-sdp-func::ska_sdp_func)
     if (WIN32)
         install(FILES ${SKA_SDP_FUNC_DLL}
             DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
@@ -121,10 +120,6 @@ install(TARGETS ${libname}
     LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR} COMPONENT libraries
     RUNTIME DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime
 )
-
-if (CUDA_FOUND)
-    cuda_build_clean_target()
-endif()
 
 # === Install header tree.
 if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")

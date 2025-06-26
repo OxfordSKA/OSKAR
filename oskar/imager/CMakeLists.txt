@@ -27,6 +27,7 @@ set(imager_SRC
     src/oskar_imager_update.c
     src/oskar_imager_gpu.cl
     src/oskar_imager.cl
+    src/oskar_imager.cu
     src/private_imager_composite_nearest_even.c
     src/private_imager_create_fits_files.c
     src/private_imager_filter_time.c
@@ -49,14 +50,9 @@ set(imager_SRC
     src/private_imager_weight_uniform.c
 )
 
-if (CUDA_FOUND)
-    list(APPEND imager_SRC src/oskar_imager.cu)
-endif()
-
 set(imager_SRC "${imager_SRC}" PARENT_SCOPE)
 
 # Build tests.
 if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
     add_subdirectory(test)
 endif()
-

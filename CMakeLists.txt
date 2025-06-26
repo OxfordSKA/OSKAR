@@ -3,7 +3,7 @@
 #
 
 # === Set the project name and specify the required CMake version.
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 if (APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum macOS version")
 endif()
@@ -21,11 +21,11 @@ endif()
 project(OSKAR CXX C)
 
 # === Project version.
-set(OSKAR_VERSION_ID "0x020B00")
+set(OSKAR_VERSION_ID "0x020B01")
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 11)
-set(OSKAR_VERSION_PATCH 0)
-set(OSKAR_VERSION_SUFFIX "")
+set(OSKAR_VERSION_PATCH 1)
+set(OSKAR_VERSION_SUFFIX "dev")
 
 # === Add local CMake module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake)
@@ -75,7 +75,7 @@ endif()
 
 # === Find dependencies and set definitions.
 if (FIND_CUDA OR NOT DEFINED FIND_CUDA)
-    find_package(CUDA 7.0)
+    find_package(CUDAToolkit 7.0)
 endif()
 if (FIND_OPENCL)
     if (NOT APPLE)
@@ -95,7 +95,7 @@ find_package(HDF5 QUIET)
 find_package(Threads REQUIRED)
 find_package(HARP QUIET)
 find_package(ska-sdp-func QUIET)
-if (CUDA_FOUND)
+if (CUDAToolkit_FOUND)
     add_definitions(-DOSKAR_HAVE_CUDA)
 endif()
 if (OpenCL_FOUND)

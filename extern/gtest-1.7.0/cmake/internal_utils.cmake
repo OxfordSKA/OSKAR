@@ -79,7 +79,7 @@ macro(config_compiler_and_linker)
     # whether RTTI is enabled.  Therefore we define GTEST_HAS_RTTI
     # explicitly.
     set(cxx_no_rtti_flags "-fno-rtti -DGTEST_HAS_RTTI=0")
-    set(cxx_strict_flags 
+    set(cxx_strict_flags
         "-Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-long-long")
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
     set(cxx_exception_flags "-features=except")
@@ -186,8 +186,8 @@ function(cxx_executable name dir libs)
     ${name} "${cxx_default}" "${libs}" "${dir}/${name}.cc" ${ARGN})
 endfunction()
 
-# Sets PYTHONINTERP_FOUND and PYTHON_EXECUTABLE.
-find_package(PythonInterp)
+# Sets Python3_FOUND and Python3_EXECUTABLE.
+find_package(Python3)
 
 # cxx_test_with_flags(name cxx_flags libs srcs...)
 #
@@ -215,7 +215,7 @@ endfunction()
 function(py_test name)
   # We are not supporting Python tests on Linux yet as they consider
   # all Linux environments to be google3 and try to use google3 features.
-  if (PYTHONINTERP_FOUND)
+  if (Python3_FOUND)
     # ${CMAKE_BINARY_DIR} is known at configuration time, so we can
     # directly bind it from cmake. ${CTEST_CONFIGURATION_TYPE} is known
     # only at ctest runtime (by calling ctest -c <Configuration>), so

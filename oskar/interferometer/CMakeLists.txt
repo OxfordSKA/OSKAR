@@ -23,6 +23,7 @@ set(interferometer_SRC
     src/oskar_interferometer_cpu.cl
     src/oskar_interferometer_gpu.cl
     src/oskar_interferometer.cl
+    src/oskar_interferometer.cu
     src/oskar_jones_accessors.c
     src/oskar_jones_apply_cable_length_errors.c
     src/oskar_jones_apply_station_gains.c
@@ -33,10 +34,6 @@ set(interferometer_SRC
     src/oskar_jones_set_size.c
     #src/oskar_WorkJonesZ.c
 )
-
-if (CUDA_FOUND)
-    list(APPEND interferometer_SRC src/oskar_interferometer.cu)
-endif()
 
 set(interferometer_SRC "${interferometer_SRC}" PARENT_SCOPE)
 

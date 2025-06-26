@@ -52,12 +52,9 @@ set(${name}_SRC
     src/oskar_convert_theta_phi_to_enu_directions.c
     src/oskar_convert_xyz_to_lon_lat.c
     src/oskar_convert.cl
+    src/oskar_convert.cu
     #src/oskar_evaluate_diurnal_aberration.c
     src/oskar_equation_of_equinoxes_fast.c)
-
-if (CUDA_FOUND)
-    list(APPEND ${name}_SRC src/oskar_convert.cu)
-endif()
 
 set(${name}_SRC "${${name}_SRC}" PARENT_SCOPE)
 

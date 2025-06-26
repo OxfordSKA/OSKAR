@@ -1,5 +1,5 @@
 # CMake initialisation.
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 if (POLICY CMP0045)
     cmake_policy(SET CMP0045 NEW)
 endif()

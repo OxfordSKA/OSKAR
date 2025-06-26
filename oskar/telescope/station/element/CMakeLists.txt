@@ -23,15 +23,12 @@ set(element_SRC
     src/oskar_element_load_spherical_wave_coeff_galileo.c
     src/oskar_element_resize_freq_data.c
     src/oskar_element.cl
+    src/oskar_element.cu
     src/oskar_evaluate_dipole_pattern.c
     #src/oskar_evaluate_geometric_dipole_pattern.c
     src/oskar_evaluate_spherical_wave_sum.c
     src/oskar_evaluate_spherical_wave_sum_feko.c
     src/oskar_evaluate_spherical_wave_sum_galileo.c
 )
-
-if (CUDA_FOUND)
-    list(APPEND element_SRC src/oskar_element.cu)
-endif()
 
 set(element_SRC "${element_SRC}" PARENT_SCOPE)

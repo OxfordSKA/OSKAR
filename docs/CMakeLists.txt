@@ -3,7 +3,7 @@
 #
 
 find_package(Sphinx)
-find_package(PythonInterp)
+find_package(Python3)
 
 # Define a function to add build targets for the Sphinx documentation.
 # It will create build targets based on the target root name,
@@ -15,7 +15,7 @@ find_package(PythonInterp)
 # )
 #
 function(add_sphinx_doc)
-    if (Sphinx_FOUND AND PythonInterp_FOUND)
+    if (Sphinx_FOUND AND Python3_FOUND)
         set(options)
         set(oneValueArgs TARGET_ROOT DOC_SOURCE_DIR)
         set(multiValueArgs)

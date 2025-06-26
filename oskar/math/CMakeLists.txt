@@ -35,6 +35,7 @@ set(math_SRC
     src/oskar_math_cpu.cl
     src/oskar_math_gpu.cl
     src/oskar_math.cl
+    src/oskar_math.cu
     src/oskar_matrix_multiply.c
     src/oskar_meshgrid.c
     src/oskar_prefix_sum.c
@@ -49,10 +50,6 @@ set(math_SRC
     #src/oskar_spherical_harmonic.c
     #src/oskar_sph_rotate_to_position.c
 )
-
-if (CUDA_FOUND)
-    list(APPEND math_SRC src/oskar_math.cu)
-endif()
 
 set(math_SRC "${math_SRC}" PARENT_SCOPE)
 

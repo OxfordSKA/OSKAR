@@ -39,12 +39,9 @@ set(sky_SRC
     src/oskar_sky_set_spectral_index.c
     src/oskar_sky_write.c
     src/oskar_sky.cl
+    src/oskar_sky.cu
     src/oskar_update_horizon_mask.c
 )
-
-if (CUDA_FOUND)
-    list(APPEND sky_SRC src/oskar_sky.cu)
-endif()
 
 set(sky_SRC "${sky_SRC}" PARENT_SCOPE)
 
