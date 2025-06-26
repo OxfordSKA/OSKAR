@@ -41,9 +41,9 @@ function(add_sphinx_doc)
         configure_file("${SPHINX_DOC_SOURCE_DIR}/conf.py"
             "${SPHINX_BINARY_BUILD_DIR}/conf.py" @ONLY)
 
-        # message("-- Using Python: ${PYTHON_EXECUTABLE}")
+        message("-- Using Python: ${Python3_EXECUTABLE}")
         add_custom_target(${SPHINX_TARGET_ROOT}_html
-            COMMAND "${PYTHON_EXECUTABLE}"
+            COMMAND "${Python3_EXECUTABLE}"
                 "${PROJECT_BINARY_DIR}/docs/settings/xml_to_rst.py"
             COMMAND "${SPHINX_EXECUTABLE}"
                 -M html
@@ -54,7 +54,7 @@ function(add_sphinx_doc)
             COMMENT "Building HTML documentation with Sphinx"
         )
         add_custom_target(${SPHINX_TARGET_ROOT}_pdf
-            COMMAND "${PYTHON_EXECUTABLE}"
+            COMMAND "${Python3_EXECUTABLE}"
                 "${PROJECT_BINARY_DIR}/docs/settings/xml_to_rst.py"
             COMMAND "${SPHINX_EXECUTABLE}"
                 -M latexpdf
