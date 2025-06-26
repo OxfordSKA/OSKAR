@@ -27,7 +27,7 @@ set(${name}_SRC
     src/oskar_convert_ecef_to_enu.c
     src/oskar_convert_ecef_to_geodetic_spherical.c
     src/oskar_convert_ecef_to_station_uvw.c
-    src/oskar_convert_enu_directions_to_az_el.c
+    #src/oskar_convert_enu_directions_to_az_el.c
     #src/oskar_convert_enu_directions_to_cirs_relative_directions.c
     src/oskar_convert_enu_directions_to_local_tangent_plane.c
     src/oskar_convert_enu_directions_to_relative_directions.c

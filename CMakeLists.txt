@@ -134,22 +134,20 @@ if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
         message(STATUS "INFO: Adding code coverage build target")
         include(CodeCoverage)
         set(COVERAGE_EXCLUDES
-            "${PROJECT_BINARY_DIR}/*"
-            "${PROJECT_SOURCE_DIR}/apps/*"
-            "${PROJECT_SOURCE_DIR}/extern/*"
-            "${PROJECT_SOURCE_DIR}/gui/*"
-            "${PROJECT_SOURCE_DIR}/oskar/math/src/oskar_lapack_subset.c"
-            "${PROJECT_SOURCE_DIR}/oskar/settings/extern/*"
-            "${PROJECT_SOURCE_DIR}/.*/test/.*"
-            "${PROJECT_SOURCE_DIR}/*/test/*"
-            ".*.h"
-            "*.h"
-            "/usr/*"
-            "/Applications/*"
-            "/Users/*/Qt/*"
+            "${PROJECT_SOURCE_DIR}/apps/"
+            "/extern/"
+            "/gui/"
+            "lapack_subset.c"
+            "/test/"
+            ".h"
+            "/usr/"
         )
         append_coverage_compiler_flags()
-        setup_target_for_coverage_lcov(NAME coverage EXECUTABLE ctest)
+        setup_target_for_coverage_fastcov(
+            NAME coverage
+            EXECUTABLE ctest
+            POST_CMD python3 ${PROJECT_SOURCE_DIR}/cmake/modules/lcov_cobertura.py coverage.info
+        )
     endif()
 endif()
 

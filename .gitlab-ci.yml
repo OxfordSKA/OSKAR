@@ -23,6 +23,7 @@ build-test-debug:
   before_script:
     - *ready_reports
     - nvidia-smi
+    - pip3 install fastcov # Could go into the base image at some point.
     - mkdir debug
     - cd debug/
     - cmake ../ -DCOVERAGE_REPORT=ON -DCUDA_ARCH=$CUDA_ARCH

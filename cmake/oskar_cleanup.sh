@@ -26,6 +26,7 @@ rm -rf Testing
 rm -f  Info.plist
 rm -f  install_manifest.txt
 rm -rf _CPack_Packages
+rm -rf coverage*
 
 # Remove OSKAR source module folders
 rm -rf apps
