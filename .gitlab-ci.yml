@@ -6,8 +6,9 @@ variables:
   CONTAINER_SCANNING_DISABLED: 'true'
   DEPENDENCY_SCANNING_DISABLED: 'true'
 
-image: fdulwich/oskar-ci:cuda-12.6-3
-tags: [ska-dp-default]
+default:
+  image: fdulwich/oskar-ci:cuda-12.6-3
+  tags: [ska-dp-default]
 
 stages:
   - build and test
