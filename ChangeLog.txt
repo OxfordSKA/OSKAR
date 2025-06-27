@@ -1,3 +1,9 @@
+2025-06-27  OSKAR-2.11.1
+
+    * Update build system and list of supported GPUs.
+
+    * Update Apptainer and Docker containers to Ubuntu 24.04.
+
 2025-06-25  OSKAR-2.11.0
 
     * Revert back to using (theta, phi) instead of Ludwig-3 polarisation basis
