@@ -1,3 +1,7 @@
+2025-xx-yy  OSKAR-2.11.2
+
+    * Fix to correctly link CFITSIO dependencies, required on some systems.
+
 2025-06-27  OSKAR-2.11.1
 
     * Update build system and list of supported GPUs.

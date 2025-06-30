@@ -19,6 +19,8 @@ set(cfitsio_SRC
     wcssub.c wcsutil.c zcompress.c zuncompress.c
 )
 
+find_package(ZLIB REQUIRED)
+
 if (NOT WIN32)
     # We need a thread-safe version of this library!
     find_package(Threads REQUIRED)
@@ -47,7 +49,21 @@ set(CMAKE_C_FLAGS_MINSIZEREL ${CFITSIO_FLAGS_RELEASE})
 set(CMAKE_C_FLAGS_RELWITHDEBINFO ${CFITSIO_FLAGS_RELEASE})
 
 add_library(cfitsio STATIC ${cfitsio_SRC})
-target_link_libraries(cfitsio Threads::Threads)
+
+# Math:
+target_link_libraries(cfitsio ${M_LIB})
+# zlib:
+if (ZLIB_FOUND)
+    target_include_directories(cfitsio PUBLIC ${ZLIB_INCLUDE_DIR})
+    target_link_libraries(cfitsio ${ZLIB_LIBRARIES})
+    # For cfitsio.pc.cmake:
+    set(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} -lz")
+endif()
+# PThreads:
+if (Threads_FOUND)
+    target_link_libraries(cfitsio Threads::Threads)
+endif()
+
 if (WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS -DFF_NO_UNISTD_H)
 endif()

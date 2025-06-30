@@ -21,11 +21,11 @@ endif()
 project(OSKAR CXX C)
 
 # === Project version.
-set(OSKAR_VERSION_ID "0x020B01")
+set(OSKAR_VERSION_ID "0x020B02")
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 11)
-set(OSKAR_VERSION_PATCH 1)
-set(OSKAR_VERSION_SUFFIX "")
+set(OSKAR_VERSION_PATCH 2)
+set(OSKAR_VERSION_SUFFIX "dev")
 
 # === Add local CMake module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake)
