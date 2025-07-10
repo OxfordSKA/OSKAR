@@ -34,11 +34,11 @@ if (CASACORE_FOUND)
     # (PARENT_SCOPE is no good here, as there may not be a parent.)
     set(CASACORE_FOUND TRUE CACHE BOOL "CASACORE_FOUND")
 
-    # C++14 is now required for casacore headers.
+    # C++17 is now required for casacore headers.
     include(CheckCXXCompilerFlag)
-    CHECK_CXX_COMPILER_FLAG(-std=c++14 COMPILER_SUPPORTS_CXX14)
-    if (COMPILER_SUPPORTS_CXX14)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    CHECK_CXX_COMPILER_FLAG(-std=c++17 COMPILER_SUPPORTS_CXX17)
+    if (COMPILER_SUPPORTS_CXX17)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
     endif()
 
     include_directories(${CASACORE_INCLUDE_DIR})

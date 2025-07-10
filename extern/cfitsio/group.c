@@ -22,9 +22,7 @@
 
 #if defined(WIN32) || defined(__WIN32__)
 #include <direct.h>   /* defines the getcwd function on Windows PCs */
-#endif
-
-#if defined(unix) || defined(__unix__)  || defined(__unix) || defined(HAVE_UNISTD_H)
+#else
 #include <unistd.h>  /* needed for getcwd prototype on unix machines */
 #endif
 
