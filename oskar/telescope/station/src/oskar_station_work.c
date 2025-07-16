@@ -87,6 +87,7 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
     {
         oskar_mem_free(work->beam[i], status);
     }
+    free(work->beam);
     oskar_mem_free(work->poly, status);
     oskar_mem_free(work->ee, status);
     oskar_mem_free(work->qq, status);

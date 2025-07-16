@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -430,6 +430,7 @@ void oskar_imager_finalise_plane(oskar_Imager* h,
         }
         h->corr_func = oskar_mem_convert_precision(corr_func,
                 h->imager_prec, status);
+        oskar_mem_free(corr_func, status);
     }
 
     /* FFT shift again, and apply grid correction. */
