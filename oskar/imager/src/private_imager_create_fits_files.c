@@ -138,6 +138,9 @@ fitsfile* create_fits_file(const char* filename, int precision,
 
     /* Write other headers. */
     fits_write_key_str(f, "BUNIT", "JY/BEAM", "Brightness units", status);
+    fits_write_key_dbl(
+            f, "EQUINOX", 2000, 1, "Year of coordinate system", status
+    );
     fits_write_key_dbl(f, "OBSRA", centre_deg[0], 10, "RA", status);
     fits_write_key_dbl(f, "OBSDEC", centre_deg[1], 10, "DEC", status);
     /*fits_flush_file(f, status);*/
