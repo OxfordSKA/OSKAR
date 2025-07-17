@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024, The OSKAR Developers.
+ * Copyright (c) 2022-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -607,28 +607,36 @@ void oskar_harp_load_hdf5(oskar_Harp* h, int* status)
     if (!h->num_mbf)
     {
         int feed = 0;
-        oskar_HDF5* hdf5_file = oskar_hdf5_open(h->filename, status);
+        oskar_HDF5* hdf5_file = oskar_hdf5_open(h->filename, 'r', status);
 
         /* Load the attributes. */
         const double freq = oskar_hdf5_read_attribute_double(
-                hdf5_file, "freq", status);
+                hdf5_file, 0, "freq", status
+        );
         const int num_antennas = oskar_hdf5_read_attribute_int(
-                hdf5_file, "num_ant", status);
+                hdf5_file, 0, "num_ant", status
+        );
         const int num_mbf = oskar_hdf5_read_attribute_int(
-                hdf5_file, "num_mbf", status);
+                hdf5_file, 0, "num_mbf", status
+        );
         const int max_order = oskar_hdf5_read_attribute_int(
-                hdf5_file, "max_order", status);
+                hdf5_file, 0, "max_order", status
+        );
 
         /* Load the data. */
         oskar_Mem* coeffs[] = {0, 0};
         oskar_Mem* alpha_te = oskar_hdf5_read_dataset(
-                hdf5_file, "alpha_te", 0, 0, status);
+                hdf5_file, 0, "alpha_te", 0, 0, status
+        );
         oskar_Mem* alpha_tm = oskar_hdf5_read_dataset(
-                hdf5_file, "alpha_tm", 0, 0, status);
+                hdf5_file, 0, "alpha_tm", 0, 0, status
+        );
         coeffs[0] = oskar_hdf5_read_dataset(
-                hdf5_file, "coeffs_polX", 0, 0, status);
+                hdf5_file, 0, "coeffs_polX", 0, 0, status
+        );
         coeffs[1] = oskar_hdf5_read_dataset(
-                hdf5_file, "coeffs_polY", 0, 0, status);
+                hdf5_file, 0, "coeffs_polY", 0, 0, status
+        );
         oskar_hdf5_close(hdf5_file);
         if (*status)
         {

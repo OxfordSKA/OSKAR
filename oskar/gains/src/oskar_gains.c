@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, The OSKAR Developers.
+ * Copyright (c) 2020-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -99,8 +99,9 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
     if (oskar_mem_is_matrix(gains))
     {
         /* Read gains for X polarisation. */
-        ptr_x = x = oskar_hdf5_read_hyperslab(h->hdf5_file, "gain_xpol",
-                3, offsets, sizes, status);
+        ptr_x = x = oskar_hdf5_read_hyperslab(
+                h->hdf5_file, 0, "gain_xpol", 3, offsets, sizes, status
+        );
         if (oskar_mem_precision(x) != out_prec)
         {
             ptr_x = temp_x = oskar_mem_convert_precision(x, out_prec, status);
@@ -109,12 +110,14 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
         /* Read gains for Y polarisation. */
         if (oskar_hdf5_dataset_exists(h->hdf5_file, "/gain_ypol"))
         {
-            ptr_y = y = oskar_hdf5_read_hyperslab(h->hdf5_file, "gain_ypol",
-                    3, offsets, sizes, status);
+            ptr_y = y = oskar_hdf5_read_hyperslab(
+                    h->hdf5_file, 0, "gain_ypol", 3, offsets, sizes, status
+            );
             if (oskar_mem_precision(y) != out_prec)
             {
                 ptr_y = temp_y = oskar_mem_convert_precision(
-                        y, out_prec, status);
+                        y, out_prec, status
+                );
             }
         }
         else
@@ -176,8 +179,9 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
         {
             dataset = "gain_ypol";
         }
-        ptr_x = x = oskar_hdf5_read_hyperslab(h->hdf5_file, dataset,
-                3, offsets, sizes, status);
+        ptr_x = x = oskar_hdf5_read_hyperslab(
+                h->hdf5_file, 0, dataset, 3, offsets, sizes, status
+        );
         if (oskar_mem_precision(x) != out_prec)
         {
             ptr_x = temp_x = oskar_mem_convert_precision(x, out_prec, status);
@@ -205,15 +209,18 @@ void oskar_gains_free(oskar_Gains* h, int* status)
 void oskar_gains_open_hdf5(oskar_Gains* h, const char* path, int* status)
 {
     if (*status) return;
-    h->hdf5_file = oskar_hdf5_open(path, status);
+    h->hdf5_file = oskar_hdf5_open(path, 'r', status);
 
     /* Load the frequency channel map. */
     oskar_mem_free(h->freqs, status);
-    h->freqs = oskar_hdf5_read_dataset(h->hdf5_file, "freq (Hz)", 0, 0, status);
+    h->freqs = oskar_hdf5_read_dataset(
+            h->hdf5_file, 0, "freq (Hz)", 0, 0, status
+    );
 
     /* Get the size of the gain table. */
-    oskar_hdf5_read_dataset_dims(h->hdf5_file, "gain_xpol",
-            &h->num_dims, &h->dims, status);
+    oskar_hdf5_read_dataset_dims(
+            h->hdf5_file, 0, "gain_xpol", &h->num_dims, &h->dims, status
+    );
 
     /* Check the array is 3-dimensional. */
     if (h->num_dims != 3)

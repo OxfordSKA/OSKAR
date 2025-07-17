@@ -12,6 +12,13 @@ set(${name}_SRC
     Test_Thread.cpp
     Test_Timer.cpp
 )
+
+if (HDF5_FOUND)
+    list(APPEND ${name}_SRC
+        Test_HDF5.cpp
+    )
+endif()
+
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)
 add_test(utility_test ${name})
