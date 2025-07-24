@@ -1,6 +1,13 @@
 2025-xx-yy  OSKAR-2.11.2
 
+    * Add EQUINOX keyword to header of FITS images written by the imager.
+
+    * Fix to evaluate Earth magnetic field at stations using the correct
+      station altitude (IGRF routines require altitude in km, not metres).
+
     * Fix to correctly link CFITSIO dependencies, required on some systems.
+
+    * Fix a small memory leak.
 
 2025-06-27  OSKAR-2.11.1
 

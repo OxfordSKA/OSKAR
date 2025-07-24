@@ -33,10 +33,10 @@ void oskar_station_evaluate_magnetic_field(
 {
     double x = 0., y = 0., z = 0., f = 0.;
     if (*status || !station) return;
-    const double alt = oskar_station_alt_metres(station);
+    const double alt_km = oskar_station_alt_metres(station) / 1000.0;
     const double colat = 90.0 - (oskar_station_lat_rad(station) * 180 / M_PI);
     const double elong = oskar_station_lon_rad(station) * 180 / M_PI;
-    igrf14syn(0, year, 1, alt, colat, elong, &x, &y, &z, &f, status);
+    igrf14syn(0, year, 1, alt_km, colat, elong, &x, &y, &z, &f, status);
     /*
      * Store field components along horizontal ENU directions.
      *   X is north component
