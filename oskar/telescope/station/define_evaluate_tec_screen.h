@@ -63,6 +63,8 @@ OSKAR_REGISTER_KERNEL(NAME)
 #define OSKAR_EVALUATE_TEC_SCREEN_WITH_FARADAY_ROTATION(NAME, FP, FP4c)\
 KERNEL(NAME) (OSKAR_EVALUATE_TEC_SCREEN_ARGS(FP), GLOBAL_OUT(FP4c, out))\
 {\
+    const FP inv_frequency_ghz = 1e9 * inv_frequency_hz;\
+    const FP f2 = inv_frequency_ghz * inv_frequency_ghz;\
     KERNEL_LOOP_X(int, i, 0, num_points)\
     FP4c matx;\
     FP tec = (FP) 0;\
@@ -76,7 +78,10 @@ KERNEL(NAME) (OSKAR_EVALUATE_TEC_SCREEN_ARGS(FP), GLOBAL_OUT(FP4c, out))\
         FP b = -hor_x[i] * field_x - hor_y[i] * field_y - hor_z[i] * field_z;\
         b *= ((FP) 1e-9); /* Convert from nT to Wb/m^2. */\
         /* Use equation 2 in ITU-R P.531-6. */\
-        const FP f2 = inv_frequency_hz * inv_frequency_hz;\
+        /* Note that the frequency in equation 2 is in GHz. */\
+        /* The units of TEC are supposedly in electrons/m^2, but it seems */\
+        /* they do actually mean TECU here (/10^16 electrons/m^2), */\
+        /* otherwise the values are inconsistent with those plotted. */\
         const FP faraday_angle = ((FP) 2.36e2) * b * tec * f2;\
         SINCOS(faraday_angle, sin_angle, cos_angle);\
         const FP phase = OSKAR_TEC_TO_PHASE(FP, tec, inv_frequency_hz);\

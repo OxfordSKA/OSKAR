@@ -5,6 +5,9 @@
     * Fix to evaluate Earth magnetic field at stations using the correct
       station altitude (IGRF routines require altitude in km, not metres).
 
+    * Fix to evaluate ionospheric Faraday rotation using the correct unit
+      scaling (GHz instead of Hz).
+
     * Fix to correctly link CFITSIO dependencies, required on some systems.
 
     * Fix a small memory leak.
