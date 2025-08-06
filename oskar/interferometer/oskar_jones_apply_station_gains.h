@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, The OSKAR Developers.
+ * Copyright (c) 2020-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -29,8 +29,11 @@ extern "C" {
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_jones_apply_station_gains(oskar_Jones* jones,
-        oskar_Mem* gains, int* status);
+void oskar_jones_apply_station_gains(
+        oskar_Jones* jones,
+        oskar_Mem* gains,
+        int* status
+);
 
 #ifdef __cplusplus
 }

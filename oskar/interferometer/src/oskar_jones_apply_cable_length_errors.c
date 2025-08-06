@@ -42,8 +42,8 @@ void oskar_jones_apply_cable_length_errors(
     if ((errors_x && ((int) oskar_mem_length(errors_x) < num_stations)) ||
             (errors_y && ((int) oskar_mem_length(errors_y) < num_stations)))
     {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
-        return;
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;           /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
     mem = oskar_jones_mem(jones);
     if (location == OSKAR_CPU)
@@ -80,9 +80,9 @@ void oskar_jones_apply_cable_length_errors(
                     oskar_mem_double4c(mem, status)
             );
             break;
-        default:
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            return;
+        default:                                          /* LCOV_EXCL_LINE */
+            *status = OSKAR_ERR_BAD_DATA_TYPE;            /* LCOV_EXCL_LINE */
+            return;                                       /* LCOV_EXCL_LINE */
         }
     }
     else
@@ -107,30 +107,35 @@ void oskar_jones_apply_cable_length_errors(
             k = "jones_apply_cable_length_errors_matrix_double";
             is_dbl = 1;
             break;
-        default:
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            return;
+        default:                                          /* LCOV_EXCL_LINE */
+            *status = OSKAR_ERR_BAD_DATA_TYPE;            /* LCOV_EXCL_LINE */
+            return;                                       /* LCOV_EXCL_LINE */
         }
         oskar_device_check_local_size(location, 0, local_size);
         oskar_device_check_local_size(location, 1, local_size);
         global_size[0] = oskar_device_global_size(
-                (size_t) num_sources, local_size[0]);
+                (size_t) num_sources, local_size[0]
+        );
         global_size[1] = oskar_device_global_size(
-                (size_t) num_stations, local_size[1]);
-        const oskar_Arg args[] = {
-                {INT_SZ, &num_sources},
-                {INT_SZ, &num_stations},
-                {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
-                        (const void*)&wavenumber : (const void*)&wavenumber_f
-                },
-                {INT_SZ, &apply_x},
-                {INT_SZ, &apply_y},
-                {PTR_SZ, apply_x ? oskar_mem_buffer_const(errors_x) : &nullp},
-                {PTR_SZ, apply_y ? oskar_mem_buffer_const(errors_y) : &nullp},
-                {PTR_SZ, oskar_mem_buffer(mem)}
+                (size_t) num_stations, local_size[1]
+        );
+        const oskar_Arg args[] =
+        {
+            {INT_SZ, &num_sources},
+            {INT_SZ, &num_stations},
+            {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
+                    (const void*) &wavenumber : (const void*) &wavenumber_f
+            },
+            {INT_SZ, &apply_x},
+            {INT_SZ, &apply_y},
+            {PTR_SZ, apply_x ? oskar_mem_buffer_const(errors_x) : &nullp},
+            {PTR_SZ, apply_y ? oskar_mem_buffer_const(errors_y) : &nullp},
+            {PTR_SZ, oskar_mem_buffer(mem)}
         };
-        oskar_device_launch_kernel(k, location, 2, local_size, global_size,
-                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
+        oskar_device_launch_kernel(
+                k, location, 2, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status
+        );
     }
 }
 

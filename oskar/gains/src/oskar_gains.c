@@ -10,12 +10,14 @@
 #include "log/oskar_log.h"
 #include "math/oskar_find_closest_match.h"
 
+
 oskar_Gains* oskar_gains_create(int precision)
 {
     oskar_Gains* h = (oskar_Gains*) calloc(1, sizeof(oskar_Gains));
     h->precision = precision;
     return h;
 }
+
 
 oskar_Gains* oskar_gains_create_copy(const oskar_Gains* other, int* status)
 {
@@ -40,13 +42,21 @@ oskar_Gains* oskar_gains_create_copy(const oskar_Gains* other, int* status)
     return h;
 }
 
+
 int oskar_gains_defined(const oskar_Gains* h)
 {
     return (h->hdf5_file != 0);
 }
 
-void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
-        double frequency_hz, oskar_Mem* gains, int feed, int* status)
+
+void oskar_gains_evaluate(
+        const oskar_Gains* h,
+        int time_index_sim,
+        double frequency_hz,
+        oskar_Mem* gains,
+        int feed,
+        int* status
+)
 {
     oskar_Mem *temp_gains = 0, *temp_x = 0, *temp_y = 0;
     oskar_Mem *ptr_gains = 0, *ptr_x = 0, *ptr_y = 0;
@@ -58,9 +68,9 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
     /* Check data have been loaded. */
     if (!h->freqs || !h->hdf5_file)
     {
-        oskar_log_error(0, "HDF5 file not opened.");
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-        return;
+        oskar_log_error(0, "HDF5 file not opened.");      /* LCOV_EXCL_LINE */
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;         /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
 
     /* Find the channel corresponding to this frequency. */
@@ -71,21 +81,28 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
     {
         if ((int) h->dims[0] > 1)
         {
-            oskar_log_warning(0,
-                    "Time index %d out of range of HDF5 gain table (%d)",
-                    time_index_sim, h->dims[0]);
+            oskar_log_warning(
+                    0, "Time index %d out of range "
+                    "of HDF5 gain table (%d)",
+                    time_index_sim, h->dims[0]
+            );
         }
         time_index_sim = (int) h->dims[0] - 1;
     }
     if (channel_index >= (int) h->dims[1])
     {
-        if ((int) h->dims[1] > 1)
+        /*
+         * This should never be reached, because of the "find closest match".
+         */
+        if ((int) h->dims[1] > 1)                         /* LCOV_EXCL_LINE */
         {
-            oskar_log_warning(0,
-                    "Channel index %d out of range of HDF5 gain table (%d)",
-                    channel_index, h->dims[1]);
+            oskar_log_warning(                            /* LCOV_EXCL_LINE */
+                    0, "Channel index %d out of range "   /* LCOV_EXCL_LINE */
+                    "of HDF5 gain table (%d)",            /* LCOV_EXCL_LINE */
+                    channel_index, h->dims[1]             /* LCOV_EXCL_LINE */
+            );
         }
-        channel_index = (int) h->dims[1] - 1;
+        channel_index = (int) h->dims[1] - 1;             /* LCOV_EXCL_LINE */
     }
 
     /* Get the dimensions to read. */
@@ -197,6 +214,7 @@ void oskar_gains_evaluate(const oskar_Gains* h, int time_index_sim,
     oskar_mem_free(y, status);
 }
 
+
 void oskar_gains_free(oskar_Gains* h, int* status)
 {
     if (!h) return;
@@ -205,6 +223,7 @@ void oskar_gains_free(oskar_Gains* h, int* status)
     oskar_hdf5_close(h->hdf5_file);
     free(h);
 }
+
 
 void oskar_gains_open_hdf5(oskar_Gains* h, const char* path, int* status)
 {
@@ -233,8 +252,9 @@ void oskar_gains_open_hdf5(oskar_Gains* h, const char* path, int* status)
     /* Check the frequency dimensions match. */
     if (oskar_mem_length(h->freqs) != h->dims[1])
     {
-        oskar_log_error(0,
-                "Inconsistent frequency dimensions in HDF5 gain table.");
+        oskar_log_error(
+                0, "Inconsistent frequency dimensions in HDF5 gain table."
+        );
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
     }
