@@ -544,8 +544,12 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         }
         if (num_skipped > 0)
         {
-            oskar_log_warning(h->log, "Skipped %lu visibility weights.",
-                    (unsigned long) num_skipped);
+            oskar_log_warning(                            /* LCOV_EXCL_LINE */
+                    h->log,                               /* LCOV_EXCL_LINE */
+                    "Skipped %lu visibility weights. "    /* LCOV_EXCL_LINE */
+                    "Adjust your imaging parameters!",    /* LCOV_EXCL_LINE */
+                    (unsigned long) num_skipped           /* LCOV_EXCL_LINE */
+            );
         }
 
         /* Apply (u,v) tapering to weights if required. */
@@ -586,8 +590,12 @@ void oskar_imager_update_plane(oskar_Imager* h, size_t num_vis,
         h->num_vis_processed += (num_vis - num_skipped);
         if (num_skipped > 0)
         {
-            oskar_log_warning(h->log, "Skipped %lu visibility points.",
-                    (unsigned long) num_skipped);
+            oskar_log_warning(                            /* LCOV_EXCL_LINE */
+                    h->log,                               /* LCOV_EXCL_LINE */
+                    "Skipped %lu visibility points. "     /* LCOV_EXCL_LINE */
+                    "Adjust your imaging parameters!",    /* LCOV_EXCL_LINE */
+                    (unsigned long) num_skipped           /* LCOV_EXCL_LINE */
+            );
         }
     }
 
@@ -642,8 +650,12 @@ void oskar_imager_update_weights_grid(oskar_Imager* h, size_t num_points,
         }
         if (num_skipped > 0)
         {
-            oskar_log_warning(h->log, "Skipped %lu visibility weights.",
-                    (unsigned long) num_skipped);
+            oskar_log_warning(                            /* LCOV_EXCL_LINE */
+                    h->log,                               /* LCOV_EXCL_LINE */
+                    "Skipped %lu visibility weights. "    /* LCOV_EXCL_LINE */
+                    "Adjust your imaging parameters!",    /* LCOV_EXCL_LINE */
+                    (unsigned long) num_skipped           /* LCOV_EXCL_LINE */
+            );
         }
         oskar_timer_pause(h->tmr_weights_grid);
     }

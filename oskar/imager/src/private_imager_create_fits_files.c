@@ -121,20 +121,60 @@ fitsfile* create_fits_file(const char* filename, int precision,
     naxes[1]  = height;
     naxes[2]  = num_channels;
     fits_create_file(&f, filename, status);
+    if (*status)
+    {
+        oskar_log_error(                                  /* LCOV_EXCL_LINE */
+                0,                                        /* LCOV_EXCL_LINE */
+                "Error creating FITS file '%s' "          /* LCOV_EXCL_LINE */
+                "(CFITSIO error code %d)", *status        /* LCOV_EXCL_LINE */
+        );
+        return f;                                         /* LCOV_EXCL_LINE */
+    }
     fits_create_img(f, (precision == OSKAR_DOUBLE ? DOUBLE_IMG : FLOAT_IMG),
             3, naxes, status);
     fits_set_hdrsize(f, 160, status); /* Reserve some header space for log. */
     fits_write_date(f, status);
 
     /* Write axis headers. */
-    delta = oskar_convert_fov_to_cellsize(fov_deg[0] * M_PI/180, width) * 180/M_PI;
-    write_axis_header(f, 1, "RA---SIN", "Right Ascension",
-            centre_deg[0], -delta, width / 2 + 1, 0.0, status);
-    delta = oskar_convert_fov_to_cellsize(fov_deg[1] * M_PI/180, height) * 180/M_PI;
-    write_axis_header(f, 2, "DEC--SIN", "Declination",
-            centre_deg[1], delta, height / 2 + 1, 0.0, status);
-    write_axis_header(f, 3, "FREQ", "Frequency",
-            start_freq_hz, delta_freq_hz, 1.0, 0.0, status);
+    delta = (180.0 / M_PI) * oskar_convert_fov_to_cellsize(
+            fov_deg[0] * M_PI / 180.0, width
+    );
+    write_axis_header(
+            f, 1, "RA---SIN", "Right Ascension",
+            centre_deg[0], -delta, width / 2 + 1, 0.0, status
+    );
+    delta = (180.0 / M_PI) * oskar_convert_fov_to_cellsize(
+            fov_deg[1] * M_PI / 180.0, height
+    );
+    write_axis_header(
+            f, 2, "DEC--SIN", "Declination",
+            centre_deg[1], delta, height / 2 + 1, 0.0, status
+    );
+    if (*status)
+    {
+        oskar_log_error(
+                0,                                        /* LCOV_EXCL_LINE */
+                "Error writing image RA/Dec axis to "     /* LCOV_EXCL_LINE */
+                "FITS header (CFITSIO error code %d)",    /* LCOV_EXCL_LINE */
+                *status                                   /* LCOV_EXCL_LINE */
+        );
+        if (delta != delta) /* Catch NaN value. */        /* LCOV_EXCL_LINE */
+        {
+            oskar_log_error(                              /* LCOV_EXCL_LINE */
+                    0,                                    /* LCOV_EXCL_LINE */
+                    "Image pixel delta is NaN. "          /* LCOV_EXCL_LINE */
+                    "This is usually caused by trying "   /* LCOV_EXCL_LINE */
+                    "to image a field of view that is "   /* LCOV_EXCL_LINE */
+                    "too large. "                         /* LCOV_EXCL_LINE */
+                    "Adjust your imaging parameters!"     /* LCOV_EXCL_LINE */
+            );
+        }
+        return f;                                         /* LCOV_EXCL_LINE */
+    }
+    write_axis_header(
+            f, 3, "FREQ", "Frequency",
+            start_freq_hz, delta_freq_hz, 1.0, 0.0, status
+    );
 
     /* Write other headers. */
     fits_write_key_str(f, "BUNIT", "JY/BEAM", "Brightness units", status);
