@@ -1,5 +1,11 @@
 2025-xx-yy  OSKAR-2.11.2
 
+    * Support loading of coefficients for spherical wave element patterns
+      directly from HDF5 files written by FEKO.
+
+    * New setting to allow maximum order of spherical wave coefficients
+      to be specified.
+
     * Add EQUINOX keyword to header of FITS images written by the imager.
 
     * Fix to evaluate Earth magnetic field at stations using the correct

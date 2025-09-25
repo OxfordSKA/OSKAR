@@ -421,6 +421,20 @@ int oskar_telescope_max_station_size(const oskar_Telescope* model);
 OSKAR_EXPORT
 int oskar_telescope_max_station_depth(const oskar_Telescope* model);
 
+/**
+ * @brief
+ * Returns the maximum order of spherical wave coefficients to use.
+ *
+ * @details
+ * Returns the maximum order of spherical wave coefficients to use.
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The maximum order of spherical wave coefficients to use.
+ */
+OSKAR_EXPORT
+int oskar_telescope_spherical_wave_max_order(const oskar_Telescope* model);
+
 
 /* Station models. */
 
@@ -915,6 +929,23 @@ void oskar_telescope_set_noise_rms(oskar_Telescope* model,
 OSKAR_EXPORT
 void oskar_telescope_set_phase_centre(oskar_Telescope* model,
         int coord_type, double longitude_rad, double latitude_rad);
+
+/**
+ * @brief
+ * Sets the maximum order of spherical wave coefficients to load.
+ *
+ * @details
+ * For spherical wave element patterns, sets the maximum order of
+ * spherical wave coefficients to load.
+ *
+ * @param[in] model         Pointer to telescope model.
+ * @param[in] max_order     Maximum order of spherical wave to load.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_spherical_wave_max_order(
+        oskar_Telescope* model,
+        int max_order
+);
 
 /**
  * @brief

@@ -8,6 +8,10 @@
         <desc>If <b>true</b>, make use of any available numerical
             element pattern files. If numerical pattern data are
             missing, the functional type will be used instead.</desc></s>
+    <s k="max_order"><label>Maximum order of spherical wave pattern</label>
+        <type name="IntRangeExt" default="all">0,MAX,all</type>
+        <desc>For numerically-defined spherical wave patterns, the maximum
+            order of the spherical wave to load.</desc></s>
     <s k="normalise"><label>Normalise element pattern</label>
         <type name="bool" default="false" />
         <desc>If true, the amplitude of each element beam will be normalised

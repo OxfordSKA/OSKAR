@@ -64,6 +64,23 @@ OSKAR_EXPORT
 int oskar_hdf5_dataset_exists(const oskar_HDF5* handle, const char* name);
 
 /**
+ * @brief Returns the name (path) of a dataset in the file.
+ *
+ * @param[in] handle  Handle to HDF5 file.
+ * @param[in] i       Index of dataset.
+ */
+OSKAR_EXPORT
+const char* oskar_hdf5_dataset_name(const oskar_HDF5* handle, int i);
+
+/**
+ * @brief Returns the number of datasets in the HDF5 file.
+ *
+ * @param[in] handle  Handle to HDF5 file.
+ */
+OSKAR_EXPORT
+int oskar_hdf5_num_datasets(const oskar_HDF5* handle);
+
+/**
  * @brief Reads a named attribute of an object as a single integer.
  *
  * @param[in] handle         Handle to HDF5 file.

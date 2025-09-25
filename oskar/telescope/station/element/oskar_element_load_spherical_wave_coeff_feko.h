@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, The OSKAR Developers.
+ * Copyright (c) 2023-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -44,13 +44,20 @@ extern "C" {
  *
  * @param[in,out] data         Pointer to element model data structure to fill.
  * @param[in]  filename        Data file name.
+ * @param[in]  max_order       If greater than 0, the maximum order to load.
  * @param[in]  freq_hz         Frequency at which element data applies, in Hz.
  * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_element_load_spherical_wave_coeff_feko(oskar_Element* data,
-        const char* filename, double freq_hz, int* num_tmp, double** tmp,
-        int* status);
+void oskar_element_load_spherical_wave_coeff_feko(
+        oskar_Element* data,
+        const char* filename,
+        int max_order,
+        double freq_hz,
+        int* num_tmp,
+        double** tmp,
+        int* status
+);
 
 #ifdef __cplusplus
 }

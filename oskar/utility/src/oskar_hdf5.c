@@ -230,6 +230,18 @@ int oskar_hdf5_dataset_exists(const oskar_HDF5* handle, const char* name)
 }
 
 
+const char* oskar_hdf5_dataset_name(const oskar_HDF5* handle, int i)
+{
+    return handle->names[i];
+}
+
+
+int oskar_hdf5_num_datasets(const oskar_HDF5* handle)
+{
+    return handle->num_datasets;
+}
+
+
 #ifdef OSKAR_HAVE_HDF5
 static void get_data_dims(
         int num_dims,

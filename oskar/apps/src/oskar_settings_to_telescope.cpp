@@ -20,11 +20,17 @@ using oskar::SettingsTree;
 #define D2R M_PI/180.0
 
 /* Private functions. */
-static void set_station_data(oskar_Station* station, SettingsTree* s,
-        int* status);
+static void set_station_data(
+        oskar_Station* station,
+        SettingsTree* s,
+        int* status
+);
 
-oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
-        oskar_Log* log, int* status)
+oskar_Telescope* oskar_settings_to_telescope(
+        SettingsTree* s,
+        oskar_Log* log,
+        int* status
+)
 {
     if (*status || !s) return 0;
     s->clear_group();
@@ -38,22 +44,38 @@ oskar_Telescope* oskar_settings_to_telescope(SettingsTree* s,
     /* Options that affect the load. */
     if (s->contains("interferometer"))
     {
-        oskar_telescope_set_enable_noise(t,
+        oskar_telescope_set_enable_noise(
+                t,
                 s->to_int("interferometer/noise/enable", status),
-                s->to_int("interferometer/noise/seed", status));
+                s->to_int("interferometer/noise/seed", status)
+        );
     }
-    oskar_telescope_set_pol_mode(t,
-            s->to_string("telescope/pol_mode", status), status);
-    oskar_telescope_set_allow_station_beam_duplication(t,
-            s->to_int("telescope/allow_station_beam_duplication", status));
-    oskar_telescope_set_enable_numerical_patterns(t,
-            s->to_int("telescope/aperture_array/element_pattern/"
-                    "enable_numerical", status));
+    oskar_telescope_set_pol_mode(
+            t, s->to_string("telescope/pol_mode", status), status
+    );
+    oskar_telescope_set_allow_station_beam_duplication(
+            t, s->to_int("telescope/allow_station_beam_duplication", status)
+    );
+    oskar_telescope_set_enable_numerical_patterns(
+            t,
+            s->to_int(
+                    "telescope/aperture_array/element_pattern/enable_numerical",
+                    status
+            )
+    );
+    oskar_telescope_set_spherical_wave_max_order(
+            t,
+            s->to_int(
+                    "telescope/aperture_array/element_pattern/max_order",
+                    status
+            )
+    );
 
     /************************************************************************/
     /* Load telescope model folders to define the stations. */
-    oskar_telescope_load(t,
-            s->to_string("telescope/input_directory", status), log, status);
+    oskar_telescope_load(
+            t, s->to_string("telescope/input_directory", status), log, status
+    );
     if (*status) return t;
 
     /* Return if no stations were found. */

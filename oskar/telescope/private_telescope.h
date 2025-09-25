@@ -64,6 +64,7 @@ struct oskar_Telescope
     int max_station_depth;                             /* Maximum station depth. */
     int allow_station_beam_duplication;                /* True if station beam duplication is allowed. */
     int enable_numerical_patterns;                     /* True if numerical element patterns are enabled. */
+    int spherical_wave_max_order;                      /* For spherical wave element patterns, the maximum order of spherical wave to load. */
 };
 
 #ifndef OSKAR_TELESCOPE_TYPEDEF_

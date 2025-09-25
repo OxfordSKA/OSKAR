@@ -27,9 +27,15 @@ enum {
     OPTION_TM     = 1 << 4
 };
 
-void oskar_element_load_spherical_wave_coeff_feko(oskar_Element* data,
-        const char* filename, double freq_hz, int* num_tmp, double** tmp,
-        int* status)
+void oskar_element_load_spherical_wave_coeff_feko(
+        oskar_Element* data,
+        const char* filename,
+        int max_order,
+        double freq_hz,
+        int* num_tmp,
+        double** tmp,
+        int* status
+)
 {
     int i = 0, j = 0, n = 0, selector = 0, line_counter = 1;
     int offset_complex = -1, offset1 = 0, offset2 = -1;
@@ -163,10 +169,12 @@ void oskar_element_load_spherical_wave_coeff_feko(oskar_Element* data,
             *num_tmp += num_m;
             *tmp = (double*) realloc(*tmp, *num_tmp * sizeof(double));
         }
-        const int num_read = (int)oskar_string_to_array_d(
-                line, num_m, *tmp + n);
+        const int num_read = (int) oskar_string_to_array_d(
+                line, num_m, *tmp + n
+        );
         if (num_read < num_m) continue;
         n += num_m;
+        if (max_order > 0 && line_counter >= max_order) break;
         line_counter++;
     }
     if ((int)oskar_mem_length(sw) < n)

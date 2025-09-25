@@ -15,34 +15,70 @@ class TelescopeLoaderElementPattern : public oskar_TelescopeLoadAbstract
 public:
     TelescopeLoaderElementPattern();
     virtual ~TelescopeLoaderElementPattern();
-    virtual void load(oskar_Telescope* telescope, const std::string& cwd,
-            int num_subdirs, std::map<std::string, std::string>& filemap,
-            int* status);
-    virtual void load(oskar_Station* station, const std::string& cwd,
-            int num_subdirs, int depth,
-            std::map<std::string, std::string>& filemap, int* status);
+    virtual void load(
+            oskar_Telescope* telescope,
+            const std::string& cwd,
+            int num_subdirs,
+            std::map<std::string, std::string>& filemap,
+            int* status
+    );
+    virtual void load(
+            oskar_Station* station,
+            const std::string& cwd,
+            int num_subdirs,
+            int depth,
+            std::map<std::string, std::string>& filemap,
+            int* status
+    );
     virtual std::string name() const;
 
 private:
-    void load_element_patterns(oskar_Station* station,
-            const std::map<std::string, std::string>& filemap, int* status);
-    void load_spherical_wave_data(oskar_Station* station,
+    static int ends_with(const char* str, const char* suffix);
+    void load_element_patterns(
+            oskar_Station* station,
+            const std::map<std::string, std::string>& filemap,
+            int* status
+    );
+    void load_spherical_wave_data(
+            oskar_Station* station,
             const std::vector<std::string>& keys,
-            const std::vector<std::string>& paths, int* status);
-    void load_spherical_wave_feko_data(oskar_Station* station,
+            const std::vector<std::string>& paths,
+            int* status
+    );
+    void load_spherical_wave_feko_data(
+            oskar_Station* station,
             const std::vector<std::string>& keys,
-            const std::vector<std::string>& paths, int* status);
-    void load_spherical_wave_galileo_data(oskar_Station* station,
+            const std::vector<std::string>& paths,
+            int* status
+    );
+    void load_spherical_wave_feko_h5_data(
+            oskar_Station* station,
             const std::vector<std::string>& keys,
-            const std::vector<std::string>& paths, int* status);
-    static void parse_filename(const char* s, char** buffer, size_t* buflen,
-            int* index, double* freq, int* status);
-    void update_map(std::map<std::string, std::string>& files,
-            const std::string& cwd);
+            const std::vector<std::string>& paths,
+            int* status
+    );
+    void load_spherical_wave_galileo_data(
+            oskar_Station* station,
+            const std::vector<std::string>& keys,
+            const std::vector<std::string>& paths,
+            int* status
+    );
+    static void parse_filename(
+            const char* s,
+            char** buffer,
+            size_t* buflen,
+            int* index,
+            double* freq,
+            int* status
+    );
+    void update_map(
+            std::map<std::string, std::string>& files,
+            const std::string& cwd
+    );
 
 private:
-    std::string wildcard;
     oskar_Telescope* telescope_;
+    int max_order_;
 };
 
-#endif /* OSKAR_TELESCOPE_LOADER_ELEMENT_PATTERN_H_ */
+#endif /* include guard */

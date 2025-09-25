@@ -160,6 +160,11 @@ int oskar_telescope_max_station_depth(const oskar_Telescope* model)
     return model->max_station_depth;
 }
 
+int oskar_telescope_spherical_wave_max_order(const oskar_Telescope* model)
+{
+    return model->spherical_wave_max_order;
+}
+
 
 /* Station models. */
 
@@ -505,6 +510,14 @@ void oskar_telescope_set_phase_centre(oskar_Telescope* model,
         oskar_telescope_set_station_phase_centre(model->station[i],
                 coord_type, longitude_rad, latitude_rad);
     }
+}
+
+void oskar_telescope_set_spherical_wave_max_order(
+        oskar_Telescope* model,
+        int max_order
+)
+{
+    model->spherical_wave_max_order = max_order;
 }
 
 void oskar_telescope_set_tec_screen_height(oskar_Telescope* model,

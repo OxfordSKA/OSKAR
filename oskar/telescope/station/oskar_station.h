@@ -55,6 +55,7 @@ enum OSKAR_STATION_TYPE
 #include <telescope/station/oskar_station_load_layout.h>
 #include <telescope/station/oskar_station_load_mount_types.h>
 #include <telescope/station/oskar_station_load_permitted_beams.h>
+#include <telescope/station/oskar_station_load_spherical_wave_coeff_feko_h5.h>
 #include <telescope/station/oskar_station_override_element_cable_length_errors.h>
 #include <telescope/station/oskar_station_override_element_feed_angle.h>
 #include <telescope/station/oskar_station_override_element_gains.h>
