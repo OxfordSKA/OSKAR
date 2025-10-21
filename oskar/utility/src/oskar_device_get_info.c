@@ -20,6 +20,7 @@ extern "C" {
 
 static unsigned int oskar_get_num_cuda_cores(int major, int minor);
 
+/* LCOV_EXCL_START */
 void oskar_device_get_info_cl(oskar_Device* device)
 {
 #ifdef OSKAR_HAVE_OPENCL
@@ -93,6 +94,7 @@ void oskar_device_get_info_cl(oskar_Device* device)
 #endif
     device->init = 1;
 }
+/* LCOV_EXCL_STOP */
 
 void oskar_device_get_info_cuda(oskar_Device* device)
 {
@@ -126,8 +128,20 @@ void oskar_device_get_info_cuda(oskar_Device* device)
     device->max_local_size[1] = prop.maxThreadsDim[1];
     device->max_local_size[2] = prop.maxThreadsDim[2];
     device->max_compute_units = prop.multiProcessorCount;
+#if CUDART_VERSION < 13000
+    /* These fields were removed from the struct in CUDA 13. */
     device->max_clock_freq_kHz = prop.clockRate;
     device->memory_clock_freq_kHz = prop.memoryClockRate;
+#else
+    cudaDeviceGetAttribute(
+            &device->max_clock_freq_kHz,
+            cudaDevAttrClockRate, device->index
+    );
+    cudaDeviceGetAttribute(
+            &device->memory_clock_freq_kHz,
+            cudaDevAttrMemoryClockRate, device->index
+    );
+#endif
     device->memory_bus_width = prop.memoryBusWidth;
     device->num_registers = (unsigned int) prop.regsPerBlock;
     device->warp_size = prop.warpSize;
@@ -138,6 +152,7 @@ void oskar_device_get_info_cuda(oskar_Device* device)
     device->init = 1;
 }
 
+/* LCOV_EXCL_START */
 static unsigned int oskar_get_num_cuda_cores(int major, int minor)
 {
     switch ((major << 4) + minor)
@@ -180,6 +195,7 @@ static unsigned int oskar_get_num_cuda_cores(int major, int minor)
         return 0;
     }
 }
+/* LCOV_EXCL_STOP */
 
 #ifdef __cplusplus
 }
