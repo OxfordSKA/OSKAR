@@ -41,23 +41,12 @@ private:
     );
     void load_spherical_wave_data(
             oskar_Station* station,
-            const std::vector<std::string>& keys,
-            const std::vector<std::string>& paths,
-            int* status
-    );
-    void load_spherical_wave_feko_data(
-            oskar_Station* station,
+            int sph_wave_type,
             const std::vector<std::string>& keys,
             const std::vector<std::string>& paths,
             int* status
     );
     void load_spherical_wave_feko_h5_data(
-            oskar_Station* station,
-            const std::vector<std::string>& keys,
-            const std::vector<std::string>& paths,
-            int* status
-    );
-    void load_spherical_wave_galileo_data(
             oskar_Station* station,
             const std::vector<std::string>& keys,
             const std::vector<std::string>& paths,

@@ -19,8 +19,6 @@ set(element_SRC
     src/oskar_element_evaluate.c
     src/oskar_element_free.c
     src/oskar_element_load_spherical_wave_coeff.c
-    src/oskar_element_load_spherical_wave_coeff_feko.c
-    src/oskar_element_load_spherical_wave_coeff_galileo.c
     src/oskar_element_resize_freq_data.c
     src/oskar_element.cl
     src/oskar_element.cu

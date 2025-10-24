@@ -46,8 +46,6 @@ enum OSKAR_ELEMENT_TAPER
 #include <telescope/station/element/oskar_element_evaluate.h>
 #include <telescope/station/element/oskar_element_free.h>
 #include <telescope/station/element/oskar_element_load_spherical_wave_coeff.h>
-#include <telescope/station/element/oskar_element_load_spherical_wave_coeff_feko.h>
-#include <telescope/station/element/oskar_element_load_spherical_wave_coeff_galileo.h>
 #include <telescope/station/element/oskar_element_resize_freq_data.h>
 
 #endif /* include guard */

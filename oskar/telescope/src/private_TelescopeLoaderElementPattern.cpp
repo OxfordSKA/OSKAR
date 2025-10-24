@@ -107,10 +107,8 @@ void TelescopeLoaderElementPattern::load_element_patterns(
 
     // Get lists of all paths in the map that have keys starting with the
     // right root name.
-    vector<string> keys_sw_fit, paths_sw_fit;
-    vector<string> keys_sw_feko, paths_sw_feko;
+    vector<string> keys_sw[3], paths_sw[3]; // Original[0], FEKO[1], Galileo[2].
     vector<string> keys_sw_feko_h5, paths_sw_feko_h5;
-    vector<string> keys_sw_galileo, paths_sw_galileo;
     for (map<string, string>::const_iterator i = filemap.begin();
             i != filemap.end(); ++i)
     {
@@ -119,18 +117,18 @@ void TelescopeLoaderElementPattern::load_element_patterns(
         {
             if (key.find("_feko", 0) != string::npos)
             {
-                keys_sw_feko.push_back(key);
-                paths_sw_feko.push_back(i->second);
+                keys_sw[1].push_back(key);
+                paths_sw[1].push_back(i->second);
             }
             else if (key.find("_galileo", 0) != string::npos)
             {
-                keys_sw_galileo.push_back(key);
-                paths_sw_galileo.push_back(i->second);
+                keys_sw[2].push_back(key);
+                paths_sw[2].push_back(i->second);
             }
             else if (key.find("_wave", 0) != string::npos)
             {
-                keys_sw_fit.push_back(key);
-                paths_sw_fit.push_back(i->second);
+                keys_sw[0].push_back(key);
+                paths_sw[0].push_back(i->second);
             }
         }
         else if (ends_with(key.c_str(), "h5"))
@@ -144,11 +142,10 @@ void TelescopeLoaderElementPattern::load_element_patterns(
     }
 
     // Load fitted X, Y or scalar data.
-    load_spherical_wave_data(station, keys_sw_fit, paths_sw_fit, status);
-    load_spherical_wave_feko_data(station, keys_sw_feko, paths_sw_feko, status);
-    load_spherical_wave_galileo_data(
-            station, keys_sw_galileo, paths_sw_galileo, status
-    );
+    for (int i = 0; i < 3; ++i)
+    {
+        load_spherical_wave_data(station, i, keys_sw[i], paths_sw[i], status);
+    }
     load_spherical_wave_feko_h5_data(
             station, keys_sw_feko_h5, paths_sw_feko_h5, status
     );
@@ -157,6 +154,7 @@ void TelescopeLoaderElementPattern::load_element_patterns(
 
 void TelescopeLoaderElementPattern::load_spherical_wave_data(
         oskar_Station* station,
+        int sph_wave_type,
         const vector<string>& keys,
         const vector<string>& paths,
         int* status
@@ -183,43 +181,7 @@ void TelescopeLoaderElementPattern::load_spherical_wave_data(
         }
         oskar_element_load_spherical_wave_coeff(
                 oskar_station_element(station, ind), paths[i].c_str(),
-                max_order_, freq, &num_tmp, &tmp, status
-        );
-    }
-    free(buffer);
-    free(tmp);
-}
-
-
-void TelescopeLoaderElementPattern::load_spherical_wave_feko_data(
-        oskar_Station* station,
-        const vector<string>& keys,
-        const vector<string>& paths,
-        int* status
-)
-{
-    if (*status || !station || keys.empty()) return;
-    size_t buflen = 0;
-    char* buffer = 0;
-    int num_tmp = 21;
-    double* tmp = (double*) calloc((size_t) num_tmp, sizeof(double));
-    for (size_t i = 0; i < keys.size(); ++i)
-    {
-        int ind = 0;
-        double freq = 0.0;
-
-        // Get the element index and frequency from the key.
-        parse_filename(keys[i].c_str(), &buffer, &buflen, &ind, &freq, status);
-
-        // Load the file.
-        if (*status) break;
-        if (oskar_station_num_element_types(station) < ind + 1)
-        {
-            oskar_station_resize_element_types(station, ind + 1, status);
-        }
-        oskar_element_load_spherical_wave_coeff_feko(
-                oskar_station_element(station, ind), paths[i].c_str(),
-                max_order_, freq, &num_tmp, &tmp, status
+                sph_wave_type, max_order_, freq, &num_tmp, &tmp, status
         );
     }
     free(buffer);
@@ -241,42 +203,6 @@ void TelescopeLoaderElementPattern::load_spherical_wave_feko_h5_data(
                 station, paths[i].c_str(), max_order_, status
         );
     }
-}
-
-
-void TelescopeLoaderElementPattern::load_spherical_wave_galileo_data(
-        oskar_Station* station,
-        const vector<string>& keys,
-        const vector<string>& paths,
-        int* status
-)
-{
-    if (*status || !station || keys.empty()) return;
-    size_t buflen = 0;
-    char* buffer = 0;
-    int num_tmp = 21;
-    double* tmp = (double*) calloc((size_t) num_tmp, sizeof(double));
-    for (size_t i = 0; i < keys.size(); ++i)
-    {
-        int ind = 0;
-        double freq = 0.0;
-
-        // Get the element index and frequency from the key.
-        parse_filename(keys[i].c_str(), &buffer, &buflen, &ind, &freq, status);
-
-        // Load the file.
-        if (*status) break;
-        if (oskar_station_num_element_types(station) < ind + 1)
-        {
-            oskar_station_resize_element_types(station, ind + 1, status);
-        }
-        oskar_element_load_spherical_wave_coeff_galileo(
-                oskar_station_element(station, ind), paths[i].c_str(),
-                max_order_, freq, &num_tmp, &tmp, status
-        );
-    }
-    free(buffer);
-    free(tmp);
 }
 
 

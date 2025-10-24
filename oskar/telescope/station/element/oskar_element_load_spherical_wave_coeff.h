@@ -44,6 +44,7 @@ extern "C" {
  *
  * @param[in,out] data         Pointer to element model data structure to fill.
  * @param[in]  filename        Data file name.
+ * @param[in]  sph_wave_type   Specify type: 0=Original, 1=FEKO, 2=Galileo.
  * @param[in]  max_order       If greater than 0, the maximum order to load.
  * @param[in]  freq_hz         Frequency at which element data applies, in Hz.
  * @param[in,out] status       Status return code.
@@ -52,6 +53,7 @@ OSKAR_EXPORT
 void oskar_element_load_spherical_wave_coeff(
         oskar_Element* data,
         const char* filename,
+        int sph_wave_type,
         int max_order,
         double freq_hz,
         int* num_tmp,
