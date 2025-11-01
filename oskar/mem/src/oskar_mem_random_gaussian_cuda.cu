@@ -68,34 +68,37 @@ void oskar_mem_random_gaussian_double(
     OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
 
     /* Convert to normalised Gaussian distribution. */
-    double4 r;
-    oskar_box_muller_d(u.i[0], u.i[1], &r.x, &r.y);
-    oskar_box_muller_d(u.i[2], u.i[3], &r.z, &r.w);
-    r.x = std * r.x;
-    r.y = std * r.y;
-    r.z = std * r.z;
-    r.w = std * r.w;
+    double r1, r2, r3, r4;
+    oskar_box_muller_d(u.i[0], u.i[1], &r1, &r2);
+    oskar_box_muller_d(u.i[2], u.i[3], &r3, &r4);
+    r1 *= std;
+    r2 *= std;
+    r3 *= std;
+    r4 *= std;
 
     /* Store random numbers. */
     if (i4 <= num_elements - 4)
     {
-        ((double4*) data)[i] = r;
+        data[i4] = r1;
+        data[i4 + 1] = r2;
+        data[i4 + 2] = r3;
+        data[i4 + 3] = r4;
     }
     else
     {
         /* End case only if length not divisible by 4. */
-        data[i4] = r.x;
+        data[i4] = r1;
         if (i4 + 1 < num_elements)
         {
-            data[i4 + 1] = r.y;
+            data[i4 + 1] = r2;
         }
         if (i4 + 2 < num_elements)
         {
-            data[i4 + 2] = r.z;
+            data[i4 + 2] = r3;
         }
         if (i4 + 3 < num_elements)
         {
-            data[i4 + 3] = r.w;
+            data[i4 + 3] = r4;
         }
     }
 }

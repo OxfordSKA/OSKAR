@@ -33,30 +33,30 @@ kernel void mem_random_gaussian_Real(const uint n,
         const uint counter1, const uint counter2, const uint counter3,
         const Real std)
 {
-    Real4 r;
     const uint i = get_global_id(0);
     const uint i4 = i * 4;
     if (i4 >= n) return;
     uint4 rnd = rnd_uint4(seed, i, counter1, counter2, counter3);
-    r.xy = box_muller_Real(rnd.x, rnd.y);
-    r.zw = box_muller_Real(rnd.z, rnd.w);
-    r *= std;
+    Real2 r1 = box_muller_Real(rnd.x, rnd.y);
+    Real2 r2 = box_muller_Real(rnd.z, rnd.w);
+    r1 *= std;
+    r2 *= std;
 
     /* Store random numbers. */
     if (i4 <= n - 4)
     {
-        ((global Real4*) data)[i] = r;
+        data[i4] = r1.x;
+        data[i4 + 1] = r1.y;
+        data[i4 + 2] = r2.x;
+        data[i4 + 3] = r2.y;
     }
     else
     {
         /* End case only if length not divisible by 4. */
-        data[i4] = r.x;
-        if (i4 + 1 < n)
-            data[i4 + 1] = r.y;
-        if (i4 + 2 < n)
-            data[i4 + 2] = r.z;
-        if (i4 + 3 < n)
-            data[i4 + 3] = r.w;
+        data[i4] = r1.x;
+        if (i4 + 1 < n) data[i4 + 1] = r1.y;
+        if (i4 + 2 < n) data[i4 + 2] = r2.x;
+        if (i4 + 3 < n) data[i4 + 3] = r2.y;
     }
 }
 
@@ -64,30 +64,29 @@ kernel void mem_random_uniform_Real(const uint n,
         global Real* restrict data, const uint seed,
         const uint counter1, const uint counter2, const uint counter3)
 {
-    Real4 r;
     const uint i = get_global_id(0);
     const uint i4 = i * 4;
     if (i4 >= n) return;
     uint4 rnd = rnd_uint4(seed, i, counter1, counter2, counter3);
-    r.x = int_to_range_0_to_1_Real(rnd.x);
-    r.y = int_to_range_0_to_1_Real(rnd.y);
-    r.z = int_to_range_0_to_1_Real(rnd.z);
-    r.w = int_to_range_0_to_1_Real(rnd.w);
+    const Real r1 = int_to_range_0_to_1_Real(rnd.x);
+    const Real r2 = int_to_range_0_to_1_Real(rnd.y);
+    const Real r3 = int_to_range_0_to_1_Real(rnd.z);
+    const Real r4 = int_to_range_0_to_1_Real(rnd.w);
 
     /* Store random numbers. */
     if (i4 <= n - 4)
     {
-        ((global Real4*) data)[i] = r;
+        data[i4] = r1;
+        data[i4 + 1] = r2;
+        data[i4 + 2] = r3;
+        data[i4 + 3] = r4;
     }
     else
     {
         /* End case only if length not divisible by 4. */
-        data[i4] = r.x;
-        if (i4 + 1 < n)
-            data[i4 + 1] = r.y;
-        if (i4 + 2 < n)
-            data[i4 + 2] = r.z;
-        if (i4 + 3 < n)
-            data[i4 + 3] = r.w;
+        data[i4] = r1;
+        if (i4 + 1 < n) data[i4 + 1] = r2;
+        if (i4 + 2 < n) data[i4 + 2] = r3;
+        if (i4 + 3 < n) data[i4 + 3] = r4;
     }
 }
