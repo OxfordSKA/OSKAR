@@ -28,6 +28,9 @@
 #include <string>
 #include <vector>
 
+// Disable multi-threaded load, as it seems to cause problems with HDF5 files.
+#define MULTI_THREADED_LOAD 0
+
 using std::map;
 using std::string;
 using std::vector;
@@ -101,6 +104,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
 
 // Private functions.
 
+#if MULTI_THREADED_LOAD
 struct oskar_ThreadArgs
 {
     oskar_Telescope* telescope;
@@ -134,6 +138,7 @@ static void* thread_func(void* arg)
     }
     return 0;
 }
+#endif
 
 // Must pass filemap by value rather than by reference; otherwise, recursive
 // behaviour will not work as intended.
@@ -188,10 +193,11 @@ static void load_directories(oskar_Telescope* telescope,
         }
         else if (num_dirs > 1)
         {
+#if MULTI_THREADED_LOAD
             const int num_procs = oskar_get_num_procs();
             vector<oskar_Thread*> threads(num_procs);
             vector<oskar_ThreadArgs> args;
-
+#endif
             // Check if "station_type_map.txt" exists.
             if (!oskar_dir_file_exists(cwd.c_str(), "station_type_map.txt"))
             {
@@ -211,6 +217,7 @@ static void load_directories(oskar_Telescope* telescope,
                 }
             }
 
+#if MULTI_THREADED_LOAD
             // Use multi-threading for load at top level only.
             for (int i = 0; i < num_procs; ++i)
             {
@@ -228,6 +235,19 @@ static void load_directories(oskar_Telescope* telescope,
                 oskar_thread_join(threads[i]);
                 oskar_thread_free(threads[i]);
             }
+#else
+            // Loop over and descend into all stations.
+            for (int i = 0; i < num_dirs; ++i)
+            {
+                // Recursive call to load the station.
+                load_directories(
+                        telescope,
+                        oskar_TelescopeLoadAbstract::get_path(cwd, children[i]),
+                        oskar_telescope_station(telescope, i), depth + 1,
+                        loaders, filemap, log, status
+                );
+            }
+#endif
         } // End check on number of directories.
     }
 
