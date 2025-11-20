@@ -289,7 +289,7 @@ void check_values(oskar_Mem* sw, int j, int k, int* status)
 } // End anonymous namespace for file-local utility functions.
 
 
-TEST(telescope_load, element_pattern_feko_h5)
+TEST(Telescope, load_element_pattern_feko_h5)
 {
     // Define telescope and station model sizes.
     const char* tel_name = (
@@ -368,15 +368,15 @@ TEST(telescope_load, element_pattern_feko_h5)
                     );
                     if (k % 2 == 0)
                     {
-                        if (j == 0) { ASSERT_EQ(12, l_max); }
-                        if (j == 1) { ASSERT_EQ(23, l_max); }
-                        if (j == 2) { ASSERT_EQ(34, l_max); }
+                        if (j == 0) { ASSERT_EQ(13, l_max); }
+                        if (j == 1) { ASSERT_EQ(24, l_max); }
+                        if (j == 2) { ASSERT_EQ(35, l_max); }
                     }
                     else if (k % 2 == 1)
                     {
-                        if (j == 0) { ASSERT_EQ(18, l_max); }
-                        if (j == 1) { ASSERT_EQ(28, l_max); }
-                        if (j == 2) { ASSERT_EQ(38, l_max); }
+                        if (j == 0) { ASSERT_EQ(19, l_max); }
+                        if (j == 1) { ASSERT_EQ(29, l_max); }
+                        if (j == 2) { ASSERT_EQ(39, l_max); }
                     }
                 }
             }
@@ -389,7 +389,7 @@ TEST(telescope_load, element_pattern_feko_h5)
 }
 
 
-TEST(telescope_load, element_pattern_feko_h5_max_order)
+TEST(Telescope, load_element_pattern_feko_h5_max_order)
 {
     // Define telescope and station model sizes.
     const char* tel_name = (
@@ -477,7 +477,7 @@ TEST(telescope_load, element_pattern_feko_h5_max_order)
 }
 
 
-TEST(telescope_load, element_pattern_feko_h5_broken_dataset)
+TEST(Telescope, load_element_pattern_feko_h5_broken_dataset)
 {
     // Define telescope and station model sizes.
     const char* tel_name = (

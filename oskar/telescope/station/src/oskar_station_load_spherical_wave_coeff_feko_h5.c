@@ -54,7 +54,8 @@ static int dims_to_l_max(const char* dataset, const size_t* dims, int* status)
 static void extract_te_tm_from_dataset(
         const oskar_Mem* dataset,
         int dataset_dim,
-        int l_max,
+        int l_max_alloc,
+        int l_max_dataset,
         oskar_Mem** te,
         oskar_Mem** tm,
         int* status
@@ -63,15 +64,17 @@ static void extract_te_tm_from_dataset(
     int j = 0, k = 0;
     if (*status) return;
     const double deg2rad = M_PI / 180.0;
-    const size_t num_coeff = (l_max + 1) * (l_max + 1) - 1;
+    const size_t num_coeff = (l_max_alloc + 1) * (l_max_alloc + 1) - 1;
     *te = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, num_coeff, status);
     *tm = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, num_coeff, status);
+    oskar_mem_clear_contents(*te, status);
+    oskar_mem_clear_contents(*tm, status);
     double2* te_ = oskar_mem_double2(*te, status);
     double2* tm_ = oskar_mem_double2(*tm, status);
     if (oskar_mem_precision(dataset) == OSKAR_DOUBLE)
     {
         const double* data_ = oskar_mem_double_const(dataset, status);
-        for (j = 1; j <= l_max; ++j)
+        for (j = 1; j <= l_max_alloc && j <= l_max_dataset; ++j)
         {
             const int length = 2 * j + 1;
             const int index_start = j * j - 1;
@@ -93,7 +96,7 @@ static void extract_te_tm_from_dataset(
     else
     {
         const float* data_ = oskar_mem_float_const(dataset, status);
-        for (j = 1; j <= l_max; ++j)
+        for (j = 1; j <= l_max_alloc && j <= l_max_dataset; ++j)
         {
             const int length = 2 * j + 1;
             const int index_start = j * j - 1;
@@ -322,8 +325,13 @@ void oskar_station_load_spherical_wave_coeff_feko_h5(
                 );
             }
 
-            /* Find a single value of l_max to use for both polarisations. */
-            l_max_actual = l_max[0] < l_max[1] ? l_max[0] : l_max[1];
+            /*
+             * Find a single value of l_max to use for both polarisations.
+             * This needs to be big enough to support the larger l_max,
+             * and coefficients for the other polarisation should be padded
+             * with zeros if required.
+             */
+            l_max_actual = l_max[0] > l_max[1] ? l_max[0] : l_max[1];
             if (max_order > 0)
             {
                 /* Clamp to supplied maximum order if valid. */
@@ -338,7 +346,7 @@ void oskar_station_load_spherical_wave_coeff_feko_h5(
                 if (*status) break;
                 extract_te_tm_from_dataset(
                         dataset[i_pol], (int) dims[i_pol][1], l_max_actual,
-                        &te[i_pol], &tm[i_pol], status
+                        l_max[i_pol], &te[i_pol], &tm[i_pol], status
                 );
             }
 
