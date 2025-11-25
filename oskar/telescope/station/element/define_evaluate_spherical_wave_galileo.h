@@ -51,9 +51,7 @@ KERNEL(NAME) (\
     MAKE_ZERO2(FP, Yp); MAKE_ZERO2(FP, Yt);\
     theta_ = theta[i];\
     /* Intrinsic impedance of free space in order to obtain antenna voltage scaling. */\
-    const FP mu0 = 4 * (FP)M_PI * 1e-7;\
-    const FP eps0 = 8.85418781761e-12;\
-    const FP Zo = sqrt(mu0 / eps0);\
+    const FP Zo = 376.730313668; /* Post-2019 definition. */\
     /* Hack to avoid divide-by-zero (also in Matlab code!). */\
     if (theta_ < (FP)1e-5) theta_ = (FP)1e-5;\
     const FP phi_x_ = phi_x[i];\
