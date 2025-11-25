@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, The OSKAR Developers.
+ * Copyright (c) 2018-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -20,6 +20,7 @@
 extern "C" {
 #endif
 
+
 int oskar_device_count(const char* platform, int* location)
 {
     int i = 0, num_cuda = 0, num_cl = 0;
@@ -31,7 +32,7 @@ int oskar_device_count(const char* platform, int* location)
     }
     else if (env && strlen(env) > 0)
     {
-        selector = toupper(env[0]);
+        selector = toupper(env[0]);                       /* LCOV_EXCL_LINE */
     }
 #ifdef OSKAR_HAVE_CUDA
     if (cudaGetDeviceCount(&num_cuda) != cudaSuccess) num_cuda = 0;
@@ -50,8 +51,8 @@ int oskar_device_count(const char* platform, int* location)
         if (location) *location = OSKAR_CL;
         return num_cl;
     }
-    if (location) *location = OSKAR_CPU;
-    return 0;
+    if (location) *location = OSKAR_CPU;                  /* LCOV_EXCL_LINE */
+    return 0;                                             /* LCOV_EXCL_LINE */
 }
 
 #ifdef __cplusplus

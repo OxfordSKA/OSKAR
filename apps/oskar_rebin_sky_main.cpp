@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -48,16 +48,37 @@ int main(int argc, char** argv)
     oskar_sky_free(output, &error);
 
     // Rebin flux in input sky to output source positions.
-    oskar_mem_clear_contents(oskar_sky_I(output_gpu), &error);
+    oskar_mem_clear_contents(
+            oskar_sky_column(output_gpu, OSKAR_SKY_I_JY, 0, &error), &error
+    );
     oskar_rebin_sky_cuda_f(
-            oskar_sky_num_sources(input_gpu),
-            oskar_sky_num_sources(output_gpu),
-            oskar_mem_float_const(oskar_sky_ra_rad_const(input_gpu), &error),
-            oskar_mem_float_const(oskar_sky_dec_rad_const(input_gpu), &error),
-            oskar_mem_float_const(oskar_sky_I_const(input_gpu), &error),
-            oskar_mem_float_const(oskar_sky_ra_rad_const(output_gpu), &error),
-            oskar_mem_float_const(oskar_sky_dec_rad_const(output_gpu), &error),
-            oskar_mem_float(oskar_sky_I(output_gpu), &error));
+            oskar_sky_int(input_gpu, OSKAR_SKY_NUM_SOURCES),
+            oskar_sky_int(output_gpu, OSKAR_SKY_NUM_SOURCES),
+            oskar_mem_float_const(
+                    oskar_sky_column_const(input_gpu, OSKAR_SKY_RA_RAD, 0),
+                    &error
+            ),
+            oskar_mem_float_const(
+                    oskar_sky_column_const(input_gpu, OSKAR_SKY_DEC_RAD, 0),
+                    &error
+            ),
+            oskar_mem_float_const(
+                    oskar_sky_column_const(input_gpu, OSKAR_SKY_I_JY, 0),
+                    &error
+            ),
+            oskar_mem_float_const(
+                    oskar_sky_column_const(output_gpu, OSKAR_SKY_RA_RAD, 0),
+                    &error
+            ),
+            oskar_mem_float_const(
+                    oskar_sky_column_const(output_gpu, OSKAR_SKY_DEC_RAD, 0),
+                    &error
+            ),
+            oskar_mem_float(
+                    oskar_sky_column(output_gpu, OSKAR_SKY_I_JY, 0, &error),
+                    &error
+            )
+    );
     oskar_device_check_error_cuda(&error);
     if (error)
         fprintf(stderr, "CUDA error (%s).\n", oskar_get_error_string(error));

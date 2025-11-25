@@ -67,7 +67,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
     if (*status) return;
 
     /* Check data types. */
-    const int type = oskar_sky_precision(sky);
+    const int type = oskar_sky_int(sky, OSKAR_SKY_PRECISION);
     if (oskar_telescope_precision(telescope) != type ||
             oskar_jones_type(Z) != (type | OSKAR_COMPLEX))
     {
@@ -79,7 +79,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
 
     /* Resize the work array (if needed) */
     num_stations = oskar_telescope_num_stations(telescope);
-    num_sources = oskar_sky_num_sources(sky);
+    num_sources = oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES);
     oskar_work_jones_z_resize(work, num_sources, status);
 
     /* Copy the sky model to the CPU. */
@@ -100,11 +100,15 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
 
         /* Evaluate horizontal x,y,z source positions (for which to evaluate
          * pierce points) */
-        oskar_convert_relative_directions_to_enu_directions(0, 0, 0, num_sources,
-                oskar_sky_l_const(sky_cpu), oskar_sky_m_const(sky_cpu),
-                oskar_sky_n_const(sky_cpu), last - oskar_sky_reference_ra_rad(sky_cpu),
-                oskar_sky_reference_dec_rad(sky_cpu), lat,
-                0, work->hor_x, work->hor_y, work->hor_z, status);
+        oskar_convert_relative_directions_to_enu_directions(
+                0, 0, 0, num_sources,
+                oskar_sky_column_const(sky_cpu, OSKAR_SKY_SCRATCH_L, 0),
+                oskar_sky_column_const(sky_cpu, OSKAR_SKY_SCRATCH_M, 0),
+                oskar_sky_column_const(sky_cpu, OSKAR_SKY_SCRATCH_N, 0),
+                last - oskar_sky_double(sky_cpu, OSKAR_SKY_REF_RA_RAD),
+                oskar_sky_double(sky_cpu, OSKAR_SKY_REF_DEC_RAD), lat,
+                0, work->hor_x, work->hor_y, work->hor_z, status
+        );
 
         /* Obtain station coordinates in the ECEF frame. */
         evaluate_station_ECEF_coords(&station_x, &station_y, &station_z, i,

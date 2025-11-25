@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021, The OSKAR Developers.
+ * Copyright (c) 2014-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -9,18 +9,22 @@
 extern "C" {
 #endif
 
-oskar_Mem* oskar_mem_convert_precision(const oskar_Mem* input,
-        int output_precision, int* status)
+
+oskar_Mem* oskar_mem_convert_precision(
+        const oskar_Mem* input,
+        int output_precision,
+        int* status
+)
 {
     oskar_Mem *output = 0, *in_temp = 0;
     const oskar_Mem *in = 0;
-    int input_precision = 0, type = 0;
+    int type = 0;
     size_t num_elements = 0, i = 0;
     if (*status) return 0;
 
     /* If input and output precision are the same,
      * return a carbon copy of the input data. */
-    input_precision = oskar_mem_precision(input);
+    const int input_precision = oskar_mem_precision(input);
     if (input_precision == output_precision)
     {
         return oskar_mem_create_copy(input, OSKAR_CPU, status);
@@ -79,9 +83,9 @@ oskar_Mem* oskar_mem_convert_precision(const oskar_Mem* input,
     }
     else
     {
-        oskar_mem_free(output, status);
-        output = 0;
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        oskar_mem_free(output, status);                   /* LCOV_EXCL_LINE */
+        output = 0;                                       /* LCOV_EXCL_LINE */
+        *status = OSKAR_ERR_BAD_DATA_TYPE;                /* LCOV_EXCL_LINE */
     }
 
     oskar_mem_free(in_temp, status);

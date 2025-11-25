@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, The OSKAR Developers.
+ * Copyright (c) 2021-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -97,7 +97,8 @@ TEST(apps_test, test_sky_model_options)
 
         // Print the number of sources.
         printf("Generated sky model contains %d sources.\n",
-                oskar_sky_num_sources(sky));
+                oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES)
+        );
 
         // Free the sky model.
         oskar_sky_free(sky, &status);

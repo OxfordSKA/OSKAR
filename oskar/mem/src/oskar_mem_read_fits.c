@@ -1,13 +1,15 @@
 /*
- * Copyright (c) 2019-2021, The OSKAR Developers.
+ * Copyright (c) 2019-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
-#include "mem/oskar_mem.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <fitsio.h>
 #include <string.h>
+
+#include <fitsio.h>
+
+#include "mem/oskar_mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,9 +17,19 @@ extern "C" {
 
 #define MAX_AXES 10
 
-void oskar_mem_read_fits(oskar_Mem* data, size_t offset, size_t num_pixels,
-        const char* file_name, int num_index_dims, const int* start_index,
-        int* num_axes, int** axis_size, double** axis_inc, int* status)
+
+void oskar_mem_read_fits(
+        oskar_Mem* data,
+        size_t offset,
+        size_t num_pixels,
+        const char* file_name,
+        int num_index_dims,
+        const int* start_index,
+        int* num_axes,
+        int** axis_size,
+        double** axis_inc,
+        int* status
+)
 {
     int i = 0, imagetype = 0, naxis = 0, anynul = 0, type_fits = 0;
     long firstpix[MAX_AXES], naxes[MAX_AXES], num_pixels_cube = 1;
@@ -25,7 +37,21 @@ void oskar_mem_read_fits(oskar_Mem* data, size_t offset, size_t num_pixels,
     double nul = 0.0;
     oskar_Mem *data_ptr = 0, *data_temp = 0;
     fitsfile* fptr = 0;
-    if (*status) return;
+    if (*status || !data || num_index_dims == 0 || !start_index) return;
+
+    /* Get the FITS data type of the output array. */
+    switch (oskar_mem_type(data))
+    {
+    case OSKAR_SINGLE:
+        type_fits = TFLOAT;
+        break;
+    case OSKAR_DOUBLE:
+        type_fits = TDOUBLE;
+        break;
+    default:                                              /* LCOV_EXCL_LINE */
+        *status = OSKAR_ERR_BAD_DATA_TYPE;                /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
+    }
 
     /* Open the file and get the cube parameters. */
     fits_open_file(&fptr, file_name, READONLY, status);
@@ -37,9 +63,9 @@ void oskar_mem_read_fits(oskar_Mem* data, size_t offset, size_t num_pixels,
     fits_get_img_param(fptr, MAX_AXES, &imagetype, &naxis, naxes, status);
     if (*status || naxis < 1 || naxis > MAX_AXES)
     {
-        fits_close_file(fptr, status);
-        *status = OSKAR_ERR_FILE_IO;
-        return;
+        fits_close_file(fptr, status);                    /* LCOV_EXCL_LINE */
+        *status = OSKAR_ERR_FILE_IO;                      /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
 
     /* Store axis sizes and increments. */
@@ -66,29 +92,6 @@ void oskar_mem_read_fits(oskar_Mem* data, size_t offset, size_t num_pixels,
         if (axis_inc) (*axis_inc)[i] = cdelt[i];
         num_pixels_cube *= naxes[i];
     }
-    if (!data || num_index_dims == 0 || !start_index)
-    {
-        fits_close_file(fptr, status);
-        return;
-    }
-
-    /* Get the FITS data type of the output array. */
-    switch (oskar_mem_type(data))
-    {
-    case OSKAR_INT:
-        type_fits = TINT;
-        break;
-    case OSKAR_SINGLE:
-        type_fits = TFLOAT;
-        break;
-    case OSKAR_DOUBLE:
-        type_fits = TDOUBLE;
-        break;
-    default:
-        fits_close_file(fptr, status);
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
-    }
 
     /* Read the data. */
     offset *= oskar_mem_element_size(oskar_mem_type(data));
@@ -107,17 +110,17 @@ void oskar_mem_read_fits(oskar_Mem* data, size_t offset, size_t num_pixels,
     if (oskar_mem_location(data) != OSKAR_CPU)
     {
         data_temp = oskar_mem_create(
-                oskar_mem_type(data), OSKAR_CPU, num_pixels, status);
+                oskar_mem_type(data), OSKAR_CPU, num_pixels, status
+        );
         data_ptr = data_temp;
     }
     oskar_mem_ensure(data_ptr, num_pixels, status);
-    fits_read_pix(fptr, type_fits, firstpix, (long) num_pixels,
-            &nul, oskar_mem_char(data_ptr) + offset, &anynul, status);
+    fits_read_pix(
+            fptr, type_fits, firstpix, (long) num_pixels,
+            &nul, oskar_mem_char(data_ptr) + offset, &anynul, status
+    );
     fits_close_file(fptr, status);
-    if (data_ptr != data)
-    {
-        oskar_mem_copy(data, data_ptr, status);
-    }
+    if (data_ptr != data) oskar_mem_copy(data, data_ptr, status);
     oskar_mem_free(data_temp, status);
 }
 

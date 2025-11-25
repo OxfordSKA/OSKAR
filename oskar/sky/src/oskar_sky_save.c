@@ -3,116 +3,86 @@
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
-#include "sky/oskar_sky.h"
-#include "math/oskar_cmath.h"
 #include <stdio.h>
 
-#define RAD2DEG 180.0/M_PI
+#include "sky/oskar_sky.h"
+#include "math/oskar_cmath.h"
+
+#define RAD2DEG 180.0 / M_PI
 #define RAD2ARCSEC RAD2DEG * 3600.0
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+
 void oskar_sky_save(const oskar_Sky* sky, const char* filename, int* status)
 {
-    int i = 0;
+    int c = 0, i = 0;
     FILE* file = 0;
     if (*status) return;
 
-    /* Check sky model is in CPU memory. */
-    if (oskar_sky_mem_location(sky) != OSKAR_CPU)
+    /* Count the number of columns to write. */
+    c = OSKAR_SKY_PA_RAD;
+    while (c > 0 && !oskar_sky_column_const(sky, (oskar_SkyColumn) c, 0))
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
-        return;
+        --c;
     }
+    const int num_cols_out = c;
 
     /* Open the output file. */
     file = fopen(filename, "w");
     if (!file)
     {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
+        *status = OSKAR_ERR_FILE_IO;                      /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
 
-    /* Get the data type and number of sources. */
-    const int type = oskar_sky_precision(sky);
-    const int num_sources = oskar_sky_num_sources(sky);
+    /* Get the number of sources. */
+    const int num_sources = oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES);
 
     /* Print a helpful header. */
     (void) fprintf(file, "# Number of sources: %i\n", num_sources);
-    (void) fprintf(
-            file, "# RA (deg), Dec (deg), I (Jy), Q (Jy), U (Jy), V (Jy), "
-            "Ref. freq. (Hz), Spectral index, Rotation measure (rad/m^2), "
-            "FWHM major (arcsec), FWHM minor (arcsec), Position angle (deg)\n"
-    );
+    if (num_cols_out >  0) (void) fprintf(file, "# RA (deg)");
+    if (num_cols_out >  1) (void) fprintf(file, ", Dec (deg)");
+    if (num_cols_out >  2) (void) fprintf(file, ", I (Jy)");
+    if (num_cols_out >  3) (void) fprintf(file, ", Q (Jy)");
+    if (num_cols_out >  4) (void) fprintf(file, ", U (Jy)");
+    if (num_cols_out >  5) (void) fprintf(file, ", V (Jy)");
+    if (num_cols_out >  6) (void) fprintf(file, ", Ref. freq. (Hz)");
+    if (num_cols_out >  7) (void) fprintf(file, ", Spectral index");
+    if (num_cols_out >  8) (void) fprintf(file, ", Rotation measure (rad/m^2)");
+    if (num_cols_out >  9) (void) fprintf(file, ", FWHM major (arcsec)");
+    if (num_cols_out > 10) (void) fprintf(file, ", FWHM minor (arcsec)");
+    if (num_cols_out > 11) (void) fprintf(file, ", Position angle (deg)");
+    if (num_cols_out >  0) (void) fprintf(file, "\n");
 
     /* Print out sky model in ASCII format. */
-    if (type == OSKAR_DOUBLE)
+    for (i = 0; i < num_sources; ++i)
     {
-        const double *ra_ = 0, *dec_ = 0, *I_ = 0, *Q_ = 0, *U_ = 0, *V_ = 0;
-        const double *ref_ = 0, *sp_ = 0, *rm_ = 0;
-        const double *maj_ = 0, *min_ = 0, *pa_ = 0;
-        ra_  = oskar_mem_double_const(oskar_sky_ra_rad_const(sky), status);
-        dec_ = oskar_mem_double_const(oskar_sky_dec_rad_const(sky), status);
-        I_   = oskar_mem_double_const(oskar_sky_I_const(sky), status);
-        Q_   = oskar_mem_double_const(oskar_sky_Q_const(sky), status);
-        U_   = oskar_mem_double_const(oskar_sky_U_const(sky), status);
-        V_   = oskar_mem_double_const(oskar_sky_V_const(sky), status);
-        ref_ = oskar_mem_double_const(oskar_sky_reference_freq_hz_const(sky), status);
-        sp_  = oskar_mem_double_const(oskar_sky_spectral_index_const(sky), status);
-        rm_  = oskar_mem_double_const(oskar_sky_rotation_measure_rad_const(sky), status);
-        maj_ = oskar_mem_double_const(oskar_sky_fwhm_major_rad_const(sky), status);
-        min_ = oskar_mem_double_const(oskar_sky_fwhm_minor_rad_const(sky), status);
-        pa_  = oskar_mem_double_const(oskar_sky_position_angle_rad_const(sky), status);
-
-        for (i = 0; i < num_sources; ++i)
+        for (c = 1; c <= num_cols_out; ++c)
         {
-            (void) fprintf(
-                    file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,% 12.6e,"
-                    "% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 11.6f\n",
-                    ra_[i] * RAD2DEG, dec_[i] * RAD2DEG,
-                    I_[i], Q_[i], U_[i], V_[i], ref_[i], sp_[i], rm_[i],
-                    maj_[i] * RAD2ARCSEC, min_[i] * RAD2ARCSEC,
-                    pa_[i] * RAD2DEG
-            );
+            oskar_SkyColumn col_type = (oskar_SkyColumn) c;
+            const double value = oskar_sky_data(sky, col_type, 0, i);
+            switch (col_type)
+            {
+            case OSKAR_SKY_RA_RAD:
+            case OSKAR_SKY_DEC_RAD:
+            case OSKAR_SKY_PA_RAD:
+                (void) fprintf(file, "% 17.12f", value * RAD2DEG);
+                break;
+            case OSKAR_SKY_MAJOR_RAD:
+            case OSKAR_SKY_MINOR_RAD:
+                (void) fprintf(file, "% 17.12f", value * RAD2ARCSEC);
+                break;
+            default:
+                (void) fprintf(file, "% 20.14e", value);
+                break;
+            }
+            if (c != num_cols_out) (void) fprintf(file, ",");
         }
+        if (num_cols_out > 0) (void) fprintf(file, "\n");
     }
-    else if (type == OSKAR_SINGLE)
-    {
-        const float *ra_ = 0, *dec_ = 0, *I_ = 0, *Q_ = 0, *U_ = 0, *V_ = 0;
-        const float *ref_ = 0, *sp_ = 0, *rm_ = 0;
-        const float *maj_ = 0, *min_ = 0, *pa_ = 0;
-        ra_  = oskar_mem_float_const(oskar_sky_ra_rad_const(sky), status);
-        dec_ = oskar_mem_float_const(oskar_sky_dec_rad_const(sky), status);
-        I_   = oskar_mem_float_const(oskar_sky_I_const(sky), status);
-        Q_   = oskar_mem_float_const(oskar_sky_Q_const(sky), status);
-        U_   = oskar_mem_float_const(oskar_sky_U_const(sky), status);
-        V_   = oskar_mem_float_const(oskar_sky_V_const(sky), status);
-        ref_ = oskar_mem_float_const(oskar_sky_reference_freq_hz_const(sky), status);
-        sp_  = oskar_mem_float_const(oskar_sky_spectral_index_const(sky), status);
-        rm_  = oskar_mem_float_const(oskar_sky_rotation_measure_rad_const(sky), status);
-        maj_ = oskar_mem_float_const(oskar_sky_fwhm_major_rad_const(sky), status);
-        min_ = oskar_mem_float_const(oskar_sky_fwhm_minor_rad_const(sky), status);
-        pa_  = oskar_mem_float_const(oskar_sky_position_angle_rad_const(sky), status);
-
-        for (i = 0; i < num_sources; ++i)
-        {
-            (void) fprintf(
-                    file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,% 12.6e,"
-                    "% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 11.6f\n",
-                    ra_[i] * RAD2DEG, dec_[i] * RAD2DEG,
-                    I_[i], Q_[i], U_[i], V_[i], ref_[i], sp_[i], rm_[i],
-                    maj_[i] * RAD2ARCSEC, min_[i] * RAD2ARCSEC,
-                    pa_[i] * RAD2DEG
-            );
-        }
-    }
-    else
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-    }
-
     (void) fclose(file);
 }
 

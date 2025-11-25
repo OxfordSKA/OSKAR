@@ -154,11 +154,20 @@ static void set_up_vis_header(oskar_Interferometer* h, int* status)
     /* Add settings file contents if defined. */
     if (h->settings_path)
     {
-        oskar_Mem* temp = 0;
-        temp = oskar_mem_read_binary_raw(h->settings_path,
-                OSKAR_CHAR, OSKAR_CPU, status);
-        oskar_mem_copy(oskar_vis_header_settings(h->header), temp, status);
-        oskar_mem_free(temp, status);
+        FILE* stream = fopen(h->settings_path, "rb");
+        if (stream)
+        {
+            oskar_Mem* settings = oskar_vis_header_settings(h->header);
+            (void) fseek(stream, 0, SEEK_END);
+            const size_t size_bytes = ftell(stream);
+            (void) fseek(stream, 0, SEEK_SET);
+            if (size_bytes > 0)
+            {
+                oskar_mem_realloc(settings, size_bytes, status);
+                (void) !fread(oskar_mem_void(settings), 1, size_bytes, stream);
+            }
+            (void) fclose(stream);
+        }
     }
 
     /* Copy other metadata from telescope model. */

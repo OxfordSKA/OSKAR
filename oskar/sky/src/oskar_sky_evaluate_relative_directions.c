@@ -1,32 +1,8 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of the University of Oxford nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
  */
 
-#include "sky/private_sky.h"
 #include "sky/oskar_sky.h"
 
 #include "convert/oskar_convert_lon_lat_to_relative_directions.h"
@@ -35,20 +11,32 @@
 extern "C" {
 #endif
 
-void oskar_sky_evaluate_relative_directions(oskar_Sky* sky, double ra0_rad,
-        double dec0_rad, int* status)
+
+void oskar_sky_evaluate_relative_directions(
+        oskar_Sky* sky,
+        double ra0_rad,
+        double dec0_rad,
+        int* status
+)
 {
-    /* Check if safe to proceed. */
     if (*status) return;
 
     /* Convert coordinates. */
-    oskar_convert_lon_lat_to_relative_directions(sky->num_sources,
-            sky->ra_rad, sky->dec_rad, ra0_rad, dec0_rad,
-            sky->l, sky->m, sky->n, status);
+    oskar_convert_lon_lat_to_relative_directions(
+            oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES),
+            oskar_sky_column_const(sky, OSKAR_SKY_RA_RAD, 0),
+            oskar_sky_column_const(sky, OSKAR_SKY_DEC_RAD, 0),
+            ra0_rad,
+            dec0_rad,
+            oskar_sky_column(sky, OSKAR_SKY_SCRATCH_L, 0, status),
+            oskar_sky_column(sky, OSKAR_SKY_SCRATCH_M, 0, status),
+            oskar_sky_column(sky, OSKAR_SKY_SCRATCH_N, 0, status),
+            status
+    );
 
     /* Store the reference position. */
-    sky->reference_ra_rad = ra0_rad;
-    sky->reference_dec_rad = dec0_rad;
+    oskar_sky_set_double(sky, OSKAR_SKY_REF_RA_RAD, ra0_rad);
+    oskar_sky_set_double(sky, OSKAR_SKY_REF_DEC_RAD, dec0_rad);
 }
 
 #ifdef __cplusplus

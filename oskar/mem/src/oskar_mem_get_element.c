@@ -1,7 +1,9 @@
 /*
- * Copyright (c) 2014-2021, The OSKAR Developers.
+ * Copyright (c) 2014-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <math.h>
 
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
@@ -11,11 +13,10 @@
 #include "mem/private_mem.h"
 #include "utility/oskar_device.h"
 
-#include <math.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 double oskar_mem_get_element(const oskar_Mem* mem, size_t index, int* status)
 {
@@ -26,9 +27,9 @@ double oskar_mem_get_element(const oskar_Mem* mem, size_t index, int* status)
         switch (mem->type)
         {
         case OSKAR_DOUBLE:
-            return ((const double*)mem->data)[index];
+            return ((const double*) mem->data)[index];
         case OSKAR_SINGLE:
-            return ((const float*)mem->data)[index];
+            return ((const float*) mem->data)[index];
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
@@ -37,7 +38,7 @@ double oskar_mem_get_element(const oskar_Mem* mem, size_t index, int* status)
     {
 #ifdef OSKAR_HAVE_CUDA
         const size_t bytes = oskar_mem_element_size(mem->type);
-        const void* src = ((const char*)mem->data) + bytes * index;
+        const void* src = ((const char*) mem->data) + bytes * index;
         switch (mem->type)
         {
         case OSKAR_DOUBLE:
@@ -50,13 +51,13 @@ double oskar_mem_get_element(const oskar_Mem* mem, size_t index, int* status)
         {
             float val = 0.0f;
             cudaMemcpy(&val, src, bytes, cudaMemcpyDeviceToHost);
-            return (double)val;
+            return (double) val;
         }
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;           /* LCOV_EXCL_LINE */
 #endif
     }
     else if (location & OSKAR_CL)
@@ -71,28 +72,30 @@ double oskar_mem_get_element(const oskar_Mem* mem, size_t index, int* status)
         {
             double val = 0.0;
             clEnqueueReadBuffer(oskar_device_queue_cl(),
-                    mem->buffer, CL_TRUE, offset, bytes, &val, 0, NULL, NULL);
+                    mem->buffer, CL_TRUE, offset, bytes, &val, 0, NULL, NULL
+            );
             return val;
         }
         case OSKAR_SINGLE:
         {
             float val = 0.0f;
             clEnqueueReadBuffer(oskar_device_queue_cl(),
-                    mem->buffer, CL_TRUE, offset, bytes, &val, 0, NULL, NULL);
-            return (double)val;
+                    mem->buffer, CL_TRUE, offset, bytes, &val, 0, NULL, NULL
+            );
+            return (double) val;
         }
         default:
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
 #else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;         /* LCOV_EXCL_LINE */
 #endif
     }
-    else
+    else                                                  /* LCOV_EXCL_LINE */
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;                 /* LCOV_EXCL_LINE */
     }
-    return 0.0;
+    return 0.0;                                           /* LCOV_EXCL_LINE */
 }
 
 #ifdef __cplusplus

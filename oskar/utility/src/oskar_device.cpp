@@ -92,6 +92,12 @@ void oskar_device_check_local_size(int location, unsigned int dim,
         {
             max_size = 128;
         }
+        else if (!oskar_device_is_nv(location))
+        {
+            /* Some AMD Devices (e.g. MI250X) seem to support maximum
+             * block sizes of 256, despite claiming otherwise. */
+            max_size = 256;
+        }
         else if (current_device_ < cl_devices_.size() && dim < 3)
         {
             max_size = cl_devices_[current_device_]->max_local_size[dim];

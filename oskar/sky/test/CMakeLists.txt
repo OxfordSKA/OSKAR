@@ -5,7 +5,22 @@
 set(name sky_test)
 set(${name}_SRC
     main.cpp
-    Test_Sky.cpp
+    Test_Sky_append.cpp
+    Test_Sky_append_to_set.cpp
+    Test_Sky_clear_source_flux.cpp
+    Test_Sky_column_type.cpp
+    Test_Sky_copy_contents.cpp
+    Test_Sky_copy_source_data.cpp
+    Test_Sky_copy.cpp
+    Test_Sky_evaluate_gaussian_source_parameters.cpp
+    Test_Sky_evaluate_relative_directions.cpp
+    Test_Sky_filter_by_flux.cpp
+    Test_Sky_filter_by_radius.cpp
+    Test_Sky_from_fits_file.cpp
+    Test_Sky_horizon_clip.cpp
+    Test_Sky_load.cpp
+    Test_Sky_load_named_columns.cpp
+    Test_Sky_scale_flux_with_frequency.cpp
 )
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)

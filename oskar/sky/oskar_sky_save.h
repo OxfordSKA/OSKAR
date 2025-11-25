@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -10,22 +10,19 @@
  * @file oskar_sky_save.h
  */
 
-#include <oskar_global.h>
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Saves an OSKAR sky model to a text file.
+ * @brief Saves a sky model to a text file.
  *
  * @details
- * Saves the specified OSKAR sky model to an ASCII text file.
+ * Saves the specified sky model to an ASCII text file.
  * The file contains a simple header, describing the number of sources written,
  * and the data file columns.
- *
- * Note:
- * - The sky model must reside in host (CPU) memory.
  *
  * @param[in] sky         Sky model to write.
  * @param[in] filename    Output filename.

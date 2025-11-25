@@ -125,6 +125,7 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
         }
 
         /* Simulate all baselines for all channels for this time and chunk. */
+        const int num_sources = oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES);
         for (i_channel = 0; i_channel < num_chans_block; ++i_channel)
         {
             if (*status) break;
@@ -135,7 +136,8 @@ void oskar_interferometer_run_block(oskar_Interferometer* h, int block_index,
                     disp_width(total_times), sim_time_idx + 1, total_times,
                     disp_width(total_chunks), i_chunk + 1, total_chunks,
                     disp_width(total_chans), sim_chan_idx + 1, total_chans,
-                    device_id, oskar_sky_num_sources(sky));
+                    device_id, num_sources
+            );
             oskar_mutex_unlock(h->mutex);
             sim_baselines(h, d, sky, i_channel, i_time,
                     sim_chan_idx, sim_time_idx, status);
@@ -159,7 +161,7 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     /* Get dimensions. */
     const int num_baselines   = oskar_telescope_num_baselines(d->tel);
     const int num_stations    = oskar_telescope_num_stations(d->tel);
-    const int num_src         = oskar_sky_num_sources(sky);
+    const int num_src         = oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES);
     const int num_times_block = oskar_vis_block_num_times(d->vis_block);
     const int num_chans_block = oskar_vis_block_num_channels(d->vis_block);
 
@@ -182,10 +184,10 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     /* Scale source fluxes with spectral index and rotation measure. */
     oskar_sky_scale_flux_with_frequency(sky, freq, status);
     const oskar_Mem* const src_flux[] = {
-            oskar_sky_I_const(sky),
-            oskar_sky_Q_const(sky),
-            oskar_sky_U_const(sky),
-            oskar_sky_V_const(sky)
+            oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_I_JY, 0),
+            oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_Q_JY, 0),
+            oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_U_JY, 0),
+            oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_V_JY, 0)
     };
 
     /* Get true station (u,v,w) coordinates. */
@@ -210,10 +212,13 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     {
         /* Calculate ENU source direction cosines for array centre. */
         const double lst_rad = gast_rad + oskar_telescope_lon_rad(d->tel);
-        oskar_convert_apparent_ra_dec_to_enu_directions(num_src,
-                oskar_sky_ra_rad_const(sky), oskar_sky_dec_rad_const(sky),
+        oskar_convert_apparent_ra_dec_to_enu_directions(
+                num_src,
+                oskar_sky_column_const(sky, OSKAR_SKY_RA_RAD, 0),
+                oskar_sky_column_const(sky, OSKAR_SKY_DEC_RAD, 0),
                 lst_rad, oskar_telescope_lat_rad(d->tel),
-                0, d->lmn[0], d->lmn[1], d->lmn[2], status);
+                0, d->lmn[0], d->lmn[1], d->lmn[2], status
+        );
 
         /* Reference direction cosine scratch arrays. */
         lmn[0] = d->lmn[0];
@@ -223,9 +228,9 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     else
     {
         /* Reference source direction cosines from sky model. */
-        lmn[0] = oskar_sky_l_const(sky);
-        lmn[1] = oskar_sky_m_const(sky);
-        lmn[2] = oskar_sky_n_const(sky);
+        lmn[0] = oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_L, 0);
+        lmn[1] = oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_M, 0);
+        lmn[2] = oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_N, 0);
     }
 
     /* Set dimensions of Jones matrices. */
@@ -239,14 +244,15 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
 
     /* Evaluate station beam (Jones E: may be matrix). */
     const oskar_Mem* const source_coords[] = {
-            oskar_sky_l_const(sky),
-            oskar_sky_m_const(sky),
-            oskar_sky_n_const(sky)
+            oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_L, 0),
+            oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_M, 0),
+            oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_N, 0)
     };
     oskar_timer_resume(d->tmr_E);
     oskar_evaluate_jones_E(
             d->E, OSKAR_COORDS_REL_DIR, num_src, source_coords,
-            oskar_sky_reference_ra_rad(sky), oskar_sky_reference_dec_rad(sky),
+            oskar_sky_double(sky, OSKAR_SKY_REF_RA_RAD),
+            oskar_sky_double(sky, OSKAR_SKY_REF_DEC_RAD),
             d->tel, time_index_sim, t_start, t_dump, freq, d->station_work,
             status
     );
@@ -258,9 +264,10 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     {
         oskar_timer_resume(d->tmr_E);
         oskar_evaluate_jones_R(d->R, num_src,
-                oskar_sky_ra_rad_const(sky),
-                oskar_sky_dec_rad_const(sky),
-                d->tel, gast_rad, status);
+                oskar_sky_column_const(sky, OSKAR_SKY_RA_RAD, 0),
+                oskar_sky_column_const(sky, OSKAR_SKY_DEC_RAD, 0),
+                d->tel, gast_rad, status
+        );
         oskar_timer_pause(d->tmr_E);
         oskar_timer_resume(d->tmr_join);
         oskar_jones_join(d->R, d->E, d->R, status);
@@ -312,11 +319,11 @@ static void sim_baselines(oskar_Interferometer* h, DeviceData* d,
     /* Cross-correlate for this time and channel. */
     if (oskar_vis_block_has_cross_correlations(d->vis_block))
     {
-        const int source_type = oskar_sky_use_extended(sky);
+        const int source_type = oskar_sky_int(sky, OSKAR_SKY_USE_EXTENDED);
         const oskar_Mem* const src_extended[] = {
-            oskar_sky_gaussian_a_const(sky),
-            oskar_sky_gaussian_b_const(sky),
-            oskar_sky_gaussian_c_const(sky)
+            oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_EXT_A, 0),
+            oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_EXT_B, 0),
+            oskar_sky_column_const(sky, OSKAR_SKY_SCRATCH_EXT_C, 0),
         };
         oskar_cross_correlate(
                 h->casa_phase_convention,

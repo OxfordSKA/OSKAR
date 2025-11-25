@@ -262,7 +262,7 @@ void oskar_interferometer_set_sky_model(oskar_Interferometer* h,
     h->num_sky_chunks = 0;
 
     /* Split up the sky model into chunks and store them. */
-    h->num_sources_total = oskar_sky_num_sources(sky);
+    h->num_sources_total = oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES);
     if (h->num_sources_total > 0)
     {
         oskar_sky_append_to_set(&h->num_sky_chunks, &h->sky_chunks,

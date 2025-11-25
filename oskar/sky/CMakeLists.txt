@@ -11,6 +11,10 @@ set(sky_SRC
     src/oskar_sky_accessors.c
     src/oskar_sky_append_to_set.c
     src/oskar_sky_append.c
+    src/oskar_sky_clear_source_flux.c
+    src/oskar_sky_column.c
+    src/oskar_sky_column_type_from_name.c
+    src/oskar_sky_column_type_to_name.c
     src/oskar_sky_copy.c
     src/oskar_sky_copy_contents.c
     src/oskar_sky_copy_source_data.c
@@ -27,17 +31,13 @@ set(sky_SRC
     src/oskar_sky_generate_grid.c
     src/oskar_sky_generate_random_power_law.c
     src/oskar_sky_horizon_clip.c
+    src/oskar_sky_load_named_columns.c
     src/oskar_sky_load.c
-    src/oskar_sky_override_polarisation.c
-    src/oskar_sky_read.c
     src/oskar_sky_resize.c
-    #src/oskar_sky_rotate_to_position.c
+    src/oskar_sky_save_named_columns.c
     src/oskar_sky_save.c
     src/oskar_sky_scale_flux_with_frequency.c
-    src/oskar_sky_set_gaussian_parameters.c
     src/oskar_sky_set_source.c
-    src/oskar_sky_set_spectral_index.c
-    src/oskar_sky_write.c
     src/oskar_sky.cl
     src/oskar_sky.cu
     src/oskar_update_horizon_mask.c

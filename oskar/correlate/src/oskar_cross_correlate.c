@@ -504,6 +504,7 @@ void oskar_cross_correlate(
         const int is_dbl = oskar_mem_is_double(vis);
         const int is_matrix = oskar_mem_is_matrix(vis);
         const char* k = 0;
+        const void* nullp = 0;
         const float uv_filter_min_f = (float) uv_filter_min;
         const float uv_filter_max_f = (float) uv_filter_max;
         const float inv_wavelength_f = (float) inv_wavelength;
@@ -685,9 +686,12 @@ void oskar_cross_correlate(
                 {PTR_SZ, oskar_mem_buffer_const(src_dir[0])},
                 {PTR_SZ, oskar_mem_buffer_const(src_dir[1])},
                 {PTR_SZ, oskar_mem_buffer_const(src_dir[2])},
-                {PTR_SZ, oskar_mem_buffer_const(src_ext[0])},
-                {PTR_SZ, oskar_mem_buffer_const(src_ext[1])},
-                {PTR_SZ, oskar_mem_buffer_const(src_ext[2])},
+                {PTR_SZ, use_extended ?
+                        oskar_mem_buffer_const(src_ext[0]) : &nullp},
+                {PTR_SZ, use_extended ?
+                        oskar_mem_buffer_const(src_ext[1]) : &nullp},
+                {PTR_SZ, use_extended ?
+                        oskar_mem_buffer_const(src_ext[2]) : &nullp},
                 {PTR_SZ, oskar_mem_buffer_const(station_uvw[0])},
                 {PTR_SZ, oskar_mem_buffer_const(station_uvw[1])},
                 {PTR_SZ, oskar_mem_buffer_const(station_uvw[2])},

@@ -3,10 +3,10 @@
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
+#include <stdarg.h>
+
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
-
-#include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,8 +15,15 @@ extern "C" {
 #define SDF "% .6e "
 #define SDD "% .14e "
 
-void oskar_mem_save_ascii(FILE* file, size_t num_mem,
-        size_t offset, size_t num_elements, int* status, ...)
+
+void oskar_mem_save_ascii(
+        FILE* file,
+        size_t num_mem,
+        size_t offset,
+        size_t num_elements,
+        int* status,
+        ...
+)
 {
     size_t i = 0, j = 0;
     va_list args;
@@ -26,8 +33,8 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
     /* Check for at least one array. */
     if (num_mem == 0)
     {
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
-        return;
+        *status = OSKAR_ERR_INVALID_ARGUMENT;             /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
 
     /* Check there are at least the number of specified elements in
@@ -48,6 +55,11 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
 
     /* Allocate and set up the handle array. */
     handles = (oskar_Mem**) calloc(num_mem, sizeof(oskar_Mem*));
+    if (!handles)
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;         /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
+    }
     va_start(args, status);
     for (i = 0; i < num_mem; ++i)
     {
@@ -75,58 +87,58 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
             {
             case OSKAR_SINGLE:
             {
-                (void) fprintf(file, SDF, ((const float*)data)[j + offset]);
+                (void) fprintf(file, SDF, ((const float*) data)[j + offset]);
                 continue;
             }
             case OSKAR_DOUBLE:
             {
-                (void) fprintf(file, SDD, ((const double*)data)[j + offset]);
+                (void) fprintf(file, SDD, ((const double*) data)[j + offset]);
                 continue;
             }
             case OSKAR_SINGLE_COMPLEX:
             {
-                float2 d;
-                d = ((const float2*)data)[j + offset];
+                const float2 d = ((const float2*) data)[j + offset];
                 (void) fprintf(file, SDF SDF, d.x, d.y);
                 continue;
             }
             case OSKAR_DOUBLE_COMPLEX:
             {
-                double2 d;
-                d = ((const double2*)data)[j + offset];
+                const double2 d = ((const double2*) data)[j + offset];
                 (void) fprintf(file, SDD SDD, d.x, d.y);
                 continue;
             }
             case OSKAR_SINGLE_COMPLEX_MATRIX:
             {
-                float4c d;
-                d = ((const float4c*)data)[j + offset];
-                (void) fprintf(file, SDF SDF SDF SDF SDF SDF SDF SDF,
-                        d.a.x, d.a.y, d.b.x, d.b.y, d.c.x, d.c.y, d.d.x, d.d.y);
+                const float4c d = ((const float4c*) data)[j + offset];
+                (void) fprintf(
+                        file, SDF SDF SDF SDF SDF SDF SDF SDF,
+                        d.a.x, d.a.y, d.b.x, d.b.y, d.c.x, d.c.y, d.d.x, d.d.y
+                );
                 continue;
             }
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
             {
-                double4c d;
-                d = ((const double4c*)data)[j + offset];
-                (void) fprintf(file, SDD SDD SDD SDD SDD SDD SDD SDD,
-                        d.a.x, d.a.y, d.b.x, d.b.y, d.c.x, d.c.y, d.d.x, d.d.y);
+                const double4c d = ((const double4c*) data)[j + offset];
+                (void) fprintf(
+                        file, SDD SDD SDD SDD SDD SDD SDD SDD,
+                        d.a.x, d.a.y, d.b.x, d.b.y, d.c.x, d.c.y, d.d.x, d.d.y
+                );
                 continue;
             }
             case OSKAR_CHAR:
             {
-                (void) putc(((const char*)data)[j + offset], file);
+                (void) putc(((const char*) data)[j + offset], file);
                 continue;
             }
             case OSKAR_INT:
             {
-                (void) fprintf(file, "%5d ", ((const int*)data)[j + offset]);
+                (void) fprintf(file, "%5d ", ((const int*) data)[j + offset]);
                 continue;
             }
-            default:
+            default:                                      /* LCOV_EXCL_LINE */
             {
-                *status = OSKAR_ERR_BAD_DATA_TYPE;
-                continue;
+                *status = OSKAR_ERR_BAD_DATA_TYPE;        /* LCOV_EXCL_LINE */
+                continue;                                 /* LCOV_EXCL_LINE */
             }
             }
         }
@@ -137,8 +149,7 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem,
     va_start(args, status);
     for (i = 0; i < num_mem; ++i)
     {
-        const oskar_Mem* mem = 0;
-        mem = va_arg(args, const oskar_Mem*);
+        const oskar_Mem* mem = va_arg(args, const oskar_Mem*);
         if (oskar_mem_location(mem) != OSKAR_CPU)
         {
             oskar_mem_free(handles[i], status);

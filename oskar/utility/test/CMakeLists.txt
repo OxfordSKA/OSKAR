@@ -6,8 +6,11 @@ set(name utility_test)
 set(${name}_SRC
     main.cpp
     Test_crc.cpp
+    Test_device.cpp
     Test_dir.cpp
+    Test_get_binary_tag_string.cpp
     Test_getline.cpp
+    Test_string_to_angle.cpp
     Test_string_to_array.cpp
     Test_Thread.cpp
     Test_Timer.cpp

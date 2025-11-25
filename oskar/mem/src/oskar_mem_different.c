@@ -1,19 +1,25 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
-#include "mem/oskar_mem.h"
-#include "mem/private_mem.h"
 #include <stdlib.h>
 #include <string.h>
+
+#include "mem/oskar_mem.h"
+#include "mem/private_mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
-        size_t num_elements, int* status)
+
+int oskar_mem_different(
+        const oskar_Mem* one,
+        const oskar_Mem* two,
+        size_t num_elements,
+        int* status
+)
 {
     size_t bytes_to_check = 0;
 

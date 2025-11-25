@@ -4,7 +4,6 @@
 
 set(mem_SRC
     define_mem_add.h
-    define_mem_conjugate.h
     define_mem_multiply.h
     define_mem_normalise.h
     define_mem_scale_real.h
@@ -13,10 +12,8 @@ set(mem_SRC
     src/oskar_binary_write_mem.c
     src/oskar_mem_accessors.c
     src/oskar_mem_add.c
-    src/oskar_mem_add_real.c
     src/oskar_mem_append_raw.c
     src/oskar_mem_clear_contents.c
-    src/oskar_mem_conjugate.c
     src/oskar_mem_convert_precision.c
     src/oskar_mem_copy.c
     src/oskar_mem_copy_contents.c
@@ -40,19 +37,19 @@ set(mem_SRC
     src/oskar_mem_random_range.c
     src/oskar_mem_random_uniform.c
     src/oskar_mem_random_uniform_cuda.cu
-    src/oskar_mem_read_binary_raw.c
     src/oskar_mem_read_element.c
     src/oskar_mem_read_fits.c
+    src/oskar_mem_read_fits_bintable.c
     src/oskar_mem_read_fits_image_plane.c
     src/oskar_mem_read_healpix_fits.c
     src/oskar_mem_realloc.c
     src/oskar_mem_save_ascii.c
     src/oskar_mem_scale_real.c
-    src/oskar_mem_set_alias.c
     src/oskar_mem_set_element.c
     src/oskar_mem_set_value_real.c
     src/oskar_mem_stats.c
     src/oskar_mem_to_sdp_mem.cpp
+    src/oskar_mem_write_fits_bintable.c
     src/oskar_mem_write_fits_cube.c
     src/oskar_mem_write_healpix_fits.c
     src/oskar_mem_cpu.cl

@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
+#include <stdlib.h>
+
 #include "mem/oskar_mem.h"
 #include "utility/oskar_device.h"
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,8 +31,8 @@ void oskar_mem_add(
     if (*status) return;
     if (type != oskar_mem_type(in1) || type != oskar_mem_type(in2))
     {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
+        *status = OSKAR_ERR_TYPE_MISMATCH;                /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
     a_ = in1;
     b_ = in2;
@@ -76,7 +77,7 @@ void oskar_mem_add(
         }
         else
         {
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;            /* LCOV_EXCL_LINE */
         }
     }
     else
@@ -97,7 +98,7 @@ void oskar_mem_add(
         }
         else
         {
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;            /* LCOV_EXCL_LINE */
         }
         oskar_device_check_local_size(location, 0, local_size);
         global_size[0] = oskar_device_global_size(num_elements, local_size[0]);
@@ -110,8 +111,10 @@ void oskar_mem_add(
                 {PTR_SZ, oskar_mem_buffer_const(b_)},
                 {PTR_SZ, oskar_mem_buffer(out)}
         };
-        oskar_device_launch_kernel(k, location, 1, local_size, global_size,
-                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status);
+        oskar_device_launch_kernel(
+                k, location, 1, local_size, global_size,
+                sizeof(args) / sizeof(oskar_Arg), args, 0, 0, status
+        );
     }
 
     /* Free temporary arrays. */

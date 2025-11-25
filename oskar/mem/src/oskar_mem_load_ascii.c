@@ -3,30 +3,38 @@
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
-#include "mem/oskar_mem.h"
-#include "mem/oskar_mem_load_ascii.h"
-#include "utility/oskar_getline.h"
-#include "utility/oskar_string_to_array.h"
-
 #include <math.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+
+#include "mem/oskar_mem.h"
+#include "utility/oskar_getline.h"
+#include "utility/oskar_string_to_array.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-static void store_data(void* data, int type, size_t r, size_t* c,
-        const double* row_data, int* status);
 
-static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
-        double** row_defaults, size_t* num_cols_min, size_t* num_cols_max,
-        va_list args, int* status);
+static void store_data(
+        void* data, int type, size_t r, size_t* c, const double* row_data,
+        int* status
+);
 
-size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
-        int* status, ...)
+static void set_up_handles_and_defaults(
+        size_t num_mem, oskar_Mem** mem_handle, double** row_defaults,
+        size_t* num_cols_min, size_t* num_cols_max, va_list args, int* status
+);
+
+
+size_t oskar_mem_load_ascii(
+        const char* filename,
+        size_t num_mem,
+        int* status,
+        ...
+)
 {
     size_t i = 0;               /* Loop counter. */
     size_t row_index = 0;       /* Current row index loaded from file. */
@@ -39,8 +47,6 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     double* row_defaults = 0;   /* Array to hold default data for one row. */
     char* line = 0;             /* Line buffer. */
     va_list args;               /* Variable argument list. */
-
-    /* Check if safe to proceed. */
     if (*status) return 0;
 
     /* Check for at least one array. */
@@ -62,15 +68,17 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     mem_handle = (oskar_Mem**) calloc(num_mem, sizeof(oskar_Mem*));
     if (!mem_handle)
     {
-        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-        goto cleanup;
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;         /* LCOV_EXCL_LINE */
+        goto cleanup;                                     /* LCOV_EXCL_LINE */
     }
 
     /* Set up handles and default row data, and find the minimum and maximum
      * number of columns. */
     va_start(args, status);
-    set_up_handles_and_defaults(num_mem, mem_handle, &row_defaults,
-            &num_cols_min, &num_cols_max, args, status);
+    set_up_handles_and_defaults(
+            num_mem, mem_handle, &row_defaults,
+            &num_cols_min, &num_cols_max, args, status
+    );
     va_end(args);
 
     /* Allocate an array to hold numeric data for one row of the file. */
@@ -78,16 +86,14 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     row_data = (double*) calloc(num_cols_max, sizeof(double));
     if (!row_data)
     {
-        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-        goto cleanup;
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;         /* LCOV_EXCL_LINE */
+        goto cleanup;                                     /* LCOV_EXCL_LINE */
     }
 
     /* Loop over lines in the file. */
     while (oskar_getline(&line, &buffer_size, file) >= 0)
     {
         size_t num_cols_read = 0, col_index = 0;
-
-        /* Break if error. */
         if (*status) break;
 
         /* Get the row's data from the file, skipping the row if there aren't
@@ -112,9 +118,11 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
             }
 
             /* Store data. */
-            store_data(oskar_mem_void(mem_handle[i]),
-                    oskar_mem_type(mem_handle[i]), row_index, &col_index,
-                    row_data, status);
+            store_data(
+                    oskar_mem_void(mem_handle[i]),
+                    oskar_mem_type(mem_handle[i]),
+                    row_index, &col_index, row_data, status
+            );
         }
 
         /* Increment row counter. */
@@ -144,7 +152,7 @@ cleanup:
 
             /* We don't need the default here, but must advance the va_arg
              * pointer to get to the next array. */
-            (void)va_arg(args, const char*);
+            (void) va_arg(args, const char*);
         }
         va_end(args);
     }
@@ -159,9 +167,10 @@ cleanup:
 }
 
 
-static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
-        double** row_defaults, size_t* num_cols_min, size_t* num_cols_max,
-        va_list args, int* status)
+static void set_up_handles_and_defaults(
+        size_t num_mem, oskar_Mem** mem_handle, double** row_defaults,
+        size_t* num_cols_min, size_t* num_cols_max, va_list args, int* status
+)
 {
     size_t i = 0, buffer_size = 0, col_start = 0;
     char* line = 0;
@@ -172,8 +181,6 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
     {
         oskar_Mem* mem = 0;
         size_t num_cols_needed = 1;
-
-        /* Break if error. */
         if (*status) break;
 
         /* Get and store a handle to CPU-accessible memory for the array. */
@@ -181,8 +188,10 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
         mem_handle[i] = mem;
         if (oskar_mem_location(mem) != OSKAR_CPU)
         {
-            mem_handle[i] = oskar_mem_create(oskar_mem_type(mem),
-                    OSKAR_CPU, oskar_mem_length(mem), status);
+            mem_handle[i] = oskar_mem_create(
+                    oskar_mem_type(mem), OSKAR_CPU, oskar_mem_length(mem),
+                    status
+            );
         }
 
         /* Break if error. */
@@ -195,12 +204,13 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
         *num_cols_max += num_cols_needed;
 
         /* Resize array to hold row defaults. */
-        *row_defaults = (double*) realloc(*row_defaults,
-                *num_cols_max * sizeof(double));
+        *row_defaults = (double*) realloc(
+                *row_defaults, *num_cols_max * sizeof(double)
+        );
         if (!*row_defaults)
         {
-            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-            break;
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;     /* LCOV_EXCL_LINE */
+            break;                                        /* LCOV_EXCL_LINE */
         }
 
         /* Make a copy of the default string from the argument list. */
@@ -212,8 +222,8 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
             line = (char*) realloc(line, buffer_size);
             if (!line)
             {
-                *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-                break;
+                *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE; /* LCOV_EXCL_LINE */
+                break;                                    /* LCOV_EXCL_LINE */
             }
         }
         memcpy(line, def, def_len);
@@ -221,7 +231,8 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
         /* Get default value(s) for the array, and store them at the
          * current column start. */
         const size_t num_defaults = oskar_string_to_array_d(
-                line, num_cols_needed, *row_defaults + col_start);
+                line, num_cols_needed, *row_defaults + col_start
+        );
         if (num_defaults == 0)
         {
             *num_cols_min += num_cols_needed;
@@ -244,39 +255,41 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
 }
 
 
-static void store_data(void* data, int type, size_t r, size_t* c,
-        const double* row_data, int* status)
+static void store_data(
+        void* data, int type, size_t r, size_t* c, const double* row_data,
+        int* status
+)
 {
     /* Store the new data for the current row and column. */
     switch (type)
     {
     case OSKAR_SINGLE:
     {
-        ((float*)data)[r] = (float) row_data[(*c)++];
+        ((float*) data)[r] = (float) row_data[(*c)++];
         return;
     }
     case OSKAR_DOUBLE:
     {
-        ((double*)data)[r] = row_data[(*c)++];
+        ((double*) data)[r] = row_data[(*c)++];
         return;
     }
     case OSKAR_SINGLE_COMPLEX:
     {
-        float2* d = (float2*)data + r;
+        float2* d = (float2*) data + r;
         d->x = (float) row_data[(*c)++];
         d->y = (float) row_data[(*c)++];
         return;
     }
     case OSKAR_DOUBLE_COMPLEX:
     {
-        double2* d = (double2*)data + r;
+        double2* d = (double2*) data + r;
         d->x = row_data[(*c)++];
         d->y = row_data[(*c)++];
         return;
     }
     case OSKAR_SINGLE_COMPLEX_MATRIX:
     {
-        float4c* d = (float4c*)data + r;
+        float4c* d = (float4c*) data + r;
         d->a.x = (float) row_data[(*c)++];
         d->a.y = (float) row_data[(*c)++];
         d->b.x = (float) row_data[(*c)++];
@@ -289,7 +302,7 @@ static void store_data(void* data, int type, size_t r, size_t* c,
     }
     case OSKAR_DOUBLE_COMPLEX_MATRIX:
     {
-        double4c* d = (double4c*)data + r;
+        double4c* d = (double4c*) data + r;
         d->a.x = row_data[(*c)++];
         d->a.y = row_data[(*c)++];
         d->b.x = row_data[(*c)++];
@@ -302,13 +315,13 @@ static void store_data(void* data, int type, size_t r, size_t* c,
     }
     case OSKAR_INT:
     {
-        ((int*)data)[r] = (int) floor(row_data[(*c)++] + 0.5);
+        ((int*) data)[r] = (int) floor(row_data[(*c)++] + 0.5);
         return;
     }
-    default:
+    default:                                              /* LCOV_EXCL_LINE */
     {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;                /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
     }
 }

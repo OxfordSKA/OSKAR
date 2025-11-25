@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -37,11 +37,12 @@ void oskar_interferometer_finalise(oskar_Interferometer* h, int* status)
      * amplitude at the phase centre for each time and channel. */
     if (oskar_telescope_noise_enabled(h->tel) && !*status)
     {
-        int have_sources = 0, amp_calibrated = 0;
-        have_sources = (h->num_sky_chunks > 0 &&
-                oskar_sky_num_sources(h->sky_chunks[0]) > 0);
-        amp_calibrated = oskar_station_normalise_final_beam(
-                oskar_telescope_station_const(h->tel, 0));
+        const int have_sources = (h->num_sky_chunks > 0 &&
+                oskar_sky_int(h->sky_chunks[0], OSKAR_SKY_NUM_SOURCES) > 0
+        );
+        const int amp_calibrated = oskar_station_normalise_final_beam(
+                oskar_telescope_station_const(h->tel, 0)
+        );
         if (have_sources && !amp_calibrated)
         {
             const char* a = "WARNING: System noise added to visibilities";

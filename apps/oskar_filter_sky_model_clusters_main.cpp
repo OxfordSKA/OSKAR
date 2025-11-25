@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2021, The OSKAR Developers.
+ * Copyright (c) 2014-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -158,16 +158,18 @@ int main(int argc, char** argv)
     oskar_log_message(log, 'M', 0, "Using %.1f sigma overlap.", sigma);
 
     // Load the sky models.
-    oskar_Sky* sky_to_filter = oskar_sky_load(sky_file_to_filter,
-            OSKAR_DOUBLE, &status);
+    oskar_Sky* sky_to_filter = oskar_sky_load(
+            sky_file_to_filter, OSKAR_DOUBLE, &status
+    );
     if (status)
     {
         oskar_sky_free(sky_to_filter, &status);
         oskar_log_error(log, "Cannot load sky model %s", sky_file_to_filter);
         return EXIT_FAILURE;
     }
-    oskar_Sky* sky_as_filter = oskar_sky_load(sky_file_as_filter,
-            OSKAR_DOUBLE, &status);
+    oskar_Sky* sky_as_filter = oskar_sky_load(
+            sky_file_as_filter, OSKAR_DOUBLE, &status
+    );
     if (status)
     {
         oskar_sky_free(sky_to_filter, &status);
@@ -175,71 +177,78 @@ int main(int argc, char** argv)
         oskar_log_error(log, "Cannot load sky model %s", sky_file_as_filter);
         return EXIT_FAILURE;
     }
-    int num_input = oskar_sky_num_sources(sky_to_filter);
-    if (num_input != oskar_sky_num_sources(sky_as_filter))
+    int num_input = oskar_sky_int(sky_to_filter, OSKAR_SKY_NUM_SOURCES);
+    if (num_input != oskar_sky_int(sky_as_filter, OSKAR_SKY_NUM_SOURCES))
     {
         oskar_log_error(log, "Inconsistent sky model dimensions.");
         oskar_sky_free(sky_to_filter, &status);
         oskar_sky_free(sky_as_filter, &status);
         return EXIT_FAILURE;
     }
-    if (oskar_mem_different(oskar_sky_ra_rad_const(sky_to_filter),
-            oskar_sky_ra_rad_const(sky_as_filter), num_input, &status))
+    if (oskar_mem_different(
+            oskar_sky_column_const(sky_to_filter, OSKAR_SKY_RA_RAD, 0),
+            oskar_sky_column_const(sky_as_filter, OSKAR_SKY_RA_RAD, 0),
+            num_input, &status))
     {
         oskar_log_error(log, "Inconsistent sky model RA coordinates.");
         oskar_sky_free(sky_to_filter, &status);
         oskar_sky_free(sky_as_filter, &status);
         return EXIT_FAILURE;
     }
-    if (oskar_mem_different(oskar_sky_dec_rad_const(sky_to_filter),
-            oskar_sky_dec_rad_const(sky_as_filter), num_input, &status))
+    if (oskar_mem_different(
+            oskar_sky_column_const(sky_to_filter, OSKAR_SKY_DEC_RAD, 0),
+            oskar_sky_column_const(sky_as_filter, OSKAR_SKY_DEC_RAD, 0),
+            num_input, &status))
     {
         oskar_log_error(log, "Inconsistent sky model Dec coordinates.");
         oskar_sky_free(sky_to_filter, &status);
         oskar_sky_free(sky_as_filter, &status);
         return EXIT_FAILURE;
     }
+    if (!oskar_sky_column_const(sky_as_filter, OSKAR_SKY_PA_RAD, 0) ||
+            !oskar_sky_column_const(sky_as_filter, OSKAR_SKY_MAJOR_RAD, 0) ||
+            !oskar_sky_column_const(sky_as_filter, OSKAR_SKY_MINOR_RAD, 0))
+    {
+        oskar_log_error(log, "Extended source parameters not set.");
+        oskar_sky_free(sky_to_filter, &status);
+        oskar_sky_free(sky_as_filter, &status);
+        return EXIT_FAILURE;
+    }
 
     // Get sky model pointers.
-    const double* sky_ra = oskar_mem_double_const(
-            oskar_sky_ra_rad_const(sky_to_filter), &status);
-    const double* sky_dec = oskar_mem_double_const(
-            oskar_sky_dec_rad_const(sky_to_filter), &status);
-    const double* sky_I = oskar_mem_double_const(
-            oskar_sky_I_const(sky_to_filter), &status);
-    const double* sky_Q = oskar_mem_double_const(
-            oskar_sky_Q_const(sky_to_filter), &status);
-    const double* sky_U = oskar_mem_double_const(
-            oskar_sky_U_const(sky_to_filter), &status);
-    const double* sky_V = oskar_mem_double_const(
-            oskar_sky_V_const(sky_to_filter), &status);
-    const double* sky_ref_freq = oskar_mem_double_const(
-            oskar_sky_reference_freq_hz_const(sky_to_filter), &status);
-    const double* sky_spix = oskar_mem_double_const(
-            oskar_sky_spectral_index_const(sky_to_filter), &status);
-    const double* sky_rm = oskar_mem_double_const(
-            oskar_sky_rotation_measure_rad_const(sky_to_filter), &status);
-    const double* sky_maj = oskar_mem_double_const(
-            oskar_sky_fwhm_major_rad_const(sky_to_filter), &status);
-    const double* sky_min = oskar_mem_double_const(
-            oskar_sky_fwhm_minor_rad_const(sky_to_filter), &status);
-    const double* sky_pa = oskar_mem_double_const(
-            oskar_sky_position_angle_rad_const(sky_to_filter), &status);
+    const double* sky_col[12];
+    for (int i = 1; i <= 12; ++i)
+    {
+        const oskar_Mem* col = oskar_sky_column_const(
+                sky_to_filter, (oskar_SkyColumn) i, 0
+        );
+        sky_col[i - 1] = col ? oskar_mem_double_const(col, &status) : 0;
+    }
 
     // Get filter sky model pointers.
     const double* filter_I = oskar_mem_double_const(
-            oskar_sky_I_const(sky_as_filter), &status);
+            oskar_sky_column_const(sky_as_filter, OSKAR_SKY_I_JY, 0),
+            &status
+    );
     const double* filter_maj = oskar_mem_double_const(
-            oskar_sky_fwhm_major_rad_const(sky_as_filter), &status);
+            oskar_sky_column_const(sky_as_filter, OSKAR_SKY_MAJOR_RAD, 0),
+            &status
+    );
     const double* filter_min = oskar_mem_double_const(
-            oskar_sky_fwhm_minor_rad_const(sky_as_filter), &status);
+            oskar_sky_column_const(sky_as_filter, OSKAR_SKY_MINOR_RAD, 0),
+            &status
+    );
     const double* filter_pa = oskar_mem_double_const(
-            oskar_sky_position_angle_rad_const(sky_as_filter), &status);
+            oskar_sky_column_const(sky_as_filter, OSKAR_SKY_PA_RAD, 0),
+            &status
+    );
 
     // Get maximum possible size.
     double max_size_rad = 0.0;
-    oskar_mem_stats(oskar_sky_fwhm_major_rad_const(sky_as_filter),
-            num_input, 0, &max_size_rad, 0, 0, &status);
+    oskar_mem_stats(
+            oskar_sky_column_const(sky_as_filter, OSKAR_SKY_MAJOR_RAD, 0),
+            num_input, 0, &max_size_rad, 0, 0, &status
+    );
     max_size_rad *= 1.1 * sigma;
 
     // Create spatial bins.
@@ -249,8 +258,9 @@ int main(int argc, char** argv)
     vector< vector<int> > bin_indices(num_bins);
     for (int i = 0; i < num_bins; ++i)
     {
-        oskar_convert_healpix_ring_to_theta_phi_pixel(nside, i,
-                &bin_dec[i], &bin_ra[i]);
+        oskar_convert_healpix_ring_to_theta_phi_pixel(
+                nside, i, &bin_dec[i], &bin_ra[i]
+        );
         bin_dec[i] = 0.5 * M_PI - bin_dec[i];
     }
 
@@ -260,8 +270,9 @@ int main(int argc, char** argv)
         double min_d = DBL_MAX;
         for (int j = 0; j < num_bins; ++j)
         {
-            double d = oskar_angular_distance(sky_ra[i], bin_ra[j],
-                    sky_dec[i], bin_dec[j]);
+            double d = oskar_angular_distance(
+                    sky_col[0][i], bin_ra[j], sky_col[1][i], bin_dec[j]
+            );
             if (d < min_d)
             {
                 bin = j;
@@ -283,9 +294,11 @@ int main(int argc, char** argv)
         if ((num_input > 500) && (i > progress + num_input / 20))
         {
             progress = i;
-            oskar_log_message(log, 'M', 1, "%3.0f%% done after %6.1f sec.",
+            oskar_log_message(
+                    log, 'M', 1, "%3.0f%% done after %6.1f sec.",
                     100.0 * i / (num_input - 1),
-                    oskar_timer_elapsed(timer));
+                    oskar_timer_elapsed(timer)
+            );
         }
 
         // Don't check for overlap if the component is already marked
@@ -293,14 +306,18 @@ int main(int argc, char** argv)
         if (contains(components_removed, i)) continue;
 
         vector<int> components;
-        check_overlap(i, sky_ra, sky_dec, filter_maj, filter_min, filter_pa,
+        check_overlap(
+                i, sky_col[0], sky_col[1], filter_maj, filter_min, filter_pa,
                 sigma, max_size_rad,  components, components_removed,
-                bin_ra, bin_dec, bin_indices);
+                bin_ra, bin_dec, bin_indices
+        );
         output_source_components.push_back(components);
     }
-    int num_output = (int)output_source_components.size();
-    oskar_log_message(log, 'M', 1, "100%% done after %6.1f sec.",
-            oskar_timer_elapsed(timer));
+    int num_output = (int) output_source_components.size();
+    oskar_log_message(
+            log, 'M', 1, "100%% done after %6.1f sec.",
+            oskar_timer_elapsed(timer)
+    );
     oskar_timer_free(timer);
 
     // Check that all components have been grouped.
@@ -312,16 +329,20 @@ int main(int argc, char** argv)
         }
         if (num_input != counter)
         {
-            oskar_log_error(log, "Inconsistent component counts: %d input, "
-                    "%d grouped.", num_input, counter);
+            oskar_log_error(
+                    log, "Inconsistent component counts: %d input, "
+                    "%d grouped.", num_input, counter
+            );
             oskar_sky_free(sky_to_filter, &status);
             oskar_sky_free(sky_as_filter, &status);
             return EXIT_FAILURE;
         }
         if (num_input != (int)components_removed.size())
         {
-            oskar_log_error(log, "Inconsistent component counts: %d input, "
-                    "%d removed.",  num_input, (int)components_removed.size());
+            oskar_log_error(
+                    log, "Inconsistent component counts: %d input, "
+                    "%d removed.",  num_input, (int)components_removed.size()
+            );
             oskar_sky_free(sky_to_filter, &status);
             oskar_sky_free(sky_as_filter, &status);
             return EXIT_FAILURE;
@@ -338,11 +359,11 @@ int main(int argc, char** argv)
         {
             output_source_indices[i] = i;
             output_source_I[i] = 0.0;
-            int n = (int)output_source_components[i].size();
+            int n = (int) output_source_components[i].size();
             for (int j = 0; j < n; ++j)
             {
                 int c = output_source_components[i][j];
-                output_source_I[i] += sky_I[c];
+                output_source_I[i] += sky_col[2][c];
             }
         }
     }
@@ -353,7 +374,7 @@ int main(int argc, char** argv)
         {
             output_source_indices[i] = i;
             output_source_I[i] = 0.0;
-            int n = (int)output_source_components[i].size();
+            int n = (int) output_source_components[i].size();
             for (int j = 0; j < n; ++j)
             {
                 int c = output_source_components[i][j];
@@ -366,16 +387,20 @@ int main(int argc, char** argv)
     }
 
     // Sort indices by flux.
-    sort(output_source_indices.begin(), output_source_indices.end(),
-            oskar_SortIndices<double>(&output_source_I[0]));
+    sort(
+            output_source_indices.begin(), output_source_indices.end(),
+            oskar_SortIndices<double>(&output_source_I[0])
+    );
     reverse(output_source_indices.begin(), output_source_indices.end());
 
     // Get all components in clusters above the flux threshold.
     vector<int> components_to_remove;
     {
-        oskar_log_message(log, 'M', 0, "Brightest source clusters "
+        oskar_log_message(
+                log, 'M', 0, "Brightest source clusters "
                 "above %.0f %s:", threshold,
-                use_integrated_flux ? "Jy" : "Jy/beam");
+                use_integrated_flux ? "Jy" : "Jy/beam"
+        );
         double total_integrated_flux = 0.0;
         int i = 0;
         for (i = 0; i < num_output; ++i)
@@ -383,48 +408,71 @@ int main(int argc, char** argv)
             int s = output_source_indices[i];
             int num_source_components = (int)output_source_components[s].size();
             if (output_source_I[s] < threshold) break;
-            components_to_remove.insert(components_to_remove.end(),
+            components_to_remove.insert(
+                    components_to_remove.end(),
                     output_source_components[s].begin(),
-                    output_source_components[s].end());
-            oskar_log_message(log, 'M', 1, "Source %3d has %2d components "
-                    "%s %.1f %s.", i, num_source_components,
+                    output_source_components[s].end()
+            );
+            oskar_log_message(
+                    log, 'M', 1, "Source %3d has %2d components %s %.1f %s.",
+                    i, num_source_components,
                     use_integrated_flux ? "totalling" : "with peak",
                     output_source_I[s],
-                    use_integrated_flux ? "Jy" : "Jy/beam");
+                    use_integrated_flux ? "Jy" : "Jy/beam"
+            );
             for (int j = 0; j < num_source_components; ++j)
             {
                 int c = output_source_components[s][j];
-                total_integrated_flux += sky_I[c];
-                oskar_log_message(log, 'M', 2, "Component %5d "
+                total_integrated_flux += sky_col[2][c];
+                oskar_log_message(
+                        log, 'M', 2, "Component %5d "
                         "at (%7.3f, %7.3f) is %.1f Jy.", c,
-                        sky_ra[c] * R2D, sky_dec[c] * R2D, sky_I[c]);
+                        sky_col[0][c] * R2D, sky_col[1][c] * R2D, sky_col[2][c]
+                );
             }
         }
-        oskar_log_message(log, 'M', 0, "%d components from %d sources with "
+        oskar_log_message(
+                log, 'M', 0, "%d components from %d sources with "
                 "source flux greater than %.0f %s",
                 (int)components_to_remove.size(), i, threshold,
-                use_integrated_flux ? "Jy" : "Jy/beam");
-        oskar_log_message(log, 'M', 1, "Total integrated flux from listed "
-                "components: %.1f Jy.", total_integrated_flux);
+                use_integrated_flux ? "Jy" : "Jy/beam"
+        );
+        oskar_log_message(
+                log, 'M', 1, "Total integrated flux from listed "
+                "components: %.1f Jy.", total_integrated_flux
+        );
     }
 
     // Sort components above source flux threshold,
     // and create a new sky model from what's left.
-    sort(components_to_remove.begin(),
-            components_to_remove.end());
+    sort(components_to_remove.begin(), components_to_remove.end());
     int num_sources_out = num_input - (int)components_to_remove.size();
-    oskar_Sky* sky_out = oskar_sky_create(OSKAR_DOUBLE, OSKAR_CPU,
-            num_sources_out, &status);
+    oskar_Sky* sky_out = oskar_sky_create(
+            OSKAR_DOUBLE, OSKAR_CPU, num_sources_out, &status
+    );
 
     // Loop over input component positions.
     for (int i = 0, j = 0, k = 0; i < num_input; ++i)
     {
         if (i != components_to_remove[k])
         {
-            oskar_sky_set_source(sky_out, j++, sky_ra[i], sky_dec[i],
-                    sky_I[i], sky_Q[i], sky_U[i], sky_V[i], sky_ref_freq[i],
-                    sky_spix[i], sky_rm[i], sky_maj[i], sky_min[i], sky_pa[i],
-                    &status);
+            oskar_sky_set_source(
+                    sky_out,
+                    j++,
+                    sky_col[0][i],
+                    sky_col[1][i],
+                    sky_col[2][i],
+                    sky_col[3] ? sky_col[3][i] : 0.,
+                    sky_col[4] ? sky_col[4][i] : 0.,
+                    sky_col[5] ? sky_col[5][i] : 0.,
+                    sky_col[6] ? sky_col[6][i] : 0.,
+                    sky_col[7] ? sky_col[7][i] : 0.,
+                    sky_col[8] ? sky_col[8][i] : 0.,
+                    sky_col[9] ? sky_col[9][i] : 0.,
+                    sky_col[10] ? sky_col[10][i] : 0.,
+                    sky_col[11] ? sky_col[11][i] : 0.,
+                    &status
+            );
             if (status)
             {
                 oskar_log_error(log, "Error setting source %d", j);
@@ -439,12 +487,18 @@ int main(int argc, char** argv)
 
     // Print output sky model stats.
     double min_flux = 0.0, max_flux = 0.0, mean_flux = 0.0, std_flux = 0.0;
-    oskar_mem_stats(oskar_sky_I_const(sky_out), num_output,
-            &min_flux, &max_flux, &mean_flux, &std_flux, &status);
-    oskar_log_message(log, 'M', 0, "After filtering, (min, max, mean, std.dev) "
-            "component fluxes are:");
-    oskar_log_message(log, 'M', -1, "%.3e, %.3e, %.3e, %.3e",
-            min_flux, max_flux, mean_flux, std_flux);
+    oskar_mem_stats(
+            oskar_sky_column_const(sky_out, OSKAR_SKY_I_JY, 0),
+            num_output, &min_flux, &max_flux, &mean_flux, &std_flux, &status
+    );
+    oskar_log_message(
+            log, 'M', 0, "After filtering, (min, max, mean, std.dev) "
+            "component fluxes are:"
+    );
+    oskar_log_message(
+            log, 'M', -1, "%.3e, %.3e, %.3e, %.3e",
+            min_flux, max_flux, mean_flux, std_flux
+    );
 
     // Save the output sky model.
     string outname(sky_file_to_filter);
@@ -453,8 +507,9 @@ int main(int argc, char** argv)
     oskar_sky_save(sky_out, outname.c_str(), &status);
     if (status)
     {
-        oskar_log_error(log, "Error saving file: %s",
-                oskar_get_error_string(status));
+        oskar_log_error(
+                log, "Error saving file: %s", oskar_get_error_string(status)
+        );
     }
 
     // Free memory.

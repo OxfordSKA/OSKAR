@@ -1,25 +1,30 @@
 /*
- * Copyright (c) 2014-2022, The OSKAR Developers.
+ * Copyright (c) 2014-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
+#include <stdlib.h>
+
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
-
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
-        size_t num_elements, int* status)
+
+oskar_Mem* oskar_mem_create_alias(
+        const oskar_Mem* src,
+        size_t offset,
+        size_t num_elements,
+        int* status
+)
 {
     oskar_Mem* mem = (oskar_Mem*) calloc(1, sizeof(oskar_Mem));
     if (!mem)
     {
-        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-        return 0;
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;         /* LCOV_EXCL_LINE */
+        return 0;                                         /* LCOV_EXCL_LINE */
     }
 
     /* Initialise meta-data.
@@ -29,7 +34,7 @@ oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
     mem->mutex = oskar_mutex_create();
     if (src)
     {
-        size_t element_size = oskar_mem_element_size(src->type);
+        const size_t element_size = oskar_mem_element_size(src->type);
         mem->type = src->type;
         mem->location = src->location;
         mem->num_elements = num_elements;
@@ -40,24 +45,23 @@ oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
             cl_buffer_region r;
             r.origin = element_size * offset;
             r.size   = element_size * num_elements;
-            mem->buffer = clCreateSubBuffer(src->buffer,
-                    CL_MEM_READ_WRITE, CL_BUFFER_CREATE_TYPE_REGION,
-                    &r, &error);
+            mem->buffer = clCreateSubBuffer(
+                    src->buffer, CL_MEM_READ_WRITE,
+                    CL_BUFFER_CREATE_TYPE_REGION, &r, &error
+            );
             mem->data = (void*) (mem->buffer);
             if (error != CL_SUCCESS)
             {
-                *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+                *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE; /* LCOV_EXCL_LINE */
             }
         }
         else
 #endif
         {
-            size_t offset_bytes = offset * element_size;
-            mem->data = (void*)(((char*)(src->data)) + offset_bytes);
+            const size_t offset_bytes = offset * element_size;
+            mem->data = (void*) (((char*) (src->data)) + offset_bytes);
         }
     }
-
-    /* Return a handle to the new structure. */
     return mem;
 }
 

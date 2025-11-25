@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -89,6 +89,94 @@ static PyObject* append_sources(PyObject* self, PyObject* args)
 {
     oskar_Sky *h = 0;
     PyObject *obj[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+#if OSKAR_VERSION >= 0x020C00
+    int i = 0, num_sources = -1, status = 0;
+
+    /* Parse inputs: RA, Dec, I, Q, U, V, ref, spix, rm, maj, min, pa. */
+    if (!PyArg_ParseTuple(args, "OOOOOOOOOOOOO", &obj[0],
+            &obj[1], &obj[2], &obj[3], &obj[4], &obj[5], &obj[6],
+            &obj[7], &obj[8], &obj[9], &obj[10], &obj[11], &obj[12]))
+        return 0;
+    if (!(h = (oskar_Sky*) get_handle(obj[0], name))) return 0;
+    const int flags = NPY_ARRAY_FORCECAST | NPY_ARRAY_IN_ARRAY;
+    const int type = oskar_sky_int(h, OSKAR_SKY_PRECISION);
+    const int old_num = oskar_sky_int(h, OSKAR_SKY_NUM_SOURCES);
+    const int npy_type = numpy_type_from_oskar(type);
+
+    /* Get column size and check for consistency. */
+    for (i = 1; i <= 12; ++i)
+    {
+        PyArrayObject* arr_col = 0;
+        if (obj[i] == Py_None) continue; /* Skip column if not supplied. */
+        arr_col = (PyArrayObject*) PyArray_FROM_OTF(obj[i], npy_type, flags);
+        if (num_sources < 0)
+        {
+            num_sources = (int) PyArray_SIZE(arr_col);
+        }
+        else if (num_sources != (int) PyArray_SIZE(arr_col))
+        {
+            PyErr_SetString(
+                    PyExc_RuntimeError, "Input data dimension mismatch."
+            );
+            Py_XDECREF(arr_col);
+            return 0;
+        }
+        Py_XDECREF(arr_col);
+    }
+
+    /* Make sure the sky model is big enough to add the new sources. */
+    oskar_sky_resize(h, old_num + num_sources, &status);
+
+    /* Loop over objects/columns. */
+    for (i = 1; i <= 12; ++i)
+    {
+        oskar_SkyColumn col_type = OSKAR_SKY_CUSTOM;
+        oskar_Mem* column = 0;
+        oskar_Mem* wrapper = 0;
+        PyArrayObject* arr_col = 0;
+        if (obj[i] == Py_None) continue; /* Skip column if not supplied. */
+        arr_col = (PyArrayObject*) PyArray_FROM_OTF(obj[i], npy_type, flags);
+
+        /* Copy column data into the sky model. */
+        col_type = (oskar_SkyColumn) i;
+        column = oskar_sky_column(h, col_type, 0, &status);
+        wrapper = oskar_mem_create_alias_from_raw(
+                PyArray_DATA(arr_col), type, OSKAR_CPU, num_sources, &status
+        );
+        oskar_mem_copy_contents(
+                column, wrapper, old_num, 0, num_sources, &status
+        );
+        oskar_mem_free(wrapper, &status);
+        if (col_type == OSKAR_SKY_RA_RAD || col_type == OSKAR_SKY_DEC_RAD ||
+                col_type == OSKAR_SKY_PA_RAD)
+        {
+            oskar_mem_scale_real(
+                    column, deg2rad, old_num, num_sources, &status
+            );
+        }
+        else if (col_type == OSKAR_SKY_MAJOR_RAD ||
+                col_type == OSKAR_SKY_MINOR_RAD)
+        {
+            oskar_mem_scale_real(
+                    column, arcsec2rad, old_num, num_sources, &status
+            );
+        }
+
+        /* Check for errors. */
+        if (status)
+        {
+            PyErr_Format(PyExc_RuntimeError,
+                    "Sky model append_sources() failed with code %d (%s).",
+                    status, oskar_get_error_string(status)
+            );
+            Py_XDECREF(arr_col);
+            return 0;
+        }
+        Py_XDECREF(arr_col);
+    }
+    return Py_BuildValue("");
+#else
+    /* Deprecated code. */
     oskar_Mem *ra_c, *dec_c, *I_c, *Q_c, *U_c, *V_c;
     oskar_Mem *ref_c, *spix_c, *rm_c, *maj_c, *min_c, *pa_c;
     PyArrayObject *ra = 0, *dec = 0, *I_a = 0, *Q = 0, *U = 0, *V = 0;
@@ -245,6 +333,7 @@ fail:
     Py_XDECREF(min);
     Py_XDECREF(pa);
     return 0;
+#endif
 }
 
 
@@ -258,7 +347,13 @@ static PyObject* append_file(PyObject* self, PyObject* args)
     if (!(h = (oskar_Sky*) get_handle(capsule, name))) return 0;
 
     /* Load the sky model. */
+#if OSKAR_VERSION >= 0x020C00
+    temp = oskar_sky_load(
+            filename, oskar_sky_int(h, OSKAR_SKY_PRECISION), &status
+    );
+#else
     temp = oskar_sky_load(filename, oskar_sky_precision(h), &status);
+#endif
     oskar_sky_append(h, temp, &status);
     oskar_sky_free(temp, &status);
 
@@ -591,7 +686,11 @@ static PyObject* num_sources(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = (oskar_Sky*) get_handle(capsule, name))) return 0;
+#if OSKAR_VERSION >= 0x020C00
+    return Py_BuildValue("i", oskar_sky_int(h, OSKAR_SKY_NUM_SOURCES));
+#else
     return Py_BuildValue("i", oskar_sky_num_sources(h));
+#endif
 }
 
 
@@ -623,28 +722,130 @@ static PyObject* save(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* save_named_columns(PyObject* self, PyObject* args)
+{
+#if OSKAR_VERSION >= 0x020C00
+    oskar_Sky *h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    int use_degrees = 1;
+    int write_name = 0;
+    int write_type = 0;
+    const char* filename = 0;
+    if (!PyArg_ParseTuple(args, "Osiii", &capsule, &filename,
+            &use_degrees, &write_name, &write_type)
+    )
+    {
+        return 0;
+    }
+    if (!(h = (oskar_Sky*) get_handle(capsule, name))) return 0;
+
+    /* Save the sky model. */
+    oskar_sky_save_named_columns(
+            h, filename, use_degrees, write_name, write_type, &status
+    );
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_sky_save_named_columns() failed with code %d (%s).",
+                status, oskar_get_error_string(status)
+        );
+        return 0;
+    }
+    return Py_BuildValue("");
+#else
+    PyErr_Format(PyExc_RuntimeError,
+            "save_named_columns() is only available in OSKAR 2.12.0 or above."
+    );
+    return 0;
+#endif
+}
+
+
 static PyObject* to_array(PyObject* self, PyObject* args)
 {
     oskar_Sky *h = 0;
     PyArrayObject* array1 = 0;
     PyObject* capsule = 0, *array2 = 0;
     npy_intp dims[2];
-    int num_sources = 0, type = 0;
+#if OSKAR_VERSION >= 0x020C00
+    int c = 0, status = 0;
+#endif
+    int num_columns = 12, num_sources = 0, type = 0;
     size_t num_bytes;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = (oskar_Sky*) get_handle(capsule, name))) return 0;
+
+#if OSKAR_VERSION >= 0x020C00
+    num_sources = oskar_sky_int(h, OSKAR_SKY_NUM_SOURCES);
+    type = oskar_sky_int(h, OSKAR_SKY_PRECISION);
+
+    /* Count the number of columns. */
+    while (num_columns > 0 && !oskar_sky_column_const(
+            h, (oskar_SkyColumn) num_columns, 0))
+    {
+        --num_columns;
+    }
+#else
     num_sources = oskar_sky_num_sources(h);
     type = oskar_sky_precision(h);
+#endif
 
     /* Create a transposed array. */
-    dims[0] = 12;
+    dims[0] = num_columns;
     dims[1] = num_sources;
-    array1 = (PyArrayObject*)PyArray_SimpleNew(2, dims,
-            type == OSKAR_DOUBLE ? NPY_DOUBLE : NPY_FLOAT);
+    array1 = (PyArrayObject*) PyArray_SimpleNew(
+            2, dims, type == OSKAR_DOUBLE ? NPY_DOUBLE : NPY_FLOAT
+    );
 
     /* Copy the data into it. */
     num_bytes = (type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
     num_bytes *= num_sources;
+#if OSKAR_VERSION >= 0x020C00
+    for (c = 1; c <= num_columns; ++c)
+    {
+        oskar_SkyColumn col_type = OSKAR_SKY_CUSTOM;
+        oskar_Mem* tmp = 0;
+        col_type = (oskar_SkyColumn) c;
+        const oskar_Mem* column = oskar_sky_column_const(h, col_type, 0);
+
+        /* Copy or create an empty column, as appropriate. */
+        if (column)
+        {
+            tmp = oskar_mem_create_copy(column, OSKAR_CPU, &status);
+        }
+        else
+        {
+            tmp = oskar_mem_create(type, OSKAR_CPU, num_sources, &status);
+            oskar_mem_clear_contents(tmp, &status);
+        }
+
+        /* Convert to degrees / arcseconds. (In Python in old version.) */
+        if (col_type == OSKAR_SKY_RA_RAD || col_type == OSKAR_SKY_DEC_RAD ||
+                col_type == OSKAR_SKY_PA_RAD)
+        {
+            oskar_mem_scale_real(tmp, 180. / M_PI, 0, num_sources, &status);
+        }
+        else if (col_type == OSKAR_SKY_MAJOR_RAD ||
+                col_type == OSKAR_SKY_MINOR_RAD)
+        {
+            oskar_mem_scale_real(
+                    tmp, 3600. * (180. / M_PI), 0, num_sources, &status
+            );
+        }
+
+        /* Copy to output array. */
+        memcpy(PyArray_GETPTR2(array1, c - 1, 0),
+                oskar_mem_void(tmp), num_bytes
+        );
+
+        /* Free temporary. */
+        oskar_mem_free(tmp, &status);
+    }
+#else
+    /* Deprecated code. */
     memcpy(PyArray_GETPTR2(array1, 0, 0),
             oskar_mem_void(oskar_sky_ra_rad(h)), num_bytes);
     memcpy(PyArray_GETPTR2(array1, 1, 0),
@@ -669,6 +870,7 @@ static PyObject* to_array(PyObject* self, PyObject* args)
             oskar_mem_void(oskar_sky_fwhm_minor_rad(h)), num_bytes);
     memcpy(PyArray_GETPTR2(array1, 11, 0),
             oskar_mem_void(oskar_sky_position_angle_rad(h)), num_bytes);
+#endif
 
     /* Return a transposed copy. */
     array2 = PyArray_Transpose(array1, 0);
@@ -712,6 +914,9 @@ static PyMethodDef methods[] =
         {"num_sources", (PyCFunction)num_sources,
                 METH_VARARGS, "num_sources()"},
         {"save", (PyCFunction)save, METH_VARARGS, "save(filename)"},
+        {"save_named_columns", (PyCFunction)save_named_columns, METH_VARARGS,
+                "save_named_columns(filename, use_degrees, write_name, "
+                "write_type)"},
         {"to_array", (PyCFunction)to_array, METH_VARARGS, "to_array()"},
         {NULL, NULL, 0, NULL}
 };
@@ -755,4 +960,3 @@ PyMODINIT_FUNC init_sky_lib(void)
     return;
 }
 #endif
-

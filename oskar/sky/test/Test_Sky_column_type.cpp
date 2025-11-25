@@ -1,0 +1,136 @@
+/*
+ * Copyright (c) 2025, The OSKAR Developers.
+ * See the LICENSE file at the top-level directory of this distribution.
+ */
+
+#include <gtest/gtest.h>
+
+#include "sky/oskar_sky.h"
+
+
+TEST(Sky, column_type_from_name)
+{
+    ASSERT_EQ(OSKAR_SKY_RA_RAD,
+            oskar_sky_column_type_from_name("Ra")
+    );
+    ASSERT_EQ(OSKAR_SKY_DEC_RAD,
+            oskar_sky_column_type_from_name("Dec")
+    );
+    ASSERT_EQ(OSKAR_SKY_RA_DEG,
+            oskar_sky_column_type_from_name("RaD")
+    );
+    ASSERT_EQ(OSKAR_SKY_DEC_DEG,
+            oskar_sky_column_type_from_name("DecD")
+    );
+    ASSERT_EQ(OSKAR_SKY_I_JY,
+            oskar_sky_column_type_from_name("I")
+    );
+    ASSERT_EQ(OSKAR_SKY_Q_JY,
+            oskar_sky_column_type_from_name("Q")
+    );
+    ASSERT_EQ(OSKAR_SKY_U_JY,
+            oskar_sky_column_type_from_name("U")
+    );
+    ASSERT_EQ(OSKAR_SKY_V_JY,
+            oskar_sky_column_type_from_name("V")
+    );
+    ASSERT_EQ(OSKAR_SKY_REF_HZ,
+            oskar_sky_column_type_from_name("ReferenceFrequency")
+    );
+    ASSERT_EQ(OSKAR_SKY_SPEC_IDX,
+            oskar_sky_column_type_from_name("SpectralIndex")
+    );
+    ASSERT_EQ(OSKAR_SKY_RM_RAD,
+            oskar_sky_column_type_from_name("RotationMeasure")
+    );
+    ASSERT_EQ(OSKAR_SKY_MAJOR_RAD,
+            oskar_sky_column_type_from_name("MajorAxis")
+    );
+    ASSERT_EQ(OSKAR_SKY_MINOR_RAD,
+            oskar_sky_column_type_from_name("MinorAxis")
+    );
+    ASSERT_EQ(OSKAR_SKY_PA_RAD,
+            oskar_sky_column_type_from_name("Orientation")
+    );
+    ASSERT_EQ(OSKAR_SKY_POLA_RAD,
+            oskar_sky_column_type_from_name("PolarizationAngle")
+    );
+    ASSERT_EQ(OSKAR_SKY_POLF,
+            oskar_sky_column_type_from_name("PolarizedFraction")
+    );
+    ASSERT_EQ(OSKAR_SKY_REF_WAVE_M,
+            oskar_sky_column_type_from_name("ReferenceWavelength")
+    );
+    ASSERT_EQ(OSKAR_SKY_SPEC_CURV,
+            oskar_sky_column_type_from_name("SpectralCurvature")
+    );
+}
+
+
+TEST(Sky, column_type_to_name)
+{
+    ASSERT_STREQ("Ra",
+            oskar_sky_column_type_to_name(OSKAR_SKY_RA_RAD)
+    );
+    ASSERT_STREQ("Dec",
+            oskar_sky_column_type_to_name(OSKAR_SKY_DEC_RAD)
+    );
+    ASSERT_STREQ("RaD",
+            oskar_sky_column_type_to_name(OSKAR_SKY_RA_DEG)
+    );
+    ASSERT_STREQ("DecD",
+            oskar_sky_column_type_to_name(OSKAR_SKY_DEC_DEG)
+    );
+    ASSERT_STREQ("I",
+            oskar_sky_column_type_to_name(OSKAR_SKY_I_JY)
+    );
+    ASSERT_STREQ("Q",
+            oskar_sky_column_type_to_name(OSKAR_SKY_Q_JY)
+    );
+    ASSERT_STREQ("U",
+            oskar_sky_column_type_to_name(OSKAR_SKY_U_JY)
+    );
+    ASSERT_STREQ("V",
+            oskar_sky_column_type_to_name(OSKAR_SKY_V_JY)
+    );
+    ASSERT_STREQ(
+            "ReferenceFrequency",
+            oskar_sky_column_type_to_name(OSKAR_SKY_REF_HZ)
+    );
+    ASSERT_STREQ(
+            "SpectralIndex",
+            oskar_sky_column_type_to_name(OSKAR_SKY_SPEC_IDX)
+    );
+    ASSERT_STREQ(
+            "RotationMeasure",
+            oskar_sky_column_type_to_name(OSKAR_SKY_RM_RAD)
+    );
+    ASSERT_STREQ(
+            "MajorAxis",
+            oskar_sky_column_type_to_name(OSKAR_SKY_MAJOR_RAD)
+    );
+    ASSERT_STREQ(
+            "MinorAxis",
+            oskar_sky_column_type_to_name(OSKAR_SKY_MINOR_RAD)
+    );
+    ASSERT_STREQ(
+            "Orientation",
+            oskar_sky_column_type_to_name(OSKAR_SKY_PA_RAD)
+    );
+    ASSERT_STREQ(
+            "PolarizationAngle",
+            oskar_sky_column_type_to_name(OSKAR_SKY_POLA_RAD)
+    );
+    ASSERT_STREQ(
+            "PolarizedFraction",
+            oskar_sky_column_type_to_name(OSKAR_SKY_POLF)
+    );
+    ASSERT_STREQ(
+            "ReferenceWavelength",
+            oskar_sky_column_type_to_name(OSKAR_SKY_REF_WAVE_M)
+    );
+    ASSERT_STREQ(
+            "SpectralCurvature",
+            oskar_sky_column_type_to_name(OSKAR_SKY_SPEC_CURV)
+    );
+}

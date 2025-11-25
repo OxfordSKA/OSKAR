@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
-#include "mem/oskar_mem.h"
-#include <math.h>
 #include <float.h>
+#include <math.h>
+
+#include "mem/oskar_mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,12 +62,17 @@ extern "C" {
         RUNNING_STATS_KNUTH \
     }
 
-void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
-        const oskar_Mem* val_accurate, double* min_rel_error,
-        double* max_rel_error, double* avg_rel_error, double* std_rel_error,
-        int* status)
+
+void oskar_mem_evaluate_relative_error(
+        const oskar_Mem* val_approx,
+        const oskar_Mem* val_accurate,
+        double* min_rel_error,
+        double* max_rel_error,
+        double* avg_rel_error,
+        double* std_rel_error,
+        int* status
+)
 {
-    int prec_approx = 0, prec_accurate = 0;
     size_t i = 0, n = 0;
     const oskar_Mem *app_ptr = 0, *acc_ptr = 0;
     oskar_Mem *approx_temp = 0, *accurate_temp = 0;
@@ -82,27 +88,27 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     /* Type and dimension check. */
     if (oskar_mem_is_matrix(val_approx) && !oskar_mem_is_matrix(val_accurate))
     {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
+        *status = OSKAR_ERR_TYPE_MISMATCH;                /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
     if (oskar_mem_is_complex(val_approx) && !oskar_mem_is_complex(val_accurate))
     {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
+        *status = OSKAR_ERR_TYPE_MISMATCH;                /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
 
     /* Get and check base types. */
-    prec_approx = oskar_mem_precision(val_approx);
-    prec_accurate = oskar_mem_precision(val_accurate);
+    const int prec_approx = oskar_mem_precision(val_approx);
+    const int prec_accurate = oskar_mem_precision(val_accurate);
     if (prec_approx != OSKAR_SINGLE && prec_approx != OSKAR_DOUBLE)
     {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;                /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
     if (prec_accurate != OSKAR_SINGLE && prec_accurate != OSKAR_DOUBLE)
     {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;                /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
 
     /* Get number of elements to check. */
@@ -115,23 +121,21 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     acc_ptr = val_accurate;
     if (oskar_mem_location(val_approx) != OSKAR_CPU)
     {
-        approx_temp = oskar_mem_create_copy(val_approx, OSKAR_CPU,
-                status);
+        approx_temp = oskar_mem_create_copy(val_approx, OSKAR_CPU, status);
         if (*status)
         {
-            oskar_mem_free(approx_temp, status);
-            return;
+            oskar_mem_free(approx_temp, status);          /* LCOV_EXCL_LINE */
+            return;                                       /* LCOV_EXCL_LINE */
         }
         app_ptr = approx_temp;
     }
     if (oskar_mem_location(val_accurate) != OSKAR_CPU)
     {
-        accurate_temp = oskar_mem_create_copy(val_accurate, OSKAR_CPU,
-                status);
+        accurate_temp = oskar_mem_create_copy(val_accurate, OSKAR_CPU, status);
         if (*status)
         {
-            oskar_mem_free(accurate_temp, status);
-            return;
+            oskar_mem_free(accurate_temp, status);        /* LCOV_EXCL_LINE */
+            return;                                       /* LCOV_EXCL_LINE */
         }
         acc_ptr = accurate_temp;
     }
@@ -139,32 +143,26 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     /* Check numbers are the same, to appropriate precision. */
     if (prec_approx == OSKAR_SINGLE && prec_accurate == OSKAR_SINGLE)
     {
-        const float *approx = 0, *accurate = 0;
-        approx = oskar_mem_float_const(app_ptr, status);
-        accurate = oskar_mem_float_const(acc_ptr, status);
+        const float* approx = oskar_mem_float_const(app_ptr, status);
+        const float* accurate = oskar_mem_float_const(acc_ptr, status);
         CHECK_ELEMENTS(1e-5)
     }
     else if (prec_approx == OSKAR_DOUBLE && prec_accurate == OSKAR_SINGLE)
     {
-        const double *approx = 0;
-        const float *accurate = 0;
-        approx = oskar_mem_double_const(app_ptr, status);
-        accurate = oskar_mem_float_const(acc_ptr, status);
+        const double* approx = oskar_mem_double_const(app_ptr, status);
+        const float* accurate = oskar_mem_float_const(acc_ptr, status);
         CHECK_ELEMENTS(1e-5);
     }
     else if (prec_approx == OSKAR_SINGLE && prec_accurate == OSKAR_DOUBLE)
     {
-        const float *approx = 0;
-        const double *accurate = 0;
-        approx = oskar_mem_float_const(app_ptr, status);
-        accurate = oskar_mem_double_const(acc_ptr, status);
+        const float* approx = oskar_mem_float_const(app_ptr, status);
+        const double* accurate = oskar_mem_double_const(acc_ptr, status);
         CHECK_ELEMENTS(1e-5);
     }
     else if (prec_approx == OSKAR_DOUBLE && prec_accurate == OSKAR_DOUBLE)
     {
-        const double *approx = 0, *accurate = 0;
-        approx = oskar_mem_double_const(app_ptr, status);
-        accurate = oskar_mem_double_const(acc_ptr, status);
+        const double* approx = oskar_mem_double_const(app_ptr, status);
+        const double* accurate = oskar_mem_double_const(acc_ptr, status);
         CHECK_ELEMENTS(1e-15);
     }
 

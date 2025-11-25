@@ -1,7 +1,9 @@
 /*
- * Copyright (c) 2014-2021, The OSKAR Developers.
+ * Copyright (c) 2014-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <string.h>
 
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
@@ -15,8 +17,13 @@
 extern "C" {
 #endif
 
-void oskar_mem_set_element_real(oskar_Mem* mem, size_t index,
-        double val, int* status)
+
+void oskar_mem_set_element_real(
+        oskar_Mem* mem,
+        size_t index,
+        double val,
+        int* status
+)
 {
     if (*status) return;
     const int precision = oskar_type_precision(mem->type);
@@ -26,14 +33,14 @@ void oskar_mem_set_element_real(oskar_Mem* mem, size_t index,
         switch (precision)
         {
         case OSKAR_DOUBLE:
-            ((double*)(mem->data))[index] = val;
+            ((double*) (mem->data))[index] = val;
             return;
         case OSKAR_SINGLE:
-            ((float*)(mem->data))[index] = (float) val;
+            ((float*) (mem->data))[index] = (float) val;
             return;
-        default:
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            return;
+        default:                                          /* LCOV_EXCL_LINE */
+            *status = OSKAR_ERR_BAD_DATA_TYPE;            /* LCOV_EXCL_LINE */
+            return;                                       /* LCOV_EXCL_LINE */
         }
     }
     else if (location == OSKAR_GPU)
@@ -43,20 +50,24 @@ void oskar_mem_set_element_real(oskar_Mem* mem, size_t index,
         {
         case OSKAR_DOUBLE:
         {
-            cudaMemcpy((double*)(mem->data) + index, &val, sizeof(double),
-                    cudaMemcpyHostToDevice);
+            cudaMemcpy(
+                    (double*) (mem->data) + index, &val, sizeof(double),
+                    cudaMemcpyHostToDevice
+            );
             return;
         }
         case OSKAR_SINGLE:
         {
             const float val_f = (float) val;
-            cudaMemcpy((float*)(mem->data) + index, &val_f, sizeof(float),
-                    cudaMemcpyHostToDevice);
+            cudaMemcpy(
+                    (float*) (mem->data) + index, &val_f, sizeof(float),
+                    cudaMemcpyHostToDevice
+            );
             return;
         }
-        default:
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            return;
+        default:                                          /* LCOV_EXCL_LINE */
+            *status = OSKAR_ERR_BAD_DATA_TYPE;            /* LCOV_EXCL_LINE */
+            return;                                       /* LCOV_EXCL_LINE */
         }
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -82,19 +93,77 @@ void oskar_mem_set_element_real(oskar_Mem* mem, size_t index,
             *status = OSKAR_ERR_BAD_DATA_TYPE;
             return;
         }
-        const cl_int error = clEnqueueWriteBuffer(oskar_device_queue_cl(),
-                mem->buffer, CL_TRUE, offset, bytes, ptr, 0, NULL, NULL);
+        const cl_int error = clEnqueueWriteBuffer(
+                oskar_device_queue_cl(),
+                mem->buffer, CL_TRUE, offset, bytes, ptr, 0, NULL, NULL
+        );
         if (error != CL_SUCCESS)
         {
-            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
+            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;      /* LCOV_EXCL_LINE */
         }
 #else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;         /* LCOV_EXCL_LINE */
 #endif
     }
-    else
+    else                                                  /* LCOV_EXCL_LINE */
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;                 /* LCOV_EXCL_LINE */
+    }
+}
+
+
+void oskar_mem_set_element_ptr(
+        oskar_Mem* mem,
+        size_t index,
+        void* val,
+        int* status
+)
+{
+    if (*status) return;
+    if (mem->type != OSKAR_PTR)
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
+    const int location = mem->location;
+    if (location == OSKAR_CPU)
+    {
+        ((char**) (mem->data))[index] = val;
+        return;
+    }
+    else if (location == OSKAR_GPU)
+    {
+#ifdef OSKAR_HAVE_CUDA
+        cudaMemcpy(
+                (char*) (mem->data) + (index * sizeof(void*)),
+                &val, sizeof(void*), cudaMemcpyHostToDevice
+        );
+        return;
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;           /* LCOV_EXCL_LINE */
+#endif
+    }
+    else if (location & OSKAR_CL)
+    {
+#ifdef OSKAR_HAVE_OPENCL
+        const size_t bytes = oskar_mem_element_size(mem->type);
+        const size_t offset = bytes * index;
+        const void* ptr = &val;
+        const cl_int error = clEnqueueWriteBuffer(
+                oskar_device_queue_cl(),
+                mem->buffer, CL_TRUE, offset, bytes, ptr, 0, NULL, NULL
+        );
+        if (error != CL_SUCCESS)
+        {
+            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;      /* LCOV_EXCL_LINE */
+        }
+#else
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;         /* LCOV_EXCL_LINE */
+#endif
+    }
+    else                                                  /* LCOV_EXCL_LINE */
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;                 /* LCOV_EXCL_LINE */
     }
 }
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2021, The OSKAR Developers. See LICENSE file. */
+/* Copyright (c) 2018-2025, The OSKAR Developers. See LICENSE file. */
 
 #ifndef M_CAT
 #define M_CAT(A, B) M_CAT_(A, B)
@@ -221,7 +221,7 @@
 #define ATOMIC_ADD_UPDATE_int(ARRAY, IDX, VAL)\
     DO_PRAGMA(omp atomic update) ARRAY[IDX] += VAL;
 
-#define DEVICE_FUNC
+#define DEVICE_FUNC static
 #define FMA(X, Y, Z) (X * Y + Z)
 #define GLOBAL
 #define GLOBAL_IN( TYPE, NAME) const TYPE *const RESTRICT NAME

@@ -1,7 +1,9 @@
 /*
- * Copyright (c) 2013-2022, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <stdlib.h>
 
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
@@ -11,21 +13,23 @@
 #include "mem/private_mem.h"
 #include "utility/oskar_device.h"
 
-#include <stdlib.h>
-#include <string.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
-         int* status)
+
+oskar_Mem* oskar_mem_create(
+        int type,
+        int location,
+        size_t num_elements,
+        int* status
+)
 {
     oskar_Mem* mem = (oskar_Mem*) calloc(1, sizeof(oskar_Mem));
     if (!mem)
     {
-        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-        return 0;
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;         /* LCOV_EXCL_LINE */
+        return 0;                                         /* LCOV_EXCL_LINE */
     }
 
     /* Initialise meta-data.
@@ -51,35 +55,31 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return mem;
     }
-    const size_t bytes = num_elements * element_size;
 
     /* Check whether the memory should be on the host or the device. */
     mem->num_elements = num_elements;
     if (location == OSKAR_CPU)
     {
         /* Allocate host memory. */
-        mem->data = calloc(bytes, 1);
+        mem->data = calloc(num_elements, element_size);
         if (mem->data == NULL)
         {
-            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-            return mem;
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;     /* LCOV_EXCL_LINE */
+            return mem;                                   /* LCOV_EXCL_LINE */
         }
-        /* The memset() call forces the allocation
-         * to actually happen by touching the whole block.
-         * This makes subsequent copies much faster. */
-        memset(mem->data, 0, bytes);
     }
     else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         /* Allocate GPU memory. For efficiency, don't clear it. */
-        *status = (int)cudaMalloc(&mem->data, bytes);
+        const size_t bytes = num_elements * element_size;
+        *status = (int) cudaMalloc(&mem->data, bytes);
         if (!*status && mem->data == NULL)
         {
-            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;     /* LCOV_EXCL_LINE */
         }
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;           /* LCOV_EXCL_LINE */
 #endif
     }
     else if (location & OSKAR_CL)
@@ -87,20 +87,23 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
 #ifdef OSKAR_HAVE_OPENCL
         /* Allocate OpenCL memory buffer using the current context. */
         cl_int error = 0;
-        mem->buffer = clCreateBuffer(oskar_device_context_cl(),
-                CL_MEM_READ_WRITE, bytes, NULL, &error);
+        const size_t bytes = num_elements * element_size;
+        mem->buffer = clCreateBuffer(
+                oskar_device_context_cl(),
+                CL_MEM_READ_WRITE, bytes, NULL, &error
+        );
         if (error != CL_SUCCESS)
         {
-            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;     /* LCOV_EXCL_LINE */
         }
         mem->data = (void*) (mem->buffer);
 #else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;         /* LCOV_EXCL_LINE */
 #endif
     }
     else
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;                 /* LCOV_EXCL_LINE */
     }
 
     /* Return a handle to the structure .*/

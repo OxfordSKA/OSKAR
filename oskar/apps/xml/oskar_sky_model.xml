@@ -49,29 +49,6 @@
         <desc>Random number generator seed used for random
            distributions.</desc></s>
 </group>
-<group k="pol">
-<s k="pol"><label>Polarisation settings</label>
-    <s k="mean_pol_fraction"><label>Mean polarisation fraction</label>
-        <type name="DoubleRange" default="0.0">0,1</type>
-        <desc>The mean polarisation fraction of generated source fluxes
-            (range 0 to 1).</desc></s>
-    <s k="std_pol_fraction">
-        <label>Standard deviation polarisation fraction</label>
-        <type name="DoubleRange" default="0.0">0,1</type>
-        <desc>The standard deviation of polarisation fraction of
-            generated source fluxes (range 0 to 1).</desc></s>
-    <s k="mean_pol_angle_deg"><label>Mean polarisation angle [deg]</label>
-        <type name="double" default="0.0"/>
-        <desc>The mean polarisation angle of generated source fluxes, in
-            degrees.</desc></s>
-    <s k="std_pol_angle_deg">
-        <label>Standard deviation polarisation angle [deg]</label>
-        <type name="UnsignedDouble" default="0.0"/>
-        <desc>The standard deviation of polarisation angle of generated
-            source fluxes, in degrees.</desc></s>
-    <import group="sky/random_seed"/>
-</s>
-</group>
 <group k="random_generator_common">
     <s k="num_sources"><label>Number of sources</label>
         <type name="UInt" default="0"/>
@@ -101,11 +78,11 @@
     <!-- End groups -->
     <desc>These parameters specify the contents of the sky model.</desc>
     <s k="oskar_sky_model"><label>OSKAR sky model file settings</label>
-        <s k="file"><label>OSKAR sky model file(s)</label>
+        <s k="file"><label>Sky model file(s)</label>
             <type name="InputFileList" default=""/>
-            <desc>Paths to one or more OSKAR sky model text or binary files.
-                See the accompanying documentation for a description of an
-                OSKAR sky model file.</desc></s>
+            <desc>Paths to one or more sky model text files.
+                See the documentation for a description of sky model
+                text files.</desc></s>
         <import group="sky/filter"/>
         <import group="sky/extended"/>
     </s>
@@ -205,7 +182,6 @@
                 <desc>The standard deviation of generated Stokes I fluxes,
                     in Jy.</desc></s>
             <import group="sky/random_seed"/>
-            <import group="sky/pol"/>
             <import group="sky/extended"/>
         </s>
         <s k="healpix"><label>HEALPix (uniform, all sky) grid</label>
@@ -281,12 +257,40 @@
                 model covers a small area which is known to be always above
                 every station's horizon for the whole observation.</desc></s>
     </s>
-    <s k="output_binary_file"><label>Output OSKAR sky model binary file</label>
+    <s k="output_text_file"><label>Output sky model text file</label>
         <type name="OutputFile" default=""/>
-        <desc>Path used to save the final sky model structure as an
-            OSKAR binary file. Leave blank if not required.</desc></s>
-    <s k="output_text_file"><label>Output OSKAR sky model text file</label>
-        <type name="OutputFile" default=""/>
-        <desc>Path used to save the final sky model structure as a text
-            file (useful for debugging). Leave blank if not required.</desc></s>
+        <desc>Path used to save the final sky model as a text
+            file (useful for debugging). Leave blank if not required.</desc>
+        <s k="use_named_columns"><label>Use named column format</label>
+            <type name="bool" default="true"/>
+            <desc>If true, save the final sky model as a text file containing
+            a format string with named columns, compatible with
+            LOFAR/BBS/DP3/WSClean, and described at
+            https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb
+            (which can also be read by OSKAR 2.12 or later).
+            If false, save the sky model in the fixed-column format supported
+            by all versions of OSKAR.</desc>
+        </s>
+        <s k="use_degrees"><label>Use degrees in (RA, Dec) columns</label>
+            <depends k="sky/output_text_file/use_named_columns" v="true" />
+            <type name="bool" default="true"/>
+            <desc>If true, (RA, Dec) coordinate columns will be labelled
+                "RaD" and "DecD", and values will be written in degrees,
+                instead of having a "deg" suffix added.</desc>
+        </s>
+        <s k="write_name"><label>Write a source name column</label>
+            <depends k="sky/output_text_file/use_named_columns" v="true" />
+            <type name="bool" default="false"/>
+            <desc>If true, a source name column will be written to the file.
+                Source names are ignored by OSKAR, and are constructed
+                using "s" followed by a (1-based) integer index value.</desc>
+        </s>
+        <s k="write_type"><label>Write a source type column</label>
+            <depends k="sky/output_text_file/use_named_columns" v="true" />
+            <type name="bool" default="false"/>
+            <desc>If true, a source type column will be written to the file.
+                Source types will be written as POINT or GAUSSIAN, depending
+                on whether they have non-zero major and minor axes.</desc>
+        </s>
+    </s>
 </s>

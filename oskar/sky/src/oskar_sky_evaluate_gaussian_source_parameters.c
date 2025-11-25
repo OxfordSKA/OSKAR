@@ -1,20 +1,25 @@
 /*
- * Copyright (c) 2012-2021, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
-#include "sky/oskar_sky.h"
+#include <stdlib.h>
 
+#include "math/oskar_cmath.h"
 #include "math/oskar_fit_ellipse.h"
 #include "math/oskar_rotate.h"
 #include "convert/oskar_convert_lon_lat_to_relative_directions.h"
 #include "convert/oskar_convert_lon_lat_to_xyz.h"
 #include "convert/oskar_convert_relative_directions_to_lon_lat.h"
 #include "convert/oskar_convert_xyz_to_lon_lat.h"
+#include "sky/oskar_sky.h"
 
-#include <stdlib.h>
-#include "math/oskar_cmath.h"
+#define CD(X) oskar_mem_double((X), status)
+#define CDC(X) oskar_mem_double_const((X), status)
+#define CF(X) oskar_mem_float((X), status)
+#define CFC(X) oskar_mem_float_const((X), status)
 
+#define ELLIPSE_PTS 6 /* Number of points that define the ellipse */
 #define M_PI_2_2_LN_2 7.11941466249375271693034 /* pi^2 / (2 log_e(2)) */
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
@@ -23,28 +28,41 @@
 extern "C" {
 #endif
 
-/* Number of points that define the ellipse */
-#define ELLIPSE_PTS 6
 
-void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
-        int zero_failed_sources, double ra0, double dec0, int* num_failed,
-        int* status)
+void oskar_sky_evaluate_gaussian_source_parameters(
+        oskar_Sky* sky,
+        int zero_failed_sources,
+        double ra0,
+        double dec0,
+        int* num_failed,
+        int* status
+)
 {
     int i = 0, j = 0;
     if (*status) return;
-    if (oskar_sky_mem_location(sky) != OSKAR_CPU)
+    if (oskar_sky_int(sky, OSKAR_SKY_MEM_LOCATION) != OSKAR_CPU)
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
-        return;
+        *status = OSKAR_ERR_BAD_LOCATION;                 /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
-    const int type = oskar_sky_precision(sky);
-    const int num_sources = oskar_sky_num_sources(sky);
+    const oskar_Mem* major = oskar_sky_column_const(
+            sky, OSKAR_SKY_MAJOR_RAD, 0
+    );
+    const oskar_Mem* minor = oskar_sky_column_const(
+            sky, OSKAR_SKY_MINOR_RAD, 0
+    );
+    const oskar_Mem* position_angle = oskar_sky_column_const(
+            sky, OSKAR_SKY_PA_RAD, 0
+    );
+    if (!major || !minor || !position_angle) return;
+    const int type = oskar_sky_int(sky, OSKAR_SKY_PRECISION);
+    const int num_sources = oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES);
     const double sin_dec0 = sin(dec0), cos_dec0 = cos(dec0);
     if (type == OSKAR_DOUBLE)
     {
         /* Double precision. */
         const double *ra_ = 0, *dec_ = 0, *maj_ = 0, *min_ = 0, *pa_ = 0;
-        double *I_ = 0, *Q_ = 0, *U_ = 0, *V_ = 0, *a_ = 0, *b_ = 0, *c_ = 0;
+        double *a_ = 0, *b_ = 0, *c_ = 0;
         double cos_pa_2 = 0.0, sin_pa_2 = 0.0, sin_2pa = 0.0;
         double inv_std_min_2 = 0.0, inv_std_maj_2 = 0.0;
         double ellipse_a = 0.0, ellipse_b = 0.0, maj = 0.0, min = 0.0, pa = 0.0;
@@ -53,18 +71,14 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
         double work1[5 * ELLIPSE_PTS], work2[5 * ELLIPSE_PTS];
         double lon[ELLIPSE_PTS], lat[ELLIPSE_PTS];
         double x[ELLIPSE_PTS], y[ELLIPSE_PTS], z[ELLIPSE_PTS];
-        ra_  = oskar_mem_double_const(oskar_sky_ra_rad_const(sky), status);
-        dec_ = oskar_mem_double_const(oskar_sky_dec_rad_const(sky), status);
-        maj_ = oskar_mem_double_const(oskar_sky_fwhm_major_rad_const(sky), status);
-        min_ = oskar_mem_double_const(oskar_sky_fwhm_minor_rad_const(sky), status);
-        pa_  = oskar_mem_double_const(oskar_sky_position_angle_rad_const(sky), status);
-        I_   = oskar_mem_double(oskar_sky_I(sky), status);
-        Q_   = oskar_mem_double(oskar_sky_Q(sky), status);
-        U_   = oskar_mem_double(oskar_sky_U(sky), status);
-        V_   = oskar_mem_double(oskar_sky_V(sky), status);
-        a_   = oskar_mem_double(oskar_sky_gaussian_a(sky), status);
-        b_   = oskar_mem_double(oskar_sky_gaussian_b(sky), status);
-        c_   = oskar_mem_double(oskar_sky_gaussian_c(sky), status);
+        maj_ = CDC(major);
+        min_ = CDC(minor);
+        pa_  = CDC(position_angle);
+        ra_  = CDC(oskar_sky_column_const(sky, OSKAR_SKY_RA_RAD, 0));
+        dec_ = CDC(oskar_sky_column_const(sky, OSKAR_SKY_DEC_RAD, 0));
+        a_   = CD(oskar_sky_column(sky, OSKAR_SKY_SCRATCH_EXT_A, 0, status));
+        b_   = CD(oskar_sky_column(sky, OSKAR_SKY_SCRATCH_EXT_B, 0, status));
+        c_   = CD(oskar_sky_column(sky, OSKAR_SKY_SCRATCH_EXT_C, 0, status));
 
         for (i = 0; i < num_sources; ++i)
         {
@@ -138,10 +152,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
             {
                 if (zero_failed_sources)
                 {
-                    I_[i] = 0.0;
-                    Q_[i] = 0.0;
-                    U_[i] = 0.0;
-                    V_[i] = 0.0;
+                    oskar_sky_clear_source_flux(sky, i, status);
                 }
                 ++(*num_failed);
                 *status = 0;
@@ -164,7 +175,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
     {
         /* Single precision. */
         const float *ra_ = 0, *dec_ = 0, *maj_ = 0, *min_ = 0, *pa_ = 0;
-        float *I_ = 0, *Q_ = 0, *U_ = 0, *V_ = 0, *a_ = 0, *b_ = 0, *c_ = 0;
+        float *a_ = 0, *b_ = 0, *c_ = 0;
         float cos_pa_2 = 0.0, sin_pa_2 = 0.0, sin_2pa = 0.0;
         float inv_std_min_2 = 0.0, inv_std_maj_2 = 0.0;
         float ellipse_a = 0.0, ellipse_b = 0.0, maj = 0.0, min = 0.0, pa = 0.0;
@@ -173,18 +184,14 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
         float work1[5 * ELLIPSE_PTS], work2[5 * ELLIPSE_PTS];
         float lon[ELLIPSE_PTS], lat[ELLIPSE_PTS];
         float x[ELLIPSE_PTS], y[ELLIPSE_PTS], z[ELLIPSE_PTS];
-        ra_  = oskar_mem_float_const(oskar_sky_ra_rad_const(sky), status);
-        dec_ = oskar_mem_float_const(oskar_sky_dec_rad_const(sky), status);
-        maj_ = oskar_mem_float_const(oskar_sky_fwhm_major_rad_const(sky), status);
-        min_ = oskar_mem_float_const(oskar_sky_fwhm_minor_rad_const(sky), status);
-        pa_  = oskar_mem_float_const(oskar_sky_position_angle_rad_const(sky), status);
-        I_   = oskar_mem_float(oskar_sky_I(sky), status);
-        Q_   = oskar_mem_float(oskar_sky_Q(sky), status);
-        U_   = oskar_mem_float(oskar_sky_U(sky), status);
-        V_   = oskar_mem_float(oskar_sky_V(sky), status);
-        a_   = oskar_mem_float(oskar_sky_gaussian_a(sky), status);
-        b_   = oskar_mem_float(oskar_sky_gaussian_b(sky), status);
-        c_   = oskar_mem_float(oskar_sky_gaussian_c(sky), status);
+        maj_ = CFC(major);
+        min_ = CFC(minor);
+        pa_  = CFC(position_angle);
+        ra_  = CFC(oskar_sky_column_const(sky, OSKAR_SKY_RA_RAD, 0));
+        dec_ = CFC(oskar_sky_column_const(sky, OSKAR_SKY_DEC_RAD, 0));
+        a_   = CF(oskar_sky_column(sky, OSKAR_SKY_SCRATCH_EXT_A, 0, status));
+        b_   = CF(oskar_sky_column(sky, OSKAR_SKY_SCRATCH_EXT_B, 0, status));
+        c_   = CF(oskar_sky_column(sky, OSKAR_SKY_SCRATCH_EXT_C, 0, status));
 
         for (i = 0; i < num_sources; ++i)
         {
@@ -227,10 +234,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
             {
                 if (zero_failed_sources)
                 {
-                    I_[i] = 0.0;
-                    Q_[i] = 0.0;
-                    U_[i] = 0.0;
-                    V_[i] = 0.0;
+                    oskar_sky_clear_source_flux(sky, i, status);
                 }
                 ++(*num_failed);
                 *status = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -10,7 +10,7 @@
  * @file oskar_sky_set_source.h
  */
 
-#include <oskar_global.h>
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,8 +32,12 @@ extern "C" {
  * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_set_source_str(oskar_Sky* sky, int index,
-        const char* str, int* status);
+void oskar_sky_set_source_str(
+        oskar_Sky* sky,
+        int index,
+        const char* str,
+        int* status
+);
 
 /**
  * @brief
@@ -43,14 +47,16 @@ void oskar_sky_set_source_str(oskar_Sky* sky, int index,
  * This function sets sky model data for a single source at the given index.
  * The sky model must already be large enough to hold the source data.
  *
+ * Use oskar_sky_set_data() in preference where convenient.
+ *
  * @param[in,out] sky            Pointer to sky model.
  * @param[in] index              Source index in sky model to set.
  * @param[in] ra_rad             Source right ascension in radians.
  * @param[in] dec_rad            Source declination in radians.
- * @param[in] I                  Source Stokes I in Jy.
- * @param[in] Q                  Source Stokes Q in Jy.
- * @param[in] U                  Source Stokes U in Jy.
- * @param[in] V                  Source Stokes V in Jy.
+ * @param[in] stokes_i           Source Stokes I in Jy.
+ * @param[in] stokes_q           Source Stokes Q in Jy.
+ * @param[in] stokes_u           Source Stokes U in Jy.
+ * @param[in] stokes_v           Source Stokes V in Jy.
  * @param[in] ref_frequency_hz   Source reference frequency in Hz.
  * @param[in] spectral_index     Source spectral index.
  * @param[in] rotation_measure   Source rotation measure in radians/m^2.
@@ -60,11 +66,23 @@ void oskar_sky_set_source_str(oskar_Sky* sky, int index,
  * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
-        double dec_rad, double I, double Q, double U, double V,
-        double ref_frequency_hz, double spectral_index, double rotation_measure,
-        double fwhm_major_rad, double fwhm_minor_rad, double position_angle_rad,
-        int* status);
+void oskar_sky_set_source(
+        oskar_Sky* sky,
+        int index,
+        double ra_rad,
+        double dec_rad,
+        double stokes_i,
+        double stokes_q,
+        double stokes_u,
+        double stokes_v,
+        double ref_frequency_hz,
+        double spectral_index,
+        double rotation_measure,
+        double fwhm_major_rad,
+        double fwhm_minor_rad,
+        double position_angle_rad,
+        int* status
+);
 
 #ifdef __cplusplus
 }

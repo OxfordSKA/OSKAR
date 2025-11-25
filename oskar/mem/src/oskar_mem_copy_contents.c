@@ -1,7 +1,9 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <string.h>
 
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
@@ -11,14 +13,19 @@
 #include "mem/private_mem.h"
 #include "utility/oskar_device.h"
 
-#include <string.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
-        size_t offset_dst, size_t offset_src, size_t num_elements, int* status)
+
+void oskar_mem_copy_contents(
+        oskar_Mem* dst,
+        const oskar_Mem* src,
+        size_t offset_dst,
+        size_t offset_src,
+        size_t num_elements,
+        int* status
+)
 {
     void *destination = 0;
     if (*status) return;
@@ -28,14 +35,14 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     }
     if (src->type != dst->type)
     {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
+        *status = OSKAR_ERR_TYPE_MISMATCH;                /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
     if (num_elements > src->num_elements ||
             num_elements > (dst->num_elements - offset_dst))
     {
-        *status = OSKAR_ERR_OUT_OF_RANGE;
-        return;
+        *status = OSKAR_ERR_OUT_OF_RANGE;                 /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
     const size_t element_size = oskar_mem_element_size(src->type);
     const size_t bytes        = element_size * num_elements;
@@ -43,8 +50,8 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     const size_t start_src    = element_size * offset_src;
     const int location_src    = src->location;
     const int location_dst    = dst->location;
-    const void *source = (const void*)((const char*)(src->data) + start_src);
-    destination        = (void*)((char*)(dst->data) + start_dst);
+    const void *source = (const void*) ((const char*) (src->data) + start_src);
+    destination        = (void*) ((char*) (dst->data) + start_dst);
 
     /* Host to host. */
     if (location_src == OSKAR_CPU && location_dst == OSKAR_CPU)
@@ -56,10 +63,11 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     else if (location_src == OSKAR_CPU && location_dst == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        *status = (int)cudaMemcpy(destination, source, bytes,
-                cudaMemcpyHostToDevice);
+        *status = (int) cudaMemcpy(
+                destination, source, bytes, cudaMemcpyHostToDevice
+        );
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;           /* LCOV_EXCL_LINE */
 #endif
     }
 
@@ -67,10 +75,11 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     else if (location_src == OSKAR_GPU && location_dst == OSKAR_CPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        *status = (int)cudaMemcpy(destination, source, bytes,
-                cudaMemcpyDeviceToHost);
+        *status = (int) cudaMemcpy(
+                destination, source, bytes, cudaMemcpyDeviceToHost
+        );
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;           /* LCOV_EXCL_LINE */
 #endif
     }
 
@@ -78,10 +87,11 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     else if (location_src == OSKAR_GPU && location_dst == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        *status = (int)cudaMemcpy(destination, source, bytes,
-                cudaMemcpyDeviceToDevice);
+        *status = (int) cudaMemcpy(
+                destination, source, bytes, cudaMemcpyDeviceToDevice
+        );
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;           /* LCOV_EXCL_LINE */
 #endif
     }
 
@@ -89,16 +99,21 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     else if (location_src == OSKAR_CPU && (location_dst & OSKAR_CL))
     {
 #ifdef OSKAR_HAVE_OPENCL
-        const cl_int error = clEnqueueWriteBuffer(oskar_device_queue_cl(),
+        const cl_int error = clEnqueueWriteBuffer(
+                oskar_device_queue_cl(),
                 dst->buffer, CL_TRUE, start_dst, bytes, source,
-                0, NULL, NULL);
+                0, NULL, NULL
+        );
         if (error != CL_SUCCESS)
         {
-            fprintf(stderr, "clEnqueueWriteBuffer() error (%d)\n", error);
-            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
+            fprintf(                                      /* LCOV_EXCL_LINE */
+                    stderr, "clEnqueueWriteBuffer() "     /* LCOV_EXCL_LINE */
+                    "error (%d)\n", error                 /* LCOV_EXCL_LINE */
+            );
+            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;      /* LCOV_EXCL_LINE */
         }
 #else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;         /* LCOV_EXCL_LINE */
 #endif
     }
 
@@ -106,16 +121,21 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     else if ((location_src & OSKAR_CL) && location_dst == OSKAR_CPU)
     {
 #ifdef OSKAR_HAVE_OPENCL
-        const cl_int error = clEnqueueReadBuffer(oskar_device_queue_cl(),
+        const cl_int error = clEnqueueReadBuffer(
+                oskar_device_queue_cl(),
                 src->buffer, CL_TRUE, start_src, bytes, destination,
-                0, NULL, NULL);
+                0, NULL, NULL
+        );
         if (error != CL_SUCCESS)
         {
-            fprintf(stderr, "clEnqueueReadBuffer() error (%d)\n", error);
-            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
+            fprintf(                                      /* LCOV_EXCL_LINE */
+                    stderr, "clEnqueueReadBuffer() "      /* LCOV_EXCL_LINE */
+                    "error (%d)\n", error                 /* LCOV_EXCL_LINE */
+            );
+            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;      /* LCOV_EXCL_LINE */
         }
 #else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;         /* LCOV_EXCL_LINE */
 #endif
     }
 
@@ -123,21 +143,26 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     else if ((location_src & OSKAR_CL) && (location_dst & OSKAR_CL))
     {
 #ifdef OSKAR_HAVE_OPENCL
-        const cl_int error = clEnqueueCopyBuffer(oskar_device_queue_cl(),
+        const cl_int error = clEnqueueCopyBuffer(
+                oskar_device_queue_cl(),
                 src->buffer, dst->buffer, start_src, start_dst, bytes,
-                0, NULL, NULL);
+                0, NULL, NULL
+        );
         if (error != CL_SUCCESS)
         {
-            fprintf(stderr, "clEnqueueCopyBuffer() error (%d)\n", error);
-            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
+            fprintf(                                      /* LCOV_EXCL_LINE */
+                    stderr, "clEnqueueCopyBuffer() "      /* LCOV_EXCL_LINE */
+                    "error (%d)\n", error                 /* LCOV_EXCL_LINE */
+            );
+            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;      /* LCOV_EXCL_LINE */
         }
 #else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;         /* LCOV_EXCL_LINE */
 #endif
     }
-    else
+    else                                                  /* LCOV_EXCL_LINE */
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;                 /* LCOV_EXCL_LINE */
     }
 }
 

@@ -1,12 +1,13 @@
 /*
- * Copyright (c) 2013-2021, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <gtest/gtest.h>
 
-#include "utility/oskar_get_error_string.h"
 #include "mem/oskar_mem.h"
+#include "utility/oskar_device.h"
+#include "utility/oskar_get_error_string.h"
 
 
 TEST(Mem, different_none)
@@ -17,14 +18,49 @@ TEST(Mem, different_none)
     one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(one, 4.4, 0, 20, &status);
-    oskar_mem_set_value_real(two, 4.4, 0, 20, &status);
+    oskar_mem_set_value_real(one, 4.4, 0, oskar_mem_length(one), &status);
+    oskar_mem_set_value_real(two, 4.4, 0, oskar_mem_length(two), &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ((int)OSKAR_FALSE, oskar_mem_different(one, two, 0, &status));
+    ASSERT_EQ((int) OSKAR_FALSE, oskar_mem_different(one, two, 0, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(one, &status);
     oskar_mem_free(two, &status);
+}
+
+
+TEST(Mem, different_lengths)
+{
+    // Test two memory blocks of different sizes.
+    int status = 0;
+    oskar_Mem *one = 0, *two = 0;
+    one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 40, &status);
+    two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_mem_set_value_real(one, 4.4, 0, oskar_mem_length(one), &status);
+    oskar_mem_set_value_real(two, 4.4, 0, oskar_mem_length(two), &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    ASSERT_EQ((int) OSKAR_TRUE, oskar_mem_different(one, two, 0, &status));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_mem_free(one, &status);
+    oskar_mem_free(two, &status);
+}
+
+
+TEST(Mem, different_types)
+{
+    // Test two memory blocks of different types.
+    int status = 0;
+    oskar_Mem *one = 0, *two = 0;
+    one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
+    two = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 20, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_mem_set_value_real(one, 4.4, 0, oskar_mem_length(one), &status);
+    oskar_mem_set_value_real(two, 4.4, 0, oskar_mem_length(two), &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    ASSERT_EQ((int) OSKAR_TRUE, oskar_mem_different(one, two, 0, &status));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_mem_free(one, &status);
+    oskar_mem_free(two, &status);
 }
 
 
@@ -36,14 +72,13 @@ TEST(Mem, different_all)
     one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(one, 4.4, 0, 20, &status);
-    oskar_mem_set_value_real(two, 4.2, 0, 20, &status);
+    oskar_mem_set_value_real(one, 4.4, 0, oskar_mem_length(one), &status);
+    oskar_mem_set_value_real(two, 4.2, 0, oskar_mem_length(two), &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ((int)OSKAR_TRUE, oskar_mem_different(one, two, 0, &status));
+    ASSERT_EQ((int) OSKAR_TRUE, oskar_mem_different(one, two, 0, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(one, &status);
     oskar_mem_free(two, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
 
@@ -55,15 +90,14 @@ TEST(Mem, different_by_one)
     one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(one, 1.0, 0, 20, &status);
-    oskar_mem_set_value_real(two, 1.0, 0, 20, &status);
+    oskar_mem_set_value_real(one, 1.0, 0, oskar_mem_length(one), &status);
+    oskar_mem_set_value_real(two, 1.0, 0, oskar_mem_length(two), &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_float(two, &status)[4] = 1.1f;
-    ASSERT_EQ((int)OSKAR_TRUE, oskar_mem_different(one, two, 0, &status));
+    ASSERT_EQ((int) OSKAR_TRUE, oskar_mem_different(one, two, 0, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(one, &status);
     oskar_mem_free(two, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
 
@@ -76,13 +110,33 @@ TEST(Mem, different_up_to_a_point)
     one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(one, 1.0, 0, 20, &status);
-    oskar_mem_set_value_real(two, 1.0, 0, 20, &status);
+    oskar_mem_set_value_real(one, 1.0, 0, oskar_mem_length(one), &status);
+    oskar_mem_set_value_real(two, 1.0, 0, oskar_mem_length(two), &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_float(two, &status)[4] = 1.1f;
-    ASSERT_EQ((int)OSKAR_FALSE, oskar_mem_different(one, two, 4, &status));
+    ASSERT_EQ((int) OSKAR_FALSE, oskar_mem_different(one, two, 4, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(one, &status);
     oskar_mem_free(two, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+}
+
+
+TEST(Mem, different_device_mem)
+{
+    int status = 0;
+    int location = 0;
+    if (oskar_device_count(NULL, &location) > 0)
+    {
+        oskar_Mem *one = 0, *two = 0;
+        one = oskar_mem_create(OSKAR_SINGLE, location, 20, &status);
+        two = oskar_mem_create(OSKAR_SINGLE, location, 20, &status);
+        oskar_mem_set_value_real(one, 1.0, 0, oskar_mem_length(one), &status);
+        oskar_mem_set_value_real(two, 1.0, 0, oskar_mem_length(two), &status);
+
+        /* Difference checks are currently only supported in CPU memory. */
+        ASSERT_EQ((int) OSKAR_TRUE, oskar_mem_different(one, two, 0, &status));
+        ASSERT_EQ((int) OSKAR_ERR_BAD_LOCATION, status);
+        oskar_mem_free(one, &status);
+        oskar_mem_free(two, &status);
+    }
 }

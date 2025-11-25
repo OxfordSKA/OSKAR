@@ -1,26 +1,39 @@
 /*
- * Copyright (c) 2016-2022, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
-#include "mem/oskar_mem.h"
-#include "math/oskar_cmath.h"
-#include <fitsio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <fitsio.h>
+
+#include "math/oskar_cmath.h"
+#include "mem/oskar_mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define MAX_AXES 10
-#define FACTOR (2.0*sqrt(2.0*log(2.0)))
+#define FACTOR (2. * sqrt(2. * log(2.)))
 
-oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
-        int i_chan, int i_stokes, int* image_size, double* image_crval_deg,
-        double* image_crpix, double* image_cellsize_deg,
-        double* image_time, double* image_freq_hz, double* beam_area_pixels,
-        char** brightness_units, int* status)
+
+oskar_Mem* oskar_mem_read_fits_image_plane(
+        const char* filename,
+        int i_time,
+        int i_chan,
+        int i_stokes,
+        int* image_size,
+        double* image_crval_deg,
+        double* image_crpix,
+        double* image_cellsize_deg,
+        double* image_time,
+        double* image_freq_hz,
+        double* beam_area_pixels,
+        char** brightness_units,
+        int* status
+)
 {
     int i = 0, naxis = 0, imagetype = 0, anynul = 0;
     int status1 = 0, status2 = 0, type_fits = 0, type_oskar = 0;
@@ -31,16 +44,14 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
     double nul = 0.0, bmaj = 0.0, bmin = 0.0;
     fitsfile* fptr = 0;
     oskar_Mem* data = 0;
-
-    /* Check if safe to proceed. */
     if (*status) return 0;
 
     /* Open the file. */
     fits_open_file(&fptr, filename, READONLY, status);
     if (*status || !fptr)
     {
-        *status = OSKAR_ERR_FILE_IO;
-        return 0;
+        *status = OSKAR_ERR_FILE_IO;                      /* LCOV_EXCL_LINE */
+        return 0;                                         /* LCOV_EXCL_LINE */
     }
 
     /* Get the image parameters. */
@@ -75,6 +86,7 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
     fits_read_keys_dbl(fptr, "CDELT", 1, naxis, cdelt, &i, status);
     if (cdelt[0] == 0.0 || cdelt[1] == 0.0)
     {
+        /* LCOV_EXCL_START */
         double cd1_1 = 0.0, cd1_2 = 0.0, cd2_1 = 0.0, cd2_2 = 0.0;
         *status = 0;
         fits_read_key(fptr, TDOUBLE, "CD1_1", &cd1_1, 0, status);
@@ -88,16 +100,22 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
             cdelt[1] = cd2_2;
         }
         *status = 0;
+        /* LCOV_EXCL_STOP */
     }
 
     /* Identify the axes. */
     for (i = 0; i < naxis; ++i)
     {
-        if (strncmp(ctype[i], "STOKES", 6) == 0) {
+        if (strncmp(ctype[i], "STOKES", 6) == 0)
+        {
             axis_stokes = i;
-        } else if (strncmp(ctype[i], "FREQ", 4) == 0) {
+        }
+        else if (strncmp(ctype[i], "FREQ", 4) == 0)
+        {
             axis_chan = i;
-        } else if (strncmp(ctype[i], "TIME", 4) == 0) {
+        }
+        else if (strncmp(ctype[i], "TIME", 4) == 0)
+        {
             axis_time = i;
         }
     }
@@ -105,39 +123,30 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
     /* Check ranges and set the dimensions to read. */
     if (axis_stokes >= 0)
     {
-        if (i_stokes >= naxes[axis_stokes])
-        {
-            goto range_error;
-        }
+        if (i_stokes >= naxes[axis_stokes]) goto range_error;
         firstpix[axis_stokes] = 1 + i_stokes;
     }
     else if (i_stokes > 0)
     {
-        goto range_error;
+        goto range_error;                                 /* LCOV_EXCL_LINE */
     }
     if (axis_chan >= 0)
     {
-        if (i_chan >= naxes[axis_chan])
-        {
-            goto range_error;
-        }
+        if (i_chan >= naxes[axis_chan]) goto range_error;
         firstpix[axis_chan] = 1 + i_chan;
     }
     else if (i_chan > 0)
     {
-        goto range_error;
+        goto range_error;                                 /* LCOV_EXCL_LINE */
     }
     if (axis_time >= 0)
     {
-        if (i_time >= naxes[axis_time])
-        {
-            goto range_error;
-        }
+        if (i_time >= naxes[axis_time]) goto range_error;
         firstpix[axis_time] = 1 + i_time;
     }
     else if (i_time > 0)
     {
-        goto range_error;
+        goto range_error;                                 /* LCOV_EXCL_LINE */
     }
 
     /* Return requested image metadata. */
@@ -185,9 +194,9 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
             fits_read_record(fptr, i, card, status);
             if (!strncmp(card, "HISTORY AIPS   CLEAN BMAJ", 25))
             {
-                bmaj = strtod(card + 26, 0);
-                bmin = strtod(card + 44, 0);
-                break;
+                bmaj = strtod(card + 26, 0);              /* LCOV_EXCL_LINE */
+                bmin = strtod(card + 44, 0);              /* LCOV_EXCL_LINE */
+                break;                                    /* LCOV_EXCL_LINE */
             }
         }
     }
@@ -217,6 +226,7 @@ oskar_Mem* oskar_mem_read_fits_image_plane(const char* filename, int i_time,
     return data;
 
     /* Error conditions. */
+    /* LCOV_EXCL_START */
 range_error:
     oskar_mem_free(data, status);
     fits_close_file(fptr, status);
@@ -228,6 +238,7 @@ file_error:
     fits_close_file(fptr, status);
     *status = OSKAR_ERR_FILE_IO;
     return 0;
+    /* LCOV_EXCL_STOP */
 }
 
 #ifdef __cplusplus

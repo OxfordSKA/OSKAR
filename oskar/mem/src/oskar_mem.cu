@@ -1,8 +1,7 @@
-/* Copyright (c) 2018-2022, The OSKAR Developers. See LICENSE file. */
+/* Copyright (c) 2018-2025, The OSKAR Developers. See LICENSE file. */
 
 #include "math/define_multiply.h"
 #include "mem/define_mem_add.h"
-#include "mem/define_mem_conjugate.h"
 #include "mem/define_mem_multiply.h"
 #include "mem/define_mem_normalise.h"
 #include "mem/define_mem_scale_real.h"

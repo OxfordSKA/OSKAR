@@ -1,4 +1,12 @@
-2025-xx-yy  OSKAR-2.11.2
+2025-xx-yy  OSKAR-2.12.0
+
+    * Re-write sky model code to allow for source spectral profiles
+      supported by LOFAR/BBS/DP3/WSClean, using logarithmic or linear
+      polynomials with up to eight terms.
+
+    * Support loading and saving of sky model text files with named columns.
+
+    * Support sources modelled using a single spectral curvature term.
 
     * Support loading of coefficients for spherical wave element patterns
       directly from HDF5 files written by FEKO.

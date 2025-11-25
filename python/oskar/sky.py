@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2016-2020, The OSKAR Developers.
+# Copyright (c) 2016-2025, The OSKAR Developers.
 # See the LICENSE file at the top-level directory of this distribution.
 #
 
@@ -8,12 +8,20 @@
 
 from __future__ import absolute_import, division, print_function
 import math
+import re
+
 import numpy
+
 try:
     from . import _sky_lib
 except ImportError:
     _sky_lib = None
 
+from oskar.utils import oskar_version_string
+
+PATTERN = re.compile(
+    r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:[-\.]?\S+)?'
+)
 
 class Sky(object):
     """This class provides a Python interface to an OSKAR sky model.
@@ -22,7 +30,7 @@ class Sky(object):
     Python. The sky model can be thought of as simply a table of source data,
     where each row of the table contains parameters for a single source.
     The sky model table format is described in the
-    `sky model documentation <https://github.com/OxfordSKA/OSKAR/releases>`_
+    `sky model documentation <https://ska-telescope.gitlab.io/sim/oskar/sky_model/sky_model.html>`_
     and a summary of the columns is also included below for convenience.
     Only the first three are manadatory (others can be omitted, and will
     default to zero).
@@ -55,7 +63,16 @@ class Sky(object):
     | 12     | Position angle      | deg       |
     +--------+---------------------+-----------+
 
-    A sky model can be loaded from a text file using the
+    Since OSKAR 2.12.0, sky model files compatible with LOFAR software,
+    including BBS, DP3 and WSClean, can be loaded and saved.
+    Columns in the text file are almost all optional and may appear in any
+    order, and are identified using a format string, which is
+    parsed when loading the file.
+    The file format and column names are described in the
+    `LOFAR Wiki page <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb>`_
+
+    A sky model (either containing named columns, or the old fixed-format
+    style) can be loaded from a text file using the
     :meth:`load() <oskar.Sky.load()>` method,
     or created directly from a numpy array using the
     :meth:`from_array() <oskar.Sky.from_array()>` method.
@@ -72,8 +89,11 @@ class Sky(object):
     :meth:`num_sources <oskar.Sky.num_sources>` property.
     A copy of the sky model data can be returned as a numpy array using the
     :meth:`to_array() <oskar.Sky.to_array()>` method,
-    and written as a text file using the
+    and written as a fixed-format text file using the
     :meth:`save() <oskar.Sky.save()>` method.
+    Use the method :meth:`save_named_columns() <oskar.Sky.save_named_columns()>`
+    to save a flexible-format text file containing a header specifying
+    which columns are present, and in which order.
 
     Note that the sky model used by OSKAR exists independently from the
     simulated observation parameters: make sure the phase centre is set
@@ -219,30 +239,40 @@ class Sky(object):
                 Source Gaussian position angle values, in degrees.
         """
         self.capsule_ensure()
-        if Q is None:
-            Q = numpy.zeros_like(I)
-        if U is None:
-            U = numpy.zeros_like(I)
-        if V is None:
-            V = numpy.zeros_like(I)
-        if ref_freq_hz is None:
-            ref_freq_hz = numpy.zeros_like(I)
-        if spectral_index is None:
-            spectral_index = numpy.zeros_like(I)
-        if rotation_measure is None:
-            rotation_measure = numpy.zeros_like(I)
-        if major_axis_arcsec is None:
-            major_axis_arcsec = numpy.zeros_like(I)
-        if minor_axis_arcsec is None:
-            minor_axis_arcsec = numpy.zeros_like(I)
-        if position_angle_deg is None:
-            position_angle_deg = numpy.zeros_like(I)
-        _sky_lib.append_sources(
-            self._capsule, numpy.radians(ra_deg), numpy.radians(dec_deg),
-            I, Q, U, V, ref_freq_hz, spectral_index, rotation_measure,
-            numpy.radians(major_axis_arcsec / 3600.0),
-            numpy.radians(minor_axis_arcsec / 3600.0),
-            numpy.radians(position_angle_deg))
+        m = PATTERN.search(oskar_version_string())
+        major = int(m.group("major"))
+        minor = int(m.group("minor"))
+        if major <= 2 and minor <= 11:
+            if Q is None:
+                Q = numpy.zeros_like(I)
+            if U is None:
+                U = numpy.zeros_like(I)
+            if V is None:
+                V = numpy.zeros_like(I)
+            if ref_freq_hz is None:
+                ref_freq_hz = numpy.zeros_like(I)
+            if spectral_index is None:
+                spectral_index = numpy.zeros_like(I)
+            if rotation_measure is None:
+                rotation_measure = numpy.zeros_like(I)
+            if major_axis_arcsec is None:
+                major_axis_arcsec = numpy.zeros_like(I)
+            if minor_axis_arcsec is None:
+                minor_axis_arcsec = numpy.zeros_like(I)
+            if position_angle_deg is None:
+                position_angle_deg = numpy.zeros_like(I)
+            _sky_lib.append_sources(
+                self._capsule, numpy.radians(ra_deg), numpy.radians(dec_deg),
+                I, Q, U, V, ref_freq_hz, spectral_index, rotation_measure,
+                numpy.radians(major_axis_arcsec / 3600.0),
+                numpy.radians(minor_axis_arcsec / 3600.0),
+                numpy.radians(position_angle_deg))
+        else:
+            _sky_lib.append_sources(
+                self._capsule, ra_deg, dec_deg, I, Q, U, V,
+                ref_freq_hz, spectral_index, rotation_measure,
+                major_axis_arcsec, minor_axis_arcsec, position_angle_deg
+            )
 
     def append_file(self, filename):
         """Appends data to the sky model from a text file.
@@ -457,13 +487,32 @@ class Sky(object):
         return t
 
     def save(self, filename):
-        """Saves data to a sky model text file.
+        """Saves data to a fixed-format sky model text file.
 
         Args:
             filename (str): Name of file to write.
         """
         self.capsule_ensure()
         _sky_lib.save(self._capsule, filename)
+
+    def save_named_columns(
+            self, filename, use_degrees=True,
+            write_name=False, write_type=False
+    ):
+        """Saves data to a flexible-format sky model text file.
+
+        Args:
+            filename (str): Name of file to write.
+            use_degrees (bool): If true, write RA and Dec in columns
+                    titled "RaD" and "DecD", and omit the "deg" suffix
+                    from values.
+            write_name (bool): If true, write a column containing source names.
+            write_type (bool): If true, write a column containing source types.
+        """
+        self.capsule_ensure()
+        _sky_lib.save_named_columns(
+            self._capsule, filename, use_degrees, write_name, write_type
+        )
 
     def to_array(self):
         """Returns a copy of the sky model as a 2D numpy array.
@@ -473,11 +522,16 @@ class Sky(object):
         """
         self.capsule_ensure()
         array = _sky_lib.to_array(self._capsule)
-        array[:, 0] *= (180.0 / math.pi)
-        array[:, 1] *= (180.0 / math.pi)
-        array[:, 9] *= (180.0 / math.pi) * 3600.0
-        array[:, 10] *= (180.0 / math.pi) * 3600.0
-        array[:, 11] *= (180.0 / math.pi)
+        m = PATTERN.search(oskar_version_string())
+        major = int(m.group("major"))
+        minor = int(m.group("minor"))
+        if major <= 2 and minor <= 11:
+            # Old version did the conversions in Python.
+            array[:, 0] *= (180.0 / math.pi)
+            array[:, 1] *= (180.0 / math.pi)
+            array[:, 9] *= (180.0 / math.pi) * 3600.0
+            array[:, 10] *= (180.0 / math.pi) * 3600.0
+            array[:, 11] *= (180.0 / math.pi)
         return array
 
     def to_ds9_regions(self, filename, colour='green', width=1):
@@ -489,9 +543,7 @@ class Sky(object):
             width (Optional[int]): Line width. Default 1.
         """
         self.capsule_ensure()
-        array = _sky_lib.to_array(self._capsule)
-        array[:, 0] *= (180.0 / math.pi)
-        array[:, 1] *= (180.0 / math.pi)
+        array = self.to_array()
         with open(filename, "w") as file:
             file.write('global color=%s dashlist=8 3 width=%d '
                        'font="helvetica 10 normal roman" select=1 highlite=1 '

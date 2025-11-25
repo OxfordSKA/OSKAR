@@ -1,41 +1,32 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "sky/private_sky.h"
 #include "sky/oskar_sky.h"
 
-#include "mem/oskar_mem.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+
 void oskar_sky_resize(oskar_Sky* sky, int num_sources, int* status)
 {
-    if (*status) return;
+    int i = 0;
+    if (*status || sky->attr_int[OSKAR_SKY_NUM_SOURCES] == num_sources) return;
     const int capacity = num_sources + 1;
-    sky->capacity = capacity;
-    sky->num_sources = num_sources;
-    oskar_mem_realloc(sky->ra_rad, capacity, status);
-    oskar_mem_realloc(sky->dec_rad, capacity, status);
-    oskar_mem_realloc(sky->I, capacity, status);
-    oskar_mem_realloc(sky->Q, capacity, status);
-    oskar_mem_realloc(sky->U, capacity, status);
-    oskar_mem_realloc(sky->V, capacity, status);
-    oskar_mem_realloc(sky->reference_freq_hz, capacity, status);
-    oskar_mem_realloc(sky->spectral_index, capacity, status);
-    oskar_mem_realloc(sky->rm_rad, capacity, status);
-    oskar_mem_realloc(sky->l, capacity, status);
-    oskar_mem_realloc(sky->m, capacity, status);
-    oskar_mem_realloc(sky->n, capacity, status);
-    oskar_mem_realloc(sky->fwhm_major_rad, capacity, status);
-    oskar_mem_realloc(sky->fwhm_minor_rad, capacity, status);
-    oskar_mem_realloc(sky->pa_rad, capacity, status);
-    oskar_mem_realloc(sky->gaussian_a, capacity, status);
-    oskar_mem_realloc(sky->gaussian_b, capacity, status);
-    oskar_mem_realloc(sky->gaussian_c, capacity, status);
+    const int num_columns = sky->attr_int[OSKAR_SKY_NUM_COLUMNS];
+    for (i = 0; i < num_columns; ++i)
+    {
+        oskar_mem_realloc(sky->columns[i], capacity, status);
+        oskar_mem_set_element_ptr(
+                sky->ptr_columns, i,
+                oskar_mem_void(sky->columns[i]), status
+        );
+    }
+    sky->attr_int[OSKAR_SKY_CAPACITY] = capacity;
+    sky->attr_int[OSKAR_SKY_NUM_SOURCES] = num_sources;
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 
+
 void oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src, int* status)
 {
     if (*status || !src || !dst) return;
@@ -16,8 +17,8 @@ void oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src, int* status)
     /* Check the data types. */
     if (oskar_mem_type(src) != oskar_mem_type(dst))
     {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
+        *status = OSKAR_ERR_TYPE_MISMATCH;                /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
 
     /* Check the data dimensions, and resize if required. */

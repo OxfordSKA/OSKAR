@@ -8,24 +8,172 @@
 Sky Model
 *********
 
-This document describes the sky model file format used by OSKAR 2.x.
+This section describes the sky model file formats recognised by OSKAR 2.x.
 
-OSKAR sky model files contain a simple catalogue to describe the source
+Sky model files contain a simple catalogue to describe the source
 properties for a set of point sources or Gaussian sources.
-For each source in the model it is possible to specify:
 
-* A position in equatorial coordinates (Right Ascension and Declination).
-* Flux densities for all four Stokes parameters (I, Q, U, V), at a reference
-  frequency.
-* Reference frequency, spectral index and rotation measure.
-* Gaussian source width parameters (FWHM and position angle).
+Since OSKAR 2.12, it is possible to load and save a large subset of
+sky model parameters supported by LOFAR software, including BBS, DP3
+and WSClean.
+This is the "named-column" format described below.
 
-Sky Model File
-==============
 
-The sky model file holds a table of ASCII text, where each row corresponds to
-one source, and columns describe the source parameters. Most parameters are
-optional, and will be set to a default value if not specified.
+Sky Model File (named-column format)
+====================================
+
+This flexible format uses a single-line format string in the file
+header, which defines which columns are present, and in which order.
+Each row corresponds to one source, and columns describe the source
+parameters.
+The format string is described in some detail on the
+`LOFAR Wiki page <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#format_string>`_.
+
+Format strings supported by OSKAR include having the "Format =" specifier
+either at the start or the end of a line, with field types optionally
+enclosed in brackets, spelled in mixed case, or embedded within a comment,
+and space- and/or comma-separated.
+The only requirement is that "Format" must appear at the start or end of a
+line (neglecting comment characters and whitespace), and have an equals '='
+character either before or after the word.
+So all these format strings, and variations thereof, would be accepted by OSKAR:
+
+* ``Format = RA, Dec, I``
+* ``# format = RA Dec I``
+* ``Format= (Ra, Dec, I, Q, U, V)``
+* ``# (RA,Dec,I,Q,U) = format``
+
+The field types in the format string are reserved names to specify the type
+of data in each column of the text file.
+Field type names supported by OSKAR are case-insensitive, and include:
+
+.. csv-table::
+   :header: "Field type", "Unit", "Description"
+   :widths: 22, 12, 66
+
+   **Ra**, angle, "Right Ascension, in decimal degrees or radians (default);
+   |br| or sexagesimal hours, minutes and seconds.
+   |br| See note below."
+   **Dec**, angle, "Declination, in decimal degrees or radians (default);
+   |br| or sexagesimal degrees, minutes and seconds.
+   |br| See note below."
+   **RaD**, angle, "Right Ascension, in decimal degrees (default) or radians;
+   |br| or sexagesimal hours, minutes and seconds. |br|
+   Use instead of **Ra** if required. See note below."
+   **DecD**, angle, "Declination, in decimal degrees (default) or radians;
+   |br| or sexagesimal degrees, minutes and seconds. |br|
+   Use instead of **Dec** if required. See note below."
+   **I**, Jy, "Stokes I flux."
+   **Q**, Jy, "Optional Stokes Q flux."
+   **U**, Jy, "Optional Stokes U flux."
+   **V**, Jy, "Optional Stokes V flux."
+   **ReferenceFrequency**, Hz, "Optional reference frequency for spectral index"
+   **SpectralIndex**, N/A, "Optional spectral index polynomial; can be a
+   multi-valued |br| vector, with a list of values enclosed in brackets;
+   up to 8 terms |br| are supported."
+   **LogarithmicSI**, boolean, "Optional boolean flag: If true, spectral
+   indices are logarithmic, |br| otherwise linear; see the
+   `LOFAR Wiki page on LogarithmicSI <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#logarithmic_spectral_index>`_.
+   |br| Default true if omitted."
+   **MajorAxis**, arcsec, "Optional Gaussian source FWHM major axis."
+   **MinorAxis**, arcsec, "Optional Gaussian source FWHM minor axis."
+   **Orientation** |br| or **PositionAngle**, deg, "Optional position angle
+   of Gaussian major axis."
+   **RotationMeasure**, rad/m^2, "Optional source rotation measure."
+   **PolarizationAngle** |br| or **PolarisationAngle**, deg, "Optional
+   source polarisation angle; used if Q and U are |br| omitted, or when
+   a rotation measure is set."
+   **PolarizedFraction** |br| or **PolarisedFraction**, N/A, "Optional
+   fraction of linear polarisation, used if Q and U are |br| omitted, or when
+   a rotation measure is set."
+   **ReferenceWavelength**, metres, "Optional reference wavelength,
+   used with the rotation |br| measure parameter. If omitted, it will be
+   calculated based on |br| the reference frequency."
+   **SpectralCurvature**, N/A, "Optional spectral curvature term described in
+   |br| `Callingham et. al. (2017) <https://iopscience.iop.org/article/10.3847/1538-4357/836/2/174/pdf>`_,
+   equation 2, where this value is |br| interpreted as the parameter 'q'.
+   If present, only the first |br| **SpectralIndex** value will be used,
+   and any others will be |br| ignored."
+
+.. tip::
+   - Columns may appear in any order, and optional columns may be omitted
+     entirely.
+   - Unknown column types will be ignored when the file is loaded - note that
+     this includes columns **Name** and **Type** used by LOFAR software.
+   - Gaussian sources are specified using non-zero values in both
+     **MajorAxis** and **MinorAxis** columns.
+
+.. warning::
+   If the **ReferenceFrequency** is omitted or set to zero, the source flux
+   cannot be re-calculated as a function of frequency, even if spectral index
+   and/or rotation measure values are specified.
+   In this case, the source flux values will be the same at every frequency.
+
+.. note::
+   The coordinate values used in the (**RA**, **Dec**) columns may have a
+   suffix added to define the unit, either "rad" or "deg" respectively
+   for radians or degrees.
+   For consistency, if the unit is omitted, radians is assumed for
+   both the "**Ra**" and "**Dec**" columns, and degrees is assumed if the
+   column names are instead "**RaD**" or "**DecD**".
+
+.. note::
+   If a **RotationMeasure** is defined, it will be used along with the
+   **PolarizationAngle**, **PolarizedFraction** and **ReferenceWavelength**
+   parameters according to the logic described in the
+   `BBS chapter of the LOFAR Imaging Cookbook <https://support.astron.nl/LOFARImagingCookbook/bbs.html#rotation-measure>`_
+
+In addition, all columns can take a default value, which is specified
+in the format string header inside quotes, after an '=' character.
+The default will be used for all sources which do not explicitly set that
+parameter value.
+If a default is set, there must be no spaces either before or after the '='.
+
+For example, to specify a common reference frequency for all sources in the
+sky model, the following format string could be used:
+
+``Format = RaD, DecD, I, ReferenceFrequency='143e6', MajorAxis, MinorAxis``
+
+The fields can be space-separated and/or comma-separated. Characters
+appearing after a hash (``#``) symbol are treated as comments and will be
+ignored. Empty lines are also ignored.
+
+Example
+-------
+
+.. code-block:: text
+
+   # Number of sources: 3
+   # (Name, Type, Ra, Dec, I, ReferenceFrequency='100e6', SpectralIndex, Q, U, MajorAxis, MinorAxis, Orientation, V) = format
+   s1,POINT,20deg,-30deg,1,,-0.7,0,0,,,,0
+   s2,GAUSSIAN,20deg,-30.5deg,3,,-0.7,2,2,600,50,45,0
+   s3,GAUSSIAN,20.5deg,-30.5deg,3,,-0.7,0,0,700,10,-10,2
+
+.. raw:: latex
+
+    \clearpage
+
+Sky Model File (fixed format)
+=============================
+
+The original fixed-format sky model file used by OSKAR holds a simple
+text-based table, where each row corresponds to one source, and columns
+describe the source parameters.
+The column order is implicit and cannot be changed.
+Most parameters are optional, and will be set to a default value of zero if not
+specified.
+The defaults in this format cannot be changed.
+
+Although this format is less flexible and supports fewer features than the
+named-column format described above, it can be easier to parse, and is
+therefore still supported for simple sky models.
+In particular, it can be loaded into Python very straightforwardly
+using ``numpy.loadtxt()``.
+
+.. note::
+   When the file is read, parameters are assigned according to their column
+   position. In order to specify an optional parameter, all columns up to the
+   designated column must be specified.
 
 In order, the parameter columns are:
 
@@ -50,11 +198,6 @@ In order, the parameter columns are:
    In order for a source to be recognised as a Gaussian, all three of the
    major axis FWHM, minor axis FWHM and position angle parameters must be
    specified.
-
-.. note::
-   When the file is read, parameters are assigned according to their column
-   position. In order to specify an optional parameter, all columns up to the
-   designated column must be specified.
 
 .. note::
    The rotation measure column was added for OSKAR 2.3.0. To provide backwards
@@ -109,66 +252,39 @@ a number of comment lines.
 Spectral Index
 ==============
 
-The spectral index :math:`\alpha` is defined according to the following equation:
+The spectral index parameters are used as described on the
+`LOFAR Wiki page detailing logarithmic and linear spectral indices <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#logarithmic_spectral_index>`_.
 
-.. math:: \mathbf{F} = \mathbf{F_0} (\nu/\nu_0 )^{\alpha}
+Logarithmic Polynomial
+----------------------
+The default logarithmic spectral indices
+(:math:`\alpha_0, \alpha_1, \alpha_2 \cdots`) are used to scale the
+flux :math:`S_0` given at the reference frequency :math:`\nu_0` to
+another frequency :math:`\nu` as follows:
 
-where :math:`\mathbf{F}` is a 4-vector containing the Stokes (I,Q,U,V) fluxes
-of the source at the current observing frequency :math:`\nu`, and
-:math:`\mathbf{F_0}` is a 4-vector containing the fluxes at the reference
-frequency :math:`\nu_0`. Negative values for :math:`\alpha` will cause the flux at
-frequencies higher than the reference frequency to be reduced relative to the
-reference flux.
+.. math:: S_{\nu} = S_0 \left( \frac{\nu}{\nu_0} \right)^{\alpha_0 + \alpha_1 \log_{10}\left( \frac{\nu}{\nu_0} \right) + \alpha_2 \log_{10}\left( \frac{\nu}{\nu_0} \right)^2 + \cdots }
 
-Rotation Measure
-================
+If using only a single spectral index value :math:`\alpha_0`, this reduces
+to the usual expression of
+:math:`S_{\nu} = S_0 \left(\nu / \nu_0 \right)^{\alpha_0}`.
 
-Faraday rotation will cause the plane of polarisation of radiation from a
-source to be rotated, relative to a reference frequency, by an additional
-angle :math:`\beta`. This angle is defined in the normal right-handed sense
-for radiation towards the observer (:math:`\beta` is positive as sketched below).
+Linear Polynomial
+-----------------
+The linear spectral indices used by WSClean are also supported, and used if
+**LogarithmicSI** is false.
+In this case, the flux :math:`S_0` given at the reference frequency
+:math:`\nu_0` scales to another frequency :math:`\nu` as follows:
 
-.. figure:: rotation_measure.png
-   :width: 12cm
-   :align: center
-   :alt: Rotation measure definition
+.. math:: S_{\nu} = S_0 + \alpha_0 \left( \frac{\nu}{\nu_0} - 1 \right) + \alpha_1 \left( \frac{\nu}{\nu_0} - 1 \right)^2 + \alpha_2 \left( \frac{\nu}{\nu_0} - 1 \right)^3 + \cdots
 
-The rotation angle is given by the expression
-:math:`\beta = RM (\lambda^2 - \lambda_0^2 )`, where :math:`\lambda_0` is the
-wavelength at the reference frequency, :math:`\lambda` is the wavelength at the
-observing frequency, and RM is the rotation measure. The angle :math:`\beta` is
-positive when RM is positive and the new wavelength is greater than the
-reference wavelength.
+Spectral Curvature
+------------------
+If specified, the **SpectralCurvature** parameter (:math:`q`) is used with
+the first spectral index value (:math:`\alpha_0`) to scale the flux :math:`S_0`
+given at the reference frequency :math:`\nu_0` to another
+frequency :math:`\nu` as follows:
 
-The source Stokes parameters are modified for the observing frequency using a
-normal 2D rotation matrix, and its transpose:
-
-.. math::
-
-   \left[
-   \begin{array}{cc}
-   \cos\beta & -\sin\beta \\
-   \sin\beta & \cos\beta
-   \end{array}
-   \right]
-   \left[
-   \begin{array}{cc}
-   I_0 + Q_0   & U_0 + i V_0 \\
-   U_0 - i V_0 & I_0 - Q_0
-   \end{array}
-   \right]
-   \left[
-   \begin{array}{cc}
-   \cos\beta  & \sin\beta \\
-   -\sin\beta & \cos\beta
-   \end{array}
-   \right]
-
-Multiplying this out implies that
-
-* :math:`Q_0` transforms to :math:`Q=Q_0 \cos(2\beta)-U_0 \sin(2\beta)`,
-* :math:`U_0` transforms to :math:`U=Q_0 \sin(2\beta)+U_0 \cos(2\beta)`,
-* :math:`I` and :math:`V` remain unchanged, as expected.
+.. math:: S_{\nu} = S_0 \left( \frac{\nu}{\nu_0} \right)^{\alpha_0} \exp\left( q \ln\left( \frac{\nu}{\nu_0} \right)^2 \right)
 
 .. raw:: latex
 

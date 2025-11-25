@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2023, The OSKAR Developers.
+ * Copyright (c) 2012-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -48,12 +48,10 @@ enum OSKAR_MEM_LOCATION
 #include <binary/oskar_binary_data_types.h>
 #include <mem/oskar_mem_accessors.h>
 #include <mem/oskar_mem_add.h>
-#include <mem/oskar_mem_add_real.h>
 #include <mem/oskar_mem_append_raw.h>
 #include <mem/oskar_mem_clear_contents.h>
 #include <mem/oskar_mem_copy.h>
 #include <mem/oskar_mem_copy_contents.h>
-#include <mem/oskar_mem_conjugate.h>
 #include <mem/oskar_mem_convert_precision.h>
 #include <mem/oskar_mem_create.h>
 #include <mem/oskar_mem_create_alias.h>
@@ -72,19 +70,19 @@ enum OSKAR_MEM_LOCATION
 #include <mem/oskar_mem_random_gaussian.h>
 #include <mem/oskar_mem_random_range.h>
 #include <mem/oskar_mem_random_uniform.h>
-#include <mem/oskar_mem_read_binary_raw.h>
 #include <mem/oskar_mem_read_element.h>
 #include <mem/oskar_mem_read_fits.h>
+#include <mem/oskar_mem_read_fits_bintable.h>
 #include <mem/oskar_mem_read_fits_image_plane.h>
 #include <mem/oskar_mem_read_healpix_fits.h>
 #include <mem/oskar_mem_realloc.h>
 #include <mem/oskar_mem_save_ascii.h>
 #include <mem/oskar_mem_scale_real.h>
-#include <mem/oskar_mem_set_alias.h>
 #include <mem/oskar_mem_set_element.h>
 #include <mem/oskar_mem_set_value_real.h>
 #include <mem/oskar_mem_stats.h>
 #include <mem/oskar_mem_to_sdp_mem.h>
+#include <mem/oskar_mem_write_fits_bintable.h>
 #include <mem/oskar_mem_write_fits_cube.h>
 #include <mem/oskar_mem_write_healpix_fits.h>
 

@@ -1,241 +1,132 @@
 /*
- * Copyright (c) 2013-2022, The OSKAR Developers.
+ * Copyright (c) 2013-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "sky/private_sky.h"
-#include "sky/oskar_sky_accessors.h"
+#include "sky/oskar_sky.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_sky_precision(const oskar_Sky* sky)
+
+double oskar_sky_double(const oskar_Sky* sky, oskar_SkyAttribDouble attribute)
 {
-    return sky->precision;
+    return (attribute >= OSKAR_SKY_NUM_ATTRIBUTES_DOUBLE ? 0. :
+            sky->attr_double[attribute]
+    );
 }
 
-int oskar_sky_mem_location(const oskar_Sky* sky)
+
+int oskar_sky_int(const oskar_Sky* sky, oskar_SkyAttribInt attribute)
 {
-    return sky->mem_location;
+    return (attribute >= OSKAR_SKY_NUM_ATTRIBUTES_INT ? 0 :
+            sky->attr_int[attribute]
+    );
 }
 
-int oskar_sky_capacity(const oskar_Sky* sky)
+
+void oskar_sky_set_double(
+        oskar_Sky* sky,
+        oskar_SkyAttribDouble attribute,
+        double value
+)
 {
-    return sky->capacity;
+    switch (attribute)
+    {
+    case OSKAR_SKY_REF_RA_RAD:
+    case OSKAR_SKY_REF_DEC_RAD:
+        sky->attr_double[attribute] = value;
+        break;
+    default:                                              /* LCOV_EXCL_LINE */
+        break; /* Unreachable. */                         /* LCOV_EXCL_LINE */
+    }
 }
 
-int oskar_sky_num_sources(const oskar_Sky* sky)
+
+void oskar_sky_set_int(oskar_Sky* sky, oskar_SkyAttribInt attribute, int value)
 {
-    return sky->num_sources;
+    switch (attribute)
+    {
+    case OSKAR_SKY_PRECISION:
+    case OSKAR_SKY_MEM_LOCATION:
+    case OSKAR_SKY_CAPACITY:
+    case OSKAR_SKY_NUM_SOURCES:
+    case OSKAR_SKY_NUM_COLUMNS:
+        /* Read-only attributes - do nothing, as these can't be set here. */
+        break;
+    case OSKAR_SKY_USE_EXTENDED:
+        sky->attr_int[attribute] = value;
+        break;
+    default:                                              /* LCOV_EXCL_LINE */
+        break; /* Unreachable. */                         /* LCOV_EXCL_LINE */
+    }
 }
 
-int oskar_sky_use_extended(const oskar_Sky* sky)
+
+int oskar_sky_num_columns_of_type(
+        const oskar_Sky* sky,
+        oskar_SkyColumn column_type
+)
 {
-    return sky->use_extended;
+    int i = 0;
+    int count = 0;
+    const int num_columns = sky->attr_int[OSKAR_SKY_NUM_COLUMNS];
+    for (; i < num_columns; ++i)
+    {
+        if (sky->column_type[i] == column_type) count++;
+    }
+    return count;
 }
 
-void oskar_sky_set_use_extended(oskar_Sky* sky, int value)
+
+int oskar_sky_column_attribute(const oskar_Sky* sky, int column_index)
 {
-    sky->use_extended = value;
+    const int num_columns = sky->attr_int[OSKAR_SKY_NUM_COLUMNS];
+    return (column_index < 0 || column_index >= num_columns ?
+            -1 : sky->column_attr[column_index]
+    );
 }
 
-double oskar_sky_reference_ra_rad(const oskar_Sky* sky)
+
+oskar_SkyColumn oskar_sky_column_type(const oskar_Sky* sky, int column_index)
 {
-    return sky->reference_ra_rad;
+    const int num_columns = sky->attr_int[OSKAR_SKY_NUM_COLUMNS];
+    return (column_index < 0 || column_index >= num_columns ?
+            OSKAR_SKY_CUSTOM : (oskar_SkyColumn) sky->column_type[column_index]
+    );
 }
 
-double oskar_sky_reference_dec_rad(const oskar_Sky* sky)
+
+void oskar_sky_set_data(
+        oskar_Sky* sky,
+        oskar_SkyColumn column_type,
+        int column_attribute,
+        int index,
+        double value,
+        int* status
+)
 {
-    return sky->reference_dec_rad;
+    oskar_Mem* column = oskar_sky_column(
+            sky, column_type, column_attribute, status
+    );
+    if (column) oskar_mem_set_element_real(column, index, value, status);
 }
 
-oskar_Mem* oskar_sky_ra_rad(oskar_Sky* sky)
-{
-    return sky->ra_rad;
-}
 
-const oskar_Mem* oskar_sky_ra_rad_const(const oskar_Sky* sky)
+double oskar_sky_data(
+        const oskar_Sky* sky,
+        oskar_SkyColumn column_type,
+        int column_attribute,
+        int index
+)
 {
-    return sky->ra_rad;
-}
-
-oskar_Mem* oskar_sky_dec_rad(oskar_Sky* sky)
-{
-    return sky->dec_rad;
-}
-
-const oskar_Mem* oskar_sky_dec_rad_const(const oskar_Sky* sky)
-{
-    return sky->dec_rad;
-}
-
-/* NOLINTNEXTLINE(readability-identifier-naming) */
-oskar_Mem* oskar_sky_I(oskar_Sky* sky)
-{
-    return sky->I;
-}
-
-/* NOLINTNEXTLINE(readability-identifier-naming) */
-const oskar_Mem* oskar_sky_I_const(const oskar_Sky* sky)
-{
-    return sky->I;
-}
-
-/* NOLINTNEXTLINE(readability-identifier-naming) */
-oskar_Mem* oskar_sky_Q(oskar_Sky* sky)
-{
-    return sky->Q;
-}
-
-/* NOLINTNEXTLINE(readability-identifier-naming) */
-const oskar_Mem* oskar_sky_Q_const(const oskar_Sky* sky)
-{
-    return sky->Q;
-}
-
-/* NOLINTNEXTLINE(readability-identifier-naming) */
-oskar_Mem* oskar_sky_U(oskar_Sky* sky)
-{
-    return sky->U;
-}
-
-/* NOLINTNEXTLINE(readability-identifier-naming) */
-const oskar_Mem* oskar_sky_U_const(const oskar_Sky* sky)
-{
-    return sky->U;
-}
-
-/* NOLINTNEXTLINE(readability-identifier-naming) */
-oskar_Mem* oskar_sky_V(oskar_Sky* sky)
-{
-    return sky->V;
-}
-
-/* NOLINTNEXTLINE(readability-identifier-naming) */
-const oskar_Mem* oskar_sky_V_const(const oskar_Sky* sky)
-{
-    return sky->V;
-}
-
-oskar_Mem* oskar_sky_reference_freq_hz(oskar_Sky* sky)
-{
-    return sky->reference_freq_hz;
-}
-
-const oskar_Mem* oskar_sky_reference_freq_hz_const(const oskar_Sky* sky)
-{
-    return sky->reference_freq_hz;
-}
-
-oskar_Mem* oskar_sky_spectral_index(oskar_Sky* sky)
-{
-    return sky->spectral_index;
-}
-
-const oskar_Mem* oskar_sky_spectral_index_const(const oskar_Sky* sky)
-{
-    return sky->spectral_index;
-}
-
-oskar_Mem* oskar_sky_rotation_measure_rad(oskar_Sky* sky)
-{
-    return sky->rm_rad;
-}
-
-const oskar_Mem* oskar_sky_rotation_measure_rad_const(const oskar_Sky* sky)
-{
-    return sky->rm_rad;
-}
-
-oskar_Mem* oskar_sky_l(oskar_Sky* sky)
-{
-    return sky->l;
-}
-
-const oskar_Mem* oskar_sky_l_const(const oskar_Sky* sky)
-{
-    return sky->l;
-}
-
-oskar_Mem* oskar_sky_m(oskar_Sky* sky)
-{
-    return sky->m;
-}
-
-const oskar_Mem* oskar_sky_m_const(const oskar_Sky* sky)
-{
-    return sky->m;
-}
-
-oskar_Mem* oskar_sky_n(oskar_Sky* sky)
-{
-    return sky->n;
-}
-
-const oskar_Mem* oskar_sky_n_const(const oskar_Sky* sky)
-{
-    return sky->n;
-}
-
-oskar_Mem* oskar_sky_fwhm_major_rad(oskar_Sky* sky)
-{
-    return sky->fwhm_major_rad;
-}
-
-const oskar_Mem* oskar_sky_fwhm_major_rad_const(const oskar_Sky* sky)
-{
-    return sky->fwhm_major_rad;
-}
-
-oskar_Mem* oskar_sky_fwhm_minor_rad(oskar_Sky* sky)
-{
-    return sky->fwhm_minor_rad;
-}
-
-const oskar_Mem* oskar_sky_fwhm_minor_rad_const(const oskar_Sky* sky)
-{
-    return sky->fwhm_minor_rad;
-}
-
-oskar_Mem* oskar_sky_position_angle_rad(oskar_Sky* sky)
-{
-    return sky->pa_rad;
-}
-
-const oskar_Mem* oskar_sky_position_angle_rad_const(const oskar_Sky* sky)
-{
-    return sky->pa_rad;
-}
-
-oskar_Mem* oskar_sky_gaussian_a(oskar_Sky* sky)
-{
-    return sky->gaussian_a;
-}
-
-const oskar_Mem* oskar_sky_gaussian_a_const(const oskar_Sky* sky)
-{
-    return sky->gaussian_a;
-}
-
-oskar_Mem* oskar_sky_gaussian_b(oskar_Sky* sky)
-{
-    return sky->gaussian_b;
-}
-
-const oskar_Mem* oskar_sky_gaussian_b_const(const oskar_Sky* sky)
-{
-    return sky->gaussian_b;
-}
-
-oskar_Mem* oskar_sky_gaussian_c(oskar_Sky* sky)
-{
-    return sky->gaussian_c;
-}
-
-const oskar_Mem* oskar_sky_gaussian_c_const(const oskar_Sky* sky)
-{
-    return sky->gaussian_c;
+    int status = 0;
+    const oskar_Mem* column = oskar_sky_column_const(
+            sky, column_type, column_attribute
+    );
+    return column ? oskar_mem_get_element(column, index, &status) : 0.0;
 }
 
 #ifdef __cplusplus

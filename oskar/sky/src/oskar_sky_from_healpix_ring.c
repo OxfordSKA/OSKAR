@@ -1,24 +1,29 @@
 /*
- * Copyright (c) 2016-2022, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "convert/oskar_convert_galactic_to_fk5.h"
 #include "convert/oskar_convert_healpix_ring_to_theta_phi.h"
-#include "sky/oskar_sky.h"
 #include "math/oskar_cmath.h"
-
-#include <string.h>
+#include "sky/oskar_sky.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-oskar_Sky* oskar_sky_from_healpix_ring(int precision, const oskar_Mem* data,
-        double frequency_hz, double spectral_index, int nside,
-        int galactic_coords, int* status)
+
+oskar_Sky* oskar_sky_from_healpix_ring(
+        int precision,
+        const oskar_Mem* data,
+        double frequency_hz,
+        double spectral_index,
+        int nside,
+        int galactic_coords,
+        int* status
+)
 {
-    int i = 0, s = 0, num_pixels = 0, type = 0;
+    int i = 0, s = 0;
     const void* ptr = 0;
     oskar_Sky* sky = 0;
     if (*status) return 0;
@@ -28,36 +33,41 @@ oskar_Sky* oskar_sky_from_healpix_ring(int precision, const oskar_Mem* data,
 
     /* Save contents of memory to sky model. */
     ptr = oskar_mem_void_const(data);
-    type = oskar_mem_precision(data);
-    num_pixels = 12 * nside * nside;
+    const int type = oskar_mem_precision(data);
+    const int num_pixels = 12 * nside * nside;
     for (; i < num_pixels; ++i)
     {
-        double lat = 0.0, lon = 0.0, val = 0.0;
+        double lat_rad = 0.0, lon_rad = 0.0, val = 0.0;
         if (*status) break;
         val = (type == OSKAR_SINGLE) ?
-                ((const float*)ptr)[i] : ((const double*)ptr)[i];
+                ((const float*) ptr)[i] : ((const double*) ptr)[i];
         if (val == 0.0) continue;
 
         /* Convert HEALPix index into spherical coordinates. */
-        oskar_convert_healpix_ring_to_theta_phi_pixel(nside, i, &lat, &lon);
-        lat = M_PI / 2.0 - lat; /* Colatitude to latitude. */
+        oskar_convert_healpix_ring_to_theta_phi_pixel(
+                nside, i, &lat_rad, &lon_rad
+        );
+        lat_rad = M_PI / 2.0 - lat_rad; /* Colatitude to latitude. */
 
         /* Convert Galactic coordinates to RA, Dec values if required. */
         if (galactic_coords)
         {
-            oskar_convert_galactic_to_fk5(1, &lon, &lat, &lon, &lat);
+            oskar_convert_galactic_to_fk5(
+                    1, &lon_rad, &lat_rad, &lon_rad, &lat_rad
+            );
         }
 
         /* Set source data into sky model. */
-        if (oskar_sky_num_sources(sky) <= s)
+        if (oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES) <= s)
         {
             oskar_sky_resize(sky, s + 1000000, status);
         }
-        oskar_sky_set_source(sky, s++, lon, lat, val, 0.0, 0.0, 0.0,
-                frequency_hz, spectral_index, 0.0, 0.0, 0.0, 0.0, status);
+        oskar_sky_set_source(
+                sky, s++, lon_rad, lat_rad, val, 0.0, 0.0, 0.0,
+                frequency_hz, spectral_index, 0.0, 0.0, 0.0, 0.0, status
+        );
     }
     oskar_sky_resize(sky, s, status);
-
     return sky;
 }
 

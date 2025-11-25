@@ -254,30 +254,6 @@ Tags in this group have a group ID of 4.
 
    1, "Run log [string]."
 
-Sky Model
----------
-Tags in this group have a group ID of 7.
-
-.. csv-table::
-   :header: "Tag ID", "Description"
-   :widths: 10, 90
-
-   1, "Number of sources [int]."
-   2, "Data type of all arrays [int]. (See `Payload Data Type`_)"
-   3, "Right Ascension values, in radians [array; type given by tag ID 2]."
-   4, "Declination values, in radians [array; type given by tag ID 2]."
-   5, "Stokes I values, in Jy [array; type given by tag ID 2]."
-   6, "Stokes Q values, in Jy [array; type given by tag ID 2]."
-   7, "Stokes U values, in Jy [array; type given by tag ID 2]."
-   8, "Stokes V values, in Jy [array; type given by tag ID 2]."
-   9, "Reference frequency values, in Hz [array; type given by tag ID 2]."
-   10, "Spectral index values [array; type given by tag ID 2]."
-   11, "FWHM (major axis), in radians [array; type given by tag ID 2]."
-   12, "FWHM (minor axis), in radians [array; type given by tag ID 2]."
-   13, "Position angle of major axis, in radians [array; type given by tag ID 2]."
-   14, "Rotation measure, in radians / :math:`\mathrm{m}^2`
-   [array; type given by tag ID 2]."
-
 Visibility Header
 -----------------
 Tags in this group have a group ID of 11.

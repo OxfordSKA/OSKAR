@@ -1,7 +1,10 @@
 /*
- * Copyright (c) 2011-2021, The OSKAR Developers.
+ * Copyright (c) 2011-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
@@ -11,13 +14,10 @@
 #include "mem/private_mem.h"
 #include "utility/oskar_device.h"
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
 {
@@ -34,8 +34,8 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
     const size_t element_size = oskar_mem_element_size(mem->type);
     if (element_size == 0)
     {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;                /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
     const size_t new_size = num_elements * element_size;
     const size_t old_size = mem->num_elements * element_size;
@@ -50,14 +50,14 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         void* mem_new = realloc(mem->data, new_size);
         if (!mem_new && (new_size > 0))
         {
-            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-            return;
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;     /* LCOV_EXCL_LINE */
+            return;                                       /* LCOV_EXCL_LINE */
         }
 
         /* Initialise the new memory if it's larger than the old block. */
         if (new_size > old_size)
         {
-            memset((char*)mem_new + old_size, 0, new_size - old_size);
+            memset((char*) mem_new + old_size, 0, new_size - old_size);
         }
 
         /* Set the new meta-data. */
@@ -71,16 +71,16 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         void* mem_new = NULL;
         if (new_size > 0)
         {
-            const int cuda_error = (int)cudaMalloc(&mem_new, new_size);
+            const int cuda_error = (int) cudaMalloc(&mem_new, new_size);
             if (cuda_error)
             {
-                *status = cuda_error;
-                return;
+                *status = cuda_error;                     /* LCOV_EXCL_LINE */
+                return;                                   /* LCOV_EXCL_LINE */
             }
             if (!mem_new)
             {
-                *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-                return;
+                *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE; /* LCOV_EXCL_LINE */
+                return;                                   /* LCOV_EXCL_LINE */
             }
         }
 
@@ -88,23 +88,21 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         const size_t copy_size = (old_size > new_size) ? new_size : old_size;
         if (copy_size > 0)
         {
-            const int cuda_error = (int)cudaMemcpy(mem_new,
-                    mem->data, copy_size, cudaMemcpyDeviceToDevice);
-            if (cuda_error)
-            {
-                *status = cuda_error;
-            }
+            const int cuda_error = (int) cudaMemcpy(
+                    mem_new, mem->data, copy_size, cudaMemcpyDeviceToDevice
+            );
+            if (cuda_error) *status = cuda_error;
         }
 
         /* Free the old block. */
-        const int cuda_error = (int)cudaFree(mem->data);
+        const int cuda_error = (int) cudaFree(mem->data);
         if (cuda_error && !*status) *status = cuda_error;
 
         /* Set the new meta-data. */
         mem->data = mem_new;
         mem->num_elements = num_elements;
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;           /* LCOV_EXCL_LINE */
 #endif
     }
     else if (mem->location & OSKAR_CL)
@@ -114,23 +112,27 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         cl_event event = 0;
         cl_int error = 0;
         cl_mem mem_new = 0;
-        mem_new = clCreateBuffer(oskar_device_context_cl(),
-                CL_MEM_READ_WRITE, new_size, NULL, &error);
+        mem_new = clCreateBuffer(
+                oskar_device_context_cl(),
+                CL_MEM_READ_WRITE, new_size, NULL, &error
+        );
         if (error != CL_SUCCESS)
         {
-            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-            return;
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;     /* LCOV_EXCL_LINE */
+            return;                                       /* LCOV_EXCL_LINE */
         }
 
         /* Copy contents of old block to new block. */
         const size_t copy_size = (old_size > new_size) ? new_size : old_size;
         if (copy_size > 0)
         {
-            error = clEnqueueCopyBuffer(oskar_device_queue_cl(), mem->buffer,
-                    mem_new, 0, 0, copy_size, 0, NULL, &event);
+            error = clEnqueueCopyBuffer(
+                    oskar_device_queue_cl(), mem->buffer,
+                    mem_new, 0, 0, copy_size, 0, NULL, &event
+            );
             if (error != CL_SUCCESS)
             {
-                *status = OSKAR_ERR_MEMORY_COPY_FAILURE;
+                *status = OSKAR_ERR_MEMORY_COPY_FAILURE;  /* LCOV_EXCL_LINE */
             }
         }
 
@@ -145,12 +147,12 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         mem->data = (void*) (mem->buffer);
         mem->num_elements = num_elements;
 #else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;
+        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;         /* LCOV_EXCL_LINE */
 #endif
     }
     else
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;                 /* LCOV_EXCL_LINE */
     }
 }
 

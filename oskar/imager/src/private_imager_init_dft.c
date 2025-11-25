@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, The OSKAR Developers.
+ * Copyright (c) 2016-2025, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -16,7 +16,7 @@ extern "C" {
 
 void oskar_imager_init_dft(oskar_Imager* h, int* status)
 {
-    size_t num_pixels = 0;
+    size_t i = 0, num_pixels = 0;
     if (*status) return;
 
     /* Calculate pixel coordinate grid required for the DFT imager. */
@@ -28,10 +28,29 @@ void oskar_imager_init_dft(oskar_Imager* h, int* status)
     h->l = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
     h->m = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
     h->n = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
-    oskar_evaluate_image_lmn_grid(h->image_size, h->image_size,
+    oskar_evaluate_image_lmn_grid(
+            h->image_size, h->image_size,
             h->fov_deg * M_PI/180, h->fov_deg * M_PI/180, 0,
-            h->l, h->m, h->n, status);
-    oskar_mem_add_real(h->n, -1.0, status); /* n-1 */
+            h->l, h->m, h->n, status
+    );
+
+    /* Evaluate n - 1. */
+    if (h->imager_prec == OSKAR_DOUBLE)
+    {
+        double* t = oskar_mem_double(h->n, status);
+        for (i = 0; i < num_pixels; ++i)
+        {
+            t[i] -= 1.0;
+        }
+    }
+    else
+    {
+        float* t = oskar_mem_float(h->n, status);
+        for (i = 0; i < num_pixels; ++i)
+        {
+            t[i] -= 1.0;
+        }
+    }
 
     /* Expand the number of devices to the number of selected GPUs,
      * if required. */

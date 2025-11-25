@@ -7,7 +7,6 @@
 
 #include "binary/oskar_binary.h"
 #include "sky/oskar_sky.h"
-#include "telescope/station/element/oskar_element.h"
 #include "vis/oskar_vis_header.h"
 #include "vis/oskar_vis_block.h"
 
@@ -27,10 +26,12 @@ const char* oskar_get_binary_tag_string(char group, char tag)
             return "Date";
         case OSKAR_TAG_METADATA_OSKAR_VERSION_STRING:
             return "OSKAR version";
-        case OSKAR_TAG_METADATA_USERNAME:    return "Username";
-        case OSKAR_TAG_METADATA_CWD:         return "Working directory";
-        default:
-            return "Unknown metadata group tag";
+        case OSKAR_TAG_METADATA_USERNAME:
+            return "Username";
+        case OSKAR_TAG_METADATA_CWD:
+            return "Working directory";
+        default:                                          /* LCOV_EXCL_LINE */
+            return "Unknown metadata group tag";          /* LCOV_EXCL_LINE */
         }
         break;
     }
@@ -38,10 +39,12 @@ const char* oskar_get_binary_tag_string(char group, char tag)
     {
         switch (tag)
         {
-        case OSKAR_TAG_SETTINGS_PATH:        return "Settings file path";
-        case OSKAR_TAG_SETTINGS:             return "Settings file";
-        default:
-            return "Unknown settings group tag";
+        case OSKAR_TAG_SETTINGS_PATH:
+            return "Settings file path";
+        case OSKAR_TAG_SETTINGS:
+            return "Settings file";
+        default:                                          /* LCOV_EXCL_LINE */
+            return "Unknown settings group tag";          /* LCOV_EXCL_LINE */
         }
         break;
     }
@@ -49,38 +52,10 @@ const char* oskar_get_binary_tag_string(char group, char tag)
     {
         switch (tag)
         {
-        case OSKAR_TAG_RUN_LOG:             return "Run log";
-        default:
-            return "Unknown run group tag";
-        }
-        break;
-    }
-    case OSKAR_TAG_GROUP_SKY_MODEL:
-    {
-        switch (tag)
-        {
-        case OSKAR_SKY_TAG_NUM_SOURCES:     return "Number of sources";
-        case OSKAR_SKY_TAG_DATA_TYPE:       return "Data type";
-        case OSKAR_SKY_TAG_RA:              return "Right Ascension values";
-        case OSKAR_SKY_TAG_DEC:             return "Declination values";
-        case OSKAR_SKY_TAG_STOKES_I:        return "Stokes I values";
-        case OSKAR_SKY_TAG_STOKES_Q:        return "Stokes Q values";
-        case OSKAR_SKY_TAG_STOKES_U:        return "Stokes U values";
-        case OSKAR_SKY_TAG_STOKES_V:        return "Stokes V values";
-        case OSKAR_SKY_TAG_REF_FREQ:
-            return "Reference frequency values";
-        case OSKAR_SKY_TAG_SPECTRAL_INDEX:
-            return "Spectral index values";
-        case OSKAR_SKY_TAG_ROTATION_MEASURE:
-            return "Rotation measure values";
-        case OSKAR_SKY_TAG_FWHM_MAJOR:
-            return "Gaussian FWHM (major) values";
-        case OSKAR_SKY_TAG_FWHM_MINOR:
-            return "Gaussian FWHM (minor) values";
-        case OSKAR_SKY_TAG_POSITION_ANGLE:
-            return "Gaussian position angle values";
-        default:
-            return "Unknown sky model group tag";
+        case OSKAR_TAG_RUN_LOG:
+            return "Run log";
+        default:                                          /* LCOV_EXCL_LINE */
+            return "Unknown run group tag";               /* LCOV_EXCL_LINE */
         }
         break;
     }
@@ -162,8 +137,8 @@ const char* oskar_get_binary_tag_string(char group, char tag)
             return "Element Euler angle (X dipole, gamma) [rad]";
         case OSKAR_VIS_HEADER_TAG_ELEMENT_FEED_ANGLE_Y_C:
             return "Element Euler angle (Y dipole, gamma) [rad]";
-        default:
-            return "Unknown visibility header group tag";
+        default:                                          /* LCOV_EXCL_LINE */
+            return "Unknown visibility header group tag"; /* LCOV_EXCL_LINE */
         }
         break;
     }
@@ -189,15 +164,15 @@ const char* oskar_get_binary_tag_string(char group, char tag)
             return "Station V coordinates [m]";
         case OSKAR_VIS_BLOCK_TAG_STATION_W:
             return "Station W coordinates [m]";
-        default:
-            return "Unknown visibility block group tag";
+        default:                                          /* LCOV_EXCL_LINE */
+            return "Unknown visibility block group tag";  /* LCOV_EXCL_LINE */
         }
         break;
     }
-    default:
-        break;
+    default:                                              /* LCOV_EXCL_LINE */
+        break;                                            /* LCOV_EXCL_LINE */
     }
-    return "Unknown tag group";
+    return "Unknown tag group";                           /* LCOV_EXCL_LINE */
 }
 
 #ifdef __cplusplus
