@@ -21,10 +21,10 @@ endif()
 project(OSKAR CXX C)
 
 # === Project version.
-set(OSKAR_VERSION_ID "0x020B02")
+set(OSKAR_VERSION_ID "0x020C00")
 set(OSKAR_VERSION_MAJOR 2)
-set(OSKAR_VERSION_MINOR 11)
-set(OSKAR_VERSION_PATCH 2)
+set(OSKAR_VERSION_MINOR 12)
+set(OSKAR_VERSION_PATCH 0)
 set(OSKAR_VERSION_SUFFIX "dev")
 
 # === Add local CMake module path.
@@ -138,6 +138,7 @@ if (BUILD_TESTING OR NOT DEFINED BUILD_TESTING)
             "/extern/"
             "/gui/"
             "lapack_subset.c"
+            "to_sdp_mem.cpp"
             "/test/"
             ".h"
             "/usr/"
