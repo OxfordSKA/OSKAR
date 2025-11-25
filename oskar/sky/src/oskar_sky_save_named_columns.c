@@ -39,6 +39,7 @@ static void print_value(
         if (value > 0.0) (void) fprintf(file, "%.15g", value * RAD2ARCSEC);
         return;
     case OSKAR_SKY_PA_RAD:
+    case OSKAR_SKY_POLA_RAD:
         if (value != 0.0) (void) fprintf(file, "%.15g", value * RAD2DEG);
         return;
     case OSKAR_SKY_LIN_SI: /* Linear not log. */

@@ -410,6 +410,7 @@ static inline void set_value(
         (*values)[0] = value ? ARCSEC2RAD * atof(value) : 0.0;
         break;
     case OSKAR_SKY_PA_RAD:
+    case OSKAR_SKY_POLA_RAD:
         (*values)[0] = value ? DEG2RAD * atof(value) : 0.0;
         break;
     case OSKAR_SKY_LIN_SI: /* Linear not log. */
