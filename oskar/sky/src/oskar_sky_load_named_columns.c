@@ -281,7 +281,7 @@ static int parse_array_values(const char* str, double** out, int* num_out)
     if (str[0] != '[' && str[0] != '(')
     {
         /* Don't need to check size, as num_out is always at least 4 here. */
-        (*out)[0] = atof(str);
+        (*out)[0] = strtod(str, 0);
         return 1;
     }
 
@@ -407,11 +407,11 @@ static inline void set_value(
         break;
     case OSKAR_SKY_MAJOR_RAD:
     case OSKAR_SKY_MINOR_RAD:
-        (*values)[0] = value ? ARCSEC2RAD * atof(value) : 0.0;
+        (*values)[0] = value ? ARCSEC2RAD * strtod(value, 0) : 0.0;
         break;
     case OSKAR_SKY_PA_RAD:
     case OSKAR_SKY_POLA_RAD:
-        (*values)[0] = value ? DEG2RAD * atof(value) : 0.0;
+        (*values)[0] = value ? DEG2RAD * strtod(value, 0) : 0.0;
         break;
     case OSKAR_SKY_LIN_SI: /* Linear not log. */
     {
@@ -510,8 +510,10 @@ oskar_Sky* oskar_sky_load_named_columns(
                 0, "Error opening '%s': format string present "
                 "but not correct.", filename
         );
-        fclose(file);
+        (void) fclose(file);
         free(buf_hdr);
+        free(column_defaults);
+        free(column_types);
         return 0;
     }
 
@@ -521,8 +523,10 @@ oskar_Sky* oskar_sky_load_named_columns(
         /* Do not print a failure message here -
          * try to load the file using the old format instead. */
         *status = OSKAR_ERR_FILE_IO;
-        fclose(file);
+        (void) fclose(file);
         free(buf_hdr);
+        free(column_defaults);
+        free(column_types);
         return 0;
     }
 

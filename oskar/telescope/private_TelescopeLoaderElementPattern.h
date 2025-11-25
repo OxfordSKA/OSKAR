@@ -45,13 +45,13 @@ private:
             const std::vector<std::string>& keys,
             const std::vector<std::string>& paths,
             int* status
-    );
+    ) const;
     void load_spherical_wave_feko_h5_data(
             oskar_Station* station,
             const std::vector<std::string>& keys,
             const std::vector<std::string>& paths,
             int* status
-    );
+    ) const;
     static void parse_filename(
             const char* s,
             char** buffer,

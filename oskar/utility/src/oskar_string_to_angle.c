@@ -37,18 +37,27 @@ double oskar_string_degrees_to_radians(
     }
     if (dot_count >= 2)
     {
-        sscanf(p, "%d.%d.%lf", &d, &m, &sec);
+        if (sscanf(p, "%d.%d.%lf", &d, &m, &sec) != 3)
+        {
+            *status = OSKAR_ERR_BAD_UNITS;
+        }
         use_sexagesimal = 1;
     }
     else if (strchr(p, ':'))
     {
         /* Not allowed in LOFAR-format sky models, but accepted here. */
-        sscanf(p, "%d:%d:%lf", &d, &m, &sec);
+        if (sscanf(p, "%d:%d:%lf", &d, &m, &sec) != 3)
+        {
+            *status = OSKAR_ERR_BAD_UNITS;
+        }
         use_sexagesimal = 1;
     }
     else if (strchr(p, 'd') && strchr(p, 'm'))
     {
-        sscanf(p, "%dd%dm%lf", &d, &m, &sec);
+        if (sscanf(p, "%dd%dm%lf", &d, &m, &sec) != 3)
+        {
+            *status = OSKAR_ERR_BAD_UNITS;
+        }
         use_sexagesimal = 1;
     }
     if (use_sexagesimal)
@@ -58,7 +67,7 @@ double oskar_string_degrees_to_radians(
         if (m >= 60 || sec >= 60.0) *status = OSKAR_ERR_BAD_UNITS;
         return deg * DEG2RAD;
     }
-    const double val = atof(p);
+    const double val = strtod(p, 0);
     if (strstr(p, "deg")) return val * DEG2RAD;
     if (strstr(p, "rad")) return val;
     return tolower(default_unit) == 'r' ? val : val * DEG2RAD;
@@ -79,12 +88,18 @@ double oskar_string_hours_to_radians(
     while (*p && isspace(*p)) p++;
     if (strchr(p, ':'))
     {
-        sscanf(p, "%d:%d:%lf", &h, &m, &sec);
+        if (sscanf(p, "%d:%d:%lf", &h, &m, &sec) != 3)
+        {
+            *status = OSKAR_ERR_BAD_UNITS;
+        }
         use_sexagesimal = 1;
     }
     else if (strchr(p, 'h') && strchr(p, 'm'))
     {
-        sscanf(p, "%dh%dm%lf", &h, &m, &sec);
+        if (sscanf(p, "%dh%dm%lf", &h, &m, &sec) != 3)
+        {
+            *status = OSKAR_ERR_BAD_UNITS;
+        }
         use_sexagesimal = 1;
     }
     if (use_sexagesimal)
@@ -94,7 +109,7 @@ double oskar_string_hours_to_radians(
         if (m >= 60 || sec >= 60.0) *status = OSKAR_ERR_BAD_UNITS;
         return deg * DEG2RAD;
     }
-    const double val = atof(p);
+    const double val = strtod(p, 0);
     if (strstr(p, "deg")) return val * DEG2RAD;
     if (strstr(p, "rad")) return val;
     return tolower(default_unit) == 'r' ? val : val * DEG2RAD;

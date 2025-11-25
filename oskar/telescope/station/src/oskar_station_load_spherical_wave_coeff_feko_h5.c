@@ -144,7 +144,9 @@ static double* scan_datasets(
             for (i_freq = 0; i_freq < *num_freqs; ++i_freq)
             {
                 if (fabs(freqs_hz[i_freq] - freq_hz) <= freq_hz * DBL_EPSILON)
+                {
                     break;
+                }
             }
             if (i_freq >= *num_freqs)
             {

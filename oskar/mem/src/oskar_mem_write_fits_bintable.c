@@ -32,7 +32,7 @@ void oskar_mem_write_fits_bintable(
     unsigned int i = 0;
     int i_hdu = 0, num_hdu = 0;
     char *ext_name_copy = 0, **tunit = 0, **ttype = 0, **tform = 0;
-    if (*status) return;
+    if (*status || num_mem == 0) return;
 
     /* Check there are at least the number of specified elements in
      * each array. */

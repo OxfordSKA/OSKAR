@@ -158,7 +158,7 @@ void TelescopeLoaderElementPattern::load_spherical_wave_data(
         const vector<string>& keys,
         const vector<string>& paths,
         int* status
-)
+) const
 {
     if (*status || !station || keys.empty()) return;
     size_t buflen = 0;
@@ -194,7 +194,7 @@ void TelescopeLoaderElementPattern::load_spherical_wave_feko_h5_data(
         const vector<string>& keys,
         const vector<string>& paths,
         int* status
-)
+) const
 {
     if (*status || !station || keys.empty()) return;
     for (size_t i = 0; i < keys.size(); ++i)

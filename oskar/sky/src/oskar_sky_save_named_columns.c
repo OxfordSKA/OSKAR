@@ -151,7 +151,7 @@ void oskar_sky_save_named_columns(
     {
         if (write_name)
         {
-            fprintf(file, "s%d,", r + 1);
+            (void) fprintf(file, "s%d,", r + 1);
         }
         if (write_type)
         {
@@ -160,11 +160,13 @@ void oskar_sky_save_named_columns(
             {
                 const double ma = oskar_mem_get_element(maj, r, status);
                 const double mi = oskar_mem_get_element(min, r, status);
-                fprintf(file, (ma > 0.0 && mi > 0.0) ? "GAUSSIAN," : "POINT,");
+                (void) fprintf(
+                        file, (ma > 0.0 && mi > 0.0) ? "GAUSSIAN," : "POINT,"
+                );
             }
             else
             {
-                fprintf(file, "POINT,");
+                (void) fprintf(file, "POINT,");
             }
         }
 
