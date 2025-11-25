@@ -111,7 +111,8 @@ TEST(Mem, fits_healpix_not_a_healpix_fits_file)
 
     // Write a FITS binary table that is not a HEALPix FITS file.
     oskar_mem_write_fits_bintable(
-            file_name, "NOT_HEALPIX", 1, num_elem, &status, data
+            file_name, "NOT_HEALPIX", 1, num_elem, &status,
+            data, "FLOAT1"
     );
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
