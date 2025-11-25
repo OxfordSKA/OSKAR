@@ -101,7 +101,8 @@ Field type names supported by OSKAR are case-insensitive, and include:
    - Unknown column types will be ignored when the file is loaded - note that
      this includes columns **Name** and **Type** used by LOFAR software.
    - Gaussian sources are specified using non-zero values in both
-     **MajorAxis** and **MinorAxis** columns.
+     **MajorAxis** and **MinorAxis** columns. Gaussian sources also need to
+     specify an **Orientation** (or **PositionAngle**), even if it is zero.
 
 .. warning::
    If the **ReferenceFrequency** is omitted or set to zero, the source flux
