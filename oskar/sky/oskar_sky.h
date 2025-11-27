@@ -44,6 +44,7 @@ enum oskar_SkyColumn
     OSKAR_SKY_POLF,
     OSKAR_SKY_REF_WAVE_M,
     OSKAR_SKY_SPEC_CURV,
+    OSKAR_SKY_LINE_WIDTH_HZ,
     /* Scratch columns start at 0x100 (256). */
     OSKAR_SKY_SCRATCH_START = 0x100,
     OSKAR_SKY_SCRATCH_EXT_A,

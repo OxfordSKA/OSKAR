@@ -55,6 +55,9 @@ void oskar_sky_scale_flux_with_frequency(
     const oskar_Mem* sp_curv = oskar_sky_column_const(
             sky, OSKAR_SKY_SPEC_CURV, 0
     );
+    const oskar_Mem* width_hz = oskar_sky_column_const(
+            sky, OSKAR_SKY_LINE_WIDTH_HZ, 0
+    );
     oskar_Mem* out_i = oskar_sky_column(
             sky, OSKAR_SKY_SCRATCH_I_JY, 0, status
     );
@@ -107,6 +110,7 @@ void oskar_sky_scale_flux_with_frequency(
                     pola ? oskar_mem_float_const(pola, status) : nullp,
                     refw ? oskar_mem_float_const(refw, status) : nullp,
                     sp_curv ? oskar_mem_float_const(sp_curv, status) : nullp,
+                    width_hz ? oskar_mem_float_const(width_hz, status) : nullp,
                     oskar_mem_float(out_i, status),
                     oskar_mem_float(out_q, status),
                     oskar_mem_float(out_u, status),
@@ -137,6 +141,7 @@ void oskar_sky_scale_flux_with_frequency(
                     pola ? oskar_mem_double_const(pola, status) : nullp,
                     refw ? oskar_mem_double_const(refw, status) : nullp,
                     sp_curv ? oskar_mem_double_const(sp_curv, status) : nullp,
+                    width_hz ? oskar_mem_double_const(width_hz, status) : nullp,
                     oskar_mem_double(out_i, status),
                     oskar_mem_double(out_q, status),
                     oskar_mem_double(out_u, status),
@@ -195,6 +200,7 @@ void oskar_sky_scale_flux_with_frequency(
                 {PTR_SZ, pola ? oskar_mem_buffer_const(pola) : &nullp},
                 {PTR_SZ, refw ? oskar_mem_buffer_const(refw) : &nullp},
                 {PTR_SZ, sp_curv ? oskar_mem_buffer_const(sp_curv) : &nullp},
+                {PTR_SZ, width_hz ? oskar_mem_buffer_const(width_hz) : &nullp},
                 {PTR_SZ, oskar_mem_buffer(out_i)},
                 {PTR_SZ, oskar_mem_buffer(out_q)},
                 {PTR_SZ, oskar_mem_buffer(out_u)},

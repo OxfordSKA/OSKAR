@@ -63,14 +63,14 @@ Field type names supported by OSKAR are case-insensitive, and include:
    **DecD**, angle, "Declination, in decimal degrees (default) or radians;
    |br| or sexagesimal degrees, minutes and seconds. |br|
    Use instead of **Dec** if required. See note below."
-   **I**, Jy, "Stokes I flux."
+   **I**, Jy, "Stokes I flux (at reference frequency)."
    **Q**, Jy, "Optional Stokes Q flux."
    **U**, Jy, "Optional Stokes U flux."
    **V**, Jy, "Optional Stokes V flux."
-   **ReferenceFrequency**, Hz, "Optional reference frequency for spectral index"
+   **ReferenceFrequency**, Hz, "Optional reference frequency for source fluxes."
    **SpectralIndex**, N/A, "Optional spectral index polynomial; can be a
    multi-valued |br| vector, with a list of values enclosed in brackets;
-   up to 8 terms |br| are supported."
+   up to 8 terms |br| are supported. See :ref:`spectral-profiles` below."
    **LogarithmicSI**, boolean, "Optional boolean flag: If true, spectral
    indices are logarithmic, |br| otherwise linear; see the
    `LOFAR Wiki page on LogarithmicSI <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#logarithmic_spectral_index>`_.
@@ -93,7 +93,12 @@ Field type names supported by OSKAR are case-insensitive, and include:
    |br| `Callingham et. al. (2017) <https://iopscience.iop.org/article/10.3847/1538-4357/836/2/174/pdf>`_,
    equation 2, where this value is |br| interpreted as the parameter 'q'.
    If present, only the first |br| **SpectralIndex** value will be used,
-   and any others will be |br| ignored."
+   and any others will be |br| ignored. See :ref:`spectral-curvature` below."
+   **LineWidth**, Hz, "Optional line width in Hz, if this is a spectral line
+   source. |br| If the line width is greater than 0, then spectral index
+   |br| values will be ignored, and the Stokes I flux will be calculated
+   |br| using a Gaussian profile centred on the reference frequency.
+   |br| See :ref:`spectral-line-profile` below."
 
 .. tip::
    - Columns may appear in any order, and optional columns may be omitted
@@ -250,8 +255,10 @@ a number of comment lines.
 
     \clearpage
 
-Spectral Index
-==============
+.. _spectral-profiles:
+
+Spectral Profiles
+=================
 
 The spectral index parameters are used as described on the
 `LOFAR Wiki page detailing logarithmic and linear spectral indices <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#logarithmic_spectral_index>`_.
@@ -278,6 +285,8 @@ In this case, the flux :math:`S_0` given at the reference frequency
 
 .. math:: S_{\nu} = S_0 + \alpha_0 \left( \frac{\nu}{\nu_0} - 1 \right) + \alpha_1 \left( \frac{\nu}{\nu_0} - 1 \right)^2 + \alpha_2 \left( \frac{\nu}{\nu_0} - 1 \right)^3 + \cdots
 
+.. _spectral-curvature:
+
 Spectral Curvature
 ------------------
 If specified, the **SpectralCurvature** parameter (:math:`q`) is used with
@@ -286,6 +295,19 @@ given at the reference frequency :math:`\nu_0` to another
 frequency :math:`\nu` as follows:
 
 .. math:: S_{\nu} = S_0 \left( \frac{\nu}{\nu_0} \right)^{\alpha_0} \exp\left( q \ln\left( \frac{\nu}{\nu_0} \right)^2 \right)
+
+.. _spectral-line-profile:
+
+Spectral Line Profile
+---------------------
+If a **LineWidth** parameter (:math:`\sigma`, below) is specified and greater
+than 0, then the source will be treated as a spectral line source with a
+Gaussian profile centred at the reference frequency :math:`\nu_0`, with a peak
+flux given by the **StokesI** parameter.
+Any spectral index values will be ignored in this case. The flux at a frequency
+:math:`\nu` will be calculated as follows:
+
+.. math:: S_{\nu} = S_0 \exp\left(- \frac{(\nu - \nu_0)^2}{2 \sigma^2}\right)
 
 .. raw:: latex
 

@@ -52,6 +52,8 @@ const char* oskar_sky_column_type_to_name(oskar_SkyColumn column_type)
         return "ReferenceWavelength";
     case OSKAR_SKY_SPEC_CURV:
         return "SpectralCurvature";
+    case OSKAR_SKY_LINE_WIDTH_HZ:
+        return "LineWidth";
     default:                                              /* LCOV_EXCL_LINE */
         break;                                            /* LCOV_EXCL_LINE */
     }

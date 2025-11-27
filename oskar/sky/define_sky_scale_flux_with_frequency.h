@@ -10,10 +10,17 @@
         const int num_sp_indices,\
         const FP spxn[8],\
         const int have_sp_curvature,\
-        const FP sp_curvature\
+        const FP sp_curvature,\
+        const FP line_width_hz\
 )\
 {\
     int c = 0;\
+    if (line_width_hz > (FP) 0) {\
+        /* Spectral line source. Calculate flux using Gaussian profile. */\
+        const FP x = freq_hz - freq0_hz;\
+        const FP sigma = line_width_hz;\
+        return stokes_i_in * exp(-(x * x) / (2 * sigma * sigma));\
+    }\
     if (have_sp_curvature) {\
         /* Follow Equation 2 of Callingham et al. 2017. */\
         const FP freq_ratio = freq_hz / freq0_hz;\
@@ -64,6 +71,7 @@
         GLOBAL_IN(FP, pol_angle_rad),\
         GLOBAL_IN(FP, ref_wavelength_m),\
         GLOBAL_IN(FP, sp_curvature),\
+        GLOBAL_IN(FP, line_width_hz),\
         GLOBAL_OUT(FP, out_i),\
         GLOBAL_OUT(FP, out_q),\
         GLOBAL_OUT(FP, out_u),\
@@ -110,6 +118,7 @@
         FP spxn[8];\
         const FP lin_spx = linear_sp_index ? linear_sp_index[i] : (FP) 0;\
         const FP sp_curv = sp_curvature ? sp_curvature[i] : (FP) 0;\
+        const FP line_width = line_width_hz ? line_width_hz[i] : (FP) 0;\
         spxn[0] = sp_index0 ? sp_index0[i] : (FP) 0;\
         spxn[1] = sp_index1 ? sp_index1[i] : (FP) 0;\
         spxn[2] = sp_index2 ? sp_index2[i] : (FP) 0;\
@@ -124,7 +133,7 @@
         /* Calculate new Stokes I value based on spectral parameters. */\
         const FP stokes_i_out = M_CAT(calc_stokes_i_flux_, FP)(\
                 in_iquv[0], freq_hz, freq0_hz, lin_spx, num_sp_indices, spxn,\
-                have_sp_curvature, sp_curv\
+                have_sp_curvature, sp_curv, line_width\
         );\
         /* Find ratio between input and output Stokes I */\
         /* to determine default scaling for other Stokes parameters. */\
@@ -148,7 +157,8 @@
                 const FP freq_at_lambda0_hz = ((FP) C_0) / ref_wave_m;\
                 const FP stokes_i_ref = M_CAT(calc_stokes_i_flux_, FP)(\
                         in_iquv[0], freq_hz, freq_at_lambda0_hz, lin_spx,\
-                        num_sp_indices, spxn, have_sp_curvature, sp_curv\
+                        num_sp_indices, spxn, have_sp_curvature, sp_curv,\
+                        line_width\
                 );\
                 pol_ang_chi0 = 0.5 * atan2(in_iquv[2], in_iquv[1]) - (\
                         ref_wave_m * ref_wave_m * rm\

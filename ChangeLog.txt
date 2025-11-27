@@ -8,6 +8,8 @@
 
     * Support sources modelled using a single spectral curvature term.
 
+    * Support spectral line sources.
+
     * Support loading of coefficients for spherical wave element patterns
       directly from HDF5 files written by FEKO.
 

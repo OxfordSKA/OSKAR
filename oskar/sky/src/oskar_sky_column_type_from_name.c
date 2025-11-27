@@ -133,6 +133,10 @@ oskar_SkyColumn oskar_sky_column_type_from_name(const char* name)
     {
         return OSKAR_SKY_REF_WAVE_M;
     }
+    if (starts_with(name, "LineWidth"))
+    {
+        return OSKAR_SKY_LINE_WIDTH_HZ;
+    }
 
     /* Unknown column type - ignore on load. */
     return OSKAR_SKY_CUSTOM;

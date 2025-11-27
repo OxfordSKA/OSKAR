@@ -394,7 +394,79 @@ TEST(Sky, scale_flux_with_frequency_too_many_spectral_indices)
 }
 
 
-TEST(Sky, rotation_measure)
+TEST(Sky, scale_flux_with_frequency_spectral_line)
+{
+    int device_loc = 0;
+    (void) oskar_device_count(NULL, &device_loc);
+    const int num_sources = 100;
+    const int locations[] = {OSKAR_CPU, device_loc};
+    const int types[] = {OSKAR_SINGLE, OSKAR_DOUBLE};
+    const double tolerances[] = {5e-5, 1e-12};
+    const double freq_new_hz = 150e6;
+
+    for (int i_type = 0; i_type < 2; ++i_type)
+    {
+        int status = 0;
+        const double tol = tolerances[i_type];
+
+        // Create and fill a sky model.
+        oskar_Sky* sky_ref = oskar_sky_create(
+                types[i_type], OSKAR_CPU, num_sources, &status
+        );
+        for (int i = 0; i < num_sources; ++i)
+        {
+            oskar_sky_set_data(
+                    sky_ref, OSKAR_SKY_I_JY, 0, i,
+                    (double) i, &status
+            );
+            oskar_sky_set_data(
+                    sky_ref, OSKAR_SKY_LINE_WIDTH_HZ, 0, i,
+                    (double) i * 0.1e6, &status
+            );
+            oskar_sky_set_data(
+                    sky_ref, OSKAR_SKY_REF_HZ, 0, i,
+                    (double) i * 1e6 + 100e6, &status
+            );
+        }
+
+        for (int i_dev = 0; i_dev < 2; ++i_dev)
+        {
+            // Copy sky model to device.
+            const int device_loc = locations[i_dev];
+            oskar_Sky* sky_dev = oskar_sky_create_copy(
+                    sky_ref, device_loc, &status
+            );
+
+            // Scale with frequency.
+            oskar_Timer* timer = oskar_timer_create(device_loc);
+            oskar_sky_scale_flux_with_frequency(sky_dev, freq_new_hz, &status);
+            oskar_timer_free(timer);
+
+            // Check that the flux was evaluated correctly at this frequency.
+            for (int i = 0; i < num_sources; ++i)
+            {
+                const double freq_ref_hz = i * 1e6 + 100e6;
+                const double line_width_hz = i * 0.1e6;
+                const double x = freq_new_hz - freq_ref_hz;
+                const double expected = i * exp(
+                        -x * x / (2 * pow(line_width_hz, 2.))
+                );
+                EXPECT_NEAR(
+                        expected, oskar_sky_data(
+                                sky_dev, OSKAR_SKY_SCRATCH_I_JY, 0, i
+                        ), tol
+                );
+            }
+
+            // Clean up.
+            oskar_sky_free(sky_dev, &status);
+        }
+        oskar_sky_free(sky_ref, &status);
+    }
+}
+
+
+TEST(Sky, scale_flux_with_frequency_rotation_measure)
 {
     int device_loc = 0;
     (void) oskar_device_count(NULL, &device_loc);

@@ -870,6 +870,30 @@ TEST(Sky, named_columns_different_format_lines)
     {
         int status = 0;
         FILE* file = fopen(filename, "w");
+        (void) fprintf(file, "# (Ra, Dec, I, ReferenceFrequency, LineWidth) = format\n");
+        (void) fprintf(file, "1, 2, 3, 100e6, 100e3\n");
+        (void) fprintf(file, "3, 4, 5, 101e6, 150e3\n");
+        (void) fclose(file);
+        oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
+        ASSERT_EQ(0, status) << oskar_get_error_string(status);
+        ASSERT_EQ(5, oskar_sky_int(sky, OSKAR_SKY_NUM_COLUMNS));
+        ASSERT_EQ(2, oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES));
+        ASSERT_EQ(1., oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 0));
+        ASSERT_EQ(2., oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 0));
+        ASSERT_EQ(3, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, 0));
+        ASSERT_EQ(100e6, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 0, 0));
+        ASSERT_EQ(100e3, oskar_sky_data(sky, OSKAR_SKY_LINE_WIDTH_HZ, 0, 0));
+        ASSERT_EQ(3., oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 1));
+        ASSERT_EQ(4., oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 1));
+        ASSERT_EQ(5., oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, 1));
+        ASSERT_EQ(101e6, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 0, 1));
+        ASSERT_EQ(150e3, oskar_sky_data(sky, OSKAR_SKY_LINE_WIDTH_HZ, 0, 1));
+        oskar_sky_free(sky, &status);
+        (void) remove(filename);
+    }
+    {
+        int status = 0;
+        FILE* file = fopen(filename, "w");
         (void) fprintf(file, "# (ra,dec,i) format\n");
         (void) fprintf(file, "1, 2, 3\n");
         (void) fclose(file);
