@@ -63,10 +63,10 @@ Field type names supported by OSKAR are case-insensitive, and include:
    **DecD**, angle, "Declination, in decimal degrees (default) or radians;
    |br| or sexagesimal degrees, minutes and seconds. |br|
    Use instead of **Dec** if required. See note below."
-   **I**, Jy, "Stokes I flux (at reference frequency)."
-   **Q**, Jy, "Optional Stokes Q flux."
-   **U**, Jy, "Optional Stokes U flux."
-   **V**, Jy, "Optional Stokes V flux."
+   **I** |br| or **StokesI**, Jy, "Stokes I flux (at reference frequency)."
+   **Q** |br| or **StokesQ**, Jy, "Optional Stokes Q flux."
+   **U** |br| or **StokesU**, Jy, "Optional Stokes U flux."
+   **V** |br| or **StokesV**, Jy, "Optional Stokes V flux."
    **ReferenceFrequency**, Hz, "Optional reference frequency for source fluxes."
    **SpectralIndex**, N/A, "Optional spectral index polynomial; can be a
    multi-valued |br| vector, with a list of values enclosed in brackets;

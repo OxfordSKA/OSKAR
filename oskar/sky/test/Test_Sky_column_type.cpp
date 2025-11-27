@@ -25,14 +25,26 @@ TEST(Sky, column_type_from_name)
     ASSERT_EQ(OSKAR_SKY_I_JY,
             oskar_sky_column_type_from_name("I")
     );
+    ASSERT_EQ(OSKAR_SKY_I_JY,
+            oskar_sky_column_type_from_name("StokesI")
+    );
     ASSERT_EQ(OSKAR_SKY_Q_JY,
             oskar_sky_column_type_from_name("Q")
+    );
+    ASSERT_EQ(OSKAR_SKY_Q_JY,
+            oskar_sky_column_type_from_name("StokesQ")
     );
     ASSERT_EQ(OSKAR_SKY_U_JY,
             oskar_sky_column_type_from_name("U")
     );
+    ASSERT_EQ(OSKAR_SKY_U_JY,
+            oskar_sky_column_type_from_name("StokesU")
+    );
     ASSERT_EQ(OSKAR_SKY_V_JY,
             oskar_sky_column_type_from_name("V")
+    );
+    ASSERT_EQ(OSKAR_SKY_V_JY,
+            oskar_sky_column_type_from_name("StokesV")
     );
     ASSERT_EQ(OSKAR_SKY_REF_HZ,
             oskar_sky_column_type_from_name("ReferenceFrequency")
@@ -63,6 +75,9 @@ TEST(Sky, column_type_from_name)
     );
     ASSERT_EQ(OSKAR_SKY_SPEC_CURV,
             oskar_sky_column_type_from_name("SpectralCurvature")
+    );
+    ASSERT_EQ(OSKAR_SKY_LINE_WIDTH_HZ,
+            oskar_sky_column_type_from_name("LineWidth")
     );
 }
 
@@ -132,5 +147,9 @@ TEST(Sky, column_type_to_name)
     ASSERT_STREQ(
             "SpectralCurvature",
             oskar_sky_column_type_to_name(OSKAR_SKY_SPEC_CURV)
+    );
+    ASSERT_STREQ(
+            "LineWidth",
+            oskar_sky_column_type_to_name(OSKAR_SKY_LINE_WIDTH_HZ)
     );
 }
