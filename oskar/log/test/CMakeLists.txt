@@ -9,4 +9,4 @@ set(${name}_SRC
 )
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} gtest oskar)
-add_test(log_test ${name})
+add_test(NAME ${name} COMMAND ${name})

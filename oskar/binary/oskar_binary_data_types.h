@@ -47,10 +47,7 @@ enum OSKAR_DATA_TYPE
     OSKAR_SINGLE_COMPLEX_MATRIX  = OSKAR_SINGLE | OSKAR_COMPLEX | OSKAR_MATRIX,
 
     /* Matrix complex double (double4c). */
-    OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX,
-
-    /* Pointer type. Rarely used (and use with caution!). */
-    OSKAR_PTR                    = 0xFF
+    OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX
 };
 
 #if __STDC_VERSION__ >= 199901L || defined(__cplusplus)

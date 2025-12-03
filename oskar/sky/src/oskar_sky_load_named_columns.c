@@ -240,7 +240,7 @@ static int parse_header_columns(
             else if (c == ',')
             {
                 /* Empty column. */
-                (*column_types)[count] = 0;
+                (*column_types)[count] = OSKAR_SKY_CUSTOM;
                 (*column_defaults)[count] = 0;
                 count++;
             }
@@ -318,7 +318,7 @@ static int parse_array_values(const char* str, double** out, int* num_out)
         if (num >= *num_out)
         {
             int new_num_out = (*num_out == 0) ? 4 : (*num_out * 2);
-            double* tmp = realloc(*out, new_num_out * sizeof(double));
+            double* tmp = (double*) realloc(*out, new_num_out * sizeof(double));
             *out = tmp;
             *num_out = new_num_out;
         }

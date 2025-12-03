@@ -58,6 +58,13 @@ void oskar_sky_evaluate_gaussian_source_parameters(
     const int type = oskar_sky_int(sky, OSKAR_SKY_PRECISION);
     const int num_sources = oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES);
     const double sin_dec0 = sin(dec0), cos_dec0 = cos(dec0);
+
+    /* Need to make sure the scratch columns exist first. */
+    (void) oskar_sky_column(sky, OSKAR_SKY_SCRATCH_EXT_A, 0, status);
+    (void) oskar_sky_column(sky, OSKAR_SKY_SCRATCH_EXT_B, 0, status);
+    (void) oskar_sky_column(sky, OSKAR_SKY_SCRATCH_EXT_C, 0, status);
+    if (*status) return;
+
     if (type == OSKAR_DOUBLE)
     {
         /* Double precision. */

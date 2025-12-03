@@ -45,6 +45,9 @@ endif()
 if (NOT OSKAR_BIN_INSTALL_DIR)
     set(OSKAR_BIN_INSTALL_DIR "bin")
 endif()
+if (WIN32)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+endif()
 
 # === Set compiler include directories.
 include_directories(

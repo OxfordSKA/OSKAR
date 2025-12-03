@@ -42,27 +42,6 @@ void oskar_mem_set_element_real(
         int* status
 );
 
-/**
- * @brief
- * Sets the value of an element in a vector, either in CPU or GPU memory.
- *
- * @details
- * This function sets the value of one element in an array of pointers at the
- * specified index. The array may be either in CPU or GPU memory.
- *
- * @param[in] mem           Pointer to the block of memory to update.
- * @param[in] index         Array index to update.
- * @param[in] val           Value of element to set.
- * @param[in,out]  status   Status return code.
- */
-OSKAR_EXPORT
-void oskar_mem_set_element_ptr(
-        oskar_Mem* mem,
-        size_t index,
-        void* val,
-        int* status
-);
-
 #ifdef __cplusplus
 }
 #endif

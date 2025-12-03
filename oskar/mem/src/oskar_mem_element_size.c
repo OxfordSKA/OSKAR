@@ -30,8 +30,6 @@ size_t oskar_mem_element_size(int type)
         return 8 * sizeof(float);
     case OSKAR_DOUBLE_COMPLEX_MATRIX:
         return 8 * sizeof(double);
-    case OSKAR_PTR:
-        return sizeof(void*);
     default:
         return 0;
     }

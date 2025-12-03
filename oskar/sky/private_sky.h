@@ -27,8 +27,14 @@ struct oskar_Sky
     int* attr_int;                  /**< Attribute values (int). */
     int* column_attr;               /**< Optional column attribute. */
     oskar_SkyColumn* column_type;   /**< Enumerated type of each column. */
-    oskar_Mem** columns;            /**< Array of data columns. */
-    oskar_Mem* ptr_columns;         /**< Pointer to start of each column. */
+
+    /*
+     * The data table needs to be in a single memory block to cater for OpenCL,
+     * which does not support pointers-to-pointers (otherwise needed for a
+     * variable number of columns) in kernels.
+     */
+    oskar_Mem* table;               /**< Data table, as a single array. */
+    oskar_Mem** columns;            /**< Array of data column aliases. */
 };
 
 #endif /* include guard */

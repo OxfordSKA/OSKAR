@@ -12,7 +12,7 @@ set(${name}_SRC
 )
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)
-add_test(station_test ${name})
+add_test(NAME ${name} COMMAND ${name})
 
 # Array pattern benchmark binary.
 set(name oskar_array_pattern_benchmark)

@@ -65,5 +65,5 @@ if (Threads_FOUND)
 endif()
 
 if (WIN32)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS -DFF_NO_UNISTD_H)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -DFF_NO_UNISTD_H -DYY_NO_UNISTD_H)
 endif()

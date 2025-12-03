@@ -3,11 +3,11 @@
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
-#ifndef OSKAR_MEM_CREATE_ALIAS_H_
-#define OSKAR_MEM_CREATE_ALIAS_H_
+#ifndef OSKAR_MEM_SET_ALIAS_H_
+#define OSKAR_MEM_SET_ALIAS_H_
 
 /**
- * @file oskar_mem_create_alias.h
+ * @file oskar_mem_set_alias.h
  */
 
 #include <oskar_global.h>
@@ -19,25 +19,23 @@ extern "C" {
 
 /**
  * @brief
- * Creates an aliased pointer from an existing one.
+ * Sets data for an aliased pointer.
  *
  * @details
- * This function creates a handle to a memory block that contains an
- * aliased pointer to (part of) an existing memory block. The structure does
- * not own the memory to which it points.
+ * This function sets the meta-data in a structure to set up a pointer alias
+ * to existing memory. The destination structure must not own the memory to
+ * which it points, so it must have been created using an
+ * oskar_mem_create_alias*() function.
  *
- * A handle to the memory is returned. The handle must be deallocated
- * using oskar_mem_free() when it is no longer required.
- *
- * @param[in] src           Handle to source memory block (may be NULL).
+ * @param[in] mem           Handle to destination memory block.
+ * @param[in] src           Handle to source memory block.
  * @param[in] offset        Offset number of elements from start of source memory block.
  * @param[in] num_elements  Number of elements in the returned array.
  * @param[in,out]  status   Status return code.
- *
- * @return A handle to the aliased memory.
  */
 OSKAR_EXPORT
-oskar_Mem* oskar_mem_create_alias(
+void oskar_mem_set_alias(
+        oskar_Mem* mem,
         const oskar_Mem* src,
         size_t offset,
         size_t num_elements,

@@ -45,6 +45,7 @@ set(mem_SRC
     src/oskar_mem_realloc.c
     src/oskar_mem_save_ascii.c
     src/oskar_mem_scale_real.c
+    src/oskar_mem_set_alias.c
     src/oskar_mem_set_element.c
     src/oskar_mem_set_value_real.c
     src/oskar_mem_stats.c

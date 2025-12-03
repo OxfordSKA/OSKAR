@@ -78,6 +78,7 @@ enum OSKAR_MEM_LOCATION
 #include <mem/oskar_mem_realloc.h>
 #include <mem/oskar_mem_save_ascii.h>
 #include <mem/oskar_mem_scale_real.h>
+#include <mem/oskar_mem_set_alias.h>
 #include <mem/oskar_mem_set_element.h>
 #include <mem/oskar_mem_set_value_real.h>
 #include <mem/oskar_mem_stats.h>

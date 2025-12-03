@@ -111,62 +111,6 @@ void oskar_mem_set_element_real(
     }
 }
 
-
-void oskar_mem_set_element_ptr(
-        oskar_Mem* mem,
-        size_t index,
-        void* val,
-        int* status
-)
-{
-    if (*status) return;
-    if (mem->type != OSKAR_PTR)
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
-    }
-    const int location = mem->location;
-    if (location == OSKAR_CPU)
-    {
-        ((char**) (mem->data))[index] = val;
-        return;
-    }
-    else if (location == OSKAR_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        cudaMemcpy(
-                (char*) (mem->data) + (index * sizeof(void*)),
-                &val, sizeof(void*), cudaMemcpyHostToDevice
-        );
-        return;
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;           /* LCOV_EXCL_LINE */
-#endif
-    }
-    else if (location & OSKAR_CL)
-    {
-#ifdef OSKAR_HAVE_OPENCL
-        const size_t bytes = oskar_mem_element_size(mem->type);
-        const size_t offset = bytes * index;
-        const void* ptr = &val;
-        const cl_int error = clEnqueueWriteBuffer(
-                oskar_device_queue_cl(),
-                mem->buffer, CL_TRUE, offset, bytes, ptr, 0, NULL, NULL
-        );
-        if (error != CL_SUCCESS)
-        {
-            *status = OSKAR_ERR_MEMORY_COPY_FAILURE;      /* LCOV_EXCL_LINE */
-        }
-#else
-        *status = OSKAR_ERR_OPENCL_NOT_AVAILABLE;         /* LCOV_EXCL_LINE */
-#endif
-    }
-    else                                                  /* LCOV_EXCL_LINE */
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;                 /* LCOV_EXCL_LINE */
-    }
-}
-
 #ifdef __cplusplus
 }
 #endif

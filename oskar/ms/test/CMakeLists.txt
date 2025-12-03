@@ -8,4 +8,4 @@ set(${name}_SRC
 )
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar_ms gtest_main)
-add_test(ms_test ${name})
+add_test(NAME ${name} COMMAND ${name})

@@ -25,7 +25,6 @@ void oskar_sky_scale_flux_with_frequency(
 )
 {
     if (*status) return;
-    const void* nullp = 0;
     const int type = oskar_sky_int(sky, OSKAR_SKY_PRECISION);
     const int location = oskar_sky_int(sky, OSKAR_SKY_MEM_LOCATION);
     const int num_sources = oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES);
@@ -88,6 +87,7 @@ void oskar_sky_scale_flux_with_frequency(
     {
         if (type == OSKAR_SINGLE)
         {
+            const float* nullp = 0;
             scale_flux_with_frequency_float(
                     num_sources, freq_hz,
                     oskar_mem_float_const(in_i, status),
@@ -119,6 +119,7 @@ void oskar_sky_scale_flux_with_frequency(
         }
         else if (type == OSKAR_DOUBLE)
         {
+            const double* nullp = 0;
             scale_flux_with_frequency_double(
                     num_sources, freq_hz,
                     oskar_mem_double_const(in_i, status),
@@ -157,6 +158,7 @@ void oskar_sky_scale_flux_with_frequency(
     {
         size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
         const float freq_hz_f = (float) freq_hz;
+        const void* nullp = 0;
         const char* k = 0;
         const int is_dbl = (type == OSKAR_DOUBLE);
         if (is_dbl)

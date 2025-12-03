@@ -40,7 +40,7 @@ oskar_Sky* oskar_sky_create(
     model->attr_int[OSKAR_SKY_MEM_LOCATION] = location;
     model->attr_int[OSKAR_SKY_CAPACITY] = num_sources + 1;
     model->attr_int[OSKAR_SKY_NUM_SOURCES] = num_sources;
-    model->ptr_columns = oskar_mem_create(OSKAR_PTR, location, 0, status);
+    model->table = oskar_mem_create(type, location, 0, status);
     return model;
 }
 

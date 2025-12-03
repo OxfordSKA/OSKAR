@@ -12,4 +12,14 @@ if (APPLE)
                 \${BUNDLE_DIR} ${QtMac_location} ${QtMacStyle_location})
         endif()
         " COMPONENT runtime)
+elseif (WIN32)
+    configure_file(
+        ${PROJECT_SOURCE_DIR}/cmake/oskar_bundle_deps.cmake.in
+        ${PROJECT_BINARY_DIR}/oskar_bundle_deps.cmake
+        @ONLY
+    )
+    install(
+        SCRIPT "${PROJECT_BINARY_DIR}/oskar_bundle_deps.cmake"
+        COMPONENT applications
+    )
 endif()

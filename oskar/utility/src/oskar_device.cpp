@@ -346,7 +346,7 @@ void oskar_device_launch_kernel(const char* name, int location,
     {
         *status = OSKAR_ERR_BAD_LOCATION;
     }
-#if !defined(OSKAR_HAVE_CUDA) and !defined(OSKAR_HAVE_OPENCL)
+#if !defined(OSKAR_HAVE_CUDA) && !defined(OSKAR_HAVE_OPENCL)
     (void) num_dims;
     (void) num_args;
     (void) arg;

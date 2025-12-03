@@ -35,12 +35,13 @@ void oskar_sky_filter_by_flux(
     const int location = oskar_sky_int(sky, OSKAR_SKY_MEM_LOCATION);
     const int num_sources = oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES);
     const int num_columns = oskar_sky_int(sky, OSKAR_SKY_NUM_COLUMNS);
+    const size_t capacity = (size_t) oskar_sky_int(sky, OSKAR_SKY_CAPACITY);
 
     /* Switch on location and data type. */
     if (location == OSKAR_CPU)
     {
         int c = 0, in = 0, out = 0;
-        void** col = oskar_mem_void(sky->ptr_columns);
+        void* table = oskar_mem_void(sky->table);
         const void* f_ = oskar_mem_void_const(
                 oskar_sky_column_const(sky, OSKAR_SKY_I_JY, 0)
         );
@@ -56,7 +57,8 @@ void oskar_sky_filter_by_flux(
                 #pragma GCC unroll 8
                 for (c = 0; c < num_columns; ++c)
                 {
-                    ((float**) col)[c][out] = ((float**) col)[c][in];
+                    const size_t off = c * capacity;
+                    ((float*) table)[off + out] = ((float*) table)[off + in];
                 }
                 out++;
             }
@@ -73,7 +75,8 @@ void oskar_sky_filter_by_flux(
                 #pragma GCC unroll 8
                 for (c = 0; c < num_columns; ++c)
                 {
-                    ((double**) col)[c][out] = ((double**) col)[c][in];
+                    const size_t off = c * capacity;
+                    ((double*) table)[off + out] = ((double*) table)[off + in];
                 }
                 out++;
             }

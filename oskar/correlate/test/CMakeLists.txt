@@ -12,7 +12,7 @@ set(${name}_SRC
 )
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)
-add_test(correlate_test ${name})
+add_test(NAME ${name} COMMAND ${name})
 
 set(name oskar_correlator_benchmark)
 add_executable(${name} ${name}.cpp)

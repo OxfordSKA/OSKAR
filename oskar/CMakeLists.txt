@@ -67,48 +67,21 @@ if (CASACORE_FOUND)
     target_link_libraries(${libname} PUBLIC oskar_ms)
 endif()
 
-# Link with HDF5 if we have it.
+# Link with other optional dependencies if they're available.
 if (HDF5_FOUND)
     target_link_libraries(${libname} PRIVATE ${HDF5_LIBRARIES})
-    if (WIN32)
-        get_target_property(HDF5_lib_location ${HDF5_LIBRARIES} LOCATION)
-        install(FILES ${HDF5_lib_location}
-            DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
-    endif()
 endif()
-
-# Link with OpenCL if we have it.
 if (OpenCL_FOUND)
     target_link_libraries(${libname} PRIVATE ${OpenCL_LIBRARIES})
 endif()
-
-# Link with cuFFT if we have CUDA.
 if (CUDAToolkit_FOUND)
     target_link_libraries(${libname} PRIVATE CUDA::cufft CUDA::cudart)
-    if (WIN32)
-        file(GLOB lib_cudart_ "${CUDA_TOOLKIT_ROOT_DIR}/bin/cudart64*")
-        file(GLOB lib_cufft_ "${CUDA_TOOLKIT_ROOT_DIR}/bin/cufft64*")
-        install(FILES ${lib_cudart_} ${lib_cufft_}
-            DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
-    endif()
 endif()
-
-# Link with HARP functions if available
 if (HARP_FOUND)
     target_link_libraries(${libname} PRIVATE ${HARP_LIBRARY})
-    if (WIN32)
-        install(FILES ${HARP_DLL}
-            DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
-    endif()
 endif()
-
-# Link with SKA SDP functions if available
 if (ska-sdp-func_FOUND)
     target_link_libraries(${libname} PRIVATE ska-sdp-func::ska_sdp_func)
-    if (WIN32)
-        install(FILES ${SKA_SDP_FUNC_DLL}
-            DESTINATION ${OSKAR_BIN_INSTALL_DIR} COMPONENT runtime)
-    endif()
 endif()
 
 set_target_properties(${libname} PROPERTIES

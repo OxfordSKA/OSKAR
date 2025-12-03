@@ -1,0 +1,26 @@
+#
+# From https://cmake.org/cmake/help/book/mastering-cmake/chapter/Install.html#installing-prerequisite-shared-libraries
+#
+include(BundleUtilities)
+
+# Set bundle to the full path name of the executable(s) already
+# existing in the install tree:
+set(bundle
+    "${CMAKE_INSTALL_PREFIX}/bin/oskar_sim_interferometer@CMAKE_EXECUTABLE_SUFFIX@"
+)
+
+# Set other_libs to a list of full path names to additional
+# libraries that cannot be reached by dependency analysis.
+# (Dynamically loaded PlugIns, for example.)
+set(other_libs "")
+
+# Set dirs to a list of directories where prerequisite libraries
+# may be found:
+set(dirs
+    "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@"
+    "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@"
+    "@CMAKE_PREFIX_PATH@/bin"
+)
+
+message("Calling fixup_bundle on: ${bundle}")
+fixup_bundle("${bundle}" "${other_libs}" "${dirs}")

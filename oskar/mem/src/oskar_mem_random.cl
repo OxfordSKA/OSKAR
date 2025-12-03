@@ -28,7 +28,7 @@ inline Real2 box_muller_Real(const uint u0, const uint u1)
     return rnd;
 }
 
-kernel void mem_random_gaussian_Real(const uint n,
+kernel void oskar_mem_random_gaussian_Real(const uint n,
         global Real* restrict data, const uint seed,
         const uint counter1, const uint counter2, const uint counter3,
         const Real std)
@@ -60,7 +60,7 @@ kernel void mem_random_gaussian_Real(const uint n,
     }
 }
 
-kernel void mem_random_uniform_Real(const uint n,
+kernel void oskar_mem_random_uniform_Real(const uint n,
         global Real* restrict data, const uint seed,
         const uint counter1, const uint counter2, const uint counter3)
 {

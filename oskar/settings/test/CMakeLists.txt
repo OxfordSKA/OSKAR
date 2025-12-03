@@ -40,4 +40,4 @@ target_link_libraries(${name}
     gtest_main
     oskar_settings
 )
-add_test(${name} ${name})
+add_test(NAME ${name} COMMAND ${name})

@@ -20,8 +20,9 @@ set(${name}_SRC
     Test_Sky_horizon_clip.cpp
     Test_Sky_load.cpp
     Test_Sky_load_named_columns.cpp
+    Test_Sky_resize.cpp
     Test_Sky_scale_flux_with_frequency.cpp
 )
 add_executable(${name} ${${name}_SRC})
-target_link_libraries(${name} oskar gtest)
-add_test(sky_test ${name})
+target_link_libraries(${name} oskar cfitsio gtest)
+add_test(NAME ${name} COMMAND ${name})

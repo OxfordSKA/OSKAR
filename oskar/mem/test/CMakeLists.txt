@@ -24,6 +24,6 @@ set(${name}_SRC
     Test_Mem_random.cpp
 )
 add_executable(${name} ${${name}_SRC})
-target_link_libraries(${name} oskar gtest)
+target_link_libraries(${name} oskar cfitsio gtest)
 
-add_test(${name} ${name})
+add_test(NAME ${name} COMMAND ${name})

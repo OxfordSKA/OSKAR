@@ -27,6 +27,8 @@ void oskar_sky_copy_source_data(
     const int type = oskar_sky_int(out, OSKAR_SKY_PRECISION);
     const int num_in = oskar_sky_int(in, OSKAR_SKY_NUM_SOURCES);
     const int num_columns = oskar_sky_int(in, OSKAR_SKY_NUM_COLUMNS);
+    const int capacity_in = oskar_sky_int(in, OSKAR_SKY_CAPACITY);
+    const int capacity_out = oskar_sky_int(out, OSKAR_SKY_CAPACITY);
     for (c = 0; c < num_columns; ++c)
     {
         /* Touch each output column to make sure it exists, and
@@ -48,8 +50,8 @@ void oskar_sky_copy_source_data(
     }
     if (location == OSKAR_CPU)
     {
-        void** o_col = oskar_mem_void(out->ptr_columns);
-        const void* const* col = oskar_mem_void_const(in->ptr_columns);
+        void* o_table = oskar_mem_void(out->table);
+        const void* table = oskar_mem_void_const(in->table);
         const int* mask = oskar_mem_int_const(horizon_mask, status);
         (void) indices;
         if (type == OSKAR_SINGLE)
@@ -61,8 +63,8 @@ void oskar_sky_copy_source_data(
                     #pragma GCC unroll 8
                     for (c = 0; c < num_columns; ++c)
                     {
-                        ((float**) o_col)[c][num_out] =
-                                ((const float* const*) col)[c][i];
+                        ((float*) o_table)[c * capacity_out + num_out] =
+                                ((const float*) table)[c * capacity_in + i];
                     }
                     num_out++;
                 }
@@ -77,8 +79,8 @@ void oskar_sky_copy_source_data(
                     #pragma GCC unroll 8
                     for (c = 0; c < num_columns; ++c)
                     {
-                        ((double**) o_col)[c][num_out] =
-                                ((const double* const*) col)[c][i];
+                        ((double*) o_table)[c * capacity_out + num_out] =
+                                ((const double*) table)[c * capacity_in + i];
                     }
                     num_out++;
                 }
@@ -112,11 +114,13 @@ void oskar_sky_copy_source_data(
         );
         const oskar_Arg args[] = {
                 {INT_SZ, &num_in},
+                {INT_SZ, &capacity_in},
+                {INT_SZ, &capacity_out},
                 {PTR_SZ, oskar_mem_buffer_const(horizon_mask)},
                 {PTR_SZ, oskar_mem_buffer_const(indices)},
                 {INT_SZ, &num_columns},
-                {PTR_SZ, oskar_mem_buffer_const(in->ptr_columns)},
-                {PTR_SZ, oskar_mem_buffer(out->ptr_columns)}
+                {PTR_SZ, oskar_mem_buffer_const(in->table)},
+                {PTR_SZ, oskar_mem_buffer(out->table)}
         };
         oskar_device_launch_kernel(
                 k, location, 1, local_size, global_size,

@@ -22,7 +22,7 @@ void oskar_sky_free(oskar_Sky* model, int* status)
     {
         oskar_mem_free(model->columns[i], status);
     }
-    oskar_mem_free(model->ptr_columns, status);
+    oskar_mem_free(model->table, status);
     free(model->columns);
     free(model->column_attr);
     free(model->column_type);

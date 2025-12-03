@@ -18,11 +18,11 @@ oskar_Mem* oskar_sky_column(
         int* status
 )
 {
-    int i = 0, num_columns = 0;
+    size_t i = 0, num_columns = 0;
     if (*status || column_type < 0) return 0;
 
     /* Scan the columns to return the specified type. */
-    num_columns = sky->attr_int[OSKAR_SKY_NUM_COLUMNS];
+    num_columns = (size_t) sky->attr_int[OSKAR_SKY_NUM_COLUMNS];
     for (i = 0; i < num_columns; ++i)
     {
         if (sky->column_type[i] == column_type &&
@@ -33,7 +33,7 @@ oskar_Mem* oskar_sky_column(
     }
 
     /* The column was not found, so create it. */
-    num_columns = ++(sky->attr_int[OSKAR_SKY_NUM_COLUMNS]);
+    num_columns = (size_t) (++(sky->attr_int[OSKAR_SKY_NUM_COLUMNS]));
     sky->column_type = (oskar_SkyColumn*) realloc(
             sky->column_type, num_columns * sizeof(oskar_SkyColumn)
     );
@@ -48,17 +48,21 @@ oskar_Mem* oskar_sky_column(
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;         /* LCOV_EXCL_LINE */
         return 0;                                         /* LCOV_EXCL_LINE */
     }
-    sky->column_type[i] = column_type;
-    sky->column_attr[i] = column_attribute;
-    const int precision = sky->attr_int[OSKAR_SKY_PRECISION];
-    const int location = sky->attr_int[OSKAR_SKY_MEM_LOCATION];
-    const int capacity = sky->attr_int[OSKAR_SKY_CAPACITY];
-    sky->columns[i] = oskar_mem_create(precision, location, capacity, status);
-    oskar_mem_realloc(sky->ptr_columns, num_columns, status);
-    oskar_mem_set_element_ptr(
-            sky->ptr_columns, i, oskar_mem_void(sky->columns[i]), status
-    );
-    return sky->columns[i];
+    const size_t capacity = (size_t) (sky->attr_int[OSKAR_SKY_CAPACITY]);
+    oskar_mem_realloc(sky->table, capacity * num_columns, status);
+    sky->column_type[num_columns - 1] = column_type;
+    sky->column_attr[num_columns - 1] = column_attribute;
+    sky->columns[num_columns - 1] = oskar_mem_create_alias(0, 0, 0, status);
+
+    /* Need to refresh all the cached aliases because of the reallocation. */
+    for (i = 0; i < num_columns; ++i)
+    {
+        oskar_mem_set_alias(
+                sky->columns[i], sky->table, i * capacity, capacity, status
+        );
+    }
+    oskar_mem_clear_contents(sky->columns[num_columns - 1], status);
+    return sky->columns[num_columns - 1];
 }
 
 

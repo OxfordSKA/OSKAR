@@ -34,8 +34,6 @@ const char* oskar_mem_data_type_string(int data_type)
         return "SINGLE COMPLEX MATRIX";
     case OSKAR_DOUBLE_COMPLEX_MATRIX:
         return "DOUBLE COMPLEX MATRIX";
-    case OSKAR_PTR:
-        return "POINTER";
     default:                                              /* LCOV_EXCL_LINE */
         break;                                            /* LCOV_EXCL_LINE */
     };

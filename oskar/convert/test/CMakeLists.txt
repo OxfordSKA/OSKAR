@@ -15,4 +15,4 @@ target_link_libraries(${name}
     oskar gtest
     #${CASACORE_LIBRARIES}
 )
-add_test(${name} ${name})
+add_test(NAME ${name} COMMAND ${name})

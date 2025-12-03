@@ -15,7 +15,7 @@ if (NOT TARGET tests)
 endif()
 add_dependencies(tests ${name})
 
-add_test(binary_test ${name})
+add_test(NAME ${name} COMMAND ${name})
 
 set(name test_binary_vis_read_write)
 add_executable(${name} Test_binary_vis_read_write.c)
