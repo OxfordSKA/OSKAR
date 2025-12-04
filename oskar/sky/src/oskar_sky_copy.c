@@ -22,7 +22,7 @@ void oskar_sky_copy(oskar_Sky* dst, const oskar_Sky* src, int* status)
         return;                                           /* LCOV_EXCL_LINE */
     }
     const int num_sources = oskar_sky_int(src, OSKAR_SKY_NUM_SOURCES);
-    if (oskar_sky_int(dst, OSKAR_SKY_CAPACITY) < num_sources)
+    if (oskar_sky_int(dst, OSKAR_SKY_CAPACITY) <= num_sources)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;           /* LCOV_EXCL_LINE */
         return;                                           /* LCOV_EXCL_LINE */
