@@ -138,7 +138,7 @@ void oskar_sky_save_named_columns(
                     file, "%s", oskar_sky_column_type_to_name(column_type)
             );
         }
-        if (c < num_unique_columns - 1) fprintf(file, ", ");
+        if (c < num_unique_columns - 1) (void) fprintf(file, ", ");
     }
     (void) fprintf(file, ") = format\n");
 

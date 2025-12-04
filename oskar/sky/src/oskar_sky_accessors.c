@@ -59,7 +59,9 @@ void oskar_sky_set_int(oskar_Sky* sky, oskar_SkyAttribInt attribute, int value)
         /* The number of (valid) sources can be set,
          * as long as it's less than the capacity. */
         if (value < sky->attr_int[OSKAR_SKY_CAPACITY])
+        {
             sky->attr_int[attribute] = value;
+        }
         break;
     case OSKAR_SKY_USE_EXTENDED:
         sky->attr_int[attribute] = value;
