@@ -9,7 +9,6 @@
         const FP lin_spx,\
         const int num_sp_indices,\
         const FP spxn[8],\
-        const int have_sp_curvature,\
         const FP sp_curvature,\
         const FP line_width_hz\
 )\
@@ -21,7 +20,7 @@
         const FP sigma = line_width_hz;\
         return stokes_i_in * exp(-(x * x) / (2 * sigma * sigma));\
     }\
-    if (have_sp_curvature) {\
+    if (sp_curvature != (FP) 0) {\
         /* Follow Equation 2 of Callingham et al. 2017. */\
         const FP freq_ratio = freq_hz / freq0_hz;\
         const FP curv = exp(sp_curvature * pow(log(freq_ratio), 2));\
@@ -83,7 +82,6 @@
     const int have_pol_angle = pol_angle_rad ? 1 : 0;\
     const int have_pol_fraction = pol_fraction ? 1 : 0;\
     const int have_ref_wavelength = ref_wavelength_m ? 1 : 0;\
-    const int have_sp_curvature = sp_curvature ? 1 : 0;\
     const int have_q = in_q ? 1 : 0;\
     const int have_u = in_u ? 1 : 0;\
     KERNEL_LOOP_X(int, i, 0, num_sources)\
@@ -133,7 +131,7 @@
         /* Calculate new Stokes I value based on spectral parameters. */\
         const FP stokes_i_out = M_CAT(calc_stokes_i_flux_, FP)(\
                 in_iquv[0], freq_hz, freq0_hz, lin_spx, num_sp_indices, spxn,\
-                have_sp_curvature, sp_curv, line_width\
+                sp_curv, line_width\
         );\
         /* Find ratio between input and output Stokes I */\
         /* to determine default scaling for other Stokes parameters. */\
@@ -157,8 +155,7 @@
                 const FP freq_at_lambda0_hz = ((FP) C_0) / ref_wave_m;\
                 const FP stokes_i_ref = M_CAT(calc_stokes_i_flux_, FP)(\
                         in_iquv[0], freq_hz, freq_at_lambda0_hz, lin_spx,\
-                        num_sp_indices, spxn, have_sp_curvature, sp_curv,\
-                        line_width\
+                        num_sp_indices, spxn, sp_curv, line_width\
                 );\
                 pol_ang_chi0 = 0.5 * atan2(in_iquv[2], in_iquv[1]) - (\
                         ref_wave_m * ref_wave_m * rm\

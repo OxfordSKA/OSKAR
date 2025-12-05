@@ -92,7 +92,7 @@ Field type names supported by OSKAR are case-insensitive, and include:
    **SpectralCurvature**, N/A, "Optional spectral curvature term described in
    |br| `Callingham et. al. (2017) <https://iopscience.iop.org/article/10.3847/1538-4357/836/2/174/pdf>`_,
    equation 2, where this value is |br| interpreted as the parameter 'q'.
-   If present, only the first |br| **SpectralIndex** value will be used,
+   If non-zero, only the first |br| **SpectralIndex** value will be used,
    and any others will be |br| ignored. See :ref:`spectral-curvature` below."
    **LineWidth**, Hz, "Optional line width in Hz, if this is a spectral line
    source. |br| If the line width is greater than 0, then spectral index
@@ -122,6 +122,18 @@ Field type names supported by OSKAR are case-insensitive, and include:
    For consistency, if the unit is omitted, radians is assumed for
    both the "**Ra**" and "**Dec**" columns, and degrees is assumed if the
    column names are instead "**RaD**" or "**DecD**".
+
+.. note::
+   Sources of different spectral types can be combined within the same sky
+   model, if the relevant columns are specified. If all the columns are
+   present, the priority order is:
+
+   1. A spectral line profile will be used for the source if **LineWidth** is
+      greater than zero;
+   2. Otherwise, a spectral curvature model for the source will be used
+      if **SpectralCurvature** is non-zero;
+   3. Otherwise, a logarithmic or linear spectral index polynomial
+      will be used.
 
 .. note::
    If a **RotationMeasure** is defined, it will be used along with the
@@ -289,9 +301,9 @@ In this case, the flux :math:`S_0` given at the reference frequency
 
 Spectral Curvature
 ------------------
-If specified, the **SpectralCurvature** parameter (:math:`q`) is used with
-the first spectral index value (:math:`\alpha_0`) to scale the flux :math:`S_0`
-given at the reference frequency :math:`\nu_0` to another
+If specified, and not 0, the **SpectralCurvature** parameter (:math:`q`, below)
+is used with the first spectral index value (:math:`\alpha_0`) to scale the
+flux :math:`S_0` given at the reference frequency :math:`\nu_0` to another
 frequency :math:`\nu` as follows:
 
 .. math:: S_{\nu} = S_0 \left( \frac{\nu}{\nu_0} \right)^{\alpha_0} \exp\left( q \ln\left( \frac{\nu}{\nu_0} \right)^2 \right)
