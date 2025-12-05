@@ -56,7 +56,7 @@ void oskar_mem_set_alias(
         cl_buffer_region r;
         r.origin = element_size * offset;
         r.size   = element_size * num_elements;
-        clReleaseMemObject(mem->buffer);
+        if (mem->data) clReleaseMemObject(mem->buffer);
         mem->buffer = clCreateSubBuffer(
                 src->buffer, CL_MEM_READ_WRITE,
                 CL_BUFFER_CREATE_TYPE_REGION, &r, &error
