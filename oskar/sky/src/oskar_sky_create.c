@@ -32,10 +32,6 @@ oskar_Sky* oskar_sky_create(
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;         /* LCOV_EXCL_LINE */
         return 0;                                         /* LCOV_EXCL_LINE */
     }
-    model->attr_double = (double*) calloc(
-            OSKAR_SKY_NUM_ATTRIBUTES_DOUBLE, sizeof(double)
-    );
-    model->attr_int = (int*) calloc(OSKAR_SKY_NUM_ATTRIBUTES_INT, sizeof(int));
     model->attr_int[OSKAR_SKY_PRECISION] = type;
     model->attr_int[OSKAR_SKY_MEM_LOCATION] = location;
     model->attr_int[OSKAR_SKY_CAPACITY] = num_sources + 1;

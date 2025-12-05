@@ -26,8 +26,6 @@ void oskar_sky_free(oskar_Sky* model, int* status)
     free(model->columns);
     free(model->column_attr);
     free(model->column_type);
-    free(model->attr_double);
-    free(model->attr_int);
     free(model);
 }
 
