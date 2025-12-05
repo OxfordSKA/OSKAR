@@ -14,7 +14,8 @@ import numpy
 
 try:
     from . import _sky_lib
-except ImportError:
+except ImportError as exc:
+    ERROR_MSG = exc.msg
     _sky_lib = None
 
 from oskar.utils import oskar_version_string
@@ -189,7 +190,7 @@ class Sky(object):
                 Optional settings to use to set up the sky model.
         """
         if _sky_lib is None:
-            raise RuntimeError("OSKAR library not found.")
+            raise RuntimeError(f"OSKAR library not found ({ERROR_MSG})")
         self._capsule = None
         if precision is not None and settings is not None:
             raise RuntimeError("Specify either precision or all settings.")
