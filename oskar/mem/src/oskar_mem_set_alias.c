@@ -3,6 +3,7 @@
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
+#include "log/oskar_log.h"
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
 
@@ -63,7 +64,17 @@ void oskar_mem_set_alias(
         mem->data = (void*) (mem->buffer);
         if (error != CL_SUCCESS)
         {
-            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;     /* LCOV_EXCL_LINE */
+            /* LCOV_EXCL_START */
+            oskar_log_error(
+                    0,
+                    "OpenCL error (code %d) in oskar_mem_set_alias() "
+                    "when calling clCreateSubBuffer(): "
+                    "origin=%d, size=%d; parent buffer size=%d\n",
+                    (int) error, (int) (r.origin), (int) (r.size),
+                    (int) (src->num_elements * element_size)
+            );
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            /* LCOV_EXCL_STOP */
         }
     }
     else
