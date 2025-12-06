@@ -13,12 +13,14 @@ extern "C" {
 
 void oskar_sky_resize(oskar_Sky* sky, int num_sources, int* status)
 {
-    size_t i = 0;
+    size_t i = 0, new_capacity = 0;
     oskar_Mem* table = 0;
     if (*status || sky->attr_int[OSKAR_SKY_NUM_SOURCES] == num_sources) return;
 
     /* Allocate a new table of the correct size. */
-    const size_t new_capacity = (size_t) num_sources + 1;
+    const size_t factor = 256;
+    new_capacity = (size_t) num_sources + 1;
+    new_capacity = new_capacity + (factor - new_capacity % factor) % factor;
     const size_t old_capacity = (size_t) (sky->attr_int[OSKAR_SKY_CAPACITY]);
     const size_t num_columns = (size_t) (sky->attr_int[OSKAR_SKY_NUM_COLUMNS]);
     table = oskar_mem_create(
