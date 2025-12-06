@@ -634,13 +634,13 @@ TEST(Sky, named_columns_different_format_lines)
         /* LogarithmicSI should be implicitly true by default. */
         int status = 0;
         FILE* file = fopen(filename, "w");
-        (void) fprintf(file, "# ( RA, Dec, LogarithmicSI ) = format\n");
-        (void) fprintf(file, "1, 2, false\n");
-        (void) fprintf(file, "10, 20\n");
+        (void) fprintf(file, "# ( RA, Dec, I, LogarithmicSI ) = format\n");
+        (void) fprintf(file, "1, 2, 3, false\n");
+        (void) fprintf(file, "10, 20, 30\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ(3, oskar_sky_int(sky, OSKAR_SKY_NUM_COLUMNS));
+        ASSERT_EQ(4, oskar_sky_int(sky, OSKAR_SKY_NUM_COLUMNS));
         ASSERT_EQ(2, oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES));
         ASSERT_EQ(1., oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 0));
         ASSERT_EQ(2., oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 0));
@@ -654,13 +654,13 @@ TEST(Sky, named_columns_different_format_lines)
     {
         int status = 0;
         FILE* file = fopen(filename, "w");
-        (void) fprintf(file, "# (RA, Dec, LogarithmicSI='false') = format\n");
-        (void) fprintf(file, "1, 2, true\n");
-        (void) fprintf(file, "10, 20\n");
+        (void) fprintf(file, "# (RA, Dec, I, LogarithmicSI='false') = format\n");
+        (void) fprintf(file, "1, 2, 3, true\n");
+        (void) fprintf(file, "10, 20, 30\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ(3, oskar_sky_int(sky, OSKAR_SKY_NUM_COLUMNS));
+        ASSERT_EQ(4, oskar_sky_int(sky, OSKAR_SKY_NUM_COLUMNS));
         ASSERT_EQ(2, oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES));
         ASSERT_EQ(1., oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 0));
         ASSERT_EQ(2., oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 0));
@@ -918,6 +918,50 @@ TEST(Sky, named_columns_different_format_lines)
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "# (ra,dec,i) = format blah\n");
         (void) fprintf(file, "1, 2, 3\n");
+        (void) fclose(file);
+        oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
+        ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);
+        ASSERT_EQ(0, sky);
+        (void) remove(filename);
+    }
+    {
+        int status = 0;
+        FILE* file = fopen(filename, "w");
+        (void) fprintf(file, "# (Ra, Dec) = format\n");
+        (void) fprintf(file, "1, 2\n");
+        (void) fclose(file);
+        oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
+        ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);
+        ASSERT_EQ(0, sky);
+        (void) remove(filename);
+    }
+    {
+        int status = 0;
+        FILE* file = fopen(filename, "w");
+        (void) fprintf(file, "# (Ra, I) = format\n");
+        (void) fprintf(file, "1, 2\n");
+        (void) fclose(file);
+        oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
+        ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);
+        ASSERT_EQ(0, sky);
+        (void) remove(filename);
+    }
+    {
+        int status = 0;
+        FILE* file = fopen(filename, "w");
+        (void) fprintf(file, "# (Ra, RaD, I) = format\n");
+        (void) fprintf(file, "1, 2, 3\n");
+        (void) fclose(file);
+        oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
+        ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);
+        ASSERT_EQ(0, sky);
+        (void) remove(filename);
+    }
+    {
+        int status = 0;
+        FILE* file = fopen(filename, "w");
+        (void) fprintf(file, "# (I) = format\n");
+        (void) fprintf(file, "1\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);

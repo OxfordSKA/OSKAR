@@ -454,6 +454,9 @@ oskar_Sky* oskar_sky_load_named_columns(
 {
     int c = 0, n = 0;
     int array_workspace_size = 4;
+    int have_ra = 0;
+    int have_dec = 0;
+    int have_flux = 0;
     char* buf = 0;
     char* buf_hdr = 0;
     oskar_SkyColumn* column_types = 0;
@@ -523,6 +526,41 @@ oskar_Sky* oskar_sky_load_named_columns(
         /* Do not print a failure message here -
          * try to load the file using the old format instead. */
         *status = OSKAR_ERR_FILE_IO;
+        (void) fclose(file);
+        free(buf_hdr);
+        free(column_defaults);
+        free(column_types);
+        return 0;
+    }
+
+    /* Check that the required columns are present. */
+    for (c = 0; c < num_columns; ++c)
+    {
+        oskar_SkyColumn col = column_types[c];
+        if (col == OSKAR_SKY_RA_DEG || col == OSKAR_SKY_RA_RAD) have_ra++;
+        if (col == OSKAR_SKY_DEC_DEG || col == OSKAR_SKY_DEC_RAD) have_dec++;
+        if (col == OSKAR_SKY_I_JY) have_flux++;
+    }
+    if (have_ra != 1 || have_dec != 1)
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_log_error(
+                0, "Error opening '%s': need one RA and one Dec column.",
+                filename
+        );
+        (void) fclose(file);
+        free(buf_hdr);
+        free(column_defaults);
+        free(column_types);
+        return 0;
+    }
+    if (have_flux == 0)
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_log_error(
+                0, "Error opening '%s': need a Stokes I column.",
+                filename
+        );
         (void) fclose(file);
         free(buf_hdr);
         free(column_defaults);
