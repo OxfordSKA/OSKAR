@@ -12,6 +12,7 @@ set(${name}_SRC
     Test_Sky_copy_contents.cpp
     Test_Sky_copy_source_data.cpp
     Test_Sky_copy.cpp
+    Test_Sky_create_columns.cpp
     Test_Sky_evaluate_gaussian_source_parameters.cpp
     Test_Sky_evaluate_relative_directions.cpp
     Test_Sky_filter_by_flux.cpp

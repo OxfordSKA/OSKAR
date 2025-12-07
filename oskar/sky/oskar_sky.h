@@ -47,7 +47,7 @@ enum oskar_SkyColumn
     OSKAR_SKY_LINE_WIDTH_HZ,
     /* Scratch columns start at 0x100 (256). */
     OSKAR_SKY_SCRATCH_START = 0x100,
-    OSKAR_SKY_SCRATCH_EXT_A,
+    OSKAR_SKY_SCRATCH_EXT_A = OSKAR_SKY_SCRATCH_START,
     OSKAR_SKY_SCRATCH_EXT_B,
     OSKAR_SKY_SCRATCH_EXT_C,
     OSKAR_SKY_SCRATCH_L,
@@ -56,7 +56,8 @@ enum oskar_SkyColumn
     OSKAR_SKY_SCRATCH_I_JY,
     OSKAR_SKY_SCRATCH_Q_JY,
     OSKAR_SKY_SCRATCH_U_JY,
-    OSKAR_SKY_SCRATCH_V_JY
+    OSKAR_SKY_SCRATCH_V_JY,
+    OSKAR_SKY_SCRATCH_END
 };
 typedef enum oskar_SkyColumn oskar_SkyColumn;
 
@@ -100,6 +101,7 @@ typedef enum oskar_SkyAttribDouble oskar_SkyAttribDouble;
 #include "sky/oskar_sky_copy.h"
 #include "sky/oskar_sky_copy_contents.h"
 #include "sky/oskar_sky_create.h"
+#include "sky/oskar_sky_create_columns.h"
 #include "sky/oskar_sky_create_copy.h"
 #include "sky/oskar_sky_evaluate_gaussian_source_parameters.h"
 #include "sky/oskar_sky_evaluate_relative_directions.h"

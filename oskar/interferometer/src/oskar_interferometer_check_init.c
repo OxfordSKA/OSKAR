@@ -345,6 +345,11 @@ static void* init_device(void* arg)
         d->lmn[2] = oskar_mem_create(h->prec, dev_loc, 1 + num_src, status);
         d->chunk = oskar_sky_create(h->prec, dev_loc, num_src, status);
         d->chunk_clip = oskar_sky_create(h->prec, dev_loc, num_src, status);
+        if (h->num_sky_chunks > 0)
+        {
+            oskar_sky_create_columns(d->chunk, h->sky_chunks[0], status);
+            oskar_sky_create_columns(d->chunk_clip, h->sky_chunks[0], status);
+        }
         d->tel = oskar_telescope_create_copy(h->tel, dev_loc, status);
         d->J = oskar_jones_create(vistype, dev_loc, num_stations, num_src,
                 status);

@@ -19,6 +19,7 @@ set(sky_SRC
     src/oskar_sky_copy_contents.c
     src/oskar_sky_copy_source_data.c
     src/oskar_sky_create.c
+    src/oskar_sky_create_columns.c
     src/oskar_sky_create_copy.c
     src/oskar_sky_evaluate_gaussian_source_parameters.c
     src/oskar_sky_evaluate_relative_directions.c
