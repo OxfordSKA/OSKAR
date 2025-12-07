@@ -11,6 +11,21 @@ extern "C" {
 #endif
 
 
+static int contains(
+        int num_columns,
+        const oskar_SkyColumn* columns,
+        oskar_SkyColumn value
+)
+{
+    int i = 0;
+    for (; i < num_columns; ++i)
+    {
+        if (columns[i] == value) return 1;
+    }
+    return 0;
+}
+
+
 void oskar_sky_create_columns(
         oskar_Sky* sky,
         const oskar_Sky* src,
@@ -18,7 +33,9 @@ void oskar_sky_create_columns(
 )
 {
     int i = 0;
+    int counter = 0;
     int num_columns = 0;
+    oskar_SkyColumn* scratch_columns = 0;
     if (*status) return;
 
     /* Clear any existing column data. */
@@ -37,7 +54,18 @@ void oskar_sky_create_columns(
     const int num_columns_scratch = (
             OSKAR_SKY_SCRATCH_END - OSKAR_SKY_SCRATCH_START
     );
-    num_columns = num_columns_src + num_columns_scratch;
+    scratch_columns = (oskar_SkyColumn*) calloc(
+            num_columns_scratch, sizeof(oskar_SkyColumn)
+    );
+    for (i = 0; i < num_columns_scratch; ++i)
+    {
+        scratch_columns[i] = (oskar_SkyColumn) (i + OSKAR_SKY_SCRATCH_START);
+        if (!contains(num_columns_src, src->column_type, scratch_columns[i]))
+        {
+            counter++;
+        }
+    }
+    num_columns = num_columns_src + counter;
 
     /* Create the new (empty) table. */
     const size_t capacity = (size_t) sky->attr_int[OSKAR_SKY_CAPACITY];
@@ -68,11 +96,13 @@ void oskar_sky_create_columns(
     }
 
     /* Set the metadata for the scratch columns. */
+    counter = num_columns_src;
     for (i = 0; i < num_columns_scratch; ++i)
     {
-        sky->column_type[i + num_columns_src] = (oskar_SkyColumn) (
-                i + OSKAR_SKY_SCRATCH_START
-        );
+        if (!contains(num_columns_src, src->column_type, scratch_columns[i]))
+        {
+            sky->column_type[counter++] = scratch_columns[i];
+        }
     }
 
     /* Set all the column references. */
@@ -85,6 +115,7 @@ void oskar_sky_create_columns(
 
     /* Update the new number of columns. */
     sky->attr_int[OSKAR_SKY_NUM_COLUMNS] = num_columns;
+    free(scratch_columns);
 }
 
 #ifdef __cplusplus
