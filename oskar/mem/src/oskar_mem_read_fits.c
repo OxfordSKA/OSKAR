@@ -37,21 +37,7 @@ void oskar_mem_read_fits(
     double nul = 0.0;
     oskar_Mem *data_ptr = 0, *data_temp = 0;
     fitsfile* fptr = 0;
-    if (*status || !data || num_index_dims == 0 || !start_index) return;
-
-    /* Get the FITS data type of the output array. */
-    switch (oskar_mem_type(data))
-    {
-    case OSKAR_SINGLE:
-        type_fits = TFLOAT;
-        break;
-    case OSKAR_DOUBLE:
-        type_fits = TDOUBLE;
-        break;
-    default:                                              /* LCOV_EXCL_LINE */
-        *status = OSKAR_ERR_BAD_DATA_TYPE;                /* LCOV_EXCL_LINE */
-        return;                                           /* LCOV_EXCL_LINE */
-    }
+    if (*status) return;
 
     /* Open the file and get the cube parameters. */
     fits_open_file(&fptr, file_name, READONLY, status);
@@ -91,6 +77,29 @@ void oskar_mem_read_fits(
         if (axis_size) (*axis_size)[i] = naxes[i];
         if (axis_inc) (*axis_inc)[i] = cdelt[i];
         num_pixels_cube *= naxes[i];
+    }
+    if (!data || num_index_dims == 0 || !start_index)
+    {
+        fits_close_file(fptr, status);
+        return;
+    }
+
+    /* Get the FITS data type of the output array. */
+    switch (oskar_mem_type(data))
+    {
+    case OSKAR_INT:
+        type_fits = TINT;
+        break;
+    case OSKAR_SINGLE:
+        type_fits = TFLOAT;
+        break;
+    case OSKAR_DOUBLE:
+        type_fits = TDOUBLE;
+        break;
+    default:
+        fits_close_file(fptr, status);                    /* LCOV_EXCL_LINE */
+        *status = OSKAR_ERR_BAD_DATA_TYPE;                /* LCOV_EXCL_LINE */
+        return;                                           /* LCOV_EXCL_LINE */
     }
 
     /* Read the data. */
