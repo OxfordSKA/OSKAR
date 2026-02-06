@@ -1,4 +1,4 @@
-2025-xx-yy  OSKAR-2.12.0
+2026-02-06  OSKAR-2.12.0
 
     * Re-write sky model code to allow for source spectral profiles
       supported by LOFAR/BBS/DP3/WSClean, using logarithmic or linear
