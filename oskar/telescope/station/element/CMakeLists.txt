@@ -9,6 +9,7 @@ set(element_SRC
     #define_evaluate_geometric_dipole_pattern.h
     define_evaluate_spherical_wave.h
     define_evaluate_spherical_wave_feko.h
+    define_evaluate_spherical_wave_feko_norm_polynomial.h
     define_evaluate_spherical_wave_galileo.h
     src/oskar_apply_element_taper_cosine.c
     src/oskar_apply_element_taper_gaussian.c
@@ -26,6 +27,7 @@ set(element_SRC
     #src/oskar_evaluate_geometric_dipole_pattern.c
     src/oskar_evaluate_spherical_wave_sum.c
     src/oskar_evaluate_spherical_wave_sum_feko.c
+    src/oskar_evaluate_spherical_wave_sum_feko_norm_polynomial.c
     src/oskar_evaluate_spherical_wave_sum_galileo.c
 )
 

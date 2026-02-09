@@ -173,7 +173,8 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                         oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, 0),
                         offset_points, num_points, x, y, z, frequency_hz,
-                        theta, phi_x, phi_y, i * num_points, signal, status);
+                        theta, phi_x, phi_y, work->root_n, work->feko_workspace,
+                        i * num_points, signal, status);
             }
         }
         else
@@ -199,7 +200,8 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                         oskar_station_element_euler_index_rad(s, 0, 0, i) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, i),
                         offset_points, num_points, x, y, z, frequency_hz,
-                        theta, phi_x, phi_y, i * num_points, signal, status);
+                        theta, phi_x, phi_y, work->root_n, work->feko_workspace,
+                        i * num_points, signal, status);
             }
         }
         if (oskar_station_enable_array_pattern(s))

@@ -1,5 +1,7 @@
-/* Copyright (c) 2018-2025, The OSKAR Developers. See LICENSE file. */
+/* Copyright (c) 2018-2026, The OSKAR Developers. See LICENSE file. */
 
+OSKAR_IPOW( M_CAT(ipow_, Real), Real, Real2)
+OSKAR_LEGENDRE_NORM( M_CAT(legendre_norm_, Real), Real)
 OSKAR_ELEMENT_TAPER_COSINE_SCALAR( M_CAT(apply_element_taper_cosine_scalar_, Real), Real, Real2)
 OSKAR_ELEMENT_TAPER_COSINE_MATRIX( M_CAT(apply_element_taper_cosine_matrix_, Real), Real, Real4c)
 OSKAR_ELEMENT_TAPER_GAUSSIAN_SCALAR( M_CAT(apply_element_taper_gaussian_scalar_, Real), Real, Real2)
@@ -8,4 +10,5 @@ OSKAR_EVALUATE_DIPOLE_PATTERN( M_CAT(evaluate_dipole_pattern_, Real), Real, Real
 OSKAR_EVALUATE_DIPOLE_PATTERN_SCALAR( M_CAT(evaluate_dipole_pattern_scalar_, Real), Real, Real2)
 OSKAR_EVALUATE_SPHERICAL_WAVE_SUM( M_CAT(evaluate_spherical_wave_sum_, Real), Real, Real2, Real4c)
 OSKAR_EVALUATE_SPHERICAL_WAVE_SUM_FEKO( M_CAT(evaluate_spherical_wave_sum_feko_, Real), Real, Real2, Real4c)
+OSKAR_EVALUATE_SPHERICAL_WAVE_SUM_FEKO_NORM( M_CAT(evaluate_spherical_wave_sum_feko_norm_, Real), Real, Real2, Real4c)
 OSKAR_EVALUATE_SPHERICAL_WAVE_SUM_GALILEO( M_CAT(evaluate_spherical_wave_sum_galileo_, Real), Real, Real2, Real4c)

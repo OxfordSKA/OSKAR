@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2025, The OSKAR Developers.
+ * Copyright (c) 2012-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -39,6 +39,8 @@ extern "C" {
  * @param[in,out] theta     Pointer to work array for computing theta values.
  * @param[in,out] phi_x     Pointer to work array for computing phi values.
  * @param[in,out] phi_y     Pointer to work array for computing phi values.
+ * @param[in] root_n        Pre-computed square roots, length 2 * l_max + 1.
+ * @param[in,out] workspace Work array for FEKO element evaluation.
  * @param[in] offset_out    Start offset into output array.
  * @param[in,out] output    Pointer to output array.
  * @param[in,out] status    Status return code.
@@ -59,9 +61,12 @@ void oskar_element_evaluate(
         oskar_Mem* theta,
         oskar_Mem* phi_x,
         oskar_Mem* phi_y,
+        const oskar_Mem* root_n,
+        oskar_Mem* workspace,
         int offset_out,
         oskar_Mem* output,
-        int* status);
+        int* status
+);
 
 #ifdef __cplusplus
 }

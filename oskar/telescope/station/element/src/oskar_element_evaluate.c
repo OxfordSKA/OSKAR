@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2025, The OSKAR Developers.
+ * Copyright (c) 2012-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -10,7 +10,7 @@
 #include "telescope/station/element/oskar_apply_element_taper_gaussian.h"
 #include "telescope/station/element/oskar_evaluate_dipole_pattern.h"
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum.h"
-#include "telescope/station/element/oskar_evaluate_spherical_wave_sum_feko.h"
+#include "telescope/station/element/oskar_evaluate_spherical_wave_sum_feko_norm_polynomial.h"
 #include "telescope/station/element/oskar_evaluate_spherical_wave_sum_galileo.h"
 #include "convert/oskar_convert_enu_directions_to_theta_phi.h"
 #include "math/oskar_find_closest_match.h"
@@ -38,9 +38,12 @@ void oskar_element_evaluate(
         oskar_Mem* theta,
         oskar_Mem* phi_x,
         oskar_Mem* phi_y,
+        const oskar_Mem* root_n,
+        oskar_Mem* workspace,
         int offset_out,
         oskar_Mem* output,
-        int* status)
+        int* status
+)
 {
     double dipole_length_m = 0.0;
     if (*status) return;
@@ -103,11 +106,18 @@ void oskar_element_evaluate(
         }
         else if (oskar_element_has_spherical_wave_feko_data(model, id))
         {
-            oskar_evaluate_spherical_wave_sum_feko(
+            const size_t workspace_length = (
+                    (model->l_max[id] + 2) * num_points_norm
+            );
+            const int use_ticra_convention = 0;
+            oskar_mem_ensure(workspace, workspace_length, status);
+            oskar_mem_clear_contents(workspace, status);
+            oskar_evaluate_spherical_wave_sum_feko_norm_polynomial(
                     num_points_norm, theta, phi_x,
                     (model->common_phi_coords[id] ? phi_x : phi_y),
-                    model->l_max[id], model->sph_wave_feko[id],
-                    swap_xy, offset_out, output, status
+                    model->l_max[id], root_n, use_ticra_convention,
+                    model->sph_wave_feko[id], workspace, swap_xy,
+                    offset_out, output, status
             );
         }
         else if (oskar_element_has_spherical_wave_galileo_data(model, id))

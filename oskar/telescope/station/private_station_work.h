@@ -22,6 +22,8 @@ struct oskar_StationWork
     oskar_Mem* phi_x;            /* Real scalar. */
     oskar_Mem* phi_y;            /* Real scalar. */
     oskar_Mem* beam_out_scratch; /* Output scratch array. */
+    oskar_Mem* root_n;
+    oskar_Mem* feko_workspace;
 
     /* TEC screen. */
     char screen_type;

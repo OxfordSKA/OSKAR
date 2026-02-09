@@ -37,6 +37,8 @@ oskar_StationWork* oskar_station_work_create(int type,
     work->theta_modified = oskar_mem_create(type, location, 0, status);
     work->phi_x = oskar_mem_create(type, location, 0, status);
     work->phi_y = oskar_mem_create(type, location, 0, status);
+    work->root_n = oskar_mem_create(type, location, 1000, status);
+    work->feko_workspace = oskar_mem_create(type, location, 0, status);
     for (i = 0; i < 3; ++i)
     {
         work->enu[i] = oskar_mem_create(type, location, 0, status);
@@ -48,6 +50,10 @@ oskar_StationWork* oskar_station_work_create(int type,
     work->tec_screen_path = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
     work->screen_type = 'N'; /* None */
     work->previous_time_index = -1;
+    for (i = 0; i < 1000; ++i)
+    {
+        oskar_mem_set_element_real(work->root_n, i, sqrt((double) i), status);
+    }
 
     /* HARP data. */
     work->poly = oskar_mem_create(type, location, 0, status);
@@ -73,6 +79,8 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
     oskar_mem_free(work->phi_x, status);
     oskar_mem_free(work->phi_y, status);
     oskar_mem_free(work->beam_out_scratch, status);
+    oskar_mem_free(work->root_n, status);
+    oskar_mem_free(work->feko_workspace, status);
     oskar_mem_free(work->tec_screen, status);
     oskar_mem_free(work->tec_screen_path, status);
     oskar_mem_free(work->screen_output, status);

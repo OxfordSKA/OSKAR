@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2025, The OSKAR Developers. See LICENSE file. */
+/* Copyright (c) 2018-2026, The OSKAR Developers. See LICENSE file. */
 
 #ifndef M_CAT
 #define M_CAT(A, B) M_CAT_(A, B)
@@ -45,6 +45,7 @@
 #define GLOBAL_ID_Y (blockDim.y * blockIdx.y + threadIdx.y)
 #define GROUP_ID_X blockIdx.x
 #define GROUP_ID_Y blockIdx.y
+#define INLINE __device__ __forceinline__
 #define KERNEL(NAME) __global__ void NAME
 #define KERNEL_PUB(NAME) __global__ void NAME
 #define KERNEL_LOOP_X(TYPE, I, OFFSET, N)\
@@ -164,6 +165,7 @@
 #define GLOBAL_ID_Y get_global_id(1)
 #define GROUP_ID_X get_group_id(0)
 #define GROUP_ID_Y get_group_id(1)
+#define INLINE inline
 #define KERNEL(NAME) kernel void NAME
 #define KERNEL_PUB(NAME) kernel void NAME
 #define KERNEL_LOOP_X(TYPE, I, OFFSET, N)\
@@ -226,6 +228,11 @@
 #define GLOBAL
 #define GLOBAL_IN( TYPE, NAME) const TYPE *const RESTRICT NAME
 #define GLOBAL_OUT(TYPE, NAME) TYPE *RESTRICT NAME
+#if __STDC_VERSION__ >= 199901L || defined(__cplusplus)
+#define INLINE static inline
+#else
+#define INLINE static
+#endif
 #define KERNEL(NAME) static void NAME
 #define KERNEL_PUB(NAME) void NAME
 #define KERNEL_LOOP_X(TYPE, I, OFFSET, N)\
