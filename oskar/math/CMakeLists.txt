@@ -10,6 +10,7 @@ set(math_SRC
     define_gaussian_circular.h
     define_gaussian_ellipse.h
     define_legendre_polynomial.h
+    define_legendre_polynomial_norm.h
     define_multiply.h
     define_prefix_sum.h
     define_spherical_harmonic.h
