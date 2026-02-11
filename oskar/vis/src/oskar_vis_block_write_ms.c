@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2021, The OSKAR Developers.
+ * Copyright (c) 2015-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -70,8 +70,12 @@ extern "C" {
                 }\
 
 
-void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
-        const oskar_VisHeader* hdr, oskar_MeasurementSet* ms, int* status)
+void oskar_vis_block_write_ms(
+        const oskar_VisBlock* blk,
+        const oskar_VisHeader* hdr,
+        oskar_MeasurementSet* ms,
+        int* status
+)
 {
     const oskar_Mem *in_acorr = 0, *in_xcorr = 0;
     const oskar_Mem *in_uu = 0, *in_vv = 0, *in_ww = 0;
@@ -158,8 +162,21 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     }
 
     /* Write visibilities and (u,v,w) coordinates. */
-    temp_vis = oskar_mem_create(prec | OSKAR_COMPLEX, OSKAR_CPU,
-            num_baseln_out * num_channels * num_pols_out, status);
+    if (num_pols_out == 1)
+    {
+        temp_vis = oskar_mem_create(
+                prec | OSKAR_COMPLEX, OSKAR_CPU,
+                num_baseln_out * num_channels, status
+        );
+    }
+    else
+    {
+        /* Use the right data type to ensure correct alignment. */
+        temp_vis = oskar_mem_create(
+                prec | OSKAR_COMPLEX | OSKAR_MATRIX, OSKAR_CPU,
+                num_baseln_out * num_channels, status
+        );
+    }
     temp_uu = oskar_mem_create(prec, OSKAR_CPU, num_baseln_out, status);
     temp_vv = oskar_mem_create(prec, OSKAR_CPU, num_baseln_out, status);
     temp_ww = oskar_mem_create(prec, OSKAR_CPU, num_baseln_out, status);
@@ -180,17 +197,21 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
              * for the given time. */
             ASSEMBLE_ALL_FOR_TIME(double, double2, double4c)
             const unsigned int row0 = (start_time_index + t) * num_baseln_out;
-            oskar_ms_write_vis_d(ms, row0, start_chan_index,
-                    num_channels, num_baseln_out, (double*)out);
+            oskar_ms_write_vis_d(
+                    ms, row0, start_chan_index,
+                    num_channels, num_baseln_out, (double*) out
+            );
 
             /* Only write the coordinates for the first channel. */
             if (start_chan_index == 0)
             {
-                oskar_ms_write_coords_d(ms, row0, num_baseln_out,
-                        (double*)uu_out, (double*)vv_out, (double*)ww_out,
+                oskar_ms_write_coords_d(
+                        ms, row0, num_baseln_out,
+                        (double*) uu_out, (double*) vv_out, (double*) ww_out,
                         exposure_sec, interval_sec,
                         (start_time_index + t + 0.5) * interval_sec +
-                        t_start_sec);
+                        t_start_sec
+                );
             }
         }
     }
@@ -202,17 +223,21 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
              * for the given time. */
             ASSEMBLE_ALL_FOR_TIME(float, float2, float4c)
             const unsigned int row0 = (start_time_index + t) * num_baseln_out;
-            oskar_ms_write_vis_f(ms, row0, start_chan_index,
-                    num_channels, num_baseln_out, (float*)out);
+            oskar_ms_write_vis_f(
+                    ms, row0, start_chan_index,
+                    num_channels, num_baseln_out, (float*) out
+            );
 
             /* Only write the coordinates for the first channel. */
             if (start_chan_index == 0)
             {
-                oskar_ms_write_coords_f(ms, row0, num_baseln_out,
-                        (float*)uu_out, (float*)vv_out, (float*)ww_out,
+                oskar_ms_write_coords_f(
+                        ms, row0, num_baseln_out,
+                        (float*) uu_out, (float*) vv_out, (float*) ww_out,
                         exposure_sec, interval_sec,
                         (start_time_index + t + 0.5) * interval_sec +
-                        t_start_sec);
+                        t_start_sec
+                );
             }
         }
     }
