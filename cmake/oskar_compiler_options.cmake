@@ -8,6 +8,9 @@ endmacro()
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Using C11 for aligned_alloc.
+set(CMAKE_C_STANDARD 11)
+
 # Set OpenMP compile and link flags for all targets, if defined.
 if (OpenMP_C_FLAGS)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -35,11 +38,6 @@ if (NOT WIN32)
 
     if ("${CMAKE_C_COMPILER_ID}" MATCHES ".*Clang.*"
             OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-        # Specify C standard manually here.
-        # (Using CMAKE_C_STANDARD sets it to GNU version instead,
-        # which breaks strtok_r.)
-        append_flags(CMAKE_C_FLAGS -std=c99)
-
         # Note: long-long is required for cfitsio
         append_flags(CMAKE_CXX_FLAGS
             -Wall -Wextra -pedantic -Wcast-qual -Wcast-align -Wno-long-long

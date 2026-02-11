@@ -1,7 +1,9 @@
 /*
- * Copyright (c) 2011-2025, The OSKAR Developers.
+ * Copyright (c) 2011-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <stdlib.h>
 
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
@@ -10,11 +12,10 @@
 #include "mem/oskar_mem.h"
 #include "mem/private_mem.h"
 
-#include <stdlib.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 void oskar_mem_free(oskar_Mem* mem, int* status)
 {
@@ -52,13 +53,17 @@ void oskar_mem_free(oskar_Mem* mem, int* status)
         if (mem->location == OSKAR_CPU)
         {
             /* Free host memory. */
+#ifdef OSKAR_OS_WIN
+            _aligned_free(mem->data);
+#else
             free(mem->data);
+#endif
         }
         else if (mem->location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             /* Free GPU memory. */
-            const int error = (int)cudaFree(mem->data);
+            const int error = (int) cudaFree(mem->data);
             if (status && error) *status = error;
 #else
             if (status) *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;

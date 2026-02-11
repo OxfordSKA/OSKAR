@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2025, The OSKAR Developers.
+ * Copyright (c) 2013-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -60,8 +60,18 @@ oskar_Mem* oskar_mem_create(
     mem->num_elements = num_elements;
     if (location == OSKAR_CPU)
     {
-        /* Allocate host memory. */
+        /* Allocate host memory, suitably aligned to the element size. */
+#ifdef OSKAR_OS_WIN
+        const size_t bytes = num_elements * element_size;
+        mem->data = _aligned_malloc(bytes, element_size);
+        if (mem->data) memset(mem->data, 0, bytes);
+#elif __STDC_VERSION__ > 201112L
+        const size_t bytes = num_elements * element_size;
+        mem->data = aligned_alloc(element_size, bytes);
+        if (mem->data) memset(mem->data, 0, bytes);
+#else
         mem->data = calloc(num_elements, element_size);
+#endif
         if (mem->data == NULL)
         {
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;     /* LCOV_EXCL_LINE */

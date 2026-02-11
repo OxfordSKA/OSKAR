@@ -3,6 +3,8 @@
     * Add faster version of function to evaluate FEKO patterns using normalised
       polynomials.
 
+    * Use aligned_alloc for host memory allocation if available.
+
 2026-02-06  OSKAR-2.12.0
 
     * Re-write sky model code to allow for source spectral profiles
