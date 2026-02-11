@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025, The OSKAR Developers.
+ * Copyright (c) 2011-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -47,12 +47,34 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
     if (mem->location == OSKAR_CPU)
     {
         /* Reallocate the memory. */
-        void* mem_new = realloc(mem->data, new_size);
+        void* mem_new = 0;
+#ifdef OSKAR_OS_WIN
+        if (new_size > 0)
+        {
+            mem_new = _aligned_realloc(mem->data, new_size, element_size);
+        }
+#elif __STDC_VERSION__ >= 201112L
+        if (new_size > 0)
+        {
+            mem_new = aligned_alloc(element_size, new_size);
+        }
+#else
+        mem_new = realloc(mem->data, new_size);
+#endif
         if (!mem_new && (new_size > 0))
         {
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;     /* LCOV_EXCL_LINE */
             return;                                       /* LCOV_EXCL_LINE */
         }
+
+#if !OSKAR_OS_WIN && __STDC_VERSION__ >= 201112L
+        /* Copy contents of old block to new block. */
+        const size_t copy_size = (old_size > new_size) ? new_size : old_size;
+        if (copy_size > 0) memcpy(mem_new, mem->data, copy_size);
+
+        /* Free the old block. */
+        free(mem->data);
+#endif
 
         /* Initialise the new memory if it's larger than the old block. */
         if (new_size > old_size)
