@@ -4,6 +4,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
