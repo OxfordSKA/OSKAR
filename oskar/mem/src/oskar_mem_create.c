@@ -65,7 +65,7 @@ oskar_Mem* oskar_mem_create(
         const size_t bytes = num_elements * element_size;
         mem->data = _aligned_malloc(bytes, element_size);
         if (mem->data) memset(mem->data, 0, bytes);
-#elif __STDC_VERSION__ > 201112L
+#elif __STDC_VERSION__ >= 201112L
         const size_t bytes = num_elements * element_size;
         mem->data = aligned_alloc(element_size, bytes);
         if (mem->data) memset(mem->data, 0, bytes);
