@@ -11,6 +11,16 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Using C11 for aligned_alloc.
 set(CMAKE_C_STANDARD 11)
 
+# Add -march=native if enabled and supported.
+option(USE_NATIVE_CPU_ARCH "Build with -march=native" OFF)
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+if (COMPILER_SUPPORTS_MARCH_NATIVE AND USE_NATIVE_CPU_ARCH)
+    message("-- INFO: Adding -march=native flag")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+endif()
+
 # Set OpenMP compile and link flags for all targets, if defined.
 if (OpenMP_C_FLAGS)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
