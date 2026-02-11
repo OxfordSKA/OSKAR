@@ -67,7 +67,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
             return;                                       /* LCOV_EXCL_LINE */
         }
 
-#if !OSKAR_OS_WIN && __STDC_VERSION__ >= 201112L
+#if !defined(OSKAR_OS_WIN) && __STDC_VERSION__ >= 201112L
         /* Copy contents of old block to new block. */
         const size_t copy_size = (old_size > new_size) ? new_size : old_size;
         if (copy_size > 0) memcpy(mem_new, mem->data, copy_size);
