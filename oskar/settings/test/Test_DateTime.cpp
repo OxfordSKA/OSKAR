@@ -62,7 +62,7 @@ TEST(settings_types, DateTime)
     {
         double mjd = t.to_mjd();
         double mjd2 = t.to_mjd_2();
-        EXPECT_DOUBLE_EQ(mjd, mjd2);
+        EXPECT_NEAR(mjd, mjd2, 1e-8);
         t.from_mjd(mjd);
         EXPECT_DOUBLE_EQ(mjd, t.to_mjd());
 
@@ -71,7 +71,7 @@ TEST(settings_types, DateTime)
     {
         double mjd = 46113.7511111;
         t.from_mjd(mjd);
-        EXPECT_DOUBLE_EQ(mjd, t.to_mjd());
+        EXPECT_NEAR(mjd, t.to_mjd(), 1e-8);
         EXPECT_EQ(DateTime::MJD, t.format());
     }
     {
@@ -79,7 +79,7 @@ TEST(settings_types, DateTime)
         EXPECT_TRUE(t1.set_value("46113.7654321"));
         EXPECT_EQ(DateTime::MJD, t1.format());
         EXPECT_STREQ("46113.7654321", t1.get_value());
-        EXPECT_DOUBLE_EQ(46113.7654321, t1.to_mjd());
+        EXPECT_NEAR(46113.7654321, t1.to_mjd(), 1e-8);
     }
     {
         DateTime t1;

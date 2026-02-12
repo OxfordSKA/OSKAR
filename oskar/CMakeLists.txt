@@ -68,6 +68,12 @@ if (CASACORE_FOUND)
 endif()
 
 # Link with other optional dependencies if they're available.
+if (OpenMP_C_FOUND)
+    target_link_libraries(${libname} PRIVATE OpenMP::OpenMP_C)
+endif()
+if (OpenMP_CXX_FOUND)
+    target_link_libraries(${libname} PRIVATE OpenMP::OpenMP_CXX)
+endif()
 if (HDF5_FOUND)
     target_link_libraries(${libname} PRIVATE ${HDF5_LIBRARIES})
 endif()

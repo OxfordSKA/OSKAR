@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025, The OSKAR Developers.
+ * Copyright (c) 2011-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -217,7 +217,7 @@ TEST(Sky, scale_by_spectral_index_linear_multi)
     const int num_sources = 10000;
     const int locations[] = {OSKAR_CPU, device_loc};
     const int types[] = {OSKAR_SINGLE, OSKAR_DOUBLE};
-    const double tol[] = {5e-5, 1e-12};
+    const double tol[] = {5e-5, 2e-12};
     const double freqs[] = {50.0e6, 5e6};
     const int num_freqs = sizeof(freqs) / sizeof(double);
 

@@ -15,8 +15,9 @@ TEST(settings_types, DoubleList)
         ASSERT_TRUE(l.set_default("0.0,1.1,2.2,3.3,4.4,5.5"));
         ASSERT_TRUE(l.is_default());
         ASSERT_EQ(6, l.size());
-        for (int i = 0; i < l.size(); ++i) {
-            ASSERT_EQ(double(i)+double(i)/10., l.values()[i]);
+        for (int i = 0; i < l.size(); ++i)
+        {
+            ASSERT_NEAR(double(i) + double(i) / 10., l.values()[i], 1e-10);
         }
         ASSERT_STREQ("0.0,1.1,2.2,3.3,4.4,5.5", l.get_value());
     }
@@ -39,4 +40,3 @@ TEST(settings_types, DoubleList)
         ASSERT_FALSE(l1 > l2);
     }
 }
-

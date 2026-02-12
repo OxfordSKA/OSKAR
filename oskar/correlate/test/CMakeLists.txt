@@ -13,7 +13,13 @@ set(${name}_SRC
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)
 add_test(NAME ${name} COMMAND ${name})
+if (OpenMP_CXX_FOUND)
+    target_link_libraries(${name} OpenMP::OpenMP_CXX)
+endif()
 
 set(name oskar_correlator_benchmark)
 add_executable(${name} ${name}.cpp)
 target_link_libraries(${name} oskar oskar_settings)
+if (OpenMP_CXX_FOUND)
+    target_link_libraries(${name} OpenMP::OpenMP_CXX)
+endif()

@@ -15,4 +15,7 @@ target_link_libraries(${name}
     oskar gtest
     #${CASACORE_LIBRARIES}
 )
+if (OpenMP_CXX_FOUND)
+    target_link_libraries(${name} OpenMP::OpenMP_CXX)
+endif()
 add_test(NAME ${name} COMMAND ${name})

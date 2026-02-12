@@ -12,8 +12,11 @@ if (CASACORE_FOUND)
     list(APPEND ${name}_SRC
         Test_write_ms.cpp
     )
-endif ()
+endif()
 
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)
 add_test(NAME ${name} COMMAND ${name})
+if (OpenMP_CXX_FOUND)
+    target_link_libraries(${name} OpenMP::OpenMP_CXX)
+endif()
