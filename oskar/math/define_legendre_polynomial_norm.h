@@ -9,7 +9,7 @@
         const FP cos_theta,\
         const FP sin_theta,\
         GLOBAL_IN(FP, root_n),\
-        FP* y)\
+        GLOBAL_OUT(FP, y))\
 {\
     const FP tol = sqrt((FP) 1.17549435082228750796873653722224568e-38);\
     const FP root_n_plus_half = sqrt(n + (FP) 0.5);\
