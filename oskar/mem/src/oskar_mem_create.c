@@ -14,6 +14,8 @@
 #include "mem/private_mem.h"
 #include "utility/oskar_device.h"
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -66,10 +68,19 @@ oskar_Mem* oskar_mem_create(
         const size_t bytes = num_elements * element_size;
         mem->data = _aligned_malloc(bytes, element_size);
         if (mem->data) memset(mem->data, 0, bytes);
-#elif __STDC_VERSION__ >= 201112L
+#elif defined(OSKAR_OS_MAC) || _POSIX_C_SOURCE >= 200112L
         const size_t bytes = num_elements * element_size;
-        mem->data = aligned_alloc(element_size, bytes);
-        if (mem->data) memset(mem->data, 0, bytes);
+        const size_t alignment = MAX(element_size, 16);
+        const int error = posix_memalign(&mem->data, alignment, bytes);
+        if (error != 0)
+        {
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;     /* LCOV_EXCL_LINE */
+            return mem;                                   /* LCOV_EXCL_LINE */
+        }
+        else if (mem->data)
+        {
+            memset(mem->data, 0, bytes);
+        }
 #else
         mem->data = calloc(num_elements, element_size);
 #endif

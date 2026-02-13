@@ -14,6 +14,8 @@
 #include "mem/private_mem.h"
 #include "utility/oskar_device.h"
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -53,10 +55,16 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         {
             mem_new = _aligned_realloc(mem->data, new_size, element_size);
         }
-#elif __STDC_VERSION__ >= 201112L
+#elif defined(OSKAR_OS_MAC) || _POSIX_C_SOURCE >= 200112L
         if (new_size > 0)
         {
-            mem_new = aligned_alloc(element_size, new_size);
+            const size_t alignment = MAX(element_size, 16);
+            const int error = posix_memalign(&mem_new, alignment, new_size);
+            if (error != 0)
+            {
+                *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE; /* LCOV_EXCL_LINE */
+                return;                                   /* LCOV_EXCL_LINE */
+            }
         }
 #else
         mem_new = realloc(mem->data, new_size);
@@ -67,7 +75,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
             return;                                       /* LCOV_EXCL_LINE */
         }
 
-#if !defined(OSKAR_OS_WIN) && __STDC_VERSION__ >= 201112L
+#if !defined(OSKAR_OS_WIN) && (defined(OSKAR_OS_MAC) || _POSIX_C_SOURCE >= 200112L)
         /* Copy contents of old block to new block. */
         const size_t copy_size = (old_size > new_size) ? new_size : old_size;
         if (copy_size > 0) memcpy(mem_new, mem->data, copy_size);

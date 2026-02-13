@@ -7,9 +7,7 @@ endmacro()
 # Set general compiler flags.
 set(BUILD_SHARED_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# Using C11 for aligned_alloc.
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 99)
 
 # Add -march=native if enabled and supported.
 option(USE_NATIVE_CPU_ARCH "Build with -march=native" OFF)
