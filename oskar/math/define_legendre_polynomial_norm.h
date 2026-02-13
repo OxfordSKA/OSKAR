@@ -8,7 +8,7 @@
         const int idx_point,\
         const FP cos_theta,\
         const FP sin_theta,\
-        const FP* root_n,\
+        GLOBAL_IN(FP, root_n),\
         FP* y)\
 {\
     const FP tol = sqrt((FP) 1.17549435082228750796873653722224568e-38);\
