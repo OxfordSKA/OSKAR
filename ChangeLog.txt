@@ -1,4 +1,4 @@
-2026-xx-yy  OSKAR-2.12.2
+2026-02-19  OSKAR-2.12.2
 
     * Use posix_memalign instead of aligned_alloc for better macOS support.
 
