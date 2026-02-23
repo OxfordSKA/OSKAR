@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2015-2025, The OSKAR Developers.
+ * Copyright (c) 2015-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
-#include "settings/oskar_SettingsNode.h"
 #include <cstring>
 #include <vector>
+
+#include "settings/oskar_SettingsNode.h"
 
 using std::vector;
 
@@ -111,9 +112,9 @@ int SettingsNode::child_number() const
 {
     if (p->parent)
     {
-        for (unsigned i = 0; i < p->children.size(); ++i)
+        for (unsigned i = 0; i < p->parent->p->children.size(); ++i)
         {
-            if (p->children[i] == this) return i;
+            if (p->parent->p->children[i] == this) return i;
         }
     }
     return 0;

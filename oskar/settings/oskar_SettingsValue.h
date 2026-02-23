@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2025, The OSKAR Developers.
+ * Copyright (c) 2015-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -77,7 +77,6 @@ public:
     OSKAR_SETTINGS_EXPORT virtual ~SettingsValue();
 
 public:
-    OSKAR_SETTINGS_EXPORT void operator=(const value_t& other);
     OSKAR_SETTINGS_EXPORT SettingsValue& operator=(const SettingsValue& other);
 
 public:

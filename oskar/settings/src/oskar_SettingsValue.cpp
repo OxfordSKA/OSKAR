@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2025, The OSKAR Developers.
+ * Copyright (c) 2015-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -33,11 +33,6 @@ SettingsValue& SettingsValue::operator=(const SettingsValue& other)
     if (this == &other) return *this;
     value_ = other.value_;
     return *this;
-}
-
-void SettingsValue::operator=(const value_t& other)
-{
-    value_ = other;
 }
 
 SettingsValue::TypeId SettingsValue::type() const

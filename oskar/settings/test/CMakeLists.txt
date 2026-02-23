@@ -20,6 +20,7 @@ add_executable(${name}
     Test_IntRange.cpp
     Test_IntRangeExt.cpp
     Test_OptionList.cpp
+    Test_OptionParser.cpp
     Test_OutputFile.cpp
     Test_RandomSeed.cpp
     Test_settings_utility_string.cpp

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2022, The OSKAR Developers.
+ * Copyright (c) 2015-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -257,7 +257,7 @@ bool SettingsTree::is_critical(const char* key) const
     const SettingsNode* node = find_node(p->root_, k, 0);
     bool item_critical = false;
     if (node->item_type() == SettingsItem::SETTING &&
-                    dependencies_satisfied(k))
+                    dependencies_satisfied(key))
     {
         if (node->is_required() && !node->is_set())
         {
