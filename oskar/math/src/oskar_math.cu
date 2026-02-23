@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2023, The OSKAR Developers. See LICENSE file. */
+/* Copyright (c) 2018-2026, The OSKAR Developers. See LICENSE file. */
 
 #include "math/define_dft_c2r.h"
 #include "math/define_dftw_c2c.h"
@@ -9,7 +9,6 @@
 #include "math/define_legendre_polynomial.h"
 #include "math/define_multiply.h"
 #include "math/define_prefix_sum.h"
-#include "math/define_spherical_harmonic.h"
 #include "utility/oskar_cuda_registrar.h"
 #include "utility/oskar_kernel_macros.h"
 #include "utility/oskar_vector_types.h"

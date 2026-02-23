@@ -13,7 +13,6 @@ set(math_SRC
     define_legendre_polynomial_norm.h
     define_multiply.h
     define_prefix_sum.h
-    define_spherical_harmonic.h
     src/oskar_angular_distance.c
     src/oskar_bearing_angle.c
     src/oskar_dft_c2r.c
@@ -47,9 +46,6 @@ set(math_SRC
     src/oskar_random_power_law.c
     src/oskar_rotate.c
     src/oskar_round_robin.c
-    #src/oskar_spherical_harmonic_sum.c
-    #src/oskar_spherical_harmonic.c
-    #src/oskar_sph_rotate_to_position.c
 )
 
 set(math_SRC "${math_SRC}" PARENT_SCOPE)
