@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2025, The OSKAR Developers.
+ * Copyright (c) 2013-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -24,16 +24,18 @@ static void store_data(
 );
 
 static void set_up_handles_and_defaults(
-        size_t num_mem, oskar_Mem** mem_handle, double** row_defaults,
-        size_t* num_cols_min, size_t* num_cols_max, va_list args, int* status
+        size_t num_mem, oskar_Mem** mem_array, const char** defaults,
+        oskar_Mem** mem_handle, double** row_defaults,
+        size_t* num_cols_min, size_t* num_cols_max, int* status
 );
 
 
-size_t oskar_mem_load_ascii(
+size_t oskar_mem_load_ascii_table(
         const char* filename,
         size_t num_mem,
-        int* status,
-        ...
+        oskar_Mem** mem_array,
+        const char** defaults,
+        int* status
 )
 {
     size_t i = 0;               /* Loop counter. */
@@ -46,55 +48,38 @@ size_t oskar_mem_load_ascii(
     double* row_data = 0;       /* Array to hold data from one row of file. */
     double* row_defaults = 0;   /* Array to hold default data for one row. */
     char* line = 0;             /* Line buffer. */
-    va_list args;               /* Variable argument list. */
-    if (*status) return 0;
-
-    /* Check for at least one array. */
-    if (num_mem == 0)
-    {
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
-        return 0;
-    }
+    if (*status || num_mem == 0) return 0;
 
     /* Open the file. */
     file = fopen(filename, "r");
     if (!file)
     {
-        *status = OSKAR_ERR_FILE_IO;
-        return 0;
+        *status = OSKAR_ERR_FILE_IO;                      /* LCOV_EXCL_LINE */
+        return 0;                                         /* LCOV_EXCL_LINE */
     }
 
     /* Allocate array of handles to data in CPU memory. */
     mem_handle = (oskar_Mem**) calloc(num_mem, sizeof(oskar_Mem*));
-    if (!mem_handle)
-    {
-        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;         /* LCOV_EXCL_LINE */
-        goto cleanup;                                     /* LCOV_EXCL_LINE */
-    }
+    if (!mem_handle) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
 
     /* Set up handles and default row data, and find the minimum and maximum
      * number of columns. */
-    va_start(args, status);
     set_up_handles_and_defaults(
-            num_mem, mem_handle, &row_defaults,
-            &num_cols_min, &num_cols_max, args, status
+            num_mem, mem_array, defaults, mem_handle, &row_defaults,
+            &num_cols_min, &num_cols_max, status
     );
-    va_end(args);
 
     /* Allocate an array to hold numeric data for one row of the file. */
-    if (*status) goto cleanup;
-    row_data = (double*) calloc(num_cols_max, sizeof(double));
-    if (!row_data)
+    if (!(*status))
     {
-        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;         /* LCOV_EXCL_LINE */
-        goto cleanup;                                     /* LCOV_EXCL_LINE */
+        row_data = (double*) calloc(num_cols_max, sizeof(double));
+        if (!row_data) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
     }
 
     /* Loop over lines in the file. */
-    while (oskar_getline(&line, &buffer_size, file) >= 0)
+    while (oskar_getline(&line, &buffer_size, file) >= 0 && !(*status))
     {
         size_t num_cols_read = 0, col_index = 0;
-        if (*status) break;
 
         /* Get the row's data from the file, skipping the row if there aren't
          * enough columns to read. */
@@ -114,7 +99,6 @@ size_t oskar_mem_load_ascii(
             if (oskar_mem_length(mem_handle[i]) <= row_index)
             {
                 oskar_mem_realloc(mem_handle[i], row_index + 1000, status);
-                if (*status) break;
             }
 
             /* Store data. */
@@ -129,32 +113,16 @@ size_t oskar_mem_load_ascii(
         ++row_index;
     }
 
-    /* Ensure that the handle array exists. */
-cleanup:
-    if (mem_handle)
+    /* Resize all arrays to their actual final length. */
+    /* Free any temporary memory used by this function. */
+    for (i = 0; (i < num_mem) && (mem_handle != 0); ++i)
     {
-        /* Resize all arrays to their actual final length. */
-        for (i = 0; i < num_mem; ++i)
+        oskar_mem_realloc(mem_handle[i], row_index, status);
+        if (oskar_mem_location(mem_array[i]) != OSKAR_CPU)
         {
-            oskar_mem_realloc(mem_handle[i], row_index, status);
+            oskar_mem_copy(mem_array[i], mem_handle[i], status);
+            oskar_mem_free(mem_handle[i], status);
         }
-
-        /* Free any temporary memory used by this function. */
-        va_start(args, status);
-        for (i = 0; i < num_mem; ++i)
-        {
-            oskar_Mem* mem = va_arg(args, oskar_Mem*);
-            if (oskar_mem_location(mem) != OSKAR_CPU)
-            {
-                oskar_mem_copy(mem, mem_handle[i], status);
-                oskar_mem_free(mem_handle[i], status);
-            }
-
-            /* We don't need the default here, but must advance the va_arg
-             * pointer to get to the next array. */
-            (void) va_arg(args, const char*);
-        }
-        va_end(args);
     }
 
     /* Free local arrays. */
@@ -167,30 +135,78 @@ cleanup:
 }
 
 
+size_t oskar_mem_load_ascii(
+        const char* filename,
+        size_t num_mem,
+        int* status,
+        ...
+)
+{
+    oskar_Mem** mem_array = 0;
+    const char** defaults = 0;
+    size_t num_read = 0;
+    if (*status) return 0;
+
+    /* Check for at least one array. */
+    if (num_mem == 0)
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;             /* LCOV_EXCL_LINE */
+        return 0;                                         /* LCOV_EXCL_LINE */
+    }
+
+    /* Extract data from va_list and call non-vararg version. */
+    mem_array = (oskar_Mem**) calloc(num_mem, sizeof(oskar_Mem*));
+    defaults = (const char**) calloc(num_mem, sizeof(char*));
+    if (mem_array && defaults)
+    {
+        size_t i = 0;
+        va_list args;
+        va_start(args, status);
+        for (i = 0; i < num_mem; ++i)
+        {
+            mem_array[i] = va_arg(args, oskar_Mem*);
+            defaults[i] = va_arg(args, const char*);
+        }
+        va_end(args);
+        num_read = oskar_mem_load_ascii_table(
+                filename, num_mem, mem_array, defaults, status
+        );
+    }
+    else
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;         /* LCOV_EXCL_LINE */
+    }
+
+    /* Clean up. */
+    free(mem_array);
+    free(defaults);
+    return num_read;
+}
+
+
 static void set_up_handles_and_defaults(
-        size_t num_mem, oskar_Mem** mem_handle, double** row_defaults,
-        size_t* num_cols_min, size_t* num_cols_max, va_list args, int* status
+        size_t num_mem, oskar_Mem** mem_array, const char** defaults,
+        oskar_Mem** mem_handle, double** row_defaults,
+        size_t* num_cols_min, size_t* num_cols_max, int* status
 )
 {
     size_t i = 0, buffer_size = 0, col_start = 0;
     char* line = 0;
+    if (*status) return;
 
     /* Loop over arrays passed to this function to set up handles and
      * default row data. */
-    for (i = 0; i < num_mem; ++i)
+    for (i = 0; (i < num_mem) && !(*status); ++i)
     {
-        oskar_Mem* mem = 0;
         size_t num_cols_needed = 1;
-        if (*status) break;
 
         /* Get and store a handle to CPU-accessible memory for the array. */
-        mem = va_arg(args, oskar_Mem*);
-        mem_handle[i] = mem;
-        if (oskar_mem_location(mem) != OSKAR_CPU)
+        mem_handle[i] = mem_array[i];
+        if (oskar_mem_location(mem_array[i]) != OSKAR_CPU)
         {
             mem_handle[i] = oskar_mem_create(
-                    oskar_mem_type(mem), OSKAR_CPU, oskar_mem_length(mem),
-                    status
+                    oskar_mem_type(mem_array[i]), OSKAR_CPU,
+                    oskar_mem_length(mem_array[i]), status
             );
         }
 
@@ -213,9 +229,8 @@ static void set_up_handles_and_defaults(
             break;                                        /* LCOV_EXCL_LINE */
         }
 
-        /* Make a copy of the default string from the argument list. */
-        const char* def = va_arg(args, const char*);
-        const size_t def_len = 1 + strlen(def);
+        /* Make a copy of the default string. */
+        const size_t def_len = 1 + strlen(defaults[i]);
         if (buffer_size < def_len)
         {
             buffer_size = def_len;
@@ -226,7 +241,7 @@ static void set_up_handles_and_defaults(
                 break;                                    /* LCOV_EXCL_LINE */
             }
         }
-        memcpy(line, def, def_len);
+        memcpy(line, defaults[i], def_len);
 
         /* Get default value(s) for the array, and store them at the
          * current column start. */
@@ -260,6 +275,7 @@ static void store_data(
         int* status
 )
 {
+    if (*status) return;
     /* Store the new data for the current row and column. */
     switch (type)
     {
