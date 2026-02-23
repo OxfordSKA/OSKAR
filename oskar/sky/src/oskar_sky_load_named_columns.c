@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The OSKAR Developers.
+ * Copyright (c) 2025-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -513,24 +513,14 @@ oskar_Sky* oskar_sky_load_named_columns(
                 0, "Error opening '%s': format string present "
                 "but not correct.", filename
         );
-        (void) fclose(file);
-        free(buf_hdr);
-        free(column_defaults);
-        free(column_types);
-        return 0;
     }
 
     /* Check if header is missing. */
-    if (num_columns <= 0)
+    if (num_columns <= 0 && !(*status))
     {
         /* Do not print a failure message here -
          * try to load the file using the old format instead. */
         *status = OSKAR_ERR_FILE_IO;
-        (void) fclose(file);
-        free(buf_hdr);
-        free(column_defaults);
-        free(column_types);
-        return 0;
     }
 
     /* Check that the required columns are present. */
@@ -541,31 +531,24 @@ oskar_Sky* oskar_sky_load_named_columns(
         if (col == OSKAR_SKY_DEC_DEG || col == OSKAR_SKY_DEC_RAD) have_dec++;
         if (col == OSKAR_SKY_I_JY) have_flux++;
     }
-    if (have_ra != 1 || have_dec != 1)
+    if (!(*status))
     {
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
-        oskar_log_error(
-                0, "Error opening '%s': need one RA and one Dec column.",
-                filename
-        );
-        (void) fclose(file);
-        free(buf_hdr);
-        free(column_defaults);
-        free(column_types);
-        return 0;
-    }
-    if (have_flux == 0)
-    {
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
-        oskar_log_error(
-                0, "Error opening '%s': need a Stokes I column.",
-                filename
-        );
-        (void) fclose(file);
-        free(buf_hdr);
-        free(column_defaults);
-        free(column_types);
-        return 0;
+        if (have_ra != 1 || have_dec != 1)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            oskar_log_error(
+                    0, "Error opening '%s': need one RA and one Dec column.",
+                    filename
+            );
+        }
+        if (have_flux == 0)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            oskar_log_error(
+                    0, "Error opening '%s': need a Stokes I column.",
+                    filename
+            );
+        }
     }
 
     /* Create an empty sky model and cache the column handles if possible. */
@@ -586,7 +569,7 @@ oskar_Sky* oskar_sky_load_named_columns(
     }
 
     /* Loop over lines in file. */
-    while (oskar_getline(&buf, &buf_size, file) != OSKAR_ERR_EOF)
+    while (oskar_getline(&buf, &buf_size, file) != OSKAR_ERR_EOF && !(*status))
     {
         char* trimmed = 0;
         char* tokens[MAX_TOKENS];
@@ -637,8 +620,8 @@ oskar_Sky* oskar_sky_load_named_columns(
     /* Check if an error occurred. */
     if (*status)
     {
-        oskar_sky_free(sky, status);                      /* LCOV_EXCL_LINE */
-        sky = 0;                                          /* LCOV_EXCL_LINE */
+        oskar_sky_free(sky, status);
+        sky = 0;
     }
 
     /* Return a handle to the sky model. */
