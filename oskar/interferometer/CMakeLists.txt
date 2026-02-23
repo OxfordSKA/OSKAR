@@ -10,7 +10,6 @@ set(interferometer_SRC
     src/oskar_evaluate_jones_E.c
     src/oskar_evaluate_jones_K.c
     src/oskar_evaluate_jones_R.c
-    #src/oskar_evaluate_jones_Z.c
     src/oskar_interferometer_accessors.c
     src/oskar_interferometer_check_init.c
     src/oskar_interferometer_create.c
@@ -32,7 +31,6 @@ set(interferometer_SRC
     src/oskar_jones_free.c
     src/oskar_jones_join.c
     src/oskar_jones_set_size.c
-    #src/oskar_WorkJonesZ.c
 )
 
 set(interferometer_SRC "${interferometer_SRC}" PARENT_SCOPE)

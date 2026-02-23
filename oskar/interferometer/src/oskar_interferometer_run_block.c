@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025, The OSKAR Developers.
+ * Copyright (c) 2011-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -14,7 +14,6 @@
 #include "interferometer/oskar_evaluate_jones_E.h"
 #include "interferometer/oskar_evaluate_jones_K.h"
 #include "interferometer/oskar_evaluate_jones_R.h"
-#include "interferometer/oskar_evaluate_jones_Z.h"
 #include "utility/oskar_device.h"
 
 #ifdef __cplusplus
