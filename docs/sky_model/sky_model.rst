@@ -45,60 +45,102 @@ So all these format strings, and variations thereof, would be accepted by OSKAR:
 
 The field types in the format string are reserved names to specify the type
 of data in each column of the text file.
-Field type names supported by OSKAR are case-insensitive, and include:
+Many column types can be labelled using alternative names, to cater for sky
+model files from different sources -- for example, the Stokes I column can be
+labelled either ``I`` or ``StokesI`` or ``i_pol``.
+Column names supported by OSKAR are case-insensitive, and include:
 
-.. csv-table::
-   :header: "Field type", "Unit", "Description"
-   :widths: 22, 12, 66
+.. list-table::
+   :widths: 22 12 66
+   :header-rows: 1
 
-   **Ra**, angle, "Right Ascension, in decimal degrees or radians (default);
-   |br| or sexagesimal hours, minutes and seconds.
-   |br| See note below."
-   **Dec**, angle, "Declination, in decimal degrees or radians (default);
-   |br| or sexagesimal degrees, minutes and seconds.
-   |br| See note below."
-   **RaD**, angle, "Right Ascension, in decimal degrees (default) or radians;
-   |br| or sexagesimal hours, minutes and seconds. |br|
-   Use instead of **Ra** if required. See note below."
-   **DecD**, angle, "Declination, in decimal degrees (default) or radians;
-   |br| or sexagesimal degrees, minutes and seconds. |br|
-   Use instead of **Dec** if required. See note below."
-   **I** |br| or **StokesI**, Jy, "Stokes I flux (at reference frequency)."
-   **Q** |br| or **StokesQ**, Jy, "Optional Stokes Q flux."
-   **U** |br| or **StokesU**, Jy, "Optional Stokes U flux."
-   **V** |br| or **StokesV**, Jy, "Optional Stokes V flux."
-   **ReferenceFrequency**, Hz, "Optional reference frequency for source fluxes."
-   **SpectralIndex**, N/A, "Optional spectral index polynomial; can be a
-   multi-valued |br| vector, with a list of values enclosed in brackets;
-   up to 8 terms |br| are supported. See :ref:`spectral-profiles` below."
-   **LogarithmicSI**, boolean, "Optional boolean flag: If true, spectral
-   indices are logarithmic, |br| otherwise linear; see the
-   `LOFAR Wiki page on LogarithmicSI <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#logarithmic_spectral_index>`_.
-   |br| Default true if omitted."
-   **MajorAxis**, arcsec, "Optional Gaussian source FWHM major axis."
-   **MinorAxis**, arcsec, "Optional Gaussian source FWHM minor axis."
-   **Orientation** |br| or **PositionAngle**, deg, "Optional position angle
-   of Gaussian major axis."
-   **RotationMeasure**, rad/m^2, "Optional source rotation measure."
-   **PolarizationAngle** |br| or **PolarisationAngle**, deg, "Optional
-   source polarisation angle; used if Q and U are |br| omitted, or when
-   a rotation measure is set."
-   **PolarizedFraction** |br| or **PolarisedFraction**, N/A, "Optional
-   fraction of linear polarisation, used if Q and U are |br| omitted, or when
-   a rotation measure is set."
-   **ReferenceWavelength**, metres, "Optional reference wavelength,
-   used with the rotation |br| measure parameter. If omitted, it will be
-   calculated based on |br| the reference frequency."
-   **SpectralCurvature**, N/A, "Optional spectral curvature term described in
-   |br| `Callingham et. al. (2017) <https://iopscience.iop.org/article/10.3847/1538-4357/836/2/174/pdf>`_,
-   equation 2, where this value is |br| interpreted as the parameter 'q'.
-   If non-zero, only the first |br| **SpectralIndex** value will be used,
-   and any others will be |br| ignored. See :ref:`spectral-curvature` below."
-   **LineWidth**, Hz, "Optional line width in Hz, if this is a spectral line
-   source. |br| If the line width is greater than 0, then spectral index
-   |br| values will be ignored, and the Stokes I flux will be calculated
-   |br| using a Gaussian profile centred on the reference frequency.
-   |br| See :ref:`spectral-line-profile` below."
+   * - Field type
+     - Unit
+     - Description
+   * - **Ra**
+     - angle
+     - Right Ascension, in decimal degrees or radians (default);
+       |br| or sexagesimal hours, minutes and seconds. |br| See note below.
+   * - **Dec**
+     - angle
+     - Declination, in decimal degrees or radians (default);
+       |br| or sexagesimal degrees, minutes and seconds. |br| See note below.
+   * - **RaD**
+     - angle
+     - Right Ascension, in decimal degrees (default) or radians;
+       |br| or sexagesimal hours, minutes and seconds. |br|
+       Use instead of **Ra** if required. See note below.
+   * - **DecD**
+     - angle
+     - Declination, in decimal degrees (default) or radians;
+       |br| or sexagesimal degrees, minutes and seconds. |br|
+       Use instead of **Dec** if required. See note below.
+   * - **I** |br| or **StokesI** |br| or **i_pol**
+     - Jy
+     - Stokes I flux (at reference frequency).
+   * - **Q** |br| or **StokesQ** |br| or **q_pol**
+     - Jy
+     - Optional Stokes Q flux.
+   * - **U** |br| or **StokesU** |br| or **u_pol**
+     - Jy
+     - Optional Stokes U flux.
+   * - **V** |br| or **StokesV** |br| or **v_pol**
+     - Jy
+     - Optional Stokes V flux.
+   * - **ReferenceFrequency** |br| or **ref_freq**
+     - Hz
+     - Optional reference frequency for source fluxes.
+   * - **SpectralIndex** |br| or **spec_idx**
+     - N/A
+     - Optional spectral index polynomial; can be a multi-valued |br|
+       vector, with a list of values enclosed in brackets; up to 8 terms |br|
+       are supported. See :ref:`spectral-profiles` below.
+   * - **LogarithmicSI** |br| or **log_spec_idx**
+     - boolean
+     - Optional boolean flag: If true, spectral indices are logarithmic, |br|
+       otherwise linear; see the
+       `LOFAR Wiki page on LogarithmicSI <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#logarithmic_spectral_index>`_.
+       |br| Default true if omitted.
+   * - **MajorAxis** |br| or **major_ax**
+     - arcsec
+     - Optional Gaussian source FWHM major axis.
+   * - **MinorAxis** |br| or **minor_ax**
+     - arcsec
+     - Optional Gaussian source FWHM minor axis.
+   * - **Orientation** |br| or **PositionAngle** |br| or **pos_ang**
+     - deg
+     - Optional position angle of Gaussian major axis.
+   * - **RotationMeasure** |br| or **rot_meas**
+     - rad / m\ :sup:`2`
+     - Optional source rotation measure.
+   * - **PolarizationAngle** |br| or **PolarisationAngle** |br| or **pol_ang**
+     - deg
+     - Optional source polarisation angle; used if Q and U are |br|
+       omitted, or when a rotation measure is set.
+   * - **PolarizedFraction** |br| or **PolarisedFraction** |br| or **pol_frac**
+     - N/A
+     - Optional fraction of linear polarisation, used if Q and U are |br|
+       omitted, or when a rotation measure is set.
+   * - **ReferenceWavelength**
+     - metres
+     - Optional reference wavelength, used with the rotation |br|
+       measure parameter. If omitted, it will be calculated based on |br|
+       the reference frequency.
+   * - **SpectralCurvature**
+     - N/A
+     - Optional spectral curvature term described in |br|
+       `Callingham et. al. (2017) <https://iopscience.iop.org/article/10.3847/1538-4357/836/2/174/pdf>`_,
+       equation 2, where this value is |br|
+       interpreted as the parameter 'q'. If non-zero, only the first |br|
+       **SpectralIndex** value will be used, and any others will be |br|
+       ignored. See :ref:`spectral-curvature` below.
+   * - **LineWidth**
+     - Hz
+     - Optional line width in Hz, if this is a spectral line source. |br|
+       If the line width is greater than 0, then spectral index |br|
+       values will be ignored, and the Stokes I flux will be calculated |br|
+       using a Gaussian profile centred on the reference frequency. |br|
+       See :ref:`spectral-line-profile` below.
 
 .. tip::
    - Columns may appear in any order, and optional columns may be omitted
@@ -207,7 +249,7 @@ In order, the parameter columns are:
    6, "Stokes V flux", "Jy", "Optional (default 0)."
    7, "Reference frequency", "Hz", "Optional (default 0). |br| Frequency at which flux densities are given."
    8, "Spectral index", "N/A", "Optional (default 0)."
-   9, "Rotation measure", "rad / m^2", "Optional (default 0)."
+   9, "Rotation measure", "rad / m\ :sup:`2`", "Optional (default 0)."
    10, "Major axis FWHM", "arcsec", "Optional (default 0)."
    11, "Minor axis FWHM", "arcsec", "Optional (default 0)."
    12, "Position angle", "deg", "Optional (default 0). East of North."
@@ -349,7 +391,7 @@ where
 
    a &= \frac{\cos^2 \theta}{2\sigma_x^2} + \frac{\sin^2 \theta}{2\sigma_y^2} \\
    b &= -\frac{\sin2\theta}{4\sigma_x^2} + \frac{\cos2\theta}{4\sigma_y^2} \\
-   c &= \frac{sin^2 \theta}{2\sigma_x^2} + \frac{\cos^2 \theta}{2\sigma_y^2},
+   c &= \frac{\sin^2 \theta}{2\sigma_x^2} + \frac{\cos^2 \theta}{2\sigma_y^2},
 
 and :math:`\sigma_x`  and :math:`\sigma_y` are related to the minor and major
 FWHM respectively, according to

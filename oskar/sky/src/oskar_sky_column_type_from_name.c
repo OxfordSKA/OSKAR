@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The OSKAR Developers.
+ * Copyright (c) 2025-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -56,30 +56,35 @@ oskar_SkyColumn oskar_sky_column_type_from_name(const char* name)
     }
     if (matches(name, "I") ||
             matches(name, "StokesI") ||
+            starts_with(name, "i_pol") ||
             starts_with(name, "STOKES_I"))
     {
         return OSKAR_SKY_I_JY;
     }
     if (matches(name, "Q") ||
             matches(name, "StokesQ") ||
+            starts_with(name, "q_pol") ||
             starts_with(name, "STOKES_Q"))
     {
         return OSKAR_SKY_Q_JY;
     }
     if (matches(name, "U") ||
             matches(name, "StokesU") ||
+            starts_with(name, "u_pol") ||
             starts_with(name, "STOKES_U"))
     {
         return OSKAR_SKY_U_JY;
     }
     if (matches(name, "V") ||
             matches(name, "StokesV") ||
+            starts_with(name, "v_pol") ||
             starts_with(name, "STOKES_V"))
     {
         return OSKAR_SKY_V_JY;
     }
     if (starts_with(name, "ReferenceF") ||
-            starts_with(name, "RefFreq"))
+            starts_with(name, "RefFreq") ||
+            starts_with(name, "ref_freq"))
     {
         return OSKAR_SKY_REF_HZ;
     }
@@ -87,11 +92,12 @@ oskar_SkyColumn oskar_sky_column_type_from_name(const char* name)
             matches(name, "SpInx") ||
             matches(name, "SpIdx") ||
             matches(name, "SPIX") ||
+            matches(name, "spec_idx") ||
             starts_with(name, "alpha"))
     {
         return OSKAR_SKY_SPEC_IDX;
     }
-    if (starts_with(name, "Rotat"))
+    if (starts_with(name, "Rotat") || matches(name, "rot_meas"))
     {
         return OSKAR_SKY_RM_RAD;
     }
@@ -104,7 +110,8 @@ oskar_SkyColumn oskar_sky_column_type_from_name(const char* name)
         return OSKAR_SKY_MINOR_RAD;
     }
     if (starts_with(name, "Ori") ||
-            matches(name, "PositionAngle"))
+            matches(name, "PositionAngle") ||
+            starts_with(name, "pos_ang"))
     {
         return OSKAR_SKY_PA_RAD;
     }
@@ -112,18 +119,20 @@ oskar_SkyColumn oskar_sky_column_type_from_name(const char* name)
     {
         return OSKAR_SKY_SPEC_CURV;
     }
-    if (matches(name, "LogarithmicSI"))
+    if (matches(name, "LogarithmicSI") || matches(name, "log_spec_idx"))
     {
         return OSKAR_SKY_LIN_SI;
     }
     if (starts_with(name, "PolarizationAngle") ||
             starts_with(name, "PolarisationAngle") ||
+            starts_with(name, "pol_ang") ||
             matches(name, "POLA"))
     {
         return OSKAR_SKY_POLA_RAD;
     }
     if (matches(name, "PolarizedFraction") ||
             matches(name, "PolarisedFraction") ||
+            starts_with(name, "pol_frac") ||
             matches(name, "POLF"))
     {
         return OSKAR_SKY_POLF;
