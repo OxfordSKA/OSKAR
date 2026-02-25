@@ -46,13 +46,13 @@ static char* find_clean_header(char* line, int* status)
     if (!line) return 0;
 
     /* Remove whitespace from both ends. */
-    trimmed = oskar_string_trim(line);
+    trimmed = oskar_string_trim(line, 0);
 
     /* Skip over any comment character and re-trim. */
     if (*trimmed == '#')
     {
         trimmed++;
-        trimmed = oskar_string_trim(trimmed);
+        trimmed = oskar_string_trim(trimmed, 0);
     }
 
     /* Convert to lower case. */
@@ -133,7 +133,7 @@ static char* find_clean_header(char* line, int* status)
     }
 
     /* Remove the new spaces at the start or end. */
-    trimmed = oskar_string_trim(trimmed);
+    trimmed = oskar_string_trim(trimmed, 0);
 
     /* Blank out any brackets around what's left (keeping internal ones). */
     const size_t n = strlen(trimmed);
@@ -148,7 +148,7 @@ static char* find_clean_header(char* line, int* status)
     }
 
     /* Trim the line again to remove the spaces that were used for blanking. */
-    return oskar_string_trim(trimmed);
+    return oskar_string_trim(trimmed, 0);
 }
 
 
@@ -216,22 +216,16 @@ static int parse_header_columns(
                 char* val = 0;
                 *p = '\0';
                 in_token = 0;
-                name = oskar_string_trim(token_start);
+                name = oskar_string_trim(token_start, 0);
 
                 /* Handle optional default value, after an '='. */
                 val = strchr(name, '=');
                 if (val)
                 {
                     *val = '\0';
-                    val = oskar_string_trim(val + 1);
 
-                    /* Strip surrounding quotes if present. */
-                    if (*val == '"' || *val == '\'')
-                    {
-                        const char quote = *val++;
-                        char* end = strchr(val, quote);
-                        if (end) *end = '\0';
-                    }
+                    /* Also strip surrounding quotes if present. */
+                    val = oskar_string_trim(val + 1, 1);
                 }
                 (*column_types)[count] = oskar_sky_column_type_from_name(name);
                 (*column_defaults)[count] = val;
@@ -289,20 +283,20 @@ static int parse_array_values(const char* str, double** out, int* num_out)
     str++;
 
     /* Find end of bracketed region. */
-    const char *end_br = str;
-    while (*end_br && *end_br != ']' && *end_br != ')')
+    const char* end_bracket = str;
+    while (*end_bracket && *end_bracket != ']' && *end_bracket != ')')
     {
-        end_br++;
+        end_bracket++;
     }
     const char* p = str;
-    while (p < end_br)
+    while (p < end_bracket)
     {
         /* Skip whitespace and commas. */
-        while (p < end_br && (isspace(*p) || *p == ','))
+        while (p < end_bracket && (isspace(*p) || *p == ','))
         {
             p++;
         }
-        if (p >= end_br) break;
+        if (p >= end_bracket) break;
 
         /* Parse number using strtod. */
         char* next = 0;
@@ -330,29 +324,32 @@ static int parse_array_values(const char* str, double** out, int* num_out)
 }
 
 
-/* Row tokeniser. Splits on spaces and commas, preserves bracket groups. */
+/* Row tokeniser. Split on spaces and commas, respect quotes and brackets. */
 static int split_tokens(char* line, char* tokens[], int max_tokens)
 {
     int count = 0;
-    int in_brackets = 0;
+    int bracket_depth = 0;
+    int in_quotes = 0;
+    char quote_char = ' ';
     char* p = line;
     char* token_start = p;
     if (count < max_tokens) tokens[count++] = token_start;
     while (*p && count < max_tokens)
     {
-        if (*p == '[' || *p == '(')
+        /* Handle brackets and delimiters when not in quotes. */
+        if (!in_quotes)
         {
-            in_brackets++;
-        }
-        else if (*p == ']' || *p == ')')
-        {
-            in_brackets--;
-        }
-        else if (!in_brackets)
-        {
-            if (*p == ',' || isspace(*p))
+            if (*p == '[' || *p == '(')
             {
-                /* Terminate token. */
+                bracket_depth++;
+            }
+            else if ((*p == ']' || *p == ')') && bracket_depth > 0)
+            {
+                bracket_depth--;
+            }
+            else if ((*p == ',' || isspace(*p)) && bracket_depth == 0)
+            {
+                /* Token boundary. Add a null-terminator. */
                 *p = '\0';
                 p++;
 
@@ -363,12 +360,29 @@ static int split_tokens(char* line, char* tokens[], int max_tokens)
                 }
 
                 /* Start of next token. */
-                if (count < max_tokens) tokens[count++] = p;
+                tokens[count++] = p;
 
                 /* Already at the next character - don't increment p again. */
                 continue;
             }
         }
+
+        /* Handle quotes. Quotes override everything, including brackets. */
+        if (*p == '"' || *p == '\'')
+        {
+            if (!in_quotes)
+            {
+                in_quotes = 1;
+                quote_char = *p;
+            }
+            else if (in_quotes && *p == quote_char)
+            {
+                in_quotes = 0;
+                quote_char = ' ';
+            }
+        }
+
+        /* Check next character. */
         p++;
     }
     return count;
@@ -381,12 +395,16 @@ static inline void set_value(
         oskar_Mem* column,
         oskar_SkyColumn column_type,
         const char* value,
+        const char* default_value,
         int row,
         int* values_size,
         double** values,
         int* status
 )
 {
+    /* Use default if there's no value. */
+    if (!value) value = default_value;
+
     /* Column type here is that which was detected in the file. */
     switch (column_type)
     {
@@ -424,7 +442,13 @@ static inline void set_value(
     default:
     {
         /* All other known columns. Assume that they can be arrays. */
-        const int num_items = parse_array_values(value, values, values_size);
+        int num_items = 0;
+        num_items = parse_array_values(value, values, values_size);
+        if (num_items == 0)
+        {
+            num_items = parse_array_values(default_value, values, values_size);
+        }
+        if (num_items == 0) return;
         if (num_items > 1)
         {
             int b = 0;
@@ -575,7 +599,7 @@ oskar_Sky* oskar_sky_load_named_columns(
         char* tokens[MAX_TOKENS];
 
         /* Skip empty or comment lines. */
-        trimmed = oskar_string_trim(buf);
+        trimmed = oskar_string_trim(buf, 0);
         if (*trimmed == '#' || *trimmed == '\0') continue;
 
         /* Split up the line, keeping any bracketed values together. */
@@ -592,11 +616,11 @@ oskar_Sky* oskar_sky_load_named_columns(
         /* Loop over columns in the header. */
         for (c = 0; c < num_columns; c++)
         {
-            char* val = c < num_tokens ? oskar_string_trim(tokens[c]) : 0;
+            char* val = c < num_tokens ? oskar_string_trim(tokens[c], 1) : 0;
             if (val && *val == '\0') val = 0;
-            if (!val) val = column_defaults[c]; /* Use default if no value. */
             set_value(
-                    sky, cached_columns[c], column_types[c], val, n,
+                    sky, cached_columns[c], column_types[c],
+                    val, column_defaults[c], n,
                     &array_workspace_size, &array_workspace, status
             );
         }

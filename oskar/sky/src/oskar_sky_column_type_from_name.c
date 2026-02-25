@@ -38,11 +38,13 @@ static int starts_with(const char* str, const char* prefix)
 
 oskar_SkyColumn oskar_sky_column_type_from_name(const char* name)
 {
-    if (starts_with(name, "RaD"))
+    if (starts_with(name, "RaD") ||
+            starts_with(name, "ra_deg"))
     {
         return OSKAR_SKY_RA_DEG;
     }
-    if (starts_with(name, "DecD"))
+    if (starts_with(name, "DecD") ||
+            starts_with(name, "dec_deg"))
     {
         return OSKAR_SKY_DEC_DEG;
     }
@@ -97,7 +99,8 @@ oskar_SkyColumn oskar_sky_column_type_from_name(const char* name)
     {
         return OSKAR_SKY_SPEC_IDX;
     }
-    if (starts_with(name, "Rotat") || matches(name, "rot_meas"))
+    if (starts_with(name, "Rotat") ||
+            matches(name, "rot_meas"))
     {
         return OSKAR_SKY_RM_RAD;
     }
@@ -119,7 +122,8 @@ oskar_SkyColumn oskar_sky_column_type_from_name(const char* name)
     {
         return OSKAR_SKY_SPEC_CURV;
     }
-    if (matches(name, "LogarithmicSI") || matches(name, "log_spec_idx"))
+    if (matches(name, "LogarithmicSI") ||
+            matches(name, "log_spec_idx"))
     {
         return OSKAR_SKY_LIN_SI;
     }

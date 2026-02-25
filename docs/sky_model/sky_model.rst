@@ -65,12 +65,12 @@ Column names supported by OSKAR are case-insensitive, and include:
      - angle
      - Declination, in decimal degrees or radians (default);
        |br| or sexagesimal degrees, minutes and seconds. |br| See note below.
-   * - **RaD**
+   * - **RaD** |br| or **ra_deg**
      - angle
      - Right Ascension, in decimal degrees (default) or radians;
        |br| or sexagesimal hours, minutes and seconds. |br|
        Use instead of **Ra** if required. See note below.
-   * - **DecD**
+   * - **DecD** |br| or **dec_deg**
      - angle
      - Declination, in decimal degrees (default) or radians;
        |br| or sexagesimal degrees, minutes and seconds. |br|
@@ -147,6 +147,14 @@ Column names supported by OSKAR are case-insensitive, and include:
      entirely.
    - Unknown column types will be ignored when the file is loaded - note that
      this includes columns **Name** and **Type** used by LOFAR software.
+
+     * Note also that if **Name** is present
+       *and if source component names contain either spaces or commas*
+       then **quotes must be used** around the whole name to allow the parser
+       to work properly, as fields are otherwise split on whitespace or commas.
+       In some cases it may be easier to remove this column before the file
+       is loaded.
+
    - Gaussian sources are specified using non-zero values in both
      **MajorAxis** and **MinorAxis** columns. Gaussian sources also need to
      specify an **Orientation** (or **PositionAngle**), even if it is zero.
@@ -158,12 +166,13 @@ Column names supported by OSKAR are case-insensitive, and include:
    In this case, the source flux values will be the same at every frequency.
 
 .. note::
-   The coordinate values used in the (**RA**, **Dec**) columns may have a
+   The coordinate values in the (**RA**, **Dec**) columns may have a
    suffix added to define the unit, either "rad" or "deg" respectively
    for radians or degrees.
    For consistency, if the unit is omitted, radians is assumed for
    both the "**Ra**" and "**Dec**" columns, and degrees is assumed if the
-   column names are instead "**RaD**" or "**DecD**".
+   column names are instead "**RaD**" or "**DecD**"
+   (or "**ra_deg**" or "**dec_deg**").
 
 .. note::
    Sources of different spectral types can be combined within the same sky

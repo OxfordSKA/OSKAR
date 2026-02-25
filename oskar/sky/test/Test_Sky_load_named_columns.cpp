@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The OSKAR Developers.
+ * Copyright (c) 2025-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -28,7 +28,7 @@ static void check_test_sky_model(const oskar_Sky* sky)
     ASSERT_NEAR(ra, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, s), tol);
     ASSERT_NEAR(dec, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, s), tol);
     ASSERT_EQ(99.9, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, s));
-    ASSERT_EQ(0.7, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, s));
+    ASSERT_EQ(+0.5, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, s));
     ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 1, s));
     ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 2, s));
     ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_LIN_SI, 0, s));
@@ -38,14 +38,14 @@ static void check_test_sky_model(const oskar_Sky* sky)
     ASSERT_NEAR(pa, oskar_sky_data(sky, OSKAR_SKY_PA_RAD, 0, s), tol);
     //----------------
     s = 1;
-    ra = 123.456 * DEG2RAD;
-    dec = 43.21 * DEG2RAD;
+    ra = 234.567 * DEG2RAD;
+    dec = 54.32 * DEG2RAD;
     maj = 4. * ARCSEC2RAD;
     min = 5. * ARCSEC2RAD;
     pa = 6. * DEG2RAD;
     ASSERT_NEAR(ra, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, s), tol);
     ASSERT_NEAR(dec, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, s), tol);
-    ASSERT_EQ(99.9, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, s));
+    ASSERT_EQ(799.9, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, s));
     ASSERT_EQ(-0.7, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, s));
     ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 1, s));
     ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 2, s));
@@ -58,35 +58,35 @@ static void check_test_sky_model(const oskar_Sky* sky)
     s = 2;
     ra = -15. * DEG2RAD * (1. / 60.0 + 1.1 / 3600.0);
     dec = -1. * DEG2RAD * (10.2 / 3600.0);
-    maj = 5. * ARCSEC2RAD;
-    min = 6. * ARCSEC2RAD;
-    pa = 7. * DEG2RAD;
+    maj = 5.1 * ARCSEC2RAD;
+    min = 6.2 * ARCSEC2RAD;
+    pa = 7.3 * DEG2RAD;
     ASSERT_NEAR(ra, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, s), tol);
     ASSERT_NEAR(dec, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, s), tol);
     ASSERT_EQ(34.56, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, s));
-    ASSERT_EQ(+0.5, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, s));
+    ASSERT_EQ(-0.7, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, s));
     ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 1, s));
     ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 2, s));
-    ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_LIN_SI, 0, s));
+    ASSERT_EQ(1., oskar_sky_data(sky, OSKAR_SKY_LIN_SI, 0, s));
     ASSERT_EQ(100e3, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 0, s));
     ASSERT_NEAR(maj, oskar_sky_data(sky, OSKAR_SKY_MAJOR_RAD, 0, s), tol);
     ASSERT_NEAR(min, oskar_sky_data(sky, OSKAR_SKY_MINOR_RAD, 0, s), tol);
     ASSERT_NEAR(pa, oskar_sky_data(sky, OSKAR_SKY_PA_RAD, 0, s), tol);
     //----------------
     s = 3;
-    ra = -15. * DEG2RAD * (1. / 60.0 + 1.1 / 3600.0);
-    dec = -1. * DEG2RAD * (10.2 / 3600.0);
-    maj = 5. * ARCSEC2RAD;
-    min = 6. * ARCSEC2RAD;
-    pa = 7. * DEG2RAD;
+    ra = -15. * DEG2RAD * (2. / 60.0 + 3.4 / 3600.0);
+    dec = -1. * DEG2RAD * (20.2 / 3600.0);
+    maj = 5.2 * ARCSEC2RAD;
+    min = 6.3 * ARCSEC2RAD;
+    pa = 7.4 * DEG2RAD;
     ASSERT_NEAR(ra, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, s), tol);
     ASSERT_NEAR(dec, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, s), tol);
-    ASSERT_EQ(34.56, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, s));
-    ASSERT_EQ(+0.5, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, s));
+    ASSERT_EQ(45.67, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, s));
+    ASSERT_EQ(-0.7, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, s));
     ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 1, s));
     ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 2, s));
     ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_LIN_SI, 0, s));
-    ASSERT_EQ(100e3, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 0, s));
+    ASSERT_EQ(101e3, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 0, s));
     ASSERT_NEAR(maj, oskar_sky_data(sky, OSKAR_SKY_MAJOR_RAD, 0, s), tol);
     ASSERT_NEAR(min, oskar_sky_data(sky, OSKAR_SKY_MINOR_RAD, 0, s), tol);
     ASSERT_NEAR(pa, oskar_sky_data(sky, OSKAR_SKY_PA_RAD, 0, s), tol);
@@ -156,8 +156,8 @@ static void check_test_sky_model(const oskar_Sky* sky)
     ASSERT_NEAR(ra, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, s), tol);
     ASSERT_NEAR(dec, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, s), tol);
     ASSERT_EQ(2.345, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, s));
-    ASSERT_EQ(-0.7654, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, s));
-    ASSERT_EQ(-0.3210, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 1, s));
+    ASSERT_EQ(-0.6543, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, s));
+    ASSERT_EQ(-0.147, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 1, s));
     ASSERT_EQ(0., oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 2, s));
     ASSERT_EQ(1., oskar_sky_data(sky, OSKAR_SKY_LIN_SI, 0, s));
     ASSERT_EQ(152e6, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 0, s));
@@ -227,18 +227,19 @@ TEST(Sky, named_columns_load_save)
     (void) fprintf(file, "# Some comments\n");
     (void) fprintf(file, "  #   (Name, Type ra dec I, SpectralIndex=-0.7, LogarithmicSI, ReferenceFrequency='123456.789', MajorAxis, MinorAxis, Orientation) = format\n");
     (void) fprintf(file, " # A pretty messy test file\n");
-    (void) fprintf(file, "s0,   A,    123.456rad 43.21deg   99.9  +0.7 true,,1,2,3\n");
-    (void) fprintf(file, "s1, B, 123.456deg 43.21deg 99.9,, true, ,4 5 6\n");
-    (void) fprintf(file, "s2, C, -00:01:01.1 -00.00.10.2   34.56 +0.5 true 100e3 5,6,7\n");
-    (void) fprintf(file, "s3, C, -00h01m01.1 -00d00m10.2   34.56 +0.5 true 100e3 5,6,7\n");
+    (void) fprintf(file, "s0,   A,    123.456rad '43.21deg'   99.9  +0.5 true,,1,2,3\n");
+    (void) fprintf(file, "s1, B,   \"234.567deg\"   54.32deg 799.9,, true, , 4 5 6\n");
+    (void) fprintf(file, "s2, C, -00:01:01.1 -00.00.10.2   34.56 [] false 100e3 5.1 6.2 7.3\n");
+    (void) fprintf(file, " 'a quoted name, containing commas, and spaces'  C   -00h02m03.4 -00d00m20.2   45.67,[],1 101e3 5.2,6.3,7.4\n");
     (void) fprintf(file, ", D 3.14 1.57   42 0.1 true 100e6 6 7 8.9\n");
     (void) fprintf(file, ",,3.14 1.57   42 [0.1, -0.2, 0.3]\n");
     (void) fprintf(file, "alice,POINT, -01:02:03.456, -10.11.12.345, -0.123456789, [-0.0123456, 1.23456], false, 150e6,,,\n");
-    (void) fprintf(file, "bob,POINT,02:03:04.567,11.12.13.456, 1.234,[0.7654,0.3210],false,151e6,,,\n");
-    (void) fprintf(file, "charlie,POINT,03:04:05.678,12.13.14.567, 2.345,[-0.7654 -0.3210],false,152e6,,,\n");
-    (void) fprintf(file, "dave,POINT,04:05:06.789,13.14.15.678,3.456,[0.0456  0.0654],false,153e6,,,\n");
-    (void) fprintf(file, "eve,GAUSSIAN,05:06:07.89,14.15.16.789, 4.567,[-0.00321,0.00123],false,,80.1,50.2,0\n");
-    (void) fprintf(file, "frank,GAUSSIAN,06:07:08.9,15.16.17.89,5.6789,[9.876,-1.234],false,,741,147,0\n");
+    (void) fprintf(file, "bob,POINT,02:03:04.567,11.12.13.456, 1.234,\"[0.7654,0.3210]\",false,151e6,,,\n");
+    (void) fprintf(file, "charlie,POINT,03:04:05.678,12.13.14.567, 2.345,(-0.6543 -0.147),false,152e6,,,\n");
+    (void) fprintf(file, "dave,POINT,04:05:06.789,13.14.15.678,3.456,'[0.0456  0.0654]',false,153e6,,,\n");
+    (void) fprintf(file, "# A partially broken line (missing closing bracket; but quoted, so it should still work)\n");
+    (void) fprintf(file, "eve,GAUSSIAN,\"05:06:07.89\",14.15.16.789, 4.567,\"[-0.00321,0.00123\",false,,80.1,50.2,0\n");
+    (void) fprintf(file, "frank,GAUSSIAN,06:07:08.9,'15.16.17.89',5.6789,[9.876,-1.234],0,,741,147,0\n");
     (void) fclose(file);
 
     {
@@ -424,6 +425,22 @@ TEST(Sky, named_columns_different_format_lines)
     {
         int status = 0;
         FILE* file = fopen(filename, "w");
+        (void) fprintf(file, "# (ra_deg, dec_deg, i_pol) = format\n");
+        (void) fprintf(file, "1, 2, 3\n");
+        (void) fclose(file);
+        oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
+        ASSERT_EQ(0, status) << oskar_get_error_string(status);
+        ASSERT_EQ(3, oskar_sky_int(sky, OSKAR_SKY_NUM_COLUMNS));
+        ASSERT_EQ(1, oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES));
+        ASSERT_EQ(1. * DEG2RAD, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 0));
+        ASSERT_EQ(2. * DEG2RAD, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 0));
+        ASSERT_EQ(3., oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, 0));
+        oskar_sky_free(sky, &status);
+        (void) remove(filename);
+    }
+    {
+        int status = 0;
+        FILE* file = fopen(filename, "w");
         (void) fprintf(file, " Format=RaD, DecD, I\n");
         (void) fprintf(file, "1, 2, 3\n");
         (void) fclose(file);
@@ -489,7 +506,7 @@ TEST(Sky, named_columns_different_format_lines)
         int status = 0;
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "RA, Dec, I = format\n");
-        (void) fprintf(file, "1, 2, 3\n");
+        (void) fprintf(file, " 1, 2, 3\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -506,7 +523,7 @@ TEST(Sky, named_columns_different_format_lines)
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "# (RA, Dec, I='12') = format\n");
         (void) fprintf(file, "1, 2, 3\n");
-        (void) fprintf(file, "10, 20\n");
+        (void) fprintf(file, "    10, 20\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
