@@ -254,12 +254,12 @@ void oskar_ms_set_element_coords(
     // https://casacore.github.io/casacore-notes/264.pdf
     Matrix<Bool> flags(
             IPosition(2, num_elements, (p->num_pols == 4 ? 2 : 1)), false);
-    Matrix<Double> offset(IPosition(2, num_elements, 3));
+    Matrix<Double> offset(IPosition(2, 3, num_elements));
     for (unsigned int i = 0; i < num_elements; ++i)
     {
-        offset(i, 0) = x[i];
-        offset(i, 1) = y[i];
-        offset(i, 2) = z[i];
+        offset(0, i) = x[i];
+        offset(1, i) = y[i];
+        offset(2, i) = z[i];
     }
     antennaId.put(station, station);
     position.put(station, pos);
