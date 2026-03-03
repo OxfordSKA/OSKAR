@@ -133,7 +133,7 @@ void TelescopeLoaderElementPattern::load_element_patterns(
         }
         else if (ends_with(key.c_str(), "h5"))
         {
-            if (key.find("_FEKO", 0) != string::npos)
+            if (key.find("FEKO", 0) != string::npos)
             {
                 keys_sw_feko_h5.push_back(key);
                 paths_sw_feko_h5.push_back(i->second);
