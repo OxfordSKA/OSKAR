@@ -1,18 +1,22 @@
 /*
- * Copyright (c) 2017-2021, The OSKAR Developers.
+ * Copyright (c) 2017-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
-
-#include "apps/oskar_settings_log.h"
-#include "apps/oskar_settings_to_beam_pattern.h"
 
 #include <cstdlib>
 #include <cstring>
 
+#include "apps/oskar_settings_log.h"
+#include "apps/oskar_settings_to_beam_pattern.h"
+
 using namespace std;
 
-oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
-        oskar_Log* log, int* status)
+
+oskar_BeamPattern* oskar_settings_to_beam_pattern(
+        oskar::SettingsTree* s,
+        oskar_Log* log,
+        int* status
+)
 {
     (void) log;
     int size = 0;
@@ -27,8 +31,9 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
 
     // Set simulator settings.
     s->begin_group("simulator");
-    oskar_beam_pattern_set_max_chunk_size(h,
-            s->to_int("max_sources_per_chunk", status));
+    oskar_beam_pattern_set_max_chunk_size(
+            h, s->to_int("max_sources_per_chunk", status)
+    );
     if (!s->to_int("use_gpus", status))
     {
         oskar_beam_pattern_set_gpus(h, 0, 0, status);
@@ -61,21 +66,24 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
         oskar_beam_pattern_set_num_devices(h, s->to_int("num_devices", status));
     }
     oskar_log_set_keep_file(log_, s->to_int("keep_log_file", status));
-    oskar_log_set_file_priority(log_,
-            s->to_int("write_status_to_log_file", status) ?
-            OSKAR_LOG_STATUS : OSKAR_LOG_MESSAGE);
+    oskar_log_set_file_priority(
+            log_, s->to_int("write_status_to_log_file", status) ?
+            OSKAR_LOG_STATUS : OSKAR_LOG_MESSAGE
+    );
     s->end_group();
 
     // Set observation settings.
     s->begin_group("observation");
     int num_time_steps = s->to_int("num_time_steps", status);
     double inc_sec = s->to_double("length", status) / num_time_steps;
-    oskar_beam_pattern_set_observation_time(h,
-            s->to_double("start_time_utc", status), inc_sec, num_time_steps);
-    oskar_beam_pattern_set_observation_frequency(h,
-            s->to_double("start_frequency_hz", status),
+    oskar_beam_pattern_set_observation_time(
+            h, s->to_double("start_time_utc", status), inc_sec, num_time_steps
+    );
+    oskar_beam_pattern_set_observation_frequency(
+            h, s->to_double("start_frequency_hz", status),
             s->to_double("frequency_inc_hz", status),
-            s->to_int("num_channels", status));
+            s->to_int("num_channels", status)
+    );
     s->end_group();
 
     // Set beam pattern options.
@@ -89,10 +97,12 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
         const int* station_ids = s->to_int_list("station_ids", &size, status);
         oskar_beam_pattern_set_station_ids(h, size, station_ids);
     }
-    oskar_beam_pattern_set_coordinate_frame(h,
-            s->first_letter("coordinate_frame", status));
-    oskar_beam_pattern_set_coordinate_type(h,
-            s->first_letter("coordinate_type", status));
+    oskar_beam_pattern_set_coordinate_frame(
+            h, s->first_letter("coordinate_frame", status)
+    );
+    oskar_beam_pattern_set_coordinate_type(
+            h, s->first_letter("coordinate_type", status)
+    );
     const int* image_size = s->to_int_list("beam_image/size", &size, status);
     if (size == 1)
     {
@@ -102,17 +112,20 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
     {
         oskar_beam_pattern_set_image_size(h, image_size[0], image_size[1]);
     }
-    const int specify_cellsize =
-            s->to_int("beam_image/specify_cellsize", status);
+    const int specify_cellsize = s->to_int(
+            "beam_image/specify_cellsize", status
+    );
     if (specify_cellsize)
     {
-        oskar_beam_pattern_set_image_cellsize(h,
-                s->to_double("beam_image/cellsize_arcsec", status));
+        oskar_beam_pattern_set_image_cellsize(
+                h, s->to_double("beam_image/cellsize_arcsec", status)
+        );
     }
     else
     {
-        const double* image_fov =
-                s->to_double_list("beam_image/fov_deg", &size, status);
+        const double* image_fov = s->to_double_list(
+                "beam_image/fov_deg", &size, status
+        );
         if (size == 1)
         {
             oskar_beam_pattern_set_image_fov(h, image_fov[0], image_fov[0]);
@@ -122,72 +135,131 @@ oskar_BeamPattern* oskar_settings_to_beam_pattern(oskar::SettingsTree* s,
             oskar_beam_pattern_set_image_fov(h, image_fov[0], image_fov[1]);
         }
     }
-    oskar_beam_pattern_set_root_path(h,
-            s->to_string("root_path", status));
-    oskar_beam_pattern_set_sky_model_file(h,
-            s->to_string("sky_model/file", status));
+    oskar_beam_pattern_set_root_path(
+            h, s->to_string("root_path", status)
+    );
+    oskar_beam_pattern_set_sky_model_file(
+            h, s->to_string("sky_model/file", status)
+    );
     s->end_group();
 
     // Set output options.
     s->begin_group("beam_pattern/output");
-    oskar_beam_pattern_set_average_single_axis(h,
-            s->first_letter("average_single_axis", status));
-    oskar_beam_pattern_set_average_time_and_channel(h,
-            s->to_int("average_time_and_channel", status));
-    oskar_beam_pattern_set_separate_time_and_channel(h,
-            s->to_int("separate_time_and_channel", status));
+    oskar_beam_pattern_set_average_single_axis(
+            h, s->first_letter("average_single_axis", status)
+    );
+    oskar_beam_pattern_set_average_time_and_channel(
+            h, s->to_int("average_time_and_channel", status)
+    );
+    oskar_beam_pattern_set_separate_time_and_channel(
+            h, s->to_int("separate_time_and_channel", status)
+    );
     s->end_group();
 
     // Set output files.
     s->begin_group("beam_pattern");
-    oskar_beam_pattern_set_auto_power_fits(h,
-            s->to_int("station_outputs/fits_image/auto_power", status));
-    oskar_beam_pattern_set_auto_power_phase_fits(h,
-            s->to_int("station_outputs/fits_image/auto_power_phase", status));
-    oskar_beam_pattern_set_auto_power_real_fits(h,
-            s->to_int("station_outputs/fits_image/auto_power_real", status));
-    oskar_beam_pattern_set_auto_power_imag_fits(h,
-            s->to_int("station_outputs/fits_image/auto_power_imag", status));
-    oskar_beam_pattern_set_auto_power_text(h,
-            s->to_int("station_outputs/text_file/auto_power", status));
-    oskar_beam_pattern_set_voltage_amp_fits(h,
-            s->to_int("station_outputs/fits_image/amp", status));
-    oskar_beam_pattern_set_voltage_amp_text(h,
-            s->to_int("station_outputs/text_file/amp", status));
-    oskar_beam_pattern_set_voltage_phase_fits(h,
-            s->to_int("station_outputs/fits_image/phase", status));
-    oskar_beam_pattern_set_voltage_phase_text(h,
-            s->to_int("station_outputs/text_file/phase", status));
-    oskar_beam_pattern_set_voltage_raw_text(h,
-            s->to_int("station_outputs/text_file/raw_complex", status));
-    oskar_beam_pattern_set_cross_power_amp_fits(h,
-            s->to_int("telescope_outputs/fits_image/cross_power_amp", status));
-    oskar_beam_pattern_set_cross_power_amp_text(h,
-            s->to_int("telescope_outputs/text_file/cross_power_amp", status));
-    oskar_beam_pattern_set_cross_power_phase_fits(h,
-            s->to_int("telescope_outputs/fits_image/cross_power_phase",
-                    status));
-    oskar_beam_pattern_set_cross_power_phase_text(h,
-            s->to_int("telescope_outputs/text_file/cross_power_phase", status));
-    oskar_beam_pattern_set_cross_power_real_fits(h,
-            s->to_int("telescope_outputs/fits_image/cross_power_real", status));
-    oskar_beam_pattern_set_cross_power_imag_fits(h,
-            s->to_int("telescope_outputs/fits_image/cross_power_imag", status));
-    oskar_beam_pattern_set_cross_power_raw_text(h,
-            s->to_int("telescope_outputs/text_file/cross_power_raw_complex",
-                    status));
+    oskar_beam_pattern_set_auto_power_fits(
+            h, s->to_int("station_outputs/fits_image/auto_power", status)
+    );
+    oskar_beam_pattern_set_auto_power_phase_fits(
+            h, s->to_int("station_outputs/fits_image/auto_power_phase", status)
+    );
+    oskar_beam_pattern_set_auto_power_real_fits(
+            h, s->to_int("station_outputs/fits_image/auto_power_real", status)
+    );
+    oskar_beam_pattern_set_auto_power_imag_fits(
+            h, s->to_int("station_outputs/fits_image/auto_power_imag", status)
+    );
+    oskar_beam_pattern_set_auto_power_text(
+            h, s->to_int("station_outputs/text_file/auto_power", status)
+    );
+    oskar_beam_pattern_set_auto_power_hdf5(
+            h, s->to_int("station_outputs/hdf5_file/auto_power", status)
+    );
+    oskar_beam_pattern_set_voltage_amp_fits(
+            h, s->to_int("station_outputs/fits_image/amp", status)
+    );
+    oskar_beam_pattern_set_voltage_amp_text(
+            h, s->to_int("station_outputs/text_file/amp", status)
+    );
+    oskar_beam_pattern_set_voltage_amp_hdf5(
+            h, s->to_int("station_outputs/hdf5_file/amp", status)
+    );
+    oskar_beam_pattern_set_voltage_phase_fits(
+            h, s->to_int("station_outputs/fits_image/phase", status)
+    );
+    oskar_beam_pattern_set_voltage_phase_text(
+            h, s->to_int("station_outputs/text_file/phase", status)
+    );
+    oskar_beam_pattern_set_voltage_phase_hdf5(
+            h, s->to_int("station_outputs/hdf5_file/phase", status)
+    );
+    oskar_beam_pattern_set_voltage_raw_text(
+            h, s->to_int("station_outputs/text_file/raw_complex", status)
+    );
+    oskar_beam_pattern_set_voltage_raw_hdf5(
+            h, s->to_int("station_outputs/hdf5_file/raw_complex", status)
+    );
+    oskar_beam_pattern_set_cross_power_amp_fits(
+            h, s->to_int("telescope_outputs/fits_image/cross_power_amp", status)
+    );
+    oskar_beam_pattern_set_cross_power_amp_text(
+            h, s->to_int("telescope_outputs/text_file/cross_power_amp", status)
+    );
+    oskar_beam_pattern_set_cross_power_amp_hdf5(
+            h, s->to_int("telescope_outputs/hdf5_file/cross_power_amp", status)
+    );
+    oskar_beam_pattern_set_cross_power_phase_fits(
+            h, s->to_int(
+                    "telescope_outputs/fits_image/cross_power_phase", status
+            )
+    );
+    oskar_beam_pattern_set_cross_power_phase_text(
+            h, s->to_int(
+                    "telescope_outputs/text_file/cross_power_phase", status
+            )
+    );
+    oskar_beam_pattern_set_cross_power_phase_hdf5(
+            h, s->to_int(
+                    "telescope_outputs/hdf5_file/cross_power_phase", status
+            )
+    );
+    oskar_beam_pattern_set_cross_power_real_fits(
+            h, s->to_int(
+                    "telescope_outputs/fits_image/cross_power_real", status
+            )
+    );
+    oskar_beam_pattern_set_cross_power_imag_fits(
+            h, s->to_int(
+                    "telescope_outputs/fits_image/cross_power_imag", status
+            )
+    );
+    oskar_beam_pattern_set_cross_power_raw_text(
+            h, s->to_int(
+                    "telescope_outputs/text_file/cross_power_raw_complex",
+                    status
+            )
+    );
+    oskar_beam_pattern_set_cross_power_raw_hdf5(
+            h, s->to_int(
+                    "telescope_outputs/hdf5_file/cross_power_raw_complex",
+                    status
+            )
+    );
     s->end_group();
 
     // Set test source configuration.
     s->begin_group("beam_pattern/test_source");
-    oskar_beam_pattern_set_test_source_stokes_i(h,
-            s->to_int("stokes_i", status));
-    oskar_beam_pattern_set_test_source_stokes_custom(h,
-            s->to_int("custom", status),
+    oskar_beam_pattern_set_test_source_stokes_i(
+            h, s->to_int("stokes_i", status)
+    );
+    oskar_beam_pattern_set_test_source_stokes_custom(
+            h, s->to_int("custom", status),
             s->to_double("custom_stokes_i", status),
             s->to_double("custom_stokes_q", status),
             s->to_double("custom_stokes_u", status),
-            s->to_double("custom_stokes_v", status), status);
+            s->to_double("custom_stokes_v", status), status
+    );
     s->end_group();
 
     // Return handle to beam pattern simulator.

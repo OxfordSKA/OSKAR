@@ -1,7 +1,10 @@
 /*
- * Copyright (c) 2016-2022, The OSKAR Developers.
+ * Copyright (c) 2016-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <string.h>
+#include <stdlib.h>
 
 #include "beam_pattern/oskar_beam_pattern.h"
 #include "beam_pattern/private_beam_pattern.h"
@@ -11,9 +14,6 @@
 #include "math/oskar_cmath.h"
 #include "utility/oskar_device.h"
 #include "utility/oskar_get_num_procs.h"
-
-#include <string.h>
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,6 +65,12 @@ void oskar_beam_pattern_set_auto_power_text(oskar_BeamPattern* h, int flag)
 }
 
 
+void oskar_beam_pattern_set_auto_power_hdf5(oskar_BeamPattern* h, int flag)
+{
+    h->auto_power_h5 = flag;
+}
+
+
 void oskar_beam_pattern_set_average_time_and_channel(oskar_BeamPattern* h,
         int flag)
 {
@@ -103,6 +109,12 @@ void oskar_beam_pattern_set_cross_power_amp_text(oskar_BeamPattern* h, int flag)
 }
 
 
+void oskar_beam_pattern_set_cross_power_amp_hdf5(oskar_BeamPattern* h, int flag)
+{
+    h->cross_power_amp_h5 = flag;
+}
+
+
 void oskar_beam_pattern_set_cross_power_phase_fits(oskar_BeamPattern* h,
         int flag)
 {
@@ -114,6 +126,13 @@ void oskar_beam_pattern_set_cross_power_phase_text(oskar_BeamPattern* h,
         int flag)
 {
     h->cross_power_phase_txt = flag;
+}
+
+
+void oskar_beam_pattern_set_cross_power_phase_hdf5(oskar_BeamPattern* h,
+        int flag)
+{
+    h->cross_power_phase_h5 = flag;
 }
 
 
@@ -133,6 +152,13 @@ void oskar_beam_pattern_set_cross_power_raw_text(oskar_BeamPattern* h,
         int flag)
 {
     h->cross_power_raw_txt = flag;
+}
+
+
+void oskar_beam_pattern_set_cross_power_raw_hdf5(oskar_BeamPattern* h,
+        int flag)
+{
+    h->cross_power_raw_h5 = flag;
 }
 
 
@@ -386,6 +412,12 @@ void oskar_beam_pattern_set_voltage_amp_text(oskar_BeamPattern* h, int flag)
 }
 
 
+void oskar_beam_pattern_set_voltage_amp_hdf5(oskar_BeamPattern* h, int flag)
+{
+    h->voltage_amp_h5 = flag;
+}
+
+
 void oskar_beam_pattern_set_voltage_phase_fits(oskar_BeamPattern* h, int flag)
 {
     h->voltage_phase_fits = flag;
@@ -398,9 +430,21 @@ void oskar_beam_pattern_set_voltage_phase_text(oskar_BeamPattern* h, int flag)
 }
 
 
+void oskar_beam_pattern_set_voltage_phase_hdf5(oskar_BeamPattern* h, int flag)
+{
+    h->voltage_phase_h5 = flag;
+}
+
+
 void oskar_beam_pattern_set_voltage_raw_text(oskar_BeamPattern* h, int flag)
 {
     h->voltage_raw_txt = flag;
+}
+
+
+void oskar_beam_pattern_set_voltage_raw_hdf5(oskar_BeamPattern* h, int flag)
+{
+    h->voltage_raw_h5 = flag;
 }
 
 #ifdef __cplusplus

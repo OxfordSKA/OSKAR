@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2025, The OSKAR Developers.
+ * Copyright (c) 2012-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -48,6 +48,9 @@ static char* construct_filename(oskar_BeamPattern* h, int data_product_type,
         int stokes_in, int stokes_out, int i_station, int time_average,
         int channel_average, const char* ext);
 static void new_fits_file(oskar_BeamPattern* h, int data_product_type,
+        int stokes_in, int stokes_out, int i_station, int channel_average,
+        int time_average, int* status);
+static void new_hdf5_file(oskar_BeamPattern* h, int data_product_type,
         int stokes_in, int stokes_out, int i_station, int channel_average,
         int time_average, int* status);
 static void new_text_file(oskar_BeamPattern* h, int data_product_type,
@@ -163,6 +166,44 @@ static void set_up_host_data(oskar_BeamPattern* h, int *status)
                 new_text_file(h, IXR, -1, -1, i, 0, 0, status);
             }
 
+            /* HDF5 file. */
+            if (h->voltage_raw_h5)
+            {
+                new_hdf5_file(h, RAW_COMPLEX, -1, -1, i, 0, 0, status);
+            }
+            if (h->voltage_amp_h5)
+            {
+                if (h->pol_mode == OSKAR_POL_MODE_SCALAR)
+                {
+                    new_hdf5_file(h, AMP, -1, -1, i, 0, 0, status);
+                }
+                else
+                {
+                    for (k = X_THETA; k <= Y_PHI; ++k)
+                    {
+                        new_hdf5_file(h, AMP, -1, k, i, 0, 0, status);
+                    }
+                }
+            }
+            if (h->voltage_phase_h5)
+            {
+                if (h->pol_mode == OSKAR_POL_MODE_SCALAR)
+                {
+                    new_hdf5_file(h, PHASE, -1, -1, i, 0, 0, status);
+                }
+                else
+                {
+                    for (k = X_THETA; k <= Y_PHI; ++k)
+                    {
+                        new_hdf5_file(h, PHASE, -1, k, i, 0, 0, status);
+                    }
+                }
+            }
+            if (h->ixr_h5 && h->pol_mode == OSKAR_POL_MODE_FULL)
+            {
+                new_hdf5_file(h, IXR, -1, -1, i, 0, 0, status);
+            }
+
             /* Can only create images if coordinates are on a grid. */
             if (h->coord_grid_type != 'B') continue;
 
@@ -247,6 +288,15 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
             }
         }
 
+        /* HDF5 file. */
+        for (i = 0; i < 2; ++i)
+        {
+            for (o = I; (o <= V) && h->stokes[i] && h->auto_power_h5; ++o)
+            {
+                new_hdf5_file(h, AUTO_POWER_AMP, i, o, s, ta, ca, status);
+            }
+        }
+
         /* Can only create images if coordinates are on a grid. */
         if (h->coord_grid_type != 'B') continue;
 
@@ -292,6 +342,28 @@ static void create_averaged_products(oskar_BeamPattern* h, int ta, int ca,
             if (h->cross_power_phase_txt)
             {
                 new_text_file(h, CROSS_POWER_PHASE, i, o, -1, ta, ca, status);
+            }
+        }
+    }
+
+    /* HDF5 file. */
+    for (i = 0; i < 2; ++i)
+    {
+        if (h->cross_power_raw_h5 && h->stokes[i])
+        {
+            new_hdf5_file(
+                    h, CROSS_POWER_RAW_COMPLEX, i, -1, -1, ta, ca, status
+            );
+        }
+        for (o = I; (o <= V) && h->stokes[i]; ++o)
+        {
+            if (h->cross_power_amp_h5)
+            {
+                new_hdf5_file(h, CROSS_POWER_AMP, i, o, -1, ta, ca, status);
+            }
+            if (h->cross_power_phase_h5)
+            {
+                new_hdf5_file(h, CROSS_POWER_PHASE, i, o, -1, ta, ca, status);
             }
         }
     }
@@ -558,6 +630,96 @@ static void new_fits_file(oskar_BeamPattern* h, int data_product_type,
 }
 
 
+static void new_hdf5_file(oskar_BeamPattern* h, int data_product_type,
+        int stokes_in, int stokes_out, int i_station, int time_average,
+        int channel_average, int* status)
+{
+    int i = 0, data_type = 0;
+    char* name = 0;
+    oskar_HDF5* f = 0;
+    oskar_Mem* temp_type = 0;
+    if (*status) return;
+
+    /* Check polarisation type is possible. */
+    if ((stokes_in > 0 || stokes_out > I) && h->pol_mode != OSKAR_POL_MODE_FULL)
+    {
+        return;
+    }
+
+    /* Construct the filename. */
+    name = construct_filename(
+            h, data_product_type, stokes_in, stokes_out,
+            i_station, time_average, channel_average, "h5"
+    );
+
+    /* Create an empty array of the correct type. */
+    const char* dimension_str = "time,channel,pixel";
+    data_type = h->prec;
+    if (data_product_type == RAW_COMPLEX ||
+            data_product_type == CROSS_POWER_RAW_COMPLEX)
+    {
+        data_type |= OSKAR_COMPLEX;
+        if (h->pol_mode == OSKAR_POL_MODE_FULL)
+        {
+            data_type |= OSKAR_MATRIX;
+            dimension_str = "time,channel,pixel,pol";
+        }
+    }
+    temp_type = oskar_mem_create(data_type, OSKAR_CPU, 0, status);
+
+    /* Create a new HDF5 file. */
+    if (oskar_file_exists(name)) (void) remove(name);
+    f = oskar_hdf5_open(name, 'w', status);
+    if (!f || *status)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        free(name);
+        return;
+    }
+
+    /* Create an empty dataset of the correct size and type. */
+    const size_t num_times = time_average ? 1 : (size_t) h->num_time_steps;
+    const size_t num_channels = channel_average ? 1 : (size_t) h->num_channels;
+    size_t dims[] = {num_times, num_channels, (size_t) h->num_pixels};
+    oskar_hdf5_write_dataset(
+            f, "/", "beam_data", 3, dims, temp_type, 1, status
+    );
+    oskar_mem_free(temp_type, status);
+
+    /* Write metadata as attributes. */
+    oskar_hdf5_write_attribute_string(
+            f, "/", "dimension_order", dimension_str, status
+    );
+    oskar_hdf5_write_attribute_int(
+            f, "/", "num_times", (int) num_times, status
+    );
+    oskar_hdf5_write_attribute_int(
+            f, "/", "num_channels", (int) num_channels, status
+    );
+    oskar_hdf5_write_attribute_int(
+            f, "/", "num_pixels", h->num_pixels, status
+    );
+    oskar_hdf5_write_attribute_double(
+            f, "/", "time_start_mjd_utc", h->time_start_mjd_utc, status
+    );
+    oskar_hdf5_write_attribute_double(
+            f, "/", "time_inc_sec", h->time_inc_sec, status
+    );
+    oskar_hdf5_write_attribute_double(
+            f, "/", "freq_start_hz", h->freq_start_hz, status
+    );
+    oskar_hdf5_write_attribute_double(
+            f, "/", "freq_inc_hz", h->freq_inc_hz, status
+    );
+    i = data_product_index(
+            h, data_product_type, stokes_in, stokes_out,
+            i_station, time_average, channel_average
+    );
+    if (h->data_products) h->data_products[i].hdf5_file = f;
+    free(name);
+}
+
+
 static void new_text_file(oskar_BeamPattern* h, int data_product_type,
         int stokes_in, int stokes_out, int i_station, int time_average,
         int channel_average, int* status)
@@ -698,15 +860,17 @@ static void set_up_device_data(oskar_BeamPattern* h, int* status)
     {
         beam_type |= OSKAR_MATRIX;
     }
-    raw_data = h->ixr_txt || h->ixr_fits ||
+    raw_data = h->ixr_txt || h->ixr_h5 || h->ixr_fits ||
             h->voltage_raw_txt || h->voltage_amp_txt || h->voltage_phase_txt ||
+            h->voltage_raw_h5 || h->voltage_amp_h5 || h->voltage_phase_h5 ||
             h->voltage_amp_fits || h->voltage_phase_fits;
-    auto_power = h->auto_power_txt || h->auto_power_fits ||
+    auto_power = h->auto_power_txt || h->auto_power_h5 || h->auto_power_fits ||
             h->auto_power_phase_fits ||
             h->auto_power_real_fits || h->auto_power_imag_fits;
-    cross_power = h->cross_power_raw_txt ||
+    cross_power = h->cross_power_raw_txt || h->cross_power_raw_h5 ||
             h->cross_power_amp_fits || h->cross_power_phase_fits ||
             h->cross_power_amp_txt || h->cross_power_phase_txt ||
+            h->cross_power_amp_h5 || h->cross_power_phase_h5 ||
             h->cross_power_real_fits || h->cross_power_imag_fits;
 
     /* Expand the number of devices to the number of selected GPUs,

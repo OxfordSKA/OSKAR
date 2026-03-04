@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2025, The OSKAR Developers.
+ * Copyright (c) 2012-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -692,6 +692,13 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
 {
     int i = 0;
     if (!in) return;
+    const char* hdf5_name = "beam_data";
+    const size_t hdf5_offset[] = {
+            (size_t) i_time,
+            (size_t) i_channel,
+            (size_t) (i_chunk * h->max_chunk_size)
+    };
+    const size_t hdf5_dims[] = { 1uL, 1uL, (size_t) num_pix };
 
     /* Loop over data products. */
     const int num_pol = h->pol_mode == OSKAR_POL_MODE_FULL ? 4 : 1;
@@ -699,11 +706,13 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
     {
         fitsfile* f = 0;
         FILE* t = 0;
+        oskar_HDF5* hdf5 = 0;
         int dp = 0, stokes_out = 0, i_station = 0, off = 0;
 
         /* Get data product info. */
         f          = h->data_products[i].fits_file;
         t          = h->data_products[i].text_file;
+        hdf5       = h->data_products[i].hdf5_file;
         dp         = h->data_products[i].type;
         stokes_out = h->data_products[i].stokes_out;
         i_station  = h->data_products[i].i_station;
@@ -717,19 +726,38 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
         }
 
         /* Treat raw data output as special case, as it doesn't go via pix. */
-        if (dp == RAW_COMPLEX && chunk_desc == JONES_DATA && t)
+        if (dp == RAW_COMPLEX && chunk_desc == JONES_DATA)
         {
             oskar_Mem* station_data = 0;
             station_data = oskar_mem_create_alias(in, i_station * num_pix,
                     num_pix, status);
-            oskar_mem_save_ascii(t, 1, 0, num_pix, status, station_data);
+            if (t)
+            {
+                oskar_mem_save_ascii(t, 1, 0, num_pix, status, station_data);
+            }
+            if (hdf5)
+            {
+                oskar_hdf5_write_hyperslab(
+                        hdf5, "/", hdf5_name, 3, hdf5_offset, hdf5_dims,
+                        station_data, status
+                );
+            }
             oskar_mem_free(station_data, status);
             continue;
         }
-        if (dp == CROSS_POWER_RAW_COMPLEX &&
-                chunk_desc == CROSS_POWER_DATA && t)
+        if (dp == CROSS_POWER_RAW_COMPLEX && chunk_desc == CROSS_POWER_DATA)
         {
-            oskar_mem_save_ascii(t, 1, 0, num_pix, status, in);
+            if (t)
+            {
+                oskar_mem_save_ascii(t, 1, 0, num_pix, status, in);
+            }
+            if (hdf5)
+            {
+                oskar_hdf5_write_hyperslab(
+                        hdf5, "/", hdf5_name, 3, hdf5_offset, hdf5_dims,
+                        in, status
+                );
+            }
             continue;
         }
 
@@ -846,6 +874,15 @@ static void write_pixels(oskar_BeamPattern* h, int i_chunk, int i_time,
 
         /* Check for text file. */
         if (t) oskar_mem_save_ascii(t, 1, 0, num_pix, status, h->pix);
+
+        /* Check for HDF5 file. */
+        if (hdf5)
+        {
+            oskar_hdf5_write_hyperslab(
+                    hdf5, "/", hdf5_name, 3, hdf5_offset, hdf5_dims,
+                    h->pix, status
+            );
+        }
     }
 }
 

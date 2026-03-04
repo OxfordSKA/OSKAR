@@ -1,5 +1,7 @@
 2026-xx-yy  OSKAR-2.12.3
 
+    * Add options to write beam pattern data to HDF5 files.
+
     * Add support for SKA sky model column names.
 
     * Handle quotes around fields in sky model file.

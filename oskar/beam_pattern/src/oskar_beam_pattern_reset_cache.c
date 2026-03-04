@@ -1,20 +1,19 @@
 /*
- * Copyright (c) 2016-2025, The OSKAR Developers.
+ * Copyright (c) 2016-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "beam_pattern/oskar_beam_pattern.h"
 #include "beam_pattern/private_beam_pattern.h"
 #include "beam_pattern/private_beam_pattern_free_device_data.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <fitsio.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 void oskar_beam_pattern_reset_cache(oskar_BeamPattern* h, int* status)
 {
@@ -39,6 +38,10 @@ void oskar_beam_pattern_reset_cache(oskar_BeamPattern* h, int* status)
         if (h->data_products[i].fits_file)
         {
             ffclos(h->data_products[i].fits_file, status);
+        }
+        if (h->data_products[i].hdf5_file)
+        {
+            oskar_hdf5_close(h->data_products[i].hdf5_file);
         }
     }
     free(h->data_products);

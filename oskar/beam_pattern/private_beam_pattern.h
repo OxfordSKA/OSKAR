@@ -1,18 +1,19 @@
 /*
- * Copyright (c) 2016-2025, The OSKAR Developers.
+ * Copyright (c) 2016-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
-
-#include <log/oskar_log.h>
-#include <mem/oskar_mem.h>
-#include <telescope/oskar_telescope.h>
-#include <utility/oskar_timer.h>
-#include <utility/oskar_thread.h>
 
 #include <fitsio.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
+
+#include "log/oskar_log.h"
+#include "mem/oskar_mem.h"
+#include "telescope/oskar_telescope.h"
+#include "utility/oskar_hdf5.h"
+#include "utility/oskar_timer.h"
+#include "utility/oskar_thread.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,6 +59,7 @@ struct DataProduct
     int channel_average;
     fitsfile* fits_file;
     FILE* text_file;
+    oskar_HDF5* hdf5_file;
 };
 typedef struct DataProduct DataProduct;
 
@@ -70,14 +72,17 @@ struct oskar_BeamPattern
     int pol_mode, width, height, nside;
     int num_active_stations, *station_ids;
     int voltage_amp_txt, voltage_phase_txt, voltage_raw_txt;
+    int voltage_amp_h5, voltage_phase_h5, voltage_raw_h5;
     int voltage_amp_fits, voltage_phase_fits;
     int auto_power_txt;
+    int auto_power_h5;
     int auto_power_fits, auto_power_phase_fits;
     int auto_power_real_fits, auto_power_imag_fits;
     int cross_power_amp_txt, cross_power_phase_txt, cross_power_raw_txt;
+    int cross_power_amp_h5, cross_power_phase_h5, cross_power_raw_h5;
     int cross_power_amp_fits, cross_power_phase_fits;
     int cross_power_real_fits, cross_power_imag_fits;
-    int ixr_txt, ixr_fits;
+    int ixr_txt, ixr_h5, ixr_fits;
     int average_time_and_channel, separate_time_and_channel;
     int set_cellsize;
     int stokes[2]; /* Stokes I true/false, Stokes custom true/false. */

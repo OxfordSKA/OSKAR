@@ -144,6 +144,31 @@
                 <desc>If true, save the IXR map of the beam in text
                     files (see Carozzi and Woan, 2011).</desc></s> -->
         </s>
+        <s k="hdf5_file"><label>HDF5 file</label>
+            <s k="raw_complex"><label>Raw (complex) pattern</label>
+                <type name="bool" default="false"/>
+                <depends k="beam_pattern/output/separate_time_and_channel"
+                    v="true"/>
+                <desc>If true, save the raw complex pattern in HDF5
+                    files.</desc></s>
+            <s k="amp"><label>Amplitude pattern</label>
+                <type name="bool" default="false"/>
+                <depends k="beam_pattern/output/separate_time_and_channel"
+                    v="true"/>
+                <desc>If true, save each amplitude (voltage) pattern in HDF5
+                    files. This is given by the square root of the sum
+                    of the squares of the real and imaginary values.</desc></s>
+            <s k="phase"><label>Phase pattern</label>
+                <type name="bool" default="false"/>
+                <depends k="beam_pattern/output/separate_time_and_channel"
+                    v="true"/>
+                <desc>If true, save each phase pattern in HDF5 files.</desc></s>
+            <s k="auto_power">
+                <label>Auto-correlation power pattern</label>
+                <type name="bool" default="false"/>
+                <desc>If true, save each total intensity (auto-correlation)
+                    beam in HDF5 files.</desc></s>
+        </s>
         <s k="fits_image"><label>FITS image</label>
             <depends k="beam_pattern/coordinate_type" v="Beam image"/>
             <s k="amp"><label>Amplitude pattern</label>
@@ -210,6 +235,26 @@
                     response from all specified stations as text files.
                 </desc></s>
         </s>
+        <s k="hdf5_file"><label>HDF5 file</label>
+            <s k="cross_power_raw_complex">
+                <label>Cross-correlation raw power pattern</label>
+                <type name="bool" default="false"/>
+                <desc>If true, save the average cross-power beam raw
+                    response from all specified stations as a HDF5 file.
+                </desc></s>
+            <s k="cross_power_amp">
+                <label>Cross-correlation amplitude power pattern</label>
+                <type name="bool" default="false"/>
+                <desc>If true, save the average cross-power beam amplitude
+                    response from all specified stations as HDF5 files.
+                </desc></s>
+            <s k="cross_power_phase">
+                <label>Cross-correlation phase power pattern</label>
+                <type name="bool" default="false"/>
+                <desc>If true, save the average cross-power beam phase
+                    response from all specified stations as HDF5 files.
+                </desc></s>
+        </s>
         <s k="fits_image"><label>FITS image</label>
             <depends k="beam_pattern/coordinate_type" v="Beam image"/>
             <s k="cross_power_amp">
@@ -243,13 +288,17 @@
             <depends k="telescope/pol_mode" v="Full"/>
             <logic group="OR">
                 <depends k="beam_pattern/station_outputs/text_file/auto_power" v="true"/>
+                <depends k="beam_pattern/station_outputs/hdf5_file/auto_power" v="true"/>
                 <depends k="beam_pattern/station_outputs/fits_image/auto_power" v="true"/>
                 <depends k="beam_pattern/station_outputs/fits_image/auto_power_phase" v="true"/>
                 <depends k="beam_pattern/station_outputs/fits_image/auto_power_real" v="true"/>
                 <depends k="beam_pattern/station_outputs/fits_image/auto_power_imag" v="true"/>
                 <depends k="beam_pattern/telescope_outputs/text_file/cross_power_raw_complex" v="true"/>
+                <depends k="beam_pattern/telescope_outputs/hdf5_file/cross_power_raw_complex" v="true"/>
                 <depends k="beam_pattern/telescope_outputs/text_file/cross_power_amp" v="true"/>
+                <depends k="beam_pattern/telescope_outputs/hdf5_file/cross_power_amp" v="true"/>
                 <depends k="beam_pattern/telescope_outputs/text_file/cross_power_phase" v="true"/>
+                <depends k="beam_pattern/telescope_outputs/hdf5_file/cross_power_phase" v="true"/>
                 <depends k="beam_pattern/telescope_outputs/fits_image/cross_power_amp" v="true"/>
                 <depends k="beam_pattern/telescope_outputs/fits_image/cross_power_phase" v="true"/>
                 <depends k="beam_pattern/telescope_outputs/fits_image/cross_power_real" v="true"/>
