@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
 #include "sky/oskar_sky.h"
 #include "utility/oskar_getline.h"
@@ -604,6 +605,16 @@ oskar_Sky* oskar_sky_load_named_columns(
 
         /* Split up the line, keeping any bracketed values together. */
         const int num_tokens = split_tokens(trimmed, tokens, MAX_TOKENS);
+        if (num_tokens > 0 && num_tokens != num_columns)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            oskar_log_error(
+                    0, "Number of fields for source %d does not match the "
+                    "expected number of columns: %d found, but %d expected.",
+                    n, num_tokens, num_columns
+            );
+            break;
+        }
 
         /* Ensure enough space in sky model. */
         if (oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES) <= n)

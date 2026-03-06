@@ -232,7 +232,7 @@ TEST(Sky, named_columns_load_save)
     (void) fprintf(file, "s2, C, -00:01:01.1 -00.00.10.2   34.56 [] false 100e3 5.1 6.2 7.3\n");
     (void) fprintf(file, " 'a quoted name, containing commas, and spaces'  C   -00h02m03.4 -00d00m20.2   45.67,[],1 101e3 5.2,6.3,7.4\n");
     (void) fprintf(file, ", D 3.14 1.57   42 0.1 true 100e6 6 7 8.9\n");
-    (void) fprintf(file, ",,3.14 1.57   42 [0.1, -0.2, 0.3]\n");
+    (void) fprintf(file, ",,3.14 1.57   42 [0.1, -0.2, 0.3],,,,,\n");
     (void) fprintf(file, "alice,POINT, -01:02:03.456, -10.11.12.345, -0.123456789, [-0.0123456, 1.23456], false, 150e6,,,\n");
     (void) fprintf(file, "bob,POINT,02:03:04.567,11.12.13.456, 1.234,\"[0.7654,0.3210]\",false,151e6,,,\n");
     (void) fprintf(file, "charlie,POINT,03:04:05.678,12.13.14.567, 2.345,(-0.6543 -0.147),false,152e6,,,\n");
@@ -523,7 +523,7 @@ TEST(Sky, named_columns_different_format_lines)
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "# (RA, Dec, I='12') = format\n");
         (void) fprintf(file, "1, 2, 3\n");
-        (void) fprintf(file, "    10, 20\n");
+        (void) fprintf(file, "    10, 20,\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -543,7 +543,7 @@ TEST(Sky, named_columns_different_format_lines)
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "Format = RA, Dec, I='12'\n");
         (void) fprintf(file, "1, 2, 3\n");
-        (void) fprintf(file, "10, 20\n");
+        (void) fprintf(file, "10, 20,\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -563,7 +563,7 @@ TEST(Sky, named_columns_different_format_lines)
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "Format = RA, Dec, I=12\n");
         (void) fprintf(file, "1, 2, 3\n");
-        (void) fprintf(file, "10, 20\n");
+        (void) fprintf(file, "10, 20,\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -583,7 +583,7 @@ TEST(Sky, named_columns_different_format_lines)
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "Format=RA=1.1, Dec=2.2, I=3.3\n");
         (void) fprintf(file, ",,\n");
-        (void) fprintf(file, "10, 20\n");
+        (void) fprintf(file, "10, 20,\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -602,8 +602,8 @@ TEST(Sky, named_columns_different_format_lines)
         int status = 0;
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "# (RA, Dec, I=10.5, Q, U='1.2', V) = format\n");
-        (void) fprintf(file, "1,2,3\n");
-        (void) fprintf(file, "10 20\n");
+        (void) fprintf(file, "1,2,3,,,\n");
+        (void) fprintf(file, "10 20,,,,\n");
         (void) fprintf(file, "# embedded comment\n");
         (void) fprintf(file, "100, 200, 300, 400, 500, 600\n");
         (void) fprintf(file, "\n");
@@ -653,7 +653,7 @@ TEST(Sky, named_columns_different_format_lines)
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "# ( RA, Dec, I, LogarithmicSI ) = format\n");
         (void) fprintf(file, "1, 2, 3, false\n");
-        (void) fprintf(file, "10, 20, 30\n");
+        (void) fprintf(file, "10, 20, 30,\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -673,7 +673,7 @@ TEST(Sky, named_columns_different_format_lines)
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "# (RA, Dec, I, LogarithmicSI='false') = format\n");
         (void) fprintf(file, "1, 2, 3, true\n");
-        (void) fprintf(file, "10, 20, 30\n");
+        (void) fprintf(file, "10, 20, 30,\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -844,7 +844,7 @@ TEST(Sky, named_columns_different_format_lines)
         int status = 0;
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "# (Ra, Dec, I=\"[0.1,0.2]\") = format\n");
-        (void) fprintf(file, "1, 2\n");
+        (void) fprintf(file, "1, 2,\n");
         (void) fprintf(file, "3, 4, 5\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
@@ -866,7 +866,7 @@ TEST(Sky, named_columns_different_format_lines)
         int status = 0;
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "# (Ra, Dec, I='[0.1, 0.2]') = format\n");
-        (void) fprintf(file, "1, 2\n");
+        (void) fprintf(file, "1, 2,\n");
         (void) fprintf(file, "3, 4, 5\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
@@ -935,6 +935,28 @@ TEST(Sky, named_columns_different_format_lines)
         FILE* file = fopen(filename, "w");
         (void) fprintf(file, "# (ra,dec,i) = format blah\n");
         (void) fprintf(file, "1, 2, 3\n");
+        (void) fclose(file);
+        oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
+        ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);
+        ASSERT_EQ(0, sky);
+        (void) remove(filename);
+    }
+    {
+        int status = 0;
+        FILE* file = fopen(filename, "w");
+        (void) fprintf(file, "# (ra,dec,i,referencefrequency) = format\n");
+        (void) fprintf(file, "1, 2, 3\n");
+        (void) fclose(file);
+        oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
+        ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);
+        ASSERT_EQ(0, sky);
+        (void) remove(filename);
+    }
+    {
+        int status = 0;
+        FILE* file = fopen(filename, "w");
+        (void) fprintf(file, "# (ra,dec,i,q,u,v) = format\n");
+        (void) fprintf(file, "1, 2, 3 4 5 6,false\n");
         (void) fclose(file);
         oskar_Sky* sky = oskar_sky_load_named_columns(filename, type, &status);
         ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);

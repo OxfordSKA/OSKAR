@@ -6,6 +6,9 @@
 
     * Handle quotes around fields in sky model file.
 
+    * Add check to make sure the number of columns matches the number of
+      fields found for each source in the sky model.
+
     * Fix to allow FEKO HDF5 element data to be loaded if "FEKO" appears
       anywhere in the file name.
 
