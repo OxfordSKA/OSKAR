@@ -147,7 +147,7 @@ mac-release:
     - brew install wget cmake qt@5 hdf5
     # Install casacore tables from source (no Homebrew bottle available).
     - mkdir build-casacore && cd build-casacore/
-    - wget -O casacore.tar.gz https://github.com/casacore/casacore/archive/v3.5.0.tar.gz
+    - wget -O casacore.tar.gz https://github.com/casacore/casacore/archive/v3.8.0.tar.gz
     - mkdir casacore-src
     - tar zxf casacore.tar.gz -C casacore-src --strip-components 1
     - cmake casacore-src/
