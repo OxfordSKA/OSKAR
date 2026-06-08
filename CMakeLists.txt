@@ -5,7 +5,10 @@
 # === Set the project name and specify the required CMake version.
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 if (APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum macOS version")
+    # OSKAR macOS builds target Apple Silicon (arm64) only.
+    # macOS 11.0 is the first release that supports Apple Silicon.
+    set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "macOS build architecture")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS version")
 endif()
 
 # Set policies to avoid CMake warnings.

@@ -24,6 +24,8 @@ if (APPLE)
     set(CPACK_MONOLITHIC_INSTALL 1)
 
     # Bundle generator options.
+    set(OSKAR_CODESIGN_IDENTITY "-" CACHE STRING
+        "codesign identity for the macOS bundle (\"-\" = ad-hoc)")
     configure_file(${PROJECT_SOURCE_DIR}/cmake/Info.plist.in
         ${PROJECT_BINARY_DIR}/Info.plist @ONLY)
     set(CPACK_GENERATOR "Bundle")
@@ -31,6 +33,11 @@ if (APPLE)
     set(CPACK_BUNDLE_PLIST ${PROJECT_BINARY_DIR}/Info.plist)
     set(CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/gui/icons/oskar.icns)
     set(CPACK_BUNDLE_STARTUP_COMMAND ${PROJECT_SOURCE_DIR}/cmake/OSKAR)
+    set(CPACK_BUNDLE_APPLE_CERT_APP "${OSKAR_CODESIGN_IDENTITY}")
+    if (NOT OSKAR_CODESIGN_IDENTITY STREQUAL "-")
+        set(CPACK_BUNDLE_APPLE_CODESIGN_PARAMETER
+            "--deep -f --options runtime --timestamp")
+    endif()
     set(CPACK_DMG_VOLUME_NAME "OSKAR-${OSKAR_VERSION_SHORT}")
     set(CPACK_COMMAND_HDIUTIL ${PROJECT_SOURCE_DIR}/cmake/oskar_hdiutil.sh)
     set(CPACK_PACKAGE_ICON ${PROJECT_SOURCE_DIR}/gui/icons/oskar.icns)

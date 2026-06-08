@@ -12,6 +12,9 @@ Singularity), macOS and Windows platforms are available to download from
 
 - [https://github.com/OxfordSKA/OSKAR/releases](https://github.com/OxfordSKA/OSKAR/releases)
 
+macOS builds support Apple Silicon (arm64) on macOS 11 or later. Intel Macs
+are not supported.
+
 OSKAR is licensed under the terms of the 3-clause BSD License,
 and makes use of a number of third-party libraries.
 Please see the OSKAR documentation for license details
