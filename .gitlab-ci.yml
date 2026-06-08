@@ -144,7 +144,11 @@ mac-release:
     # The build image's macOS version sets the bottles' deployment target, so
     # it must match the macOS 14 minimum declared in CMakeLists.txt;
     # validate_macos_bundle.sh enforces that floor on the packaged DMG.
-    - brew install wget cmake qt@5 hdf5
+    - brew install wget cmake qt@5 hdf5 bison flex
+    # Homebrew's bison/flex are keg-only, so CMake's FindBISON/FindFLEX would
+    # otherwise pick up macOS's ancient /usr/bin/bison (2.3); casacore's TaQL
+    # parser needs BISON >= 3. Put the keg-only bin dirs ahead of /usr/bin.
+    - export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/flex/bin:$PATH"
     # Install casacore tables from source (no Homebrew bottle available).
     - mkdir build-casacore && cd build-casacore/
     - wget -O casacore.tar.gz https://github.com/casacore/casacore/archive/v3.8.0.tar.gz
