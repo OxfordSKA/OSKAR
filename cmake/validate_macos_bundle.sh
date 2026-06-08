@@ -65,9 +65,9 @@ while IFS= read -r -d '' file_path; do
     if ! awk -v version="$min_os" 'BEGIN {
         split(version, actual, ".");
         minor = (actual[2] == "") ? 0 : actual[2] + 0;
-        exit !((actual[1] < 11) || (actual[1] == 11 && minor == 0))
+        exit !((actual[1] < 14) || (actual[1] == 14 && minor == 0))
     }'; then
-        echo "Deployment target exceeds macOS 11.0 in $relative_path: $min_os" >&2
+        echo "Deployment target exceeds macOS 14.0 in $relative_path: $min_os" >&2
         exit 1
     fi
 

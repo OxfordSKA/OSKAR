@@ -6,9 +6,11 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 if (APPLE)
     # OSKAR macOS builds target Apple Silicon (arm64) only.
-    # macOS 11.0 is the first release that supports Apple Silicon.
+    # macOS 14.0 (Sonoma) is the minimum: it matches the Homebrew bottles the
+    # packaged dependencies are built from, so the floor is honest rather than
+    # nominal. All Apple Silicon hardware can run macOS 14 or later.
     set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "macOS build architecture")
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS version")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "Minimum macOS version")
 endif()
 
 # Set policies to avoid CMake warnings.

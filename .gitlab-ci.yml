@@ -135,49 +135,17 @@ apptainer-release:
 mac-release:
   stage: publish
   tags: [saas-macos-large-m2pro]
-  image: macos-26-xcode-26
+  image: macos-14-xcode-15
   before_script:
-    - export MACOSX_DEPLOYMENT_TARGET="11.0"
     - export HOMEBREW_NO_AUTO_UPDATE=1
     - export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
-    # Install build tools using native Apple Silicon Homebrew.
-    - brew install wget cmake
-    # Build runtime dependencies from source so their deployment targets do
-    # not silently raise the packaged application's macOS 11 minimum.
-    - brew install --build-from-source
-      libpng freetype gettext glib jpeg-turbo giflib xz lz4 zstd libtiff webp
-      pcre2 md4c gsl qt@5
-    # Install HDF5 from source.
-    - mkdir build-hdf5 && cd build-hdf5/
-    - wget -O hdf5.tar.gz https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/src/CMake-hdf5-1.14.0.tar.gz
-    - mkdir hdf5-src
-    - tar zxf hdf5.tar.gz -C hdf5-src --strip-components 2
-    - cmake hdf5-src/hdf5-1.14.0/
-      -DCMAKE_BUILD_TYPE=Release
-      -DBUILD_SHARED_LIBS=ON
-      -DBUILD_STATIC_LIBS=OFF
-      -DBUILD_STATIC_EXECS=OFF
-      -DBUILD_TESTING=OFF
-      -DHDF5_BUILD_CPP_LIB=OFF
-      -DHDF5_BUILD_EXAMPLES=OFF
-      -DHDF5_BUILD_FORTRAN=OFF
-      -DHDF5_BUILD_JAVA=OFF
-      -DHDF5_BUILD_HL_LIB=OFF
-      -DHDF5_BUILD_TOOLS=OFF
-      -DHDF5_BUILD_HL_TOOLS=OFF
-      -DHDF5_BUILD_HL_GIF_TOOLS=OFF
-      -DHDF5_ENABLE_THREADSAFE=ON
-      -DHDF5_ENABLE_SZIP_SUPPORT=OFF
-      -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF
-      -DONLY_SHARED_LIBS=ON
-      -DHDF5_DISABLE_COMPILER_WARNINGS=ON
-      -DHDF5_NO_PACKAGES=ON
-      -DCMAKE_INSTALL_PREFIX="$HOME/local"
-      -DCMAKE_OSX_ARCHITECTURES=arm64
-      -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
-    - make -j4 && make install
-    - cd ../ && rm -rf build-hdf5/
-    # Install casacore tables from source.
+    # Install build tools and runtime dependencies as native arm64 Homebrew
+    # bottles (qt@5 and hdf5 pour in seconds instead of compiling from source).
+    # The build image's macOS version sets the bottles' deployment target, so
+    # it must match the macOS 14 minimum declared in CMakeLists.txt;
+    # validate_macos_bundle.sh enforces that floor on the packaged DMG.
+    - brew install wget cmake qt@5 hdf5
+    # Install casacore tables from source (no Homebrew bottle available).
     - mkdir build-casacore && cd build-casacore/
     - wget -O casacore.tar.gz https://github.com/casacore/casacore/archive/v3.5.0.tar.gz
     - mkdir casacore-src
@@ -195,7 +163,7 @@ mac-release:
       -DUSE_THREADS=ON
       -DCMAKE_INSTALL_PREFIX="$HOME/local"
       -DCMAKE_OSX_ARCHITECTURES=arm64
-      -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0
     - make -j4 && make install
     - cd ../ && rm -rf build-casacore/
     # Build OSKAR.
@@ -204,7 +172,7 @@ mac-release:
       -DFIND_OPENCL=ON
       -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;$HOME/local"
       -DCMAKE_OSX_ARCHITECTURES=arm64
-      -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0
     - make -j4
   script:
     - make package

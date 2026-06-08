@@ -88,7 +88,7 @@ macOS
 Installation on macOS
 ^^^^^^^^^^^^^^^^^^^^^
 
-OSKAR supports Apple Silicon (arm64) Macs running macOS 11 or later.
+OSKAR supports Apple Silicon (arm64) Macs running macOS 14 or later.
 Intel Macs are not supported.
 
 To install the OSKAR package on macOS, download and open the disk image (DMG)
@@ -174,10 +174,10 @@ of many recent Linux distributions, including Debian and Ubuntu.
 Build Commands
 --------------
 
-On macOS, source builds target Apple Silicon (arm64) and require macOS 11 or
+On macOS, source builds target Apple Silicon (arm64) and require macOS 14 or
 later. Intel (x86_64) builds are not supported. These defaults are set using
 ``CMAKE_OSX_ARCHITECTURES=arm64`` and
-``CMAKE_OSX_DEPLOYMENT_TARGET=11.0``.
+``CMAKE_OSX_DEPLOYMENT_TARGET=14.0``.
 
 To build from source, either clone the repository (for the current master
 branch) or download and unpack the source archive, then:
