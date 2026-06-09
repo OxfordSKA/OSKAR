@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The OSKAR Developers.
+ * Copyright (c) 2025-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -118,6 +118,14 @@ static void extract_te_tm_from_dataset(
 }
 
 
+static int cmp_double(const void* a, const void* b)
+{
+    const double aa = *(const double*) a;
+    const double bb = *(const double*) b;
+    return (aa < bb) ? -1 : ((aa > bb) ? 1 : 0);
+}
+
+
 /* Scan all datasets in the file to find number of antennas and frequencies. */
 static double* scan_datasets(
         oskar_HDF5* file,
@@ -159,6 +167,7 @@ static double* scan_datasets(
             if (index > *num_antennas) *num_antennas = index;
         }
     }
+    qsort(freqs_hz, *num_freqs, sizeof(double), cmp_double);
     return freqs_hz;
 }
 
