@@ -182,16 +182,16 @@ TEST(matrix_multiply, jones_to_visibility)
     OSKAR_CLEAR_COMPLEX_MATRIX(double, jq)
 
     // Brightness matrix.
-    b.a = {1.0, 0.0};  b.b = {2.0, 3.0};
-    b.c = {2.0, -3.0}; b.d = {6.0, 0.0};
+    b.a.x = 1.0; b.a.y = 0.0;  b.b.x = 2.0; b.b.y = 3.0;
+    b.c.x = 2.0; b.c.y = -3.0; b.d.x = 6.0; b.d.y = 0.0;
 
     // Jones matrix 1.
-    jp.a = {1.2, 2.3}; jp.b = {3.4, 4.5};
-    jp.c = {5.6, 6.7}; jp.d = {7.8, 8.9};
+    jp.a.x = 1.2; jp.a.y = 2.3; jp.b.x = 3.4; jp.b.y = 4.5;
+    jp.c.x = 5.6; jp.c.y = 6.7; jp.d.x = 7.8; jp.d.y = 8.9;
 
     // Jones matrix 2.
-    jq.a = {0.11, 1.22}; jq.b = {2.33, 3.44};
-    jq.c = {4.55, 5.66}; jq.d = {6.77, 7.88};
+    jq.a.x = 0.11; jq.a.y = 1.22; jq.b.x = 2.33; jq.b.y = 3.44;
+    jq.c.x = 4.55; jq.c.y = 5.66; jq.d.x = 6.77; jq.d.y = 7.88;
 
     // Multiply first Jones matrix with source brightness matrix.
     // jp = jp * b
