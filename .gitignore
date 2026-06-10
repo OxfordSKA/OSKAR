@@ -17,7 +17,14 @@
 /release/
 /debug/
 /build/
+/build-*/
 
 # Auto-generated settings documentation
 /docs/settings/settings.rst
 /docs/settings/settings-*.rst
+
+# Notes on apple signing
+/apple_sign.md
+
+# local claude settings
+/.claude/settings.local.json
