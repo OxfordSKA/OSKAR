@@ -25,13 +25,19 @@ int main(int argc, char** argv)
     oskar_device_set_require_double_precision(0);
 
     // Log relevant environment variables.
+    // Unset variables are reported as "<not set>" rather than passing a null
+    // pointer to a %s format (which is undefined behaviour).
+    const char* not_set = "<not set>";
+    const char* env_platform = getenv("OSKAR_PLATFORM");
+    const char* env_vendor = getenv("OSKAR_CL_DEVICE_VENDOR");
+    const char* env_type = getenv("OSKAR_CL_DEVICE_TYPE");
     oskar_log_section(log, 'M', "Environment variables");
     oskar_log_value(log, 'M', 1, "OSKAR_PLATFORM",
-            "%s", getenv("OSKAR_PLATFORM"));
+            "%s", env_platform ? env_platform : not_set);
     oskar_log_value(log, 'M', 1, "OSKAR_CL_DEVICE_VENDOR",
-            "%s", getenv("OSKAR_CL_DEVICE_VENDOR"));
+            "%s", env_vendor ? env_vendor : not_set);
     oskar_log_value(log, 'M', 1, "OSKAR_CL_DEVICE_TYPE",
-            "%s", getenv("OSKAR_CL_DEVICE_TYPE"));
+            "%s", env_type ? env_type : not_set);
 
     // Create CUDA device information list.
     oskar_device_count("CUDA", &platform);

@@ -85,7 +85,10 @@ endif()
 if (FIND_CUDA OR NOT DEFINED FIND_CUDA)
     find_package(CUDAToolkit 7.0)
 endif()
-if (FIND_OPENCL)
+# OpenCL is opt-in (-DFIND_OPENCL=ON) on all platforms except Apple, where it
+# is the only GPU compute path (no CUDA on Apple Silicon) and so defaults ON.
+# This avoids silently pulling OpenCL into CUDA builds on Linux/Windows.
+if (FIND_OPENCL OR (APPLE AND NOT DEFINED FIND_OPENCL))
     if (NOT APPLE)
         set(OpenCL_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern)
     endif()
