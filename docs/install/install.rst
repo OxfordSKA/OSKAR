@@ -6,7 +6,7 @@ Installation Guide
 
 OSKAR can be installed by following the steps described below.
 A source code archive, and pre-built binary packages for Linux (using
-Singularity), macOS and Windows platforms are available to download from
+Apptainer), macOS and Windows platforms are available to download from
 https://github.com/OxfordSKA/OSKAR/releases
 
 Platforms
@@ -15,24 +15,25 @@ Platforms
 Linux
 -----
 
-Singularity Image for Linux
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Apptainer/Singularity Image for Linux
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A pre-built Singularity (`<https://sylabs.io/singularity/>`_) SIF container
+A pre-built Apptainer (or Singularity) SIF container
 image is available for Linux which can be used to run OSKAR command line
 applications or Python scripts directly, without needing to compile or install
-anything. For Singularity 3.0 or later, an application or script can be run
-using the downloaded container with the `singularity exec` command,
+anything.
+An application or script can be run using the downloaded container
+with the `apptainer exec` or `singularity exec` command,
 which takes the form:
 
   .. code-block:: text
 
-     singularity exec [flags] <container_path> <app_name> <arguments>...
+     apptainer exec [flags] <container_path> <app_name> <arguments>...
 
-Use the ``--nv`` flag to enable NVIDIA GPU support in Singularity, if
+Use the ``--nv`` flag to enable NVIDIA GPU support in Apptainer, if
 applicable.
 
-Note also that Singularity will mount the home directory into the container by
+Note also that Apptainer will mount the home directory into the container by
 default, unless configured otherwise. If you have packages installed in your
 home area that should be kept isolated from those in the container (for
 example, because of conflicting packages or Python versions, or if you see
@@ -47,21 +48,21 @@ with a parameter file ``settings.ini`` and a container image file
 
   .. code-block:: text
 
-     singularity exec --nv ./OSKAR-Python3.sif \
+     apptainer exec --nv ./OSKAR-Python3.sif \
           oskar_sim_interferometer settings.ini
 
 Similarly, to run a Python script ``sim_script.py`` that uses OSKAR:
 
   .. code-block:: text
 
-     singularity exec --nv ./OSKAR-Python3.sif python3 sim_script.py
+     apptainer exec --nv ./OSKAR-Python3.sif python3 sim_script.py
 
 
 Installation on Linux
 ^^^^^^^^^^^^^^^^^^^^^
 
 To install the OSKAR package on a Linux system that does not have Docker or
-Singularity, you will need to compile it from source. Ensure the dependencies
+Apptainer, you will need to compile it from source. Ensure the dependencies
 have been installed as described in `Dependencies`_ (below).
 Then download the archive and follow the short steps in `Build Commands`_.
 
@@ -90,15 +91,13 @@ Installation on macOS
 
 OSKAR supports Apple Silicon (arm64) Macs running macOS 14 or later.
 Intel Macs are not supported.
+Apple has deprecated support for OpenCL on macOS, but currently it can still
+be used to run numerical code in single precision on Apple Silicon.
 
 To install the OSKAR package on macOS, download and open the disk image (DMG)
 file and drag the OSKAR.app bundle to your /Applications folder.
 After installation, double-click the OSKAR.app bundle to launch the GUI and
 set symbolic links to the applications in /usr/local/bin.
-
-If using a GPU on macOS, please ensure you have an up-to-date driver for it.
-NVIDIA drivers for macOS can be downloaded from
-`<http://www.nvidia.com/object/mac-driver-archive.html>`_
 
 Uninstallation on macOS
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -154,7 +153,7 @@ not if using a pre-built package.
 
 The dependencies are:
 
-* CMake >= 3.1 (`<https://cmake.org>`_)
+* CMake >= 3.18 (`<https://cmake.org>`_)
 
 * [Optional] CUDA >= 7.0 (`<https://developer.nvidia.com/cuda-downloads>`_)
   or OpenCL, required for GPU acceleration on supported hardware.
@@ -198,11 +197,11 @@ When running the 'cmake' command a number of build options can be specified.
 - ``-DCUDA_ARCH="<arch>"`` (default: all)
 
   - Sets the target architecture for the compilation of CUDA device code
-  - <arch> must be one of either: 2.0, 2.1, 3.0, 3.2, 3.5, 3.7,
-    5.0, 5.2, 6.0, 6.1, 6.2, 7.0, 7.5, 8.0, 8.6, 8.7 or ALL
-  - Note that ALL is currently most from 3.5 to 7.5.
+  - <arch> must be one of either: 3.0, 3.2, 3.5, 3.7, 5.0, 5.2, 6.0, 6.1, 6.2,
+    7.0, 7.5, 8.0, 8.6, 8.7, 8.9, 9.0, 10.0, 12.0 or ALL
+  - Note that ALL is currently CUDA architectures from 7.5 to 8.9.
   - Separate multiple architectures using semi-colons, if required
-    (e.g. -DCUDA_ARCH="ALL;8.0").
+    (e.g. -DCUDA_ARCH="ALL;12.0").
 
 - ``-DCMAKE_INSTALL_PREFIX=<path>``  (default: /usr/local/)
 
@@ -235,12 +234,6 @@ Advanced Build Options
 
   - Can be used to tell the build system not to find or link against OpenCL.
   - OpenCL support in OSKAR is currently experimental.
-
-- ``-DNVCC_COMPILER_BINDIR=<path>`` (default: None)
-
-  - Specifies a nvcc compiler binary directory override. See nvcc help.
-  - Note: This is likely to be needed only on macOS when the version of the compiler picked up by nvcc (which is related to the version of XCode being used) is incompatible with the current version of CUDA.
-  - Set this to 'clang' on macOS if using GCC to build the rest of OSKAR.
 
 - ``-DFORCE_LIBSTDC++=ON|OFF`` (default: OFF)
 

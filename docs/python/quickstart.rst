@@ -3,7 +3,7 @@
 Quick Start
 ===========
 
-Those using the Docker, Kubernetes or Singularity container
+Those using the Docker, Kubernetes or Apptainer container
 runtime environments may wish to skip straight to the page on
 :ref:`containers`.
 

@@ -1,30 +1,30 @@
-.. _container_singularity:
+.. _container_apptainer:
 
-Singularity
-===========
+Apptainer/Singularity
+=====================
 
-`Singularity <https://sylabs.io/singularity/>`_ containers are more suitable
-for use in traditional multi-user HPC environments, and are generally easier
-to use than Docker containers for running straightforward applications.
-Processes in a Singularity container run as the current user so there are fewer
+`Apptainer (https://apptainer.org) <https://apptainer.org/>`_
+(formerly Singularity) containers are more suitable for use in traditional
+multi-user HPC environments, and are generally easier to use than Docker
+containers for running straightforward applications.
+Processes in Apptainer run as the current user so there are fewer
 security concerns, and the current directory is mounted by default, so binding
 volumes is unnecessary.
 
-For convenience, a SIF-format Singularity container (for use with
-Singularity 3.0 and above) can be used to run Python scripts that make use of
-OSKAR without needing to compile or install any code.
+For convenience, a SIF-format Apptainer image can be used to run Python
+scripts that make use of OSKAR without needing to compile or install any code.
 The SIF file can be downloaded from the
 `OSKAR release page <https://github.com/OxfordSKA/OSKAR/releases>`_
-and run with the ``singularity exec`` command, which takes the form:
+and run with the ``apptainer exec`` command, which takes the form:
 
 .. code-block:: bash
 
-   singularity exec [flags] <container_path> <app_name> <arguments>...
+   apptainer exec [flags] <container_path> <app_name> <arguments>...
 
-Use the ``--nv`` flag to enable NVIDIA GPU support in Singularity, if
+Use the ``--nv`` flag to enable NVIDIA GPU support in Apptainer, if
 applicable.
 
-Note also that Singularity will mount the home directory into the container by
+Note also that Apptainer will mount the home directory into the container by
 default, unless configured otherwise. If you have packages installed in your
 home area that should be kept isolated from those in the container (for
 example, because of conflicting packages or Python versions, or if you see

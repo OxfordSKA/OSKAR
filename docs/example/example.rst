@@ -8,7 +8,7 @@
 Example
 *******
 
-This document will guide you through an example to perform a couple of simple
+This section will guide you through an example to perform a couple of simple
 simulations using OSKAR.
 
 Getting Started
@@ -16,10 +16,13 @@ Getting Started
 This example assumes that OSKAR has been built successfully with
 the Qt dependency satisfied. For details, see the install guide documentation.
 
+To avoid having to build OSKAR from source, pre-built binary packages of recent
+versions can be downloaded from https://github.com/OxfordSKA/OSKAR/releases
+
 Obtaining the Example Setup Files
 ---------------------------------
-The data files used for this example can be downloaded from
-https://github.com/OxfordSKA/OSKAR/releases
+The data files used for this example can be downloaded in a small ZIP file here:
+:download:`OSKAR-Example-Data.zip [9 kB] <OSKAR-Example-Data.zip>`
 
 This archive contains:
 
@@ -30,7 +33,7 @@ This archive contains:
    "oskar_imager.ini", "A configuration file used to run the imager for the example simulation."
    "oskar_sim_beam_pattern.ini", "A configuration file used to run the example beam pattern simulation."
    "oskar_sim_interferometer.ini", "A configuration file used to run the example interferometer simulation."
-   "sky.osm", "An OSKAR sky model file, containing 3 sources."
+   "sky.txt", "A sky model text file, containing 3 sources."
    "telescope.tm/", "An OSKAR telescope configuration directory structure consisting |br|
    of an interferometer with 30 aperture array stations, each with |br| 2587 antenna elements."
 
@@ -219,7 +222,7 @@ This will simultaneously load the file and select the
 Before running the simulation, the paths to the sky model file and
 telescope model directory must be set:
 
-#. The sky model file (``sky.osm``) is specified by double clicking
+#. The sky model file (``sky.txt``) is specified by double clicking
    the value field to the right of the **OSKAR sky model file(s)** setting
    found in the **Sky model settings** group.
    Select the sky model using the file browser dialog that appears after
