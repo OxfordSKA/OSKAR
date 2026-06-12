@@ -357,7 +357,8 @@ def codesign_bundle(bundle_root, identity):
         for path in failed:
             print("ERROR: codesign failed for %s" % path)
         sys.exit(1)
-    print("Code-signed %d Mach-O files (identity: %s)" % (len(macho), identity))
+    identity_label = "ad-hoc" if identity == "-" else "configured identity"
+    print("Code-signed %d Mach-O files (%s)" % (len(macho), identity_label))
 
 
 def main():
