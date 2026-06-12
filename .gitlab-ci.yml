@@ -134,54 +134,27 @@ apptainer-release:
 
 mac-release:
   stage: publish
-  tags: [saas-macos-medium-m1]
-  image: macos-12-xcode-13
+  tags: [saas-macos-large-m2pro]
+  image: macos-14-xcode-15
   before_script:
-    - export MACOSX_DEPLOYMENT_TARGET="10.13"
+    - export HOMEBREW_NO_AUTO_UPDATE=1
     - export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
-    # Install CMake and Qt 5 from Homebrew.
-    - brew install wget
-    - NONINTERACTIVE=1 arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    - (echo; echo 'eval "$(/usr/local/bin/brew shellenv)"') >> $HOME/.zprofile
-    - eval "$(/usr/local/bin/brew shellenv)"
-    # Install Qt dependencies from source.
-    - arch -x86_64 brew install --build-from-source libpng freetype gettext glib jpeg-turbo giflib xz lz4 zstd libtiff webp
-    - arch -x86_64 brew install cmake pcre2 qt@5 || true  # Ignore Homebrew errors.
-    # Install HDF5 from source.
-    - mkdir build-hdf5 && cd build-hdf5/
-    - wget -O hdf5.tar.gz https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.0/src/CMake-hdf5-1.14.0.tar.gz
-    - mkdir hdf5-src
-    - tar zxf hdf5.tar.gz -C hdf5-src --strip-components 2
-    - arch -x86_64 cmake hdf5-src/hdf5-1.14.0/
-      -DCMAKE_BUILD_TYPE=Release
-      -DBUILD_SHARED_LIBS=ON
-      -DBUILD_STATIC_LIBS=OFF
-      -DBUILD_STATIC_EXECS=OFF
-      -DBUILD_TESTING=OFF
-      -DHDF5_BUILD_CPP_LIB=OFF
-      -DHDF5_BUILD_EXAMPLES=OFF
-      -DHDF5_BUILD_FORTRAN=OFF
-      -DHDF5_BUILD_JAVA=OFF
-      -DHDF5_BUILD_HL_LIB=OFF
-      -DHDF5_BUILD_TOOLS=OFF
-      -DHDF5_BUILD_HL_TOOLS=OFF
-      -DHDF5_BUILD_HL_GIF_TOOLS=OFF
-      -DHDF5_ENABLE_THREADSAFE=ON
-      -DHDF5_ENABLE_SZIP_SUPPORT=OFF
-      -DHDF5_ENABLE_Z_LIB_SUPPORT=OFF
-      -DONLY_SHARED_LIBS=ON
-      -DHDF5_DISABLE_COMPILER_WARNINGS=ON
-      -DHDF5_NO_PACKAGES=ON
-      -DCMAKE_INSTALL_PREFIX="$HOME/local"
-      -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
-    - make -j4 && make install
-    - cd ../ && rm -rf build-hdf5/
-    # Install casacore tables from source.
+    # Install build tools and runtime dependencies as native arm64 Homebrew
+    # bottles (qt@5 and hdf5 pour in seconds instead of compiling from source).
+    # The build image's macOS version sets the bottles' deployment target, so
+    # it must match the macOS 14 minimum declared in CMakeLists.txt;
+    # validate_macos_bundle.sh enforces that floor on the packaged DMG.
+    - brew install wget cmake qt@5 hdf5 bison flex
+    # Homebrew's bison/flex are keg-only, so CMake's FindBISON/FindFLEX would
+    # otherwise pick up macOS's ancient /usr/bin/bison (2.3); casacore's TaQL
+    # parser needs BISON >= 3. Put the keg-only bin dirs ahead of /usr/bin.
+    - export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/flex/bin:$PATH"
+    # Install casacore tables from source (no Homebrew bottle available).
     - mkdir build-casacore && cd build-casacore/
-    - wget -O casacore.tar.gz https://github.com/casacore/casacore/archive/v3.5.0.tar.gz
+    - wget -O casacore.tar.gz https://github.com/casacore/casacore/archive/v3.8.0.tar.gz
     - mkdir casacore-src
     - tar zxf casacore.tar.gz -C casacore-src --strip-components 1
-    - arch -x86_64 cmake casacore-src/
+    - cmake casacore-src/
       -DMODULE=tables
       -DBUILD_TESTING=OFF
       -DBUILD_DYSCO=OFF
@@ -193,25 +166,53 @@ mac-release:
       -DUSE_READLINE=OFF
       -DUSE_THREADS=ON
       -DCMAKE_INSTALL_PREFIX="$HOME/local"
-      -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+      -DCMAKE_OSX_ARCHITECTURES=arm64
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0
     - make -j4 && make install
     - cd ../ && rm -rf build-casacore/
     # Build OSKAR.
     - mkdir build-mac && cd build-mac/
-    - arch -x86_64 cmake ../
+    - cmake ../
       -DFIND_OPENCL=ON
-      -DCMAKE_PREFIX_PATH="/usr/local/opt/qt5/;$HOME/local"
-      -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+      -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;$HOME/local"
+      -DCMAKE_OSX_ARCHITECTURES=arm64
+      -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0
     - make -j4
   script:
     - make package
-  allow_failure: true  # Allow failure, as macOS runners are in beta.
+    - ../cmake/validate_macos_bundle.sh ./*.dmg
   artifacts:
+    when: always
     paths:
       - build-mac/*.dmg
     expire_in: 3600 seconds
   rules:
-    - when: never  # Disable stage, as it needs updating to run again.
+    - when: manual
+      allow_failure: true
+
+homebrew-test:
+  stage: publish
+  tags: [saas-macos-large-m2pro]
+  image: macos-26-xcode-26
+  variables:
+    # Tap that hosts the oskar formula.
+    HOMEBREW_TAP_NAME: "ska-telescope/ska-homebrew-tap"
+    HOMEBREW_TAP_URL: "https://gitlab.com/ska-telescope/ska-homebrew-tap.git"
+  before_script:
+    - export HOMEBREW_NO_AUTO_UPDATE=1
+    - export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
+  script:
+    # Tap and lint the formula (depends_on "casacore" resolves within the tap).
+    - brew tap "$HOMEBREW_TAP_NAME" "$HOMEBREW_TAP_URL"
+    - brew audit --strict "$HOMEBREW_TAP_NAME/oskar"
+    # Install and run the formula's own test block.
+    - brew install --verbose "$HOMEBREW_TAP_NAME/oskar"
+    - brew test "$HOMEBREW_TAP_NAME/oskar"
+    # Smoke-test the installed binary (oskar_system_info exits 0 with no args).
+    - oskar_system_info
+  rules:
+    - when: manual
+      allow_failure: true
 
 pages:
   stage: publish

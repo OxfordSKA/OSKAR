@@ -228,8 +228,12 @@ def fixup(bundle_info, bundle_root, file_path, output_dir=None, depth=""):
                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
     # Get ID and dependencies of the item.
+    # Read from local_path (the copy already inside the bundle), not file_path:
+    # Homebrew's versioned dylibs are often symlinks, and get_dependencies()
+    # bails on symlinks - reading the original path would skip the item's
+    # transitive dependencies and poison the cache for later passes.
     if local_path not in bundle_info:
-        bundle_info[local_path] = get_dependencies(file_path)
+        bundle_info[local_path] = get_dependencies(local_path)
     if not bundle_info[local_path]:
         return
 
@@ -240,7 +244,9 @@ def fixup(bundle_info, bundle_root, file_path, output_dir=None, depth=""):
         bundle_info[local_path]['id'] = new_name
         print(depth + "In %s, changing ID from %s to %s" %
                 (os.path.basename(local_path), current_id, new_name))
-        subprocess.call(['install_name_tool', '-id', new_name, local_path])
+        subprocess.check_call(
+            ['install_name_tool', '-id', new_name, local_path]
+        )
 
     # Iterate dependencies of the item.
     loader_path = os.path.dirname(file_path)
@@ -265,8 +271,9 @@ def fixup(bundle_info, bundle_root, file_path, output_dir=None, depth=""):
             bundle_info[local_path]['rpaths'].append(rpath)
             print(depth + "In %s, adding %s to RPATH" %
                   (os.path.basename(local_path), rpath))
-            subprocess.call(['install_name_tool', '-add_rpath',
-                             rpath, local_path])
+            subprocess.check_call(
+                ['install_name_tool', '-add_rpath', rpath, local_path]
+            )
 
         # Update the install_name for this item if necessary.
         if not dep.startswith('@rpath'):
@@ -278,8 +285,10 @@ def fixup(bundle_info, bundle_root, file_path, output_dir=None, depth=""):
                     for d in bundle_info[local_path]['deps']]
                 print(depth + "In %s, changing install name %s to %s" %
                       (os.path.basename(local_path), dep, new_name))
-                subprocess.call(['install_name_tool', '-change',
-                                 dep, new_name, local_path])
+                subprocess.check_call(
+                    ['install_name_tool', '-change',
+                     dep, new_name, local_path]
+                )
 
         # Recursive call.
         fixup(bundle_info, bundle_root, dep_path, depth=depth+"    ")
@@ -293,8 +302,63 @@ def fixup(bundle_info, bundle_root, file_path, output_dir=None, depth=""):
             bundle_info[local_path]['rpaths'].remove(rpath)
             print(depth + "In %s, removing %s from RPATH" %
                   (os.path.basename(local_path), rpath))
-            subprocess.call(['install_name_tool', '-delete_rpath',
-                             rpath, local_path])
+            subprocess.check_call(
+                ['install_name_tool', '-delete_rpath', rpath, local_path]
+            )
+
+
+def is_macho(file_name):
+    """Returns True if the file looks like a Mach-O object or fat binary."""
+    if os.path.islink(file_name) or not os.path.isfile(file_name):
+        return False
+    try:
+        with open(file_name, "rb") as f:
+            data = f.read(4)
+    except OSError:
+        return False
+    if len(data) < 4:
+        return False
+    magic = struct.unpack_from("=I", data)[0]
+    return magic in (FAT_MAGIC, FAT_CIGAM, FAT_MAGIC_64, FAT_CIGAM_64,
+                     MH_MAGIC, MH_MAGIC_64)
+
+
+def codesign_bundle(bundle_root, identity):
+    """Re-signs every Mach-O file in the bundle.
+
+    install_name_tool rewrites invalidate existing code signatures, and arm64
+    refuses to load invalidly-signed code, so a re-sign is mandatory. We sign
+    individual Mach-O files rather than the .app bundle because CPack has not
+    yet added Info.plist at this point, so it is not a signable bundle yet.
+    Files are signed deepest-first (frameworks before whatever links them).
+
+    Default identity "-" is an ad-hoc seal (enough for local arm64 use). A
+    real "Developer ID Application: ..." identity additionally gets the
+    hardened runtime and a secure timestamp, which notarization requires;
+    ad-hoc signing supports neither. CPack seals the finished .app after it
+    adds Info.plist.
+    """
+    sign_cmd = ['codesign', '--force', '--sign', identity]
+    if identity != '-':
+        sign_cmd += ['--options', 'runtime', '--timestamp']
+    macho = []
+    for root, _, files in os.walk(bundle_root):
+        for name in files:
+            path = os.path.join(root, name)
+            if is_macho(path):
+                macho.append(path)
+    macho.sort(key=lambda p: p.count(os.sep), reverse=True)
+    failed = []
+    for path in macho:
+        rc = subprocess.call(sign_cmd + [path])
+        if rc != 0:
+            failed.append(path)
+    if failed:
+        for path in failed:
+            print("ERROR: codesign failed for %s" % path)
+        sys.exit(1)
+    identity_label = "ad-hoc" if identity == "-" else "configured identity"
+    print("Code-signed %d Mach-O files (%s)" % (len(macho), identity_label))
 
 
 def main():
@@ -319,11 +383,14 @@ def main():
     for item in items:
         fixup(bundle_info, bundle_root, item)
 
-    # Create symbolic link to GUI.
+    # Create symbolic link to GUI (idempotent, so re-runs do not crash).
     link_dir = os.path.join(bundle_root, 'Contents', 'MacOS')
     if not os.path.isdir(link_dir):
         os.makedirs(link_dir)
-    os.symlink("../Resources/bin/oskar", os.path.join(link_dir, 'oskar_gui'))
+    gui_link = os.path.join(link_dir, 'oskar_gui')
+    if os.path.islink(gui_link) or os.path.exists(gui_link):
+        os.remove(gui_link)
+    os.symlink("../Resources/bin/oskar", gui_link)
 
     # Bundle and fix up Qt plugins.
     plugin_dir = os.path.join(bundle_root, 'Contents', 'PlugIns')
@@ -333,6 +400,9 @@ def main():
     if len(sys.argv) > 3:
         fixup(bundle_info, bundle_root, sys.argv[3],
               os.path.join(plugin_dir, 'styles'))
+
+    # Re-sign every relocated Mach-O file (see codesign_bundle docstring).
+    codesign_bundle(bundle_root, os.environ.get('OSKAR_CODESIGN_IDENTITY', '-'))
 
 
 if __name__ == '__main__':

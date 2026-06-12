@@ -39,7 +39,6 @@ if (Qt5Core_FOUND AND Qt5Widgets_FOUND AND Qt5Network_FOUND)
         set_target_properties(${target}
             PROPERTIES
             OUTPUT_NAME oskar
-            OSX_ARCHITECTURES ${CMAKE_HOST_SYSTEM_PROCESSOR}
         )
     elseif (WIN32)
         set(gui_ICON icons/oskar.rc)
