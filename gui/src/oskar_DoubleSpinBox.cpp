@@ -258,11 +258,12 @@ void DoubleSpinBox::setValue(double val)
 
 void DoubleSpinBox::setValue(const QString& text)
 {
-    QVariant var(text);
-    if (!var.canConvert(QVariant::Double) && text != minText_)
+    bool ok = false;
+    double val = text.toDouble(&ok);
+    if (!ok && text != minText_)
         return;
     lineEdit()->setText(text);
-    value_ = var.toDouble();
+    value_ = val;
     emit valueChanged(value_);
     emit valueChanged(text);
 }

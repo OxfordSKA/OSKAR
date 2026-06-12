@@ -43,6 +43,8 @@
 #include <QModelIndex>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <QSpinBox>
 
 #include <cstdio>
@@ -200,8 +202,9 @@ QWidget* SettingsDelegate::createEditor(QWidget* parent,
         {
             // Floating-point arrays.
             QLineEdit* line = new QLineEdit(parent);
-            QRegExp regex("^[+-]?\\d+(?:\\.\\d+)?(,[+-]?\\d+(?:\\.\\d+)?)*$");
-            QValidator* validator = new QRegExpValidator(regex, line);
+            QRegularExpression regex(
+                    "^[+-]?\\d+(?:\\.\\d+)?(,[+-]?\\d+(?:\\.\\d+)?)*$");
+            QValidator* validator = new QRegularExpressionValidator(regex, line);
             line->setFrame(false);
             line->setValidator(validator);
             editor = line;
@@ -312,7 +315,8 @@ bool SettingsDelegate::editorEvent(QEvent* event,
             menu.addAction(strCopyKey);
 
             // Display the context menu.
-            QAction* action = menu.exec(mouseEvent->globalPos());
+            QAction* action = menu.exec(
+                    mouseEvent->globalPosition().toPoint());
 
             // Check which action was selected.
             if (action && action->text() == strResetValue)
@@ -334,7 +338,8 @@ bool SettingsDelegate::editorEvent(QEvent* event,
             QMenu menu;
             QString strResetGroup = "Reset Group";
             menu.addAction(strResetGroup);
-            QAction* action = menu.exec(mouseEvent->globalPos());
+            QAction* action = menu.exec(
+                    mouseEvent->globalPosition().toPoint());
             if (action && action->text() == strResetGroup)
                 mod->setData(index, QVariant(), SettingsModel::ResetGroupRole);
             event->accept();
@@ -502,7 +507,8 @@ void SettingsDelegate::setModelData(QWidget* editor,
             QString rdate6 = "(\\d+\\.?\\d*[e|E]-?\\d{1,2})";
             QString rdatetime = rdate1+"|"+rdate2+"|"+rdate3+"|"+rdate4+
                             "|"+rdate5+"|"+rdate6;
-            QRegExpValidator validator(QRegExp(rdatetime), 0);
+            QRegularExpressionValidator validator(
+                    QRegularExpression(rdatetime), 0);
             int pos = 0;
             QString v = value.toString();
             if (validator.validate(v, pos) != QValidator::Acceptable &&
@@ -523,7 +529,8 @@ void SettingsDelegate::setModelData(QWidget* editor,
             QString rtime  = h+":"+m+":"+s+z;        // h:m:s.zzz
             QString sec    = "(\\d+\\.?\\d*)";
             QString exp_sec = "(\\d+\\.?\\d*[e|E]-?\\d{1,2})";
-            QRegExpValidator validator(QRegExp(rtime+"|"+sec+"|"+exp_sec), 0);
+            QRegularExpressionValidator validator(
+                    QRegularExpression(rtime+"|"+sec+"|"+exp_sec), 0);
             int pos = 0;
             QString v = value.toString();
             if (validator.validate(v, pos) != QValidator::Acceptable &&
