@@ -259,6 +259,112 @@ Apart from the format line, characters appearing after a hash (``#``)
 symbol are treated as comments and will be ignored.
 Empty lines are also ignored.
 
+.. raw:: latex
+
+    \clearpage
+
+.. _spectral-profiles:
+
+Spectral Profiles
+=================
+
+The spectral index parameters are used as described on the
+`LOFAR Wiki page detailing logarithmic and linear spectral indices <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#logarithmic_spectral_index>`_.
+
+Note that to evaluate a spectral model using one or more spectral index
+parameters, there must be only a single Stokes I flux and a single reference
+frequency specified for the source.
+As noted above, different sources in the same sky model can use different
+spectral models.
+
+Logarithmic Polynomial
+----------------------
+The default logarithmic spectral indices
+(:math:`\alpha_0, \alpha_1, \alpha_2 \cdots`) are used to scale the
+flux :math:`S_0` given at the reference frequency :math:`\nu_0` to
+another frequency :math:`\nu` as follows:
+
+.. math:: S_{\nu} = S_0 \left( \frac{\nu}{\nu_0} \right)^{\alpha_0 + \alpha_1 \log_{10}\left( \frac{\nu}{\nu_0} \right) + \alpha_2 \log_{10}\left( \frac{\nu}{\nu_0} \right)^2 + \cdots }
+
+If using only a single spectral index value :math:`\alpha_0`, this reduces
+to the usual expression of
+:math:`S_{\nu} = S_0 \left(\nu / \nu_0 \right)^{\alpha_0}`.
+
+Linear Polynomial
+-----------------
+The linear spectral indices used by WSClean are also supported, and used if
+**LogarithmicSI** is false.
+In this case, the flux :math:`S_0` given at the reference frequency
+:math:`\nu_0` scales to another frequency :math:`\nu` as follows:
+
+.. math:: S_{\nu} = S_0 + \alpha_0 \left( \frac{\nu}{\nu_0} - 1 \right) + \alpha_1 \left( \frac{\nu}{\nu_0} - 1 \right)^2 + \alpha_2 \left( \frac{\nu}{\nu_0} - 1 \right)^3 + \cdots
+
+.. _spectral-curvature:
+
+Spectral Curvature
+------------------
+If specified, the **SpectralCurvature** parameter (:math:`q`, below)
+is used with the first **SpectralIndex** value :math:`\alpha_0` to scale the
+flux :math:`S_0` given at the reference frequency :math:`\nu_0` to another
+frequency :math:`\nu` as follows:
+
+.. math:: S_{\nu} = S_0 \left( \frac{\nu}{\nu_0} \right)^{\alpha_0} \exp\left( q \ln\left( \frac{\nu}{\nu_0} \right)^2 \right)
+
+.. _multi-frequency-flux:
+
+Multi-frequency Flux
+--------------------
+Sometimes it may not be possible to fit a broad-band spectral model to a source
+if it has very complex spectral behaviour. In this case, it may be more useful
+to specify source flux values at multiple frequencies, and select an
+appropriate value for the source flux from this list as the channel frequency
+varies.
+This spectral model will be used if more than one **StokesI** flux and more
+than one **ReferenceFrequency** value are provided for a source
+(**and no** **LineWidth** is given: otherwise a spectral line profile will be
+used instead; see below).
+Note that the number of reference frequencies and number of Stokes I flux
+values needs to be the same for a given source, but different sources can
+use their own sets of values; there is no requirement to use the same number
+of reference frequencies for all sources.
+
+Please be aware that using a sky model containing flux values at many
+frequencies can have a significant negative impact on the efficiency of
+simulations.
+If all sky model components are always within the field of view during a
+simulation, set the option ``sky/advanced/apply_horizon_clip`` to ``false``
+(`see documentation here <https://ska-telescope.gitlab.io/sim/oskar/settings/settings-sky.html#sky-advanced-apply-horizon-clip>`_)
+to disable the horizon clip and reduce the impact on efficiency.
+
+.. _spectral-line-profile:
+
+Spectral Line Profile
+---------------------
+If a **LineWidth** parameter (:math:`\sigma`, below) is specified,
+then the source will be treated as a spectral line source with a
+Gaussian profile centred at the **ReferenceFrequency** :math:`\nu_0`,
+with a peak flux given by the **StokesI** parameter.
+Spectral index values cannot be given for spectral line sources.
+
+Multiple spectral lines can be specified at multiple reference frequencies for
+a single source: in this case, the flux at a particular frequency is evaluated
+as a sum of Gaussians, each with their own **LineWidth** :math:`\sigma_i`,
+centred on their own **ReferenceFrequency** :math:`\nu_{0,i}`
+and with their own peak **StokesI** flux value :math:`S_i`.
+
+For a spectral line source, the flux :math:`S_\nu` at a frequency :math:`\nu`
+is calculated as follows:
+
+.. math:: S_{\nu} = \sum_i S_i \exp\left(- \frac{(\nu - \nu_{0,i})^2}{2 \sigma_i^2}\right)
+
+.. raw:: latex
+
+    \clearpage
+
+
+Examples
+========
+
 .. _example1:
 
 Example: Using defaults
@@ -364,103 +470,6 @@ catalogue with Stokes I values given for two sources at five frequencies
 
     \clearpage
 
-.. _spectral-profiles:
-
-Spectral Profiles
-=================
-
-The spectral index parameters are used as described on the
-`LOFAR Wiki page detailing logarithmic and linear spectral indices <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#logarithmic_spectral_index>`_.
-
-Note that to evaluate a spectral model using one or more spectral index
-parameters, there must be only a single Stokes I flux and a single reference
-frequency specified for the source.
-As noted above, different sources in the same sky model can use different
-spectral models.
-
-Logarithmic Polynomial
-----------------------
-The default logarithmic spectral indices
-(:math:`\alpha_0, \alpha_1, \alpha_2 \cdots`) are used to scale the
-flux :math:`S_0` given at the reference frequency :math:`\nu_0` to
-another frequency :math:`\nu` as follows:
-
-.. math:: S_{\nu} = S_0 \left( \frac{\nu}{\nu_0} \right)^{\alpha_0 + \alpha_1 \log_{10}\left( \frac{\nu}{\nu_0} \right) + \alpha_2 \log_{10}\left( \frac{\nu}{\nu_0} \right)^2 + \cdots }
-
-If using only a single spectral index value :math:`\alpha_0`, this reduces
-to the usual expression of
-:math:`S_{\nu} = S_0 \left(\nu / \nu_0 \right)^{\alpha_0}`.
-
-Linear Polynomial
------------------
-The linear spectral indices used by WSClean are also supported, and used if
-**LogarithmicSI** is false.
-In this case, the flux :math:`S_0` given at the reference frequency
-:math:`\nu_0` scales to another frequency :math:`\nu` as follows:
-
-.. math:: S_{\nu} = S_0 + \alpha_0 \left( \frac{\nu}{\nu_0} - 1 \right) + \alpha_1 \left( \frac{\nu}{\nu_0} - 1 \right)^2 + \alpha_2 \left( \frac{\nu}{\nu_0} - 1 \right)^3 + \cdots
-
-.. _spectral-curvature:
-
-Spectral Curvature
-------------------
-If specified, the **SpectralCurvature** parameter (:math:`q`, below)
-is used with the first **SpectralIndex** value :math:`\alpha_0` to scale the
-flux :math:`S_0` given at the reference frequency :math:`\nu_0` to another
-frequency :math:`\nu` as follows:
-
-.. math:: S_{\nu} = S_0 \left( \frac{\nu}{\nu_0} \right)^{\alpha_0} \exp\left( q \ln\left( \frac{\nu}{\nu_0} \right)^2 \right)
-
-.. _multi-frequency-flux:
-
-Multi-frequency Flux
---------------------
-Sometimes it may not be possible to fit a broad-band spectral model to a source
-if it has very complex spectral behaviour. In this case, it may be more useful
-to specify source flux values at multiple frequencies, and select an
-appropriate value for the source flux from this list as the channel frequency
-varies.
-This spectral model will be used if more than one **StokesI** flux and more
-than one **ReferenceFrequency** value are provided for a source
-(**and no** **LineWidth** is given: otherwise a spectral line profile will be
-used instead; see below).
-Note that the number of reference frequencies and number of Stokes I flux
-values needs to be the same for a given source, but different sources can
-use their own sets of values; there is no requirement to use the same number
-of reference frequencies for all sources.
-
-Please be aware that using a sky model containing flux values at many
-frequencies can have a significant negative impact on the efficiency of
-simulations.
-If all sky model components are always within the field of view during a
-simulation, set the option ``sky/advanced/apply_horizon_clip`` to ``false``
-(`see documentation here <https://ska-telescope.gitlab.io/sim/oskar/settings/settings-sky.html#sky-advanced-apply-horizon-clip>`_)
-to disable the horizon clip and reduce the impact on efficiency.
-
-.. _spectral-line-profile:
-
-Spectral Line Profile
----------------------
-If a **LineWidth** parameter (:math:`\sigma`, below) is specified,
-then the source will be treated as a spectral line source with a
-Gaussian profile centred at the **ReferenceFrequency** :math:`\nu_0`,
-with a peak flux given by the **StokesI** parameter.
-Spectral index values cannot be given for spectral line sources.
-
-Multiple spectral lines can be specified at multiple reference frequencies for
-a single source: in this case, the flux at a particular frequency is evaluated
-as a sum of Gaussians, each with their own **LineWidth** :math:`\sigma_i`,
-centred on their own **ReferenceFrequency** :math:`\nu_{0,i}`
-and with their own peak **StokesI** flux value :math:`S_i`.
-
-For a spectral line source, the flux :math:`S_\nu` at a frequency :math:`\nu`
-is calculated as follows:
-
-.. math:: S_{\nu} = \sum_i S_i \exp\left(- \frac{(\nu - \nu_{0,i})^2}{2 \sigma_i^2}\right)
-
-.. raw:: latex
-
-    \clearpage
 
 Gaussian Sources
 ================
