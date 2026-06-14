@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2012-2025, The OSKAR Developers.
+ * Copyright (c) 2012-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include "sky/oskar_sky.h"
+#include "sky/private_sky.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,6 +33,13 @@ void oskar_sky_copy_contents(
                 offset_dst, offset_src, num_sources, status
         );
     }
+    oskar_mem_copy_contents(
+            dst->num_valid_columns,
+            src->num_valid_columns,
+            (int) OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * offset_dst,
+            (int) OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * offset_src,
+            (int) OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * num_sources, status
+    );
 }
 
 #ifdef __cplusplus

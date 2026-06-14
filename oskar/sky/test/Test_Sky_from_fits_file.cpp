@@ -187,12 +187,6 @@ TEST(Sky, from_fits_image_file)
                 oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 2), 1e-6
         );
 
-        // Save sky model to text file for checking.
-        // oskar_sky_save_named_columns(
-        //         sky, (std::string(filename) + ".txt").c_str(),
-        //         false, true, true, &status
-        // );
-
         // Clean up.
         oskar_sky_free(sky, &status);
         (void) remove(filename);

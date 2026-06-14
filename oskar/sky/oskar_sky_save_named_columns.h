@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The OSKAR Developers.
+ * Copyright (c) 2025-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -30,8 +30,14 @@ extern "C" {
  *
  * @param[in] sky         Sky model to write.
  * @param[in] filename    Output filename.
+ * @param[in] use_ska_convention If true, write the file using SKA conventions.
+ *                               Overrides @p use_degree_coord_column,
+ *                               @p write_quoted_vectors and @p write_type
+ *                               parameters.
  * @param[in] use_degree_coord_column If true, don't use a suffix for degrees.
- * @param[in] write_name  If true, write a source name, based on its index.
+ * @param[in] write_format_wrapper If true, write a LOFAR-style header line.
+ * @param[in] write_name  If true, write a source name/ID, based on its index.
+ * @param[in] write_quoted_vectors If true, write quotes around vector columns.
  * @param[in] write_type  If true, write source type (POINT/GAUSSIAN).
  * @param[in,out] status  Status return code.
  */
@@ -39,8 +45,11 @@ OSKAR_EXPORT
 void oskar_sky_save_named_columns(
         const oskar_Sky* sky,
         const char* filename,
+        int use_ska_convention,
         int use_degree_coord_column,
+        int write_format_wrapper,
         int write_name,
+        int write_quoted_vectors,
         int write_type,
         int* status
 );

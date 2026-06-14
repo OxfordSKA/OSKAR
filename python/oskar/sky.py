@@ -487,32 +487,48 @@ class Sky(object):
         t.capsule = _sky_lib.load(filename, precision)
         return t
 
-    def save(self, filename):
-        """Saves data to a fixed-format sky model text file.
+    def save(self, filename, fixed_format=False):
+        """Saves data to a sky model text file.
 
         Args:
             filename (str): Name of file to write.
+            fixed_format (bool): If true, use the old headerless
+                    fixed-column format.
         """
         self.capsule_ensure()
-        _sky_lib.save(self._capsule, filename)
+        if fixed_format:
+            _sky_lib.save(self._capsule, filename)
+        else:
+            _sky_lib.save_named_columns(
+                self._capsule, filename, False, True,
+                True, False, False, False
+            )
 
     def save_named_columns(
-            self, filename, use_degrees=True,
-            write_name=False, write_type=False
+            self, filename, use_ska_convention=False, use_degrees=True,
+            write_format_wrapper=True, write_name=False,
+            write_quoted_vectors=False, write_type=False
     ):
         """Saves data to a flexible-format sky model text file.
 
         Args:
             filename (str): Name of file to write.
+            use_ska_convention (bool): If true, write the file using SKA
+                    conventions. Overrides use_degrees,
+                    write_quoted_vectors and write_type parameters.
             use_degrees (bool): If true, write RA and Dec in columns
                     titled "RaD" and "DecD", and omit the "deg" suffix
                     from values.
+            write_format_wrapper (bool): If true, write a LOFAR-style header.
             write_name (bool): If true, write a column containing source names.
+            write_quoted_vectors (bool): If true, write quotes around
+                    column entries containing vectors.
             write_type (bool): If true, write a column containing source types.
         """
         self.capsule_ensure()
         _sky_lib.save_named_columns(
-            self._capsule, filename, use_degrees, write_name, write_type
+            self._capsule, filename, use_ska_convention, use_degrees,
+            write_format_wrapper, write_name, write_quoted_vectors, write_type
         )
 
     def to_array(self):

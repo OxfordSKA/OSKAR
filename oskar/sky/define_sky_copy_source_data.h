@@ -1,9 +1,10 @@
-/* Copyright (c) 2017-2025, The OSKAR Developers. See LICENSE file. */
+/* Copyright (c) 2017-2026, The OSKAR Developers. See LICENSE file. */
 
 #define OSKAR_SKY_COPY_SOURCE_DATA(NAME, FP) KERNEL(NAME) (\
         const int num, const int capacity_in, const int capacity_out,\
-        GLOBAL_IN(int, mask), GLOBAL_IN(int, indices),\
-        const int num_col, GLOBAL_IN(FP, table_in), GLOBAL_OUT(FP, table_out)\
+        GLOBAL_IN(int, mask), GLOBAL_IN(int, indices), const int num_col,\
+        GLOBAL_IN(FP, table_in), GLOBAL_OUT(FP, table_out),\
+        GLOBAL_IN(int, num_valid_in), GLOBAL_OUT(int, num_valid_out)\
 )\
 {\
     KERNEL_LOOP_X(int, i, 0, num)\
@@ -13,6 +14,11 @@
         for (int c = 0; c < num_col; ++c) {\
             table_out[c * capacity_out + i_out] =\
                     table_in[c * capacity_in + i];\
+        }\
+        _Pragma("unroll")\
+        for (int c = 0; c < OSKAR_SKY_NUM_FIXED_COLUMN_TYPES; ++c) {\
+            num_valid_out[OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * i_out + c] = \
+                    num_valid_in[OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * i + c];\
         }\
     }\
     KERNEL_LOOP_END\

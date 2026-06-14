@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2025, The OSKAR Developers.
+ * Copyright (c) 2013-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -72,6 +72,18 @@ void oskar_sky_set_int(oskar_Sky* sky, oskar_SkyAttribInt attribute, int value)
 }
 
 
+int oskar_sky_first_column(const oskar_Sky* sky, oskar_SkyColumn column_type)
+{
+    int i = 0;
+    const int num_columns = sky->attr_int[OSKAR_SKY_NUM_COLUMNS];
+    for (; i < num_columns; ++i)
+    {
+        if (sky->column_type[i] == column_type) return i;
+    }
+    return -1;
+}
+
+
 int oskar_sky_num_columns_of_type(
         const oskar_Sky* sky,
         oskar_SkyColumn column_type
@@ -85,6 +97,41 @@ int oskar_sky_num_columns_of_type(
         if (sky->column_type[i] == column_type) count++;
     }
     return count;
+}
+
+
+int oskar_sky_num_valid_columns_of_type(
+        const oskar_Sky* sky,
+        oskar_SkyColumn column_type,
+        int index
+)
+{
+    int num = 0, status = 0;
+    index = index * (int) OSKAR_SKY_NUM_FIXED_COLUMN_TYPES + (int) column_type;
+    if (sky->attr_int[OSKAR_SKY_MEM_LOCATION] == OSKAR_CPU)
+    {
+        const int* ptr = (const int*) oskar_mem_void_const(
+                sky->num_valid_columns
+        );
+        return ptr[index];
+    }
+    oskar_mem_read_element(sky->num_valid_columns, index, &num, &status);
+    return num;
+}
+
+
+void oskar_sky_set_num_valid_columns_of_type(
+        oskar_Sky* sky,
+        oskar_SkyColumn column_type,
+        int index,
+        int value
+)
+{
+    index = index * (int) OSKAR_SKY_NUM_FIXED_COLUMN_TYPES + (int) column_type;
+    if (sky->attr_int[OSKAR_SKY_MEM_LOCATION] == OSKAR_CPU)
+    {
+        ((int*) oskar_mem_void(sky->num_valid_columns))[index] = value;
+    }
 }
 
 
@@ -118,7 +165,25 @@ void oskar_sky_set_data(
     oskar_Mem* column = oskar_sky_column(
             sky, column_type, column_attribute, status
     );
-    if (column) oskar_mem_set_element_real(column, index, value, status);
+    if (column)
+    {
+        oskar_mem_set_element_real(column, index, value, status);
+
+        /* Update the number of valid columns of this type for this source,
+         * if required. */
+        if ((int) column_type < (int) OSKAR_SKY_NUM_FIXED_COLUMN_TYPES)
+        {
+            const int num_valid = oskar_sky_num_valid_columns_of_type(
+                    sky, column_type, index
+            );
+            if (num_valid < column_attribute + 1)
+            {
+                oskar_sky_set_num_valid_columns_of_type(
+                        sky, column_type, index, column_attribute + 1
+                );
+            }
+        }
+    }
 }
 
 

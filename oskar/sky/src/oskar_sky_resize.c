@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025, The OSKAR Developers.
+ * Copyright (c) 2011-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -29,6 +29,10 @@ void oskar_sky_resize(oskar_Sky* sky, int num_sources, int* status)
             new_capacity * num_columns, status
     );
     oskar_mem_clear_contents(table, status);
+    oskar_mem_realloc(
+            sky->num_valid_columns,
+            new_capacity * OSKAR_SKY_NUM_FIXED_COLUMN_TYPES, status
+    );
 
     /* Copy the existing data to the new table. */
     const size_t copy_len = (
@@ -36,13 +40,11 @@ void oskar_sky_resize(oskar_Sky* sky, int num_sources, int* status)
     );
     for (i = 0; i < num_columns; ++i)
     {
-        /* Copy each column. */
+        /* Copy each column and set new column reference. */
         oskar_mem_copy_contents(
                 table, sky->table, i * new_capacity, i * old_capacity,
                 copy_len, status
         );
-
-        /* Set new column reference. */
         oskar_mem_set_alias(
                 sky->columns[i], table, i * new_capacity, new_capacity, status
         );

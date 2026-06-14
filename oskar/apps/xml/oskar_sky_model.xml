@@ -268,8 +268,14 @@
             LOFAR/BBS/DP3/WSClean, and described at
             https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb
             (which can also be read by OSKAR 2.12 or later).
-            If false, save the sky model in the fixed-column format supported
-            by all versions of OSKAR.</desc>
+            If false, save the sky model in the old fixed-column format
+            supported by all versions of OSKAR.</desc>
+        </s>
+        <s k="use_ska_convention"><label>Use SKA formatting conventions</label>
+            <depends k="sky/output_text_file/use_named_columns" v="true" />
+            <type name="bool" default="false"/>
+            <desc>If true, write the file using SKA conventions. Overrides
+                use_degrees, write_quoted_vectors and write_type options.</desc>
         </s>
         <s k="use_degrees"><label>Use degrees in (RA, Dec) columns</label>
             <depends k="sky/output_text_file/use_named_columns" v="true" />
@@ -278,12 +284,24 @@
                 "RaD" and "DecD", and values will be written in degrees,
                 instead of having a "deg" suffix added.</desc>
         </s>
+        <s k="write_format_wrapper"><label>Write format wrapper</label>
+            <depends k="sky/output_text_file/use_named_columns" v="true" />
+            <type name="bool" default="true"/>
+            <desc>If true, write a LOFAR-style wrapper around the column
+                names.</desc>
+        </s>
         <s k="write_name"><label>Write a source name column</label>
             <depends k="sky/output_text_file/use_named_columns" v="true" />
             <type name="bool" default="false"/>
             <desc>If true, a source name column will be written to the file.
                 Source names are ignored by OSKAR, and are constructed
                 using "s" followed by a (1-based) integer index value.</desc>
+        </s>
+        <s k="write_quoted_vectors"><label>Write quotes around vectors</label>
+            <depends k="sky/output_text_file/use_named_columns" v="true" />
+            <type name="bool" default="false"/>
+            <desc>If true, write quotes around column entries containing
+                vectors.</desc>
         </s>
         <s k="write_type"><label>Write a source type column</label>
             <depends k="sky/output_text_file/use_named_columns" v="true" />

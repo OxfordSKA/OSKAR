@@ -1,8 +1,12 @@
-2026-xx-yy  OSKAR-2.12.3
+2026-xx-yy  OSKAR-2.13.0
+
+    * Support sky models containing source fluxes at different frequencies.
+
+    * Support sources with multiple spectral lines.
 
     * Add options to write beam pattern data to HDF5 files.
 
-    * Add support for SKA sky model column names.
+    * Add support for SKA sky model conventions.
 
     * Handle quotes around fields in sky model file.
 
@@ -11,6 +15,8 @@
 
     * Fix to allow FEKO HDF5 element data to be loaded if "FEKO" appears
       anywhere in the file name.
+
+    * Updated the GUI to use Qt 6.
 
 2026-02-19  OSKAR-2.12.2
 

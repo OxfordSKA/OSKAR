@@ -1,7 +1,9 @@
 /*
- * Copyright (c) 2014-2025, The OSKAR Developers.
+ * Copyright (c) 2014-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
+
+#include <string.h>
 
 #include "sky/private_sky.h"
 #include "sky/oskar_sky.h"
@@ -51,7 +53,9 @@ void oskar_sky_copy_source_data(
     if (location == OSKAR_CPU)
     {
         void* o_table = oskar_mem_void(out->table);
+        int* o_valid = oskar_mem_int(out->num_valid_columns, status);
         const void* table = oskar_mem_void_const(in->table);
+        const int* valid = oskar_mem_int_const(in->num_valid_columns, status);
         const int* mask = oskar_mem_int_const(horizon_mask, status);
         (void) indices;
         if (type == OSKAR_SINGLE)
@@ -90,6 +94,19 @@ void oskar_sky_copy_source_data(
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;            /* LCOV_EXCL_LINE */
         }
+        num_out = 0;
+        for (i = 0; i < num_in; ++i)
+        {
+            if (mask[i])
+            {
+                memcpy(
+                        OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * num_out + o_valid,
+                        OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * i + valid,
+                        OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * sizeof(int)
+                );
+                num_out++;
+            }
+        }
     }
     else
     {
@@ -120,7 +137,9 @@ void oskar_sky_copy_source_data(
                 {PTR_SZ, oskar_mem_buffer_const(indices)},
                 {INT_SZ, &num_columns},
                 {PTR_SZ, oskar_mem_buffer_const(in->table)},
-                {PTR_SZ, oskar_mem_buffer(out->table)}
+                {PTR_SZ, oskar_mem_buffer(out->table)},
+                {PTR_SZ, oskar_mem_buffer_const(in->num_valid_columns)},
+                {PTR_SZ, oskar_mem_buffer(out->num_valid_columns)}
         };
         oskar_device_launch_kernel(
                 k, location, 1, local_size, global_size,

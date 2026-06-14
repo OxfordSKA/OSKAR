@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2025, The OSKAR Developers.
+ * Copyright (c) 2012-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -23,6 +23,7 @@ void oskar_sky_free(oskar_Sky* model, int* status)
         oskar_mem_free(model->columns[i], status);
     }
     oskar_mem_free(model->table, status);
+    oskar_mem_free(model->num_valid_columns, status);
     free(model->columns);
     free(model->column_attr);
     free(model->column_type);

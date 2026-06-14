@@ -18,6 +18,10 @@ sky model parameters supported by LOFAR software, including BBS, DP3
 and WSClean.
 This is the "named-column" format described below.
 
+Since OSKAR 2.13, source fluxes can be specified at multiple frequencies, and
+multiple spectral lines can be specified for each source if required.
+
+.. _sky-model-file-named-column-format:
 
 Sky Model File (named-column format)
 ====================================
@@ -28,6 +32,8 @@ Each row corresponds to one source, and columns describe the source
 parameters.
 The format string is described in some detail on the
 `LOFAR Wiki page <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#format_string>`_.
+This file format has been extended in OSKAR to provide some additional features,
+although many of the concepts are compatible.
 
 Format strings supported by OSKAR include having the "Format =" specifier
 either at the start or the end of a line, with field types optionally
@@ -36,7 +42,7 @@ and space- and/or comma-separated.
 The only requirement is that "Format" must appear at the start or end of a
 line (neglecting comment characters and whitespace), and have an equals '='
 character either before or after the word.
-So all these format strings, and variations thereof, would be accepted by OSKAR:
+So all these format strings, and variations thereof, are permitted:
 
 * ``Format = RA, Dec, I``
 * ``# format = RA Dec I``
@@ -45,9 +51,13 @@ So all these format strings, and variations thereof, would be accepted by OSKAR:
 
 The field types in the format string are reserved names to specify the type
 of data in each column of the text file.
-Many column types can be labelled using alternative names, to cater for sky
-model files from different sources -- for example, the Stokes I column can be
-labelled either ``I`` or ``StokesI`` or ``i_pol``.
+Many column types can be labelled using alternative names to cater for sky
+model files from different sources, and variants of the name indicated in the
+table below using the * wildcard character will not check characters after that
+point -- for example, the Stokes I column may be labelled either ``I`` or
+``StokesI`` or ``I_pol`` or ``i_pol_jy`` (since **i_*** matches both of the
+last two variants).
+
 Column names supported by OSKAR are case-insensitive, and include:
 
 .. list-table::
@@ -75,71 +85,103 @@ Column names supported by OSKAR are case-insensitive, and include:
      - Declination, in decimal degrees (default) or radians;
        |br| or sexagesimal degrees, minutes and seconds. |br|
        Use instead of **Dec** if required. See note below.
-   * - **I** |br| or **StokesI** |br| or **i_pol**
+   * - **I** |br| or **i_*** |br| or **StokesI** |br|  or **stokes_i*** |br|
+       or **int_flux*** |br| or **Fint***
      - Jy
-     - Stokes I flux (at reference frequency).
-   * - **Q** |br| or **StokesQ** |br| or **q_pol**
+     - Stokes I flux (at reference frequency/frequencies). |br|
+       Can be multi-valued, with a list of values inside brackets |br|
+       to specify the flux at multiple frequencies. |br|
+       See :ref:`multi-frequency-flux` below.
+   * - **Q** |br| or **q_*** |br| or **StokesQ** |br| or **stokes_q***
      - Jy
-     - Optional Stokes Q flux.
-   * - **U** |br| or **StokesU** |br| or **u_pol**
+     - Optional Stokes Q flux. |br|
+       Can be multi-valued, with a list of values inside brackets |br|
+       to specify the flux at multiple frequencies.
+   * - **U** |br| or **u_*** |br| or **StokesU** |br| or **stokes_u***
      - Jy
-     - Optional Stokes U flux.
-   * - **V** |br| or **StokesV** |br| or **v_pol**
+     - Optional Stokes U flux. |br|
+       Can be multi-valued, with a list of values inside brackets |br|
+       to specify the flux at multiple frequencies.
+   * - **V** |br| or **v_*** |br| or **StokesV** |br| or **stokes_v***
      - Jy
-     - Optional Stokes V flux.
-   * - **ReferenceFrequency** |br| or **ref_freq**
+     - Optional Stokes V flux. |br|
+       Can be multi-valued, with a list of values inside brackets |br|
+       to specify the flux at multiple frequencies.
+   * - **ReferenceFrequency** |br| or **ReferenceFreq*** |br|
+       or **reference_freq*** |br| or **RefFreq*** |br| or **ref_freq***
      - Hz
-     - Optional reference frequency for source fluxes.
-   * - **SpectralIndex** |br| or **spec_idx**
+     - Optional reference frequency for source fluxes. |br|
+       Can be multi-valued, with a list of values inside brackets |br|
+       to specify frequencies for multiple flux values. |br|
+       See :ref:`multi-frequency-flux` and :ref:`spectral-line-profile` below.
+   * - **SpectralIndex** |br| or **spectral_index** |br| or **spec_idx** |br|
+       or **alpha***
      - N/A
-     - Optional spectral index polynomial; can be a multi-valued |br|
-       vector, with a list of values enclosed in brackets; up to 8 terms |br|
-       are supported. See :ref:`spectral-profiles` below.
+     - Optional spectral index polynomial. |br|
+       Can be multi-valued, with a list of values inside brackets. |br|
+       See :ref:`spectral-profiles` below.
    * - **LogarithmicSI** |br| or **log_spec_idx**
      - boolean
      - Optional boolean flag: If true, spectral indices are logarithmic, |br|
        otherwise linear; see the
        `LOFAR Wiki page on LogarithmicSI <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#logarithmic_spectral_index>`_.
        |br| Default true if omitted.
-   * - **MajorAxis** |br| or **major_ax**
+   * - **MajorAxis** |br| or **maj***
      - arcsec
      - Optional Gaussian source FWHM major axis.
-   * - **MinorAxis** |br| or **minor_ax**
+   * - **MinorAxis** |br| or **min***
      - arcsec
      - Optional Gaussian source FWHM minor axis.
-   * - **Orientation** |br| or **PositionAngle** |br| or **pos_ang**
+   * - **SemiMajorAxis** |br| or **semi_maj*** |br| or **a***
+     - arcsec
+     - Optional Gaussian source FWHM semi-major axis. |br|
+       Use instead of **MajorAxis** if required.
+   * - **SemiMinorAxis** |br| or **semi_min*** |br| or **b***
+     - arcsec
+     - Optional Gaussian source FWHM semi-minor axis. |br|
+       Use instead of **MinorAxis** if required.
+   * - **Orientation** |br| or **PositionAngle** |br| or **pos_ang*** |br|
+       or **pa***
      - deg
      - Optional position angle of Gaussian major axis.
-   * - **RotationMeasure** |br| or **rot_meas**
+   * - **RotationMeasure** |br| or **rot_meas*** |br| or **rm***
      - rad / m\ :sup:`2`
      - Optional source rotation measure.
-   * - **PolarizationAngle** |br| or **PolarisationAngle** |br| or **pol_ang**
+   * - **PolarizationAngle** |br| or **PolarisationAngle** |br| or **pol_ang***
      - deg
      - Optional source polarisation angle; used if Q and U are |br|
-       omitted, or when a rotation measure is set.
-   * - **PolarizedFraction** |br| or **PolarisedFraction** |br| or **pol_frac**
+       omitted, or when a rotation measure is set. |br|
+       Can be multi-valued, with a list of values inside brackets |br|
+       to specify the value at multiple frequencies.
+   * - **PolarizedFraction** |br| or **PolarisedFraction** |br| or **pol_frac***
      - N/A
      - Optional fraction of linear polarisation, used if Q and U are |br|
-       omitted, or when a rotation measure is set.
-   * - **ReferenceWavelength**
+       omitted, or when a rotation measure is set. |br|
+       Can be multi-valued, with a list of values inside brackets |br|
+       to specify the value at multiple frequencies.
+   * - **ReferenceWavelength** |br| or **reference_wave*** |br| or **ref_wave***
      - metres
      - Optional reference wavelength, used with the rotation |br|
        measure parameter. If omitted, it will be calculated based on |br|
        the reference frequency.
-   * - **SpectralCurvature**
+   * - **SpectralCurvature** |br| or **spectral_curv*** |br| or **spec_curv***
      - N/A
      - Optional spectral curvature term described in |br|
        `Callingham et. al. (2017) <https://iopscience.iop.org/article/10.3847/1538-4357/836/2/174/pdf>`_,
        equation 2, where this value is |br|
-       interpreted as the parameter 'q'. If non-zero, only the first |br|
+       interpreted as the parameter 'q'. If specified, only the first |br|
        **SpectralIndex** value will be used, and any others will be |br|
        ignored. See :ref:`spectral-curvature` below.
-   * - **LineWidth**
+   * - **LineWidth** |br| or **line_width***
      - Hz
      - Optional line width in Hz, if this is a spectral line source. |br|
-       If the line width is greater than 0, then spectral index |br|
-       values will be ignored, and the Stokes I flux will be calculated |br|
-       using a Gaussian profile centred on the reference frequency. |br|
+       Can be multi-valued, with a list of values inside brackets |br|
+       to specify multiple spectral lines, each at their own reference |br|
+       frequency. If a line width is specified for a source, then |br|
+       spectral index values will be ignored, and the Stokes I flux will |br|
+       be calculated using Gaussian profile(s) centred on the reference |br|
+       frequencies, with peak amplitudes given by corresponding |br|
+       entries in the **StokesI** vector. |br|
        See :ref:`spectral-line-profile` below.
 
 .. tip::
@@ -179,12 +221,20 @@ Column names supported by OSKAR are case-insensitive, and include:
    model, if the relevant columns are specified. If all the columns are
    present, the priority order is:
 
-   1. A spectral line profile will be used for the source if **LineWidth** is
-      greater than zero;
-   2. Otherwise, a spectral curvature model for the source will be used
-      if **SpectralCurvature** is non-zero;
-   3. Otherwise, a logarithmic or linear spectral index polynomial
+   1. A spectral line profile will be used for the source if a **LineWidth** is
+      specified;
+   2. Otherwise, if source flux values are specified at multiple reference
+      frequencies, the value nearest the current channel frequency will
+      be used;
+   3. Otherwise, a spectral curvature model for the source will be used
+      if **SpectralCurvature** is specified;
+   4. Otherwise, a logarithmic or linear spectral index polynomial
       will be used.
+
+   Therefore, to make use of a spectral-index-based model, ensure that only
+   a single Stokes I value and single reference frequency are set for that
+   source. The file will be checked for consistency when it is loaded.
+   See the :ref:`second example <example2>` below.
 
 .. note::
    If a **RotationMeasure** is defined, it will be used along with the
@@ -192,127 +242,123 @@ Column names supported by OSKAR are case-insensitive, and include:
    parameters according to the logic described in the
    `BBS chapter of the LOFAR Imaging Cookbook <https://support.astron.nl/LOFARImagingCookbook/bbs.html#rotation-measure>`_
 
-In addition, all columns can take a default value, which is specified
-in the format string header inside quotes, after an '=' character.
+Default values
+--------------
+All columns can take a default value, which is specified in the format string
+header inside quotes, after an '=' character.
 The default will be used for all sources which do not explicitly set that
 parameter value.
-If a default is set, there must be no spaces either before or after the '='.
 
 For example, to specify a common reference frequency for all sources in the
 sky model, the following format string could be used:
 
 ``Format = RaD, DecD, I, ReferenceFrequency='143e6', MajorAxis, MinorAxis``
 
-The fields can be space-separated and/or comma-separated. Characters
-appearing after a hash (``#``) symbol are treated as comments and will be
-ignored. Empty lines are also ignored.
+The fields can be space-separated and/or comma-separated.
+Apart from the format line, characters appearing after a hash (``#``)
+symbol are treated as comments and will be ignored.
+Empty lines are also ignored.
 
-Example
--------
+.. _example1:
 
-.. code-block:: text
-
-   # Number of sources: 3
-   # (Name, Type, Ra, Dec, I, ReferenceFrequency='100e6', SpectralIndex, Q, U, MajorAxis, MinorAxis, Orientation, V) = format
-   s1,POINT,20deg,-30deg,1,,-0.7,0,0,,,,0
-   s2,GAUSSIAN,20deg,-30.5deg,3,,-0.7,2,2,600,50,45,0
-   s3,GAUSSIAN,20.5deg,-30.5deg,3,,-0.7,0,0,700,10,-10,2
-
-.. raw:: latex
-
-    \clearpage
-
-Sky Model File (fixed format)
-=============================
-
-The original fixed-format sky model file used by OSKAR holds a simple
-text-based table, where each row corresponds to one source, and columns
-describe the source parameters.
-The column order is implicit and cannot be changed.
-Most parameters are optional, and will be set to a default value of zero if not
-specified.
-The defaults in this format cannot be changed.
-
-Although this format is less flexible and supports fewer features than the
-named-column format described above, it can be easier to parse, and is
-therefore still supported for simple sky models.
-In particular, it can be loaded into Python very straightforwardly
-using ``numpy.loadtxt()``.
-
-.. note::
-   When the file is read, parameters are assigned according to their column
-   position. In order to specify an optional parameter, all columns up to the
-   designated column must be specified.
-
-In order, the parameter columns are:
-
-.. csv-table::
-   :header: "Column", "Parameter", "Unit", "Comment"
-   :widths: 10, 22, 12, 56
-
-   1, "Right Ascension", "deg", "Required. Currently interpreted as the apparent |br| rather than mean (J2000) Right Ascension."
-   2, "Declination", "deg", "Required. Currently interpreted as the apparent |br| rather than mean (J2000) Declination."
-   3, "Stokes I flux", "Jy", "Required."
-   4, "Stokes Q flux", "Jy", "Optional (default 0)."
-   5, "Stokes U flux", "Jy", "Optional (default 0)."
-   6, "Stokes V flux", "Jy", "Optional (default 0)."
-   7, "Reference frequency", "Hz", "Optional (default 0). |br| Frequency at which flux densities are given."
-   8, "Spectral index", "N/A", "Optional (default 0)."
-   9, "Rotation measure", "rad / m\ :sup:`2`", "Optional (default 0)."
-   10, "Major axis FWHM", "arcsec", "Optional (default 0)."
-   11, "Minor axis FWHM", "arcsec", "Optional (default 0)."
-   12, "Position angle", "deg", "Optional (default 0). East of North."
-
-.. note::
-   In order for a source to be recognised as a Gaussian, all three of the
-   major axis FWHM, minor axis FWHM and position angle parameters must be
-   specified.
-
-.. note::
-   The rotation measure column was added for OSKAR 2.3.0. To provide backwards
-   compatibility with older sky model files containing extended sources, a
-   check is made on the number of columns on each line, and source data is
-   loaded according to the following rules:
-
-   1. Lines containing between 3 and 9 columns will set all parameters
-      up to and including the rotation measure. Any missing parameters will
-      be set to defaults.
-   2. Lines containing 11 columns set the first 8 parameters and the
-      Gaussian source data (this is the old file format). The rotation
-      measure will be set to zero.
-   3. Lines containing 12 columns set all parameters.
-   4. Lines containing 10, 13, or more columns will raise an error.
-
-The fields can be space-separated and/or comma-separated. Characters
-appearing after a hash (``#``) symbol are treated as comments and will be
-ignored. Empty lines are also ignored.
-
-
-Example
--------
-
-The following is an example sky file describing three sources, making use of
-a number of comment lines.
+Example: Using defaults
+-----------------------
 
 .. code-block:: text
 
+   Format=Name,Type,Ra,Dec,I,ReferenceFrequency='100e6',SpectralIndex='-0.7',Q,U,V,Major,Minor,Orientation
+   # A default reference frequency of 100 MHz and spectral index of -0.7
+   # (see the format line above) will be used for the three sources after
+   # these comments, since those fields are empty.
+   # Note the consecutive commas below to denote empty fields.
    #
-   # Required columns:
-   # =================
-   # RA(deg), Dec(deg), I(Jy)
-   #
-   # Optional columns:
-   # =================
-   # Q(Jy), U(Jy), V(Jy), freq0(Hz), spectral index, rotation measure,
-   #           FWHM major (arcsec), FWHM minor (arcsec), position angle (deg)
-   #
-   #
-   # Two fully-specified sources
-   0.0 70.0 1.1 0.0 0.0 0.0 100e6 -0.7 0.0 200.0 150.0  23.0
-   0.0 71.2 2.3 1.0 0.0 0.0 100e6 -0.7 0.0  90.0  40.0 -10.0
+   # The following line is just a comment, and will be ignored.
+   # NUMBER_OF_COMPONENTS=3
 
-   # A source where only Stokes I is defined (other columns take default values)
-   0.1 69.8 1.0
+   # If a "Name" column is included, as here, quotes are recommended around
+   # each source name to avoid issues. Quotes are not required in this
+   # case, but they would be needed if a name contains spaces or commas.
+   # Any "Name" and "Type" columns are ignored when the file is loaded in OSKAR.
+
+   # Extra spaces can be added between fields. The spacing below has been
+   # adjusted to make columns line up and easier to read, but the only
+   # requirement is that the column order must match that given in the format
+   # line. If fields are not empty, one or more spaces can be used as separators
+   # instead of commas; for example, after the "Ra" and "Dec" columns below:
+   "s1", POINT,     20.0deg   -30.0deg   1,,, 0, 0, 0,    ,   ,
+   "s2", GAUSSIAN,  20.0deg   -30.5deg   3,,, 2, 2, 0, 600, 50,  45
+   "s3", GAUSSIAN,  20.5deg   -30.5deg   3,,, 0, 0, 2, 700, 10, -10
+
+.. _example2:
+
+Example: Using a mixture of different spectral types
+----------------------------------------------------
+
+This example will work with OSKAR 2.13 or above, and shows seven sources in the
+same sky model file that use different spectral model types.
+Note that the extra spacing added between commas is not necessary, but helps to
+show which values are in which columns, and which ones are left blank.
+
+.. code-block:: text
+
+   #(RaD, DecD, I,                     ReferenceFrequency,                 SpectralIndex     , LogarithmicSI, SpectralCurvature, LineWidth) = format
+
+   # Source 0: Simple logarithmic spectral index.
+   0.01,  0.1,  1.1,                   100e6,                              -0.55             ,              ,                  ,
+
+   # Source 1: Two-term logarithmic spectral index polynomial.
+   0.02,  0.2,  1.2,                   101e6,                              [-0.7, 0.05]      , true         ,                  ,
+
+   # Source 2: Three-term linear spectral index polynomial.
+   0.03,  0.3,  1.3,                   102e6,                              [0.08, 0.07, 0.02], false        ,                  ,
+
+   # Source 3: Spectral curvature model.
+   0.04,  0.4,  1.4,                   103e6,                              -0.6              ,              , 0.1              ,
+
+   # Source 4: Simple Gaussian spectral line model.
+   0.05,  0.5,  1.5,                   104e6,                                                ,              ,                  , 100e3
+
+   # Source 5: Three spectral lines of different widths, each a Gaussian.
+   0.06,  0.6,  [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6],                                ,              ,                  , [250e3, 350e3, 500e3]
+
+   # Source 6: Different flux at four frequencies (selected based on current channel frequency).
+   0.07,  0.7,  [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],                   ,              ,                  ,
+
+.. admonition:: A more compact version
+
+   The following is a more compact but otherwise equivalent version of the
+   example above:
+
+   .. code-block:: text
+
+      #(RaD, DecD, I, RefFreq, SpectralIndex, LogarithmicSI, SpectralCurvature, LineWidth) = format
+      0.01,  0.1,  1.1, 100e6, -0.55,,,
+      0.02,  0.2,  1.2, 101e6, [-0.7, 0.05], true,,
+      0.03,  0.3,  1.3, 102e6, [0.08, 0.07, 0.02], false,,
+      0.04,  0.4,  1.4, 103e6, -0.6,, 0.1,
+      0.05,  0.5,  1.5, 104e6,,,, 100e3
+      0.06,  0.6,  [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, [250e3, 350e3, 500e3]
+      0.07,  0.7,  [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],,,,
+
+.. _example3:
+
+Example: Using implicit reference frequencies
+---------------------------------------------
+
+As a special case, flux values at multiple frequencies can be given
+with the frequency supplied as a numeric suffix of the Stokes I column name,
+which is interpreted as the reference frequency in MHz.
+This makes it easier to use published source catalogues that contain fluxes
+tabulated using coarse channels.
+This example will work with OSKAR 2.13 or above, and shows part of the GLEAM
+catalogue with Stokes I values given for two sources at five frequencies
+(84 MHz, 92 MHz, 99 MHz, 107 MHz and 115 MHz).
+
+.. code-block:: text
+
+   Format =   RaD,           DecD,       Fint084,       Fint092,       Fint099,       Fint107,       Fint115
+   "3.592961E+02","-8.805832E+01","6.503801E-01","4.790057E-01","4.282346E-01","5.804349E-01","4.903897E-01"
+   "3.452839E+02","-8.760236E+01","1.879063E+00","1.725631E+00","1.407624E+00","1.224768E+00","1.304032E+00"
 
 .. raw:: latex
 
@@ -325,6 +371,12 @@ Spectral Profiles
 
 The spectral index parameters are used as described on the
 `LOFAR Wiki page detailing logarithmic and linear spectral indices <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#logarithmic_spectral_index>`_.
+
+Note that to evaluate a spectral model using one or more spectral index
+parameters, there must be only a single Stokes I flux and a single reference
+frequency specified for the source.
+As noted above, different sources in the same sky model can use different
+spectral models.
 
 Logarithmic Polynomial
 ----------------------
@@ -352,25 +404,59 @@ In this case, the flux :math:`S_0` given at the reference frequency
 
 Spectral Curvature
 ------------------
-If specified, and not 0, the **SpectralCurvature** parameter (:math:`q`, below)
-is used with the first spectral index value (:math:`\alpha_0`) to scale the
+If specified, the **SpectralCurvature** parameter (:math:`q`, below)
+is used with the first **SpectralIndex** value :math:`\alpha_0` to scale the
 flux :math:`S_0` given at the reference frequency :math:`\nu_0` to another
 frequency :math:`\nu` as follows:
 
 .. math:: S_{\nu} = S_0 \left( \frac{\nu}{\nu_0} \right)^{\alpha_0} \exp\left( q \ln\left( \frac{\nu}{\nu_0} \right)^2 \right)
 
+.. _multi-frequency-flux:
+
+Multi-frequency Flux
+--------------------
+Sometimes it may not be possible to fit a broad-band spectral model to a source
+if it has very complex spectral behaviour. In this case, it may be more useful
+to specify source flux values at multiple frequencies, and select an
+appropriate value for the source flux from this list as the channel frequency
+varies.
+This spectral model will be used if more than one **StokesI** flux and more
+than one **ReferenceFrequency** value are provided for a source
+(**and no** **LineWidth** is given: otherwise a spectral line profile will be
+used instead; see below).
+Note that the number of reference frequencies and number of Stokes I flux
+values needs to be the same for a given source, but different sources can
+use their own sets of values; there is no requirement to use the same number
+of reference frequencies for all sources.
+
+Please be aware that using a sky model containing flux values at many
+frequencies can have a significant negative impact on the efficiency of
+simulations.
+If all sky model components are always within the field of view during a
+simulation, set the option ``sky/advanced/apply_horizon_clip`` to ``false``
+(`see documentation here <https://ska-telescope.gitlab.io/sim/oskar/settings/settings-sky.html#sky-advanced-apply-horizon-clip>`_)
+to disable the horizon clip and reduce the impact on efficiency.
+
 .. _spectral-line-profile:
 
 Spectral Line Profile
 ---------------------
-If a **LineWidth** parameter (:math:`\sigma`, below) is specified and greater
-than 0, then the source will be treated as a spectral line source with a
-Gaussian profile centred at the reference frequency :math:`\nu_0`, with a peak
-flux given by the **StokesI** parameter.
-Any spectral index values will be ignored in this case. The flux at a frequency
-:math:`\nu` will be calculated as follows:
+If a **LineWidth** parameter (:math:`\sigma`, below) is specified,
+then the source will be treated as a spectral line source with a
+Gaussian profile centred at the **ReferenceFrequency** :math:`\nu_0`,
+with a peak flux given by the **StokesI** parameter.
+Spectral index values cannot be given for spectral line sources.
 
-.. math:: S_{\nu} = S_0 \exp\left(- \frac{(\nu - \nu_0)^2}{2 \sigma^2}\right)
+Multiple spectral lines can be specified at multiple reference frequencies for
+a single source: in this case, the flux at a particular frequency is evaluated
+as a sum of Gaussians, each with their own **LineWidth** :math:`\sigma_i`,
+centred on their own **ReferenceFrequency** :math:`\nu_{0,i}`
+and with their own peak **StokesI** flux value :math:`S_i`.
+
+For a spectral line source, the flux :math:`S_\nu` at a frequency :math:`\nu`
+is calculated as follows:
+
+.. math:: S_{\nu} = \sum_i S_i \exp\left(- \frac{(\nu - \nu_{0,i})^2}{2 \sigma_i^2}\right)
 
 .. raw:: latex
 
@@ -426,3 +512,19 @@ each point source therefore takes the simple analytical form
 where :math:`f(u,v)` is the equation for an elliptical Gaussian (defined above as
 :math:`f(x,y)`) evaluated in the :math:`(u,v)` plane according to the FWHM and
 position angle of the source.
+
+.. raw:: latex
+
+    \clearpage
+
+Sky Model File (fixed format)
+=============================
+
+Detailed documentation for the original fixed-format OSKAR sky model has been
+moved to a sub-page, as it may have been easily confused with the description
+above for the named-column format.
+For those still needing to use this format, the details are linked below.
+
+.. toctree::
+
+   Detailed description <sky_model_fixed_format>

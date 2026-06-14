@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025, The OSKAR Developers.
+ * Copyright (c) 2011-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -117,70 +117,46 @@ void oskar_sky_set_source(
     }
     /* Only the first three values are required. */
     /* Store remaining values only if set. */
-    oskar_mem_set_element_real(
-            oskar_sky_column(sky, OSKAR_SKY_RA_RAD, 0, status),
-            index, ra_rad, status
-    );
-    oskar_mem_set_element_real(
-            oskar_sky_column(sky, OSKAR_SKY_DEC_RAD, 0, status),
-            index, dec_rad, status
-    );
-    oskar_mem_set_element_real(
-            oskar_sky_column(sky, OSKAR_SKY_I_JY, 0, status),
-            index, stokes_i, status
-    );
+    oskar_sky_set_data(sky, OSKAR_SKY_RA_RAD, 0, index, ra_rad, status);
+    oskar_sky_set_data(sky, OSKAR_SKY_DEC_RAD, 0, index, dec_rad, status);
+    oskar_sky_set_data(sky, OSKAR_SKY_I_JY, 0, index, stokes_i, status);
     if (stokes_q != 0.0 || stokes_u != 0.0)
     {
-        oskar_mem_set_element_real(
-                oskar_sky_column(sky, OSKAR_SKY_Q_JY, 0, status),
-                index, stokes_q, status
-        );
-        oskar_mem_set_element_real(
-                oskar_sky_column(sky, OSKAR_SKY_U_JY, 0, status),
-                index, stokes_u, status
-        );
+        oskar_sky_set_data(sky, OSKAR_SKY_Q_JY, 0, index, stokes_q, status);
+        oskar_sky_set_data(sky, OSKAR_SKY_U_JY, 0, index, stokes_u, status);
     }
     if (stokes_v != 0.0)
     {
-        oskar_mem_set_element_real(
-                oskar_sky_column(sky, OSKAR_SKY_V_JY, 0, status),
-                index, stokes_v, status
-        );
+        oskar_sky_set_data(sky, OSKAR_SKY_V_JY, 0, index, stokes_v, status);
     }
     if (ref_freq_hz != 0.0)
     {
-        oskar_mem_set_element_real(
-                oskar_sky_column(sky, OSKAR_SKY_REF_HZ, 0, status),
-                index, ref_freq_hz, status
+        oskar_sky_set_data(
+                sky, OSKAR_SKY_REF_HZ, 0, index, ref_freq_hz, status
         );
     }
     if (spectral_index != 0.0)
     {
-        oskar_mem_set_element_real(
-                oskar_sky_column(sky, OSKAR_SKY_SPEC_IDX, 0, status),
-                index, spectral_index, status
+        oskar_sky_set_data(
+                sky, OSKAR_SKY_SPEC_IDX, 0, index, spectral_index, status
         );
     }
     if (rotation_measure != 0.0)
     {
-        oskar_mem_set_element_real(
-                oskar_sky_column(sky, OSKAR_SKY_RM_RAD, 0, status),
-                index, rotation_measure, status
+        oskar_sky_set_data(
+                sky, OSKAR_SKY_RM_RAD, 0, index, rotation_measure, status
         );
     }
     if (fwhm_major_rad > 0.0 && fwhm_minor_rad > 0.0)
     {
-        oskar_mem_set_element_real(
-                oskar_sky_column(sky, OSKAR_SKY_MAJOR_RAD, 0, status),
-                index, fwhm_major_rad, status
+        oskar_sky_set_data(
+                sky, OSKAR_SKY_MAJOR_RAD, 0, index, fwhm_major_rad, status
         );
-        oskar_mem_set_element_real(
-                oskar_sky_column(sky, OSKAR_SKY_MINOR_RAD, 0, status),
-                index, fwhm_minor_rad, status
+        oskar_sky_set_data(
+                sky, OSKAR_SKY_MINOR_RAD, 0, index, fwhm_minor_rad, status
         );
-        oskar_mem_set_element_real(
-                oskar_sky_column(sky, OSKAR_SKY_PA_RAD, 0, status),
-                index, position_angle_rad, status
+        oskar_sky_set_data(
+                sky, OSKAR_SKY_PA_RAD, 0, index, position_angle_rad, status
         );
     }
 }

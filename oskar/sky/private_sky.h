@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025, The OSKAR Developers.
+ * Copyright (c) 2011-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -33,6 +33,7 @@ struct oskar_Sky
      * variable number of columns) in kernels.
      */
     oskar_Mem* table;               /**< Data table, as a single array. */
+    oskar_Mem* num_valid_columns;   /**< For each fixed column type and row. */
     oskar_Mem** columns;            /**< Array of data column aliases. */
     oskar_SkyColumn* column_type;   /**< Enumerated type of each column. */
     int* column_attr;               /**< Optional column attribute. */

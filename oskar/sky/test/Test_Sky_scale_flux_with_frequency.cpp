@@ -27,297 +27,163 @@ static const char* device_string(int type)
 }
 
 
-TEST(Sky, scale_by_spectral_index_log_single)
+TEST(Sky, scale_spectral_index)
 {
     int device_loc = 0;
     (void) oskar_device_count(NULL, &device_loc);
-    const int types[] = {OSKAR_SINGLE, OSKAR_DOUBLE};
-    const double tol[] = {1e-5, 1e-14};
-    const int locations[] = {OSKAR_CPU, device_loc};
     const int num_sources = 10000;
+    const int locations[] = {OSKAR_CPU, device_loc};
+    const int types[] = {OSKAR_SINGLE, OSKAR_DOUBLE};
+    const double tolerances[] = {2e-5, 3e-14};
+    const double freqs[] = {100e6, 80e6, 60e6, 40e6, 20e6, 5e6};
+    const int num_freqs = sizeof(freqs) / sizeof(double);
+    const double flux[] = {10.0, 1.0, 0.5, 0.1}; // IQUV.
+    const double spx[] = {-0.7, -0.2, 0.1};
+    const double freq_ref = 10.0e6;
 
     for (int i_type = 0; i_type < 2; ++i_type)
     {
         // Create and fill a sky model.
         int status = 0;
-        const double flux[] = {10.0, 1.0, 0.5, 0.1}; // IQUV.
-        const double spix = -0.7, freq_ref = 10.0e6, freq_new = 50.0e6;
-        oskar_Sky* sky0 = oskar_sky_create(
+        oskar_Sky* sky = oskar_sky_create(
                 types[i_type], OSKAR_CPU, num_sources, &status
         );
-        for (int c = 0; c < 4; ++c)
+        for (int i = 0; i < num_sources; ++i)
         {
-            oskar_SkyColumn col_type = (oskar_SkyColumn) (c + OSKAR_SKY_I_JY);
-            oskar_mem_set_value_real(
-                    oskar_sky_column(sky0, col_type, 0, &status),
-                    flux[c], 0, num_sources, &status
+            const double frac = 2. * M_PI * i / (double) num_sources;
+            const double w = sin(frac);
+            oskar_sky_set_data(sky, OSKAR_SKY_RA_RAD, 0, i, frac, &status);
+            oskar_sky_set_data(sky, OSKAR_SKY_DEC_RAD, 0, i, 0.0, &status);
+            oskar_sky_set_data(sky, OSKAR_SKY_I_JY, 0, i, flux[0] * w, &status);
+            oskar_sky_set_data(sky, OSKAR_SKY_Q_JY, 0, i, flux[1] * w, &status);
+            oskar_sky_set_data(sky, OSKAR_SKY_U_JY, 0, i, flux[2] * w, &status);
+            oskar_sky_set_data(sky, OSKAR_SKY_V_JY, 0, i, flux[3] * w, &status);
+            oskar_sky_set_data(sky, OSKAR_SKY_REF_HZ, 0, i, freq_ref, &status);
+            oskar_sky_set_data(
+                    sky, OSKAR_SKY_LIN_SI, 0, i, i % 2 == 0 ? 0. : 1., &status
             );
+            if (i < num_sources / 2)
+            {
+                oskar_sky_set_data(
+                        sky, OSKAR_SKY_SPEC_IDX, 0, i, spx[0] * w, &status
+                );
+                oskar_sky_set_data(
+                        sky, OSKAR_SKY_SPEC_IDX, 1, i, spx[1], &status
+                );
+                oskar_sky_set_data(
+                        sky, OSKAR_SKY_SPEC_IDX, 2, i, spx[2], &status
+                );
+            }
+            else
+            {
+                oskar_sky_set_data(
+                        sky, OSKAR_SKY_SPEC_IDX, 0, i, spx[0] * w, &status
+                );
+            }
         }
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky0, OSKAR_SKY_REF_HZ, 0, &status),
-                freq_ref, 0, num_sources, &status
-        );
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky0, OSKAR_SKY_SPEC_IDX, 0, &status),
-                spix, 0, num_sources, &status
-        );
+        oskar_sky_sort_columns(sky, &status);
+        oskar_sky_check_columns(sky, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
+        // oskar_sky_save_named_columns(
+        //         sky, "temp_test_sky_model_spectral_indices.txt",
+        //         false, true, true, false, false, false,
+        //         &status
+        // );
+
         for (int i_dev = 0; i_dev < 2; ++i_dev)
         {
             // Copy to device.
             oskar_Sky* sky1 = oskar_sky_create_copy(
-                    sky0, locations[i_dev], &status
+                    sky, locations[i_dev], &status
             );
-
-            // Scale.
             oskar_Timer* timer = oskar_timer_create(locations[i_dev]);
-            oskar_timer_resume(timer);
-            oskar_sky_scale_flux_with_frequency(sky1, freq_new, &status);
-            ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
+            // Scale at each frequency.
+            for (int i_freq = 0; i_freq < num_freqs; ++i_freq)
+            {
+                const double freq_new = freqs[i_freq];
+                oskar_timer_resume(timer);
+                oskar_sky_scale_flux_with_frequency(sky1, freq_new, &status);
+                oskar_timer_pause(timer);
+                ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
+                // Make copy for checking.
+                oskar_Sky* sky2 = oskar_sky_create_copy(
+                        sky1, OSKAR_CPU, &status
+                );
+                ASSERT_EQ(0, status) << oskar_get_error_string(status);
+                ASSERT_EQ(
+                        num_sources, oskar_sky_int(sky2, OSKAR_SKY_NUM_SOURCES)
+                );
+                for (int i = 0; i < num_sources; ++i)
+                {
+                    double factor = 1.;
+                    const double w = sin(2. * M_PI * i / (double) num_sources);
+                    const double log_r = log10(freq_new / freq_ref);
+                    const double base = (freq_new / freq_ref) - 1.0;
+                    if (i < num_sources / 2)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            // Check a 3-term logarithmic spectral index.
+                            factor = pow(
+                                    freq_new / freq_ref,
+                                    spx[0] * w +
+                                    spx[1] * log_r +
+                                    spx[2] * log_r * log_r
+                            );
+                        }
+                        else
+                        {
+                            // Check a 3-term linear spectral index.
+                            const double delta = (
+                                    spx[0] * w * base +
+                                    spx[1] * pow(base, 2.0) +
+                                    spx[2] * pow(base, 3.0)
+                            );
+                            factor = ((flux[0] * w) + delta) / (flux[0] * w);
+                        }
+                    }
+                    else
+                    {
+                        if (i % 2 == 0)
+                        {
+                            // Check a single logarithmic spectral index.
+                            factor = pow(freq_new / freq_ref, spx[0] * w);
+                        }
+                        else
+                        {
+                            // Check a single linear spectral index.
+                            const double delta = (spx[0] * w * base);
+                            factor = ((flux[0] * w) + delta) / (flux[0] * w);
+                        }
+                    }
+                    for (int c = 0; c < 4; ++c)
+                    {
+                        oskar_SkyColumn col = (
+                                (oskar_SkyColumn) (c + OSKAR_SKY_SCRATCH_I_JY)
+                        );
+                        ASSERT_NEAR(flux[c] * w * factor,
+                                oskar_sky_data(sky2, col, 0, i),
+                                tolerances[i_type]
+                        ) << "Check failed at i=" << i << " c=" << c;
+                    }
+                }
+                oskar_sky_free(sky2, &status);
+            }
+            oskar_sky_free(sky1, &status);
+
+            // Report timing.
             printf(
                     "Scale flux with frequency (%s, %s): %.3g sec "
-                    "(%d sources)\n",
+                    "(%d sources, %d frequencies)\n",
                     device_string(locations[i_dev]),
                     oskar_mem_data_type_string(types[i_type]),
-                    oskar_timer_elapsed(timer), num_sources
+                    oskar_timer_elapsed(timer), num_sources, num_freqs
             );
             oskar_timer_free(timer);
-
-            // Make copy for checking.
-            oskar_Sky* sky2 = oskar_sky_create_copy(
-                    sky1, OSKAR_CPU, &status
-            );
-            ASSERT_EQ(0, status) << oskar_get_error_string(status);
-            ASSERT_EQ(num_sources, oskar_sky_int(sky2, OSKAR_SKY_NUM_SOURCES));
-            for (int i = 0; i < num_sources; ++i)
-            {
-                double factor = pow(freq_new / freq_ref, spix);
-                for (int c = 0; c < 4; ++c)
-                {
-                    oskar_SkyColumn col = (
-                            (oskar_SkyColumn) (c + OSKAR_SKY_SCRATCH_I_JY)
-                    );
-                    ASSERT_NEAR(flux[c] * factor,
-                            oskar_sky_data(sky2, col, 0, i), tol[i_type]
-                    );
-                }
-            }
-            oskar_sky_free(sky2, &status);
-            oskar_sky_free(sky1, &status);
         }
-        oskar_sky_free(sky0, &status);
-    }
-}
-
-
-TEST(Sky, scale_by_spectral_index_log_multi)
-{
-    int device_loc = 0;
-    (void) oskar_device_count(NULL, &device_loc);
-    const int num_sources = 10000;
-    const int locations[] = {OSKAR_CPU, device_loc};
-    const int types[] = {OSKAR_SINGLE, OSKAR_DOUBLE};
-    const double tol[] = {1e-5, 1e-14};
-    const double freqs[] = {50.0e6, 5e6};
-    const int num_freqs = sizeof(freqs) / sizeof(double);
-
-    for (int i_type = 0; i_type < 2; ++i_type)
-    {
-        // Create and fill a sky model.
-        int status = 0;
-        const double flux[] = {10.0, 1.0, 0.5, 0.1};
-        const double spix[] = {-0.7, -0.2, 0.1};
-        const double freq_ref = 10.0e6;
-        oskar_Sky* sky0 = oskar_sky_create(
-                types[i_type], OSKAR_CPU, num_sources, &status
-        );
-        for (int c = 0; c < 4; ++c)
-        {
-            oskar_SkyColumn col_type = (oskar_SkyColumn) (c + OSKAR_SKY_I_JY);
-            oskar_mem_set_value_real(
-                    oskar_sky_column(sky0, col_type, 0, &status),
-                    flux[c], 0, num_sources, &status
-            );
-        }
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky0, OSKAR_SKY_REF_HZ, 0, &status),
-                freq_ref, 0, num_sources, &status
-        );
-        for (int s = 0; s < 3; ++s)
-        {
-            oskar_mem_set_value_real(
-                    oskar_sky_column(sky0, OSKAR_SKY_SPEC_IDX, s, &status),
-                    spix[s], 0, num_sources, &status
-            );
-        }
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        for (int i_dev = 0; i_dev < 2; ++i_dev)
-        {
-            // Copy to device.
-            oskar_Sky* sky1 = oskar_sky_create_copy(
-                    sky0, locations[i_dev], &status
-            );
-
-            // Scale at each frequency.
-            for (int i_freq = 0; i_freq < num_freqs; ++i_freq)
-            {
-                // Scale.
-                const double freq_new = freqs[i_freq];
-                oskar_Timer* timer = oskar_timer_create(locations[i_dev]);
-                oskar_timer_resume(timer);
-                oskar_sky_scale_flux_with_frequency(sky1, freq_new, &status);
-                ASSERT_EQ(0, status) << oskar_get_error_string(status);
-                printf(
-                        "Scale flux with frequency (%s, %s): %.3g sec "
-                        "(%d sources)\n",
-                        device_string(locations[i_dev]),
-                        oskar_mem_data_type_string(types[i_type]),
-                        oskar_timer_elapsed(timer), num_sources
-                );
-                oskar_timer_free(timer);
-
-                // Make copy for checking.
-                oskar_Sky* sky2 = oskar_sky_create_copy(
-                        sky1, OSKAR_CPU, &status
-                );
-                ASSERT_EQ(0, status) << oskar_get_error_string(status);
-                ASSERT_EQ(
-                        num_sources, oskar_sky_int(sky2, OSKAR_SKY_NUM_SOURCES)
-                );
-                for (int i = 0; i < num_sources; ++i)
-                {
-                    const double log_r = log10(freq_new / freq_ref);
-                    const double factor = pow(
-                            freq_new / freq_ref,
-                            spix[0] + spix[1] * log_r + spix[2] * log_r * log_r
-                    );
-                    for (int c = 0; c < 4; ++c)
-                    {
-                        oskar_SkyColumn col = (
-                                (oskar_SkyColumn) (c + OSKAR_SKY_SCRATCH_I_JY)
-                        );
-                        ASSERT_NEAR(flux[c] * factor,
-                                oskar_sky_data(sky2, col, 0, i), tol[i_type]
-                        );
-                    }
-                }
-                oskar_sky_free(sky2, &status);
-            }
-            oskar_sky_free(sky1, &status);
-        }
-        oskar_sky_free(sky0, &status);
-    }
-}
-
-
-TEST(Sky, scale_by_spectral_index_linear_multi)
-{
-    int device_loc = 0;
-    (void) oskar_device_count(NULL, &device_loc);
-    const int num_sources = 10000;
-    const int locations[] = {OSKAR_CPU, device_loc};
-    const int types[] = {OSKAR_SINGLE, OSKAR_DOUBLE};
-    const double tol[] = {5e-5, 2e-12};
-    const double freqs[] = {50.0e6, 5e6};
-    const int num_freqs = sizeof(freqs) / sizeof(double);
-
-    for (int i_type = 0; i_type < 2; ++i_type)
-    {
-        // Create and fill a sky model.
-        int status = 0;
-        const double flux[] = {10.0, 1.0, 0.5, 0.1};
-        const double spix[] = {-0.7, -0.2, 0.1, -0.05, 0.01, 0.02, -0.01, 0.02};
-        const int num_spix_values = sizeof(spix) / sizeof(double);
-        const double freq_ref = 10.0e6;
-        oskar_Sky* sky0 = oskar_sky_create(
-                types[i_type], OSKAR_CPU, num_sources, &status
-        );
-        for (int c = 0; c < 4; ++c)
-        {
-            oskar_SkyColumn col_type = (oskar_SkyColumn) (c + OSKAR_SKY_I_JY);
-            oskar_mem_set_value_real(
-                    oskar_sky_column(sky0, col_type, 0, &status),
-                    flux[c], 0, num_sources, &status
-            );
-        }
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky0, OSKAR_SKY_REF_HZ, 0, &status),
-                freq_ref, 0, num_sources, &status
-        );
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky0, OSKAR_SKY_LIN_SI, 0, &status),
-                1.0, 0, num_sources, &status
-        );
-        for (int s = 0; s < num_spix_values; ++s)
-        {
-            oskar_mem_set_value_real(
-                    oskar_sky_column(sky0, OSKAR_SKY_SPEC_IDX, s, &status),
-                    spix[s], 0, num_sources, &status
-            );
-        }
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        for (int i_dev = 0; i_dev < 2; ++i_dev)
-        {
-            // Copy to device.
-            oskar_Sky* sky1 = oskar_sky_create_copy(
-                    sky0, locations[i_dev], &status
-            );
-
-            // Scale at each frequency.
-            for (int i_freq = 0; i_freq < num_freqs; ++i_freq)
-            {
-                // Scale.
-                const double freq_new = freqs[i_freq];
-                oskar_Timer* timer = oskar_timer_create(locations[i_dev]);
-                oskar_timer_resume(timer);
-                oskar_sky_scale_flux_with_frequency(sky1, freq_new, &status);
-                ASSERT_EQ(0, status) << oskar_get_error_string(status);
-                printf(
-                        "Scale flux with frequency (%s, %s): %.3g sec "
-                        "(%d sources)\n",
-                        device_string(locations[i_dev]),
-                        oskar_mem_data_type_string(types[i_type]),
-                        oskar_timer_elapsed(timer), num_sources
-                );
-                oskar_timer_free(timer);
-
-                // Make copy for checking.
-                oskar_Sky* sky2 = oskar_sky_create_copy(
-                        sky1, OSKAR_CPU, &status
-                );
-                ASSERT_EQ(0, status) << oskar_get_error_string(status);
-                ASSERT_EQ(
-                        num_sources, oskar_sky_int(sky2, OSKAR_SKY_NUM_SOURCES)
-                );
-                for (int i = 0; i < num_sources; ++i)
-                {
-                    const double base = (freq_new / freq_ref) - 1.0;
-                    const double delta = (
-                            spix[0] * base +
-                            spix[1] * pow(base, 2.0) +
-                            spix[2] * pow(base, 3.0) +
-                            spix[3] * pow(base, 4.0) +
-                            spix[4] * pow(base, 5.0) +
-                            spix[5] * pow(base, 6.0) +
-                            spix[6] * pow(base, 7.0) +
-                            spix[7] * pow(base, 8.0)
-                    );
-                    const double factor = (flux[0] + delta) / flux[0];
-                    for (int c = 0; c < 4; ++c)
-                    {
-                        oskar_SkyColumn col = (
-                                (oskar_SkyColumn) (c + OSKAR_SKY_SCRATCH_I_JY)
-                        );
-                        ASSERT_NEAR(flux[c] * factor,
-                                oskar_sky_data(sky2, col, 0, i), tol[i_type]
-                        );
-                    }
-                }
-                oskar_sky_free(sky2, &status);
-            }
-            oskar_sky_free(sky1, &status);
-        }
-        oskar_sky_free(sky0, &status);
+        oskar_sky_free(sky, &status);
     }
 }
 
@@ -329,140 +195,155 @@ TEST(Sky, scale_flux_with_frequency_no_stokes_i)
     oskar_Sky* sky = oskar_sky_create(
             OSKAR_DOUBLE, OSKAR_CPU, num_sources, &status
     );
-    oskar_mem_set_value_real(
-            oskar_sky_column(sky, OSKAR_SKY_RA_RAD, 0, &status),
-            1., 0, num_sources, &status
-    );
-    oskar_mem_set_value_real(
-            oskar_sky_column(sky, OSKAR_SKY_DEC_RAD, 0, &status),
-            2., 0, num_sources, &status
-    );
-    oskar_mem_set_value_real(
-            oskar_sky_column(sky, OSKAR_SKY_REF_HZ, 0, &status),
-            100e6, 0, num_sources, &status
-    );
+    for (int i = 0; i < num_sources; ++i)
+    {
+        oskar_sky_set_data(sky, OSKAR_SKY_RA_RAD, 0, i, 1., &status);
+        oskar_sky_set_data(sky, OSKAR_SKY_DEC_RAD, 0, i, 2., &status);
+        oskar_sky_set_data(sky, OSKAR_SKY_REF_HZ, 0, i, 100e6, &status);
+    }
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Scaling should fail, since there is no reference flux.
     oskar_sky_scale_flux_with_frequency(sky, 101e6, &status);
     ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);
-
-    // Clean up.
     oskar_sky_free(sky, &status);
 }
 
 
-TEST(Sky, scale_flux_with_frequency_too_many_spectral_indices)
-{
-    int status = 0;
-    const int num_sources = 100;
-    const int num_spectal_index_values = 9;
-    oskar_Sky* sky = oskar_sky_create(
-            OSKAR_DOUBLE, OSKAR_CPU, num_sources, &status
-    );
-    oskar_mem_set_value_real(
-            oskar_sky_column(sky, OSKAR_SKY_RA_RAD, 0, &status),
-            1., 0, num_sources, &status
-    );
-    oskar_mem_set_value_real(
-            oskar_sky_column(sky, OSKAR_SKY_DEC_RAD, 0, &status),
-            2., 0, num_sources, &status
-    );
-    oskar_mem_set_value_real(
-            oskar_sky_column(sky, OSKAR_SKY_I_JY, 0, &status),
-            3., 0, num_sources, &status
-    );
-    oskar_mem_set_value_real(
-            oskar_sky_column(sky, OSKAR_SKY_REF_HZ, 0, &status),
-            100e6, 0, num_sources, &status
-    );
-    for (int i = 0; i < num_spectal_index_values; ++i)
-    {
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky, OSKAR_SKY_SPEC_IDX, i, &status),
-                (double) i, 0, num_sources, &status
-        );
-    }
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-
-    // Scaling should fail.
-    oskar_sky_scale_flux_with_frequency(sky, 101e6, &status);
-    ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);
-
-    // Clean up.
-    oskar_sky_free(sky, &status);
-}
-
-
-TEST(Sky, scale_flux_with_frequency_spectral_line)
+TEST(Sky, scale_flux_with_frequency_mixed_spectral_types)
 {
     int device_loc = 0;
     (void) oskar_device_count(NULL, &device_loc);
-    const int num_sources = 100;
     const int locations[] = {OSKAR_CPU, device_loc};
     const int types[] = {OSKAR_SINGLE, OSKAR_DOUBLE};
+    const int num_freqs = 100;
+    const oskar_SkyColumn col = OSKAR_SKY_SCRATCH_I_JY;
+    const double freq_start_hz = 95e6;
+    const double freq_inc_hz = 100e3;
     const double tolerances[] = {5e-5, 1e-12};
-    const double freq_new_hz = 150e6;
+
+    // Write a test sky model file to load.
+    const char* name = "temp_test_mixed_scale_mixed_spectral_types.txt";
+    FILE* file = fopen(name, "w");
+    (void) fprintf(file, "(Ra,  Dec, I, ReferenceFrequency, SpectralIndex, LogarithmicSI, SpectralCurvature, LineWidth) = format\n");
+    (void) fprintf(file, "\n");
+    (void) fprintf(file, "# Source 0: Simple logarithmic spectral index:\n");
+    (void) fprintf(file, "0.01, 0.1, 1.1, 100e6, -0.55,,,\n");
+    (void) fprintf(file, "\n");
+    (void) fprintf(file, "# Source 1: Two-term logarithmic spectral index polynomial:\n");
+    (void) fprintf(file, "0.02, 0.2, 1.2, 101e6, [-0.7, 0.05], true,,\n");
+    (void) fprintf(file, "\n");
+    (void) fprintf(file, "# Source 2: Three-term linear spectral index polynomial:\n");
+    (void) fprintf(file, "0.03, 0.3, 1.3, 102e6, [0.08, 0.07, 0.02], false,,\n");
+    (void) fprintf(file, "\n");
+    (void) fprintf(file, "# Source 3: Spectral curvature model:\n");
+    (void) fprintf(file, "0.04, 0.4, 1.4, [103e6], [-0.6],, 0.1,\n");
+    (void) fprintf(file, "\n");
+    (void) fprintf(file, "# Source 4: Simple Gaussian spectral line model:\n");
+    (void) fprintf(file, "0.05, 0.5, 1.5, 104e6,,,, 100e3\n");
+    (void) fprintf(file, "\n");
+    (void) fprintf(file, "# Source 5: Three spectral lines, each a Gaussian:\n");
+    (void) fprintf(file, "0.06, 0.6, [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, [250e3, 350e3, 500e3]\n");
+    (void) fprintf(file, "\n");
+    (void) fprintf(file, "# Source 6: Different flux at four frequencies:\n");
+    (void) fprintf(file, "0.07, 0.7, [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],,,,\n");
+    (void) fclose(file);
 
     for (int i_type = 0; i_type < 2; ++i_type)
     {
         int status = 0;
         const double tol = tolerances[i_type];
 
-        // Create and fill a sky model.
-        oskar_Sky* sky_ref = oskar_sky_create(
-                types[i_type], OSKAR_CPU, num_sources, &status
+        // Load the sky model.
+        oskar_Sky* sky = oskar_sky_load_named_columns(
+                name, types[i_type], &status
         );
-        for (int i = 0; i < num_sources; ++i)
-        {
-            oskar_sky_set_data(
-                    sky_ref, OSKAR_SKY_I_JY, 0, i,
-                    (double) i, &status
-            );
-            oskar_sky_set_data(
-                    sky_ref, OSKAR_SKY_LINE_WIDTH_HZ, 0, i,
-                    (double) i * 0.1e6, &status
-            );
-            oskar_sky_set_data(
-                    sky_ref, OSKAR_SKY_REF_HZ, 0, i,
-                    (double) i * 1e6 + 100e6, &status
-            );
-        }
+        ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         for (int i_dev = 0; i_dev < 2; ++i_dev)
         {
             // Copy sky model to device.
             const int device_loc = locations[i_dev];
-            oskar_Sky* sky_dev = oskar_sky_create_copy(
-                    sky_ref, device_loc, &status
-            );
+            oskar_Sky* sky1 = oskar_sky_create_copy(sky, device_loc, &status);
 
-            // Scale with frequency.
-            oskar_Timer* timer = oskar_timer_create(device_loc);
-            oskar_sky_scale_flux_with_frequency(sky_dev, freq_new_hz, &status);
-            oskar_timer_free(timer);
-
-            // Check that the flux was evaluated correctly at this frequency.
-            for (int i = 0; i < num_sources; ++i)
+            // Scale at each frequency.
+            for (int i_freq = 0; i_freq < num_freqs; ++i_freq)
             {
-                const double freq_ref_hz = i * 1e6 + 100e6;
-                const double line_width_hz = i * 0.1e6;
-                const double x = freq_new_hz - freq_ref_hz;
-                const double expected = i * exp(
-                        -x * x / (2 * pow(line_width_hz, 2.))
-                );
-                EXPECT_NEAR(
-                        expected, oskar_sky_data(
-                                sky_dev, OSKAR_SKY_SCRATCH_I_JY, 0, i
-                        ), tol
-                );
-            }
+                double expect = 0.0, freq_ref_hz = 0.0, sigma = 0.0, x = 0.0;
+                const double freq_new_hz = freq_start_hz + i_freq * freq_inc_hz;
+                oskar_sky_scale_flux_with_frequency(sky1, freq_new_hz, &status);
 
-            // Clean up.
-            oskar_sky_free(sky_dev, &status);
+                // Check Source 0.
+                freq_ref_hz = 100e6;
+                expect = 1.1 * pow(freq_new_hz / freq_ref_hz, -0.55);
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 0), tol);
+
+                // Check Source 1.
+                freq_ref_hz = 101e6;
+                const double log_r = log10(freq_new_hz / freq_ref_hz);
+                expect = 1.2 * pow(
+                        freq_new_hz / freq_ref_hz, -0.7 + 0.05 * log_r
+                );
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 1), tol);
+
+                // Check Source 2.
+                freq_ref_hz = 102e6;
+                const double b = (freq_new_hz / freq_ref_hz) - 1.0;
+                expect = 1.3 + (0.08 * b) + (0.07 * b * b) + (0.02 * b * b * b);
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 2), tol);
+
+                // Check Source 3.
+                freq_ref_hz = 103e6;
+                expect = 1.4 * pow(freq_new_hz / freq_ref_hz, -0.6) * exp(
+                        0.1 * pow(log(freq_new_hz / freq_ref_hz), 2.0)
+                );
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 3), tol);
+
+                // Check Source 4.
+                freq_ref_hz = 104e6;
+                sigma = 100e3;
+                x = freq_new_hz - freq_ref_hz;
+                expect = 1.5 * exp(-x * x / (2 * sigma * sigma));
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 4), tol);
+
+                // Check Source 5.
+                expect = 0.0;
+                freq_ref_hz = 101e6;
+                sigma = 250e3;
+                x = freq_new_hz - freq_ref_hz;
+                expect += 1.6 * exp(-x * x / (2 * sigma * sigma));
+                freq_ref_hz = 102e6;
+                sigma = 350e3;
+                x = freq_new_hz - freq_ref_hz;
+                expect += 1.7 * exp(-x * x / (2 * sigma * sigma));
+                freq_ref_hz = 104e6;
+                sigma = 500e3;
+                x = freq_new_hz - freq_ref_hz;
+                expect += 1.8 * exp(-x * x / (2 * sigma * sigma));
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 5), tol);
+
+                // Check Source 6.
+                int i_closest = 0;
+                x = 1e38;
+                for (int j = 0; j < 4; ++j)
+                {
+                    const double diff = fabs(freq_new_hz - oskar_sky_data(
+                            sky1, OSKAR_SKY_REF_HZ, j, 6
+                    ));
+                    if (diff < x)
+                    {
+                        x = diff;
+                        i_closest = j;
+                    }
+                }
+                expect = oskar_sky_data(sky1, OSKAR_SKY_I_JY, i_closest, 6);
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 6), tol);
+            }
+            oskar_sky_free(sky1, &status);
         }
-        oskar_sky_free(sky_ref, &status);
+        oskar_sky_free(sky, &status);
     }
+    (void) remove(name);
 }
 
 
@@ -479,86 +360,61 @@ TEST(Sky, scale_flux_with_frequency_rotation_measure)
     for (int i_type = 0; i_type < 2; ++i_type)
     {
         int status = 0;
-        const double tol = tolerances[i_type];
 
         // Create and fill a sky model.
-        oskar_Sky* sky_ref = oskar_sky_create(
+        oskar_Sky* sky = oskar_sky_create(
                 types[i_type], OSKAR_CPU, num_sources, &status
         );
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky_ref, OSKAR_SKY_I_JY, 0, &status), 10.,
-                0, num_sources, &status
-        );
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky_ref, OSKAR_SKY_Q_JY, 0, &status), 1.,
-                0, num_sources, &status
-        );
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky_ref, OSKAR_SKY_U_JY, 0, &status), 0.,
-                0, num_sources, &status
-        );
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky_ref, OSKAR_SKY_V_JY, 0, &status), 0.1,
-                0, num_sources, &status
-        );
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky_ref, OSKAR_SKY_REF_HZ, 0, &status),
-                freq_ref, 0, num_sources, &status
-        );
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky_ref, OSKAR_SKY_RM_RAD, 0, &status),
-                rm, 0, num_sources, &status
-        );
-
+        for (int i = 0; i < num_sources; ++i)
+        {
+            oskar_sky_set_data(sky, OSKAR_SKY_I_JY, 0, i, 10., &status);
+            oskar_sky_set_data(sky, OSKAR_SKY_Q_JY, 0, i, 1., &status);
+            oskar_sky_set_data(sky, OSKAR_SKY_U_JY, 0, i, 0., &status);
+            oskar_sky_set_data(sky, OSKAR_SKY_V_JY, 0, i, 0.1, &status);
+            oskar_sky_set_data(sky, OSKAR_SKY_RM_RAD, 0, i, rm, &status);
+            oskar_sky_set_data(sky, OSKAR_SKY_REF_HZ, 0, i, freq_ref, &status);
+        }
         for (int i_dev = 0; i_dev < 2; ++i_dev)
         {
             // Copy sky model to device.
             const int device_loc = locations[i_dev];
-            oskar_Sky* sky_dev = oskar_sky_create_copy(
-                    sky_ref, device_loc, &status
-            );
+            oskar_Sky* sky1 = oskar_sky_create_copy(sky, device_loc, &status);
 
             // Scale with frequency.
             oskar_Timer* timer = oskar_timer_create(device_loc);
-            oskar_sky_scale_flux_with_frequency(sky_dev, freq_new, &status);
+            oskar_sky_scale_flux_with_frequency(sky1, freq_new, &status);
             oskar_timer_free(timer);
 
             // Check that Q is no longer 1, and U no longer 0.
             for (int i = 0; i < num_sources; ++i)
             {
                 EXPECT_NE(
-                        1., oskar_sky_data(
-                                sky_dev, OSKAR_SKY_SCRATCH_Q_JY, 0, i
-                        )
+                        1., oskar_sky_data(sky1, OSKAR_SKY_SCRATCH_Q_JY, 0, i)
                 );
                 EXPECT_NE(
-                        0., oskar_sky_data(
-                                sky_dev, OSKAR_SKY_SCRATCH_U_JY, 0, i
-                        )
+                        0., oskar_sky_data(sky1, OSKAR_SKY_SCRATCH_U_JY, 0, i)
                 );
             }
 
             // Scale back to reference frequency.
-            oskar_sky_scale_flux_with_frequency(sky_dev, freq_ref, &status);
+            oskar_sky_scale_flux_with_frequency(sky1, freq_ref, &status);
 
             // Check for consistency.
             for (int i = 0; i < num_sources; ++i)
             {
                 EXPECT_NEAR(
-                        1., oskar_sky_data(
-                                sky_dev, OSKAR_SKY_SCRATCH_Q_JY, 0, i
-                        ), tol
+                        1., oskar_sky_data(sky1, OSKAR_SKY_SCRATCH_Q_JY, 0, i),
+                        tolerances[i_type]
                 );
                 EXPECT_NEAR(
-                        0., oskar_sky_data(
-                                sky_dev, OSKAR_SKY_SCRATCH_U_JY, 0, i
-                        ), tol
+                        0., oskar_sky_data(sky1, OSKAR_SKY_SCRATCH_U_JY, 0, i),
+                        tolerances[i_type]
                 );
             }
 
             // Clean up.
-            oskar_sky_free(sky_dev, &status);
+            oskar_sky_free(sky1, &status);
         }
-        oskar_sky_free(sky_ref, &status);
+        oskar_sky_free(sky, &status);
     }
 }

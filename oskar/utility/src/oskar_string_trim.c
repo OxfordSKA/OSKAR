@@ -13,18 +13,41 @@ extern "C" {
 #endif
 
 
-char* oskar_string_trim(char* str, int trim_quotes)
+char* oskar_string_trim(char* str, int trim_quotes, int trim_brackets)
 {
     if (!str) return str;
     while (*str && isspace(*str)) str++;
     if (!*str) return str;
     char* end = str + strlen(str) - 1;
     while (end > str && isspace(*end)) *end-- = '\0';
-    if (trim_quotes && (*str == '"' || *str == '\''))
+    if (trim_quotes && (*str == '"' || *str == '\'' || *str == '`'))
     {
         const char quote = *str++;
-        end = strchr(str, quote);
+        end = strrchr(str, quote);
         if (end) *end = '\0';
+        return oskar_string_trim(str, trim_quotes, trim_brackets);
+    }
+    if (trim_brackets && (*str == '(' || *str == '[' || *str == '{'))
+    {
+        char end_bracket = '\0';
+        const char bracket = *str++;
+        switch (bracket)
+        {
+        case '(':
+            end_bracket =')';
+            break;
+        case '[':
+            end_bracket =']';
+            break;
+        case '{':
+            end_bracket ='}';
+            break;
+        default:                                          /* LCOV_EXCL_LINE */
+            break;                                        /* LCOV_EXCL_LINE */
+        }
+        end = strrchr(str, end_bracket);
+        if (end) *end = '\0';
+        return oskar_string_trim(str, trim_quotes, trim_brackets);
     }
     return str;
 }

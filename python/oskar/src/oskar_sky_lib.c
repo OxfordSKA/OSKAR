@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2025, The OSKAR Developers.
+ * Copyright (c) 2016-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -90,7 +90,7 @@ static PyObject* append_sources(PyObject* self, PyObject* args)
     oskar_Sky *h = 0;
     PyObject *obj[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #if OSKAR_VERSION >= 0x020C00
-    int i = 0, num_sources = -1, status = 0;
+    int i = 0, j = 0, num_sources = -1, status = 0;
 
     /* Parse inputs: RA, Dec, I, Q, U, V, ref, spix, rm, maj, min, pa. */
     if (!PyArg_ParseTuple(args, "OOOOOOOOOOOOO", &obj[0],
@@ -101,14 +101,13 @@ static PyObject* append_sources(PyObject* self, PyObject* args)
     const int flags = NPY_ARRAY_FORCECAST | NPY_ARRAY_IN_ARRAY;
     const int type = oskar_sky_int(h, OSKAR_SKY_PRECISION);
     const int old_num = oskar_sky_int(h, OSKAR_SKY_NUM_SOURCES);
-    const int npy_type = numpy_type_from_oskar(type);
 
     /* Get column size and check for consistency. */
     for (i = 1; i <= 12; ++i)
     {
         PyArrayObject* arr_col = 0;
         if (obj[i] == Py_None) continue; /* Skip column if not supplied. */
-        arr_col = (PyArrayObject*) PyArray_FROM_OTF(obj[i], npy_type, flags);
+        arr_col = (PyArrayObject*) PyArray_FROM_OTF(obj[i], NPY_DOUBLE, flags);
         if (num_sources < 0)
         {
             num_sources = (int) PyArray_SIZE(arr_col);
@@ -130,35 +129,32 @@ static PyObject* append_sources(PyObject* self, PyObject* args)
     /* Loop over objects/columns. */
     for (i = 1; i <= 12; ++i)
     {
-        oskar_SkyColumn col_type = OSKAR_SKY_CUSTOM;
-        oskar_Mem* column = 0;
-        oskar_Mem* wrapper = 0;
         PyArrayObject* arr_col = 0;
+        const double* in = 0;
         if (obj[i] == Py_None) continue; /* Skip column if not supplied. */
-        arr_col = (PyArrayObject*) PyArray_FROM_OTF(obj[i], npy_type, flags);
+        arr_col = (PyArrayObject*) PyArray_FROM_OTF(obj[i], NPY_DOUBLE, flags);
 
         /* Copy column data into the sky model. */
-        col_type = (oskar_SkyColumn) i;
-        column = oskar_sky_column(h, col_type, 0, &status);
-        wrapper = oskar_mem_create_alias_from_raw(
-                PyArray_DATA(arr_col), type, OSKAR_CPU, num_sources, &status
-        );
-        oskar_mem_copy_contents(
-                column, wrapper, old_num, 0, num_sources, &status
-        );
-        oskar_mem_free(wrapper, &status);
+        const oskar_SkyColumn col_type = (oskar_SkyColumn) i;
+        in = (const double*) PyArray_DATA(arr_col);
+        for (j = 0; j < num_sources; ++j)
+        {
+            oskar_sky_set_data(h, col_type, 0, j + old_num, in[j], &status);
+        }
         if (col_type == OSKAR_SKY_RA_RAD || col_type == OSKAR_SKY_DEC_RAD ||
                 col_type == OSKAR_SKY_PA_RAD)
         {
             oskar_mem_scale_real(
-                    column, deg2rad, old_num, num_sources, &status
+                    oskar_sky_column(h, col_type, 0, &status),
+                    deg2rad, old_num, num_sources, &status
             );
         }
         else if (col_type == OSKAR_SKY_MAJOR_RAD ||
                 col_type == OSKAR_SKY_MINOR_RAD)
         {
             oskar_mem_scale_real(
-                    column, arcsec2rad, old_num, num_sources, &status
+                    oskar_sky_column(h, col_type, 0, &status),
+                    arcsec2rad, old_num, num_sources, &status
             );
         }
 
@@ -724,16 +720,20 @@ static PyObject* save(PyObject* self, PyObject* args)
 
 static PyObject* save_named_columns(PyObject* self, PyObject* args)
 {
-#if OSKAR_VERSION >= 0x020C00
+#if OSKAR_VERSION >= 0x020D00
     oskar_Sky *h = 0;
     PyObject* capsule = 0;
     int status = 0;
+    int use_ska_convention = 0;
     int use_degrees = 1;
+    int write_format_wrapper = 1;
     int write_name = 0;
+    int write_quoted_vectors = 0;
     int write_type = 0;
     const char* filename = 0;
-    if (!PyArg_ParseTuple(args, "Osiii", &capsule, &filename,
-            &use_degrees, &write_name, &write_type)
+    if (!PyArg_ParseTuple(args, "Osiiiiii", &capsule, &filename,
+            &use_ska_convention, &use_degrees, &write_format_wrapper,
+            &write_name, &write_quoted_vectors, &write_type)
     )
     {
         return 0;
@@ -742,7 +742,8 @@ static PyObject* save_named_columns(PyObject* self, PyObject* args)
 
     /* Save the sky model. */
     oskar_sky_save_named_columns(
-            h, filename, use_degrees, write_name, write_type, &status
+            h, filename, use_ska_convention, use_degrees, write_format_wrapper,
+            write_name, write_quoted_vectors, write_type, &status
     );
 
     /* Check for errors. */
@@ -757,7 +758,7 @@ static PyObject* save_named_columns(PyObject* self, PyObject* args)
     return Py_BuildValue("");
 #else
     PyErr_Format(PyExc_RuntimeError,
-            "save_named_columns() is only available in OSKAR 2.12.0 or above."
+            "save_named_columns() is only available in OSKAR 2.13.0 or above."
     );
     return 0;
 #endif

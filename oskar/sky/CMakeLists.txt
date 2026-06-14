@@ -6,10 +6,12 @@ set(sky_SRC
     define_sky_copy_source_data.h
     define_sky_scale_flux_with_frequency.h
     define_update_horizon_mask.h
+    oskar_sky_enum.h
     src/oskar_generate_random_coordinate.c
     src/oskar_sky_accessors.c
     src/oskar_sky_append_to_set.c
     src/oskar_sky_append.c
+    src/oskar_sky_check_columns.c
     src/oskar_sky_clear_source_flux.c
     src/oskar_sky_column.c
     src/oskar_sky_column_type_from_name.c
@@ -38,6 +40,7 @@ set(sky_SRC
     src/oskar_sky_save.c
     src/oskar_sky_scale_flux_with_frequency.c
     src/oskar_sky_set_source.c
+    src/oskar_sky_sort_columns.c
     src/oskar_sky.cl
     src/oskar_sky.cu
     src/oskar_update_horizon_mask.c

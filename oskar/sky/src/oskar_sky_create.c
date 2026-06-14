@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2025, The OSKAR Developers.
+ * Copyright (c) 2013-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -43,6 +43,10 @@ oskar_Sky* oskar_sky_create(
     model->attr_int[OSKAR_SKY_CAPACITY] = capacity;
     model->attr_int[OSKAR_SKY_NUM_SOURCES] = num_sources;
     model->table = oskar_mem_create(type, location, 0, status);
+    model->num_valid_columns = oskar_mem_create(
+            OSKAR_INT, location, capacity * OSKAR_SKY_NUM_FIXED_COLUMN_TYPES,
+            status
+    );
     return model;
 }
 

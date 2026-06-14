@@ -11,7 +11,9 @@
 #include "log/oskar_log.h"
 #include "math/oskar_cmath.h"
 #include "sky/oskar_sky.h"
+#include "utility/oskar_get_error_string.h"
 #include "utility/oskar_getline.h"
+#include "utility/oskar_string_split.h"
 #include "utility/oskar_string_to_angle.h"
 #include "utility/oskar_string_trim.h"
 
@@ -20,8 +22,8 @@ extern "C" {
 #endif
 
 #define DEG2RAD (M_PI / 180.0)
+#define RAD2DEG (180.0 / M_PI)
 #define ARCSEC2RAD (DEG2RAD / 3600.0)
-#define MAX_TOKENS 64
 
 
 /*
@@ -47,13 +49,13 @@ static char* find_clean_header(char* line, int* status)
     if (!line) return 0;
 
     /* Remove whitespace from both ends. */
-    trimmed = oskar_string_trim(line, 0);
+    trimmed = oskar_string_trim(line, 0, 0);
 
     /* Skip over any comment character and re-trim. */
     if (*trimmed == '#')
     {
         trimmed++;
-        trimmed = oskar_string_trim(trimmed, 0);
+        trimmed = oskar_string_trim(trimmed, 0, 0);
     }
 
     /* Convert to lower case. */
@@ -133,129 +135,75 @@ static char* find_clean_header(char* line, int* status)
         fmt_pos[i] = ' ';
     }
 
-    /* Remove the new spaces at the start or end. */
-    trimmed = oskar_string_trim(trimmed, 0);
-
-    /* Blank out any brackets around what's left (keeping internal ones). */
-    const size_t n = strlen(trimmed);
-    if (n > 0)
-    {
-        if (*trimmed == '[' || *trimmed == '(') *trimmed = ' ';
-        if (n > 1)
-        {
-            char* end = trimmed + n - 1;
-            if (*end == ']' || *end == ')') *end = ' ';
-        }
-    }
-
-    /* Trim the line again to remove the spaces that were used for blanking. */
-    return oskar_string_trim(trimmed, 0);
+    /* Trim the line again to remove the spaces and any enclosing brackets. */
+    return oskar_string_trim(trimmed, 0, 1);
 }
 
 
 /* Find out which columns we have from the cleaned-up header string. */
-static int parse_header_columns(
+static int parse_header(
         char* header_line,
         oskar_SkyColumn** column_types,
         char*** column_defaults,
-        const int* status
+        double** column_suffixes,
+        int* status
 )
 {
-    int capacity = 0, count = 0;
-    char* p = header_line;
-    char* token_start = p;
-    int in_token = 0;
-    int in_quotes = 0;
-    char quote_char = 0;
+    int i = 0, j = 0, list1_size = 0, list2_size = 0;
+    char **list1 = 0, **list2 = 0;
+    double suffix = 0.0;
     if (*status || !header_line || !*header_line) return 0;
-    for (;;)
+
+    /* Split up the header string into fields. */
+    const int num_fields = oskar_string_split(
+            header_line, &list1_size, &list1, 0, status
+    );
+    if (*status || num_fields <= 0)
     {
-        /* Current character. */
-        const char c = *p;
-
-        /* If we're inside a quoted default, ignore all delimiters until
-         * the closing quote. */
-        if (in_quotes)
-        {
-            if (c == quote_char) in_quotes = 0; /* End of quoted default. */
-            if (c == '\0') break;
-
-            /* Next character. */
-            p++;
-            continue;
-        }
-
-        /* Enter quoted-default mode if current char is a quote and the
-         * previous char is '='. */
-        if ((c == '"' || c == '\'') && *(p - 1) == '=')
-        {
-            in_quotes = 1;
-            quote_char = c;
-
-            /* Next character. */
-            p++;
-            continue;
-        }
-
-        /* Token boundary unless inside quotes. */
-        if (c == ',' || isspace(c) || c == '\0')
-        {
-            /* Resize arrays if needed before appending a new token. */
-            if (count >= capacity)
-            {
-                capacity = (capacity == 0) ? 8 : (capacity * 2);
-                *column_types = (oskar_SkyColumn*) realloc(
-                        *column_types, capacity * sizeof(oskar_SkyColumn)
-                );
-                *column_defaults = (char**) realloc(
-                        *column_defaults, capacity * sizeof(char*)
-                );
-            }
-            if (in_token)
-            {
-                char* name = 0;
-                char* val = 0;
-                *p = '\0';
-                in_token = 0;
-                name = oskar_string_trim(token_start, 0);
-
-                /* Handle optional default value, after an '='. */
-                val = strchr(name, '=');
-                if (val)
-                {
-                    *val = '\0';
-
-                    /* Also strip surrounding quotes if present. */
-                    val = oskar_string_trim(val + 1, 1);
-                }
-                (*column_types)[count] = oskar_sky_column_type_from_name(name);
-                (*column_defaults)[count] = val;
-                count++;
-            }
-            else if (c == ',')
-            {
-                /* Empty column. */
-                (*column_types)[count] = OSKAR_SKY_CUSTOM;
-                (*column_defaults)[count] = 0;
-                count++;
-            }
-            if (c == '\0') break;
-
-            /* Next character. */
-            p++;
-            token_start = p;
-            continue;
-        } /* (End if token boundary.) */
-
-        /* Start of new token (outside quotes). */
-        if (!in_token)
-        {
-            in_token = 1;
-            token_start = p;
-        }
-        p++;
+        free(list1);
+        return 0;
     }
-    return count;
+
+    /* Resize the output arrays. */
+    *column_types = (oskar_SkyColumn*) realloc(
+            *column_types, num_fields * sizeof(oskar_SkyColumn)
+    );
+    *column_defaults = (char**) realloc(
+            *column_defaults, num_fields * sizeof(char*)
+    );
+    *column_suffixes = (double*) realloc(
+            *column_suffixes, num_fields * sizeof(double)
+    );
+
+    /* Process each field. */
+    for (i = 0; i < num_fields; ++i)
+    {
+        /* Split each field name on equals to check for a default. */
+        const int num_parts = oskar_string_split(
+                list1[i], &list2_size, &list2, 1, status
+        );
+        for (j = 0; j < num_parts; ++j)
+        {
+            list2[j] = oskar_string_trim(list2[j], 1, 0); /* Trim quotes. */
+        }
+        if (num_parts > 0)
+        {
+            (*column_types)[i] = oskar_sky_column_type_from_name(
+                    list2[0], &suffix
+            );
+            (*column_defaults)[i] = num_parts > 1 ? list2[1] : 0;
+            (*column_suffixes)[i] = suffix;
+        }
+        else
+        {
+            (*column_types)[i] = OSKAR_SKY_CUSTOM;
+            (*column_defaults)[i] = 0;
+            (*column_suffixes)[i] = 0.0;
+        }
+    }
+    free(list1);
+    free(list2);
+    return num_fields;
 }
 
 
@@ -263,14 +211,7 @@ static int parse_header_columns(
 static int parse_array_values(const char* str, double** out, int* num_out)
 {
     int num = 0;
-
-    /* No values: assume 0. */
-    if (!str || !*str)
-    {
-        /* Don't need to check size, as num_out is always at least 4 here. */
-        (*out)[0] = 0;
-        return 1;
-    }
+    if (!str || !*str) return 0;
 
     /* Single non-bracketed value. */
     if (str[0] != '[' && str[0] != '(')
@@ -325,75 +266,9 @@ static int parse_array_values(const char* str, double** out, int* num_out)
 }
 
 
-/* Row tokeniser. Split on spaces and commas, respect quotes and brackets. */
-static int split_tokens(char* line, char* tokens[], int max_tokens)
-{
-    int count = 0;
-    int bracket_depth = 0;
-    int in_quotes = 0;
-    char quote_char = ' ';
-    char* p = line;
-    char* token_start = p;
-    if (count < max_tokens) tokens[count++] = token_start;
-    while (*p && count < max_tokens)
-    {
-        /* Handle brackets and delimiters when not in quotes. */
-        if (!in_quotes)
-        {
-            if (*p == '[' || *p == '(')
-            {
-                bracket_depth++;
-            }
-            else if ((*p == ']' || *p == ')') && bracket_depth > 0)
-            {
-                bracket_depth--;
-            }
-            else if ((*p == ',' || isspace(*p)) && bracket_depth == 0)
-            {
-                /* Token boundary. Add a null-terminator. */
-                *p = '\0';
-                p++;
-
-                /* Skip any additional spaces. */
-                while (*p && isspace(*p))
-                {
-                    p++;
-                }
-
-                /* Start of next token. */
-                tokens[count++] = p;
-
-                /* Already at the next character - don't increment p again. */
-                continue;
-            }
-        }
-
-        /* Handle quotes. Quotes override everything, including brackets. */
-        if (*p == '"' || *p == '\'')
-        {
-            if (!in_quotes)
-            {
-                in_quotes = 1;
-                quote_char = *p;
-            }
-            else if (in_quotes && *p == quote_char)
-            {
-                in_quotes = 0;
-                quote_char = ' ';
-            }
-        }
-
-        /* Check next character. */
-        p++;
-    }
-    return count;
-}
-
-
 /* Save the value (or the default) in the sky model. */
 static inline void set_value(
         oskar_Sky* sky,
-        oskar_Mem* column,
         oskar_SkyColumn column_type,
         const char* value,
         const char* default_value,
@@ -403,6 +278,11 @@ static inline void set_value(
         int* status
 )
 {
+    int b = 0, num_items = 1;
+    double scaling = 1.0;
+    const double tol = 1e-4;
+    if (*status) return;
+
     /* Use default if there's no value. */
     if (!value) value = default_value;
 
@@ -414,60 +294,142 @@ static inline void set_value(
         return;
     case OSKAR_SKY_RA_RAD:
         (*values)[0] = oskar_string_hours_to_radians(value, 'r', status);
+        if ((*values)[0] > 2 * M_PI + tol || (*values)[0] < -2 * M_PI - tol)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            oskar_log_error(
+                    0, "Source %d has a Right Ascension (%.4f radians) "
+                    "which is out of range. Check the units of "
+                    "the RA and Dec columns.", row, (*values)[0]
+            );
+        }
         break;
     case OSKAR_SKY_DEC_RAD:
         (*values)[0] = oskar_string_degrees_to_radians(value, 'r', status);
+        if ((*values)[0] > M_PI / 2 + tol || (*values)[0] < -M_PI / 2 - tol)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            oskar_log_error(
+                    0, "Source %d has a Declination (%.4f radians) "
+                    "which is out of range. Check the units of "
+                    "the RA and Dec columns.", row, (*values)[0]
+            );
+        }
         break;
     case OSKAR_SKY_RA_DEG:
         (*values)[0] = oskar_string_hours_to_radians(value, 'd', status);
+        if ((*values)[0] > 2 * M_PI + tol || (*values)[0] < -2 * M_PI - tol)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            oskar_log_error(
+                    0, "Source %d has a Right Ascension (%.4f degrees) "
+                    "which is out of range.", row, (*values)[0] * RAD2DEG
+            );
+        }
         break;
     case OSKAR_SKY_DEC_DEG:
         (*values)[0] = oskar_string_degrees_to_radians(value, 'd', status);
-        break;
-    case OSKAR_SKY_MAJOR_RAD:
-    case OSKAR_SKY_MINOR_RAD:
-        (*values)[0] = value ? ARCSEC2RAD * strtod(value, 0) : 0.0;
-        break;
-    case OSKAR_SKY_PA_RAD:
-    case OSKAR_SKY_POLA_RAD:
-        (*values)[0] = value ? DEG2RAD * strtod(value, 0) : 0.0;
+        if ((*values)[0] > M_PI / 2 + tol || (*values)[0] < -M_PI / 2 - tol)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            oskar_log_error(
+                    0, "Source %d has a Declination (%.4f degrees) "
+                    "which is out of range.", row, (*values)[0] * RAD2DEG
+            );
+        }
         break;
     case OSKAR_SKY_LIN_SI: /* Linear not log. */
     {
         /* Default value for LogarithmicSI is true, even if absent. */
-        const char c = value ? tolower(*value) : 't';
-        const double log_si = (c == 'f' || c == 'n' || c == '0') ? 0. : 1.;
-        (*values)[0] = log_si > 0. ? 0. : 1.; /* Inverted for sky model. */
+        if (!value || !*value)
+        {
+            num_items = 0;
+        }
+        else
+        {
+            const char c = tolower(*value);
+            const double log_si = (c == 'f' || c == 'n' || c == '0') ? 0. : 1.;
+            (*values)[0] = log_si > 0. ? 0. : 1.; /* Inverted for sky model. */
+        }
         break;
     }
     default:
     {
         /* All other known columns. Assume that they can be arrays. */
-        int num_items = 0;
+        switch (column_type)
+        {
+        case OSKAR_SKY_MAJOR_RAD:
+        case OSKAR_SKY_MINOR_RAD:
+            scaling = ARCSEC2RAD;
+            break;
+        case OSKAR_SKY_SEMI_MAJOR:
+        case OSKAR_SKY_SEMI_MINOR:
+            scaling = 2 * ARCSEC2RAD;
+            break;
+        case OSKAR_SKY_PA_RAD:
+        case OSKAR_SKY_POLA_RAD:
+            scaling = DEG2RAD;
+            break;
+        default:
+            break;
+        }
         num_items = parse_array_values(value, values, values_size);
         if (num_items == 0)
         {
             num_items = parse_array_values(default_value, values, values_size);
         }
-        if (num_items == 0) return;
-        if (num_items > 1)
-        {
-            int b = 0;
-            for (; b < num_items; ++b)
-            {
-                if ((*values)[b] != 0.0)
-                {
-                    oskar_sky_set_data(
-                            sky, column_type, b, row, (*values)[b], status
-                    );
-                }
-            }
-            return;
-        }
         break;
     }
     }
-    oskar_mem_set_element_real(column, row, (*values)[0], status);
+    if (column_type == OSKAR_SKY_RA_DEG) column_type = OSKAR_SKY_RA_RAD;
+    if (column_type == OSKAR_SKY_DEC_DEG) column_type = OSKAR_SKY_DEC_RAD;
+    if (column_type == OSKAR_SKY_SEMI_MAJOR) column_type = OSKAR_SKY_MAJOR_RAD;
+    if (column_type == OSKAR_SKY_SEMI_MINOR) column_type = OSKAR_SKY_MINOR_RAD;
+    const int column_count = oskar_sky_num_valid_columns_of_type(
+            sky, column_type, row
+    );
+    for (b = 0; b < num_items; ++b)
+    {
+        oskar_sky_set_data(
+                sky, column_type, b + column_count, row,
+                (*values)[b] * scaling, status
+        );
+    }
+}
+
+
+static void check_create_ref_freq_columns(
+        oskar_Sky* sky,
+        int num_columns,
+        oskar_SkyColumn* column_types,
+        const double* column_suffixes,
+        int* status
+)
+{
+    int c = 0, i = 0;
+    int num_ref_freq = 0, num_stokes_i = 0;
+    if (*status) return;
+    num_ref_freq = oskar_sky_num_columns_of_type(sky, OSKAR_SKY_REF_HZ);
+    num_stokes_i = oskar_sky_num_columns_of_type(sky, OSKAR_SKY_I_JY);
+    const int capacity = oskar_sky_int(sky, OSKAR_SKY_CAPACITY);
+    if (num_ref_freq == 0 && num_stokes_i >= 1)
+    {
+        /* Create the reference frequency columns using Stokes-I suffixes. */
+        for (c = 0; c < num_columns; ++c)
+        {
+            if (column_types[c] == OSKAR_SKY_I_JY && column_suffixes[c] > 0.0)
+            {
+                for (i = 0; i < capacity; ++i)
+                {
+                    oskar_sky_set_data(
+                            sky, OSKAR_SKY_REF_HZ, num_ref_freq, i,
+                            column_suffixes[c] * 1e6, status
+                    );
+                }
+                num_ref_freq++;
+            }
+        }
+    }
 }
 
 
@@ -479,20 +441,20 @@ oskar_Sky* oskar_sky_load_named_columns(
 {
     int c = 0, n = 0;
     int array_workspace_size = 4;
-    int have_ra = 0;
-    int have_dec = 0;
-    int have_flux = 0;
+    int line_counter = 0;
     char* buf = 0;
     char* buf_hdr = 0;
     oskar_SkyColumn* column_types = 0;
     char** column_defaults = 0;
+    double* column_suffixes = 0;
     double* array_workspace = 0;
     char* hdr = 0;
+    char** tokens = 0;
+    int tokens_size = 0;
     size_t buf_size = 0;
     size_t hdr_buf_size = 0;
     FILE* file = 0;
     oskar_Sky* sky = 0;
-    oskar_Mem** cached_columns = 0;
     if (*status) return 0;
 
     /* Check the data type. */
@@ -513,19 +475,20 @@ oskar_Sky* oskar_sky_load_named_columns(
     /* Find Format= header and parse it. */
     while (oskar_getline(&buf_hdr, &hdr_buf_size, file) != OSKAR_ERR_EOF)
     {
+        line_counter++;
         if (*status) break;
         if ((hdr = find_clean_header(buf_hdr, status))) break;
         if (ftell(file) > 0x1000L) break; /* Only search within first 4 kiB. */
     }
-    const int num_columns = parse_header_columns(
-            hdr, &column_types, &column_defaults, status
+    const int num_columns = parse_header(
+            hdr, &column_types, &column_defaults, &column_suffixes, status
     );
 #if 0
     /* Debug printing of detected columns and defaults. */
     for (c = 0; c < num_columns; ++c)
     {
         printf("Column %s has default %s\n",
-                oskar_sky_column_type_to_name(column_types[c]),
+                oskar_sky_column_type_to_name(column_types[c], 0),
                 column_defaults[c]
         );
     }
@@ -535,8 +498,8 @@ oskar_Sky* oskar_sky_load_named_columns(
     if (*status == OSKAR_ERR_INVALID_ARGUMENT)
     {
         oskar_log_error(
-                0, "Error opening '%s': format string present "
-                "but not correct.", filename
+                0, "Error opening sky model file '%s': "
+                "Format string present but not correct.", filename
         );
     }
 
@@ -546,72 +509,46 @@ oskar_Sky* oskar_sky_load_named_columns(
         /* Do not print a failure message here -
          * try to load the file using the old format instead. */
         *status = OSKAR_ERR_FILE_IO;
+        oskar_log_warning(
+                0, "Unknown sky model file header: "
+                "Assuming old fixed-format sky model file."
+        );
     }
 
-    /* Check that the required columns are present. */
-    for (c = 0; c < num_columns; ++c)
-    {
-        oskar_SkyColumn col = column_types[c];
-        if (col == OSKAR_SKY_RA_DEG || col == OSKAR_SKY_RA_RAD) have_ra++;
-        if (col == OSKAR_SKY_DEC_DEG || col == OSKAR_SKY_DEC_RAD) have_dec++;
-        if (col == OSKAR_SKY_I_JY) have_flux++;
-    }
-    if (!(*status))
-    {
-        if (have_ra != 1 || have_dec != 1)
-        {
-            *status = OSKAR_ERR_INVALID_ARGUMENT;
-            oskar_log_error(
-                    0, "Error opening '%s': need one RA and one Dec column.",
-                    filename
-            );
-        }
-        if (have_flux == 0)
-        {
-            *status = OSKAR_ERR_INVALID_ARGUMENT;
-            oskar_log_error(
-                    0, "Error opening '%s': need a Stokes I column.",
-                    filename
-            );
-        }
-    }
-
-    /* Create an empty sky model and cache the column handles if possible. */
+    /* Create an empty sky model. */
     sky = oskar_sky_create(type, OSKAR_CPU, 0, status);
-    cached_columns = (oskar_Mem**) calloc(num_columns, sizeof(oskar_Mem*));
     array_workspace = (double*) calloc(array_workspace_size, sizeof(double));
-    for (c = 0; c < num_columns; ++c)
-    {
-        oskar_SkyColumn column_type = column_types[c];
-        /* If column is default degrees, make sure the one we store the
-         * values in is in radians (convert as needed before storing). */
-        if (column_type == OSKAR_SKY_RA_DEG) column_type = OSKAR_SKY_RA_RAD;
-        if (column_type == OSKAR_SKY_DEC_DEG) column_type = OSKAR_SKY_DEC_RAD;
-        if (column_type != OSKAR_SKY_CUSTOM)
-        {
-            cached_columns[c] = oskar_sky_column(sky, column_type, 0, status);
-        }
-    }
 
     /* Loop over lines in file. */
     while (oskar_getline(&buf, &buf_size, file) != OSKAR_ERR_EOF && !(*status))
     {
-        char* trimmed = 0;
-        char* tokens[MAX_TOKENS];
-
         /* Skip empty or comment lines. */
-        trimmed = oskar_string_trim(buf, 0);
+        char* trimmed = oskar_string_trim(buf, 0, 0);
+        line_counter++;
         if (*trimmed == '#' || *trimmed == '\0') continue;
 
         /* Split up the line, keeping any bracketed values together. */
-        const int num_tokens = split_tokens(trimmed, tokens, MAX_TOKENS);
+        const int num_tokens = oskar_string_split(
+                trimmed, &tokens_size, &tokens, 0, status
+        );
+        if (*status == OSKAR_ERR_INVALID_ARGUMENT)
+        {
+            oskar_log_error(
+                    0, "Error opening sky model file '%s': "
+                    "Malformed line at line %d. "
+                    "Check closing quotes and closing brackets.",
+                    filename, line_counter
+            );
+            break;
+        }
         if (num_tokens > 0 && num_tokens != num_columns)
         {
             *status = OSKAR_ERR_INVALID_ARGUMENT;
             oskar_log_error(
-                    0, "Number of fields for source %d does not match the "
+                    0, "Error opening sky model file '%s': "
+                    "Number of fields at line %d does not match the "
                     "expected number of columns: %d found, but %d expected.",
-                    n, num_tokens, num_columns
+                    filename, line_counter, num_tokens, num_columns
             );
             break;
         }
@@ -619,7 +556,7 @@ oskar_Sky* oskar_sky_load_named_columns(
         /* Ensure enough space in sky model. */
         if (oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES) <= n)
         {
-            const int new_size = ((2 * n) < 100) ? 100 : (2 * n);
+            const int new_size = ((2 * n) < 128) ? 128 : (2 * n);
             oskar_sky_resize(sky, new_size, status);
             if (*status) break;
         }
@@ -627,11 +564,10 @@ oskar_Sky* oskar_sky_load_named_columns(
         /* Loop over columns in the header. */
         for (c = 0; c < num_columns; c++)
         {
-            char* val = c < num_tokens ? oskar_string_trim(tokens[c], 1) : 0;
+            char* val = oskar_string_trim(tokens[c], 1, 0);
             if (val && *val == '\0') val = 0;
             set_value(
-                    sky, cached_columns[c], column_types[c],
-                    val, column_defaults[c], n,
+                    sky, column_types[c], val, column_defaults[c], n,
                     &array_workspace_size, &array_workspace, status
             );
         }
@@ -643,14 +579,24 @@ oskar_Sky* oskar_sky_load_named_columns(
     /* Set the size to be the actual number of elements loaded. */
     oskar_sky_resize(sky, n, status);
 
+    /* Add in the reference frequency columns if required/possible. */
+    check_create_ref_freq_columns(
+            sky, num_columns, column_types, column_suffixes, status
+    );
+
     /* Clean up. */
     free(array_workspace);
     free(buf);
     free(buf_hdr);
-    free(cached_columns);
     free(column_defaults);
     free(column_types);
+    free(column_suffixes);
+    free(tokens);
     (void) fclose(file);
+
+    /* Sort the columns and check for consistent source parameters. */
+    oskar_sky_sort_columns(sky, status);
+    oskar_sky_check_columns(sky, status);
 
     /* Check if an error occurred. */
     if (*status)

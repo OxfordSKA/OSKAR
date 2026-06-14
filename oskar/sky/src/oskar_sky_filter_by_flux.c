@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2012-2025, The OSKAR Developers.
+ * Copyright (c) 2012-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
 #include <float.h>
+#include <string.h>
 
 #include "sky/oskar_sky.h"
 #include "sky/private_sky.h"
@@ -41,6 +42,7 @@ void oskar_sky_filter_by_flux(
     if (location == OSKAR_CPU)
     {
         int c = 0, in = 0, out = 0;
+        int* valid = oskar_mem_int(sky->num_valid_columns, status);
         void* table = oskar_mem_void(sky->table);
         const void* f_ = oskar_mem_void_const(
                 oskar_sky_column_const(sky, OSKAR_SKY_I_JY, 0)
@@ -60,6 +62,11 @@ void oskar_sky_filter_by_flux(
                     const size_t off = c * capacity;
                     ((float*) table)[off + out] = ((float*) table)[off + in];
                 }
+                memcpy(
+                        OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * out + valid,
+                        OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * in + valid,
+                        OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * sizeof(int)
+                );
                 out++;
             }
         }
@@ -78,6 +85,11 @@ void oskar_sky_filter_by_flux(
                     const size_t off = c * capacity;
                     ((double*) table)[off + out] = ((double*) table)[off + in];
                 }
+                memcpy(
+                        OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * out + valid,
+                        OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * in + valid,
+                        OSKAR_SKY_NUM_FIXED_COLUMN_TYPES * sizeof(int)
+                );
                 out++;
             }
         }

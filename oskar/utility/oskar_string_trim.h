@@ -26,14 +26,20 @@ extern "C" {
  *
  * If \p trim_quotes is true, then any surrounding quotes that remain after
  * trimming whitespace are also removed.
+ * The string is then trimmed recursively.
+ *
+ * If \p trim_brackets is true, then any surrounding brackets that remain after
+ * trimming whitespace and quotes are also removed.
+ * The string is then trimmed recursively.
  *
  * @param[in,out] str The string to trim.
- * @param[in] trim_quotes If true, then any surrounding quotes are also trimmed.
+ * @param[in] trim_quotes If true, any surrounding quotes are also trimmed.
+ * @param[in] trim_brackets If true, any surrounding brackets are also trimmed.
  *
  * @return A pointer to the first non-whitespace character.
  */
 OSKAR_EXPORT
-char* oskar_string_trim(char* str, int trim_quotes);
+char* oskar_string_trim(char* str, int trim_quotes, int trim_brackets);
 
 #ifdef __cplusplus
 }

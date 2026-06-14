@@ -2,4 +2,4 @@
 
 """Gives the version of the oskarpy OSKAR Python bindings."""
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"

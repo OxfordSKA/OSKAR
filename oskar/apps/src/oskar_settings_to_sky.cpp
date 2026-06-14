@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025, The OSKAR Developers.
+ * Copyright (c) 2011-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -102,19 +102,13 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
         oskar_log_message(
                 log, 'M', 0, "Overriding source spectral index values..."
         );
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky, OSKAR_SKY_REF_HZ, 0, status),
-                ref, 0, num_sources, status
-        );
         for (int i = 0; i < num_sources; ++i)
         {
             double val[2];
             oskar_random_gaussian2(seed, i, 0, val);
             val[0] = std_dev * val[0] + mean;
-            oskar_mem_set_element_real(
-                    oskar_sky_column(sky, OSKAR_SKY_SPEC_IDX, 0, status),
-                    i, val[0], status
-            );
+            oskar_sky_set_data(sky, OSKAR_SKY_REF_HZ, 0, i, ref, status);
+            oskar_sky_set_data(sky, OSKAR_SKY_SPEC_IDX, 0, i, val[0], status);
         }
         oskar_log_message(log, 'M', 1, "done.");
     }
@@ -129,24 +123,36 @@ oskar_Sky* oskar_settings_to_sky(SettingsTree* s, oskar_Log* log, int* status)
     filename = s->to_string("output_text_file", status);
     if (filename && strlen(filename) > 0 && !*status)
     {
-        oskar_log_message(log, 'M', 1,
-                "Writing sky model text file: %s", filename);
+        oskar_log_message(
+                log, 'M', 1, "Writing sky model text file: %s", filename
+        );
         const int use_named_columns = s->to_int(
                 "output_text_file/use_named_columns", status
         );
         if (use_named_columns)
         {
+            const int use_ska_convention = s->to_int(
+                    "output_text_file/use_ska_convention", status
+            );
             const int use_degrees = s->to_int(
                     "output_text_file/use_degrees", status
             );
+            const int write_format_wrapper = s->to_int(
+                    "output_text_file/write_format_wrapper", status
+            );
             const int write_name = s->to_int(
                     "output_text_file/write_name", status
+            );
+            const int write_quoted_vectors = s->to_int(
+                    "output_text_file/write_quoted_vectors", status
             );
             const int write_type = s->to_int(
                     "output_text_file/write_type", status
             );
             oskar_sky_save_named_columns(
-                    sky, filename, use_degrees, write_name, write_type, status
+                    sky, filename, use_ska_convention, use_degrees,
+                    write_format_wrapper, write_name, write_quoted_vectors,
+                    write_type, status
             );
         }
         else
@@ -550,18 +556,18 @@ static void set_up_extended(oskar_Sky* sky, SettingsTree* s, int* status)
     if (major_rad > 0.0 && minor_rad > 0.0)
     {
         const int num_sources = oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES);
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky, OSKAR_SKY_MAJOR_RAD, 0, status),
-                major_rad, 0, num_sources, status
-        );
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky, OSKAR_SKY_MINOR_RAD, 0, status),
-                minor_rad, 0, num_sources, status
-        );
-        oskar_mem_set_value_real(
-                oskar_sky_column(sky, OSKAR_SKY_PA_RAD, 0, status),
-                pa_rad, 0, num_sources, status
-        );
+        for (int i = 0; i < num_sources; ++i)
+        {
+            oskar_sky_set_data(
+                    sky, OSKAR_SKY_MAJOR_RAD, 0, i, major_rad, status
+            );
+            oskar_sky_set_data(
+                    sky, OSKAR_SKY_MINOR_RAD, 0, i, minor_rad, status
+            );
+            oskar_sky_set_data(
+                    sky, OSKAR_SKY_PA_RAD, 0, i, pa_rad, status
+            );
+        }
     }
     s->end_group();
 }

@@ -20,6 +20,7 @@ set(utility_SRC
     src/oskar_hdf5.c
     src/oskar_lock_file.c
     src/oskar_thread.c
+    src/oskar_string_split.c
     src/oskar_string_to_angle.c
     src/oskar_string_to_array.c
     src/oskar_string_trim.c

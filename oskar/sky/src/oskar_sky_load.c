@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025, The OSKAR Developers.
+ * Copyright (c) 2011-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -62,14 +62,14 @@ oskar_Sky* oskar_sky_load(const char* filename, int type, int* status)
     sky = oskar_sky_create(type, OSKAR_CPU, 0, status);
 
     /* Loop over lines in file. */
-    while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
+    while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF && !(*status))
     {
         int str_error = 0;
 
         /* Ensure enough space in arrays. */
         if (oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES) <= n)
         {
-            const int new_size = ((2 * n) < 100) ? 100 : (2 * n);
+            const int new_size = ((2 * n) < 128) ? 128 : (2 * n);
             oskar_sky_resize(sky, new_size, status);
             if (*status) break;
         }

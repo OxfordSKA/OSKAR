@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025, The OSKAR Developers.
+ * Copyright (c) 2025-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -22,12 +22,16 @@ extern "C" {
  * @details
  * Returns the column type by comparing against a set of known strings.
  *
- * @param[in] name             String name to check.
+ * @param[in] name String name to check.
+ * @param[in,out] suffix Optional numeric suffix of name.
  *
  * @return Enumerated column type.
  */
 OSKAR_EXPORT
-oskar_SkyColumn oskar_sky_column_type_from_name(const char* name);
+oskar_SkyColumn oskar_sky_column_type_from_name(
+        const char* name,
+        double* suffix
+);
 
 #ifdef __cplusplus
 }

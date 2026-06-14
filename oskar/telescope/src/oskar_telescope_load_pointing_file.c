@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2013-2025, The OSKAR Developers.
+ * Copyright (c) 2013-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
-
-#include "telescope/private_telescope.h"
-#include "telescope/oskar_telescope.h"
-#include "utility/oskar_getline.h"
-#include "utility/oskar_string_to_array.h"
-#include "math/oskar_cmath.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "telescope/private_telescope.h"
+#include "telescope/oskar_telescope.h"
+#include "utility/oskar_getline.h"
+#include "utility/oskar_string_split.h"
+#include "math/oskar_cmath.h"
 
 #define DEG2RAD (M_PI / 180.0)
 
@@ -19,15 +19,29 @@
 extern "C" {
 #endif
 
-static void set_coords(oskar_Station* station, int set_recursive,
-        size_t current_depth, size_t num_sub_ids, int* sub_ids, int coord_type,
-        double lon, double lat, int* status);
 
-void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
-        const char* filename, int* status)
+static void set_coords(
+        oskar_Station* station,
+        int set_recursive,
+        int current_depth,
+        int num_sub_ids,
+        int* sub_ids,
+        int coord_type,
+        double lon,
+        double lat,
+        int* status
+);
+
+
+void oskar_telescope_load_pointing_file(
+        oskar_Telescope* telescope,
+        const char* filename,
+        int* status
+)
 {
     char* line = 0;
-    size_t bufsize = 0, size_id = 0, i = 0, num_par = 0;
+    size_t bufsize = 0;
+    int i = 0, num_par = 0, size_id = 0;
     FILE* file = 0;
     char** par = 0;
     int* id = 0;
@@ -57,12 +71,11 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
         const int base = 10;
 
         /* Split into string array and check for required number of fields. */
-        const size_t read = oskar_string_to_array_realloc_s(
-                line, &num_par, &par);
+        const int read = oskar_string_split(line, &num_par, &par, 0, status);
         if (read < 4) continue;
 
         /* Get number of IDs. */
-        const size_t num_ids = read - 3;
+        const int num_ids = read - 3;
 
         /* Get all IDs on the line. */
         for (i = 0; i < num_ids && i < num_par; ++i)
@@ -70,7 +83,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
             /* Ensure enough space in ID array. */
             if (i >= size_id)
             {
-                void* t = realloc(id, (size_id + 1) * sizeof(int));
+                void* t = realloc(id, (size_t) (size_id + 1) * sizeof(int));
                 if (!t)
                 {
                     *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
@@ -131,16 +144,20 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
             if (id[0] < 0)
             {
                 /* Loop over stations. */
-                for (i = 0; i < (size_t)telescope->num_station_models; ++i)
+                for (i = 0; i < telescope->num_station_models; ++i)
                 {
-                    set_coords(oskar_telescope_station(telescope, (int)i), 0, 0,
-                            num_ids - 1, sub_id, coordsys, lon, lat, status);
+                    set_coords(
+                            oskar_telescope_station(telescope, i), 0, 0,
+                            num_ids - 1, sub_id, coordsys, lon, lat, status
+                    );
                 }
             }
             else if (id[0] < telescope->num_station_models)
             {
-                set_coords(oskar_telescope_station(telescope, id[0]), 0, 0,
-                        num_ids - 1, sub_id, coordsys, lon, lat, status);
+                set_coords(
+                        oskar_telescope_station(telescope, id[0]), 0, 0,
+                        num_ids - 1, sub_id, coordsys, lon, lat, status
+                );
             }
             else
             {
@@ -163,9 +180,18 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
     (void) fclose(file);
 }
 
-static void set_coords(oskar_Station* station, int set_recursive,
-        size_t current_depth, size_t num_sub_ids, int* sub_ids, int coord_type,
-        double lon, double lat, int* status)
+
+static void set_coords(
+        oskar_Station* station,
+        int set_recursive,
+        int current_depth,
+        int num_sub_ids,
+        int* sub_ids,
+        int coord_type,
+        double lon,
+        double lat,
+        int* status
+)
 {
     if (*status || !station) return;
 
@@ -177,13 +203,15 @@ static void set_coords(oskar_Station* station, int set_recursive,
         /* Set pointing data recursively for all child stations. */
         if (oskar_station_has_child(station))
         {
-            size_t i = 0, num_elements = 0;
-            num_elements = (size_t)oskar_station_num_elements(station);
+            int i = 0;
+            const int num_elements = oskar_station_num_elements(station);
             for (i = 0; i < num_elements; ++i)
             {
-                set_coords(oskar_station_child(station, (int)i), 1,
+                set_coords(
+                        oskar_station_child(station, i), 1,
                         current_depth + 1, num_sub_ids, sub_ids,
-                        coord_type, lon, lat, status);
+                        coord_type, lon, lat, status
+                );
             }
         }
     }
@@ -192,8 +220,11 @@ static void set_coords(oskar_Station* station, int set_recursive,
         /* Check if there's nothing more in the list of indices. */
         if (current_depth == num_sub_ids)
         {
-            set_coords(station, 1, current_depth,
-                    num_sub_ids, sub_ids, coord_type, lon, lat, status);
+            set_coords(
+                    station, 1,
+                    current_depth, num_sub_ids, sub_ids,
+                    coord_type, lon, lat, status
+            );
         }
         else if (oskar_station_has_child(station))
         {
@@ -212,20 +243,24 @@ static void set_coords(oskar_Station* station, int set_recursive,
 
             if (id < 0)
             {
-                size_t i = 0, num_elements = 0;
-                num_elements = (size_t)oskar_station_num_elements(station);
+                int i = 0;
+                const int num_elements = oskar_station_num_elements(station);
                 for (i = 0; i < num_elements; ++i)
                 {
-                    set_coords(oskar_station_child(station, (int)i), 0,
+                    set_coords(
+                            oskar_station_child(station, i), 0,
                             current_depth + 1, num_sub_ids, sub_ids,
-                            coord_type, lon, lat, status);
+                            coord_type, lon, lat, status
+                    );
                 }
             }
             else if (id < oskar_station_num_elements(station))
             {
-                set_coords(oskar_station_child(station, id), 0,
+                set_coords(
+                        oskar_station_child(station, id), 0,
                         current_depth + 1, num_sub_ids, sub_ids,
-                        coord_type, lon, lat, status);
+                        coord_type, lon, lat, status
+                );
             }
             else
             {

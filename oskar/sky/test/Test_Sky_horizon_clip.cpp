@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025, The OSKAR Developers.
+ * Copyright (c) 2011-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -42,13 +42,6 @@ TEST(Sky, horizon_clip)
             oskar_Sky* sky_in = oskar_sky_create(
                     type, OSKAR_CPU, num_sources, &status
             );
-            oskar_Mem* col[3];
-            for (int i = 0; i < 3; ++i)
-            {
-                col[i] = oskar_sky_column(
-                        sky_in, (oskar_SkyColumn) (i + 1), 0, &status
-                );
-            }
             ASSERT_EQ(0, status) << oskar_get_error_string(status);
             int expected_num_sources = 0;
             for (int i = 0, k = 0; i < num_dec; ++i)
@@ -62,9 +55,15 @@ TEST(Sky, horizon_clip)
                             dec_start_rad + i * (dec_range_rad / (num_dec - 1))
                     );
                     if (dec_rad >= 0.) expected_num_sources++;
-                    oskar_mem_set_element_real(col[0], k, ra_rad, &status);
-                    oskar_mem_set_element_real(col[1], k, dec_rad, &status);
-                    oskar_mem_set_element_real(col[2], k, (double) k, &status);
+                    oskar_sky_set_data(
+                            sky_in, OSKAR_SKY_RA_RAD, 0, k, ra_rad, &status
+                    );
+                    oskar_sky_set_data(
+                            sky_in, OSKAR_SKY_DEC_RAD, 0, k, dec_rad, &status
+                    );
+                    oskar_sky_set_data(
+                            sky_in, OSKAR_SKY_I_JY, 0, k, (double) k, &status
+                    );
                     ASSERT_EQ(0, status) << oskar_get_error_string(status);
                 }
             }

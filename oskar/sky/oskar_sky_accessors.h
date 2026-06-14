@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2025, The OSKAR Developers.
+ * Copyright (c) 2013-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -76,6 +76,19 @@ OSKAR_EXPORT
 void oskar_sky_set_int(oskar_Sky* sky, oskar_SkyAttribInt attribute, int value);
 
 /**
+ * @brief Returns the index of the first column of the specified type.
+ *
+ * @details
+ * Returns the index of the first column of the specified type
+ * in the sky model.
+ *
+ * @param[in] sky Pointer to sky model.
+ * @param[in] column_type Enumerated column type to match.
+ */
+OSKAR_EXPORT
+int oskar_sky_first_column(const oskar_Sky* sky, oskar_SkyColumn column_type);
+
+/**
  * @brief Returns the number of columns of the specified type in the sky model.
  *
  * @details
@@ -88,6 +101,45 @@ OSKAR_EXPORT
 int oskar_sky_num_columns_of_type(
         const oskar_Sky* sky,
         oskar_SkyColumn column_type
+);
+
+/**
+ * @brief Return the number of valid columns of the given type for a source.
+ *
+ * @details
+ * Return the number of valid columns of the given type for a source.
+ *
+ * @param[in] sky Pointer to sky model.
+ * @param[in] column_type Enumerated column type to check.
+ * @param[in] index Source index to check.
+ *
+ * @return An integer containing the number of valid columns of the given type
+ * for the given source index.
+ */
+OSKAR_EXPORT
+int oskar_sky_num_valid_columns_of_type(
+        const oskar_Sky* sky,
+        oskar_SkyColumn column_type,
+        int index
+);
+
+/**
+ * @brief Set the number of valid columns of the given type for a source.
+ *
+ * @details
+ * Set the number of valid columns of the given type for a source.
+ *
+ * @param[in] sky Pointer to sky model.
+ * @param[in] column_type Enumerated column type to set.
+ * @param[in] index Source index to set.
+ * @param[in] value Number of valid columns of the specified type.
+ */
+OSKAR_EXPORT
+void oskar_sky_set_num_valid_columns_of_type(
+        oskar_Sky* sky,
+        oskar_SkyColumn column_type,
+        int index,
+        int value
 );
 
 /**

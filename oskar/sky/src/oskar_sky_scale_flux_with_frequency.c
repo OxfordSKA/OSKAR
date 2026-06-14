@@ -4,6 +4,7 @@
  */
 
 #include "sky/oskar_sky.h"
+#include "sky/private_sky.h"
 #include "sky/define_sky_scale_flux_with_frequency.h"
 #include "utility/oskar_kernel_macros.h"
 #include "utility/oskar_device.h"
@@ -28,35 +29,24 @@ void oskar_sky_scale_flux_with_frequency(
     const int type = oskar_sky_int(sky, OSKAR_SKY_PRECISION);
     const int location = oskar_sky_int(sky, OSKAR_SKY_MEM_LOCATION);
     const int num_sources = oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES);
-    const int num_spx_values = oskar_sky_num_columns_of_type(
-            sky, OSKAR_SKY_SPEC_IDX
-    );
-    const oskar_Mem* in_i = oskar_sky_column_const(sky, OSKAR_SKY_I_JY, 0);
-    const oskar_Mem* in_q = oskar_sky_column_const(sky, OSKAR_SKY_Q_JY, 0);
-    const oskar_Mem* in_u = oskar_sky_column_const(sky, OSKAR_SKY_U_JY, 0);
-    const oskar_Mem* in_v = oskar_sky_column_const(sky, OSKAR_SKY_V_JY, 0);
-    const oskar_Mem* ref_hz = oskar_sky_column_const(sky, OSKAR_SKY_REF_HZ, 0);
-    const oskar_Mem* lin_si = oskar_sky_column_const(sky, OSKAR_SKY_LIN_SI, 0);
-    const oskar_Mem* spx0 = oskar_sky_column_const(sky, OSKAR_SKY_SPEC_IDX, 0);
-    const oskar_Mem* spx1 = oskar_sky_column_const(sky, OSKAR_SKY_SPEC_IDX, 1);
-    const oskar_Mem* spx2 = oskar_sky_column_const(sky, OSKAR_SKY_SPEC_IDX, 2);
-    const oskar_Mem* spx3 = oskar_sky_column_const(sky, OSKAR_SKY_SPEC_IDX, 3);
-    const oskar_Mem* spx4 = oskar_sky_column_const(sky, OSKAR_SKY_SPEC_IDX, 4);
-    const oskar_Mem* spx5 = oskar_sky_column_const(sky, OSKAR_SKY_SPEC_IDX, 5);
-    const oskar_Mem* spx6 = oskar_sky_column_const(sky, OSKAR_SKY_SPEC_IDX, 6);
-    const oskar_Mem* spx7 = oskar_sky_column_const(sky, OSKAR_SKY_SPEC_IDX, 7);
-    const oskar_Mem* rm = oskar_sky_column_const(sky, OSKAR_SKY_RM_RAD, 0);
-    const oskar_Mem* pola = oskar_sky_column_const(sky, OSKAR_SKY_POLA_RAD, 0);
-    const oskar_Mem* polf = oskar_sky_column_const(sky, OSKAR_SKY_POLF, 0);
-    const oskar_Mem* refw = oskar_sky_column_const(
-            sky, OSKAR_SKY_REF_WAVE_M, 0
-    );
-    const oskar_Mem* sp_curv = oskar_sky_column_const(
-            sky, OSKAR_SKY_SPEC_CURV, 0
-    );
-    const oskar_Mem* width_hz = oskar_sky_column_const(
-            sky, OSKAR_SKY_LINE_WIDTH_HZ, 0
-    );
+    const int capacity = oskar_sky_int(sky, OSKAR_SKY_CAPACITY);
+
+    /* Get start indices of relevant sky model columns. */
+    const int in_i = oskar_sky_first_column(sky, OSKAR_SKY_I_JY);
+    const int in_q = oskar_sky_first_column(sky, OSKAR_SKY_Q_JY);
+    const int in_u = oskar_sky_first_column(sky, OSKAR_SKY_U_JY);
+    const int in_v = oskar_sky_first_column(sky, OSKAR_SKY_V_JY);
+    const int ref_hz = oskar_sky_first_column(sky, OSKAR_SKY_REF_HZ);
+    const int spx = oskar_sky_first_column(sky, OSKAR_SKY_SPEC_IDX);
+    const int lin_si = oskar_sky_first_column(sky, OSKAR_SKY_LIN_SI);
+    const int rm = oskar_sky_first_column(sky, OSKAR_SKY_RM_RAD);
+    const int pola = oskar_sky_first_column(sky, OSKAR_SKY_POLA_RAD);
+    const int polf = oskar_sky_first_column(sky, OSKAR_SKY_POLF);
+    const int refw = oskar_sky_first_column(sky, OSKAR_SKY_REF_WAVE_M);
+    const int sp_curv = oskar_sky_first_column(sky, OSKAR_SKY_SPEC_CURV);
+    const int width_hz = oskar_sky_first_column(sky, OSKAR_SKY_LINE_WIDTH_HZ);
+
+    /* Get pointers to the output scratch columns. */
     oskar_Mem* out_i = oskar_sky_column(
             sky, OSKAR_SKY_SCRATCH_I_JY, 0, status
     );
@@ -69,18 +59,10 @@ void oskar_sky_scale_flux_with_frequency(
     oskar_Mem* out_v = oskar_sky_column(
             sky, OSKAR_SKY_SCRATCH_V_JY, 0, status
     );
-    if (!in_i)
+    if (in_i < 0)
     {
         *status = OSKAR_ERR_INVALID_ARGUMENT;
         oskar_log_error(0, "No Stokes I column in sky model.");
-        return;
-    }
-    if (num_spx_values > 8)
-    {
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
-        oskar_log_error(
-                0, "A maximum of 8 spectral index terms are supported."
-        );
         return;
     }
     if (location == OSKAR_CPU)
@@ -88,28 +70,11 @@ void oskar_sky_scale_flux_with_frequency(
         if (type == OSKAR_SINGLE)
         {
             scale_flux_with_frequency_float(
-                    num_sources, freq_hz,
-                    oskar_mem_float_const(in_i, status),
-                    oskar_mem_float_const(in_q, status),
-                    oskar_mem_float_const(in_u, status),
-                    oskar_mem_float_const(in_v, status),
-                    oskar_mem_float_const(ref_hz, status),
-                    oskar_mem_float_const(lin_si, status),
-                    num_spx_values,
-                    oskar_mem_float_const(spx0, status),
-                    oskar_mem_float_const(spx1, status),
-                    oskar_mem_float_const(spx2, status),
-                    oskar_mem_float_const(spx3, status),
-                    oskar_mem_float_const(spx4, status),
-                    oskar_mem_float_const(spx5, status),
-                    oskar_mem_float_const(spx6, status),
-                    oskar_mem_float_const(spx7, status),
-                    oskar_mem_float_const(rm, status),
-                    oskar_mem_float_const(polf, status),
-                    oskar_mem_float_const(pola, status),
-                    oskar_mem_float_const(refw, status),
-                    oskar_mem_float_const(sp_curv, status),
-                    oskar_mem_float_const(width_hz, status),
+                    num_sources, capacity, freq_hz,
+                    oskar_mem_float_const(sky->table, status),
+                    oskar_mem_int_const(sky->num_valid_columns, status),
+                    in_i, in_q, in_u, in_v, ref_hz, lin_si, spx,
+                    rm, polf, pola, refw, sp_curv, width_hz,
                     oskar_mem_float(out_i, status),
                     oskar_mem_float(out_q, status),
                     oskar_mem_float(out_u, status),
@@ -119,28 +84,11 @@ void oskar_sky_scale_flux_with_frequency(
         else if (type == OSKAR_DOUBLE)
         {
             scale_flux_with_frequency_double(
-                    num_sources, freq_hz,
-                    oskar_mem_double_const(in_i, status),
-                    oskar_mem_double_const(in_q, status),
-                    oskar_mem_double_const(in_u, status),
-                    oskar_mem_double_const(in_v, status),
-                    oskar_mem_double_const(ref_hz, status),
-                    oskar_mem_double_const(lin_si, status),
-                    num_spx_values,
-                    oskar_mem_double_const(spx0, status),
-                    oskar_mem_double_const(spx1, status),
-                    oskar_mem_double_const(spx2, status),
-                    oskar_mem_double_const(spx3, status),
-                    oskar_mem_double_const(spx4, status),
-                    oskar_mem_double_const(spx5, status),
-                    oskar_mem_double_const(spx6, status),
-                    oskar_mem_double_const(spx7, status),
-                    oskar_mem_double_const(rm, status),
-                    oskar_mem_double_const(polf, status),
-                    oskar_mem_double_const(pola, status),
-                    oskar_mem_double_const(refw, status),
-                    oskar_mem_double_const(sp_curv, status),
-                    oskar_mem_double_const(width_hz, status),
+                    num_sources, capacity, freq_hz,
+                    oskar_mem_double_const(sky->table, status),
+                    oskar_mem_int_const(sky->num_valid_columns, status),
+                    in_i, in_q, in_u, in_v, ref_hz, lin_si, spx,
+                    rm, polf, pola, refw, sp_curv, width_hz,
                     oskar_mem_double(out_i, status),
                     oskar_mem_double(out_q, status),
                     oskar_mem_double(out_u, status),
@@ -156,7 +104,6 @@ void oskar_sky_scale_flux_with_frequency(
     {
         size_t local_size[] = {256, 1, 1}, global_size[] = {1, 1, 1};
         const float freq_hz_f = (float) freq_hz;
-        const void* nullp = 0;
         const char* k = 0;
         const int is_dbl = (type == OSKAR_DOUBLE);
         if (is_dbl)
@@ -178,29 +125,24 @@ void oskar_sky_scale_flux_with_frequency(
         );
         const oskar_Arg args[] = {
                 {INT_SZ, &num_sources},
+                {INT_SZ, &capacity},
                 {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
                         (const void*)&freq_hz : (const void*)&freq_hz_f},
-                {PTR_SZ, oskar_mem_buffer_const(in_i)},
-                {PTR_SZ, in_q ? oskar_mem_buffer_const(in_q) : &nullp},
-                {PTR_SZ, in_u ? oskar_mem_buffer_const(in_u) : &nullp},
-                {PTR_SZ, in_v ? oskar_mem_buffer_const(in_v) : &nullp},
-                {PTR_SZ, ref_hz ? oskar_mem_buffer_const(ref_hz) : &nullp},
-                {PTR_SZ, lin_si ? oskar_mem_buffer_const(lin_si) : &nullp},
-                {INT_SZ, &num_spx_values},
-                {PTR_SZ, spx0 ? oskar_mem_buffer_const(spx0) : &nullp},
-                {PTR_SZ, spx1 ? oskar_mem_buffer_const(spx1) : &nullp},
-                {PTR_SZ, spx2 ? oskar_mem_buffer_const(spx2) : &nullp},
-                {PTR_SZ, spx3 ? oskar_mem_buffer_const(spx3) : &nullp},
-                {PTR_SZ, spx4 ? oskar_mem_buffer_const(spx4) : &nullp},
-                {PTR_SZ, spx5 ? oskar_mem_buffer_const(spx5) : &nullp},
-                {PTR_SZ, spx6 ? oskar_mem_buffer_const(spx6) : &nullp},
-                {PTR_SZ, spx7 ? oskar_mem_buffer_const(spx7) : &nullp},
-                {PTR_SZ, rm ? oskar_mem_buffer_const(rm) : &nullp},
-                {PTR_SZ, polf ? oskar_mem_buffer_const(polf) : &nullp},
-                {PTR_SZ, pola ? oskar_mem_buffer_const(pola) : &nullp},
-                {PTR_SZ, refw ? oskar_mem_buffer_const(refw) : &nullp},
-                {PTR_SZ, sp_curv ? oskar_mem_buffer_const(sp_curv) : &nullp},
-                {PTR_SZ, width_hz ? oskar_mem_buffer_const(width_hz) : &nullp},
+                {PTR_SZ, oskar_mem_buffer_const(sky->table)},
+                {PTR_SZ, oskar_mem_buffer_const(sky->num_valid_columns)},
+                {INT_SZ, &in_i},
+                {INT_SZ, &in_q},
+                {INT_SZ, &in_u},
+                {INT_SZ, &in_v},
+                {INT_SZ, &ref_hz},
+                {INT_SZ, &lin_si},
+                {INT_SZ, &spx},
+                {INT_SZ, &rm},
+                {INT_SZ, &polf},
+                {INT_SZ, &pola},
+                {INT_SZ, &refw},
+                {INT_SZ, &sp_curv},
+                {INT_SZ, &width_hz},
                 {PTR_SZ, oskar_mem_buffer(out_i)},
                 {PTR_SZ, oskar_mem_buffer(out_q)},
                 {PTR_SZ, oskar_mem_buffer(out_u)},

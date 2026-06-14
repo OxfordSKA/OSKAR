@@ -1,8 +1,9 @@
-/* Copyright (c) 2018, The University of Oxford. See LICENSE file. */
+/* Copyright (c) 2018-2026, The OSKAR Developers. See LICENSE file. */
 
 #include "sky/define_sky_copy_source_data.h"
 #include "sky/define_sky_scale_flux_with_frequency.h"
 #include "sky/define_update_horizon_mask.h"
+#include "sky/oskar_sky_enum.h"
 #include "utility/oskar_cuda_registrar.h"
 #include "utility/oskar_kernel_macros.h"
 #include "utility/oskar_vector_types.h"
