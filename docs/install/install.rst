@@ -158,7 +158,7 @@ The dependencies are:
 * [Optional] CUDA >= 7.0 (`<https://developer.nvidia.com/cuda-downloads>`_)
   or OpenCL, required for GPU acceleration on supported hardware.
 
-* [Optional] Qt 5 (`<https://qt.io>`_),
+* [Optional] Qt 6 >= 6.2 (`<https://qt.io>`_),
   required to build the graphical user interface.
 
 * [Optional] casacore >= 2.0 (`<https://github.com/casacore/casacore>`_),
@@ -223,8 +223,9 @@ Advanced Build Options
 
 - ``-DCMAKE_PREFIX_PATH=<path>`` (default: None)
 
-  - Specifies a location in which to search for Qt 5. For example, if
-    using Homebrew on macOS, this may need to be set to /usr/local/opt/qt5/
+  - Specifies a location in which to search for Qt 6. For example, if
+    using Homebrew on macOS, this may need to be set to the output of
+    ``brew --prefix qt``
 
 - ``-DFIND_CUDA=ON|OFF`` (default: ON)
 

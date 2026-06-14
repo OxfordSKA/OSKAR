@@ -140,11 +140,12 @@ mac-release:
     - export HOMEBREW_NO_AUTO_UPDATE=1
     - export HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
     # Install build tools and runtime dependencies as native arm64 Homebrew
-    # bottles (qt@5 and hdf5 pour in seconds instead of compiling from source).
+    # bottles (qt and hdf5 pour in seconds instead of compiling from source).
     # The build image's macOS version sets the bottles' deployment target, so
     # it must match the macOS 14 minimum declared in CMakeLists.txt;
     # validate_macos_bundle.sh enforces that floor on the packaged DMG.
-    - brew install wget cmake qt@5 hdf5 bison flex
+    # The GUI requires Qt 6 (>= 6.2); Homebrew's "qt" formula is Qt 6.
+    - brew install wget cmake qt hdf5 bison flex
     # Homebrew's bison/flex are keg-only, so CMake's FindBISON/FindFLEX would
     # otherwise pick up macOS's ancient /usr/bin/bison (2.3); casacore's TaQL
     # parser needs BISON >= 3. Put the keg-only bin dirs ahead of /usr/bin.
@@ -174,7 +175,7 @@ mac-release:
     - mkdir build-mac && cd build-mac/
     - cmake ../
       -DFIND_OPENCL=ON
-      -DCMAKE_PREFIX_PATH="/opt/homebrew/opt/qt@5;$HOME/local"
+      -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$HOME/local"
       -DCMAKE_OSX_ARCHITECTURES=arm64
       -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0
     - make -j4

@@ -215,7 +215,7 @@ QVariant SettingsModel::data(const QModelIndex& index, int role) const
         {
         case Qt::SizeHintRole:
         {
-            int width = QApplication::fontMetrics().width(
+            int width = QFontMetrics(QApplication::font()).horizontalAdvance(
                     (data(index, Qt::DisplayRole)).toString()) + 20;
             return QSize(width, 26);
         }
@@ -482,22 +482,22 @@ SettingsModelFilter::~SettingsModelFilter()
 
 QVariant SettingsModelFilter::data(const QModelIndex& index, int role) const
 {
-    if (!filterRegExp().isEmpty())
+    if (!filterText_.isEmpty())
     {
         if (role == Qt::BackgroundRole && index.column() == 0)
         {
             QString label = QSortFilterProxyModel::data(index,
                     Qt::DisplayRole).toString();
-            if (label.contains(filterRegExp().pattern(), Qt::CaseInsensitive))
+            if (label.contains(filterText_, Qt::CaseInsensitive))
                 return QColor("#FFFF9F");
         }
     }
     return QSortFilterProxyModel::data(index, role);
 }
 
-void SettingsModelFilter::setFilterRegExp(const QString& pattern)
+void SettingsModelFilter::setFilterText(const QString& text)
 {
-    QSortFilterProxyModel::setFilterRegExp(pattern);
+    filterText_ = text;
     invalidate();
 }
 
@@ -524,7 +524,7 @@ bool SettingsModelFilter::filterAcceptsChildren(int sourceRow,
 bool SettingsModelFilter::filterAcceptsCurrentRow(const QModelIndex& idx) const
 {
     QString labelCurrent = sourceModel()->data(idx, Qt::DisplayRole).toString();
-    return labelCurrent.contains(filterRegExp().pattern(), Qt::CaseInsensitive);
+    return labelCurrent.contains(filterText_, Qt::CaseInsensitive);
 }
 
 bool SettingsModelFilter::filterAcceptsCurrentRow(int sourceRow,

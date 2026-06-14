@@ -81,7 +81,7 @@ RunDialog::RunDialog(const QString& app, QWidget *parent) : QDialog(parent)
 
     // Set the display size based on the font.
     QFontMetrics metric(terminalFont);
-    int displayWidth = 75 * metric.width('A');
+    int displayWidth = 75 * metric.horizontalAdvance('A');
     int displayHeight = 25 * metric.lineSpacing() + metric.ascent() - 2;
     display_->setMinimumSize(displayWidth, displayHeight);
 

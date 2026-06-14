@@ -31,6 +31,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -56,7 +57,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     // Create the settings model.
     settings_ = new SettingsTree;
     model_ = new SettingsModel(settings_, this);
-    QSortFilterProxyModel* modelProxy_ = new SettingsModelFilter(this);
+    SettingsModelFilter* modelProxy_ = new SettingsModelFilter(this);
     modelProxy_->setSourceModel(model_);
 
     // Create application selector, current directory view and search box.
@@ -92,10 +93,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     gridLayout->addWidget(filter_, 2, 0, 1, 3);
     connect(runner, SIGNAL(clicked()), SLOT(runButton()));
     connect(change_dir, SIGNAL(clicked()), SLOT(changeDir()));
-    connect(selector_, SIGNAL(currentIndexChanged(QString)),
-            SLOT(appChanged(QString)));
-    connect(filter_, SIGNAL(textChanged(QString)),
-            modelProxy_, SLOT(setFilterRegExp(QString)));
+    connect(selector_, &QComboBox::currentTextChanged,
+            this, &MainWindow::appChanged);
+    connect(filter_, &QLineEdit::textChanged,
+            modelProxy_, &SettingsModelFilter::setFilterText);
 
     // Create and set up the settings view.
     view_ = new SettingsView(widget);
@@ -597,7 +598,7 @@ void MainWindow::processNetworkReply(QNetworkReply* reply)
     reply->deleteLater();
 
     // Split version strings into components.
-    QRegExp rx("\\.|-");
+    QRegularExpression rx("\\.|-");
     QStringList currentVer = currentVerString.split(rx);
     QStringList thisVer = QString(current_app_version_).split(rx);
 

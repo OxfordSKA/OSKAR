@@ -35,8 +35,9 @@
 #include <QSortFilterProxyModel>
 #include <QIcon>
 
+#include <QStringList>
+
 class QModelIndex;
-class QStringList;
 class QVariant;
 
 namespace oskar {
@@ -110,7 +111,7 @@ public:
     QVariant data(const QModelIndex& index, int role) const;
 
 public slots:
-    void setFilterRegExp(const QString& pattern);
+    void setFilterText(const QString& text);
 
 protected:
     bool filterAcceptsChildren(int sourceRow,
@@ -120,6 +121,9 @@ protected:
             const QModelIndex& sourceParent) const;
     virtual bool filterAcceptsRow(int sourceRow,
             const QModelIndex& sourceParent) const;
+
+private:
+    QString filterText_;
 };
 
 } /* namespace oskar */
