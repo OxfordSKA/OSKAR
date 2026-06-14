@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2025, The OSKAR Developers.
+ * Copyright (c) 2012-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -102,7 +102,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     connect(selector_, SIGNAL(currentIndexChanged(QString)),
             SLOT(appChanged(QString)));
     connect(filter_, SIGNAL(textChanged(QString)),
-            modelProxy_, SLOT(setFilterRegExp(QString)));
+            modelProxy_, SLOT(setFilterText(QString)));
 #endif
 
     // Create and set up the settings view.
