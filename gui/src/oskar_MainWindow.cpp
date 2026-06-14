@@ -93,10 +93,17 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent),
     gridLayout->addWidget(filter_, 2, 0, 1, 3);
     connect(runner, SIGNAL(clicked()), SLOT(runButton()));
     connect(change_dir, SIGNAL(clicked()), SLOT(changeDir()));
+#if QT_VERSION >= 0x060000
     connect(selector_, &QComboBox::currentTextChanged,
             this, &MainWindow::appChanged);
     connect(filter_, &QLineEdit::textChanged,
             modelProxy_, &SettingsModelFilter::setFilterText);
+#else
+    connect(selector_, SIGNAL(currentIndexChanged(QString)),
+            SLOT(appChanged(QString)));
+    connect(filter_, SIGNAL(textChanged(QString)),
+            modelProxy_, SLOT(setFilterRegExp(QString)));
+#endif
 
     // Create and set up the settings view.
     view_ = new SettingsView(widget);

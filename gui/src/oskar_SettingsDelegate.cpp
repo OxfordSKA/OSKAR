@@ -315,8 +315,12 @@ bool SettingsDelegate::editorEvent(QEvent* event,
             menu.addAction(strCopyKey);
 
             // Display the context menu.
+#if QT_VERSION >= 0x060000
             QAction* action = menu.exec(
                     mouseEvent->globalPosition().toPoint());
+#else
+            QAction* action = menu.exec(mouseEvent->globalPos());
+#endif
 
             // Check which action was selected.
             if (action && action->text() == strResetValue)
@@ -338,8 +342,12 @@ bool SettingsDelegate::editorEvent(QEvent* event,
             QMenu menu;
             QString strResetGroup = "Reset Group";
             menu.addAction(strResetGroup);
+#if QT_VERSION >= 0x060000
             QAction* action = menu.exec(
                     mouseEvent->globalPosition().toPoint());
+#else
+            QAction* action = menu.exec(mouseEvent->globalPos());
+#endif
             if (action && action->text() == strResetGroup)
                 mod->setData(index, QVariant(), SettingsModel::ResetGroupRole);
             event->accept();
