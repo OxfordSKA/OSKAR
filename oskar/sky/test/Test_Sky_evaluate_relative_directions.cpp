@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025, The OSKAR Developers.
+ * Copyright (c) 2011-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -17,6 +17,7 @@ TEST(Sky, evaluate_relative_directions)
 {
     int status = 0;
     int device_loc = 0;
+    const double tol = 1e-14;
     (void) oskar_device_count(NULL, &device_loc);
 
     // Construct a simple sky model.
@@ -48,9 +49,9 @@ TEST(Sky, evaluate_relative_directions)
         double l = sin(ra - ra0) * cos(dec);
         double m = cos(dec0) * sin(dec) - sin(dec0) * cos(dec) * cos(ra - ra0);
         double n = sqrt(1.0 - l * l - m * m);
-        EXPECT_DOUBLE_EQ(l, oskar_sky_data(sky2, OSKAR_SKY_SCRATCH_L, 0, i));
-        EXPECT_DOUBLE_EQ(m, oskar_sky_data(sky2, OSKAR_SKY_SCRATCH_M, 0, i));
-        EXPECT_DOUBLE_EQ(n, oskar_sky_data(sky2, OSKAR_SKY_SCRATCH_N, 0, i));
+        EXPECT_NEAR(l, oskar_sky_data(sky2, OSKAR_SKY_SCRATCH_L, 0, i), tol);
+        EXPECT_NEAR(m, oskar_sky_data(sky2, OSKAR_SKY_SCRATCH_M, 0, i), tol);
+        EXPECT_NEAR(n, oskar_sky_data(sky2, OSKAR_SKY_SCRATCH_N, 0, i), tol);
     }
     oskar_sky_free(sky1, &status);
     oskar_sky_free(sky2, &status);

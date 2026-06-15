@@ -400,35 +400,41 @@ Example: Using defaults
 Example: Using a mixture of different spectral types
 ----------------------------------------------------
 
-This example will work with OSKAR 2.13 or above, and shows seven sources in the
+This example will work with OSKAR 2.13 or above, and shows nine sources in the
 same sky model file that use different spectral model types.
 Note that the extra spacing added between commas is not necessary, but helps to
 show which values are in which columns, and which ones are left blank.
 
 .. code-block:: text
 
-   #(RaD, DecD, I,                     ReferenceFrequency,                 SpectralIndex     , LogarithmicSI, SpectralCurvature, LineWidth) = format
+   #(RaD, DecD, I,                     ReferenceFrequency                , SpectralIndex     , LogarithmicSI, SpectralCurvature, LineWidth) = format
 
-   # Source 0: Simple logarithmic spectral index.
-   0.01,  0.1,  1.1,                   100e6,                              -0.55             ,              ,                  ,
+   # Source 0: Flat spectrum (no reference frequency).
+   0.00,  0.0,  1.0,                                                     ,                   ,              ,                  ,
 
-   # Source 1: Two-term logarithmic spectral index polynomial.
-   0.02,  0.2,  1.2,                   101e6,                              [-0.7, 0.05]      , true         ,                  ,
+   # Source 1: Simple logarithmic spectral index.
+   0.01,  0.1,  1.1,                   101e6                             , -0.55             ,              ,                  ,
 
-   # Source 2: Three-term linear spectral index polynomial.
-   0.03,  0.3,  1.3,                   102e6,                              [0.08, 0.07, 0.02], false        ,                  ,
+   # Source 2: Two-term logarithmic spectral index polynomial.
+   0.02,  0.2,  1.2,                   102e6                             , [-0.7, 0.05]      , true         ,                  ,
 
-   # Source 3: Spectral curvature model.
-   0.04,  0.4,  1.4,                   103e6,                              -0.6              ,              , 0.1              ,
+   # Source 3: Three-term linear spectral index polynomial.
+   0.03,  0.3,  1.3,                   103e6                             , [0.08, 0.07, 0.02], false        ,                  ,
 
-   # Source 4: Simple Gaussian spectral line model.
-   0.05,  0.5,  1.5,                   104e6,                                                ,              ,                  , 100e3
+   # Source 4: Spectral curvature model.
+   0.04,  0.4,  1.4,                   104e6                             , -0.6              ,              , 0.1              ,
 
-   # Source 5: Three spectral lines of different widths, each a Gaussian.
-   0.06,  0.6,  [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6],                                ,              ,                  , [250e3, 350e3, 500e3]
+   # Source 5: Simple Gaussian spectral line model.
+   0.05,  0.5,  1.5,                   105e6                             ,                   ,              ,                  , 100e3
 
-   # Source 6: Different flux at four frequencies (selected based on current channel frequency).
-   0.07,  0.7,  [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],                   ,              ,                  ,
+   # Source 6: Three spectral lines of the same width, each a Gaussian.
+   0.06,  0.6,  [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6]             ,                   ,              ,                  , 125e3
+
+   # Source 7: Three spectral lines of different widths, each a Gaussian.
+   0.07,  0.7,  [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6]             ,                   ,              ,                  , [250e3, 350e3, 500e3]
+
+   # Source 8: Different flux at four frequencies.
+   0.08,  0.8,  [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],                   ,              ,                  ,
 
 .. admonition:: A more compact version
 
@@ -438,13 +444,15 @@ show which values are in which columns, and which ones are left blank.
    .. code-block:: text
 
       #(RaD, DecD, I, RefFreq, SpectralIndex, LogarithmicSI, SpectralCurvature, LineWidth) = format
-      0.01,  0.1,  1.1, 100e6, -0.55,,,
-      0.02,  0.2,  1.2, 101e6, [-0.7, 0.05], true,,
-      0.03,  0.3,  1.3, 102e6, [0.08, 0.07, 0.02], false,,
-      0.04,  0.4,  1.4, 103e6, -0.6,, 0.1,
-      0.05,  0.5,  1.5, 104e6,,,, 100e3
-      0.06,  0.6,  [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, [250e3, 350e3, 500e3]
-      0.07,  0.7,  [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],,,,
+      0.00,  0.0,  1.0,,,,,
+      0.01,  0.1,  1.1, 101e6, -0.55,,,
+      0.02,  0.2,  1.2, 102e6, [-0.7, 0.05], true,,
+      0.03,  0.3,  1.3, 103e6, [0.08, 0.07, 0.02], false,,
+      0.04,  0.4,  1.4, 104e6, -0.6,, 0.1,
+      0.05,  0.5,  1.5, 105e6,,,, 100e3
+      0.06,  0.6,  [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, 125e3
+      0.07,  0.7,  [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, [250e3, 350e3, 500e3]
+      0.08,  0.8,  [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],,,,
 
 .. _example3:
 

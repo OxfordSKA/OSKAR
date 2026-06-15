@@ -225,28 +225,34 @@ TEST(Sky, scale_flux_with_frequency_mixed_spectral_types)
     // Write a test sky model file to load.
     const char* name = "temp_test_mixed_scale_mixed_spectral_types.txt";
     FILE* file = fopen(name, "w");
-    (void) fprintf(file, "(Ra,  Dec, I, ReferenceFrequency, SpectralIndex, LogarithmicSI, SpectralCurvature, LineWidth) = format\n");
+    (void) fprintf(file, "#(Ra, Dec, I, ReferenceFrequency, SpectralIndex, LogarithmicSI, SpectralCurvature, LineWidth) = format\n");
     (void) fprintf(file, "\n");
-    (void) fprintf(file, "# Source 0: Simple logarithmic spectral index:\n");
-    (void) fprintf(file, "0.01, 0.1, 1.1, 100e6, -0.55,,,\n");
+    (void) fprintf(file, "# Source 0: Flat spectrum (no reference frequency).\n");
+    (void) fprintf(file, "0.00, 0.0, 1.0,,,,,\n");
     (void) fprintf(file, "\n");
-    (void) fprintf(file, "# Source 1: Two-term logarithmic spectral index polynomial:\n");
-    (void) fprintf(file, "0.02, 0.2, 1.2, 101e6, [-0.7, 0.05], true,,\n");
+    (void) fprintf(file, "# Source 1: Simple logarithmic spectral index.\n");
+    (void) fprintf(file, "0.01, 0.1, 1.1, 101e6, -0.55,,,\n");
     (void) fprintf(file, "\n");
-    (void) fprintf(file, "# Source 2: Three-term linear spectral index polynomial:\n");
-    (void) fprintf(file, "0.03, 0.3, 1.3, 102e6, [0.08, 0.07, 0.02], false,,\n");
+    (void) fprintf(file, "# Source 2: Two-term logarithmic spectral index polynomial.\n");
+    (void) fprintf(file, "0.02, 0.2, 1.2, 102e6, [-0.7, 0.05], true,,\n");
     (void) fprintf(file, "\n");
-    (void) fprintf(file, "# Source 3: Spectral curvature model:\n");
-    (void) fprintf(file, "0.04, 0.4, 1.4, [103e6], [-0.6],, 0.1,\n");
+    (void) fprintf(file, "# Source 3: Three-term linear spectral index polynomial.\n");
+    (void) fprintf(file, "0.03, 0.3, 1.3, 103e6, [0.08, 0.07, 0.02], false,,\n");
     (void) fprintf(file, "\n");
-    (void) fprintf(file, "# Source 4: Simple Gaussian spectral line model:\n");
-    (void) fprintf(file, "0.05, 0.5, 1.5, 104e6,,,, 100e3\n");
+    (void) fprintf(file, "# Source 4: Spectral curvature model.\n");
+    (void) fprintf(file, "0.04, 0.4, 1.4, [104e6], [-0.6],, 0.1,\n");
     (void) fprintf(file, "\n");
-    (void) fprintf(file, "# Source 5: Three spectral lines, each a Gaussian:\n");
-    (void) fprintf(file, "0.06, 0.6, [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, [250e3, 350e3, 500e3]\n");
+    (void) fprintf(file, "# Source 5: Simple Gaussian spectral line model.\n");
+    (void) fprintf(file, "0.05, 0.5, 1.5, 105e6,,,, 100e3\n");
     (void) fprintf(file, "\n");
-    (void) fprintf(file, "# Source 6: Different flux at four frequencies:\n");
-    (void) fprintf(file, "0.07, 0.7, [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],,,,\n");
+    (void) fprintf(file, "# Source 6: Three spectral lines of the same width, each a Gaussian.\n");
+    (void) fprintf(file, "0.06, 0.6, [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, 125e3\n");
+    (void) fprintf(file, "\n");
+    (void) fprintf(file, "# Source 7: Three spectral lines of different widths, each a Gaussian.\n");
+    (void) fprintf(file, "0.07, 0.7, [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, [250e3, 350e3, 500e3]\n");
+    (void) fprintf(file, "\n");
+    (void) fprintf(file, "# Source 8: Different flux at four frequencies.\n");
+    (void) fprintf(file, "0.08, 0.8, [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],,,,\n");
     (void) fclose(file);
 
     for (int i_type = 0; i_type < 2; ++i_type)
@@ -269,44 +275,70 @@ TEST(Sky, scale_flux_with_frequency_mixed_spectral_types)
             // Scale at each frequency.
             for (int i_freq = 0; i_freq < num_freqs; ++i_freq)
             {
+                int s = 0;
                 double expect = 0.0, freq_ref_hz = 0.0, sigma = 0.0, x = 0.0;
                 const double freq_new_hz = freq_start_hz + i_freq * freq_inc_hz;
                 oskar_sky_scale_flux_with_frequency(sky1, freq_new_hz, &status);
 
                 // Check Source 0.
-                freq_ref_hz = 100e6;
-                expect = 1.1 * pow(freq_new_hz / freq_ref_hz, -0.55);
-                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 0), tol);
+                s = 0;
+                ASSERT_DOUBLE_EQ(1.0, oskar_sky_data(sky1, col, 0, s));
 
                 // Check Source 1.
+                s = 1;
                 freq_ref_hz = 101e6;
+                expect = 1.1 * pow(freq_new_hz / freq_ref_hz, -0.55);
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, s), tol);
+
+                // Check Source 2.
+                s = 2;
+                freq_ref_hz = 102e6;
                 const double log_r = log10(freq_new_hz / freq_ref_hz);
                 expect = 1.2 * pow(
                         freq_new_hz / freq_ref_hz, -0.7 + 0.05 * log_r
                 );
-                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 1), tol);
-
-                // Check Source 2.
-                freq_ref_hz = 102e6;
-                const double b = (freq_new_hz / freq_ref_hz) - 1.0;
-                expect = 1.3 + (0.08 * b) + (0.07 * b * b) + (0.02 * b * b * b);
-                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 2), tol);
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, s), tol);
 
                 // Check Source 3.
+                s = 3;
                 freq_ref_hz = 103e6;
+                const double b = (freq_new_hz / freq_ref_hz) - 1.0;
+                expect = 1.3 + (0.08 * b) + (0.07 * b * b) + (0.02 * b * b * b);
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, s), tol);
+
+                // Check Source 4.
+                s = 4;
+                freq_ref_hz = 104e6;
                 expect = 1.4 * pow(freq_new_hz / freq_ref_hz, -0.6) * exp(
                         0.1 * pow(log(freq_new_hz / freq_ref_hz), 2.0)
                 );
-                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 3), tol);
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, s), tol);
 
-                // Check Source 4.
-                freq_ref_hz = 104e6;
+                // Check Source 5.
+                s = 5;
+                freq_ref_hz = 105e6;
                 sigma = 100e3;
                 x = freq_new_hz - freq_ref_hz;
                 expect = 1.5 * exp(-x * x / (2 * sigma * sigma));
-                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 4), tol);
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, s), tol);
 
-                // Check Source 5.
+                // Check Source 6.
+                s = 6;
+                expect = 0.0;
+                freq_ref_hz = 101e6;
+                sigma = 125e3;
+                x = freq_new_hz - freq_ref_hz;
+                expect += 1.6 * exp(-x * x / (2 * sigma * sigma));
+                freq_ref_hz = 102e6;
+                x = freq_new_hz - freq_ref_hz;
+                expect += 1.7 * exp(-x * x / (2 * sigma * sigma));
+                freq_ref_hz = 104e6;
+                x = freq_new_hz - freq_ref_hz;
+                expect += 1.8 * exp(-x * x / (2 * sigma * sigma));
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, s), tol);
+
+                // Check Source 7.
+                s = 7;
                 expect = 0.0;
                 freq_ref_hz = 101e6;
                 sigma = 250e3;
@@ -320,15 +352,16 @@ TEST(Sky, scale_flux_with_frequency_mixed_spectral_types)
                 sigma = 500e3;
                 x = freq_new_hz - freq_ref_hz;
                 expect += 1.8 * exp(-x * x / (2 * sigma * sigma));
-                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 5), tol);
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, s), tol);
 
-                // Check Source 6.
+                // Check Source 8.
+                s = 8;
                 int i_closest = 0;
                 x = 1e38;
                 for (int j = 0; j < 4; ++j)
                 {
                     const double diff = fabs(freq_new_hz - oskar_sky_data(
-                            sky1, OSKAR_SKY_REF_HZ, j, 6
+                            sky1, OSKAR_SKY_REF_HZ, j, s
                     ));
                     if (diff < x)
                     {
@@ -336,8 +369,8 @@ TEST(Sky, scale_flux_with_frequency_mixed_spectral_types)
                         i_closest = j;
                     }
                 }
-                expect = oskar_sky_data(sky1, OSKAR_SKY_I_JY, i_closest, 6);
-                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, 6), tol);
+                expect = oskar_sky_data(sky1, OSKAR_SKY_I_JY, i_closest, s);
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, s), tol);
             }
             oskar_sky_free(sky1, &status);
         }

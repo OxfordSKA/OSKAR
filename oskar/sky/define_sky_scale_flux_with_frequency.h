@@ -28,10 +28,15 @@
     if (num_line_width_hz > 0) {\
         /* Spectral line source. Calculate flux using Gaussian profile(s). */\
         FP stokes_i_out = (FP) 0;\
-        for (c = 0; c < num_line_width_hz && c < num_stokes_i; ++c) {\
-            const FP ref_hz = table[capacity * (col_ref_freq + c) + i_src];\
-            const FP sigma = table[capacity * (col_line_width + c) + i_src];\
+        for (c = 0; c < num_stokes_i; ++c) {\
+            FP sigma = (FP) 0;\
             const FP amp = table[capacity * (col_i + c) + i_src];\
+            const FP ref_hz = table[capacity * (col_ref_freq + c) + i_src];\
+            if (c < num_line_width_hz) {\
+                sigma = table[capacity * (col_line_width + c) + i_src];\
+            } else {\
+                sigma = table[capacity * col_line_width + i_src];\
+            }\
             const FP x = freq_hz - ref_hz;\
             stokes_i_out += amp * exp(-(x * x) / (2 * sigma * sigma));\
         }\

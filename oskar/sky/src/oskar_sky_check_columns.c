@@ -167,7 +167,7 @@ void oskar_sky_check_columns(const oskar_Sky* sky, int* status)
                     "values as PolarizedFraction values.", i
             );
         }
-        if (num_line_width > 0 && num_line_width != num_freq)
+        if (num_line_width > 1 && num_line_width != num_freq)
         {
             *status = OSKAR_ERR_INVALID_ARGUMENT;
             oskar_log_error(
@@ -175,7 +175,7 @@ void oskar_sky_check_columns(const oskar_Sky* sky, int* status)
                     "values as LineWidth values.", i
             );
         }
-        if (num_line_width > 0 && num_line_width != num_stokes[0])
+        if (num_line_width > 1 && num_line_width != num_stokes[0])
         {
             *status = OSKAR_ERR_INVALID_ARGUMENT;
             oskar_log_error(
