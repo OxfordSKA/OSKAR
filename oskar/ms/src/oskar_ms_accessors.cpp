@@ -253,7 +253,7 @@ void oskar_ms_set_element_coords(
     // This is different from current MSv3 working draft at
     // https://casacore.github.io/casacore-notes/264.pdf
     Matrix<Bool> flags(
-            IPosition(2, num_elements, (p->num_pols == 4 ? 2 : 1)), false);
+            IPosition(2, (p->num_pols == 4 ? 2 : 1), num_elements), false);
     Matrix<Double> offset(IPosition(2, 3, num_elements));
     for (unsigned int i = 0; i < num_elements; ++i)
     {

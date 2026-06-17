@@ -16,6 +16,10 @@
     * Fix to allow FEKO HDF5 element data to be loaded if "FEKO" appears
       anywhere in the file name.
 
+    * Fix to transpose both ELEMENT_FLAG and ELEMENT_OFFSET columns in the
+      PHASED_ARRAY table for consistency.
+      Thanks to Callan Gray, Cyril Tasse and Tammo Jan Dijkema.
+
     * Updated the GUI to use Qt 6.
 
 2026-02-19  OSKAR-2.12.2
