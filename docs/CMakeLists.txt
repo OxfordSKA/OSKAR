@@ -40,6 +40,10 @@ function(add_sphinx_doc)
 
         configure_file("${SPHINX_DOC_SOURCE_DIR}/conf.py"
             "${SPHINX_BINARY_BUILD_DIR}/conf.py" @ONLY)
+        execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${SPHINX_DOC_SOURCE_DIR}/_static"
+            "${SPHINX_BINARY_BUILD_DIR}/_static"
+        )
 
         message("-- Using Python: ${Python3_EXECUTABLE}")
         add_custom_target(${SPHINX_TARGET_ROOT}_html
