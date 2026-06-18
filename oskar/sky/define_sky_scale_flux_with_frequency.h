@@ -13,6 +13,7 @@
         const int col_sp_index,\
         const int col_sp_curvature,\
         const int col_line_width,\
+        const int col_freq_inc,\
         const FP stokes_i_in,\
         const FP freq_hz,\
         const FP freq0_hz\
@@ -20,18 +21,22 @@
 {\
     FP lin_spx = (FP) 0;\
     int c = 0;\
-    const int have_lin_si = num_valid_col[OSKAR_SKY_LIN_SI] > 0;\
     const int num_stokes_i = num_valid_col[OSKAR_SKY_I_JY];\
-    const int num_sp_indices = num_valid_col[OSKAR_SKY_SPEC_IDX];\
-    const int num_sp_curvature = num_valid_col[OSKAR_SKY_SPEC_CURV];\
     const int num_line_width_hz = num_valid_col[OSKAR_SKY_LINE_WIDTH_HZ];\
     if (num_line_width_hz > 0) {\
         /* Spectral line source. Calculate flux using Gaussian profile(s). */\
         FP stokes_i_out = (FP) 0;\
+        FP sigma = (FP) 0, inc_hz = (FP) 0, ref_hz = (FP) 0;\
+        const int num_ref_freq = num_valid_col[OSKAR_SKY_REF_HZ];\
+        const int num_freq_inc = num_valid_col[OSKAR_SKY_INC_HZ];\
+        if (num_freq_inc > 0) inc_hz = table[capacity * col_freq_inc + i_src];\
         for (c = 0; c < num_stokes_i; ++c) {\
-            FP sigma = (FP) 0;\
             const FP amp = table[capacity * (col_i + c) + i_src];\
-            const FP ref_hz = table[capacity * (col_ref_freq + c) + i_src];\
+            if (c < num_ref_freq) {\
+                ref_hz = table[capacity * (col_ref_freq + c) + i_src];\
+            } else {\
+                ref_hz = table[capacity * col_ref_freq + i_src] + c * inc_hz;\
+            }\
             if (c < num_line_width_hz) {\
                 sigma = table[capacity * (col_line_width + c) + i_src];\
             } else {\
@@ -44,7 +49,8 @@
     }\
     /* Use of any spectral index requires only a single Stokes I value. */\
     if (num_stokes_i > 1) return stokes_i_in;\
-    if (num_sp_curvature > 0) {\
+    const int num_sp_indices = num_valid_col[OSKAR_SKY_SPEC_IDX];\
+    if (num_valid_col[OSKAR_SKY_SPEC_CURV] > 0) {\
         /* Follow Equation 2 of Callingham et al. 2017. */\
         FP sp_index = (FP) 0;\
         FP sp_curvature = table[capacity * col_sp_curvature + i_src];\
@@ -57,6 +63,7 @@
         const FP curv = exp(sp_curvature * pow(log(freq_ratio), 2));\
         return stokes_i_in * curv * pow(freq_ratio, sp_index);\
     }\
+    const int have_lin_si = num_valid_col[OSKAR_SKY_LIN_SI] > 0;\
     if (have_lin_si) lin_spx = table[capacity * col_lin_sp_index + i_src];\
     if (lin_spx == (FP) 0) {\
         /* Default is logarithmic spectral index. */\
@@ -102,6 +109,7 @@
         const int col_ref_wavelength,\
         const int col_sp_curvature,\
         const int col_line_width,\
+        const int col_freq_inc,\
         GLOBAL_OUT(FP, out_i),\
         GLOBAL_OUT(FP, out_q),\
         GLOBAL_OUT(FP, out_u),\
@@ -117,20 +125,38 @@
             i * OSKAR_SKY_NUM_FIXED_COLUMN_TYPES\
     ];\
     /* Find the sky model channel index closest to the current frequency. */\
+    for (j = 0; j < 4; ++j) {\
+        num_iquv[j] = num_valid_col[(int) OSKAR_SKY_I_JY + j];\
+    }\
     const int num_ref_freq = num_valid_col[OSKAR_SKY_REF_HZ];\
+    const int num_freq_inc = num_valid_col[OSKAR_SKY_INC_HZ];\
     FP diff = 1e38, freq0_hz = (FP) 0;\
-    for (j = 0; j < num_ref_freq; ++j) {\
-        const FP test_freq_hz = table[capacity * (col_ref_freq + j) + i];\
-        const FP temp = fabs(test_freq_hz - freq_hz);\
-        if (temp < diff) {\
-            diff = temp;\
-            chan_idx = j;\
-            freq0_hz = test_freq_hz;\
+    if (num_freq_inc == 1 && num_ref_freq == 1) {\
+        const FP start_freq_hz = table[capacity * col_ref_freq + i];\
+        const FP freq_inc_hz = table[capacity * col_freq_inc + i];\
+        for (j = 0; j < num_iquv[0]; ++j) {\
+            const FP test_freq_hz = start_freq_hz + j * freq_inc_hz;\
+            const FP temp = fabs(test_freq_hz - freq_hz);\
+            if (temp < diff) {\
+                diff = temp;\
+                chan_idx = j;\
+                freq0_hz = test_freq_hz;\
+            }\
+        }\
+    }\
+    else {\
+        for (j = 0; j < num_iquv[0]; ++j) {\
+            const FP test_freq_hz = table[capacity * (col_ref_freq + j) + i];\
+            const FP temp = fabs(test_freq_hz - freq_hz);\
+            if (temp < diff) {\
+                diff = temp;\
+                chan_idx = j;\
+                freq0_hz = test_freq_hz;\
+            }\
         }\
     }\
     /* Get reference Stokes parameters. */\
     for (j = 0; j < 4; ++j) {\
-        num_iquv[j] = num_valid_col[(int) OSKAR_SKY_I_JY + j];\
         if (num_iquv[j] > 0) {\
             if (chan_idx < num_iquv[j]) {\
                 in_iquv[j] = table[capacity * (col_iquv[j] + chan_idx) + i];\
@@ -175,7 +201,7 @@
         const FP stokes_i_out = M_CAT(calc_stokes_i_flux_, FP)(\
                 capacity, table, num_valid_col, i,\
                 col_i, col_ref_freq, col_lin_sp_index, col_sp_index,\
-                col_sp_curvature, col_line_width,\
+                col_sp_curvature, col_line_width, col_freq_inc,\
                 in_iquv[0], freq_hz, freq0_hz\
         );\
         /* Find ratio between input and output Stokes I */\
@@ -203,7 +229,7 @@
                 const FP stokes_i_ref = M_CAT(calc_stokes_i_flux_, FP)(\
                         capacity, table, num_valid_col, i, col_i,\
                         col_ref_freq, col_lin_sp_index, col_sp_index,\
-                        col_sp_curvature, col_line_width,\
+                        col_sp_curvature, col_line_width, col_freq_inc,\
                         in_iquv[0], freq_hz, freq_at_lambda0_hz\
                 );\
                 pol_ang_chi0 = ((FP) 0.5) * atan2(in_iquv[2], in_iquv[1]) - (\

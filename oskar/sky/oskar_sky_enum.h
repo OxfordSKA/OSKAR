@@ -33,6 +33,7 @@ enum oskar_SkyColumn
     OSKAR_SKY_REF_WAVE_M,
     OSKAR_SKY_SPEC_CURV,
     OSKAR_SKY_LINE_WIDTH_HZ,
+    OSKAR_SKY_INC_HZ,
     /* Keep track of the number of fixed ("real") column types. */
     OSKAR_SKY_NUM_FIXED_COLUMN_TYPES,
     /* The following are "phantom" column types, used only for loading. */

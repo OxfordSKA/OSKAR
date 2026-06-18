@@ -118,6 +118,13 @@ oskar_SkyColumn oskar_sky_column_type_from_name(
     {
         return OSKAR_SKY_REF_HZ;
     }
+    if (starts_with(name, "FrequencyInc") ||
+            starts_with(name, "FreqInc") ||
+            starts_with(name, "frequency_inc") ||
+            starts_with(name, "freq_inc"))
+    {
+        return OSKAR_SKY_INC_HZ;
+    }
     if (starts_with(name, "SpectralCurv") ||
             starts_with(name, "spectral_curv") ||
             starts_with(name, "spec_curv"))

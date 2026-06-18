@@ -225,34 +225,37 @@ TEST(Sky, scale_flux_with_frequency_mixed_spectral_types)
     // Write a test sky model file to load.
     const char* name = "temp_test_mixed_scale_mixed_spectral_types.txt";
     FILE* file = fopen(name, "w");
-    (void) fprintf(file, "#(Ra, Dec, I, ReferenceFrequency, SpectralIndex, LogarithmicSI, SpectralCurvature, LineWidth) = format\n");
+    (void) fprintf(file, "#(Ra, Dec, I, RefFreq, FreqInc, SpectralIndex, LogarithmicSI, SpectralCurvature, LineWidth) = format\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 0: Flat spectrum (no reference frequency).\n");
-    (void) fprintf(file, "0.00, 0.0, 1.0,,,,,\n");
+    (void) fprintf(file, "0.00, 0.0, 1.0,,,,,,\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 1: Simple logarithmic spectral index.\n");
-    (void) fprintf(file, "0.01, 0.1, 1.1, 101e6, -0.55,,,\n");
+    (void) fprintf(file, "0.01, 0.1, 1.1, 101e6,, -0.55,,,\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 2: Two-term logarithmic spectral index polynomial.\n");
-    (void) fprintf(file, "0.02, 0.2, 1.2, 102e6, [-0.7, 0.05], true,,\n");
+    (void) fprintf(file, "0.02, 0.2, 1.2, 102e6,, [-0.7, 0.05], true,,\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 3: Three-term linear spectral index polynomial.\n");
-    (void) fprintf(file, "0.03, 0.3, 1.3, 103e6, [0.08, 0.07, 0.02], false,,\n");
+    (void) fprintf(file, "0.03, 0.3, 1.3, 103e6,, [0.08, 0.07, 0.02], false,,\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 4: Spectral curvature model.\n");
-    (void) fprintf(file, "0.04, 0.4, 1.4, [104e6], [-0.6],, 0.1,\n");
+    (void) fprintf(file, "0.04, 0.4, 1.4, [104e6],, [-0.6],, 0.1,\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 5: Simple Gaussian spectral line model.\n");
-    (void) fprintf(file, "0.05, 0.5, 1.5, 105e6,,,, 100e3\n");
+    (void) fprintf(file, "0.05, 0.5, 1.5, 105e6,,,,, 100e3\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 6: Three spectral lines of the same width, each a Gaussian.\n");
-    (void) fprintf(file, "0.06, 0.6, [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, 125e3\n");
+    (void) fprintf(file, "0.06, 0.6, [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,,, 125e3\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 7: Three spectral lines of different widths, each a Gaussian.\n");
-    (void) fprintf(file, "0.07, 0.7, [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, [250e3, 350e3, 500e3]\n");
+    (void) fprintf(file, "0.07, 0.7, [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,,, [250e3, 350e3, 500e3]\n");
     (void) fprintf(file, "\n");
-    (void) fprintf(file, "# Source 8: Different flux at four frequencies.\n");
-    (void) fprintf(file, "0.08, 0.8, [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],,,,\n");
+    (void) fprintf(file, "# Source 8: Different flux at four arbitrary frequencies.\n");
+    (void) fprintf(file, "0.08, 0.8, [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],,,,,\n");
+    (void) fprintf(file, "\n");
+    (void) fprintf(file, "# Source 9: Different flux at four regularly-spaced frequencies.\n");
+    (void) fprintf(file, "0.09, 0.9, [1.5, 1.6, 1.7, 1.55], 101e6, 1e6,,,,\n");
     (void) fclose(file);
 
     for (int i_type = 0; i_type < 2; ++i_type)
@@ -362,6 +365,26 @@ TEST(Sky, scale_flux_with_frequency_mixed_spectral_types)
                 {
                     const double diff = fabs(freq_new_hz - oskar_sky_data(
                             sky1, OSKAR_SKY_REF_HZ, j, s
+                    ));
+                    if (diff < x)
+                    {
+                        x = diff;
+                        i_closest = j;
+                    }
+                }
+                expect = oskar_sky_data(sky1, OSKAR_SKY_I_JY, i_closest, s);
+                ASSERT_NEAR(expect, oskar_sky_data(sky1, col, 0, s), tol);
+
+                // Check Source 9.
+                s = 9;
+                i_closest = 0;
+                x = 1e38;
+                freq_ref_hz = 101e6;
+                const double freq_inc_hz = 1e6;
+                for (int j = 0; j < 4; ++j)
+                {
+                    const double diff = fabs(freq_new_hz - (
+                            freq_ref_hz + j * freq_inc_hz
                     ));
                     if (diff < x)
                     {

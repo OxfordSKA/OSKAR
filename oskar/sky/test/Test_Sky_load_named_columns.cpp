@@ -894,39 +894,42 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     int status = 0;
     const char* name = "temp_test_mixed_spectral_types.txt";
     FILE* file = fopen(name, "w");
-    (void) fprintf(file, "(Ra,  Dec, I,                     ReferenceFrequency                , SpectralIndex     , LogarithmicSI, SpectralCurvature, LineWidth) = format\n");
+    (void) fprintf(file, "(Ra,  Dec, I,                     ReferenceFrequency                , FrequencyIncrement, SpectralIndex     , LogarithmicSI, SpectralCurvature, LineWidth) = format\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 0: Flat spectrum (no reference frequency).\n");
-    (void) fprintf(file, "0.00, 0.0, 1.0,                                                     ,                   ,              ,                  ,\n");
+    (void) fprintf(file, "0.00, 0.0, 1.0,                                                     ,                   ,                   ,              ,                  ,\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 1: Simple logarithmic spectral index.\n");
-    (void) fprintf(file, "0.01, 0.1, 1.1,                   101e6                             , -0.55             ,              ,                  ,\n");
+    (void) fprintf(file, "0.01, 0.1, 1.1,                   101e6                             ,                   , -0.55             ,              ,                  ,\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 2: Two-term logarithmic spectral index polynomial.\n");
-    (void) fprintf(file, "0.02, 0.2, 1.2,                   102e6                             , [-0.7, 0.05]      , true         ,                  ,\n");
+    (void) fprintf(file, "0.02, 0.2, 1.2,                   102e6                             ,                   , [-0.7, 0.05]      , true         ,                  ,\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 3: Three-term linear spectral index polynomial.\n");
-    (void) fprintf(file, "0.03, 0.3, 1.3,                   103e6                             , [0.08, 0.07, 0.02], false        ,                  ,\n");
+    (void) fprintf(file, "0.03, 0.3, 1.3,                   103e6                             ,                   , [0.08, 0.07, 0.02], false        ,                  ,\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 4: Spectral curvature model.\n");
-    (void) fprintf(file, "0.04, 0.4, 1.4,                   [104e6]                           , [-0.6]            ,              , 0.1              ,\n");
+    (void) fprintf(file, "0.04, 0.4, 1.4,                   [104e6]                           ,                   , [-0.6]            ,              , 0.1              ,\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 5: Simple Gaussian spectral line model.\n");
-    (void) fprintf(file, "0.05, 0.5, 1.5,                   105e6                             ,                   ,              ,                  , 100e3\n");
+    (void) fprintf(file, "0.05, 0.5, 1.5,                   105e6                             ,                   ,                   ,              ,                  , 100e3\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 6: Three spectral lines of the same width, each a Gaussian.\n");
-    (void) fprintf(file, "0.06, 0.6, [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6]             ,                   ,              ,                  , 125e3\n");
+    (void) fprintf(file, "0.06, 0.6, [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6]             ,                   ,                   ,              ,                  , 125e3\n");
     (void) fprintf(file, "\n");
     (void) fprintf(file, "# Source 7: Three spectral lines of different widths, each a Gaussian.\n");
-    (void) fprintf(file, "0.07, 0.7, [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6]             ,                   ,              ,                  , [250e3, 350e3, 500e3]\n");
+    (void) fprintf(file, "0.07, 0.7, [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6]             ,                   ,                   ,              ,                  , [250e3, 350e3, 500e3]\n");
     (void) fprintf(file, "\n");
-    (void) fprintf(file, "# Source 8: Different flux at four frequencies.\n");
-    (void) fprintf(file, "0.08, 0.8, [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],                   ,              ,                  ,\n");
+    (void) fprintf(file, "# Source 8: Different flux at four arbitrary frequencies.\n");
+    (void) fprintf(file, "0.08, 0.8, [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],                   ,                   ,              ,                  ,\n");
+    (void) fprintf(file, "\n");
+    (void) fprintf(file, "# Source 9: Different flux at four regularly-spaced frequencies.\n");
+    (void) fprintf(file, "0.09, 0.9, [1.5, 1.6, 1.7, 1.55], 101e6                             , 1e6               ,                   ,              ,                  ,\n");
     (void) fclose(file);
     oskar_Sky* sky = oskar_sky_load_named_columns(name, OSKAR_DOUBLE, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(18, oskar_sky_int(sky, OSKAR_SKY_NUM_COLUMNS));
-    ASSERT_EQ(9, oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES));
+    ASSERT_EQ(19, oskar_sky_int(sky, OSKAR_SKY_NUM_COLUMNS));
+    ASSERT_EQ(10, oskar_sky_int(sky, OSKAR_SKY_NUM_SOURCES));
     ASSERT_EQ(0.00, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 0));
     ASSERT_EQ(0.01, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 1));
     ASSERT_EQ(0.02, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 2));
@@ -936,6 +939,7 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(0.06, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 6));
     ASSERT_EQ(0.07, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 7));
     ASSERT_EQ(0.08, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 8));
+    ASSERT_EQ(0.09, oskar_sky_data(sky, OSKAR_SKY_RA_RAD, 0, 9));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 0));
     ASSERT_EQ(0.1, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 1));
     ASSERT_EQ(0.2, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 2));
@@ -945,6 +949,7 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(0.6, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 6));
     ASSERT_EQ(0.7, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 7));
     ASSERT_EQ(0.8, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 8));
+    ASSERT_EQ(0.9, oskar_sky_data(sky, OSKAR_SKY_DEC_RAD, 0, 9));
     ASSERT_EQ(1, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_I_JY, 0));
     ASSERT_EQ(1, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_I_JY, 1));
     ASSERT_EQ(1, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_I_JY, 2));
@@ -954,6 +959,7 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(3, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_I_JY, 6));
     ASSERT_EQ(3, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_I_JY, 7));
     ASSERT_EQ(4, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_I_JY, 8));
+    ASSERT_EQ(4, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_I_JY, 9));
     ASSERT_EQ(1.0, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, 0));
     ASSERT_EQ(1.1, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, 1));
     ASSERT_EQ(1.2, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, 2));
@@ -970,6 +976,10 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(1.8, oskar_sky_data(sky, OSKAR_SKY_I_JY, 1, 8));
     ASSERT_EQ(1.9, oskar_sky_data(sky, OSKAR_SKY_I_JY, 2, 8));
     ASSERT_EQ(1.75, oskar_sky_data(sky, OSKAR_SKY_I_JY, 3, 8));
+    ASSERT_EQ(1.5, oskar_sky_data(sky, OSKAR_SKY_I_JY, 0, 9));
+    ASSERT_EQ(1.6, oskar_sky_data(sky, OSKAR_SKY_I_JY, 1, 9));
+    ASSERT_EQ(1.7, oskar_sky_data(sky, OSKAR_SKY_I_JY, 2, 9));
+    ASSERT_EQ(1.55, oskar_sky_data(sky, OSKAR_SKY_I_JY, 3, 9));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_REF_HZ, 0));
     ASSERT_EQ(1, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_REF_HZ, 1));
     ASSERT_EQ(1, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_REF_HZ, 2));
@@ -979,6 +989,7 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(3, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_REF_HZ, 6));
     ASSERT_EQ(3, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_REF_HZ, 7));
     ASSERT_EQ(4, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_REF_HZ, 8));
+    ASSERT_EQ(1, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_REF_HZ, 9));
     ASSERT_EQ(0, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 0, 0));
     ASSERT_EQ(101e6, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 0, 1));
     ASSERT_EQ(102e6, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 0, 2));
@@ -995,6 +1006,7 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(102.4e6, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 1, 8));
     ASSERT_EQ(103.8e6, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 2, 8));
     ASSERT_EQ(104.1e6, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 3, 8));
+    ASSERT_EQ(101e6, oskar_sky_data(sky, OSKAR_SKY_REF_HZ, 0, 9));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_IDX, 0));
     ASSERT_EQ(1, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_IDX, 1));
     ASSERT_EQ(2, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_IDX, 2));
@@ -1004,6 +1016,7 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_IDX, 6));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_IDX, 7));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_IDX, 8));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_IDX, 9));
     ASSERT_EQ(0, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, 0));
     ASSERT_EQ(-0.55, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, 1));
     ASSERT_EQ(-0.7, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, 2));
@@ -1021,6 +1034,8 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 1, 7));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, 8));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 1, 8));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 0, 9));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_IDX, 1, 9));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_CURV, 0));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_CURV, 1));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_CURV, 2));
@@ -1030,6 +1045,7 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_CURV, 6));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_CURV, 7));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_CURV, 8));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_SPEC_CURV, 9));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_CURV, 0, 0));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_CURV, 0, 1));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_CURV, 0, 2));
@@ -1039,6 +1055,7 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_CURV, 0, 6));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_CURV, 0, 7));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_CURV, 0, 8));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_SPEC_CURV, 0, 9));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_LINE_WIDTH_HZ, 0));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_LINE_WIDTH_HZ, 1));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_LINE_WIDTH_HZ, 2));
@@ -1048,6 +1065,7 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(1, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_LINE_WIDTH_HZ, 6));
     ASSERT_EQ(3, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_LINE_WIDTH_HZ, 7));
     ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_LINE_WIDTH_HZ, 8));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_LINE_WIDTH_HZ, 9));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_LINE_WIDTH_HZ, 0, 0));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_LINE_WIDTH_HZ, 0, 1));
     ASSERT_EQ(100e3, oskar_sky_data(sky, OSKAR_SKY_LINE_WIDTH_HZ, 0, 5));
@@ -1058,6 +1076,29 @@ TEST(Sky, load_named_columns_mixed_spectral_types)
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_LINE_WIDTH_HZ, 0, 8));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_LINE_WIDTH_HZ, 1, 8));
     ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_LINE_WIDTH_HZ, 2, 8));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_LINE_WIDTH_HZ, 0, 9));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_LINE_WIDTH_HZ, 1, 9));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_LINE_WIDTH_HZ, 2, 9));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_INC_HZ, 0));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_INC_HZ, 1));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_INC_HZ, 2));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_INC_HZ, 3));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_INC_HZ, 4));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_INC_HZ, 5));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_INC_HZ, 6));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_INC_HZ, 7));
+    ASSERT_EQ(0, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_INC_HZ, 8));
+    ASSERT_EQ(1, oskar_sky_num_valid_columns_of_type(sky, OSKAR_SKY_INC_HZ, 9));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_INC_HZ, 0, 0));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_INC_HZ, 0, 1));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_INC_HZ, 0, 2));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_INC_HZ, 0, 3));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_INC_HZ, 0, 4));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_INC_HZ, 0, 5));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_INC_HZ, 0, 6));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_INC_HZ, 0, 7));
+    ASSERT_EQ(0.0, oskar_sky_data(sky, OSKAR_SKY_INC_HZ, 0, 8));
+    ASSERT_EQ(1e6, oskar_sky_data(sky, OSKAR_SKY_INC_HZ, 0, 9));
     oskar_sky_free(sky, &status);
     (void) remove(name);
 }
@@ -1263,6 +1304,21 @@ TEST(Sky, load_named_columns_missing_reference_freq_for_spectral_index)
 }
 
 
+TEST(Sky, load_named_columns_too_many_fluxes_for_spectral_index)
+{
+    int status = 0;
+    const char* name = "temp_test_too_many_fluxes_for_spectral_index.txt";
+    FILE* file = fopen(name, "w");
+    (void) fprintf(file, "# (Ra, Dec, I, ReferenceFrequency, SpectralIndex) = format\n");
+    (void) fprintf(file, "0.1, 0.2, [0.3, 0.4], 100e6, -0.7\n");
+    (void) fclose(file);
+    oskar_Sky* sky = oskar_sky_load_named_columns(name, OSKAR_DOUBLE, &status);
+    ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);
+    ASSERT_EQ(0, sky);
+    (void) remove(name);
+}
+
+
 TEST(Sky, load_named_columns_too_many_rm)
 {
     int status = 0;
@@ -1367,6 +1423,38 @@ TEST(Sky, load_named_columns_inconsistent_pol_angle)
     (void) fprintf(file, "0.1, 0.2, 0.3, [100e6], [23.0]\n");
     (void) fprintf(file, "0.11, 0.22, [0.33, 0.44], [100e6, 101e6], [-0.5, 0.01]\n");
     (void) fprintf(file, "0.111, 0.222, [0.333, 0.444], [100e6, 101e6], [-11 -22 -33]\n");
+    (void) fclose(file);
+    oskar_Sky* sky = oskar_sky_load_named_columns(name, OSKAR_DOUBLE, &status);
+    ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);
+    ASSERT_EQ(0, sky);
+    (void) remove(name);
+}
+
+
+TEST(Sky, load_named_columns_too_many_freq_inc)
+{
+    int status = 0;
+    const char* name = "temp_test_too_many_freq_inc.txt";
+    FILE* file = fopen(name, "w");
+    (void) fprintf(file, "# (Ra, Dec, I, ReferenceFrequency, FreqInc) = format\n");
+    (void) fprintf(file, "0.1, 0.2, 0.3, [100e6], [1e6]\n");
+    (void) fprintf(file, "0.1, 0.2, 0.3, [100e6], [100e3, 500e3]\n");
+    (void) fprintf(file, "0.11, 0.22, [0.33, 0.44], [100e6, 101e6], [1e3, 1e4]\n");
+    (void) fclose(file);
+    oskar_Sky* sky = oskar_sky_load_named_columns(name, OSKAR_DOUBLE, &status);
+    ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);
+    ASSERT_EQ(0, sky);
+    (void) remove(name);
+}
+
+
+TEST(Sky, load_named_columns_freq_inc_with_multiple_ref_freq)
+{
+    int status = 0;
+    const char* name = "temp_test_freq_inc_with_multiple_ref_freq.txt";
+    FILE* file = fopen(name, "w");
+    (void) fprintf(file, "# (Ra, Dec, I, ReferenceFrequency, FreqInc) = format\n");
+    (void) fprintf(file, "0.11, 0.22, [0.33, 0.44], [100e6, 101e6], 1e3\n");
     (void) fclose(file);
     oskar_Sky* sky = oskar_sky_load_named_columns(name, OSKAR_DOUBLE, &status);
     ASSERT_EQ((int) OSKAR_ERR_INVALID_ARGUMENT, status);

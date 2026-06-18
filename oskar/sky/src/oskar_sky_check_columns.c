@@ -32,6 +32,9 @@ void oskar_sky_check_columns(const oskar_Sky* sky, int* status)
         const int num_freq = oskar_sky_num_valid_columns_of_type(
                 sky, OSKAR_SKY_REF_HZ, i
         );
+        const int num_inc = oskar_sky_num_valid_columns_of_type(
+                sky, OSKAR_SKY_INC_HZ, i
+        );
         const int num_alpha = oskar_sky_num_valid_columns_of_type(
                 sky, OSKAR_SKY_SPEC_IDX, i
         );
@@ -71,8 +74,8 @@ void oskar_sky_check_columns(const oskar_Sky* sky, int* status)
                     j + (int) OSKAR_SKY_I_JY
             );
             num_stokes[j] = oskar_sky_num_valid_columns_of_type(sky, col, i);
-            if ((num_stokes[j] > 1 && num_freq != num_stokes[j]) ||
-                    (num_stokes[j] == 1 && num_freq > num_stokes[j]))
+            if ((num_stokes[j] > 1 && num_inc == 0 && num_freq != num_stokes[j])
+                    || (num_stokes[j] == 1 && num_freq > num_stokes[j]))
             {
                 *status = OSKAR_ERR_INVALID_ARGUMENT;
                 oskar_log_error(
@@ -106,6 +109,14 @@ void oskar_sky_check_columns(const oskar_Sky* sky, int* status)
             *status = OSKAR_ERR_INVALID_ARGUMENT;
             oskar_log_error(
                     0, "Source %d needs one ReferenceFrequency "
+                    "to use SpectralIndex values.", i
+            );
+        }
+        if (num_stokes[0] != 1 && num_alpha > 0)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            oskar_log_error(
+                    0, "Source %d needs one Stokes I value "
                     "to use SpectralIndex values.", i
             );
         }
@@ -151,7 +162,21 @@ void oskar_sky_check_columns(const oskar_Sky* sky, int* status)
                     "so it also requires a single SpectralIndex term.", i
             );
         }
-        if (num_pol_ang > 1 && num_pol_ang != num_freq)
+        if (num_inc > 1)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            oskar_log_error(0, "Source %d can have, at most, one "
+                    "FrequencyIncrement value.", i
+            );
+        }
+        if (num_freq > 1 && num_inc > 0)
+        {
+            *status = OSKAR_ERR_INVALID_ARGUMENT;
+            oskar_log_error(0, "Source %d has multiple ReferenceFrequency "
+                    "values as well as a FrequencyIncrement value.", i
+            );
+        }
+        if (num_pol_ang > 1 && num_pol_ang != num_freq && num_inc == 0)
         {
             *status = OSKAR_ERR_INVALID_ARGUMENT;
             oskar_log_error(
@@ -159,7 +184,7 @@ void oskar_sky_check_columns(const oskar_Sky* sky, int* status)
                     "values as PolarizationAngle values.", i
             );
         }
-        if (num_pol_frac > 1 && num_pol_frac != num_freq)
+        if (num_pol_frac > 1 && num_pol_frac != num_freq && num_inc == 0)
         {
             *status = OSKAR_ERR_INVALID_ARGUMENT;
             oskar_log_error(
@@ -167,7 +192,7 @@ void oskar_sky_check_columns(const oskar_Sky* sky, int* status)
                     "values as PolarizedFraction values.", i
             );
         }
-        if (num_line_width > 1 && num_line_width != num_freq)
+        if (num_line_width > 1 && num_line_width != num_freq && num_inc == 0)
         {
             *status = OSKAR_ERR_INVALID_ARGUMENT;
             oskar_log_error(

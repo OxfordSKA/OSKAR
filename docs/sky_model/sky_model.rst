@@ -2,6 +2,9 @@
 
    <br />
 
+.. |_| unicode:: 0xA0
+   :trim:
+
 .. _sky-model:
 
 *********
@@ -70,49 +73,60 @@ Column names supported by OSKAR are case-insensitive, and include:
    * - **Ra**
      - angle
      - Right Ascension, in decimal degrees or radians (default);
-       |br| or sexagesimal hours, minutes and seconds. |br| See note below.
+       or sexagesimal hours, minutes and seconds. |br| See note below.
    * - **Dec**
      - angle
      - Declination, in decimal degrees or radians (default);
-       |br| or sexagesimal degrees, minutes and seconds. |br| See note below.
+       or sexagesimal degrees, minutes and seconds. |br| See note below.
    * - **RaD** |br| or **ra_deg**
      - angle
      - Right Ascension, in decimal degrees (default) or radians;
-       |br| or sexagesimal hours, minutes and seconds. |br|
+       or sexagesimal hours, minutes and seconds. |br|
        Use instead of **Ra** if required. See note below.
    * - **DecD** |br| or **dec_deg**
      - angle
      - Declination, in decimal degrees (default) or radians;
-       |br| or sexagesimal degrees, minutes and seconds. |br|
+       or sexagesimal degrees, minutes and seconds. |br|
        Use instead of **Dec** if required. See note below.
    * - **I** |br| or **i_*** |br| or **StokesI** |br|  or **stokes_i*** |br|
        or **int_flux*** |br| or **Fint***
      - Jy
      - Stokes I flux (at reference frequency/frequencies). |br|
-       Can be multi-valued, with a list of values inside brackets |br|
+       Can be multi-valued, with a list of values inside brackets
        to specify the flux at multiple frequencies. |br|
        See :ref:`multi-frequency-flux` below.
    * - **Q** |br| or **q_*** |br| or **StokesQ** |br| or **stokes_q***
      - Jy
      - Optional Stokes Q flux. |br|
-       Can be multi-valued, with a list of values inside brackets |br|
+       Can be multi-valued, with a list of values inside brackets
        to specify the flux at multiple frequencies.
    * - **U** |br| or **u_*** |br| or **StokesU** |br| or **stokes_u***
      - Jy
      - Optional Stokes U flux. |br|
-       Can be multi-valued, with a list of values inside brackets |br|
+       Can be multi-valued, with a list of values inside brackets
        to specify the flux at multiple frequencies.
    * - **V** |br| or **v_*** |br| or **StokesV** |br| or **stokes_v***
      - Jy
      - Optional Stokes V flux. |br|
-       Can be multi-valued, with a list of values inside brackets |br|
+       Can be multi-valued, with a list of values inside brackets
        to specify the flux at multiple frequencies.
    * - **ReferenceFrequency** |br| or **ReferenceFreq*** |br|
        or **reference_freq*** |br| or **RefFreq*** |br| or **ref_freq***
      - Hz
      - Optional reference frequency for source fluxes. |br|
-       Can be multi-valued, with a list of values inside brackets |br|
+       Can be multi-valued, with a list of values inside brackets
        to specify frequencies for multiple flux values. |br|
+       See :ref:`multi-frequency-flux` and :ref:`spectral-line-profile` below.
+   * - **FrequencyIncrement** |br| or **FrequencyInc*** |br|
+       or **frequency_inc*** |br| or **FreqInc*** |br| or **freq_inc***
+     - Hz
+     - Optional frequency increment, if reference frequencies for multiple
+       flux values are regularly-spaced. If this is defined, then the
+       **ReferenceFrequency** can be only a single value, which is
+       interpreted as the start frequency. |br|
+       It is more efficient to use this parameter than supply an array of
+       reference frequencies if the intervals between them are all the same.
+       |br|
        See :ref:`multi-frequency-flux` and :ref:`spectral-line-profile` below.
    * - **SpectralIndex** |br| or **spectral_index** |br| or **spec_idx** |br|
        or **alpha***
@@ -122,7 +136,7 @@ Column names supported by OSKAR are case-insensitive, and include:
        See :ref:`spectral-profiles` below.
    * - **LogarithmicSI** |br| or **log_spec_idx**
      - boolean
-     - Optional boolean flag: If true, spectral indices are logarithmic, |br|
+     - Optional boolean flag: If true, spectral indices are logarithmic,
        otherwise linear; see the
        `LOFAR Wiki page on LogarithmicSI <https://www.astron.nl/lofarwiki/doku.php?id=public:user_software:documentation:makesourcedb#logarithmic_spectral_index>`_.
        |br| Default true if omitted.
@@ -145,42 +159,40 @@ Column names supported by OSKAR are case-insensitive, and include:
      - deg
      - Optional position angle of Gaussian major axis.
    * - **RotationMeasure** |br| or **rot_meas*** |br| or **rm***
-     - rad / m\ :sup:`2`
+     - rad |_| / |_| m\ :sup:`2`
      - Optional source rotation measure.
    * - **PolarizationAngle** |br| or **PolarisationAngle** |br| or **pol_ang***
      - deg
-     - Optional source polarisation angle; used if Q and U are |br|
+     - Optional source polarisation angle; used if Q and U are
        omitted, or when a rotation measure is set. |br|
-       Can be multi-valued, with a list of values inside brackets |br|
+       Can be multi-valued, with a list of values inside brackets
        to specify the value at multiple frequencies.
    * - **PolarizedFraction** |br| or **PolarisedFraction** |br| or **pol_frac***
      - N/A
-     - Optional fraction of linear polarisation, used if Q and U are |br|
+     - Optional fraction of linear polarisation, used if Q and U are
        omitted, or when a rotation measure is set. |br|
-       Can be multi-valued, with a list of values inside brackets |br|
+       Can be multi-valued, with a list of values inside brackets
        to specify the value at multiple frequencies.
    * - **ReferenceWavelength** |br| or **reference_wave*** |br| or **ref_wave***
      - metres
-     - Optional reference wavelength, used with the rotation |br|
-       measure parameter. If omitted, it will be calculated based on |br|
-       the reference frequency.
+     - Optional reference wavelength, used with the rotation measure parameter.
+       If omitted, it will be calculated based on the reference frequency.
    * - **SpectralCurvature** |br| or **spectral_curv*** |br| or **spec_curv***
      - N/A
      - Optional spectral curvature term described in |br|
        `Callingham et. al. (2017) <https://iopscience.iop.org/article/10.3847/1538-4357/836/2/174/pdf>`_,
-       equation 2, where this value is |br|
-       interpreted as the parameter 'q'. If specified, only the first |br|
-       **SpectralIndex** value will be used, and any others will be |br|
-       ignored. See :ref:`spectral-curvature` below.
+       equation 2, where this value is interpreted as the parameter 'q'.
+       If specified, only the first **SpectralIndex** value can be used.
+       See :ref:`spectral-curvature` below.
    * - **LineWidth** |br| or **line_width***
      - Hz
      - Optional line width in Hz, if this is a spectral line source. |br|
-       Can be multi-valued, with a list of values inside brackets |br|
-       to specify multiple spectral lines, each at their own reference |br|
-       frequency. If a line width is specified for a source, then |br|
-       spectral index values will be ignored, and the Stokes I flux will |br|
-       be calculated using Gaussian profile(s) centred on the reference |br|
-       frequencies, with peak amplitudes given by corresponding |br|
+       Can be multi-valued, with a list of values inside brackets
+       to specify multiple spectral lines, each at their own reference
+       frequency. If a line width is specified for a source, then
+       spectral index values cannot be used, and the Stokes I flux will
+       be calculated using Gaussian profile(s) centred on the reference
+       frequencies, with peak amplitudes given by corresponding
        entries in the **StokesI** vector. |br|
        See :ref:`spectral-line-profile` below.
 
@@ -328,6 +340,11 @@ values needs to be the same for a given source, but different sources can
 use their own sets of values; there is no requirement to use the same number
 of reference frequencies for all sources.
 
+If the interval between each **ReferenceFrequency** would be constant
+(i.e. the frequencies are regularly-spaced), then it is more efficient to
+specify the frequency interval as a **FrequencyIncrement**, and supply the
+start frequency as a single value in the reference frequency column.
+
 Please be aware that using a sky model containing flux values at many
 frequencies can have a significant negative impact on the efficiency of
 simulations.
@@ -400,41 +417,44 @@ Example: Using defaults
 Example: Using a mixture of different spectral types
 ----------------------------------------------------
 
-This example will work with OSKAR 2.13 or above, and shows nine sources in the
+This example will work with OSKAR 2.13 or above, and shows ten sources in the
 same sky model file that use different spectral model types.
 Note that the extra spacing added between commas is not necessary, but helps to
 show which values are in which columns, and which ones are left blank.
 
 .. code-block:: text
 
-   #(RaD, DecD, I,                     ReferenceFrequency                , SpectralIndex     , LogarithmicSI, SpectralCurvature, LineWidth) = format
+   #(RaD, DecD, I,                     ReferenceFrequency                , FrequencyIncrement, SpectralIndex     , LogarithmicSI, SpectralCurvature, LineWidth) = format
 
    # Source 0: Flat spectrum (no reference frequency).
-   0.00,  0.0,  1.0,                                                     ,                   ,              ,                  ,
+   0.00,  0.0,  1.0,                                                     ,                   ,                   ,              ,                  ,
 
    # Source 1: Simple logarithmic spectral index.
-   0.01,  0.1,  1.1,                   101e6                             , -0.55             ,              ,                  ,
+   0.01,  0.1,  1.1,                   101e6                             ,                   , -0.55             ,              ,                  ,
 
    # Source 2: Two-term logarithmic spectral index polynomial.
-   0.02,  0.2,  1.2,                   102e6                             , [-0.7, 0.05]      , true         ,                  ,
+   0.02,  0.2,  1.2,                   102e6                             ,                   , [-0.7, 0.05]      , true         ,                  ,
 
    # Source 3: Three-term linear spectral index polynomial.
-   0.03,  0.3,  1.3,                   103e6                             , [0.08, 0.07, 0.02], false        ,                  ,
+   0.03,  0.3,  1.3,                   103e6                             ,                   , [0.08, 0.07, 0.02], false        ,                  ,
 
    # Source 4: Spectral curvature model.
-   0.04,  0.4,  1.4,                   104e6                             , -0.6              ,              , 0.1              ,
+   0.04,  0.4,  1.4,                   104e6                             ,                   , -0.6              ,              , 0.1              ,
 
    # Source 5: Simple Gaussian spectral line model.
-   0.05,  0.5,  1.5,                   105e6                             ,                   ,              ,                  , 100e3
+   0.05,  0.5,  1.5,                   105e6                             ,                   ,                   ,              ,                  , 100e3
 
    # Source 6: Three spectral lines of the same width, each a Gaussian.
-   0.06,  0.6,  [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6]             ,                   ,              ,                  , 125e3
+   0.06,  0.6,  [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6]             ,                   ,                   ,              ,                  , 125e3
 
    # Source 7: Three spectral lines of different widths, each a Gaussian.
-   0.07,  0.7,  [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6]             ,                   ,              ,                  , [250e3, 350e3, 500e3]
+   0.07,  0.7,  [1.6, 1.7, 1.8],       [101e6, 102e6, 104e6]             ,                   ,                   ,              ,                  , [250e3, 350e3, 500e3]
 
-   # Source 8: Different flux at four frequencies.
-   0.08,  0.8,  [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],                   ,              ,                  ,
+   # Source 8: Different flux at four arbitrary frequencies.
+   0.08,  0.8,  [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],                   ,                   ,              ,                  ,
+
+   # Source 9: Different flux at four regularly-spaced frequencies.
+   0.09,  0.9,  [1.5, 1.6, 1.7, 1.55], 101e6                             , 1e6               ,                   ,              ,                  ,
 
 .. admonition:: A more compact version
 
@@ -443,16 +463,17 @@ show which values are in which columns, and which ones are left blank.
 
    .. code-block:: text
 
-      #(RaD, DecD, I, RefFreq, SpectralIndex, LogarithmicSI, SpectralCurvature, LineWidth) = format
-      0.00,  0.0,  1.0,,,,,
-      0.01,  0.1,  1.1, 101e6, -0.55,,,
-      0.02,  0.2,  1.2, 102e6, [-0.7, 0.05], true,,
-      0.03,  0.3,  1.3, 103e6, [0.08, 0.07, 0.02], false,,
-      0.04,  0.4,  1.4, 104e6, -0.6,, 0.1,
-      0.05,  0.5,  1.5, 105e6,,,, 100e3
-      0.06,  0.6,  [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, 125e3
-      0.07,  0.7,  [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,, [250e3, 350e3, 500e3]
-      0.08,  0.8,  [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],,,,
+      #(RaD,DecD,I,RefFreq,FreqInc,SpectralIndex,LogarithmicSI,SpectralCurvature,LineWidth) = format
+      0.00, 0.0, 1.0,,,,,,
+      0.01, 0.1, 1.1, 101e6,, -0.55,,,
+      0.02, 0.2, 1.2, 102e6,, [-0.7, 0.05], true,,
+      0.03, 0.3, 1.3, 103e6,, [0.08, 0.07, 0.02], false,,
+      0.04, 0.4, 1.4, 104e6,, -0.6,, 0.1,
+      0.05, 0.5, 1.5, 105e6,,,,, 100e3
+      0.06, 0.6, [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,,, 125e3
+      0.07, 0.7, [1.6, 1.7, 1.8], [101e6, 102e6, 104e6],,,,, [250e3, 350e3, 500e3]
+      0.08, 0.8, [1.7, 1.8, 1.9, 1.75], [101e6, 102.4e6, 103.8e6, 104.1e6],,,,,
+      0.09, 0.9, [1.5, 1.6, 1.7, 1.55], 101e6, 1e6,,,,
 
 .. _example3:
 

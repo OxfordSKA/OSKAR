@@ -45,6 +45,7 @@ void oskar_sky_scale_flux_with_frequency(
     const int refw = oskar_sky_first_column(sky, OSKAR_SKY_REF_WAVE_M);
     const int sp_curv = oskar_sky_first_column(sky, OSKAR_SKY_SPEC_CURV);
     const int width_hz = oskar_sky_first_column(sky, OSKAR_SKY_LINE_WIDTH_HZ);
+    const int inc_hz = oskar_sky_first_column(sky, OSKAR_SKY_INC_HZ);
 
     /* Get pointers to the output scratch columns. */
     oskar_Mem* out_i = oskar_sky_column(
@@ -74,7 +75,7 @@ void oskar_sky_scale_flux_with_frequency(
                     oskar_mem_float_const(sky->table, status),
                     oskar_mem_int_const(sky->num_valid_columns, status),
                     in_i, in_q, in_u, in_v, ref_hz, lin_si, spx,
-                    rm, polf, pola, refw, sp_curv, width_hz,
+                    rm, polf, pola, refw, sp_curv, width_hz, inc_hz,
                     oskar_mem_float(out_i, status),
                     oskar_mem_float(out_q, status),
                     oskar_mem_float(out_u, status),
@@ -88,7 +89,7 @@ void oskar_sky_scale_flux_with_frequency(
                     oskar_mem_double_const(sky->table, status),
                     oskar_mem_int_const(sky->num_valid_columns, status),
                     in_i, in_q, in_u, in_v, ref_hz, lin_si, spx,
-                    rm, polf, pola, refw, sp_curv, width_hz,
+                    rm, polf, pola, refw, sp_curv, width_hz, inc_hz,
                     oskar_mem_double(out_i, status),
                     oskar_mem_double(out_q, status),
                     oskar_mem_double(out_u, status),
@@ -143,6 +144,7 @@ void oskar_sky_scale_flux_with_frequency(
                 {INT_SZ, &refw},
                 {INT_SZ, &sp_curv},
                 {INT_SZ, &width_hz},
+                {INT_SZ, &inc_hz},
                 {PTR_SZ, oskar_mem_buffer(out_i)},
                 {PTR_SZ, oskar_mem_buffer(out_q)},
                 {PTR_SZ, oskar_mem_buffer(out_u)},

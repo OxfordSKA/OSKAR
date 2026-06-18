@@ -37,6 +37,8 @@ const char* oskar_sky_column_type_to_name(
             return "v_pol_jy";
         case OSKAR_SKY_REF_HZ:
             return "ref_freq_hz";
+        case OSKAR_SKY_INC_HZ:
+            return "freq_inc_hz";
         case OSKAR_SKY_SPEC_IDX:
             return "spec_idx";
         case OSKAR_SKY_RM_RAD:
@@ -88,6 +90,8 @@ const char* oskar_sky_column_type_to_name(
         return "V";
     case OSKAR_SKY_REF_HZ:
         return "ReferenceFrequency";
+    case OSKAR_SKY_INC_HZ:
+        return "FrequencyIncrement";
     case OSKAR_SKY_SPEC_IDX:
         return "SpectralIndex";
     case OSKAR_SKY_RM_RAD:
@@ -96,10 +100,10 @@ const char* oskar_sky_column_type_to_name(
         return "MajorAxis";
     case OSKAR_SKY_MINOR_RAD:
         return "MinorAxis";
-    case OSKAR_SKY_SEMI_MAJOR:
-        return "SemiMajorAxis";
-    case OSKAR_SKY_SEMI_MINOR:
-        return "SemiMinorAxis";
+    case OSKAR_SKY_SEMI_MAJOR: /* Unused */               /* LCOV_EXCL_LINE */
+        return "SemiMajorAxis";                           /* LCOV_EXCL_LINE */
+    case OSKAR_SKY_SEMI_MINOR: /* Unused */               /* LCOV_EXCL_LINE */
+        return "SemiMinorAxis";                           /* LCOV_EXCL_LINE */
     case OSKAR_SKY_PA_RAD:
         return "Orientation";
     case OSKAR_SKY_LIN_SI:

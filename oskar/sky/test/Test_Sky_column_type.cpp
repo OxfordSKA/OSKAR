@@ -67,11 +67,20 @@ TEST(Sky, column_type_from_name)
     ASSERT_EQ(OSKAR_SKY_REF_HZ,
             oskar_sky_column_type_from_name("ref_freq_hz", 0)
     );
+    ASSERT_EQ(OSKAR_SKY_INC_HZ,
+            oskar_sky_column_type_from_name("FrequencyIncrement", 0)
+    );
+    ASSERT_EQ(OSKAR_SKY_INC_HZ,
+            oskar_sky_column_type_from_name("freq_inc_hz", 0)
+    );
     ASSERT_EQ(OSKAR_SKY_SPEC_IDX,
             oskar_sky_column_type_from_name("SpectralIndex", 0)
     );
     ASSERT_EQ(OSKAR_SKY_SPEC_IDX,
             oskar_sky_column_type_from_name("spec_idx", 0)
+    );
+    ASSERT_EQ(OSKAR_SKY_SPEC_IDX,
+            oskar_sky_column_type_from_name("alpha", 0)
     );
     ASSERT_EQ(OSKAR_SKY_RM_RAD,
             oskar_sky_column_type_from_name("RotationMeasure", 0)
@@ -144,11 +153,20 @@ TEST(Sky, column_type_to_name)
     ASSERT_STREQ("Q",
             oskar_sky_column_type_to_name(OSKAR_SKY_Q_JY, 0)
     );
+    ASSERT_STREQ("q_pol_jy",
+            oskar_sky_column_type_to_name(OSKAR_SKY_Q_JY, 1)
+    );
     ASSERT_STREQ("U",
             oskar_sky_column_type_to_name(OSKAR_SKY_U_JY, 0)
     );
+    ASSERT_STREQ("u_pol_jy",
+            oskar_sky_column_type_to_name(OSKAR_SKY_U_JY, 1)
+    );
     ASSERT_STREQ("V",
             oskar_sky_column_type_to_name(OSKAR_SKY_V_JY, 0)
+    );
+    ASSERT_STREQ("v_pol_jy",
+            oskar_sky_column_type_to_name(OSKAR_SKY_V_JY, 1)
     );
     ASSERT_STREQ(
             "ReferenceFrequency",
@@ -157,6 +175,14 @@ TEST(Sky, column_type_to_name)
     ASSERT_STREQ(
             "ref_freq_hz",
             oskar_sky_column_type_to_name(OSKAR_SKY_REF_HZ, 1)
+    );
+    ASSERT_STREQ(
+            "FrequencyIncrement",
+            oskar_sky_column_type_to_name(OSKAR_SKY_INC_HZ, 0)
+    );
+    ASSERT_STREQ(
+            "freq_inc_hz",
+            oskar_sky_column_type_to_name(OSKAR_SKY_INC_HZ, 1)
     );
     ASSERT_STREQ(
             "SpectralIndex",
@@ -169,6 +195,10 @@ TEST(Sky, column_type_to_name)
     ASSERT_STREQ(
             "RotationMeasure",
             oskar_sky_column_type_to_name(OSKAR_SKY_RM_RAD, 0)
+    );
+    ASSERT_STREQ(
+            "rot_meas",
+            oskar_sky_column_type_to_name(OSKAR_SKY_RM_RAD, 1)
     );
     ASSERT_STREQ(
             "MajorAxis",
@@ -191,19 +221,39 @@ TEST(Sky, column_type_to_name)
             oskar_sky_column_type_to_name(OSKAR_SKY_POLA_RAD, 0)
     );
     ASSERT_STREQ(
+            "pol_ang_deg",
+            oskar_sky_column_type_to_name(OSKAR_SKY_POLA_RAD, 1)
+    );
+    ASSERT_STREQ(
             "PolarizedFraction",
             oskar_sky_column_type_to_name(OSKAR_SKY_POLF, 0)
+    );
+    ASSERT_STREQ(
+            "pol_frac",
+            oskar_sky_column_type_to_name(OSKAR_SKY_POLF, 1)
     );
     ASSERT_STREQ(
             "ReferenceWavelength",
             oskar_sky_column_type_to_name(OSKAR_SKY_REF_WAVE_M, 0)
     );
     ASSERT_STREQ(
+            "ref_wavelength_m",
+            oskar_sky_column_type_to_name(OSKAR_SKY_REF_WAVE_M, 1)
+    );
+    ASSERT_STREQ(
             "SpectralCurvature",
             oskar_sky_column_type_to_name(OSKAR_SKY_SPEC_CURV, 0)
     );
     ASSERT_STREQ(
+            "spec_curv",
+            oskar_sky_column_type_to_name(OSKAR_SKY_SPEC_CURV, 1)
+    );
+    ASSERT_STREQ(
             "LineWidth",
             oskar_sky_column_type_to_name(OSKAR_SKY_LINE_WIDTH_HZ, 0)
+    );
+    ASSERT_STREQ(
+            "line_width_hz",
+            oskar_sky_column_type_to_name(OSKAR_SKY_LINE_WIDTH_HZ, 1)
     );
 }
