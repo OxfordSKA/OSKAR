@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2025, The OSKAR Developers.
+ * Copyright (c) 2014-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -49,6 +49,10 @@ extern "C" {
  * @param[in] freq_hz         Observing frequency in Hz.
  * @param[in] dipole_length_m Length of dipole in metres.
  * @param[in] swap_xy         If true, swap the X and Y dipole in the output.
+ * @param[in] conjugate_x     If true, conjugate X response.
+ * @param[in] conjugate_y     If true, conjugate Y response.
+ * @param[in] negate_x        If true, negate X response.
+ * @param[in] negate_y        If true, negate Y response.
  * @param[in] offset_out      Start offset into output array.
  * @param[out] pattern        Array of output Jones matrices/scalars per source.
  * @param[in,out] status      Status return code.
@@ -62,6 +66,10 @@ void oskar_evaluate_dipole_pattern(
         double freq_hz,
         double dipole_length_m,
         int swap_xy,
+        int conjugate_x,
+        int conjugate_y,
+        int negate_x,
+        int negate_y,
         int offset_out,
         oskar_Mem* pattern,
         int* status

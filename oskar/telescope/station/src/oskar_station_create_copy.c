@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2025, The OSKAR Developers.
+ * Copyright (c) 2013-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -73,6 +73,10 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     dst->apply_element_weight = src->apply_element_weight;
     dst->seed_time_variable_errors = src->seed_time_variable_errors;
     dst->swap_xy = src->swap_xy;
+    dst->conjugate_element[0] = src->conjugate_element[0];
+    dst->conjugate_element[1] = src->conjugate_element[1];
+    dst->negate_element[0] = src->negate_element[0];
+    dst->negate_element[1] = src->negate_element[1];
     dst->num_permitted_beams = src->num_permitted_beams;
 
     /* Copy Gaussian station beam data. */

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2025, The OSKAR Developers. See LICENSE file. */
+/* Copyright (c) 2019-2026, The OSKAR Developers. See LICENSE file. */
 
 /* Spherical wave evaluation method based on Matlab code by
  * Christophe Craeye, Quentin Gueuning and Eloy de Lera Acedo.
@@ -25,6 +25,10 @@ KERNEL(NAME) (\
         const int l_max,\
         GLOBAL_IN(FP4c, alpha),\
         const int swap_xy,\
+        const int conjugate_x,\
+        const int conjugate_y,\
+        const int negate_x,\
+        const int negate_y,\
         const int offset,\
         GLOBAL_OUT(FP4c, pattern))\
 {\
@@ -82,6 +86,22 @@ KERNEL(NAME) (\
                 }\
             }\
         }\
+    }\
+    if (conjugate_x) {\
+        Xt.y *= -1;\
+        Xp.y *= -1;\
+    }\
+    if (conjugate_y) {\
+        Yt.y *= -1;\
+        Yp.y *= -1;\
+    }\
+    if (negate_x) {\
+        Xt.x *= -1;\
+        Xp.y *= -1;\
+    }\
+    if (negate_y) {\
+        Yt.x *= -1;\
+        Yp.y *= -1;\
     }\
     /* For some reason the theta/phi components must be reversed? */\
     if (swap_xy) {\

@@ -390,6 +390,18 @@ void set_station_data(oskar_Station* station, SettingsTree* s, int* status)
     oskar_station_set_normalise_element_pattern(station,
             s->to_int("normalise", status));
     oskar_station_set_swap_xy(station, s->to_int("swap_xy", status));
+    oskar_station_set_conjugate_element(
+            station, 0, s->to_int("conjugate_x", status)
+    );
+    oskar_station_set_conjugate_element(
+            station, 1, s->to_int("conjugate_y", status)
+    );
+    oskar_station_set_negate_element(
+            station, 0, s->to_int("negate_x", status)
+    );
+    oskar_station_set_negate_element(
+            station, 1, s->to_int("negate_y", status)
+    );
     double dipole_length = s->to_double("dipole_length", status);
     char units = s->first_letter("dipole_length_units", status);
     char functional_type = s->first_letter("functional_type", status);

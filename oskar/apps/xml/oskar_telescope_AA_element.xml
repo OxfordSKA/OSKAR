@@ -22,6 +22,20 @@
         <desc>This setting should be considered a hack to swap the order of
             the X and Y responses in the output, if they come out the
             wrong way when using numerically-defined patterns.</desc></s>
+    <s k="conjugate_x"><label>Conjugate X</label>
+        <type name="bool" default="false"/>
+        <desc>If <b>true</b>, take the complex conjugate of the X element
+            response.</desc></s>
+    <s k="conjugate_y"><label>Conjugate Y</label>
+        <type name="bool" default="false"/>
+        <desc>If <b>true</b>, take the complex conjugate of the Y element
+            response.</desc></s>
+    <s k="negate_x"><label>Negate X</label>
+        <type name="bool" default="false"/>
+        <desc>If <b>true</b>, negate the X element response.</desc></s>
+    <s k="negate_y"><label>Negate Y</label>
+        <type name="bool" default="false"/>
+        <desc>If <b>true</b>, negate the Y element response.</desc></s>
     <s k="functional_type"><label>Functional pattern type</label>
         <type name="OptionList" default="Dipole">
             Dipole,Isotropic (unpolarised)

@@ -27,6 +27,10 @@ void oskar_element_evaluate(
         const oskar_Element* model,
         int normalise,
         int swap_xy,
+        int conjugate_x,
+        int conjugate_y,
+        int negate_x,
+        int negate_y,
         double orientation_x,
         double orientation_y,
         int offset_points,
@@ -101,7 +105,8 @@ void oskar_element_evaluate(
                     num_points_norm, theta, phi_x,
                     (model->common_phi_coords[id] ? phi_x : phi_y),
                     model->l_max[id], model->sph_wave[id],
-                    swap_xy, offset_out, output, status
+                    swap_xy, conjugate_x, conjugate_y, negate_x, negate_y,
+                    offset_out, output, status
             );
         }
         else if (oskar_element_has_spherical_wave_feko_data(model, id))
@@ -116,7 +121,8 @@ void oskar_element_evaluate(
                     num_points_norm, theta, phi_x,
                     (model->common_phi_coords[id] ? phi_x : phi_y),
                     model->l_max[id], root_n, use_ticra_convention,
-                    model->sph_wave_feko[id], workspace, swap_xy,
+                    model->sph_wave_feko[id], workspace,
+                    swap_xy, conjugate_x, conjugate_y, negate_x, negate_y,
                     offset_out, output, status
             );
         }
@@ -126,7 +132,8 @@ void oskar_element_evaluate(
                     num_points_norm, theta, phi_x,
                     (model->common_phi_coords[id] ? phi_x : phi_y),
                     model->l_max[id], model->sph_wave_galileo[id],
-                    swap_xy, offset_out, output, status
+                    swap_xy, conjugate_x, conjugate_y, negate_x, negate_y,
+                    offset_out, output, status
             );
         }
         else if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
@@ -134,7 +141,8 @@ void oskar_element_evaluate(
             oskar_evaluate_dipole_pattern(
                     num_points_norm, theta, phi_x, phi_y,
                     frequency_hz, dipole_length_m,
-                    swap_xy, offset_out, output, status
+                    swap_xy, conjugate_x, conjugate_y, negate_x, negate_y,
+                    offset_out, output, status
             );
         }
     }
@@ -144,7 +152,9 @@ void oskar_element_evaluate(
         {
             oskar_evaluate_dipole_pattern(
                     num_points_norm, theta, phi_x, phi_y, frequency_hz,
-                    dipole_length_m, swap_xy, offset_out, output, status
+                    dipole_length_m,
+                    swap_xy, conjugate_x, conjugate_y, negate_x, negate_y,
+                    offset_out, output, status
             );
         }
     }

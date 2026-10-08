@@ -36,6 +36,10 @@ void oskar_evaluate_spherical_wave_sum_feko_norm_polynomial(
         const oskar_Mem* coeffs,
         oskar_Mem* workspace,
         int swap_xy,
+        int conjugate_x,
+        int conjugate_y,
+        int negate_x,
+        int negate_y,
         int offset_out,
         oskar_Mem* pattern,
         int* status
@@ -81,6 +85,10 @@ void oskar_evaluate_spherical_wave_sum_feko_norm_polynomial(
                     coeff_scale_f,
                     oskar_mem_float(workspace, status),
                     swap_xy,
+                    conjugate_x,
+                    conjugate_y,
+                    negate_x,
+                    negate_y,
                     offset_out,
                     oskar_mem_float4c(pattern, status)
             );
@@ -98,6 +106,10 @@ void oskar_evaluate_spherical_wave_sum_feko_norm_polynomial(
                     coeff_scale,
                     oskar_mem_double(workspace, status),
                     swap_xy,
+                    conjugate_x,
+                    conjugate_y,
+                    negate_x,
+                    negate_y,
                     offset_out,
                     oskar_mem_double4c(pattern, status)
             );
@@ -158,6 +170,10 @@ void oskar_evaluate_spherical_wave_sum_feko_norm_polynomial(
                         (const void*) &coeff_scale_f},
                 {PTR_SZ, oskar_mem_buffer_const(workspace)},
                 {INT_SZ, &swap_xy},
+                {INT_SZ, &conjugate_x},
+                {INT_SZ, &conjugate_y},
+                {INT_SZ, &negate_x},
+                {INT_SZ, &negate_y},
                 {INT_SZ, &offset_out},
                 {PTR_SZ, oskar_mem_buffer(pattern)}
         };

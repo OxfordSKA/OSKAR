@@ -46,6 +46,10 @@ KERNEL(NAME) (\
         const FP coeff_scale,\
         GLOBAL_OUT(FP, workspace),\
         const int swap_xy,\
+        const int conjugate_x,\
+        const int conjugate_y,\
+        const int negate_x,\
+        const int negate_y,\
         const int offset,\
         GLOBAL_OUT(FP4c, pattern))\
 {\
@@ -145,6 +149,22 @@ KERNEL(NAME) (\
         e_theta[a].y *= sqrt_fac;\
         e_phi[a].x *= sqrt_fac;\
         e_phi[a].y *= sqrt_fac;\
+    }\
+    if (conjugate_x) {\
+        e_theta[0].y *= -1;\
+        e_phi[0].y *= -1;\
+    }\
+    if (conjugate_y) {\
+        e_theta[1].y *= -1;\
+        e_phi[1].y *= -1;\
+    }\
+    if (negate_x) {\
+        e_theta[0].x *= -1;\
+        e_phi[0].y *= -1;\
+    }\
+    if (negate_y) {\
+        e_theta[1].x *= -1;\
+        e_phi[1].y *= -1;\
     }\
     const int i_out = i + offset;\
     if (swap_xy) {\

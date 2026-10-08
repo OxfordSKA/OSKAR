@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2025, The OSKAR Developers.
+ * Copyright (c) 2019-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -32,6 +32,10 @@ extern "C" {
  * @param[in] l_max         Maximum order of spherical wave.
  * @param[in] alpha         TE and TM mode coefficients for X and Y antennas.
  * @param[in] swap_xy       If true, swap the X and Y antenna in the output.
+ * @param[in] conjugate_x   If true, conjugate X response.
+ * @param[in] conjugate_y   If true, conjugate Y response.
+ * @param[in] negate_x      If true, negate X response.
+ * @param[in] negate_y      If true, negate Y response.
  * @param[in] offset_out    Offset into output data array.
  * @param[in,out] pattern   Output data array of length at least \p num_points.
  * @param[in,out] status    Status return code.
@@ -45,6 +49,10 @@ void oskar_evaluate_spherical_wave_sum(
         int l_max,
         const oskar_Mem* alpha,
         int swap_xy,
+        int conjugate_x,
+        int conjugate_y,
+        int negate_x,
+        int negate_y,
         int offset_out,
         oskar_Mem* pattern,
         int* status

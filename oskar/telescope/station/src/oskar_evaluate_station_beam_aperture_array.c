@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2025, The OSKAR Developers.
+ * Copyright (c) 2012-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -82,6 +82,10 @@ static void oskar_evaluate_station_beam_aperture_array_private(
 
     const double wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
     const int swap_xy       = oskar_station_swap_xy(s);
+    const int conjugate_x   = oskar_station_conjugate_element(s, 0);
+    const int conjugate_y   = oskar_station_conjugate_element(s, 1);
+    const int negate_x      = oskar_station_negate_element(s, 0);
+    const int negate_y      = oskar_station_negate_element(s, 1);
     const int is_3d         = oskar_station_array_is_3d(s);
     const int norm_array    = oskar_station_normalise_array_pattern(s);
     const int norm_element  = oskar_station_normalise_element_pattern(s);
@@ -170,6 +174,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                 oskar_element_evaluate(
                         oskar_station_element_const(s, i),
                         norm_element, swap_xy,
+                        conjugate_x, conjugate_y, negate_x, negate_y,
                         oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, 0),
                         offset_points, num_points, x, y, z, frequency_hz,
@@ -197,6 +202,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                 oskar_element_evaluate(
                         oskar_station_element_const(s, element_type[i]),
                         norm_element, swap_xy,
+                        conjugate_x, conjugate_y, negate_x, negate_y,
                         oskar_station_element_euler_index_rad(s, 0, 0, i) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
                         oskar_station_element_euler_index_rad(s, 1, 0, i),
                         offset_points, num_points, x, y, z, frequency_hz,

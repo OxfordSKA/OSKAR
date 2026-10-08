@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2025, The OSKAR Developers.
+ * Copyright (c) 2013-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -194,6 +194,12 @@ unsigned int oskar_station_seed_time_variable_errors(const oskar_Station* model)
 
 OSKAR_EXPORT
 int oskar_station_swap_xy(const oskar_Station* model);
+
+OSKAR_EXPORT
+int oskar_station_conjugate_element(const oskar_Station* model, int feed);
+
+OSKAR_EXPORT
+int oskar_station_negate_element(const oskar_Station* model, int feed);
 
 OSKAR_EXPORT
 double oskar_station_element_euler_index_rad(
@@ -527,6 +533,30 @@ void oskar_station_set_seed_time_variable_errors(oskar_Station* model,
  */
 OSKAR_EXPORT
 void oskar_station_set_swap_xy(oskar_Station* model, int value);
+
+/**
+ * @brief
+ * Sets the option to conjugate the element response.
+ *
+ * @param[in] model  Pointer to station model.
+ * @param[in] feed   Feed index for which value applies.
+ * @param[in] value  True or false.
+ */
+OSKAR_EXPORT
+void oskar_station_set_conjugate_element(
+        oskar_Station* model, int feed, int value);
+
+/**
+ * @brief
+ * Sets the option to negate the element response.
+ *
+ * @param[in] model  Pointer to station model.
+ * @param[in] feed   Feed index for which value applies.
+ * @param[in] value  True or false.
+ */
+OSKAR_EXPORT
+void oskar_station_set_negate_element(
+        oskar_Station* model, int feed, int value);
 
 #ifdef __cplusplus
 }

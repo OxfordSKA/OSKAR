@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2025, The OSKAR Developers.
+ * Copyright (c) 2013-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -226,6 +226,18 @@ unsigned int oskar_station_seed_time_variable_errors(const oskar_Station* model)
 int oskar_station_swap_xy(const oskar_Station* model)
 {
     return model ? model->swap_xy : 0;
+}
+
+int oskar_station_conjugate_element(const oskar_Station* model, int feed)
+{
+    if (!model || feed > 1) return 0;
+    return model->conjugate_element[feed];
+}
+
+int oskar_station_negate_element(const oskar_Station* model, int feed)
+{
+    if (!model || feed > 1) return 0;
+    return model->negate_element[feed];
 }
 
 double oskar_station_element_euler_index_rad(
@@ -623,6 +635,20 @@ void oskar_station_set_swap_xy(oskar_Station* model, int value)
 {
     if (!model) return;
     model->swap_xy = value;
+}
+
+void oskar_station_set_conjugate_element(
+        oskar_Station* model, int feed, int value)
+{
+    if (!model || feed > 1) return;
+    model->conjugate_element[feed] = value;
+}
+
+void oskar_station_set_negate_element(
+        oskar_Station* model, int feed, int value)
+{
+    if (!model || feed > 1) return;
+    model->negate_element[feed] = value;
 }
 
 #ifdef __cplusplus

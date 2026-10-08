@@ -28,6 +28,10 @@ extern "C" {
  * @param[in] model         Pointer to element model structure.
  * @param[in] normalise     If true, normalise pattern to value at zenith.
  * @param[in] swap_xy       If true, swap X and Y responses in output.
+ * @param[in] conjugate_x   If true, conjugate X response.
+ * @param[in] conjugate_y   If true, conjugate Y response.
+ * @param[in] negate_x      If true, negate X response.
+ * @param[in] negate_y      If true, negate Y response.
  * @param[in] orientation_x Azimuth of X dipole in radians.
  * @param[in] orientation_y Azimuth of Y dipole in radians.
  * @param[in] offset_points Start offset into input coordinate arrays.
@@ -50,6 +54,10 @@ void oskar_element_evaluate(
         const oskar_Element* model,
         int normalise,
         int swap_xy,
+        int conjugate_x,
+        int conjugate_y,
+        int negate_x,
+        int negate_y,
         double orientation_x,
         double orientation_y,
         int offset_points,

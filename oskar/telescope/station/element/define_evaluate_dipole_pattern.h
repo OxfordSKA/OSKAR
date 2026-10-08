@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2025, The OSKAR Developers. See LICENSE file. */
+/* Copyright (c) 2014-2026, The OSKAR Developers. See LICENSE file. */
 
 #define OSKAR_DIPOLE(FP, PHI, E_THETA, E_PHI) {\
     SINCOS(PHI, sin_phi, cos_phi);\
@@ -23,6 +23,10 @@ KERNEL(NAME) (\
         const FP kL,\
         const FP cos_kL,\
         const int swap_xy,\
+        const int conjugate_x,\
+        const int conjugate_y,\
+        const int negate_x,\
+        const int negate_y,\
         const int offset_out,\
         GLOBAL_OUT(FP4c, pattern))\
 {\
@@ -32,6 +36,22 @@ KERNEL(NAME) (\
     SINCOS(theta[i], sin_theta, cos_theta);\
     OSKAR_DIPOLE(FP, phi_x[i], x_th, x_ph)\
     OSKAR_DIPOLE(FP, phi_y[i], y_th, y_ph)\
+    if (conjugate_x) {\
+        x_th.y *= -1;\
+        x_ph.y *= -1;\
+    }\
+    if (conjugate_y) {\
+        y_th.y *= -1;\
+        y_ph.y *= -1;\
+    }\
+    if (negate_x) {\
+        x_th.x *= -1;\
+        x_ph.y *= -1;\
+    }\
+    if (negate_y) {\
+        y_th.x *= -1;\
+        y_ph.y *= -1;\
+    }\
     if (swap_xy) {\
         pattern[i + offset_out].a = y_th;\
         pattern[i + offset_out].b = y_ph;\
@@ -57,10 +77,18 @@ KERNEL(NAME) (\
         const FP kL,\
         const FP cos_kL,\
         const int swap_xy,\
+        const int conjugate_x,\
+        const int conjugate_y,\
+        const int negate_x,\
+        const int negate_y,\
         const int offset_out,\
         GLOBAL_OUT(FP2, pattern))\
 {\
     (void) swap_xy;\
+    (void) conjugate_x;\
+    (void) conjugate_y;\
+    (void) negate_x;\
+    (void) negate_y;\
     FP sin_theta = (FP)0, cos_theta = (FP)0, sin_phi = (FP)0, cos_phi = (FP)0;\
     FP2 x_th, x_ph, y_th, y_ph;\
     KERNEL_LOOP_X(int, i, 0, n)\

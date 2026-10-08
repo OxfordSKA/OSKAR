@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2025, The OSKAR Developers.
+ * Copyright (c) 2014-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -25,6 +25,10 @@ void oskar_evaluate_dipole_pattern(
         double freq_hz,
         double dipole_length_m,
         int swap_xy,
+        int conjugate_x,
+        int conjugate_y,
+        int negate_x,
+        int negate_y,
         int offset_out,
         oskar_Mem* pattern,
         int* status
@@ -64,6 +68,10 @@ void oskar_evaluate_dipole_pattern(
                     kL_f,
                     cos_kL_f,
                     swap_xy,
+                    conjugate_x,
+                    conjugate_y,
+                    negate_x,
+                    negate_y,
                     offset_out,
                     oskar_mem_float4c(pattern, status)
             );
@@ -77,6 +85,10 @@ void oskar_evaluate_dipole_pattern(
                     kL,
                     cos_kL,
                     swap_xy,
+                    conjugate_x,
+                    conjugate_y,
+                    negate_x,
+                    negate_y,
                     offset_out,
                     oskar_mem_double4c(pattern, status)
             );
@@ -90,6 +102,10 @@ void oskar_evaluate_dipole_pattern(
                     kL_f,
                     cos_kL_f,
                     swap_xy,
+                    conjugate_x,
+                    conjugate_y,
+                    negate_x,
+                    negate_y,
                     offset_out,
                     oskar_mem_float2(pattern, status)
             );
@@ -103,6 +119,10 @@ void oskar_evaluate_dipole_pattern(
                     kL,
                     cos_kL,
                     swap_xy,
+                    conjugate_x,
+                    conjugate_y,
+                    negate_x,
+                    negate_y,
                     offset_out,
                     oskar_mem_double2(pattern, status)
             );
@@ -149,6 +169,10 @@ void oskar_evaluate_dipole_pattern(
                 {is_dbl ? DBL_SZ : FLT_SZ, is_dbl ?
                         (const void*)&cos_kL : (const void*)&cos_kL_f},
                 {INT_SZ, &swap_xy},
+                {INT_SZ, &conjugate_x},
+                {INT_SZ, &conjugate_y},
+                {INT_SZ, &negate_x},
+                {INT_SZ, &negate_y},
                 {INT_SZ, &offset_out},
                 {PTR_SZ, oskar_mem_buffer(pattern)}
         };

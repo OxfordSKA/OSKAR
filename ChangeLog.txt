@@ -1,3 +1,7 @@
+2026-xx-yy  OSKAR-2.13.1
+
+    * Add options to conjugate and negate element responses.
+
 2026-07-23  OSKAR-2.13.0
 
     * Support sky models containing source fluxes at different frequencies.

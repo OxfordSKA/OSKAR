@@ -41,6 +41,10 @@ extern "C" {
  * @param workspace Pre-allocated array to use as workspace,
  *                  size ( \p n_max + 2 ) * \p num_points.
  * @param[in] swap_xy If true, swap the X and Y antenna in the output.
+ * @param[in] conjugate_x If true, conjugate X response.
+ * @param[in] conjugate_y If true, conjugate Y response.
+ * @param[in] negate_x If true, negate X response.
+ * @param[in] negate_y If true, negate Y response.
  * @param[in] offset_out Offset into output data array.
  * @param[in,out] pattern Output data array of length at least \p num_points.
  * @param[in,out] status Status return code.
@@ -57,6 +61,10 @@ void oskar_evaluate_spherical_wave_sum_feko_norm_polynomial(
         const oskar_Mem* coeffs,
         oskar_Mem* workspace,
         int swap_xy,
+        int conjugate_x,
+        int conjugate_y,
+        int negate_x,
+        int negate_y,
         int offset_out,
         oskar_Mem* pattern,
         int* status

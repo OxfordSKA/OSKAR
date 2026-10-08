@@ -26,6 +26,10 @@ void oskar_evaluate_spherical_wave_sum(
         int l_max,
         const oskar_Mem* alpha,
         int swap_xy,
+        int conjugate_x,
+        int conjugate_y,
+        int negate_x,
+        int negate_y,
         int offset_out,
         oskar_Mem* pattern,
         int* status
@@ -52,6 +56,10 @@ void oskar_evaluate_spherical_wave_sum(
                     l_max,
                     oskar_mem_float4c_const(alpha, status),
                     swap_xy,
+                    conjugate_x,
+                    conjugate_y,
+                    negate_x,
+                    negate_y,
                     offset_out,
                     oskar_mem_float4c(pattern, status)
             );
@@ -65,6 +73,10 @@ void oskar_evaluate_spherical_wave_sum(
                     l_max,
                     oskar_mem_double4c_const(alpha, status),
                     swap_xy,
+                    conjugate_x,
+                    conjugate_y,
+                    negate_x,
+                    negate_y,
                     offset_out,
                     oskar_mem_double4c(pattern, status)
             );
@@ -115,6 +127,10 @@ void oskar_evaluate_spherical_wave_sum(
                 {INT_SZ, &l_max},
                 {PTR_SZ, oskar_mem_buffer_const(alpha)},
                 {INT_SZ, &swap_xy},
+                {INT_SZ, &conjugate_x},
+                {INT_SZ, &conjugate_y},
+                {INT_SZ, &negate_x},
+                {INT_SZ, &negate_y},
                 {INT_SZ, &offset_out},
                 {PTR_SZ, oskar_mem_buffer(pattern)}
         };
