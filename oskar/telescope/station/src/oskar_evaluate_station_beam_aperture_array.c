@@ -104,19 +104,21 @@ static void oskar_evaluate_station_beam_aperture_array_private(
     oskar_Harp* harp_data = oskar_station_harp_data(s, frequency_hz);
     if (harp_data)
     {
+        oskar_Mem* phi_element = work->phi_x;
+        oskar_Mem* phi_station = work->phi_y;
         oskar_mem_ensure(theta, num_points, status);
-        oskar_mem_ensure(phi_x, num_points, status);
-        oskar_mem_ensure(phi_y, num_points, status);
+        oskar_mem_ensure(phi_element, num_points, status);
+        oskar_mem_ensure(phi_station, num_points, status);
         oskar_convert_enu_directions_to_theta_phi(
                 offset_points, num_points, x, y, z, 0,
-                M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0),
-                M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 1, 0, 0)),
-                theta, phi_x, phi_y, status);
+                -oskar_station_element_euler_index_rad(s, 0, 0, 0),
+                0.0, /* Station layout is already rotated. */
+                theta, phi_element, phi_station, status);
         oskar_harp_evaluate_smodes(
                 harp_data,
                 num_points,
                 theta,
-                phi_x,
+                phi_element,
                 work->poly,
                 work->ee,
                 work->qq,
@@ -133,7 +135,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                     harp_data,
                     num_points,
                     theta,
-                    phi_x,
+                    phi_station,
                     frequency_hz,
                     i,
                     num_elements,
@@ -152,7 +154,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(
 
         /* Back rotate patterns - seems to be required. */
         oskar_mem_jones_rotation(
-                beam, M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0),
+                beam, oskar_station_element_euler_index_rad(s, 0, 0, 0),
                 offset_out, num_points, status
         );
 
