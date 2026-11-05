@@ -149,6 +149,13 @@ static void oskar_evaluate_station_beam_aperture_array_private(
                     beam,
                     status);
         }
+
+        /* Back rotate patterns - seems to be required. */
+        oskar_mem_jones_rotation(
+                beam, M_PI/2.0 - (oskar_station_element_euler_index_rad(s, 0, 0, 0) + M_PI/2.0),
+                offset_out, num_points, status
+        );
+
         oskar_blank_below_horizon(offset_points, num_points, z,
                 offset_out, beam, status);
         return;

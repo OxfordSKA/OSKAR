@@ -28,6 +28,7 @@ set(mem_SRC
     src/oskar_mem_evaluate_relative_error.c
     src/oskar_mem_free.c
     src/oskar_mem_get_element.c
+    src/oskar_mem_jones_rotation.c
     src/oskar_mem_load_ascii.c
     src/oskar_mem_multiply.c
     src/oskar_mem_normalise.c

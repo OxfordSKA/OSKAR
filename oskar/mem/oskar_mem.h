@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2025, The OSKAR Developers.
+ * Copyright (c) 2012-2026, The OSKAR Developers.
  * See the LICENSE file at the top-level directory of this distribution.
  */
 
@@ -64,6 +64,7 @@ enum OSKAR_MEM_LOCATION
 #include <mem/oskar_mem_evaluate_relative_error.h>
 #include <mem/oskar_mem_free.h>
 #include <mem/oskar_mem_get_element.h>
+#include <mem/oskar_mem_jones_rotation.h>
 #include <mem/oskar_mem_load_ascii.h>
 #include <mem/oskar_mem_multiply.h>
 #include <mem/oskar_mem_normalise.h>
